@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-cream: #fbf7f2;
+  --ink: #2c2420;
+  --accent-coral: #e8a598;
+  --accent-sage: #c8ddd0;
+}
+
+body {
+  color: var(--ink);
+  background: radial-gradient(ellipse at top, #fff9f4 0%, var(--bg-cream) 55%, #f3ebe0 100%);
+  min-height: 100vh;
+}
+
+@layer utilities {
+  .oriental-card {
+    @apply rounded-2xl border border-white/70 bg-white/80 shadow-sm backdrop-blur-sm;
+  }
+}
