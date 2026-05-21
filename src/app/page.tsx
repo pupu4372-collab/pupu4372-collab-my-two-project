@@ -1,5 +1,5 @@
-import { SajuForm } from "@/components/k-saju/SajuForm";
+import { HomeLanding } from "@/components/home/HomeLanding";
 
 export default function HomePage() {
-  return <SajuForm />;
+  return <HomeLanding />;
 }

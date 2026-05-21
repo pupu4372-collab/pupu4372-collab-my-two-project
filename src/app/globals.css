@@ -3,20 +3,69 @@
 @tailwind utilities;
 
 :root {
-  --bg-cream: #fbf7f2;
-  --ink: #2c2420;
-  --accent-coral: #e8a598;
-  --accent-sage: #c8ddd0;
+  --ink: #3d2a4a;
+  --plum: #5c3d6e;
+  --mint: #a8e6cf;
+  --petal: #f8c8e8;
+  --lavender: #e8d4f8;
 }
 
 body {
   color: var(--ink);
-  background: radial-gradient(ellipse at top, #fff9f4 0%, var(--bg-cream) 55%, #f3ebe0 100%);
   min-height: 100vh;
 }
 
 @layer utilities {
-  .oriental-card {
-    @apply rounded-2xl border border-white/70 bg-white/80 shadow-sm backdrop-blur-sm;
+  .pastel-card {
+    border-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
   }
+
+  .pastel-input {
+    margin-top: 0.375rem;
+    width: 100%;
+    border-radius: 1rem;
+    border: 1px solid rgba(92, 61, 110, 0.12);
+    background: #fff;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .pastel-input::placeholder {
+    color: rgba(92, 61, 110, 0.35);
+  }
+
+  .pastel-input:focus {
+    border-color: rgba(168, 230, 207, 0.8);
+    box-shadow: 0 0 0 3px rgba(168, 230, 207, 0.25);
+  }
+
+  .text-gradient-hero {
+    background: linear-gradient(90deg, var(--plum), var(--petal), var(--lavender));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.star-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
 }

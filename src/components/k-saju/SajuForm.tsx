@@ -45,12 +45,16 @@ function detectTimezone(): string {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   } catch {
-    return "UTC";
+    return "Asia/Seoul";
   }
 }
 
-export function SajuForm() {
-  const [locale, setLocale] = useState<Locale>("en");
+interface SajuFormProps {
+  embedded?: boolean;
+}
+
+export function SajuForm({ embedded = false }: SajuFormProps) {
+  const [locale, setLocale] = useState<Locale>("ko");
   const [petName, setPetName] = useState("");
   const [species, setSpecies] = useState<Species>("dog");
   const [birthDate, setBirthDate] = useState("");
@@ -63,6 +67,8 @@ export function SajuForm() {
   const [result, setResult] = useState<SajuBasicResponse | null>(null);
 
   const t = UI[locale];
+  const inputClass = embedded ? "pastel-input" : "mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm";
+  const labelClass = embedded ? "block text-sm font-medium text-plum/80" : "block text-xs text-ink/60";
 
   const timezoneOptions = useMemo(() => {
     const set = new Set<string>([...COMMON_TIMEZONES, timezone]);
@@ -102,38 +108,43 @@ export function SajuForm() {
       }
       setResult(data as SajuBasicResponse);
     } catch {
-      setError("Network error. Please try again.");
+      setError(locale === "ko" ? "네트워크 오류가 발생했어요." : "Network error. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h2 className="text-2xl font-semibold tracking-tight">{t.title}</h2>
-        <p className="text-sm text-ink/60">{t.subtitle}</p>
-      </div>
+    <div className={embedded ? "space-y-5" : "space-y-6"}>
+      {!embedded && (
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold tracking-tight">{t.title}</h2>
+          <p className="text-sm text-ink/60">{t.subtitle}</p>
+        </div>
+      )}
 
-      <form onSubmit={handleSubmit} className="oriental-card space-y-4 p-5">
-        <div className="flex gap-2">
-          <label className="flex-1 text-xs text-ink/60">
+      <form
+        onSubmit={handleSubmit}
+        className={embedded ? "space-y-4" : "oriental-card space-y-4 p-5"}
+      >
+        <div className="flex gap-3">
+          <label className={`${labelClass} flex-1`}>
             {t.localeLabel}
             <select
               value={locale}
               onChange={(e) => setLocale(e.target.value as Locale)}
-              className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm"
+              className={inputClass}
             >
-              <option value="en">English</option>
               <option value="ko">한국어</option>
+              <option value="en">English</option>
             </select>
           </label>
-          <label className="flex-1 text-xs text-ink/60">
+          <label className={`${labelClass} flex-1`}>
             {t.species}
             <select
               value={species}
               onChange={(e) => setSpecies(e.target.value as Species)}
-              className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm"
+              className={inputClass}
             >
               <option value="dog">{t.dog}</option>
               <option value="cat">{t.cat}</option>
@@ -141,56 +152,56 @@ export function SajuForm() {
           </label>
         </div>
 
-        <label className="block text-xs text-ink/60">
+        <label className={labelClass}>
           {t.petName}
           <input
             value={petName}
             onChange={(e) => setPetName(e.target.value)}
-            placeholder="Mochi"
-            className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm"
+            placeholder="모찌"
+            className={inputClass}
             required
             maxLength={32}
           />
         </label>
 
-        <label className="block text-xs text-ink/60">
+        <label className={labelClass}>
           {t.birthDate}
           <input
             type="date"
             value={birthDate}
             onChange={(e) => setBirthDate(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm"
+            className={inputClass}
             required
           />
         </label>
 
-        <label className="block text-xs text-ink/60">
+        <label className={labelClass}>
           {t.birthTime}
           <input
             type="time"
             value={birthTime}
             onChange={(e) => setBirthTime(e.target.value)}
             disabled={birthTimeUnknown}
-            className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm disabled:opacity-50"
+            className={`${inputClass} disabled:opacity-50`}
           />
         </label>
 
-        <label className="flex items-center gap-2 text-xs text-ink/70">
+        <label className="flex items-center gap-2 text-sm text-plum/75">
           <input
             type="checkbox"
             checked={birthTimeUnknown}
             onChange={(e) => setBirthTimeUnknown(e.target.checked)}
-            className="rounded border-ink/30"
+            className="h-4 w-4 rounded border-plum/30 text-mint focus:ring-mint/40"
           />
           {t.timeUnknown}
         </label>
 
-        <label className="block text-xs text-ink/60">
+        <label className={labelClass}>
           {t.timezone}
           <select
             value={timezone}
             onChange={(e) => setTimezone(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm"
+            className={inputClass}
           >
             {timezoneOptions.map((tz) => (
               <option key={tz} value={tz}>
@@ -200,10 +211,13 @@ export function SajuForm() {
           </select>
         </label>
 
-        <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} />
+        <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant={embedded ? "pastel" : "default"} />
 
         {error && (
-          <p className="rounded-xl bg-blush/40 px-3 py-2 text-sm text-ink/80" role="alert">
+          <p
+            className="rounded-2xl bg-petal/40 px-4 py-2.5 text-sm text-plum"
+            role="alert"
+          >
             {error}
           </p>
         )}
@@ -211,13 +225,17 @@ export function SajuForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl bg-ink py-3 text-sm font-medium text-cream transition hover:bg-ink/90 disabled:opacity-60"
+          className={
+            embedded
+              ? "w-full rounded-full bg-mint py-3.5 text-sm font-semibold text-ink transition hover:brightness-105 disabled:opacity-60"
+              : "w-full rounded-xl bg-ink py-3 text-sm font-medium text-cream transition hover:bg-ink/90 disabled:opacity-60"
+          }
         >
           {loading ? t.loading : t.submit}
         </button>
       </form>
 
-      {result && <SajuResult result={result} />}
+      {result && <SajuResult result={result} variant={embedded ? "pastel" : "default"} />}
     </div>
   );
 }

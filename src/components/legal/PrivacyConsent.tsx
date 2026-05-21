@@ -4,6 +4,7 @@ interface PrivacyConsentProps {
   checked: boolean;
   onChange: (value: boolean) => void;
   locale: "en" | "ko";
+  variant?: "default" | "pastel";
 }
 
 const COPY = {
@@ -23,28 +24,37 @@ const COPY = {
   },
 };
 
-export function PrivacyConsent({ checked, onChange, locale }: PrivacyConsentProps) {
+export function PrivacyConsent({
+  checked,
+  onChange,
+  locale,
+  variant = "default",
+}: PrivacyConsentProps) {
   const t = COPY[locale];
+  const wrap =
+    variant === "pastel"
+      ? "space-y-2 rounded-2xl bg-lavender/25 p-4"
+      : "oriental-card space-y-2 p-4";
 
   return (
-    <div className="oriental-card space-y-2 p-4">
+    <div className={wrap}>
       <label className="flex cursor-pointer items-start gap-3">
         <input
           type="checkbox"
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
-          className="mt-1 h-4 w-4 rounded border-ink/30 text-coral focus:ring-coral"
+          className="mt-1 h-4 w-4 rounded border-plum/30 text-mint focus:ring-mint/40"
           required
         />
-        <span className="text-sm leading-relaxed text-ink/90">{t.label}</span>
+        <span className="text-sm leading-relaxed text-plum/90">{t.label}</span>
       </label>
-      <p className="pl-7 text-xs leading-relaxed text-ink/55">{t.detail}</p>
-      <p className="pl-7 text-xs text-ink/55">
-        <a href="/privacy" className="underline hover:text-ink">
+      <p className="pl-7 text-xs leading-relaxed text-plum/55">{t.detail}</p>
+      <p className="pl-7 text-xs text-plum/55">
+        <a href="/privacy" className="underline hover:text-plum">
           {t.privacy}
         </a>
         {" · "}
-        <a href="/terms" className="underline hover:text-ink">
+        <a href="/terms" className="underline hover:text-plum">
           {t.terms}
         </a>
       </p>

@@ -7,6 +7,7 @@ import { formatUtcForDisplay } from "@/lib/saju/timezone";
 
 interface SajuResultProps {
   result: SajuBasicResponse;
+  variant?: "default" | "pastel";
 }
 
 const LABELS = {
@@ -43,16 +44,24 @@ const LABELS = {
 function PillarRow({
   label,
   pillar,
+  pastel,
 }: {
   label: string;
   pillar: SajuBasicResponse["pillars"]["year"];
+  pastel: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-xl bg-sand/50 px-3 py-2 text-sm">
-      <span className="text-ink/60">{label}</span>
+    <div
+      className={
+        pastel
+          ? "flex items-center justify-between rounded-2xl bg-lavender/20 px-3 py-2 text-sm"
+          : "flex items-center justify-between rounded-xl bg-sand/50 px-3 py-2 text-sm"
+      }
+    >
+      <span className={pastel ? "text-plum/60" : "text-ink/60"}>{label}</span>
       <div className="text-right">
-        <span className="font-medium">{pillar.pillar}</span>
-        <p className="text-xs text-ink/55">
+        <span className="font-medium text-plum">{pillar.pillar}</span>
+        <p className={pastel ? "text-xs text-plum/55" : "text-xs text-ink/55"}>
           {pillar.stemLabel} · {pillar.branchLabel}
         </p>
       </div>
@@ -60,21 +69,27 @@ function PillarRow({
   );
 }
 
-export function SajuResult({ result }: SajuResultProps) {
+export function SajuResult({ result, variant = "default" }: SajuResultProps) {
   const t = LABELS[result.locale];
+  const pastel = variant === "pastel";
+  const card = pastel ? "pastel-card overflow-hidden" : "oriental-card overflow-hidden";
+  const section = pastel ? "pastel-card space-y-2 p-4" : "oriental-card space-y-2 p-4";
+  const heroBg = pastel
+    ? "bg-gradient-to-r from-lavender/50 via-petal/40 to-mint/40 px-5 py-4"
+    : "bg-gradient-to-r from-blush/60 to-sage/50 px-5 py-4";
 
   return (
     <div className="space-y-4">
-      <article className="oriental-card overflow-hidden">
-        <div className="bg-gradient-to-r from-blush/60 to-sage/50 px-5 py-4">
-          <h2 className="text-xl font-semibold leading-snug">{result.headline}</h2>
-          <p className="mt-2 text-sm leading-relaxed text-ink/80">{result.story}</p>
+      <article className={card}>
+        <div className={heroBg}>
+          <h2 className="text-xl font-semibold leading-snug text-plum">{result.headline}</h2>
+          <p className="mt-2 text-sm leading-relaxed text-plum/80">{result.story}</p>
         </div>
         <div className="flex flex-wrap gap-2 px-5 py-3">
           {result.traits.map((trait) => (
             <span
               key={trait}
-              className="rounded-full bg-cream px-3 py-1 text-xs font-medium text-ink/75"
+              className="rounded-full bg-mint/35 px-3 py-1 text-xs font-medium text-plum"
             >
               {trait}
             </span>
@@ -82,50 +97,52 @@ export function SajuResult({ result }: SajuResultProps) {
         </div>
       </article>
 
-      <section className="oriental-card space-y-2 p-4">
-        <h3 className="text-sm font-semibold text-ink/70">{t.pillars}</h3>
-        <PillarRow label={t.year} pillar={result.pillars.year} />
-        <PillarRow label={t.month} pillar={result.pillars.month} />
-        <PillarRow label={t.day} pillar={result.pillars.day} />
+      <section className={section}>
+        <h3 className="text-sm font-semibold text-plum/70">{t.pillars}</h3>
+        <PillarRow label={t.year} pillar={result.pillars.year} pastel={pastel} />
+        <PillarRow label={t.month} pillar={result.pillars.month} pastel={pastel} />
+        <PillarRow label={t.day} pillar={result.pillars.day} pastel={pastel} />
         {result.pillars.hour ? (
-          <PillarRow label={t.hour} pillar={result.pillars.hour} />
+          <PillarRow label={t.hour} pillar={result.pillars.hour} pastel={pastel} />
         ) : (
-          <p className="text-xs text-ink/50">{t.hour}: {t.unknown}</p>
+          <p className="text-xs text-plum/50">{t.hour}: {t.unknown}</p>
         )}
         {result.kstJiji && (
-          <div className="mt-2 rounded-xl border border-sage/40 bg-sage/15 px-3 py-3 text-sm">
-            <p className="text-xs font-medium text-ink/55">{t.kstHour}</p>
-            <p className="mt-1 font-medium">{formatJijiDisplay(result.kstJiji, result.locale)}</p>
-            <p className="mt-1 text-xs text-ink/55">
+          <div className="mt-2 rounded-2xl border border-mint/40 bg-mint/20 px-3 py-3 text-sm">
+            <p className="text-xs font-medium text-plum/55">{t.kstHour}</p>
+            <p className="mt-1 font-medium text-plum">
+              {formatJijiDisplay(result.kstJiji, result.locale)}
+            </p>
+            <p className="mt-1 text-xs text-plum/55">
               {t.kstAt}: {result.kstJiji.kstTime} (KST) · {t.kstWindow}: {result.kstJiji.kstRange}
             </p>
-            <p className="mt-1 text-xs text-ink/50">
+            <p className="mt-1 text-xs text-plum/50">
               {ELEMENT_META[result.kstJiji.element].hanja}{" "}
               {ELEMENT_META[result.kstJiji.element].romanized} ·{" "}
               {ELEMENT_META[result.kstJiji.element].hangul}
             </p>
           </div>
         )}
-        <p className="pt-1 text-xs text-ink/45">
+        <p className="pt-1 text-xs text-plum/45">
           {t.stored}: {formatUtcForDisplay(result.birthUtc, result.timezone)} ({result.timezone})
         </p>
       </section>
 
-      <section className="oriental-card p-4">
-        <h3 className="mb-3 text-sm font-semibold text-ink/70">{t.elements}</h3>
+      <section className={pastel ? "pastel-card p-4" : "oriental-card p-4"}>
+        <h3 className="mb-3 text-sm font-semibold text-plum/70">{t.elements}</h3>
         <div className="flex flex-wrap gap-2">
           {result.elements.map((el) => (
             <div
               key={el.key}
-              className="rounded-xl border border-white/80 bg-cream px-3 py-2 text-center"
+              className="rounded-2xl border border-lavender/50 bg-white/80 px-3 py-2 text-center"
             >
-              <p className="text-lg font-semibold">
+              <p className="text-lg font-semibold text-plum">
                 {el.hanja}{" "}
-                <span className="text-sm font-normal text-ink/60">
+                <span className="text-sm font-normal text-plum/60">
                   {el.romanized} · {el.hangul}
                 </span>
               </p>
-              <p className="text-xs text-ink/50">×{el.count}</p>
+              <p className="text-xs text-plum/50">×{el.count}</p>
             </div>
           ))}
         </div>
