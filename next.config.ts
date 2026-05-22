@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 };
 
-initOpenNextCloudflareForDev();
+// Cloudflare local dev only — skip on Vercel/production builds
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev();
+}
 
 export default withNextIntl(nextConfig);
