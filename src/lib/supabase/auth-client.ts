@@ -31,7 +31,8 @@ function getAuthCallbackUrl() {
 }
 
 export async function signInWithProvider(provider: SupportedOAuthProvider) {
-  clearSupabaseBrowserSession();
+  // Keep PKCE verifier storage so Google redirect can finish on /auth/callback.
+  clearSupabaseBrowserSession({ preserveOAuthFlow: true });
 
   const client = getSupabaseAuthActionClient();
   if (!client) {
@@ -42,7 +43,13 @@ export async function signInWithProvider(provider: SupportedOAuthProvider) {
 
   const { error } = await client.auth.signInWithOAuth({
     provider: resolveOAuthProviderId(provider),
-    options: { redirectTo },
+    options: {
+      redirectTo,
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      },
+    },
   });
 
   if (error) throw error;
@@ -71,7 +78,7 @@ async function saveDisplayNameAfterAuth(displayName: string) {
   });
 }
 
-async function persistSession(session: { access_token: string; refresh_token: string } | null) {
+export async function persistSession(session: { access_token: string; refresh_token: string } | null) {
   const browserClient = getSupabaseBrowserClient();
   if (!browserClient || !session) return;
 

@@ -1,8 +1,13 @@
 "use client";
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { persistSession } from "@/lib/supabase/auth-client";
+import { getSupabaseAuthActionClient } from "@/lib/supabase/client";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+
+function loginRedirect(message: string) {
+  window.location.replace(`/ko/login?error=${encodeURIComponent(message)}`);
+}
 
 function AuthCallbackHandler() {
   const searchParams = useSearchParams();
@@ -12,40 +17,46 @@ function AuthCallbackHandler() {
     let cancelled = false;
 
     async function finish() {
+      const oauthError = searchParams.get("error");
+      const oauthDescription = searchParams.get("error_description");
+      if (oauthError) {
+        loginRedirect(oauthDescription ?? oauthError);
+        return;
+      }
+
       const code = searchParams.get("code");
       const requestedNext = searchParams.get("next");
       const next =
         requestedNext && requestedNext !== "/profile" ? requestedNext : "/ko";
 
       if (!code) {
-        window.location.replace("/ko/login?error=missing_code");
+        loginRedirect("missing_code");
         return;
       }
 
-      const supabase = getSupabaseBrowserClient();
-      if (!supabase) {
-        window.location.replace("/ko/login?error=supabase_not_configured");
+      const authClient = getSupabaseAuthActionClient();
+      if (!authClient) {
+        loginRedirect("supabase_not_configured");
         return;
       }
 
       try {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        const { data, error } = await authClient.auth.exchangeCodeForSession(code);
         if (cancelled) return;
 
         if (error) {
-          window.location.replace(
-            `/ko/login?error=${encodeURIComponent(error.message)}`
-          );
+          loginRedirect(error.message);
           return;
         }
 
+        await persistSession(data.session);
         window.location.replace(next);
       } catch (err) {
         if (cancelled) return;
         const text =
           err instanceof Error ? err.message : "auth_callback_failed";
         setMessage("로그인 처리에 실패했습니다. 로그인 화면으로 이동합니다…");
-        window.location.replace(`/ko/login?error=${encodeURIComponent(text)}`);
+        loginRedirect(text);
       }
     }
 

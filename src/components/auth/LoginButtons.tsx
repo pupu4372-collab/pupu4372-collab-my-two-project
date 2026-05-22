@@ -54,7 +54,8 @@ export function LoginButtons() {
   const configured = isSupabaseConfigured();
 
   useEffect(() => {
-    clearSupabaseBrowserSession();
+    // Do not wipe PKCE storage; it breaks social login return from Google.
+    clearSupabaseBrowserSession({ preserveOAuthFlow: true });
   }, []);
 
   function formatAuthError(err: unknown) {

@@ -24,9 +24,14 @@ function isValidSupabaseEnv(url: string, key: string) {
   );
 }
 
-export function clearSupabaseBrowserSession() {
+function isPkceFlowStorageKey(key: string) {
+  return key.includes("code-verifier") || key.includes("code_verifier");
+}
+
+export function clearSupabaseBrowserSession(options?: { preserveOAuthFlow?: boolean }) {
   if (typeof window === "undefined") return;
 
+  const preserveOAuthFlow = options?.preserveOAuthFlow ?? false;
   const { url } = readSupabaseEnv();
   const projectRef = url.match(/^https:\/\/([^.]+)\.supabase\.co/)?.[1];
   const storageKeys = new Set<string>();
@@ -38,6 +43,7 @@ export function clearSupabaseBrowserSession() {
   }
 
   for (const key of storageKeys) {
+    if (preserveOAuthFlow && isPkceFlowStorageKey(key)) continue;
     window.localStorage.removeItem(key);
     window.sessionStorage.removeItem(key);
   }
@@ -55,6 +61,9 @@ export function getSupabaseAuthActionClient(): SupabaseClient<Database> | null {
       persistSession: false,
       autoRefreshToken: false,
       detectSessionInUrl: false,
+      flowType: "pkce",
+      storage:
+        typeof window !== "undefined" ? window.localStorage : undefined,
     },
   });
 }
