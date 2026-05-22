@@ -1,5 +1,6 @@
 "use client";
 
+import type { Provider } from "@supabase/supabase-js";
 import {
   clearSupabaseBrowserSession,
   getSupabaseAuthActionClient,
@@ -7,6 +8,27 @@ import {
 } from "./client";
 
 export type SupportedOAuthProvider = "google" | "facebook" | "naver";
+
+/** Maps UI provider to Supabase Auth provider id (Naver uses Custom OAuth2). */
+function resolveOAuthProviderId(provider: SupportedOAuthProvider): Provider {
+  switch (provider) {
+    case "google":
+    case "facebook":
+      return provider;
+    case "naver":
+      return "custom:naver" as Provider;
+  }
+}
+
+function getAuthCallbackUrl() {
+  if (typeof window === "undefined") return undefined;
+
+  const locale = document.documentElement.lang === "en" ? "en" : "ko";
+  const nextPath = locale === "en" ? "/en" : "/ko";
+  const params = new URLSearchParams({ next: nextPath });
+
+  return `${window.location.origin}/auth/callback?${params.toString()}`;
+}
 
 export async function signInWithProvider(provider: SupportedOAuthProvider) {
   clearSupabaseBrowserSession();
@@ -16,13 +38,10 @@ export async function signInWithProvider(provider: SupportedOAuthProvider) {
     throw new Error("Supabase is not configured.");
   }
 
-  const redirectTo =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/auth/callback`
-      : undefined;
+  const redirectTo = getAuthCallbackUrl();
 
   const { error } = await client.auth.signInWithOAuth({
-    provider: provider as "google",
+    provider: resolveOAuthProviderId(provider),
     options: { redirectTo },
   });
 

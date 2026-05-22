@@ -22,6 +22,7 @@ const PROVIDER_FALLBACK: Record<string, string> = {
   google: "Google",
   facebook: "Facebook",
   naver: "Naver",
+  "custom:naver": "Naver",
   kakao: "Kakao",
 };
 
