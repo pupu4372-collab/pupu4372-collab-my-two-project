@@ -1,52 +1,60 @@
+import Image from "next/image";
+
 export function PuppyOnMoon() {
   return (
-    <div className="pointer-events-none absolute left-4 top-28 hidden sm:block md:left-10 lg:left-16">
-      <svg width="120" height="120" viewBox="0 0 120 120" fill="none" aria-hidden>
-        <path
-          d="M60 95C35 95 18 78 18 58C18 38 35 22 60 22C85 22 102 38 102 58C102 78 85 95 60 95Z"
-          fill="#FFD966"
-          opacity="0.9"
+    <div className="pointer-events-none absolute right-10 top-[22rem] hidden w-24 sm:block md:right-16 md:top-[24rem] md:w-32 lg:right-24 lg:top-[26rem] lg:w-40">
+      <div className="relative">
+        <div className="absolute -inset-5 rounded-full bg-[radial-gradient(circle,rgba(255,217,102,0.34)_0%,rgba(255,214,224,0.2)_42%,rgba(248,244,255,0)_72%)] blur-xl" />
+        <Image
+          src="/images/home-dog-moon.png"
+          alt=""
+          width={721}
+          height={627}
+          priority
+          className="relative h-auto w-full drop-shadow-[0_18px_30px_rgba(120,80,140,0.16)] [mask-image:radial-gradient(ellipse_at_center,black_48%,rgba(0,0,0,0.62)_64%,rgba(0,0,0,0.24)_74%,transparent_88%)]"
+          aria-hidden
         />
-        <path
-          d="M18 58C18 38 35 22 60 22C60 22 40 45 18 58Z"
-          fill="#F5C842"
-          opacity="0.5"
-        />
-        <ellipse cx="52" cy="48" rx="22" ry="20" fill="#F4C896" />
-        <ellipse cx="68" cy="52" rx="18" ry="17" fill="#E8B87A" />
-        <circle cx="46" cy="46" r="3" fill="#3D2A4A" />
-        <circle cx="58" cy="48" r="3" fill="#3D2A4A" />
-        <ellipse cx="52" cy="54" rx="4" ry="3" fill="#C98B5A" />
-        <path d="M38 42 L32 36 M72 44 L78 38" stroke="#C98B5A" strokeWidth="2" strokeLinecap="round" />
-        <ellipse cx="52" cy="62" rx="14" ry="10" fill="#F4C896" />
-      </svg>
-      <svg
-        className="absolute -right-2 top-0 star-twinkle text-gold"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        aria-hidden
-      >
-        <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L6 21l2.3-7-6-4.6h7.6L12 2z" />
-      </svg>
+      </div>
     </div>
   );
 }
 
 export function KittenCorner() {
   return (
-    <div className="pointer-events-none absolute bottom-56 right-4 hidden sm:block md:right-10 lg:right-16">
-      <svg width="100" height="100" viewBox="0 0 100 100" fill="none" aria-hidden>
-        <ellipse cx="50" cy="58" rx="28" ry="24" fill="#F4A87A" />
-        <path d="M30 38 L26 22 L38 34 Z" fill="#F4A87A" />
-        <path d="M70 38 L74 22 L62 34 Z" fill="#F4A87A" />
-        <circle cx="40" cy="54" r="3" fill="#3D2A4A" />
-        <circle cx="60" cy="54" r="3" fill="#3D2A4A" />
-        <path d="M44 62 Q50 66 56 62" stroke="#C97A50" strokeWidth="2" fill="none" strokeLinecap="round" />
-        <path d="M48 68 L50 72 L52 68" stroke="#E8926A" strokeWidth="1.5" fill="none" />
-        <path d="M22 70 Q35 78 50 76 Q65 78 78 70" stroke="#E8926A" strokeWidth="8" strokeLinecap="round" opacity="0.6" />
-      </svg>
+    <div className="pointer-events-none absolute right-4 top-52 hidden w-32 sm:block md:right-12 md:top-56 md:w-40 lg:right-20 lg:top-60 lg:w-48">
+      <div className="relative">
+        <div className="absolute -inset-5 rounded-full bg-[radial-gradient(circle,rgba(255,214,224,0.34)_0%,rgba(232,222,255,0.22)_44%,rgba(248,244,255,0)_74%)] blur-xl" />
+        <Image
+          src="/images/home-cat-zodiac.png"
+          alt=""
+          width={713}
+          height={631}
+          priority
+          className="relative h-auto w-full drop-shadow-[0_18px_30px_rgba(120,80,140,0.14)] [mask-image:radial-gradient(ellipse_at_center,black_48%,rgba(0,0,0,0.62)_64%,rgba(0,0,0,0.24)_74%,transparent_88%)]"
+          aria-hidden
+        />
+      </div>
+    </div>
+  );
+}
+
+export function PawCrystalOrb() {
+  return (
+    <div className="pointer-events-none absolute left-0 top-52 z-0 hidden w-56 sm:block md:left-4 md:top-56 md:w-72 lg:left-8 lg:top-60 lg:w-80">
+      <div className="relative">
+        <div className="absolute -inset-16 rounded-full bg-[radial-gradient(circle,rgba(255,199,226,0.6)_0%,rgba(232,212,248,0.47)_34%,rgba(168,230,207,0.24)_58%,rgba(248,244,255,0)_78%)] blur-3xl" />
+        <div className="absolute -inset-10 rounded-full bg-[conic-gradient(from_120deg,rgba(255,217,102,0.38),rgba(248,200,232,0.5),rgba(232,212,248,0.45),rgba(168,230,207,0.31),rgba(255,217,102,0.38))] blur-2xl" />
+        <div className="absolute inset-3 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.9)_0%,rgba(255,246,252,0.43)_46%,rgba(255,255,255,0)_76%)] blur-lg" />
+        <Image
+          src="/images/home-paw-orb.png"
+          alt=""
+          width={718}
+          height={628}
+          priority
+          className="relative h-auto w-full opacity-80 drop-shadow-[0_24px_42px_rgba(139,92,246,0.16)] [mask-image:radial-gradient(ellipse_at_center,black_42%,rgba(0,0,0,0.68)_58%,rgba(0,0,0,0.26)_70%,transparent_84%)]"
+          aria-hidden
+        />
+      </div>
     </div>
   );
 }

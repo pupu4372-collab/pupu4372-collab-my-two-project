@@ -90,6 +90,7 @@ export function computeBasicSaju(input: SajuBasicRequest): SajuBasicResponse {
   return {
     petName: input.petName,
     species: input.species,
+    petGender: input.petGender ?? null,
     locale: input.locale,
     birthUtc,
     timezone: input.timezone,

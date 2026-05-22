@@ -35,14 +35,16 @@ const STEM_BRANCH_ELEMENT: Record<string, ElementKey> = {
 
 export const ELEMENT_META: Record<
   ElementKey,
-  { hanja: string; hangul: string; romanized: string }
+  { hanja: string; hangul: string; romanized: string; meaning: string }
 > = {
-  wood: { hanja: "木", hangul: "목", romanized: "Mok" },
-  fire: { hanja: "火", hangul: "화", romanized: "Hwa" },
-  earth: { hanja: "土", hangul: "토", romanized: "To" },
-  metal: { hanja: "金", hangul: "금", romanized: "Geum" },
-  water: { hanja: "水", hangul: "수", romanized: "Su" },
+  wood: { hanja: "木", hangul: "목", romanized: "Mok", meaning: "Tree" },
+  fire: { hanja: "火", hangul: "화", romanized: "Hwa", meaning: "Fire" },
+  earth: { hanja: "土", hangul: "토", romanized: "To", meaning: "Earth" },
+  metal: { hanja: "金", hangul: "금", romanized: "Geum", meaning: "Metal" },
+  water: { hanja: "水", hangul: "수", romanized: "Su", meaning: "Water" },
 };
+
+export const ELEMENT_ORDER: ElementKey[] = ["wood", "fire", "earth", "metal", "water"];
 
 const STEM_LABEL: Record<string, { hangul: string; romanized: string }> = {
   甲: { hangul: "갑", romanized: "Gap" },
@@ -109,10 +111,7 @@ export function buildElementBreakdown(chars: string[]): ElementDisplay[] {
     if (el) counts[el] += 1;
   }
 
-  return (Object.keys(counts) as ElementKey[])
-    .filter((k) => counts[k] > 0)
-    .sort((a, b) => counts[b] - counts[a])
-    .map((key) => ({
+  return ELEMENT_ORDER.map((key) => ({
       key,
       ...ELEMENT_META[key],
       count: counts[key],

@@ -21,6 +21,9 @@ const LABELS = {
     elements: "Element mix",
     traits: "Vibe check",
     stored: "Stored as UTC",
+    savedDb: "Saved to your pet profile",
+    saveFailed: "Could not save (check Supabase Auth)",
+    notSaved: "Sign in or enable anonymous auth to save",
     kstHour: "KST double-hour (12 branches)",
     kstAt: "Birth time in KST",
     kstWindow: "KST window",
@@ -35,6 +38,9 @@ const LABELS = {
     elements: "오행 밸런스",
     traits: "성향 키워드",
     stored: "UTC 저장",
+    savedDb: "반려동물 프로필에 저장됨",
+    saveFailed: "저장 실패 (Supabase Auth 확인)",
+    notSaved: "익명 로그인 활성화 시 자동 저장",
     kstHour: "KST 12지지 (시간대)",
     kstAt: "한국 표준시 기준",
     kstWindow: "KST 구간",
@@ -78,12 +84,40 @@ export function SajuResult({ result, variant = "default" }: SajuResultProps) {
     ? "bg-gradient-to-r from-lavender/50 via-petal/40 to-mint/40 px-5 py-4"
     : "bg-gradient-to-r from-blush/60 to-sage/50 px-5 py-4";
 
+  const saveBanner = result.persisted
+    ? t.savedDb
+    : result.persistError
+      ? `${t.saveFailed}: ${result.persistError}`
+      : result.persisted === false
+        ? t.notSaved
+        : null;
+
   return (
     <div className="space-y-4">
+      {saveBanner && (
+        <p
+          className={
+            result.persisted
+              ? "rounded-2xl bg-mint/30 px-4 py-2 text-sm font-medium text-plum"
+              : "rounded-2xl bg-petal/40 px-4 py-2 text-sm text-plum/80"
+          }
+          role="status"
+        >
+          {result.persisted ? "🐾 " : ""}
+          {saveBanner}
+          {result.petId && (
+            <span className="mt-1 block text-xs opacity-70">
+              pet: {result.petId.slice(0, 8)}…
+            </span>
+          )}
+        </p>
+      )}
       <article className={card}>
         <div className={heroBg}>
           <h2 className="text-xl font-semibold leading-snug text-plum">{result.headline}</h2>
-          <p className="mt-2 text-sm leading-relaxed text-plum/80">{result.story}</p>
+          <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-plum/80">
+            {result.story}
+          </p>
         </div>
         <div className="flex flex-wrap gap-2 px-5 py-3">
           {result.traits.map((trait) => (
@@ -118,7 +152,7 @@ export function SajuResult({ result, variant = "default" }: SajuResultProps) {
             </p>
             <p className="mt-1 text-xs text-plum/50">
               {ELEMENT_META[result.kstJiji.element].hanja}{" "}
-              {ELEMENT_META[result.kstJiji.element].romanized} ·{" "}
+              {ELEMENT_META[result.kstJiji.element].meaning} ·{" "}
               {ELEMENT_META[result.kstJiji.element].hangul}
             </p>
           </div>
@@ -139,7 +173,7 @@ export function SajuResult({ result, variant = "default" }: SajuResultProps) {
               <p className="text-lg font-semibold text-plum">
                 {el.hanja}{" "}
                 <span className="text-sm font-normal text-plum/60">
-                  {el.romanized} · {el.hangul}
+                  {el.meaning} · {el.hangul}
                 </span>
               </p>
               <p className="text-xs text-plum/50">×{el.count}</p>

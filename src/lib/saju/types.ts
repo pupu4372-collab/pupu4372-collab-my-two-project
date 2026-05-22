@@ -1,6 +1,7 @@
 export type ElementKey = "wood" | "fire" | "earth" | "metal" | "water";
 export type Species = "dog" | "cat";
 export type Locale = "en" | "ko";
+export type Gender = "male" | "female";
 
 export interface PillarDisplay {
   pillar: string;
@@ -17,6 +18,7 @@ export interface ElementDisplay {
   hanja: string;
   hangul: string;
   romanized: string;
+  meaning: string;
   count: number;
 }
 
@@ -37,6 +39,7 @@ export interface KstJijiHour {
 export interface SajuBasicRequest {
   petName: string;
   species: Species;
+  petGender?: Gender | null;
   birthDate: string;
   birthTime: string | null;
   birthTimeUnknown: boolean;
@@ -48,6 +51,7 @@ export interface SajuBasicRequest {
 export interface SajuBasicResponse {
   petName: string;
   species: Species;
+  petGender?: Gender | null;
   locale: Locale;
   birthUtc: string;
   timezone: string;
@@ -64,4 +68,9 @@ export interface SajuBasicResponse {
   headline: string;
   story: string;
   traits: string[];
+  /** Set when saved to Supabase (requires auth session). */
+  persisted?: boolean;
+  petId?: string | null;
+  sajuResultId?: string | null;
+  persistError?: string | null;
 }

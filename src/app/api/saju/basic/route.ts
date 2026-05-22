@@ -1,6 +1,13 @@
 import { computeBasicSaju } from "@/lib/saju/engine";
 import { validatePetName } from "@/lib/saju/moderation";
-import type { Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
+import { persistSajuResult } from "@/lib/saju/persist";
+import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
+import {
+  createUserSupabaseClient,
+  getBearerToken,
+  getUserIdFromRequest,
+} from "@/lib/supabase/auth-server";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { NextResponse } from "next/server";
 
 function isValidDate(s: string): boolean {
@@ -36,6 +43,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid species." }, { status: 400 });
   }
 
+  const petGender =
+    body.petGender === "male" || body.petGender === "female"
+      ? (body.petGender as Gender)
+      : null;
+
   if (!body.birthDate || !isValidDate(body.birthDate)) {
     return NextResponse.json({ error: "Invalid birth date." }, { status: 400 });
   }
@@ -56,19 +68,55 @@ export async function POST(request: Request) {
 
   const locale: Locale = body.locale === "ko" ? "ko" : "en";
 
-  try {
-    const result = computeBasicSaju({
-      petName: (body.petName ?? "").trim(),
-      species: body.species as Species,
-      birthDate: body.birthDate,
-      birthTime: body.birthTime ?? null,
-      birthTimeUnknown: Boolean(body.birthTimeUnknown),
-      timezone: body.timezone,
-      locale,
-      privacyConsent: true,
-    });
+  const sajuRequest: SajuBasicRequest = {
+    petName: (body.petName ?? "").trim(),
+    species: body.species as Species,
+    petGender,
+    birthDate: body.birthDate,
+    birthTime: body.birthTime ?? null,
+    birthTimeUnknown: Boolean(body.birthTimeUnknown),
+    timezone: body.timezone,
+    locale,
+    privacyConsent: true,
+  };
 
-    return NextResponse.json(result);
+  try {
+    const result = computeBasicSaju(sajuRequest);
+
+    let persisted = false;
+    let petId: string | null = null;
+    let sajuResultId: string | null = null;
+    let persistError: string | null = null;
+
+    if (isSupabaseConfigured()) {
+      const ownerId = await getUserIdFromRequest(request);
+      const token = getBearerToken(request);
+      const userClient = token ? createUserSupabaseClient(token) : null;
+
+      if (ownerId && userClient) {
+        try {
+          const saved = await persistSajuResult(userClient, {
+            request: sajuRequest,
+            result,
+            ownerId,
+          });
+          persisted = true;
+          petId = saved.petId;
+          sajuResultId = saved.sajuResultId;
+        } catch (err) {
+          persistError =
+            err instanceof Error ? err.message : "Could not save to database.";
+        }
+      }
+    }
+
+    return NextResponse.json({
+      ...result,
+      persisted,
+      petId,
+      sajuResultId,
+      persistError,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Calculation failed.";
     return NextResponse.json({ error: message }, { status: 500 });

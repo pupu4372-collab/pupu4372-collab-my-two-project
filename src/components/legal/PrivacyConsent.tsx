@@ -1,24 +1,27 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
+
 interface PrivacyConsentProps {
   checked: boolean;
   onChange: (value: boolean) => void;
   locale: "en" | "ko";
-  variant?: "default" | "pastel";
+  variant?: "default" | "pastel" | "pastelCompact";
 }
 
 const COPY = {
   en: {
-    label: "I agree to the collection of my pet's birth data for K-Saju analysis.",
+    label:
+      "I agree to the collection and use of my pet's birth data and pet photos for K-Saju analysis and service features.",
     detail:
-      "We store birth date/time as UTC, use it only for readings, and never sell personal data. You can request deletion anytime.",
+      "Birth date/time is stored as UTC and used for readings. Pet photos may be used for profile, Pet Show, and card-generation features when uploaded by you. We never sell personal data, and you can request deletion anytime.",
     privacy: "Privacy Policy",
     terms: "Terms of Service",
   },
   ko: {
-    label: "K-Saju 분석을 위해 반려동물 생년월일시 수집·이용에 동의합니다.",
+    label: "K-Saju 분석과 서비스 이용을 위해 반려동물 생년월일시 및 펫사진 수집·이용에 동의합니다.",
     detail:
-      "생년월일시는 UTC로 저장되며, 사주 분석 목적으로만 사용됩니다. 개인정보는 판매하지 않으며, 언제든 삭제를 요청할 수 있습니다.",
+      "생년월일시는 UTC로 저장되며 사주 분석에 사용됩니다. 업로드한 펫사진은 프로필, 우리아이 자랑, 카드 생성 기능에 사용될 수 있습니다. 개인정보는 판매하지 않으며, 언제든 삭제를 요청할 수 있습니다.",
     privacy: "개인정보처리방침",
     terms: "이용약관",
   },
@@ -32,31 +35,43 @@ export function PrivacyConsent({
 }: PrivacyConsentProps) {
   const t = COPY[locale];
   const wrap =
-    variant === "pastel"
+    variant === "pastelCompact"
+      ? "space-y-1.5 rounded-2xl bg-lavender/25 p-3"
+      : variant === "pastel"
       ? "space-y-2 rounded-2xl bg-lavender/25 p-4"
       : "oriental-card space-y-2 p-4";
+  const labelText =
+    variant === "pastelCompact"
+      ? "text-xs leading-relaxed text-plum/90"
+      : "text-sm leading-relaxed text-plum/90";
+  const detailText =
+    variant === "pastelCompact"
+      ? "pl-6 text-[11px] leading-relaxed text-plum/55"
+      : "pl-7 text-xs leading-relaxed text-plum/55";
+  const linkText =
+    variant === "pastelCompact" ? "pl-6 text-[11px] text-plum/55" : "pl-7 text-xs text-plum/55";
 
   return (
     <div className={wrap}>
-      <label className="flex cursor-pointer items-start gap-3">
+      <label className="flex cursor-pointer items-start gap-2.5">
         <input
           type="checkbox"
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
-          className="mt-1 h-4 w-4 rounded border-plum/30 text-mint focus:ring-mint/40"
+          className="mt-1 h-3.5 w-3.5 rounded border-plum/30 text-mint focus:ring-mint/40"
           required
         />
-        <span className="text-sm leading-relaxed text-plum/90">{t.label}</span>
+        <span className={labelText}>{t.label}</span>
       </label>
-      <p className="pl-7 text-xs leading-relaxed text-plum/55">{t.detail}</p>
-      <p className="pl-7 text-xs text-plum/55">
-        <a href="/privacy" className="underline hover:text-plum">
+      <p className={detailText}>{t.detail}</p>
+      <p className={linkText}>
+        <Link href="/privacy" className="underline hover:text-plum">
           {t.privacy}
-        </a>
+        </Link>
         {" · "}
-        <a href="/terms" className="underline hover:text-plum">
+        <Link href="/terms" className="underline hover:text-plum">
           {t.terms}
-        </a>
+        </Link>
       </p>
     </div>
   );

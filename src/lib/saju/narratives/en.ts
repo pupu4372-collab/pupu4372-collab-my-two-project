@@ -61,8 +61,8 @@ export function narrativeEn(
   const speciesLabel = SPECIES_LABEL[species];
 
   return {
-    headline: tpl.headline(petName, meta.romanized, meta.hanja),
-    story: tpl.story(petName, meta.romanized, speciesLabel),
+    headline: tpl.headline(petName, meta.meaning, meta.hanja),
+    story: tpl.story(petName, meta.meaning, speciesLabel),
     traits: tpl.traits,
   };
 }

@@ -231,3 +231,55 @@ export function formatJijiDisplay(info: JijiHourInfo, locale: Locale): string {
   }
   return `${info.siNameEn} · ${info.branchHanja} ${info.branchHangul} (${info.romanized}) · ${info.animalEn}`;
 }
+
+export type JijiAnalysisMode = "four_pillars" | "three_pillars";
+
+export type JijiResolution =
+  | {
+      mode: "four_pillars";
+      timeString: string;
+      jiji: JijiHourInfo;
+      emoji: string;
+    }
+  | {
+      mode: "three_pillars";
+      message: string;
+      emoji: string;
+    };
+
+export interface ResolveJijiInput {
+  birthTime: string | null;
+  birthTimeUnknown: boolean;
+  /** When true, map via KST (traditional Korean saju). When false, use local HH:mm as-is. */
+  useKstMapping?: boolean;
+  utcIso?: string;
+}
+
+/**
+ * Resolves 12 지지 (시지) from user input.
+ * - Unknown birth time → 삼주(三柱) mode (no hour pillar).
+ * - Known time + useKstMapping → convert UTC to KST then slot lookup.
+ * - Known time + local → HH:mm in user's timezone directly.
+ */
+export function resolveJijiBranch(input: ResolveJijiInput): JijiResolution {
+  if (input.birthTimeUnknown || !input.birthTime) {
+    return {
+      mode: "three_pillars",
+      message:
+        "Birth time unknown — we read year, month & day pillars only. Still cute. 🐾✨",
+      emoji: "🌙",
+    };
+  }
+
+  const timeString =
+    input.useKstMapping && input.utcIso
+      ? utcToKstTimeString(input.utcIso)
+      : input.birthTime;
+
+  return {
+    mode: "four_pillars",
+    timeString,
+    jiji: getZodiacSignByTime(timeString),
+    emoji: "⏰",
+  };
+}

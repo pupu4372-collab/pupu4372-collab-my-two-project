@@ -21,6 +21,10 @@ const config: Config = {
         lavender: "#E8D4F8",
         petal: "#F8C8E8",
         sky: "#C8E8F8",
+        "channel-dog": "#3B82F6",
+        "channel-cat": "#EF4444",
+        "channel-saju": "#8B5CF6",
+        "channel-community": "#22C55E",
       },
       fontFamily: {
         sans: ["var(--font-noto)", "Pretendard", "system-ui", "sans-serif"],
