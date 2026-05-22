@@ -8,7 +8,7 @@ import {
 } from "@/lib/supabase/auth-client";
 import { useRouter } from "@/i18n/navigation";
 import { clearSupabaseBrowserSession, isSupabaseConfigured } from "@/lib/supabase/client";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 type Mode = "signup" | "login";
@@ -41,6 +41,7 @@ const SOCIALS: Array<{
 
 export function LoginButtons() {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
@@ -108,7 +109,7 @@ export function LoginButtons() {
         setMessage(t("signupSuccess"));
       } else {
         await signInWithEmail(cleanEmail, password);
-        router.push("/profile");
+        router.push(locale === "en" ? "/en" : "/");
       }
     } catch (err) {
       setError(formatAuthError(err));
