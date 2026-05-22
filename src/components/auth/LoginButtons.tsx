@@ -109,7 +109,7 @@ export function LoginButtons() {
         setMessage(t("signupSuccess"));
       } else {
         await signInWithEmail(cleanEmail, password);
-        router.push(locale === "en" ? "/en" : "/");
+        window.location.replace(locale === "en" ? "/en" : "/ko");
       }
     } catch (err) {
       setError(formatAuthError(err));

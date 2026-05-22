@@ -76,7 +76,7 @@ export async function signUpWithEmail(params: {
 
   const redirectTo =
     typeof window !== "undefined"
-      ? `${window.location.origin}/auth/callback?next=${document.documentElement.lang === "en" ? "/en" : "/"}`
+      ? `${window.location.origin}/auth/callback?next=${document.documentElement.lang === "en" ? "/en" : "/ko"}`
       : undefined;
 
   const { data, error } = await client.auth.signUp({
