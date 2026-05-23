@@ -1,5 +1,6 @@
 "use client";
 
+import { getHomePath, localeFromDocument } from "@/i18n/paths";
 import type { Provider } from "@supabase/supabase-js";
 import {
   clearSupabaseBrowserSession,
@@ -23,8 +24,8 @@ function resolveOAuthProviderId(provider: SupportedOAuthProvider): Provider {
 function getAuthCallbackUrl() {
   if (typeof window === "undefined") return undefined;
 
-  const locale = document.documentElement.lang === "en" ? "en" : "ko";
-  const nextPath = locale === "en" ? "/en" : "/ko";
+  const locale = localeFromDocument();
+  const nextPath = getHomePath(locale);
   const params = new URLSearchParams({ next: nextPath });
 
   return `${window.location.origin}/auth/callback?${params.toString()}`;
@@ -102,7 +103,7 @@ export async function signUpWithEmail(params: {
 
   const redirectTo =
     typeof window !== "undefined"
-      ? `${window.location.origin}/auth/callback?next=${document.documentElement.lang === "en" ? "/en" : "/ko"}`
+      ? `${window.location.origin}/auth/callback?next=${getHomePath(localeFromDocument())}`
       : undefined;
 
   const { data, error } = await client.auth.signUp({

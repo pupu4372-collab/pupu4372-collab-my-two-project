@@ -1,12 +1,13 @@
 "use client";
 
+import { getLoginPath, normalizePostAuthPath } from "@/i18n/paths";
 import { persistSession } from "@/lib/supabase/auth-client";
 import { getSupabaseAuthActionClient } from "@/lib/supabase/client";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 function loginRedirect(message: string) {
-  window.location.replace(`/ko/login?error=${encodeURIComponent(message)}`);
+  window.location.replace(`${getLoginPath("ko")}?error=${encodeURIComponent(message)}`);
 }
 
 function AuthCallbackHandler() {
@@ -26,8 +27,7 @@ function AuthCallbackHandler() {
 
       const code = searchParams.get("code");
       const requestedNext = searchParams.get("next");
-      const next =
-        requestedNext && requestedNext !== "/profile" ? requestedNext : "/ko";
+      const next = normalizePostAuthPath(requestedNext);
 
       if (!code) {
         loginRedirect("missing_code");

@@ -22,7 +22,7 @@ Redirect URLs: https://my-first-project.vercel.app/**
 | 1 | Cloud Console OAuth 클라이언트 생성 | Meta 앱 + Facebook Login | 네이버 개발자 앱 등록 |
 | 2 | Redirect URI → Supabase callback | Valid OAuth Redirect URIs 동일 | Callback URL 동일 |
 | 3 | Supabase → Google ON | Supabase → Facebook ON | Supabase → **custom:naver** OAuth2 생성 |
-| 4 | `/ko/login` 에서 구글 버튼 테스트 | 페이스북 버튼 테스트 | 네이버 버튼 테스트 |
+| 4 | `/login` 에서 구글 버튼 테스트 | 페이스북 버튼 테스트 | 네이버 버튼 테스트 |
 
 로컬 테스트 시 Redirect URLs에 `http://localhost:3000/**` 도 추가하세요.
 
@@ -123,7 +123,7 @@ https://jvvduburvqfcualzmwig.supabase.co/auth/v1/callback
 ## 4. 테스트 순서
 
 1. Vercel 최신 배포가 **Ready**인지 확인
-2. `https://my-first-project.vercel.app/ko/login` 접속
+2. `https://my-first-project.vercel.app/login` 접속
 3. **구글로 로그인** → 계정 선택 → **홈(/ko)** 으로 이동하는지 확인
 4. 같은 방식으로 Facebook, Naver 테스트
 

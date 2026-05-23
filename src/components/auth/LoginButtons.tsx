@@ -1,5 +1,6 @@
 "use client";
 
+import { getHomePath } from "@/i18n/paths";
 import {
   signInWithEmail,
   signInWithProvider,
@@ -110,7 +111,7 @@ export function LoginButtons() {
         setMessage(t("signupSuccess"));
       } else {
         await signInWithEmail(cleanEmail, password);
-        window.location.replace(locale === "en" ? "/en" : "/ko");
+        window.location.replace(getHomePath(locale === "en" ? "en" : "ko"));
       }
     } catch (err) {
       setError(formatAuthError(err));
