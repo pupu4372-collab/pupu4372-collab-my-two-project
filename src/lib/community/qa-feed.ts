@@ -10,11 +10,17 @@ export interface QaFeedQuery {
   tag?: string | null;
 }
 
+export type CommunityBoardKind = "qa" | "free" | "tips";
+
 export interface QaFeedPage {
   posts: CommunityPost[];
   nextCursor: string | null;
   source: "supabase" | "mock";
   total?: number;
+}
+
+function boardTag(board: CommunityBoardKind) {
+  return board === "qa" ? "qa" : board === "tips" ? "tips" : "free";
 }
 
 function matchesQuery(post: CommunityPost, q?: string | null, tag?: string | null) {
@@ -38,9 +44,10 @@ function mockQaFeed(query: QaFeedQuery): QaFeedPage {
   };
 }
 
-export async function fetchQaFeed(query: QaFeedQuery = {}): Promise<QaFeedPage> {
+export async function fetchQaFeed(query: QaFeedQuery = {}, board: CommunityBoardKind = "qa"): Promise<QaFeedPage> {
   const supabase = getSupabaseServerClient();
   if (!supabase) return mockQaFeed(query);
+  const tag = boardTag(board);
 
   let dbQuery = supabase
     .from("community_posts")
@@ -48,13 +55,15 @@ export async function fetchQaFeed(query: QaFeedQuery = {}): Promise<QaFeedPage> 
       "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at",
       { count: "exact" }
     )
-    .eq("post_type", "qa")
+    .eq("post_type", board === "qa" ? "qa" : "free")
     .eq("is_hidden", false)
     .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(PAGE_SIZE);
 
-  if (query.tag && query.tag !== "all") {
+  if (board !== "qa") {
+    dbQuery = dbQuery.contains("tags", [tag]);
+  } else if (query.tag && query.tag !== "all") {
     dbQuery = dbQuery.contains("tags", [query.tag]);
   }
   if (query.q?.trim()) {
@@ -93,18 +102,20 @@ export async function fetchQaFeed(query: QaFeedQuery = {}): Promise<QaFeedPage> 
 
 export async function createQaPost(
   supabase: import("@supabase/supabase-js").SupabaseClient<import("@/lib/supabase/types").Database>,
-  input: { authorId: string; title: string; content: string; language?: string }
+  input: { authorId: string; title: string; content: string; language?: string; board?: CommunityBoardKind }
 ): Promise<CommunityPost> {
+  const board = input.board ?? "qa";
+  const tag = boardTag(board);
   const { data, error } = await supabase
     .from("community_posts")
     .insert({
       author_id: input.authorId,
       channel: "community",
-      post_type: "qa",
+      post_type: board === "qa" ? "qa" : "free",
       title: input.title.trim(),
       content: input.content.trim(),
       image_urls: [],
-      tags: ["qa"],
+      tags: [tag],
       language: input.language ?? "ko",
     } as never)
     .select(
@@ -112,6 +123,6 @@ export async function createQaPost(
     )
     .single();
 
-  if (error || !data) throw new Error(error?.message ?? "Failed to create Q&A post.");
+  if (error || !data) throw new Error(error?.message ?? "Failed to create post.");
   return data as CommunityPost;
 }

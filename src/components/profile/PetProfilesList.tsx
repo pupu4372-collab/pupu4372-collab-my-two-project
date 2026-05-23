@@ -59,6 +59,8 @@ const TYPE_LABELS = {
   },
 } as const;
 
+const MAX_PETS_PER_OWNER = 3;
+
 function petQuery(pet: PetRow, locale: string) {
   return new URLSearchParams({
     petName: pet.name,
@@ -209,8 +211,39 @@ export function PetProfilesList({ editable = false }: { editable?: boolean }) {
         setError(data.error ?? (isKo ? "펫 사진 업로드에 실패했어요." : "Could not upload pet photo."));
         return;
       }
-      updateDraft(petId, { profileImageUrl: data.imageUrl });
-      setMessage(isKo ? "펫 사진이 업로드됐어요. 저장 버튼을 눌러 반영해 주세요." : "Pet photo uploaded. Press save to apply it.");
+      const nextImageUrl = data.imageUrl as string;
+      const pet = pets.find((item) => item.id === petId);
+      const draft = drafts[petId] ?? (pet ? draftFromPet(pet) : null);
+      if (!pet || !draft) return;
+
+      const saveRes = await fetch("/api/profile/pets", {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: petId,
+          name: draft.name,
+          species: draft.species,
+          gender: draft.gender,
+          birthDate: draft.birthDate,
+          birthTime: draft.birthTimeUnknown ? null : draft.birthTime,
+          birthTimeUnknown: draft.birthTimeUnknown,
+          timezone: draft.timezone,
+          profileImageUrl: nextImageUrl,
+        }),
+      });
+      const saveData = await saveRes.json();
+      if (!saveRes.ok) {
+        setError(saveData.error ?? (isKo ? "펫 사진 저장에 실패했어요." : "Could not save pet photo."));
+        return;
+      }
+
+      const updatedPet = saveData.pet as PetRow;
+      setPets((prev) => prev.map((item) => (item.id === petId ? { ...item, ...updatedPet } : item)));
+      setDrafts((prev) => ({ ...prev, [petId]: draftFromPet(updatedPet) }));
+      setMessage(isKo ? "펫 사진이 변경됐어요." : "Pet photo updated.");
     } catch {
       setError(isKo ? "네트워크 오류" : "Network error");
     } finally {
@@ -275,7 +308,12 @@ export function PetProfilesList({ editable = false }: { editable?: boolean }) {
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-2xl bg-channel-saju/10 px-4 py-3">
           <p className="text-xs text-plum/55">{isKo ? "저장된 펫" : "Saved pets"}</p>
-          <p className="mt-1 text-2xl font-bold text-channel-saju">{pets.length}</p>
+          <p className="mt-1 text-2xl font-bold text-channel-saju">
+            {pets.length}/{MAX_PETS_PER_OWNER}
+          </p>
+          <p className="mt-1 text-[11px] text-plum/45">
+            {isKo ? "주인 1명당 최대 3마리" : "Up to 3 pets per owner"}
+          </p>
         </div>
         <div className="rounded-2xl bg-petal/35 px-4 py-3">
           <p className="text-xs text-plum/55">{isKo ? "사주 결과" : "Saju results"}</p>
@@ -314,7 +352,7 @@ export function PetProfilesList({ editable = false }: { editable?: boolean }) {
               className="rounded-3xl border border-plum/15 bg-white/55 px-5 py-5"
             >
               <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-lavender/30 text-2xl">
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-lavender/30 text-2xl">
                   {(editable ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -325,6 +363,22 @@ export function PetProfilesList({ editable = false }: { editable?: boolean }) {
                   ) : (
                     <span aria-hidden>{pet.species === "dog" ? "🐕" : "🐈"}</span>
                   )}
+                  <input
+                    id={`pet-profile-photo-${pet.id}`}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={(e) => void uploadPetImage(pet.id, e.target.files?.[0] ?? null)}
+                    className="sr-only"
+                    disabled={uploadingPetId === pet.id}
+                  />
+                  <label
+                    htmlFor={`pet-profile-photo-${pet.id}`}
+                    title={isKo ? "펫 사진 변경" : "Change pet photo"}
+                    className="absolute bottom-1 right-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white bg-channel-saju text-[10px] text-white shadow-sm transition hover:brightness-105"
+                    aria-label={isKo ? "펫 사진 변경" : "Change pet photo"}
+                  >
+                    {uploadingPetId === pet.id ? "…" : "📷"}
+                  </label>
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-bold text-plum">{pet.name}</p>
@@ -347,33 +401,6 @@ export function PetProfilesList({ editable = false }: { editable?: boolean }) {
 
               {editable && drafts[pet.id] && (
                 <div className="mt-4 grid gap-3 rounded-2xl bg-white/45 p-4 sm:grid-cols-2">
-                  <div className="block text-xs font-medium text-plum/70 sm:col-span-2">
-                    <p>{isKo ? "펫 사진" : "Pet photo"}</p>
-                    <input
-                      id={`pet-profile-photo-${pet.id}`}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif"
-                      onChange={(e) => void uploadPetImage(pet.id, e.target.files?.[0] ?? null)}
-                      className="sr-only"
-                      disabled={uploadingPetId === pet.id}
-                    />
-                    <label
-                      htmlFor={`pet-profile-photo-${pet.id}`}
-                      className="mt-2 inline-flex cursor-pointer rounded-full bg-mint/50 px-4 py-2 text-xs font-semibold text-plum transition hover:bg-mint/70"
-                    >
-                      {isKo ? "사진 선택" : "Choose photo"}
-                    </label>
-                    <span className="mt-1 block text-[11px] text-plum/45">
-                      {uploadingPetId === pet.id
-                        ? isKo
-                          ? "업로드 중..."
-                          : "Uploading..."
-                        : isKo
-                          ? "사진 선택 후 펫 프로필 저장을 눌러주세요."
-                          : "Choose a photo, then press Save pet profile."}
-                    </span>
-                  </div>
-
                   <label className="block text-xs font-medium text-plum/70 sm:col-span-2">
                     {isKo ? "펫 이름" : "Pet name"}
                     <input

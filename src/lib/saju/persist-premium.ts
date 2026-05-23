@@ -1,7 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, PetInsert, SajuResultInsert } from "@/lib/supabase/types";
+import type { Database, SajuResultInsert } from "@/lib/supabase/types";
 import type { PremiumReport } from "./premium-report";
 import type { SajuBasicRequest } from "./types";
+import { findOrCreatePet } from "./persist-pet";
 
 const ELEMENT_TO_DB = {
   wood: "mok",
@@ -25,30 +26,22 @@ export async function persistPremiumReport(
     demo: boolean;
   }
 ) {
-  const petPayload: PetInsert = {
-    owner_id: ownerId,
+  const petId = await findOrCreatePet(supabase, {
+    ownerId,
     name: request.petName,
     species: request.species,
-    birth_date: request.birthDate,
-    birth_time: request.birthTimeUnknown ? null : request.birthTime,
-    birth_time_unknown: request.birthTimeUnknown,
-    birth_timezone: request.timezone,
-  };
-
-  const { data: pet } = await supabase
-    .from("pets")
-    .insert(petPayload as never)
-    .select("id")
-    .single();
-
-  const savedPet = pet as { id: string } | null;
-  if (!savedPet) throw new Error("Failed to save pet.");
+    birthDate: request.birthDate,
+    birthTime: request.birthTime,
+    birthTimeUnknown: request.birthTimeUnknown,
+    timezone: request.timezone,
+    gender: request.petGender ?? null,
+  });
 
   const analysisMode = request.birthTimeUnknown ? "three_pillars" : "four_pillars";
   const el = report.basic.dominantElement;
 
   const sajuPayload: SajuResultInsert = {
-    pet_id: savedPet.id,
+    pet_id: petId,
     owner_id: ownerId,
     saju_type: "premium",
     analysis_mode: analysisMode,
@@ -87,7 +80,7 @@ export async function persistPremiumReport(
 
   await supabase.from("payments").insert({
     user_id: ownerId,
-    pet_id: savedPet.id,
+    pet_id: petId,
     saju_result_id: savedSaju.id,
     provider: payment.demo ? "demo" : "paypal",
     provider_order_id: payment.orderId,
@@ -99,5 +92,5 @@ export async function persistPremiumReport(
     raw_payload: { demo: payment.demo },
   } as never);
 
-  return { petId: savedPet.id, sajuResultId: savedSaju.id };
+  return { petId, sajuResultId: savedSaju.id };
 }

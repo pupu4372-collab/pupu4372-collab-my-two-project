@@ -1,4 +1,4 @@
-import { createPetShowPost } from "@/lib/community/posts";
+import { createQaPost } from "@/lib/community/qa-feed";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -19,14 +19,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Supabase not configured." }, { status: 503 });
   }
 
-  let body: {
-    title?: string;
-    content?: string;
-    imageUrl?: string;
-    petId?: string | null;
-    language?: string;
-  };
-
+  let body: { title?: string; content?: string; language?: string };
   try {
     body = await request.json();
   } catch {
@@ -36,35 +29,17 @@ export async function POST(request: Request) {
   if (!body.title?.trim()) {
     return NextResponse.json({ error: "Title is required." }, { status: 400 });
   }
-  if (!body.imageUrl?.trim()) {
-    return NextResponse.json({ error: "Image URL is required." }, { status: 400 });
-  }
-  if (!body.petId?.trim()) {
-    return NextResponse.json({ error: "Pet selection is required." }, { status: 400 });
-  }
-
-  const { data: pet, error: petError } = await supabase
-    .from("pets")
-    .select("id")
-    .eq("id", body.petId.trim())
-    .eq("owner_id", userId)
-    .maybeSingle();
-
-  if (petError) {
-    return NextResponse.json({ error: petError.message }, { status: 500 });
-  }
-  if (!pet) {
-    return NextResponse.json({ error: "Selected pet was not found." }, { status: 400 });
+  if (!body.content?.trim() || body.content.trim().length < 10) {
+    return NextResponse.json({ error: "Content must be at least 10 characters." }, { status: 400 });
   }
 
   try {
-    const post = await createPetShowPost(supabase, {
+    const post = await createQaPost(supabase, {
       authorId: userId,
       title: body.title,
       content: body.content,
-      imageUrl: body.imageUrl,
-      petId: body.petId.trim(),
       language: body.language,
+      board: "free",
     });
     return NextResponse.json({ post }, { status: 201 });
   } catch (err) {

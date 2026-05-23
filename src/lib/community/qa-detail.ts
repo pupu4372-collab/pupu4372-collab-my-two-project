@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { MOCK_QA_POSTS } from "@/lib/community/qa-mock-data";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { CommunityPost, Database, PostComment } from "@/lib/supabase/types";
+import type { CommunityBoardKind } from "./qa-feed";
 
 type Db = SupabaseClient<Database>;
 
@@ -11,6 +12,14 @@ const COMMENT_SELECT =
   "id, post_id, author_id, parent_id, content, is_hidden, created_at, updated_at";
 
 const MOCK_BY_ID = Object.fromEntries(MOCK_QA_POSTS.map((p) => [p.id, p]));
+
+function postTypeForBoard(board: CommunityBoardKind) {
+  return board === "qa" ? "qa" : "free";
+}
+
+function tagForBoard(board: CommunityBoardKind) {
+  return board === "qa" ? "qa" : board;
+}
 
 function getMockComments(postId: string): PostComment[] {
   const base = Date.now();
@@ -38,16 +47,22 @@ function getMockComments(postId: string): PostComment[] {
   ];
 }
 
-export async function fetchQaPostDetail(id: string): Promise<CommunityPost | null> {
+export async function fetchQaPostDetail(id: string, board: CommunityBoardKind = "qa"): Promise<CommunityPost | null> {
   const supabase = getSupabaseServerClient();
   if (!supabase) return MOCK_BY_ID[id] ?? null;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("community_posts")
     .select(POST_SELECT)
     .eq("id", id)
-    .eq("post_type", "qa")
-    .eq("is_hidden", false)
+    .eq("post_type", postTypeForBoard(board))
+    .eq("is_hidden", false);
+
+  if (board !== "qa") {
+    query = query.contains("tags", [tagForBoard(board)]);
+  }
+
+  const { data, error } = await query
     .single();
 
   if (error || !data) return MOCK_BY_ID[id] ?? null;
@@ -71,17 +86,24 @@ export async function fetchQaComments(postId: string): Promise<PostComment[]> {
 
 export async function createQaComment(
   supabase: Db,
-  input: { postId: string; authorId: string; content: string; parentId?: string | null }
+  input: { postId: string; authorId: string; content: string; parentId?: string | null; board?: CommunityBoardKind }
 ): Promise<PostComment> {
-  const { data: post } = await supabase
+  const board = input.board ?? "qa";
+  let postQuery = supabase
     .from("community_posts")
     .select("id")
     .eq("id", input.postId)
-    .eq("post_type", "qa")
-    .eq("is_hidden", false)
+    .eq("post_type", postTypeForBoard(board))
+    .eq("is_hidden", false);
+
+  if (board !== "qa") {
+    postQuery = postQuery.contains("tags", [tagForBoard(board)]);
+  }
+
+  const { data: post } = await postQuery
     .single();
 
-  if (!post) throw new Error("Q&A post not found.");
+  if (!post) throw new Error("Post not found.");
 
   const { data, error } = await supabase
     .from("post_comments")

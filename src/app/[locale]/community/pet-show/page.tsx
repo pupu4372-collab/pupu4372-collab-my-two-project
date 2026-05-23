@@ -1,6 +1,6 @@
 import { PetShowClient } from "@/components/community/PetShowClient";
 import { ChannelShell } from "@/components/layout/ChannelShell";
-import { fetchPetShowRanking } from "@/lib/community/ranking";
+import { fetchWeeklyPetShowSpeciesRankings } from "@/lib/community/ranking";
 
 interface PetShowPageProps {
   params: Promise<{ locale: string }>;
@@ -9,10 +9,7 @@ interface PetShowPageProps {
 export default async function PetShowPage({ params }: PetShowPageProps) {
   const { locale } = await params;
   const isKo = locale !== "en";
-  const [week, realtime] = await Promise.all([
-    fetchPetShowRanking("week"),
-    fetchPetShowRanking("realtime"),
-  ]);
+  const ranking = await fetchWeeklyPetShowSpeciesRankings();
 
   return (
     <ChannelShell
@@ -29,10 +26,9 @@ export default async function PetShowPage({ params }: PetShowPageProps) {
       ]}
     >
       <PetShowClient
-        weekRows={week.rows}
-        weekSource={week.source}
-        realtimeRows={realtime.rows}
-        realtimeSource={realtime.source}
+        dogRows={ranking.rows.dog}
+        catRows={ranking.rows.cat}
+        source={ranking.source}
       />
     </ChannelShell>
   );

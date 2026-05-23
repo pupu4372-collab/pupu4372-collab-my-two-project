@@ -137,8 +137,31 @@ export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }
         setError(data.error ?? (isKo ? "사진 업로드에 실패했어요." : "Could not upload photo."));
         return;
       }
-      setAvatarUrl(data.imageUrl);
-      setMessage(isKo ? "사진이 업로드됐어요. 저장 버튼을 눌러 반영해 주세요." : "Photo uploaded. Press save to apply it.");
+      const nextAvatarUrl = data.imageUrl as string;
+      const saveRes = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          displayName: displayName || profile?.display_name || email?.split("@")[0] || "",
+          locale: profileLocale,
+          timezone,
+          avatarUrl: nextAvatarUrl,
+        }),
+      });
+      const saveData = await saveRes.json();
+      if (!saveRes.ok) {
+        setError(saveData.error ?? (isKo ? "사진 저장에 실패했어요." : "Could not save photo."));
+        return;
+      }
+
+      const nextProfile = saveData.profile as Profile;
+      setProfile(nextProfile);
+      setAvatarUrl(nextProfile.avatar_url ?? nextAvatarUrl);
+      setMessage(isKo ? "사진이 변경됐어요." : "Photo updated.");
+      await refresh();
     } catch {
       setError(isKo ? "네트워크 오류" : "Network error");
     } finally {
@@ -207,7 +230,7 @@ export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }
   return (
     <article className="rounded-2xl border border-plum/15 bg-white/50 px-5 py-4">
       <div className="flex items-start gap-4">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-lavender/40 text-2xl">
+        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-lavender/40 text-2xl">
           {(avatarUrl ?? profile?.avatar_url) ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -218,6 +241,22 @@ export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }
           ) : (
             <span aria-hidden>👤</span>
           )}
+          <input
+            id="owner-profile-photo"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={(e) => void handleOwnerImageUpload(e.target.files?.[0] ?? null)}
+            className="sr-only"
+            disabled={uploading}
+          />
+          <label
+            htmlFor="owner-profile-photo"
+            title={isKo ? "사진 변경" : "Change photo"}
+            className="absolute -bottom-1 -right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-white bg-channel-saju text-xs text-white shadow-sm transition hover:brightness-105"
+            aria-label={isKo ? "사진 변경" : "Change photo"}
+          >
+            {uploading ? "…" : "📷"}
+          </label>
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-lg font-bold text-plum">{shownName}</h3>
@@ -254,34 +293,14 @@ export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }
           )}
         </div>
       </div>
+      {(message || error) && !showEditor && (
+        <div className="mt-3 rounded-2xl bg-white/55 px-4 py-2 text-xs">
+          {message && <p className="font-medium text-channel-community">{message}</p>}
+          {error && <p className="text-red-700/80">{error}</p>}
+        </div>
+      )}
       {showEditor && (
         <form onSubmit={handleSave} className="mt-5 grid gap-3 rounded-2xl bg-white/45 p-4 sm:grid-cols-2">
-          <div className="block text-xs font-medium text-plum/70 sm:col-span-2">
-            <p>{isKo ? "내 사진" : "My photo"}</p>
-            <input
-              id="owner-profile-photo"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              onChange={(e) => void handleOwnerImageUpload(e.target.files?.[0] ?? null)}
-              className="sr-only"
-              disabled={uploading}
-            />
-            <label
-              htmlFor="owner-profile-photo"
-              className="mt-2 inline-flex cursor-pointer rounded-full bg-mint/50 px-4 py-2 text-xs font-semibold text-plum transition hover:bg-mint/70"
-            >
-              {isKo ? "사진 선택" : "Choose photo"}
-            </label>
-            <span className="mt-1 block text-[11px] text-plum/45">
-              {uploading
-                ? isKo
-                  ? "업로드 중..."
-                  : "Uploading..."
-                : isKo
-                  ? "사진 선택 후 프로필 저장을 눌러주세요."
-                  : "Choose a photo, then press Save profile."}
-            </span>
-          </div>
           <label className="block text-xs font-medium text-plum/70 sm:col-span-2">
             {isKo ? "닉네임" : "Display name"}
             <input

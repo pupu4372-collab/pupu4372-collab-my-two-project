@@ -88,6 +88,7 @@ export interface PetShowRankingRow {
   id: string;
   author_id: string;
   pet_id: string | null;
+  pet_species?: PetSpecies | null;
   title: string | null;
   image_urls: string[];
   like_count: number;

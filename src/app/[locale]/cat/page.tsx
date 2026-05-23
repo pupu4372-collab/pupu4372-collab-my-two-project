@@ -21,10 +21,10 @@ export default async function CatChannelPage({ params }: CatChannelPageProps) {
           ? "행동 심리, 화장실, 사냥 놀이, 식단까지 냥님 중심 케어 콘텐츠."
           : "Cat-first care content for behavior, litter, hunting play, and diet."
       }
-      backHref="/community"
-      backLabel={isKo ? "← 커뮤니티" : "← Community"}
+      backHref="/"
+      backLabel={isKo ? "← 홈" : "← Home"}
       rightLinks={[
-        { href: "/", label: isKo ? "홈" : "Home" },
+        { href: "/community", label: isKo ? "커뮤니티" : "Community" },
         { href: "/dog", label: isKo ? "강아지 채널" : "Dog Channel" },
       ]}
     >

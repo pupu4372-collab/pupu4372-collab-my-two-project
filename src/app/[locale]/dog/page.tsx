@@ -21,10 +21,10 @@ export default async function DogChannelPage({ params }: DogChannelPageProps) {
           ? "산책, 훈련, 식단, 견종 성향까지 댕댕이 집사를 위한 실전 콘텐츠."
           : "Practical content for walks, training, food, and breed tendencies."
       }
-      backHref="/community"
-      backLabel={isKo ? "← 커뮤니티" : "← Community"}
+      backHref="/"
+      backLabel={isKo ? "← 홈" : "← Home"}
       rightLinks={[
-        { href: "/", label: isKo ? "홈" : "Home" },
+        { href: "/community", label: isKo ? "커뮤니티" : "Community" },
         { href: "/cat", label: isKo ? "고양이 채널" : "Cat Channel" },
       ]}
     >

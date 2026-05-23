@@ -9,6 +9,8 @@ import { useState } from "react";
 interface QaCommentsProps {
   postId: string;
   initialComments: PostComment[];
+  board?: "qa" | "free" | "tips";
+  listHref?: string;
 }
 
 function formatDate(value: string) {
@@ -20,7 +22,7 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-export function QaComments({ postId, initialComments }: QaCommentsProps) {
+export function QaComments({ postId, initialComments, board = "qa", listHref = "/community/qa" }: QaCommentsProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const { accessToken, configured, isAnonymous } = useSupabaseSession();
@@ -37,7 +39,7 @@ export function QaComments({ postId, initialComments }: QaCommentsProps) {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
-      const res = await fetch(`/api/community/qa/${postId}/comments`, {
+      const res = await fetch(`/api/community/${board}/${postId}/comments`, {
         method: "POST",
         headers,
         body: JSON.stringify({ content }),
@@ -58,7 +60,7 @@ export function QaComments({ postId, initialComments }: QaCommentsProps) {
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-bold text-plum">{isKo ? "댓글" : "Comments"} {comments.length}</h2>
-        <Link href="/community/qa" className="text-sm text-plum/55 underline hover:text-plum">
+        <Link href={listHref} className="text-sm text-plum/55 underline hover:text-plum">
           {isKo ? "목록으로" : "Back to list"}
         </Link>
       </div>

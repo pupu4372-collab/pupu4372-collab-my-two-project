@@ -1,15 +1,17 @@
 "use client";
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import type { CommunityBoardKind } from "@/lib/community/qa-feed";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useState } from "react";
 
 interface QaComposerProps {
   onPosted: () => void;
+  board?: CommunityBoardKind;
 }
 
-export function QaComposer({ onPosted }: QaComposerProps) {
+export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const { accessToken, isAnonymous, configured } = useSupabaseSession();
@@ -21,7 +23,7 @@ export function QaComposer({ onPosted }: QaComposerProps) {
   if (!configured) {
     return (
       <p className="text-sm text-plum/70">
-        {isKo ? "Supabase 연동 후 질문을 올릴 수 있어요." : "You can post questions after Supabase is connected."}
+        {isKo ? "Supabase 연동 후 글을 올릴 수 있어요." : "You can post after Supabase is connected."}
       </p>
     );
   }
@@ -29,7 +31,7 @@ export function QaComposer({ onPosted }: QaComposerProps) {
   if (isAnonymous) {
     return (
       <div className="rounded-2xl border border-dashed border-channel-community/30 bg-channel-community/5 px-5 py-4 text-center">
-        <p className="text-sm text-plum/70">{isKo ? "질문을 남기려면 로그인이 필요해요." : "Please log in to post a question."}</p>
+        <p className="text-sm text-plum/70">{isKo ? "글을 남기려면 로그인이 필요해요." : "Please log in to post."}</p>
         <Link
           href="/login"
           className="mt-3 inline-flex rounded-full bg-channel-community px-5 py-2.5 text-sm font-semibold text-white"
@@ -48,7 +50,7 @@ export function QaComposer({ onPosted }: QaComposerProps) {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
-      const res = await fetch("/api/community/qa/posts", {
+      const res = await fetch(`/api/community/${board}/posts`, {
         method: "POST",
         headers,
         body: JSON.stringify({ title, content, language: "ko" }),
@@ -68,10 +70,16 @@ export function QaComposer({ onPosted }: QaComposerProps) {
 
   return (
     <form onSubmit={handleSubmit} className="pastel-card space-y-3 p-5">
-      <h3 className="font-bold text-plum">{isKo ? "질문 올리기" : "Ask a question"}</h3>
+      <h3 className="font-bold text-plum">
+        {board === "qa"
+          ? isKo ? "질문 올리기" : "Ask a question"
+          : board === "tips"
+            ? isKo ? "꿀팁 올리기" : "Share a tip"
+            : isKo ? "자유글 올리기" : "Write a post"}
+      </h3>
       <input
         className="pastel-input"
-        placeholder={isKo ? "제목 (예: 산책 중 짖음이 심해요)" : "Title (e.g. Barking during walks)"}
+        placeholder={isKo ? "제목" : "Title"}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         required
@@ -79,7 +87,7 @@ export function QaComposer({ onPosted }: QaComposerProps) {
       />
       <textarea
         className="pastel-input min-h-[100px] resize-y"
-        placeholder={isKo ? "상황을 자세히 적어주세요 (10자 이상)" : "Describe the situation in detail (10+ chars)"}
+        placeholder={isKo ? "내용을 자세히 적어주세요 (10자 이상)" : "Describe it in detail (10+ chars)"}
         value={content}
         onChange={(e) => setContent(e.target.value)}
         required
@@ -92,7 +100,7 @@ export function QaComposer({ onPosted }: QaComposerProps) {
         disabled={loading}
         className="w-full rounded-full bg-channel-community py-3 text-sm font-semibold text-white disabled:opacity-60"
       >
-        {loading ? (isKo ? "등록 중…" : "Posting…") : isKo ? "질문 등록" : "Post question"}
+        {loading ? (isKo ? "등록 중…" : "Posting…") : isKo ? "등록" : "Post"}
       </button>
     </form>
   );

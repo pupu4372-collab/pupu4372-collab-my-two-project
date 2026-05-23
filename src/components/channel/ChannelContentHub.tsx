@@ -53,6 +53,12 @@ export function ChannelContentHub({
         className={`relative overflow-hidden rounded-[2rem] border ${theme.border} ${theme.softBg} px-5 py-6 md:px-7`}
       >
         <div className={`absolute -right-10 -top-10 h-40 w-40 rounded-full ${theme.ring} blur-3xl`} />
+        <Link
+          href="/community/pet-show"
+          className={`relative z-10 mb-5 inline-flex rounded-full bg-white/75 px-4 py-2 text-sm font-bold shadow-sm transition hover:bg-white md:absolute md:right-6 md:top-6 md:mb-0 ${theme.accent}`}
+        >
+          {isKo ? "우리아이 자랑하기" : "Join Pet Show"} →
+        </Link>
         <div className="relative">
           <p className={`text-sm font-bold ${theme.accent}`}>
             {content.emoji} {content.label} {isKo ? "채널" : "channel"}
@@ -137,9 +143,6 @@ export function ChannelContentHub({
               {isKo ? "가볍게 읽고 바로 실천할 수 있는 글" : "Quick reads you can try right away"}
             </p>
           </div>
-          <Link href="/community/pet-show" className={`text-sm font-semibold underline ${theme.accent}`}>
-            {isKo ? "우리아이 자랑" : "Pet Show"} →
-          </Link>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {listArticles.map((article) => (

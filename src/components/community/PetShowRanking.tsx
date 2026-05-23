@@ -7,6 +7,12 @@ interface PetShowRankingProps {
   source: "supabase" | "mock";
 }
 
+interface PetShowWeeklySpeciesRankingProps {
+  dogRows: PetShowRankingRow[];
+  catRows: PetShowRankingRow[];
+  source: "supabase" | "mock";
+}
+
 export function PetShowRanking({ rows, period, source }: PetShowRankingProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -42,6 +48,98 @@ export function PetShowRanking({ rows, period, source }: PetShowRankingProps) {
           </li>
         ))}
       </ol>
+    </section>
+  );
+}
+
+function SpeciesList({
+  rows,
+  emoji,
+  title,
+  emptyText,
+}: {
+  rows: PetShowRankingRow[];
+  emoji: string;
+  title: string;
+  emptyText: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-white/55 p-4">
+      <h3 className="text-sm font-bold text-plum">
+        {emoji} {title}
+      </h3>
+      {rows.length === 0 ? (
+        <p className="mt-3 rounded-xl bg-channel-community/10 px-3 py-3 text-xs text-plum/55">
+          {emptyText}
+        </p>
+      ) : (
+        <ol className="mt-3 space-y-2">
+          {rows.slice(0, 5).map((row, i) => (
+            <li key={row.id} className="flex items-center gap-3 rounded-xl bg-channel-community/10 p-2">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-channel-community text-xs font-bold text-white">
+                {row.rank_position ?? i + 1}
+              </span>
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/70">
+                {row.image_urls?.[0] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={row.image_urls[0]} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center text-xl">{emoji}</span>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-plum">{row.title ?? "Pet Show"}</p>
+                <p className="text-xs text-plum/55">♥ {row.like_count} · 💬 {row.comment_count}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+export function PetShowWeeklySpeciesRanking({
+  dogRows,
+  catRows,
+  source,
+}: PetShowWeeklySpeciesRankingProps) {
+  const locale = useLocale();
+  const isKo = locale === "ko";
+
+  return (
+    <section className="rounded-3xl border border-channel-community/25 bg-channel-community/10 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-extrabold text-channel-community">
+            {isKo ? "우리아이 자랑 주간 랭킹 Top 5" : "Pet Show Weekly Top 5"}
+          </h2>
+          <p className="mt-1 text-xs text-plum/55">
+            {isKo
+              ? "최근 7일간 좋아요 순위입니다. 동점일 때는 먼저 올린 사진이 앞에 배정돼요."
+              : "Ranked by likes from the last 7 days. Ties go to earlier uploads first."}
+          </p>
+        </div>
+        {source === "mock" && (
+          <span className="rounded-full bg-white/70 px-3 py-1 text-xs text-plum/50">
+            {isKo ? "데모 데이터" : "Demo data"}
+          </span>
+        )}
+      </div>
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <SpeciesList
+          rows={dogRows}
+          emoji="🐕"
+          title={isKo ? "강아지 Top 5" : "Dog Top 5"}
+          emptyText={isKo ? "이번 주 강아지 사진을 기다리는 중이에요." : "Waiting for dog photos this week."}
+        />
+        <SpeciesList
+          rows={catRows}
+          emoji="🐈"
+          title={isKo ? "고양이 Top 5" : "Cat Top 5"}
+          emptyText={isKo ? "이번 주 고양이 사진을 기다리는 중이에요." : "Waiting for cat photos this week."}
+        />
+      </div>
     </section>
   );
 }

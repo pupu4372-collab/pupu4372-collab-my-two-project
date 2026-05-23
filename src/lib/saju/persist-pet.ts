@@ -3,6 +3,7 @@ import type { Database, PetInsert, PetSpecies } from "@/lib/supabase/types";
 import type { Gender } from "./types";
 
 type DbClient = SupabaseClient<Database>;
+export const MAX_PETS_PER_OWNER = 3;
 
 export interface PetProfileInput {
   ownerId: string;
@@ -30,6 +31,19 @@ export async function findOrCreatePet(
 
   const row = existing as { id: string } | null;
   if (row?.id) return row.id;
+
+  const { count, error: countError } = await supabase
+    .from("pets")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", input.ownerId);
+
+  if (countError) {
+    throw new Error(countError.message);
+  }
+
+  if ((count ?? 0) >= MAX_PETS_PER_OWNER) {
+    throw new Error(`Pet registration is limited to ${MAX_PETS_PER_OWNER} pets per owner.`);
+  }
 
   const petPayload: PetInsert = {
     owner_id: input.ownerId,

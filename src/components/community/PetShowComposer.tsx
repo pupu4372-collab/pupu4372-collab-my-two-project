@@ -2,10 +2,16 @@
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { useLocale } from "next-intl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface PetShowComposerProps {
   onPosted?: () => void;
+}
+
+interface PetOption {
+  id: string;
+  name: string;
+  species: "dog" | "cat";
 }
 
 export function PetShowComposer({ onPosted }: PetShowComposerProps) {
@@ -13,6 +19,8 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   const isKo = locale === "ko";
   const { ready, accessToken, configured } = useSupabaseSession();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [pets, setPets] = useState<PetOption[]>([]);
+  const [petId, setPetId] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
@@ -20,6 +28,28 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!configured || !ready || !accessToken) return;
+
+    async function loadPets() {
+      try {
+        const res = await fetch("/api/profile/pets", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const data = await res.json();
+        if (!res.ok) return;
+
+        const nextPets = (data.pets ?? []) as PetOption[];
+        setPets(nextPets.map((pet) => ({ id: pet.id, name: pet.name, species: pet.species })));
+        setPetId((current) => current || nextPets[0]?.id || "");
+      } catch {
+        // Posting still shows a clear validation message if no pet can be selected.
+      }
+    }
+
+    void loadPets();
+  }, [configured, ready, accessToken]);
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0];
@@ -44,6 +74,10 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
     }
     if (!file) {
       setError(isKo ? "사진을 선택해 주세요." : "Please choose a photo.");
+      return;
+    }
+    if (!petId) {
+      setError(isKo ? "랭킹 배정을 위해 등록된 펫을 선택해 주세요." : "Please choose a saved pet for ranking.");
       return;
     }
     if (!title.trim()) {
@@ -77,6 +111,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
           title: title.trim(),
           content: content.trim() || undefined,
           imageUrl: uploadData.imageUrl,
+          petId,
         }),
       });
       const postData = await postRes.json();
@@ -88,6 +123,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
       setTitle("");
       setContent("");
       setFile(null);
+      setPetId(pets[0]?.id ?? "");
       setPreview(null);
       if (fileRef.current) fileRef.current.value = "";
       setSuccess(true);
@@ -130,6 +166,28 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
             onChange={onFileChange}
           />
           <div className="flex-1 space-y-3">
+            <select
+              value={petId}
+              onChange={(e) => setPetId(e.target.value)}
+              className="pastel-input"
+              required
+            >
+              <option value="">
+                {isKo ? "랭킹에 올릴 펫 선택" : "Choose a pet for ranking"}
+              </option>
+              {pets.map((pet) => (
+                <option key={pet.id} value={pet.id}>
+                  {pet.species === "dog" ? "🐕" : "🐈"} {pet.name}
+                </option>
+              ))}
+            </select>
+            {pets.length === 0 && (
+              <p className="text-xs text-plum/50">
+                {isKo
+                  ? "펫 프로필이 있어야 강아지/고양이 주간 랭킹에 배정됩니다."
+                  : "A saved pet profile is required for dog/cat weekly rankings."}
+              </p>
+            )}
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}

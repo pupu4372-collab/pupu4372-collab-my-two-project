@@ -1,7 +1,8 @@
-import type { RankingPeriod, PetShowRankingRow } from "@/lib/supabase/types";
+import type { PetShowRankingRow, PetSpecies, RankingPeriod } from "@/lib/supabase/types";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const TOP_LIMIT = 5;
+const WEEK_DAYS = 7;
 
 /** SQL reference — weekly Top 5 (uses denormalized like_count + partial index). */
 export const PET_SHOW_RANKING_WEEKLY_SQL = `
@@ -18,7 +19,7 @@ from public.community_posts
 where post_type = 'photo_show'
   and is_hidden = false
   and created_at >= now() - interval '7 days'
-order by like_count desc, created_at desc
+order by like_count desc, created_at asc
 limit ${TOP_LIMIT};
 `;
 
@@ -55,12 +56,12 @@ export async function fetchPetShowRanking(
     .eq("post_type", "photo_show")
     .eq("is_hidden", false)
     .order("like_count", { ascending: false })
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: period !== "realtime" })
     .limit(TOP_LIMIT);
 
   if (period === "week") {
     const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
+    weekAgo.setDate(weekAgo.getDate() - WEEK_DAYS);
     query.gte("created_at", weekAgo.toISOString());
   }
 
@@ -70,6 +71,76 @@ export async function fetchPetShowRanking(
   }
 
   return { rows: data as PetShowRankingRow[], source: "supabase" };
+}
+
+export interface PetShowSpeciesRankings {
+  dog: PetShowRankingRow[];
+  cat: PetShowRankingRow[];
+}
+
+type RankingPostRow = Omit<PetShowRankingRow, "pet_species">;
+
+export async function fetchWeeklyPetShowSpeciesRankings(): Promise<{
+  rows: PetShowSpeciesRankings;
+  source: "supabase" | "mock";
+}> {
+  const supabase = getSupabaseServerClient();
+
+  if (!supabase) {
+    return { rows: getMockSpeciesRankings(), source: "mock" };
+  }
+
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - WEEK_DAYS);
+
+  const { data: posts, error } = await supabase
+    .from("community_posts")
+    .select("id, author_id, pet_id, title, image_urls, like_count, comment_count, created_at")
+    .eq("post_type", "photo_show")
+    .eq("is_hidden", false)
+    .not("pet_id", "is", null)
+    .gte("created_at", weekAgo.toISOString())
+    .order("like_count", { ascending: false })
+    .order("created_at", { ascending: true })
+    .limit(60);
+
+  const postRows = (posts ?? []) as unknown as RankingPostRow[];
+  if (error || postRows.length === 0) {
+    return { rows: getMockSpeciesRankings(), source: "mock" };
+  }
+
+  const petIds = [...new Set(postRows.map((row) => row.pet_id).filter(Boolean))] as string[];
+  const { data: petRows, error: petsError } = await supabase
+    .from("pets")
+    .select("id, species")
+    .in("id", petIds);
+
+  const petList = (petRows ?? []) as unknown as Array<{ id: string; species: PetSpecies }>;
+  if (petsError || petList.length === 0) {
+    return { rows: getMockSpeciesRankings(), source: "mock" };
+  }
+
+  const speciesByPetId = new Map(
+    petList.map((pet) => [pet.id, pet.species])
+  );
+
+  const grouped: PetShowSpeciesRankings = { dog: [], cat: [] };
+  for (const post of postRows) {
+    const species = post.pet_id ? speciesByPetId.get(post.pet_id) : undefined;
+    if (species !== "dog" && species !== "cat") continue;
+    if (grouped[species].length >= TOP_LIMIT) continue;
+    grouped[species].push({
+      ...post,
+      pet_species: species,
+      rank_position: grouped[species].length + 1,
+    });
+  }
+
+  if (!grouped.dog.length && !grouped.cat.length) {
+    return { rows: getMockSpeciesRankings(), source: "mock" };
+  }
+
+  return { rows: grouped, source: "supabase" };
 }
 
 /** Dev/demo fallback when Supabase env is not set. */
@@ -107,4 +178,15 @@ function getMockPetShowRanking(): PetShowRankingRow[] {
       created_at: new Date(now - 259200000).toISOString(),
     },
   ];
+}
+
+function getMockSpeciesRankings(): PetShowSpeciesRankings {
+  const [cat1, dog1, dog2] = getMockPetShowRanking();
+  return {
+    dog: [
+      { ...dog1, pet_species: "dog", rank_position: 1 },
+      { ...dog2, pet_species: "dog", rank_position: 2 },
+    ],
+    cat: [{ ...cat1, pet_species: "cat", rank_position: 1 }],
+  };
 }

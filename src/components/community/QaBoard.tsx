@@ -1,6 +1,7 @@
 "use client";
 
 import { QA_FILTER_TAGS } from "@/lib/community/qa-mock-data";
+import type { CommunityBoardKind } from "@/lib/community/qa-feed";
 import type { CommunityPost } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
@@ -15,9 +16,10 @@ interface QaFeedResponse {
 
 interface QaBoardProps {
   refreshKey?: number;
+  board?: CommunityBoardKind;
 }
 
-export function QaBoard({ refreshKey = 0 }: QaBoardProps) {
+export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const [posts, setPosts] = useState<CommunityPost[]>([]);
@@ -39,7 +41,7 @@ export function QaBoard({ refreshKey = 0 }: QaBoardProps) {
         if (cursor) params.set("cursor", cursor);
         if (q) params.set("q", q);
         if (tag !== "all") params.set("tag", tag);
-        const res = await fetch(`/api/community/qa/feed?${params.toString()}`);
+        const res = await fetch(`/api/community/${board}/feed?${params.toString()}`);
         const data: QaFeedResponse = await res.json();
         setPosts((prev) => (cursor ? [...prev, ...(data.posts ?? [])] : data.posts ?? []));
         setNextCursor(data.nextCursor ?? null);
@@ -62,8 +64,11 @@ export function QaBoard({ refreshKey = 0 }: QaBoardProps) {
     setQ(searchInput.trim());
   }
 
+  const isQa = board === "qa";
+  const boardPath = `/community/${board}`;
+
   if (loading) {
-    return <p className="text-sm text-plum/60">{isKo ? "질문 불러오는 중…" : "Loading questions…"}</p>;
+    return <p className="text-sm text-plum/60">{isKo ? "게시글 불러오는 중…" : "Loading posts…"}</p>;
   }
 
   return (
@@ -71,7 +76,7 @@ export function QaBoard({ refreshKey = 0 }: QaBoardProps) {
       <form onSubmit={handleSearch} className="flex gap-2">
         <input
           className="pastel-input flex-1"
-          placeholder={isKo ? "제목·내용 검색 (예: 산책, 화장실)" : "Search title or content (e.g. walks, litter)"}
+          placeholder={isKo ? "제목·내용 검색" : "Search title or content"}
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
         />
@@ -83,7 +88,7 @@ export function QaBoard({ refreshKey = 0 }: QaBoardProps) {
         </button>
       </form>
 
-      <div className="flex flex-wrap gap-1.5">
+      {isQa && <div className="flex flex-wrap gap-1.5">
         {QA_FILTER_TAGS.map((item) => (
           <button
             key={item.id}
@@ -98,11 +103,11 @@ export function QaBoard({ refreshKey = 0 }: QaBoardProps) {
             {item.label}
           </button>
         ))}
-      </div>
+      </div>}
 
       <div className="flex flex-wrap items-center gap-2 text-xs text-plum/50">
         {source === "mock" && (
-          <span>{isKo ? "데모 Q&A 50건 (Supabase 연동 시 DB 데이터)" : "50 demo Q&A posts (DB data when Supabase is connected)"}</span>
+          <span>{isKo ? "데모 게시글 (Supabase 연동 시 DB 데이터)" : "Demo posts (DB data when Supabase is connected)"}</span>
         )}
         {total != null && source === "supabase" && (
           <span>{isKo ? `검색 결과 ${total}건` : `${total} results`}</span>
@@ -116,7 +121,7 @@ export function QaBoard({ refreshKey = 0 }: QaBoardProps) {
 
       {posts.length === 0 && (
         <p className="rounded-2xl bg-white/50 px-4 py-6 text-center text-sm text-plum/60">
-          {isKo ? "조건에 맞는 질문이 없어요." : "No questions match your filters."}
+          {isKo ? "조건에 맞는 게시글이 없어요." : "No posts match your filters."}
         </p>
       )}
 
@@ -124,7 +129,7 @@ export function QaBoard({ refreshKey = 0 }: QaBoardProps) {
         {posts.map((post) => (
           <li key={post.id}>
             <Link
-              href={`/community/qa/${post.id}`}
+              href={`${boardPath}/${post.id}`}
               className="block rounded-2xl border border-white/70 bg-white/60 px-4 py-4 transition hover:-translate-y-0.5 hover:bg-white/80"
             >
               <div className="flex flex-wrap items-center gap-2">
