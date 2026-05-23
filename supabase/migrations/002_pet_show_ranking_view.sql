@@ -1,7 +1,8 @@
 -- Materialized-friendly ranking view for Pet Show (photo_show)
 -- Refresh optional; live queries use community_posts.like_count index.
 
-create or replace view public.pet_show_ranking_weekly as
+create or replace view public.pet_show_ranking_weekly
+with (security_invoker = true) as
 select
   p.id,
   p.author_id,
