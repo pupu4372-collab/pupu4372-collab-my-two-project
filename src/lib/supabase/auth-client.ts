@@ -1,7 +1,5 @@
 "use client";
 
-import { getHomePath, localeFromDocument } from "@/i18n/paths";
-import type { Provider } from "@supabase/supabase-js";
 import {
   clearSupabaseBrowserSession,
   getSupabaseAuthActionClient,
@@ -10,47 +8,22 @@ import {
 
 export type SupportedOAuthProvider = "google" | "facebook" | "naver";
 
-/** Maps UI provider to Supabase Auth provider id (Naver uses Custom OAuth2). */
-function resolveOAuthProviderId(provider: SupportedOAuthProvider): Provider {
-  switch (provider) {
-    case "google":
-    case "facebook":
-      return provider;
-    case "naver":
-      return "custom:naver" as Provider;
-  }
-}
-
-function getAuthCallbackUrl() {
-  if (typeof window === "undefined") return undefined;
-
-  const locale = localeFromDocument();
-  const nextPath = getHomePath(locale);
-  const params = new URLSearchParams({ next: nextPath });
-
-  return `${window.location.origin}/auth/callback?${params.toString()}`;
-}
-
 export async function signInWithProvider(provider: SupportedOAuthProvider) {
-  // Keep PKCE verifier storage so Google redirect can finish on /auth/callback.
-  clearSupabaseBrowserSession({ preserveOAuthFlow: true });
+  clearSupabaseBrowserSession();
 
   const client = getSupabaseAuthActionClient();
   if (!client) {
     throw new Error("Supabase is not configured.");
   }
 
-  const redirectTo = getAuthCallbackUrl();
+  const redirectTo =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/auth/callback`
+      : undefined;
 
   const { error } = await client.auth.signInWithOAuth({
-    provider: resolveOAuthProviderId(provider),
-    options: {
-      redirectTo,
-      queryParams: {
-        access_type: "offline",
-        prompt: "consent",
-      },
-    },
+    provider: provider as "google",
+    options: { redirectTo },
   });
 
   if (error) throw error;
@@ -79,7 +52,7 @@ async function saveDisplayNameAfterAuth(displayName: string) {
   });
 }
 
-export async function persistSession(session: { access_token: string; refresh_token: string } | null) {
+async function persistSession(session: { access_token: string; refresh_token: string } | null) {
   const browserClient = getSupabaseBrowserClient();
   if (!browserClient || !session) return;
 
@@ -103,7 +76,7 @@ export async function signUpWithEmail(params: {
 
   const redirectTo =
     typeof window !== "undefined"
-      ? `${window.location.origin}/auth/callback?next=${getHomePath(localeFromDocument())}`
+      ? `${window.location.origin}/auth/callback?next=${document.documentElement.lang === "en" ? "/en" : "/ko"}`
       : undefined;
 
   const { data, error } = await client.auth.signUp({

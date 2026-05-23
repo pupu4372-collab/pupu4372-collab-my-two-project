@@ -1,9 +1,17 @@
 import { routing } from "@/i18n/routing";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
+import { Noto_Sans_KR } from "next/font/google";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import "../globals.css";
+
+const noto = Noto_Sans_KR({
+  variable: "--font-noto",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -36,5 +44,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   setRequestLocale(locale);
   const messages = await getMessages();
 
-  return <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>;
+  return (
+    <html lang={locale}>
+      <body className={`${noto.variable} font-sans antialiased`}>
+        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+      </body>
+    </html>
+  );
 }
