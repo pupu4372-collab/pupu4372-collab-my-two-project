@@ -1,18 +1,17 @@
-/** Public paths for localePrefix "as-needed" (ko has no /ko prefix). */
+/** Public paths when localePrefix is "always". */
 
 export function getHomePath(locale: "ko" | "en"): string {
-  return locale === "en" ? "/en" : "/";
+  return locale === "en" ? "/en" : "/ko";
 }
 
 export function getLoginPath(locale: "ko" | "en"): string {
-  return locale === "en" ? "/en/login" : "/login";
+  return locale === "en" ? "/en/login" : "/ko/login";
 }
 
-/** Normalize legacy /ko/* redirects from older auth flows. */
+/** Normalize legacy auth callback targets. */
 export function normalizePostAuthPath(path: string | null | undefined): string {
-  if (!path || path === "/profile") return "/";
-  if (path === "/ko" || path === "/ko/") return "/";
-  if (path === "/ko/login") return "/login";
+  if (!path || path === "/profile") return "/ko";
+  if (path === "/" || path === "/login") return "/ko";
   return path;
 }
 
