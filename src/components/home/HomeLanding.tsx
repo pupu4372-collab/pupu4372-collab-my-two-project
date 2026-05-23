@@ -32,9 +32,11 @@ export function HomeLanding() {
         <p className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-plum/75 md:text-[15px]">
           {isKo ? (
             <>
-              한국 전통 사주명리학을 바탕으로 반려동물의 성격과 운명을 분석합니다.
+              한국 전통 사주명리학을 바탕으로
               <br />
-              생년월일시를 입력하면 사주팔자를 확인할 수 있어요.
+              반려동물의 성격과 운명을 분석합니다.
+              <br />
+              생년월일시를 입력하면 운명을 확인할 수 있어요.
             </>
           ) : (
             t("heroSubtitle")
