@@ -52,7 +52,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
         setLoadingMore(false);
       }
     },
-    [q, tag]
+    [board, q, tag]
   );
 
   useEffect(() => {

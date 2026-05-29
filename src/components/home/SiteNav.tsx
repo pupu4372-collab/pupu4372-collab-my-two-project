@@ -47,13 +47,14 @@ export function SiteNav() {
     }
   }
 
+  const profileHref = configured && ready && isAnonymous ? "/login" : "/profile";
   const NAV = [
     { label: t("home"), href: "/" as const },
     { label: t("dog"), href: "/dog" as const },
     { label: t("cat"), href: "/cat" as const },
     { label: t("saju"), href: "/saju" as const },
     { label: t("community"), href: "/community" as const },
-    { label: t("profile"), href: "/profile" as const },
+    { label: t("profile"), href: profileHref },
   ];
 
   return (

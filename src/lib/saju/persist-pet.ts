@@ -3,7 +3,7 @@ import type { Database, PetInsert, PetSpecies } from "@/lib/supabase/types";
 import type { Gender } from "./types";
 
 type DbClient = SupabaseClient<Database>;
-export const MAX_PETS_PER_OWNER = 3;
+export const MAX_PETS_PER_OWNER = 5;
 
 export interface PetProfileInput {
   ownerId: string;

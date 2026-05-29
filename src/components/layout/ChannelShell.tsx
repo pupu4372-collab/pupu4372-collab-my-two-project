@@ -51,6 +51,8 @@ interface ChannelShellProps {
   theme: ChannelTheme;
   title: string;
   subtitle?: string;
+  beforeTitle?: ReactNode;
+  topBar?: ReactNode;
   children?: ReactNode;
   comingSoon?: boolean;
   backHref?: ComponentProps<typeof Link>["href"];
@@ -65,6 +67,8 @@ export function ChannelShell({
   theme,
   title,
   subtitle,
+  beforeTitle,
+  topBar,
   children,
   comingSoon = false,
   backHref = "/",
@@ -106,7 +110,9 @@ export function ChannelShell({
       </header>
 
       <main className="mx-auto max-w-5xl px-5 py-10 md:px-8 md:py-14">
+        {topBar && <div className="mb-5">{topBar}</div>}
         <div className={`pastel-card border-2 ${t.border} px-6 py-8 md:px-10`}>
+          {beforeTitle && <div className="mb-6">{beforeTitle}</div>}
           {comingSoon && (
             <p className="mb-4 inline-block rounded-full bg-gold/40 px-3 py-1 text-xs font-medium text-plum">
               {isKo ? "준비 중" : "Coming soon"}

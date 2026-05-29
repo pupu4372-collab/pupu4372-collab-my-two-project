@@ -1,4 +1,5 @@
 import type { PetShowRankingRow, RankingPeriod } from "@/lib/supabase/types";
+import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 
 interface PetShowRankingProps {
@@ -10,6 +11,7 @@ interface PetShowRankingProps {
 interface PetShowWeeklySpeciesRankingProps {
   dogRows: PetShowRankingRow[];
   catRows: PetShowRankingRow[];
+  otherRows: PetShowRankingRow[];
   source: "supabase" | "mock";
 }
 
@@ -30,21 +32,23 @@ export function PetShowRanking({ rows, period, source }: PetShowRankingProps) {
       </div>
       <ol className="mt-4 space-y-3">
         {rows.map((row, i) => (
-          <li
-            key={row.id}
-            className="flex items-center gap-4 rounded-2xl bg-channel-community/10 px-4 py-3"
-          >
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-channel-community text-sm font-bold text-white">
-              {row.rank_position ?? i + 1}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium text-plum">
-                {row.title ?? (isKo ? "무제 사진 자랑" : "Untitled pet show")}
-              </p>
-              <p className="text-xs text-plum/60">
-                ♥ {row.like_count} · 💬 {row.comment_count}
-              </p>
-            </div>
+          <li key={row.id}>
+            <Link
+              href={`/community/pet-show/${row.id}`}
+              className="flex items-center gap-4 rounded-2xl bg-channel-community/10 px-4 py-3 transition hover:bg-channel-community/15"
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-channel-community text-sm font-bold text-white">
+                {row.rank_position ?? i + 1}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium text-plum">
+                  {row.title ?? (isKo ? "무제 사진 자랑" : "Untitled pet show")}
+                </p>
+                <p className="text-xs text-plum/60">
+                  ♥ {row.like_count} · 💬 {row.comment_count}
+                </p>
+              </div>
+            </Link>
           </li>
         ))}
       </ol>
@@ -75,22 +79,27 @@ function SpeciesList({
       ) : (
         <ol className="mt-3 space-y-2">
           {rows.slice(0, 5).map((row, i) => (
-            <li key={row.id} className="flex items-center gap-3 rounded-xl bg-channel-community/10 p-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-channel-community text-xs font-bold text-white">
-                {row.rank_position ?? i + 1}
-              </span>
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/70">
-                {row.image_urls?.[0] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={row.image_urls[0]} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center text-xl">{emoji}</span>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-plum">{row.title ?? "Pet Show"}</p>
-                <p className="text-xs text-plum/55">♥ {row.like_count} · 💬 {row.comment_count}</p>
-              </div>
+            <li key={row.id}>
+              <Link
+                href={`/community/pet-show/${row.id}`}
+                className="flex items-center gap-3 rounded-xl bg-channel-community/10 p-2 transition hover:bg-channel-community/15"
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-channel-community text-xs font-bold text-white">
+                  {row.rank_position ?? i + 1}
+                </span>
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/70">
+                  {row.image_urls?.[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={row.image_urls[0]} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-xl">{emoji}</span>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-plum">{row.title ?? "Pet Show"}</p>
+                  <p className="text-xs text-plum/55">♥ {row.like_count} · 💬 {row.comment_count}</p>
+                </div>
+              </Link>
             </li>
           ))}
         </ol>
@@ -102,6 +111,7 @@ function SpeciesList({
 export function PetShowWeeklySpeciesRanking({
   dogRows,
   catRows,
+  otherRows,
   source,
 }: PetShowWeeklySpeciesRankingProps) {
   const locale = useLocale();
@@ -126,7 +136,7 @@ export function PetShowWeeklySpeciesRanking({
           </span>
         )}
       </div>
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <div className="mt-4 grid gap-4 md:grid-cols-3">
         <SpeciesList
           rows={dogRows}
           emoji="🐕"
@@ -138,6 +148,12 @@ export function PetShowWeeklySpeciesRanking({
           emoji="🐈"
           title={isKo ? "고양이 Top 5" : "Cat Top 5"}
           emptyText={isKo ? "이번 주 고양이 사진을 기다리는 중이에요." : "Waiting for cat photos this week."}
+        />
+        <SpeciesList
+          rows={otherRows}
+          emoji="🐾"
+          title={isKo ? "다른동물 Top 5" : "Other Animals Top 5"}
+          emptyText={isKo ? "이번 주 다른동물 사진을 기다리는 중이에요." : "Waiting for other animal photos this week."}
         />
       </div>
     </section>

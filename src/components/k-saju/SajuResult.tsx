@@ -1,5 +1,6 @@
 "use client";
 
+import { AdSlot } from "@/components/ads/AdSlot";
 import { formatJijiDisplay } from "@/lib/saju/jiji-hours";
 import { ELEMENT_META } from "@/lib/saju/elements";
 import type { SajuBasicResponse } from "@/lib/saju/types";
@@ -181,6 +182,8 @@ export function SajuResult({ result, variant = "default" }: SajuResultProps) {
           ))}
         </div>
       </section>
+
+      <AdSlot />
     </div>
   );
 }

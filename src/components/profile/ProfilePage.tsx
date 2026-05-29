@@ -1,6 +1,8 @@
 "use client";
 
+import { AdSlot } from "@/components/ads/AdSlot";
 import { PetProfilesList } from "./PetProfilesList";
+import { PetShowPostsMiniGrid } from "./PetShowPostsMiniGrid";
 import { UserProfileCard } from "./UserProfileCard";
 import { useLocale } from "next-intl";
 import { useState } from "react";
@@ -55,7 +57,9 @@ export function ProfilePage() {
                 {isKo ? "저장된 반려동물과 K-사주 결과" : "Saved pets and K-Saju results"}
               </p>
             </div>
-            <PetProfilesList />
+            <PetProfilesList compact />
+            <PetShowPostsMiniGrid />
+          <AdSlot />
           </section>
         </div>
       )}

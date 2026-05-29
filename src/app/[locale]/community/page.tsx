@@ -1,4 +1,5 @@
 import { ChannelShell } from "@/components/layout/ChannelShell";
+import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { Link } from "@/i18n/navigation";
 import { fetchWeeklyPetShowSpeciesRankings } from "@/lib/community/ranking";
 import { getTranslations } from "next-intl/server";
@@ -43,7 +44,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <Link
-          href="/community/pet-show"
+          href="/community/pet-show/ranking"
           className="rounded-[1.75rem] bg-channel-community/20 px-5 py-5 transition hover:bg-channel-community/30 sm:col-span-2"
         >
           <span className="text-2xl" aria-hidden>
@@ -54,13 +55,14 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
           </h2>
           <p className="mt-1 text-sm text-plum/65">
             {isKo
-              ? "최근 7일간 좋아요 순위로 강아지 5장, 고양이 5장을 보여줘요."
-              : "Dog Top 5 and Cat Top 5 by likes from the last 7 days."}
+              ? "최근 7일간 좋아요 순위로 강아지, 고양이, 다른동물 Top 5를 보여줘요."
+              : "Dog, cat, and other animal Top 5 by likes from the last 7 days."}
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {([
               ["🐕", isKo ? "강아지" : "Dog", weeklyRanking.rows.dog],
               ["🐈", isKo ? "고양이" : "Cat", weeklyRanking.rows.cat],
+              ["🐾", isKo ? "다른동물" : "Other Animals", weeklyRanking.rows.other],
             ] as const).map(([emoji, label, rows]) => (
               <div key={label} className="rounded-2xl bg-white/55 px-4 py-3">
                 <p className="text-xs font-bold text-plum/70">
@@ -90,15 +92,15 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
             ))}
           </div>
         </Link>
-        <Link
-          href="/community/pet-show"
+        <AuthRequiredLink
+          href="/community/pet-show/upload"
           className="flex items-center justify-center gap-3 rounded-[1.75rem] border border-channel-community/25 bg-white/70 px-5 py-4 text-sm font-bold text-channel-community shadow-sm transition hover:bg-channel-community/10 sm:col-span-2"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-channel-community text-xl text-white" aria-hidden>
             📷
           </span>
           {isKo ? "사진 업로드하고 주간 랭킹 참여하기" : "Upload a photo and join the weekly ranking"}
-        </Link>
+        </AuthRequiredLink>
         {sections.map((section) => (
           <Link
             key={section.href}

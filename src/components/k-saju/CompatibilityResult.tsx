@@ -1,5 +1,6 @@
 "use client";
 
+import { AdSlot } from "@/components/ads/AdSlot";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 
@@ -137,6 +138,8 @@ export function CompatibilityResult({
           ))}
         </ul>
       </article>
+
+      <AdSlot />
     </div>
   );
 }

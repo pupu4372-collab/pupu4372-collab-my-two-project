@@ -59,7 +59,7 @@ export function HomeLanding() {
               </h2>
               <p className="mt-1 text-xs text-plum/60">
                 {t("petShowHintBefore")}{" "}
-                <Link href="/community/pet-show" className="underline hover:text-plum">
+                <Link href="/community/pet-show/upload" className="underline hover:text-plum">
                   {t("petShowHintLink")}
                 </Link>
                 {t("petShowHintAfter") ? ` ${t("petShowHintAfter")}` : ""}

@@ -24,7 +24,7 @@ function formatDate(value: string) {
 export function PetShowComments({
   postId,
   initialComments,
-  backHref = "/community/pet-show",
+  backHref = "/community/pet-show/snapzone",
 }: PetShowCommentsProps) {
   const locale = useLocale();
   const isKo = locale === "ko";

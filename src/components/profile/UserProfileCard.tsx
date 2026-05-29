@@ -241,22 +241,26 @@ export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }
           ) : (
             <span aria-hidden>👤</span>
           )}
-          <input
-            id="owner-profile-photo"
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            onChange={(e) => void handleOwnerImageUpload(e.target.files?.[0] ?? null)}
-            className="sr-only"
-            disabled={uploading}
-          />
-          <label
-            htmlFor="owner-profile-photo"
-            title={isKo ? "사진 변경" : "Change photo"}
-            className="absolute -bottom-1 -right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-white bg-channel-saju text-xs text-white shadow-sm transition hover:brightness-105"
-            aria-label={isKo ? "사진 변경" : "Change photo"}
-          >
-            {uploading ? "…" : "📷"}
-          </label>
+          {showEditor && (
+            <>
+              <input
+                id="owner-profile-photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={(e) => void handleOwnerImageUpload(e.target.files?.[0] ?? null)}
+                className="sr-only"
+                disabled={uploading}
+              />
+              <label
+                htmlFor="owner-profile-photo"
+                title={isKo ? "사진 변경" : "Change photo"}
+                className="absolute -bottom-1 -right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-white bg-channel-saju text-xs text-white shadow-sm transition hover:brightness-105"
+                aria-label={isKo ? "사진 변경" : "Change photo"}
+              >
+                {uploading ? "…" : "📷"}
+              </label>
+            </>
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-lg font-bold text-plum">{shownName}</h3>

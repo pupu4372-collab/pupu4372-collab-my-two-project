@@ -59,7 +59,7 @@ const TYPE_LABELS = {
   },
 } as const;
 
-const MAX_PETS_PER_OWNER = 3;
+const MAX_PETS_PER_OWNER = 5;
 
 function petQuery(pet: PetRow, locale: string) {
   return new URLSearchParams({
@@ -85,7 +85,13 @@ function draftFromPet(pet: PetRow): PetEditDraft {
   };
 }
 
-export function PetProfilesList({ editable = false }: { editable?: boolean }) {
+export function PetProfilesList({
+  editable = false,
+  compact = false,
+}: {
+  editable?: boolean;
+  compact?: boolean;
+}) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
@@ -296,41 +302,61 @@ export function PetProfilesList({ editable = false }: { editable?: boolean }) {
 
   const totalReadings = pets.reduce((sum, pet) => sum + pet.readings.length, 0);
 
+  const isCompactView = compact && !editable;
+
   return (
-    <div className="space-y-4">
+    <div className={isCompactView ? "space-y-2" : "space-y-4"}>
       {(message || error) && (
-        <div className="rounded-2xl bg-white/55 px-4 py-3 text-sm">
+        <div className={`rounded-2xl bg-white/55 text-sm ${isCompactView ? "px-3 py-2 text-xs" : "px-4 py-3"}`}>
           {message && <p className="font-medium text-channel-community">{message}</p>}
           {error && <p className="text-red-700/80">{error}</p>}
         </div>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl bg-channel-saju/10 px-4 py-3">
-          <p className="text-xs text-plum/55">{isKo ? "저장된 펫" : "Saved pets"}</p>
-          <p className="mt-1 text-2xl font-bold text-channel-saju">
+      <div
+        className={
+          isCompactView
+            ? "flex flex-wrap items-center gap-2 text-[11px]"
+            : "grid gap-3 sm:grid-cols-3"
+        }
+      >
+        <div className={isCompactView ? "rounded-xl bg-channel-saju/10 px-2.5 py-1.5" : "rounded-2xl bg-channel-saju/10 px-4 py-3"}>
+          <p className="text-plum/55">{isKo ? "저장된 펫" : "Saved pets"}</p>
+          <p className={isCompactView ? "font-bold text-channel-saju" : "mt-1 text-2xl font-bold text-channel-saju"}>
             {pets.length}/{MAX_PETS_PER_OWNER}
           </p>
-          <p className="mt-1 text-[11px] text-plum/45">
-            {isKo ? "주인 1명당 최대 3마리" : "Up to 3 pets per owner"}
-          </p>
+          {!isCompactView && (
+            <p className="mt-1 text-[11px] text-plum/45">
+              {isKo ? "주인 1명당 최대 5마리" : "Up to 5 pets per owner"}
+            </p>
+          )}
         </div>
-        <div className="rounded-2xl bg-petal/35 px-4 py-3">
-          <p className="text-xs text-plum/55">{isKo ? "사주 결과" : "Saju results"}</p>
-          <p className="mt-1 text-2xl font-bold text-plum">{totalReadings}</p>
+        <div className={isCompactView ? "rounded-xl bg-petal/35 px-2.5 py-1.5" : "rounded-2xl bg-petal/35 px-4 py-3"}>
+          <p className="text-plum/55">{isKo ? "사주 결과" : "Saju results"}</p>
+          <p className={isCompactView ? "font-bold text-plum" : "mt-1 text-2xl font-bold text-plum"}>{totalReadings}</p>
         </div>
         <Link
           href="/"
-          className="rounded-2xl bg-mint/45 px-4 py-3 text-sm font-bold text-ink transition hover:brightness-105"
+          className={
+            isCompactView
+              ? "rounded-xl bg-mint/45 px-2.5 py-1.5 font-bold text-ink transition hover:brightness-105"
+              : "rounded-2xl bg-mint/45 px-4 py-3 text-sm font-bold text-ink transition hover:brightness-105"
+          }
         >
-          {isKo ? "새 펫 사주 보기" : "Read a new pet"}
-          <span className="mt-1 block text-xs font-medium text-ink/60">
-            {isKo ? "홈에서 자동 저장" : "Saved from Home"}
-          </span>
+          {isKo ? "새 펫 사주" : "New pet saju"}
+          {!isCompactView && (
+            <span className="mt-1 block text-xs font-medium text-ink/60">
+              {isKo ? "홈에서 자동 저장" : "Saved from Home"}
+            </span>
+          )}
         </Link>
       </div>
 
-      <ul className="grid gap-3 lg:grid-cols-2">
+      <ul
+        className={
+          isCompactView ? "grid grid-cols-2 gap-2 sm:grid-cols-3" : "grid gap-3 lg:grid-cols-2"
+        }
+      >
         {pets.map((pet) => {
           const q = petQuery(pet, locale);
           const typeLabels = TYPE_LABELS[isKo ? "ko" : "en"];
@@ -349,10 +375,20 @@ export function PetProfilesList({ editable = false }: { editable?: boolean }) {
           return (
             <li
               key={pet.id}
-              className="rounded-3xl border border-plum/15 bg-white/55 px-5 py-5"
+              className={
+                isCompactView
+                  ? "rounded-xl border border-plum/15 bg-white/55 px-2 py-2"
+                  : "rounded-2xl border border-plum/15 bg-white/55 px-3 py-3"
+              }
             >
-              <div className="flex items-start gap-4">
-                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-lavender/30 text-2xl">
+              <div className={`flex items-start ${isCompactView ? "gap-2" : "gap-2.5"}`}>
+                <div
+                  className={`relative flex shrink-0 items-center justify-center overflow-hidden bg-lavender/30 ${
+                    isCompactView
+                      ? "h-8 w-8 rounded-lg text-sm"
+                      : "h-14 w-14 rounded-2xl text-2xl"
+                  }`}
+                >
                   {(editable ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -363,39 +399,63 @@ export function PetProfilesList({ editable = false }: { editable?: boolean }) {
                   ) : (
                     <span aria-hidden>{pet.species === "dog" ? "🐕" : "🐈"}</span>
                   )}
-                  <input
-                    id={`pet-profile-photo-${pet.id}`}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    onChange={(e) => void uploadPetImage(pet.id, e.target.files?.[0] ?? null)}
-                    className="sr-only"
-                    disabled={uploadingPetId === pet.id}
-                  />
-                  <label
-                    htmlFor={`pet-profile-photo-${pet.id}`}
-                    title={isKo ? "펫 사진 변경" : "Change pet photo"}
-                    className="absolute bottom-1 right-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white bg-channel-saju text-[10px] text-white shadow-sm transition hover:brightness-105"
-                    aria-label={isKo ? "펫 사진 변경" : "Change pet photo"}
-                  >
-                    {uploadingPetId === pet.id ? "…" : "📷"}
-                  </label>
+                  {editable && (
+                    <>
+                      <input
+                        id={`pet-profile-photo-${pet.id}`}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        onChange={(e) => void uploadPetImage(pet.id, e.target.files?.[0] ?? null)}
+                        className="sr-only"
+                        disabled={uploadingPetId === pet.id}
+                      />
+                      <label
+                        htmlFor={`pet-profile-photo-${pet.id}`}
+                        title={isKo ? "펫 사진 변경" : "Change pet photo"}
+                        className={`absolute bottom-0 right-0 flex cursor-pointer items-center justify-center rounded-full border border-white bg-channel-saju text-white shadow-sm transition hover:brightness-105 ${
+                          isCompactView ? "h-4 w-4 text-[8px]" : "bottom-1 right-1 h-6 w-6 text-[10px]"
+                        }`}
+                        aria-label={isKo ? "펫 사진 변경" : "Change pet photo"}
+                      >
+                        {uploadingPetId === pet.id ? "…" : "📷"}
+                      </label>
+                    </>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-bold text-plum">{pet.name}</p>
-                  <p className="mt-0.5 text-xs text-plum/55">
+                  <p className={`truncate font-bold text-plum ${isCompactView ? "text-xs" : "text-sm"}`}>
+                    {pet.name}
+                  </p>
+                  <p className={`text-plum/55 ${isCompactView ? "text-[10px] leading-snug" : "text-[11px]"}`}>
                     {pet.species === "dog" ? (isKo ? "강아지" : "Dog") : isKo ? "고양이" : "Cat"} · {gender}
+                    {isCompactView ? (
+                      <>
+                        {" · "}
+                        {pet.birth_date}
+                        {pet.birth_time_unknown
+                          ? isKo
+                            ? " · 시간 미상"
+                            : " · ?"
+                          : pet.birth_time
+                            ? ` · ${pet.birth_time.slice(0, 5)}`
+                            : ""}
+                      </>
+                    ) : (
+                      <>
+                        <span className="mt-0.5 block">
+                          {isKo ? "생일" : "Birthday"} {pet.birth_date}
+                          {pet.birth_time_unknown
+                            ? isKo
+                              ? " · 시간 미상"
+                              : " · Time unknown"
+                            : pet.birth_time
+                              ? ` · ${pet.birth_time.slice(0, 5)}`
+                              : ""}
+                        </span>
+                        <span className="mt-0.5 block text-[10px] text-plum/45">{pet.birth_timezone}</span>
+                      </>
+                    )}
                   </p>
-                  <p className="mt-1 text-xs text-plum/55">
-                    {isKo ? "생일" : "Birthday"} {pet.birth_date}
-                    {pet.birth_time_unknown
-                      ? isKo
-                        ? " · 시간 미상"
-                        : " · Time unknown"
-                      : pet.birth_time
-                        ? ` · ${pet.birth_time.slice(0, 5)}`
-                        : ""}
-                  </p>
-                  <p className="mt-1 text-xs text-plum/45">{pet.birth_timezone}</p>
                 </div>
               </div>
 
@@ -509,7 +569,7 @@ export function PetProfilesList({ editable = false }: { editable?: boolean }) {
                 </div>
               )}
 
-              {pet.readings.length > 0 && (
+              {!isCompactView && pet.readings.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   {pet.readings.map((reading) => (
                     <span
@@ -522,23 +582,42 @@ export function PetProfilesList({ editable = false }: { editable?: boolean }) {
                   ))}
                 </div>
               )}
+              {isCompactView && pet.readings.length > 0 && (
+                <p className="mt-1 text-[10px] font-medium text-channel-saju">
+                  {isKo ? `사주 ${pet.readings.length}개` : `${pet.readings.length} saju`}
+                </p>
+              )}
               {pet.latestSaju && (
-                <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-plum/60">
+                <p
+                  className={
+                    isCompactView
+                      ? "mt-1 line-clamp-1 text-[10px] text-plum/55"
+                      : "mt-3 line-clamp-2 text-xs leading-relaxed text-plum/60"
+                  }
+                >
                   {isKo ? "최근" : "Latest"}: {pet.latestSaju.title ?? (isKo ? "K-Saju 결과" : "K-Saju result")}
                 </p>
               )}
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className={isCompactView ? "mt-1.5 flex flex-wrap gap-1" : "mt-4 flex flex-wrap gap-2"}>
                 <Link
                   href={`/saju/zodiac?${q}`}
-                  className="rounded-full bg-channel-saju/15 px-3 py-1.5 text-xs font-medium text-channel-saju transition hover:bg-channel-saju/25"
+                  className={
+                    isCompactView
+                      ? "rounded-full bg-channel-saju/15 px-2 py-0.5 text-[10px] font-medium text-channel-saju"
+                      : "rounded-full bg-channel-saju/15 px-3 py-1.5 text-xs font-medium text-channel-saju transition hover:bg-channel-saju/25"
+                  }
                 >
-                  {isKo ? "별자리 운세" : "Zodiac fortune"}
+                  {isKo ? "별자리" : "Zodiac"}
                 </Link>
                 <Link
                   href={`/saju/compatibility?${q}`}
-                  className="rounded-full bg-petal/50 px-3 py-1.5 text-xs font-medium text-plum transition hover:bg-petal/70"
+                  className={
+                    isCompactView
+                      ? "rounded-full bg-petal/50 px-2 py-0.5 text-[10px] font-medium text-plum"
+                      : "rounded-full bg-petal/50 px-3 py-1.5 text-xs font-medium text-plum transition hover:bg-petal/70"
+                  }
                 >
-                  {isKo ? "궁합 보기" : "Compatibility"}
+                  {isKo ? "궁합" : "Match"}
                 </Link>
               </div>
             </li>

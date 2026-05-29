@@ -1,4 +1,6 @@
 import type { ChannelContent, PetChannel } from "@/lib/channel/content";
+import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
+import { AdSlot } from "@/components/ads/AdSlot";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 
@@ -54,7 +56,7 @@ export function ChannelContentHub({
       >
         <div className={`absolute -right-10 -top-10 h-40 w-40 rounded-full ${theme.ring} blur-3xl`} />
         <Link
-          href="/community/pet-show"
+          href="/community/pet-show/upload"
           className={`relative z-10 mb-5 inline-flex rounded-full bg-white/75 px-4 py-2 text-sm font-bold shadow-sm transition hover:bg-white md:absolute md:right-6 md:top-6 md:mb-0 ${theme.accent}`}
         >
           {isKo ? "우리아이 자랑하기" : "Join Pet Show"} →
@@ -162,6 +164,8 @@ export function ChannelContentHub({
         </div>
       </section>
 
+      <AdSlot />
+
       <section className="rounded-[2rem] bg-white/60 p-5">
         <h3 className="font-bold text-plum">{isKo ? "인기 키워드" : "Popular keywords"}</h3>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -181,12 +185,12 @@ export function ChannelContentHub({
           >
             {content.sajuCta}
           </Link>
-          <Link
+          <AuthRequiredLink
             href="/saju/compatibility"
             className="inline-flex justify-center rounded-full border border-plum/15 bg-white px-6 py-3 text-sm font-bold text-plum transition hover:bg-petal/20"
           >
             {isKo ? "펫과 집사 궁합 보기" : "Check pet-parent bond"}
-          </Link>
+          </AuthRequiredLink>
         </div>
       </section>
     </div>

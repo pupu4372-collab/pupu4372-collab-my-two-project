@@ -1,6 +1,7 @@
 /** DB types for Supabase client (sync with supabase/migrations). */
 
 export type PetSpecies = "dog" | "cat";
+export type PetShowSpecies = PetSpecies | "other";
 export type AppChannel = "home" | "dog" | "cat" | "community" | "pet_saju";
 export type PostType = "photo_show" | "qa" | "free" | "saju_review";
 export type SajuType =
@@ -88,7 +89,7 @@ export interface PetShowRankingRow {
   id: string;
   author_id: string;
   pet_id: string | null;
-  pet_species?: PetSpecies | null;
+  pet_species?: PetShowSpecies | null;
   title: string | null;
   image_urls: string[];
   like_count: number;

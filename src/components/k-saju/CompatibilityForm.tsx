@@ -4,6 +4,7 @@ import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { CompatibilityResult } from "@/components/k-saju/CompatibilityResult";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { Link } from "@/i18n/navigation";
 import {
   BIRTH_TIME_OPTIONS,
   getBirthTimeOptionLabel,
@@ -87,7 +88,7 @@ function isBirthTimeOption(value: string | null): value is string {
 }
 
 export function CompatibilityForm() {
-  const { accessToken, isAnonymous } = useSupabaseSession();
+  const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const routeLocale = useLocale();
   const [locale, setLocale] = useState<Locale>(routeLocale === "en" ? "en" : "ko");
   const [petName, setPetName] = useState("");
@@ -129,6 +130,22 @@ export function CompatibilityForm() {
     if (isBirthTimeOption(nextBirthTime)) setPetBirthTime(nextBirthTime);
     if (nextTimezone) setTimezone(nextTimezone);
   }, []);
+
+  if (configured && ready && isAnonymous) {
+    return (
+      <div className="pastel-card p-6 text-center">
+        <p className="text-sm text-plum/70">
+          {locale === "ko" ? "궁합을 보려면 로그인이 필요해요." : "Please log in to check compatibility."}
+        </p>
+        <Link
+          href="/login"
+          className="mt-4 inline-flex rounded-full bg-channel-saju px-6 py-3 text-sm font-semibold text-white transition hover:brightness-105"
+        >
+          {locale === "ko" ? "로그인하기" : "Log in"}
+        </Link>
+      </div>
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

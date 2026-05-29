@@ -1,26 +1,22 @@
 "use client";
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 interface PetShowComposerProps {
   onPosted?: () => void;
 }
 
-interface PetOption {
-  id: string;
-  name: string;
-  species: "dog" | "cat";
-}
+type PetShowSpecies = "dog" | "cat" | "other";
 
 export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const { ready, accessToken, configured } = useSupabaseSession();
+  const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [pets, setPets] = useState<PetOption[]>([]);
-  const [petId, setPetId] = useState("");
+  const [petSpecies, setPetSpecies] = useState<PetShowSpecies | "">("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
@@ -28,28 +24,6 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    if (!configured || !ready || !accessToken) return;
-
-    async function loadPets() {
-      try {
-        const res = await fetch("/api/profile/pets", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        const data = await res.json();
-        if (!res.ok) return;
-
-        const nextPets = (data.pets ?? []) as PetOption[];
-        setPets(nextPets.map((pet) => ({ id: pet.id, name: pet.name, species: pet.species })));
-        setPetId((current) => current || nextPets[0]?.id || "");
-      } catch {
-        // Posting still shows a clear validation message if no pet can be selected.
-      }
-    }
-
-    void loadPets();
-  }, [configured, ready, accessToken]);
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0];
@@ -76,8 +50,8 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
       setError(isKo ? "사진을 선택해 주세요." : "Please choose a photo.");
       return;
     }
-    if (!petId) {
-      setError(isKo ? "랭킹 배정을 위해 등록된 펫을 선택해 주세요." : "Please choose a saved pet for ranking.");
+    if (!petSpecies) {
+      setError(isKo ? "반려동물 분류를 선택해 주세요." : "Please choose a pet category.");
       return;
     }
     if (!title.trim()) {
@@ -111,7 +85,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
           title: title.trim(),
           content: content.trim() || undefined,
           imageUrl: uploadData.imageUrl,
-          petId,
+          petSpecies,
         }),
       });
       const postData = await postRes.json();
@@ -123,7 +97,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
       setTitle("");
       setContent("");
       setFile(null);
-      setPetId(pets[0]?.id ?? "");
+      setPetSpecies("");
       setPreview(null);
       if (fileRef.current) fileRef.current.value = "";
       setSuccess(true);
@@ -135,13 +109,32 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
     }
   }
 
+  if (configured && ready && isAnonymous) {
+    return (
+      <section className="rounded-3xl border border-dashed border-channel-community/30 bg-channel-community/5 p-6 text-center">
+        <h2 className="text-lg font-bold text-channel-community">
+          📷 {isKo ? "우리아이 자랑 올리기" : "Post to Pet Show"}
+        </h2>
+        <p className="mt-2 text-sm text-plum/65">
+          {isKo ? "사진을 업로드하려면 로그인이 필요해요." : "Please log in to upload photos."}
+        </p>
+        <Link
+          href="/login"
+          className="mt-4 inline-flex rounded-full bg-channel-community px-6 py-3 text-sm font-semibold text-white transition hover:brightness-105"
+        >
+          {isKo ? "로그인하기" : "Log in"}
+        </Link>
+      </section>
+    );
+  }
+
   return (
     <section className="rounded-3xl border border-channel-community/25 bg-white/60 p-6">
       <h2 className="text-lg font-bold text-channel-community">📷 {isKo ? "우리아이 자랑 올리기" : "Post to Pet Show"}</h2>
       <p className="mt-1 text-xs text-plum/55">
         {isKo
-          ? "펫사진은 개인정보 동의 범위 내에서 프로필·피드에 사용됩니다."
-          : "Pet photos are used for profiles and feeds within your privacy consent."}
+          ? "펫사진은 개인정보 동의 범위 내에서 프로필·스냅존에 사용됩니다."
+          : "Pet photos are used for profiles and Snapzone within your privacy consent."}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-4 space-y-4">
@@ -167,27 +160,21 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
           />
           <div className="flex-1 space-y-3">
             <select
-              value={petId}
-              onChange={(e) => setPetId(e.target.value)}
+              value={petSpecies}
+              onChange={(e) => {
+                const value = e.target.value;
+                setPetSpecies(value === "dog" || value === "cat" || value === "other" ? value : "");
+              }}
               className="pastel-input"
               required
             >
               <option value="">
-                {isKo ? "랭킹에 올릴 펫 선택" : "Choose a pet for ranking"}
+                {isKo ? "반려동물 분류" : "Pet category"}
               </option>
-              {pets.map((pet) => (
-                <option key={pet.id} value={pet.id}>
-                  {pet.species === "dog" ? "🐕" : "🐈"} {pet.name}
-                </option>
-              ))}
+              <option value="dog">{isKo ? "강아지" : "Dog"}</option>
+              <option value="cat">{isKo ? "고양이" : "Cat"}</option>
+              <option value="other">{isKo ? "다른동물" : "Other animal"}</option>
             </select>
-            {pets.length === 0 && (
-              <p className="text-xs text-plum/50">
-                {isKo
-                  ? "펫 프로필이 있어야 강아지/고양이 주간 랭킹에 배정됩니다."
-                  : "A saved pet profile is required for dog/cat weekly rankings."}
-              </p>
-            )}
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -213,7 +200,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
         )}
         {success && (
           <p className="text-sm font-medium text-channel-community" role="status">
-            {isKo ? "🎉 올렸어요! 피드에 반영됩니다." : "🎉 Posted! It will appear in the feed."}
+            {isKo ? "🎉 올렸어요! 스냅존에 반영됩니다." : "🎉 Posted! It will appear in Snapzone."}
           </p>
         )}
 

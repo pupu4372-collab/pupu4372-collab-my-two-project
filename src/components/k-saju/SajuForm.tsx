@@ -78,7 +78,7 @@ interface SajuFormProps {
 }
 
 export function SajuForm({ embedded = false }: SajuFormProps) {
-  const { ready: sessionReady, accessToken, configured } = useSupabaseSession();
+  const { ready: sessionReady, accessToken, configured, isAnonymous } = useSupabaseSession();
   const routeLocale = useLocale();
   const [locale, setLocale] = useState<Locale>(routeLocale === "en" ? "en" : "ko");
   const [petName, setPetName] = useState("");
@@ -115,6 +115,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     timezone,
     locale,
   }).toString();
+  const lockedContinuationHref = configured && isAnonymous ? "/login" : null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -326,13 +327,13 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Link
-                  href={`/saju/zodiac?${continuationQuery}`}
+                  href={lockedContinuationHref ?? `/saju/zodiac?${continuationQuery}`}
                   className="rounded-2xl bg-channel-saju/15 px-4 py-3 text-center text-sm font-semibold text-channel-saju transition hover:bg-channel-saju/25"
                 >
                   {t.zodiacCta}
                 </Link>
                 <Link
-                  href={`/saju/compatibility?${continuationQuery}`}
+                  href={lockedContinuationHref ?? `/saju/compatibility?${continuationQuery}`}
                   className="rounded-2xl bg-petal/40 px-4 py-3 text-center text-sm font-semibold text-plum transition hover:bg-petal/60"
                 >
                   {t.compatibilityCta}

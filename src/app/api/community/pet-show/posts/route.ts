@@ -4,7 +4,12 @@ import {
   getBearerToken,
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
+import type { PetShowSpecies } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
+
+function isPetShowSpecies(value: unknown): value is PetShowSpecies {
+  return value === "dog" || value === "cat" || value === "other";
+}
 
 export async function POST(request: Request) {
   const userId = await getUserIdFromRequest(request);
@@ -24,6 +29,7 @@ export async function POST(request: Request) {
     content?: string;
     imageUrl?: string;
     petId?: string | null;
+    petSpecies?: string;
     language?: string;
   };
 
@@ -39,22 +45,8 @@ export async function POST(request: Request) {
   if (!body.imageUrl?.trim()) {
     return NextResponse.json({ error: "Image URL is required." }, { status: 400 });
   }
-  if (!body.petId?.trim()) {
-    return NextResponse.json({ error: "Pet selection is required." }, { status: 400 });
-  }
-
-  const { data: pet, error: petError } = await supabase
-    .from("pets")
-    .select("id")
-    .eq("id", body.petId.trim())
-    .eq("owner_id", userId)
-    .maybeSingle();
-
-  if (petError) {
-    return NextResponse.json({ error: petError.message }, { status: 500 });
-  }
-  if (!pet) {
-    return NextResponse.json({ error: "Selected pet was not found." }, { status: 400 });
+  if (!isPetShowSpecies(body.petSpecies)) {
+    return NextResponse.json({ error: "Pet category is required." }, { status: 400 });
   }
 
   try {
@@ -63,7 +55,8 @@ export async function POST(request: Request) {
       title: body.title,
       content: body.content,
       imageUrl: body.imageUrl,
-      petId: body.petId.trim(),
+      petId: null,
+      petShowSpecies: body.petSpecies,
       language: body.language,
     });
     return NextResponse.json({ post }, { status: 201 });

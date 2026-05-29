@@ -24,7 +24,7 @@ export default function CommunityQaPage() {
       backLabel={isKo ? "← 커뮤니티" : "← Community"}
       rightLinks={[
         { href: "/", label: isKo ? "홈" : "Home" },
-        { href: "/community/pet-show", label: isKo ? "우리아이 자랑" : "Pet Show" },
+        { href: "/community/pet-show/upload", label: isKo ? "우리아이 자랑" : "Pet Show" },
       ]}
     >
       <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr]">

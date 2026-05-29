@@ -1,5 +1,6 @@
 "use client";
 
+import { AdSlot } from "@/components/ads/AdSlot";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
 import { Link } from "@/i18n/navigation";
 import { ELEMENT_META } from "@/lib/saju/elements";
@@ -68,6 +69,7 @@ export function ZodiacResult({ result, isGuest, onBack }: ZodiacResultProps) {
     birthDate: result.birthDate,
     locale: result.locale,
   }).toString();
+  const compatibilityHref = isGuest ? "/login" : `/saju/compatibility?${compatibilityQuery}`;
 
   return (
     <div className="space-y-4">
@@ -171,6 +173,8 @@ export function ZodiacResult({ result, isGuest, onBack }: ZodiacResultProps) {
         </dl>
       </article>
 
+      <AdSlot />
+
       <section className="pastel-card space-y-3 p-5">
         <div>
           <h3 className="font-semibold text-plum">{t.nextTitle}</h3>
@@ -185,7 +189,7 @@ export function ZodiacResult({ result, isGuest, onBack }: ZodiacResultProps) {
             {t.back}
           </button>
           <Link
-            href={`/saju/compatibility?${compatibilityQuery}`}
+            href={compatibilityHref}
             className="rounded-2xl bg-channel-saju px-4 py-3 text-center text-sm font-semibold text-white transition hover:brightness-105"
           >
             {t.compatibility}

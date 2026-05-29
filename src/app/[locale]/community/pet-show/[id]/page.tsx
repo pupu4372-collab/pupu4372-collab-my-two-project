@@ -1,5 +1,6 @@
 import { PetShowComments } from "@/components/community/PetShowComments";
-import { ChannelShell } from "@/components/layout/ChannelShell";
+import { PetShowPostActions } from "@/components/community/PetShowPostActions";
+import { PetShowShell } from "@/components/community/PetShowShell";
 import { fetchPetShowComments, fetchPetShowPost } from "@/lib/community/pet-show-detail";
 import { notFound } from "next/navigation";
 
@@ -15,12 +16,12 @@ export default async function PetShowDetailPage({ params }: PetShowDetailPagePro
   if (!post) notFound();
 
   return (
-    <ChannelShell
+    <PetShowShell
       theme="community"
       title={post.title ?? (isKo ? "우리아이 자랑" : "Pet Show")}
       subtitle={isKo ? "Pet Show 상세 · 사진과 댓글" : "Pet Show detail · Photos and comments"}
-      backHref="/community/pet-show"
-      backLabel={isKo ? "← 우리아이 자랑" : "← Pet Show"}
+      backHref="/community/pet-show/snapzone"
+      backLabel={isKo ? "← 스냅존" : "← Snapzone"}
       rightLinks={[
         { href: "/", label: isKo ? "홈" : "Home" },
         { href: "/community", label: isKo ? "커뮤니티" : "Community" },
@@ -46,16 +47,21 @@ export default async function PetShowDetailPage({ params }: PetShowDetailPagePro
           <p className="text-sm leading-relaxed text-plum/75">{post.content}</p>
         )}
 
-        <div className="flex gap-4 text-sm text-plum/50">
-          <span>♥ {post.like_count}</span>
-          <span>💬 {post.comment_count}</span>
-          <span>👀 {post.view_count}</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <PetShowPostActions
+            postId={post.id}
+            initialLikeCount={post.like_count}
+            commentCount={post.comment_count}
+            commentsHref="#comments"
+            disabled={post.id.startsWith("mock-")}
+          />
+          <span className="rounded-full bg-white/50 px-3 py-1.5 text-sm font-bold text-plum/55">👀 {post.view_count}</span>
         </div>
       </article>
 
-      <div className="mt-8 border-t border-plum/10 pt-6">
+      <div id="comments" className="mt-8 scroll-mt-24 border-t border-plum/10 pt-6">
         <PetShowComments postId={post.id} initialComments={comments} />
       </div>
-    </ChannelShell>
+    </PetShowShell>
   );
 }

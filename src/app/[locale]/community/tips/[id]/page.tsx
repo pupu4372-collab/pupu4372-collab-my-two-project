@@ -1,4 +1,6 @@
 import { QaComments } from "@/components/community/QaComments";
+import { QaPostActions } from "@/components/community/QaPostActions";
+import { AdSlot } from "@/components/ads/AdSlot";
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { fetchQaComments, fetchQaPostDetail } from "@/lib/community/qa-detail";
 import { notFound } from "next/navigation";
@@ -37,12 +39,23 @@ export default async function TipsPostDetailPage({ params }: PageProps) {
           <span>💬 {post.comment_count}</span>
           <span>👀 {post.view_count}</span>
         </div>
+        <QaPostActions
+          postId={post.id}
+          authorId={post.author_id}
+          board="tips"
+          listHref="/community/tips"
+          initialTitle={post.title ?? ""}
+          initialContent={post.content ?? ""}
+        />
         {post.content && (
           <p className="whitespace-pre-wrap rounded-[1.5rem] bg-white/50 px-5 py-5 text-sm leading-relaxed text-plum/75">
             {post.content}
           </p>
         )}
       </article>
+      <div className="mt-8">
+        <AdSlot />
+      </div>
       <div className="mt-8 border-t border-plum/10 pt-6">
         <QaComments postId={post.id} initialComments={comments} board="tips" listHref="/community/tips" />
       </div>

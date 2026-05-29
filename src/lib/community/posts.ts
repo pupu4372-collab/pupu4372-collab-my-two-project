@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { CommunityPost, Database } from "@/lib/supabase/types";
+import type { CommunityPost, Database, PetShowSpecies } from "@/lib/supabase/types";
 
 const BUCKET = "pet-show";
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -42,6 +42,7 @@ export interface CreatePetShowPostInput {
   content?: string;
   imageUrl: string;
   petId?: string | null;
+  petShowSpecies: PetShowSpecies;
   language?: string;
 }
 
@@ -59,7 +60,7 @@ export async function createPetShowPost(
       title: input.title.trim(),
       content: input.content?.trim() || null,
       image_urls: [input.imageUrl],
-      tags: ["pet-show"],
+      tags: ["pet-show", `pet-show:${input.petShowSpecies}`],
       language: input.language ?? "ko",
     } as never)
     .select(

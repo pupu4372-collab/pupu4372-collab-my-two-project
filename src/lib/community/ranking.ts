@@ -1,4 +1,4 @@
-import type { PetShowRankingRow, PetSpecies, RankingPeriod } from "@/lib/supabase/types";
+import type { PetShowRankingRow, PetShowSpecies, RankingPeriod } from "@/lib/supabase/types";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const TOP_LIMIT = 5;
@@ -76,9 +76,20 @@ export async function fetchPetShowRanking(
 export interface PetShowSpeciesRankings {
   dog: PetShowRankingRow[];
   cat: PetShowRankingRow[];
+  other: PetShowRankingRow[];
 }
 
-type RankingPostRow = Omit<PetShowRankingRow, "pet_species">;
+type RankingPostRow = Omit<PetShowRankingRow, "pet_species"> & {
+  tags?: string[] | null;
+};
+
+function speciesFromTags(tags?: string[] | null): PetShowSpecies | undefined {
+  const tag = tags?.find((item) => item.startsWith("pet-show:"));
+  const species = tag?.replace("pet-show:", "");
+  return species === "dog" || species === "cat" || species === "other"
+    ? species
+    : undefined;
+}
 
 export async function fetchWeeklyPetShowSpeciesRankings(): Promise<{
   rows: PetShowSpeciesRankings;
@@ -95,10 +106,9 @@ export async function fetchWeeklyPetShowSpeciesRankings(): Promise<{
 
   const { data: posts, error } = await supabase
     .from("community_posts")
-    .select("id, author_id, pet_id, title, image_urls, like_count, comment_count, created_at")
+    .select("id, author_id, pet_id, title, image_urls, tags, like_count, comment_count, created_at")
     .eq("post_type", "photo_show")
     .eq("is_hidden", false)
-    .not("pet_id", "is", null)
     .gte("created_at", weekAgo.toISOString())
     .order("like_count", { ascending: false })
     .order("created_at", { ascending: true })
@@ -109,25 +119,12 @@ export async function fetchWeeklyPetShowSpeciesRankings(): Promise<{
     return { rows: getMockSpeciesRankings(), source: "mock" };
   }
 
-  const petIds = [...new Set(postRows.map((row) => row.pet_id).filter(Boolean))] as string[];
-  const { data: petRows, error: petsError } = await supabase
-    .from("pets")
-    .select("id, species")
-    .in("id", petIds);
-
-  const petList = (petRows ?? []) as unknown as Array<{ id: string; species: PetSpecies }>;
-  if (petsError || petList.length === 0) {
-    return { rows: getMockSpeciesRankings(), source: "mock" };
-  }
-
-  const speciesByPetId = new Map(
-    petList.map((pet) => [pet.id, pet.species])
-  );
-
-  const grouped: PetShowSpeciesRankings = { dog: [], cat: [] };
+  const grouped: PetShowSpeciesRankings = { dog: [], cat: [], other: [] };
   for (const post of postRows) {
-    const species = post.pet_id ? speciesByPetId.get(post.pet_id) : undefined;
-    if (species !== "dog" && species !== "cat") continue;
+    // Weekly species ranking follows the upload category tag only.
+    // Legacy posts without pet-show:dog|cat|other stay in the feed but not species Top 5.
+    const species = speciesFromTags(post.tags);
+    if (species !== "dog" && species !== "cat" && species !== "other") continue;
     if (grouped[species].length >= TOP_LIMIT) continue;
     grouped[species].push({
       ...post,
@@ -136,7 +133,11 @@ export async function fetchWeeklyPetShowSpeciesRankings(): Promise<{
     });
   }
 
-  if (!grouped.dog.length && !grouped.cat.length) {
+  if (!grouped.dog.length && !grouped.cat.length && !grouped.other.length) {
+    // Posts exist but none have upload category tags — show empty rankings, not demo data.
+    if (postRows.length > 0) {
+      return { rows: grouped, source: "supabase" };
+    }
     return { rows: getMockSpeciesRankings(), source: "mock" };
   }
 
@@ -188,5 +189,6 @@ function getMockSpeciesRankings(): PetShowSpeciesRankings {
       { ...dog2, pet_species: "dog", rank_position: 2 },
     ],
     cat: [{ ...cat1, pet_species: "cat", rank_position: 1 }],
+    other: [],
   };
 }
