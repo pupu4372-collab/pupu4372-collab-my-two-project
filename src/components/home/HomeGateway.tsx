@@ -1,9 +1,11 @@
 "use client";
 
+import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
+import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { signOut } from "@/lib/supabase/auth-client";
 import type { PetShowRankingRow } from "@/lib/supabase/types";
 import { useLocale } from "next-intl";
@@ -75,7 +77,7 @@ function RankingPreviewList({
         <ol className="mt-2 flex gap-2 overflow-x-auto pb-1">
           {rows.slice(0, 5).map((row, index) => (
             <li key={row.id} className="w-28 shrink-0">
-              <Link
+              <AuthRequiredLink
                 href={`/community/pet-show/${row.id}`}
                 className="block rounded-xl bg-channel-community/10 p-1.5 transition hover:bg-channel-community/15"
               >
@@ -85,14 +87,14 @@ function RankingPreviewList({
                 <div className="mt-1 h-28 w-full overflow-hidden rounded-xl bg-white/70">
                   {row.image_urls?.[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={row.image_urls[0]} alt="" className="h-full w-full object-cover" />
+                    <img src={supabaseImageTransformUrl(row.image_urls[0], { width: 224, height: 224 })} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <span className="flex h-full w-full items-center justify-center text-2xl">{emoji}</span>
                   )}
                 </div>
                 <p className="mt-1 truncate text-[11px] font-bold text-plum">{row.title ?? "Pet Show"}</p>
                 <p className="text-[10px] text-plum/45">♥ {row.like_count}</p>
-              </Link>
+              </AuthRequiredLink>
             </li>
           ))}
         </ol>
@@ -170,12 +172,6 @@ export function HomeGateway() {
           <span className="text-2xl font-extrabold tracking-tight text-plum">K-Saju Pet</span>
         </Link>
         <nav className="flex flex-wrap items-center justify-end gap-2 text-xs font-bold text-plum/75">
-          <p className="max-w-sm rounded-2xl bg-white/60 px-4 py-2 leading-5 shadow-sm">
-            <span className="block">{isKo ? "펫사주와 우리 아이 자랑보기," : "Pet Saju and Pet Show viewing"}</span>
-            <span className="block">
-              {isKo ? "케어콘텐츠 일부는 로그인 없이 이용하실 수 있어요~" : "and some care content are available without login."}
-            </span>
-          </p>
           <div className="flex items-center gap-2">
             {configured && ready && !isAnonymous ? (
               <div className="flex items-center gap-2">
@@ -225,18 +221,18 @@ export function HomeGateway() {
               : "Read your pet's saju, share photos in Pet Show, and browse dog and cat guides for today's care."}
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link
+            <AuthRequiredLink
               href="/home"
               className="rounded-full bg-channel-saju px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
             >
               {isKo ? "펫 사주 바로 시작" : "Start Pet Saju"}
-            </Link>
-            <Link
+            </AuthRequiredLink>
+            <AuthRequiredLink
               href="/community/pet-show/snapzone"
               className="rounded-full bg-white/75 px-5 py-3 text-sm font-extrabold text-channel-community shadow-sm transition hover:bg-white"
             >
               {isKo ? "우리아이 자랑 보기" : "View Pet Show"}
-            </Link>
+            </AuthRequiredLink>
           </div>
         </div>
 
@@ -253,12 +249,6 @@ export function HomeGateway() {
                 {isKo ? "최근 7일간 좋아요 순위예요." : "Ranked by likes from the last 7 days."}
               </p>
             </div>
-            <Link
-              href="/community/pet-show/ranking"
-              className="shrink-0 rounded-full bg-channel-community/10 px-3 py-1.5 text-xs font-extrabold text-channel-community transition hover:bg-channel-community/20"
-            >
-              {isKo ? "전체보기" : "View all"}
-            </Link>
           </div>
           <div className="mt-4 grid gap-3">
             <RankingPreviewList
@@ -290,7 +280,7 @@ export function HomeGateway() {
       <section className="relative z-10 mx-auto max-w-6xl px-5 pb-16 md:px-8">
         <div className="grid gap-4 md:grid-cols-3">
           {featureCards.map((card) => (
-            <Link
+            <AuthRequiredLink
               key={card.href}
               href={card.href}
               className={`rounded-[1.75rem] border border-white/70 p-5 shadow-sm transition hover:-translate-y-0.5 hover:bg-white/75 ${card.className}`}
@@ -304,7 +294,7 @@ export function HomeGateway() {
               <p className="mt-2 text-xs leading-5 text-plum/62">
                 {isKo ? card.koDesc : card.enDesc}
               </p>
-            </Link>
+            </AuthRequiredLink>
           ))}
         </div>
       </section>

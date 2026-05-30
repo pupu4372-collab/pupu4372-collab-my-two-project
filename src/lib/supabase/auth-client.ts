@@ -6,29 +6,6 @@ import {
   getSupabaseBrowserClient,
 } from "./client";
 
-export type SupportedOAuthProvider = "google" | "facebook" | "naver";
-
-export async function signInWithProvider(provider: SupportedOAuthProvider) {
-  clearSupabaseBrowserSession();
-
-  const client = getSupabaseAuthActionClient();
-  if (!client) {
-    throw new Error("Supabase is not configured.");
-  }
-
-  const redirectTo =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/auth/callback`
-      : undefined;
-
-  const { error } = await client.auth.signInWithOAuth({
-    provider: provider as "google",
-    options: { redirectTo },
-  });
-
-  if (error) throw error;
-}
-
 async function saveDisplayNameAfterAuth(displayName: string) {
   const client = getSupabaseBrowserClient();
   if (!client) return;
@@ -113,6 +90,47 @@ export async function signInWithEmail(email: string, password: string) {
   if (error) throw error;
 
   await persistSession(data.session);
+}
+
+export async function sendPasswordResetEmail(email: string, locale: string) {
+  const client = getSupabaseBrowserClient();
+  if (!client) {
+    throw new Error("Supabase is not configured.");
+  }
+
+  const redirectTo =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/auth/reset-password?next=${locale === "en" ? "/en/login" : "/ko/login"}`
+      : undefined;
+
+  const { error } = await client.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+
+  if (error) throw error;
+}
+
+export async function checkSignupEmail(email: string) {
+  const res = await fetch("/api/auth/check-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = (await res.json()) as {
+    exists?: boolean;
+    confirmed?: boolean;
+    error?: string;
+  };
+
+  if (!res.ok) {
+    throw new Error(data.error ?? "Could not check email.");
+  }
+
+  return {
+    exists: Boolean(data.exists),
+    confirmed: Boolean(data.confirmed),
+  };
 }
 
 export async function signOut() {

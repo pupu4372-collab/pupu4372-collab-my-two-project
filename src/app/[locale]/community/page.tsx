@@ -2,6 +2,7 @@ import { ChannelShell } from "@/components/layout/ChannelShell";
 import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { Link } from "@/i18n/navigation";
 import { fetchWeeklyPetShowSpeciesRankings } from "@/lib/community/ranking";
+import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { getTranslations } from "next-intl/server";
 
 interface CommunityHubPageProps {
@@ -76,7 +77,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                     >
                       {row.image_urls?.[0] ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={row.image_urls[0]} alt="" className="h-full w-full object-cover" />
+                        <img src={supabaseImageTransformUrl(row.image_urls[0], { width: 80, height: 80 })} alt="" className="h-full w-full object-cover" />
                       ) : (
                         <span className="flex h-full w-full items-center justify-center text-lg">{emoji}</span>
                       )}

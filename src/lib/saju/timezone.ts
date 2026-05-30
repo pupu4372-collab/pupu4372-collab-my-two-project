@@ -75,7 +75,6 @@ export function formatUtcForDisplay(utcIso: string, timeZone: string): string {
 }
 
 export const COMMON_TIMEZONES = [
-  "UTC",
   "Asia/Seoul",
   "Asia/Tokyo",
   "America/New_York",

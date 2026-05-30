@@ -1,6 +1,7 @@
 "use client";
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import type { Profile } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
@@ -25,6 +26,56 @@ const PROVIDER_FALLBACK: Record<string, string> = {
   kakao: "Kakao",
 };
 
+const AVATAR_SPRITE_URL = "/images/owner-avatar-presets.png";
+const AVATAR_PRESETS = [
+  { x: 115, y: 92 },
+  { x: 270, y: 92 },
+  { x: 420, y: 92 },
+  { x: 570, y: 92 },
+  { x: 720, y: 92 },
+  { x: 865, y: 92 },
+  { x: 115, y: 255 },
+  { x: 270, y: 255 },
+  { x: 420, y: 255 },
+  { x: 570, y: 255 },
+  { x: 720, y: 255 },
+  { x: 865, y: 255 },
+  { x: 115, y: 414 },
+  { x: 270, y: 414 },
+  { x: 420, y: 414 },
+  { x: 570, y: 414 },
+  { x: 720, y: 414 },
+  { x: 865, y: 414 },
+] as const;
+
+function avatarPresetUrl(index: number) {
+  return `${AVATAR_SPRITE_URL}?preset=${index}`;
+}
+
+function avatarPresetIndexFromUrl(url: string | null | undefined) {
+  if (!url?.startsWith(AVATAR_SPRITE_URL)) return null;
+  const preset = new URL(url, "https://local.invalid").searchParams.get("preset");
+  const index = Number(preset);
+  return Number.isInteger(index) && index >= 0 && index < AVATAR_PRESETS.length ? index : null;
+}
+
+function AvatarPresetVisual({ index, className = "" }: { index: number; className?: string }) {
+  const preset = AVATAR_PRESETS[index] ?? AVATAR_PRESETS[0];
+  const scale = 0.4375;
+
+  return (
+    <span
+      aria-hidden
+      className={`block h-full w-full rounded-full bg-white bg-no-repeat ${className}`}
+      style={{
+        backgroundImage: `url(${AVATAR_SPRITE_URL})`,
+        backgroundSize: `${1024 * scale}px ${685 * scale}px`,
+        backgroundPosition: `-${preset.x * scale}px -${preset.y * scale}px`,
+      }}
+    />
+  );
+}
+
 export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -38,7 +89,7 @@ export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   useEffect(() => {
     if (!configured || !ready || !accessToken) return;
@@ -106,66 +157,13 @@ export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }
       setAvatarUrl(nextProfile.avatar_url ?? null);
       setProfileLocale(nextProfile.locale === "en" ? "en" : "ko");
       setTimezone(nextProfile.timezone ?? "Asia/Seoul");
+      setShowAvatarPicker(false);
       setMessage(isKo ? "프로필이 저장됐어요." : "Profile saved.");
       await refresh();
     } catch {
       setError(isKo ? "네트워크 오류" : "Network error");
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleOwnerImageUpload(file: File | null) {
-    if (!file || !accessToken) return;
-
-    setUploading(true);
-    setError(null);
-    setMessage(null);
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("kind", "owner");
-
-    try {
-      const res = await fetch("/api/profile/upload", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` },
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? (isKo ? "사진 업로드에 실패했어요." : "Could not upload photo."));
-        return;
-      }
-      const nextAvatarUrl = data.imageUrl as string;
-      const saveRes = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          displayName: displayName || profile?.display_name || email?.split("@")[0] || "",
-          locale: profileLocale,
-          timezone,
-          avatarUrl: nextAvatarUrl,
-        }),
-      });
-      const saveData = await saveRes.json();
-      if (!saveRes.ok) {
-        setError(saveData.error ?? (isKo ? "사진 저장에 실패했어요." : "Could not save photo."));
-        return;
-      }
-
-      const nextProfile = saveData.profile as Profile;
-      setProfile(nextProfile);
-      setAvatarUrl(nextProfile.avatar_url ?? nextAvatarUrl);
-      setMessage(isKo ? "사진이 변경됐어요." : "Photo updated.");
-      await refresh();
-    } catch {
-      setError(isKo ? "네트워크 오류" : "Network error");
-    } finally {
-      setUploading(false);
     }
   }
 
@@ -226,15 +224,29 @@ export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }
     (isKo ? "알 수 없음" : "Unknown");
 
   const shownName = profile?.display_name ?? email?.split("@")[0] ?? (isKo ? "집사님" : "Pet parent");
+  const shownAvatarUrl = avatarUrl ?? profile?.avatar_url ?? null;
+  const shownAvatarPresetIndex = avatarPresetIndexFromUrl(shownAvatarUrl);
 
   return (
     <article className="rounded-2xl border border-plum/15 bg-white/50 px-5 py-4">
       <div className="flex items-start gap-4">
-        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-lavender/40 text-2xl">
-          {(avatarUrl ?? profile?.avatar_url) ? (
+        <button
+          type="button"
+          onClick={() => showEditor && setShowAvatarPicker((open) => !open)}
+          disabled={!showEditor}
+          className={
+            showEditor
+              ? "relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-lavender/40 text-2xl ring-channel-saju/0 transition hover:ring-4"
+              : "relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-lavender/40 text-2xl"
+          }
+          aria-label={showEditor ? (isKo ? "주인 이미지 선택 열기" : "Open owner image picker") : undefined}
+        >
+          {shownAvatarPresetIndex !== null ? (
+            <AvatarPresetVisual index={shownAvatarPresetIndex} />
+          ) : shownAvatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={(avatarUrl ?? profile?.avatar_url) as string}
+              src={supabaseImageTransformUrl(shownAvatarUrl, { width: 112, height: 112 })}
               alt=""
               className="h-full w-full rounded-full object-cover"
             />
@@ -242,26 +254,25 @@ export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }
             <span aria-hidden>👤</span>
           )}
           {showEditor && (
-            <>
-              <input
-                id="owner-profile-photo"
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                onChange={(e) => void handleOwnerImageUpload(e.target.files?.[0] ?? null)}
-                className="sr-only"
-                disabled={uploading}
-              />
-              <label
-                htmlFor="owner-profile-photo"
-                title={isKo ? "사진 변경" : "Change photo"}
-                className="absolute -bottom-1 -right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-white bg-channel-saju text-xs text-white shadow-sm transition hover:brightness-105"
-                aria-label={isKo ? "사진 변경" : "Change photo"}
+            <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border border-white bg-channel-saju text-xs text-white shadow-sm">
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                {uploading ? "…" : "📷"}
-              </label>
-            </>
+                <rect x="4" y="5" width="16" height="14" rx="2" />
+                <path d="m4 16 4.5-4.5a1.5 1.5 0 0 1 2.1 0L15 16" />
+                <path d="m13 14 1.5-1.5a1.5 1.5 0 0 1 2.1 0L20 16" />
+                <circle cx="15.5" cy="9.5" r="1.5" />
+              </svg>
+            </span>
           )}
-        </div>
+        </button>
         <div className="min-w-0 flex-1">
           <h3 className="text-lg font-bold text-plum">{shownName}</h3>
           {email && <p className="mt-0.5 text-sm text-plum/65">{email}</p>}
@@ -305,6 +316,41 @@ export function UserProfileCard({ showEditor = false }: { showEditor?: boolean }
       )}
       {showEditor && (
         <form onSubmit={handleSave} className="mt-5 grid gap-3 rounded-2xl bg-white/45 p-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <p className="mt-2 text-[11px] text-plum/45">
+              {isKo ? "위 주인 이미지 칸을 클릭하면 준비된 이미지를 선택할 수 있어요." : "Click the owner image above to choose a prepared image."}
+            </p>
+            {showAvatarPicker && (
+              <div className="mt-3 rounded-2xl bg-white/55 p-3">
+                <p className="text-xs font-medium text-plum/70">
+                  {isKo ? "주인 이미지 선택" : "Choose owner image"}
+                </p>
+                <div className="mt-2 grid grid-cols-6 gap-2 sm:grid-cols-9">
+                  {AVATAR_PRESETS.map((_, index) => {
+                    const selected = avatarPresetIndexFromUrl(avatarUrl) === index;
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => {
+                          setAvatarUrl(avatarPresetUrl(index));
+                          setShowAvatarPicker(false);
+                        }}
+                        className={
+                          selected
+                            ? "h-12 w-12 rounded-full border-2 border-channel-saju p-0.5 shadow-sm"
+                            : "h-12 w-12 rounded-full border border-white/80 p-0.5 opacity-80 transition hover:opacity-100 hover:ring-2 hover:ring-channel-saju/25"
+                        }
+                        aria-label={isKo ? `주인 이미지 ${index + 1}` : `Owner image ${index + 1}`}
+                      >
+                        <AvatarPresetVisual index={index} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
           <label className="block text-xs font-medium text-plum/70 sm:col-span-2">
             {isKo ? "닉네임" : "Display name"}
             <input

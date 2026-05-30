@@ -2,6 +2,8 @@
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
+import { compressImageForUpload } from "@/lib/images/upload-compression";
+import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
@@ -202,11 +204,12 @@ export function PetProfilesList({
     setError(null);
     setMessage(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("kind", "pet");
-
     try {
+      const compressed = await compressImageForUpload(file);
+      const formData = new FormData();
+      formData.append("file", compressed);
+      formData.append("kind", "pet");
+
       const res = await fetch("/api/profile/upload", {
         method: "POST",
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -250,8 +253,16 @@ export function PetProfilesList({
       setPets((prev) => prev.map((item) => (item.id === petId ? { ...item, ...updatedPet } : item)));
       setDrafts((prev) => ({ ...prev, [petId]: draftFromPet(updatedPet) }));
       setMessage(isKo ? "펫 사진이 변경됐어요." : "Pet photo updated.");
-    } catch {
-      setError(isKo ? "네트워크 오류" : "Network error");
+    } catch (err) {
+      setError(
+        err instanceof Error && err.message.includes("1MB")
+          ? isKo
+            ? "이미지를 1MB 이하 WebP로 압축할 수 없어요."
+            : "Could not compress the image under 1MB WebP."
+          : isKo
+            ? "네트워크 오류"
+            : "Network error"
+      );
     } finally {
       setUploadingPetId(null);
     }
@@ -392,7 +403,10 @@ export function PetProfilesList({
                   {(editable ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={(editable ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url) as string}
+                      src={supabaseImageTransformUrl((editable ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url) as string, {
+                        width: isCompactView ? 64 : 112,
+                        height: isCompactView ? 64 : 112,
+                      })}
                       alt=""
                       className="h-full w-full object-cover"
                     />
@@ -404,7 +418,7 @@ export function PetProfilesList({
                       <input
                         id={`pet-profile-photo-${pet.id}`}
                         type="file"
-                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        accept="image/jpeg,image/png,image/webp"
                         onChange={(e) => void uploadPetImage(pet.id, e.target.files?.[0] ?? null)}
                         className="sr-only"
                         disabled={uploadingPetId === pet.id}

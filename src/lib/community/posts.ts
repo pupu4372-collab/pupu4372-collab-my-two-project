@@ -2,8 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CommunityPost, Database, PetShowSpecies } from "@/lib/supabase/types";
 
 const BUCKET = "pet-show";
-const MAX_BYTES = 5 * 1024 * 1024;
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_BYTES = 1 * 1024 * 1024;
+const ALLOWED_TYPES = ["image/webp"];
 
 type Db = SupabaseClient<Database>;
 
@@ -14,19 +14,20 @@ export async function uploadPetShowImage(
   folder = userId
 ): Promise<string> {
   if (!ALLOWED_TYPES.includes(file.type)) {
-    throw new Error("JPEG, PNG, WebP, GIF only.");
+    throw new Error("WebP only.");
   }
   if (file.size > MAX_BYTES) {
-    throw new Error("Image must be 5MB or smaller.");
+    throw new Error("Image must be 1MB or smaller.");
   }
 
-  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const ext = "webp";
   const safeFolder = folder.startsWith(userId) ? folder : userId;
   const path = `${safeFolder}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const { error } = await supabase.storage.from(BUCKET).upload(path, buffer, {
     contentType: file.type,
+    cacheControl: "31536000",
     upsert: false,
   });
 

@@ -14,14 +14,14 @@ const COPY = {
     label:
       "I agree to the collection and use of my pet's birth data and pet photos for K-Saju analysis and service features.",
     detail:
-      "Birth date/time is stored as UTC and used for readings. Pet photos may be used for profile, Pet Show, and card-generation features when uploaded by you. We never sell personal data, and you can request deletion anytime.",
+      "Birth date/time is stored using the selected birth-region timezone and used for readings. Pet photos may be used for profile, Pet Show, and card-generation features when uploaded by you. We never sell personal data, and you can request deletion anytime.",
     privacy: "Privacy Policy",
     terms: "Terms of Service",
   },
   ko: {
     label: "K-Saju 분석과 서비스 이용을 위해 반려동물 생년월일시 및 펫사진 수집·이용에 동의합니다.",
     detail:
-      "생년월일시는 UTC로 저장되며 사주 분석에 사용됩니다. 업로드한 펫사진은 프로필, 우리아이 자랑, 카드 생성 기능에 사용될 수 있습니다. 개인정보는 판매하지 않으며, 언제든 삭제를 요청할 수 있습니다.",
+      "생년월일시는 선택한 출생 지역 시간대 기준으로 저장되어 사주 분석에 사용됩니다. 업로드한 펫사진은 프로필, 우리아이 자랑, 카드 생성 기능에 사용될 수 있습니다. 개인정보는 판매하지 않으며, 언제든 삭제를 요청할 수 있습니다.",
     privacy: "개인정보처리방침",
     terms: "이용약관",
   },

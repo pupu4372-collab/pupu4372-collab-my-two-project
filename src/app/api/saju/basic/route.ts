@@ -1,4 +1,5 @@
 import { computeBasicSaju } from "@/lib/saju/engine";
+import { generateGeminiNarrative } from "@/lib/saju/gemini-narrative";
 import { validatePetName } from "@/lib/saju/moderation";
 import { persistSajuResult } from "@/lib/saju/persist";
 import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
@@ -82,6 +83,21 @@ export async function POST(request: Request) {
 
   try {
     const result = computeBasicSaju(sajuRequest);
+    result.narrativeSource = "template";
+
+    try {
+      const narrative = await generateGeminiNarrative(sajuRequest, result);
+      if (narrative) {
+        result.headline = narrative.headline;
+        result.story = narrative.story;
+        result.traits = narrative.traits;
+        result.narrativeSource = "gemini";
+        result.narrativeError = null;
+      }
+    } catch (err) {
+      result.narrativeError =
+        err instanceof Error ? err.message : "Gemini narrative generation failed.";
+    }
 
     let persisted = false;
     let petId: string | null = null;

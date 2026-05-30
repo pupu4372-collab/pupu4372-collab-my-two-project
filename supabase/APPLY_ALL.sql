@@ -456,10 +456,16 @@ values (
   'pet-show',
   'pet-show',
   true,
-  5242880,
-  array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  1048576,
+  array['image/webp']
 )
 on conflict (id) do nothing;
+
+update storage.buckets
+set
+  file_size_limit = 1048576,
+  allowed_mime_types = array['image/webp']
+where id = 'pet-show';
 
 create policy "pet_show_images_public_read"
 on storage.objects for select

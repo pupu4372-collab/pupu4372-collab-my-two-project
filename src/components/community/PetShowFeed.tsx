@@ -3,6 +3,7 @@
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import type { CommunityPost } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
+import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { PetShowPostActions } from "./PetShowPostActions";
 import { useLocale } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -85,7 +86,7 @@ export function PetShowFeed({ refreshKey = 0 }: PetShowFeedProps) {
                   {post.image_urls?.[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={post.image_urls[0]}
+                      src={supabaseImageTransformUrl(post.image_urls[0], { width: 960, height: 540 })}
                       alt=""
                       className="h-full w-full object-cover"
                     />

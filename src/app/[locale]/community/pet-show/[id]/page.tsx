@@ -1,6 +1,7 @@
 import { PetShowComments } from "@/components/community/PetShowComments";
 import { PetShowPostActions } from "@/components/community/PetShowPostActions";
 import { PetShowShell } from "@/components/community/PetShowShell";
+import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { fetchPetShowComments, fetchPetShowPost } from "@/lib/community/pet-show-detail";
 import { notFound } from "next/navigation";
 
@@ -32,7 +33,7 @@ export default async function PetShowDetailPage({ params }: PetShowDetailPagePro
           {post.image_urls?.[0] ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={post.image_urls[0]}
+              src={supabaseImageTransformUrl(post.image_urls[0], { width: 1280, height: 720 })}
               alt=""
               className="h-full w-full object-cover"
             />

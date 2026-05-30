@@ -67,6 +67,7 @@ export function SiteNav() {
               alt=""
               fill
               sizes="44px"
+              unoptimized
               className="object-cover object-[58%_42%]"
             />
           </span>

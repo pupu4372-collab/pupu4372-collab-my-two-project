@@ -1,5 +1,6 @@
 import type { PetShowRankingRow, RankingPeriod } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
+import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { useLocale } from "next-intl";
 
 interface PetShowRankingProps {
@@ -90,7 +91,7 @@ function SpeciesList({
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/70">
                   {row.image_urls?.[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={row.image_urls[0]} alt="" className="h-full w-full object-cover" />
+                    <img src={supabaseImageTransformUrl(row.image_urls[0], { width: 96, height: 96 })} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <span className="flex h-full w-full items-center justify-center text-xl">{emoji}</span>
                   )}

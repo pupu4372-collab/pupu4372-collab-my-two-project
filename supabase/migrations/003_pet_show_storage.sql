@@ -5,8 +5,8 @@ values (
   'pet-show',
   'pet-show',
   true,
-  5242880,
-  array['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  1048576,
+  array['image/webp']
 )
 on conflict (id) do nothing;
 

@@ -68,6 +68,8 @@ export interface SajuBasicResponse {
   headline: string;
   story: string;
   traits: string[];
+  narrativeSource?: "template" | "gemini";
+  narrativeError?: string | null;
   /** Set when saved to Supabase (requires auth session). */
   persisted?: boolean;
   petId?: string | null;

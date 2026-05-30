@@ -27,7 +27,7 @@ const config: Config = {
         "channel-community": "#22C55E",
       },
       fontFamily: {
-        sans: ["var(--font-noto)", "Pretendard", "system-ui", "sans-serif"],
+        sans: ["SUIT Variable", "SUIT", "var(--font-noto)", "Pretendard", "system-ui", "sans-serif"],
       },
       borderRadius: {
         "4xl": "2rem",

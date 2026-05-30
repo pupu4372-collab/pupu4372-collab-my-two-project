@@ -2,6 +2,7 @@
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
+import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import type { CommunityPost } from "@/lib/supabase/types";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
@@ -113,7 +114,7 @@ export function PetShowPostsMiniGrid() {
         <div className="aspect-square overflow-hidden bg-channel-community/10">
           {post.image_urls[0] ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={post.image_urls[0]} alt="" className="h-full w-full object-cover" />
+            <img src={supabaseImageTransformUrl(post.image_urls[0], { width: 320, height: 320 })} alt="" className="h-full w-full object-cover" />
           ) : (
             <span className="flex h-full w-full items-center justify-center text-2xl">🐾</span>
           )}

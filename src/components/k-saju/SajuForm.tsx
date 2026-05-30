@@ -17,7 +17,7 @@ import { useMemo, useState } from "react";
 const UI = {
   en: {
     title: "K-Saju for your pet",
-    subtitle: "Enter birth data in your local timezone. We store it as UTC.",
+    subtitle: "Enter birth data using the birth-region timezone.",
     petName: "Pet name",
     species: "Species",
     petGender: "Pet gender",
@@ -41,7 +41,7 @@ const UI = {
   },
   ko: {
     title: "반려동물 K-사주",
-    subtitle: "현지 시간대로 입력하면 UTC로 안전하게 저장해요.",
+    subtitle: "출생 지역 시간대를 기준으로 생년월일시를 입력해 주세요.",
     petName: "이름",
     species: "종류",
     petGender: "동물 성별",

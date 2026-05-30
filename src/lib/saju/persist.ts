@@ -68,6 +68,8 @@ export async function persistSajuResult(
       headline: result.headline,
       story: result.story,
       petGender: request.petGender ?? null,
+      narrativeSource: result.narrativeSource ?? "template",
+      narrativeError: result.narrativeError ?? null,
     },
     is_premium: false,
   };

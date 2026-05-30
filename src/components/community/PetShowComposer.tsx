@@ -2,6 +2,7 @@
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
+import { compressImageForUpload } from "@/lib/images/upload-compression";
 import { useLocale } from "next-intl";
 import { useRef, useState } from "react";
 
@@ -25,12 +26,20 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0];
     if (!picked) return;
-    setFile(picked);
-    setPreview(URL.createObjectURL(picked));
-    setError(null);
+    try {
+      const compressed = await compressImageForUpload(picked);
+      setFile(compressed);
+      setPreview(URL.createObjectURL(compressed));
+      setError(null);
+    } catch {
+      setFile(null);
+      setPreview(null);
+      setError(isKo ? "이미지를 1MB 이하 WebP로 압축할 수 없어요." : "Could not compress the image under 1MB WebP.");
+      if (fileRef.current) fileRef.current.value = "";
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -154,9 +163,9 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
           <input
             ref={fileRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/jpeg,image/png,image/webp"
             className="hidden"
-            onChange={onFileChange}
+            onChange={(e) => void onFileChange(e)}
           />
           <div className="flex-1 space-y-3">
             <select

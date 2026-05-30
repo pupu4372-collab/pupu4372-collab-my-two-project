@@ -11,6 +11,7 @@ export function PuppyOnMoon() {
           width={721}
           height={627}
           priority
+          unoptimized
           className="relative h-auto w-full drop-shadow-[0_18px_30px_rgba(120,80,140,0.16)] [mask-image:radial-gradient(ellipse_at_center,black_48%,rgba(0,0,0,0.62)_64%,rgba(0,0,0,0.24)_74%,transparent_88%)]"
           aria-hidden
         />
@@ -30,6 +31,7 @@ export function KittenCorner() {
           width={713}
           height={631}
           priority
+          unoptimized
           className="relative h-auto w-full drop-shadow-[0_18px_30px_rgba(120,80,140,0.14)] [mask-image:radial-gradient(ellipse_at_center,black_48%,rgba(0,0,0,0.62)_64%,rgba(0,0,0,0.24)_74%,transparent_88%)]"
           aria-hidden
         />
@@ -51,6 +53,7 @@ export function PawCrystalOrb() {
           width={718}
           height={628}
           priority
+          unoptimized
           className="relative h-auto w-full opacity-80 drop-shadow-[0_24px_42px_rgba(139,92,246,0.16)] [mask-image:radial-gradient(ellipse_at_center,black_42%,rgba(0,0,0,0.68)_58%,rgba(0,0,0,0.26)_70%,transparent_84%)]"
           aria-hidden
         />

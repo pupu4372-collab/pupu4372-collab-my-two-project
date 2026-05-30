@@ -1,48 +1,28 @@
 "use client";
 
 import {
+  checkSignupEmail,
+  sendPasswordResetEmail,
   signInWithEmail,
-  signInWithProvider,
   signUpWithEmail,
-  type SupportedOAuthProvider,
 } from "@/lib/supabase/auth-client";
-import { useRouter } from "@/i18n/navigation";
 import { clearSupabaseBrowserSession, isSupabaseConfigured } from "@/lib/supabase/client";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-type Mode = "signup" | "login";
+type Mode = "signup" | "login" | "forgot" | "confirm";
 
-const SOCIALS: Array<{
-  provider: SupportedOAuthProvider;
-  labelKey: "google" | "facebook" | "naver";
-  icon: string;
-  className: string;
-}> = [
-  {
-    provider: "google",
-    labelKey: "google",
-    icon: "G",
-    className: "border border-plum/15 bg-white text-plum hover:bg-sand/50",
-  },
-  {
-    provider: "facebook",
-    labelKey: "facebook",
-    icon: "f",
-    className: "border border-plum/15 bg-white text-plum hover:bg-sand/50",
-  },
-  {
-    provider: "naver",
-    labelKey: "naver",
-    icon: "N",
-    className: "border border-plum/15 bg-white text-plum hover:bg-sand/50",
-  },
-];
+function isStrongPassword(value: string) {
+  return value.length >= 10 && /[A-Za-z]/.test(value) && /\d/.test(value);
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
 
 export function LoginButtons() {
   const t = useTranslations("auth");
   const locale = useLocale();
-  const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -59,25 +39,29 @@ export function LoginButtons() {
 
   function formatAuthError(err: unknown) {
     const message = err instanceof Error ? err.message : t("genericError");
+    const normalized = message.toLowerCase();
     if (message.includes("non ISO-8859-1 code point")) {
       return t("authStorageError");
     }
     if (message.includes("Invalid login credentials")) {
       return t("invalidCredentials");
     }
-    return message;
-  }
-
-  async function handleOAuth(provider: SupportedOAuthProvider) {
-    setError(null);
-    setMessage(null);
-    setLoading(provider);
-    try {
-      await signInWithProvider(provider);
-    } catch (err) {
-      setError(formatAuthError(err));
-      setLoading(null);
+    if (normalized.includes("supabase") && normalized.includes("not configured")) {
+      return t("supabaseRuntimeError");
     }
+    if (normalized.includes("valid email is required")) {
+      return t("emailRequired");
+    }
+    if (
+      normalized.includes("invalid json body") ||
+      normalized.includes("could not check email")
+    ) {
+      return t("genericError");
+    }
+    if (locale === "ko" && /^[\x00-\x7F\s.,'":;!?()[\]{}@/_-]+$/.test(message)) {
+      return t("genericError");
+    }
+    return message;
   }
 
   async function handleEmailSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -88,8 +72,50 @@ export function LoginButtons() {
     const cleanEmail = email.trim();
     const cleanDisplayName = displayName.trim();
 
-    if (password.length < 6) {
-      setError(t("passwordMin"));
+    if (!isValidEmail(cleanEmail)) {
+      setError(t("emailRequired"));
+      return;
+    }
+
+    if (mode === "forgot") {
+      setLoading(mode);
+      try {
+        await sendPasswordResetEmail(cleanEmail, locale);
+        setMessage(t("passwordResetSent"));
+      } catch (err) {
+        setError(formatAuthError(err));
+      } finally {
+        setLoading(null);
+      }
+      return;
+    }
+
+    if (mode === "confirm") {
+      setLoading(mode);
+      try {
+        const result = await checkSignupEmail(cleanEmail);
+        if (!result.exists) {
+          setMessage(t("signupEmailMissing"));
+        } else if (result.confirmed) {
+          setMessage(t("signupEmailConfirmed"));
+        } else {
+          setMessage(t("signupEmailUnconfirmed"));
+        }
+      } catch (err) {
+        setError(formatAuthError(err));
+      } finally {
+        setLoading(null);
+      }
+      return;
+    }
+
+    if (!password) {
+      setError(t("passwordRequired"));
+      return;
+    }
+
+    if (mode === "signup" && !isStrongPassword(password)) {
+      setError(t("passwordRuleError"));
       return;
     }
 
@@ -106,7 +132,7 @@ export function LoginButtons() {
           password,
           displayName: cleanDisplayName || cleanEmail.split("@")[0],
         });
-        setMessage(t("signupSuccess"));
+        setMessage(t("signupSuccess", { email: cleanEmail }));
       } else {
         await signInWithEmail(cleanEmail, password);
         window.location.replace(locale === "en" ? "/en" : "/ko");
@@ -135,16 +161,26 @@ export function LoginButtons() {
     <div className="mx-auto max-w-sm rounded-[2rem] bg-white/95 px-6 py-8 shadow-[0_24px_60px_rgba(92,61,110,0.12)]">
       <div className="text-center">
         <h2 className="text-2xl font-extrabold leading-tight text-ink">
-          {mode === "signup" ? t("signupTitleLine1") : t("welcomeLine1")}
-          <br />
-          {mode === "signup" ? t("signupTitleLine2") : t("welcomeLine2")}
+          {mode === "forgot" || mode === "confirm" ? (
+            t(mode === "forgot" ? "forgotTitle" : "confirmTitle")
+          ) : (
+            <>
+              {mode === "signup" ? t("signupTitleLine1") : t("welcomeLine1")}
+              <br />
+              {mode === "signup" ? t("signupTitleLine2") : t("welcomeLine2")}
+            </>
+          )}
         </h2>
         <p className="mt-3 text-sm text-plum/60">
-          {mode === "signup" ? t("signupSubtitle") : t("loginSubtitle")}
+          {mode === "forgot" || mode === "confirm"
+            ? t(mode === "forgot" ? "forgotSubtitle" : "confirmSubtitle")
+            : mode === "signup"
+              ? t("signupSubtitle")
+              : t("loginSubtitle")}
         </p>
       </div>
 
-      <form onSubmit={handleEmailSubmit} className="mt-7 space-y-3">
+      <form onSubmit={handleEmailSubmit} className="mt-7 space-y-3" noValidate>
         {mode === "signup" && (
           <label className="block">
             <span className="sr-only">{t("displayName")}</span>
@@ -171,34 +207,46 @@ export function LoginButtons() {
           />
         </label>
 
-        <label className="block">
-          <span className="sr-only">{t("password")}</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border-0 bg-[#f2f7fa] px-4 py-3 text-sm text-plum outline-none placeholder:text-plum/35 focus:ring-2 focus:ring-channel-saju/30"
-            placeholder={t("passwordPlaceholder")}
-            autoComplete={mode === "signup" ? "new-password" : "current-password"}
-            required
-            minLength={6}
-          />
-        </label>
-
-        {mode === "signup" && (
+        {mode !== "forgot" && mode !== "confirm" && (
           <label className="block">
-            <span className="sr-only">{t("passwordConfirm")}</span>
+            <span className="sr-only">{t("password")}</span>
             <input
               type="password"
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-md border-0 bg-[#f2f7fa] px-4 py-3 text-sm text-plum outline-none placeholder:text-plum/35 focus:ring-2 focus:ring-channel-saju/30"
-              placeholder={t("passwordConfirmPlaceholder")}
-              autoComplete="new-password"
+              placeholder={t("passwordPlaceholder")}
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
               required
-              minLength={6}
+              minLength={mode === "signup" ? 10 : undefined}
             />
+            {mode === "signup" && (
+              <span className="mt-1 block px-1 text-left text-[11px] leading-relaxed text-plum/45">
+                {t("passwordRule")}
+              </span>
+            )}
           </label>
+        )}
+
+        {mode === "signup" && (
+          <>
+            <label className="block">
+              <span className="sr-only">{t("passwordConfirm")}</span>
+              <input
+                type="password"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                className="w-full rounded-md border-0 bg-[#f2f7fa] px-4 py-3 text-sm text-plum outline-none placeholder:text-plum/35 focus:ring-2 focus:ring-channel-saju/30"
+                placeholder={t("passwordConfirmPlaceholder")}
+                autoComplete="new-password"
+                required
+                minLength={10}
+              />
+            </label>
+            <p className="px-1 text-left text-[11px] leading-relaxed text-plum/45">
+              {t("signupEmailConfirmHelp")}
+            </p>
+          </>
         )}
 
         {error && (
@@ -220,7 +268,11 @@ export function LoginButtons() {
         >
           {loading === mode
             ? t("processing")
-            : mode === "signup"
+            : mode === "forgot"
+              ? t("sendResetEmail")
+              : mode === "confirm"
+                ? t("checkSignupEmail")
+              : mode === "signup"
               ? t("emailSignup")
               : t("emailLoginSubmit")}
         </button>
@@ -228,25 +280,62 @@ export function LoginButtons() {
 
       <div className="mt-5 text-center text-sm text-plum/60">
         {mode === "login" ? (
-          <p>
-            {t("signupPrompt")}{" "}
-            <button
-              type="button"
-              onClick={() => {
-                setMode("signup");
-                setError(null);
-                setMessage(null);
-              }}
-              className="font-bold text-plum underline underline-offset-4"
-            >
-              {t("signupLink")}
-            </button>
-          </p>
+          <div className="space-y-2">
+            <p>
+              {t("signupPrompt")}{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("signup");
+                  setPassword("");
+                  setPasswordConfirm("");
+                  setError(null);
+                  setMessage(null);
+                }}
+                className="font-bold text-plum underline underline-offset-4"
+              >
+                {t("signupLink")}
+              </button>
+            </p>
+            <div className="flex items-center justify-center gap-2 text-[8px]">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("forgot");
+                  setPassword("");
+                  setPasswordConfirm("");
+                  setError(null);
+                  setMessage(null);
+                }}
+                className="font-bold text-plum underline underline-offset-2"
+              >
+                {t("forgotPassword")}
+              </button>
+              <span className="text-plum/25" aria-hidden>
+                |
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("confirm");
+                  setPassword("");
+                  setPasswordConfirm("");
+                  setError(null);
+                  setMessage(null);
+                }}
+                className="font-bold text-plum underline underline-offset-2"
+              >
+                {t("signupConfirm")}
+              </button>
+            </div>
+          </div>
         ) : (
           <button
             type="button"
             onClick={() => {
               setMode("login");
+              setPassword("");
+              setPasswordConfirm("");
               setError(null);
               setMessage(null);
             }}
@@ -255,38 +344,6 @@ export function LoginButtons() {
             {t("backToLogin")}
           </button>
         )}
-      </div>
-
-      <div className="my-6 flex items-center gap-4 text-xs font-medium text-plum/35">
-        <span className="h-px flex-1 bg-plum/10" />
-        <span>{t("socialSignupTitle")}</span>
-        <span className="h-px flex-1 bg-plum/10" />
-      </div>
-
-      <div className="space-y-2.5">
-        {SOCIALS.map((social) => (
-          <button
-            key={social.provider}
-            type="button"
-            disabled={!!loading}
-            onClick={() => handleOAuth(social.provider)}
-            className={`relative flex w-full items-center justify-center rounded-md px-4 py-3 text-sm font-semibold transition disabled:opacity-60 ${social.className}`}
-          >
-            <span
-              className={`absolute left-4 flex h-5 w-5 items-center justify-center rounded-full text-sm font-extrabold ${
-                social.provider === "google"
-                  ? "text-[#4285F4]"
-                  : social.provider === "facebook"
-                    ? "bg-[#1877F2] text-white"
-                    : "bg-[#03C75A] text-white"
-              }`}
-              aria-hidden
-            >
-              {social.icon}
-            </span>
-            {loading === social.provider ? t("connecting") : t(`social.${social.labelKey}`)}
-          </button>
-        ))}
       </div>
 
       <p className="mt-6 text-center text-xs leading-relaxed text-plum/45">
