@@ -20,7 +20,7 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-export function LoginButtons() {
+export function LoginButtons({ homeHref = "/" }: { homeHref?: string }) {
   const t = useTranslations("auth");
   const locale = useLocale();
   const [mode, setMode] = useState<Mode>("login");
@@ -131,6 +131,7 @@ export function LoginButtons() {
           email: cleanEmail,
           password,
           displayName: cleanDisplayName || cleanEmail.split("@")[0],
+          locale,
         });
         setMessage(t("signupSuccess", { email: cleanEmail }));
       } else {
@@ -158,9 +159,17 @@ export function LoginButtons() {
   }
 
   return (
-    <div className="mx-auto max-w-sm rounded-[2rem] bg-white/95 px-6 py-8 shadow-[0_24px_60px_rgba(92,61,110,0.12)]">
+    <div className="glass-card rounded-[2rem] border border-white/40 px-6 py-8 shadow-sm shadow-primary/5 md:px-10 md:py-10">
       <div className="text-center">
-        <h2 className="text-2xl font-extrabold leading-tight text-ink">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-plum/10 bg-white shadow-sm">
+          <span className="text-3xl text-primary" aria-hidden>
+            ✨
+          </span>
+        </div>
+        <a href={homeHref} className="text-2xl font-extrabold tracking-tight text-primary">
+          K-Saju Pet
+        </a>
+        <h2 className="mt-3 text-lg font-semibold leading-tight text-plum">
           {mode === "forgot" || mode === "confirm" ? (
             t(mode === "forgot" ? "forgotTitle" : "confirmTitle")
           ) : (
@@ -171,7 +180,7 @@ export function LoginButtons() {
             </>
           )}
         </h2>
-        <p className="mt-3 text-sm text-plum/60">
+        <p className="mt-2 text-sm text-on-surface-variant">
           {mode === "forgot" || mode === "confirm"
             ? t(mode === "forgot" ? "forgotSubtitle" : "confirmSubtitle")
             : mode === "signup"
@@ -180,27 +189,27 @@ export function LoginButtons() {
         </p>
       </div>
 
-      <form onSubmit={handleEmailSubmit} className="mt-7 space-y-3" noValidate>
+      <form onSubmit={handleEmailSubmit} className="mt-8 space-y-4" noValidate>
         {mode === "signup" && (
-          <label className="block">
-            <span className="sr-only">{t("displayName")}</span>
+          <label className="block space-y-2">
+            <span className="ml-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">{t("displayName")}</span>
             <input
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full rounded-md border-0 bg-[#f2f7fa] px-4 py-3 text-sm text-plum outline-none placeholder:text-plum/35 focus:ring-2 focus:ring-channel-saju/30"
+              className="pastel-input w-full rounded-2xl border-0 bg-sand/50 py-3.5 text-sm"
               placeholder={t("displayNamePlaceholder")}
               maxLength={32}
             />
           </label>
         )}
 
-        <label className="block">
-          <span className="sr-only">{t("email")}</span>
+        <label className="block space-y-2">
+          <span className="ml-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">{t("email")}</span>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border-0 bg-[#f2f7fa] px-4 py-3 text-sm text-plum outline-none placeholder:text-plum/35 focus:ring-2 focus:ring-channel-saju/30"
+            className="pastel-input w-full rounded-2xl border-0 bg-sand/50 py-3.5 text-sm"
             placeholder={t("emailPlaceholder")}
             autoComplete="email"
             required
@@ -208,13 +217,13 @@ export function LoginButtons() {
         </label>
 
         {mode !== "forgot" && mode !== "confirm" && (
-          <label className="block">
-            <span className="sr-only">{t("password")}</span>
+          <label className="block space-y-2">
+            <span className="ml-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">{t("password")}</span>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border-0 bg-[#f2f7fa] px-4 py-3 text-sm text-plum outline-none placeholder:text-plum/35 focus:ring-2 focus:ring-channel-saju/30"
+              className="pastel-input w-full rounded-2xl border-0 bg-sand/50 py-3.5 text-sm"
               placeholder={t("passwordPlaceholder")}
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
               required
@@ -230,13 +239,13 @@ export function LoginButtons() {
 
         {mode === "signup" && (
           <>
-            <label className="block">
-              <span className="sr-only">{t("passwordConfirm")}</span>
+            <label className="block space-y-2">
+              <span className="ml-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">{t("passwordConfirm")}</span>
               <input
                 type="password"
                 value={passwordConfirm}
                 onChange={(e) => setPasswordConfirm(e.target.value)}
-                className="w-full rounded-md border-0 bg-[#f2f7fa] px-4 py-3 text-sm text-plum outline-none placeholder:text-plum/35 focus:ring-2 focus:ring-channel-saju/30"
+                className="pastel-input w-full rounded-2xl border-0 bg-sand/50 py-3.5 text-sm"
                 placeholder={t("passwordConfirmPlaceholder")}
                 autoComplete="new-password"
                 required
@@ -264,7 +273,7 @@ export function LoginButtons() {
         <button
           type="submit"
           disabled={!!loading}
-          className="w-full rounded-md bg-[#13c4d4] py-3.5 text-sm font-bold text-white transition hover:brightness-105 disabled:opacity-60"
+          className="w-full rounded-full bg-primary py-4 text-sm font-bold text-white shadow-md shadow-primary/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
         >
           {loading === mode
             ? t("processing")

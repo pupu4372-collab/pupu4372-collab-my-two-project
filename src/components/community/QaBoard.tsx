@@ -7,6 +7,13 @@ import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 
+const EXPERIENCE_FILTER_TAGS = [
+  { id: "all", ko: "전체", en: "All" },
+  { id: "experience:dog", ko: "강아지 견종", en: "Dog breeds" },
+  { id: "experience:cat", ko: "고양이 묘종", en: "Cat breeds" },
+  { id: "experience:other", ko: "다른동물", en: "Other animals" },
+];
+
 interface QaFeedResponse {
   posts: CommunityPost[];
   nextCursor: string | null;
@@ -68,27 +75,30 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
   const boardPath = `/community/${board}`;
 
   if (loading) {
-    return <p className="text-sm text-plum/60">{isKo ? "게시글 불러오는 중…" : "Loading posts…"}</p>;
+    return <p className="pastel-card p-6 text-center text-sm text-plum/60">{isKo ? "게시글 불러오는 중…" : "Loading posts…"}</p>;
   }
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={handleSearch} className="flex gap-2">
+    <div className="space-y-6">
+      <form onSubmit={handleSearch} className="relative">
+        <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-lg text-plum/35" aria-hidden>
+          🔎
+        </span>
         <input
-          className="pastel-input flex-1"
-          placeholder={isKo ? "제목·내용 검색" : "Search title or content"}
+          className="w-full rounded-full border border-white/70 bg-white/65 py-4 pl-12 pr-28 text-sm font-semibold text-primary shadow-sm outline-none backdrop-blur focus:border-channel-community/30 focus:ring-4 focus:ring-mint/60"
+          placeholder={isKo ? "궁금한 내용을 검색해보세요" : "Search title or content"}
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
         />
         <button
           type="submit"
-          className="shrink-0 rounded-full bg-channel-community px-4 py-2 text-sm font-semibold text-white"
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-channel-community px-5 py-2.5 text-sm font-extrabold text-white shadow-sm"
         >
           {isKo ? "검색" : "Search"}
         </button>
       </form>
 
-      {isQa && <div className="flex flex-wrap gap-1.5">
+      {isQa && <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
         {QA_FILTER_TAGS.map((item) => (
           <button
             key={item.id}
@@ -96,14 +106,33 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
             onClick={() => setTag(item.id)}
             className={
               tag === item.id
-                ? "rounded-full bg-channel-community px-3 py-1 text-xs font-bold text-white"
-                : "rounded-full bg-white/60 px-3 py-1 text-xs font-semibold text-plum/70"
+                ? "whitespace-nowrap rounded-full bg-channel-community px-5 py-2.5 text-xs font-extrabold text-white shadow-sm"
+                : "whitespace-nowrap rounded-full bg-white/60 px-5 py-2.5 text-xs font-bold text-plum/70 shadow-sm transition hover:bg-white"
             }
           >
             {item.label}
           </button>
         ))}
       </div>}
+
+      {board === "experience" && (
+        <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+          {EXPERIENCE_FILTER_TAGS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setTag(item.id)}
+              className={
+                tag === item.id
+                  ? "whitespace-nowrap rounded-full bg-channel-community px-5 py-2.5 text-xs font-extrabold text-white shadow-sm"
+                  : "whitespace-nowrap rounded-full bg-white/60 px-5 py-2.5 text-xs font-bold text-plum/70 shadow-sm transition hover:bg-white"
+              }
+            >
+              {isKo ? item.ko : item.en}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2 text-xs text-plum/50">
         {source === "mock" && (
@@ -125,41 +154,47 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
         </p>
       )}
 
-      <ul className="space-y-3">
+      <ul className="grid gap-5 md:grid-cols-2">
         {posts.map((post) => (
           <li key={post.id}>
             <Link
               href={`${boardPath}/${post.id}`}
-              className="block rounded-2xl border border-white/70 bg-white/60 px-4 py-4 transition hover:-translate-y-0.5 hover:bg-white/80"
+              className="pastel-card flex h-full flex-col justify-between p-5 shadow-sm transition hover:-translate-y-1 hover:bg-white/80"
             >
-              <div className="flex flex-wrap items-center gap-2">
-                {post.is_pinned && (
-                  <span className="rounded-full bg-gold/40 px-2 py-0.5 text-[10px] font-bold text-plum">
-                    {isKo ? "고정" : "Pinned"}
-                  </span>
-                )}
-                <span className="text-xs text-plum/45">
-                  💬 {post.comment_count} · 👀 {post.view_count}
-                </span>
-              </div>
-              <h4 className="mt-2 font-bold text-plum">{post.title}</h4>
-              {post.content && (
-                <p className="mt-2 text-sm leading-relaxed text-plum/70 line-clamp-3">
-                  {post.content}
-                </p>
-              )}
-              {post.tags.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {post.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full bg-channel-community/10 px-2 py-0.5 text-[11px] text-channel-community"
-                    >
-                      #{t}
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {post.is_pinned && (
+                    <span className="rounded-full bg-gold/45 px-3 py-1 text-[10px] font-extrabold text-primary">
+                      {isKo ? "고정" : "Pinned"}
                     </span>
-                  ))}
+                  )}
+                  <span className="rounded-full bg-channel-community/10 px-3 py-1 text-[10px] font-extrabold text-channel-community">
+                    {isQa ? "Q&A" : board}
+                  </span>
+                  <span className="text-xs font-semibold text-plum/45">
+                    💬 {post.comment_count} · 👀 {post.view_count}
+                  </span>
                 </div>
-              )}
+                <h4 className="mt-4 text-lg font-extrabold leading-snug text-primary">{post.title}</h4>
+                {post.content && (
+                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-plum/70">
+                    {post.content}
+                  </p>
+                )}
+                {post.tags.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {post.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-full bg-channel-community/10 px-2.5 py-1 text-[11px] font-semibold text-channel-community"
+                      >
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <p className="mt-5 text-sm font-extrabold text-channel-community">{isKo ? "자세히 보기" : "Read more"} →</p>
             </Link>
           </li>
         ))}

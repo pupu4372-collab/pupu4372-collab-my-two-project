@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'SUIT Variable';
+            src: url('https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.woff2') format('woff2-variations');
+            font-weight: 100 900;
+        }
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        .dream-sky-gradient {
+            background: linear-gradient(135deg, #FDFBF7 0%, #E6E1F9 40%, #E1F5F0 70%, #FDECE7 100%);
+            background-size: 400% 400%;
+            animation: skyAnimation 15s ease infinite;
+        }
+        @keyframes skyAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(68, 38, 86, 0.1);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pastel-input:focus {
+            outline: none;
+            border-color: #442656;
+            box-shadow: 0 0 0 4px rgba(68, 38, 86, 0.05);
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#442656", secondary: "#715a4c", blush: "#FDECE7", lavender: "#E6E1F9", mint: "#E1F5F0", cream: "#FDFBF7", sand: "#F5F1E9", surface: "#fbf9f5", "on-surface": "#1b1c1a", "on-surface-variant": "#4b444d", outline: "#7d747e", "primary-container": "#5c3d6e", "on-primary-container": "#d1abe4", "on-error-container": "#93000a", "on-tertiary-fixed": "#1a1d00", "surface-container": "#efeeea", error: "#ba1a1a", "secondary-container": "#f9d9c8", "on-tertiary": "#ffffff", "on-primary-fixed": "#2b0d3c", "surface-tint": "#725284", "tertiary-fixed-dim": "#c5cc7f", "secondary-fixed-dim": "#dfc0b0", "on-primary-fixed-variant": "#593a6b", "surface-container-lowest": "#ffffff", "primary-fixed": "#f5d9ff", "on-tertiary-container": "#b7be73", "error-container": "#ffdad6", "secondary-fixed": "#fcdccb", "surface-container-low": "#f5f3ef", "tertiary-fixed": "#e1e999", "surface-container-highest": "#e4e2de", "on-secondary-fixed-variant": "#574236", "primary-fixed-dim": "#dfb9f2", "surface-dim": "#dbdad6", "on-primary": "#ffffff", "inverse-primary": "#dfb9f2", "surface-bright": "#fbf9f5", "on-secondary": "#ffffff", "inverse-on-surface": "#f2f0ed", "inverse-surface": "#30312e", "on-background": "#1b1c1a", "surface-variant": "#e4e2de", "on-tertiary-fixed-variant": "#454b0a", "on-error": "#ffffff", "surface-container-high": "#eae8e4", tertiary: "#313600", "tertiary-container": "#474d0d", "on-secondary-container": "#755e50", "outline-variant": "#cec3ce", background: "#fbf9f5", "on-secondary-fixed": "#28180d"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {"display-hero": ["SUIT Variable"], "headline-lg": ["SUIT Variable"], "headline-md": ["SUIT Variable"], "headline-sm": ["SUIT Variable"], "body-lg": ["SUIT Variable"], "body-md": ["SUIT Variable"], "body-sm": ["SUIT Variable"], "label-caps": ["SUIT Variable"], headline: ["SUIT Variable"], display: ["SUIT Variable"], body: ["SUIT Variable"], label: ["SUIT Variable"]}, fontSize: {"display-hero": ["42px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "800"}], "headline-lg": ["32px", {lineHeight: "1.3", fontWeight: "700"}], "headline-md": ["24px", {lineHeight: "1.4", fontWeight: "700"}], "headline-sm": ["20px", {lineHeight: "1.4", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "1.6", fontWeight: "400"}], "body-sm": ["14px", {lineHeight: "1.5", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1", letterSpacing: "0.05em", fontWeight: "700"}]}}}};</script>
+</head>
+<body class="bg-cream text-on-surface min-h-screen flex items-center justify-center p-4 dream-sky-gradient">
+<!-- Signup Container -->
+<main class="w-full max-w-[540px] animate-in fade-in slide-in-from-bottom-4 duration-1000">
+<div class="glass-card rounded-2rem p-8 md:p-12 shadow-sm relative overflow-hidden">
+<!-- Subtle Decorative Elements -->
+<div class="absolute -top-12 -right-12 w-32 h-32 bg-mint/40 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-12 -left-12 w-32 h-32 bg-lavender/40 rounded-full blur-3xl"></div>
+<!-- Header Section -->
+<div class="text-center mb-10 relative z-10">
+<div class="flex justify-center mb-4">
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">K-Saju Pet</span>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-primary mb-2">반려동물과 하늘이 맺어준 인연</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">K-Saju Pet에 오신 것을 환영합니다</p>
+</div>
+<!-- Signup Form -->
+<form class="space-y-6 relative z-10" onsubmit="return false;">
+<!-- Email Input -->
+<div class="space-y-2">
+<label class="block font-label-caps text-label-caps text-on-surface-variant ml-2">이메일 주소</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">mail</span>
+<input class="w-full pl-12 pr-4 py-4 bg-sand border-transparent rounded-2rem font-body-md text-body-md pastel-input transition-all duration-300" placeholder="이메일 주소를 입력해 주세요" type="email"/>
+</div>
+</div><div class="space-y-2">
+<label class="block font-label-caps text-label-caps text-on-surface-variant ml-2">닉네임</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">person</span>
+<input class="w-full pl-12 pr-4 py-4 bg-sand border-transparent rounded-2rem font-body-md text-body-md pastel-input transition-all duration-300" placeholder="사용할 닉네임을 입력해 주세요" type="text"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="space-y-2">
+<label class="block font-label-caps text-label-caps text-on-surface-variant ml-2">비밀번호</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">lock</span>
+<input class="w-full pl-12 pr-4 py-4 bg-sand border-transparent rounded-2rem font-body-md text-body-md pastel-input transition-all duration-300" placeholder="비밀번호를 입력해 주세요" type="password"/>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant ml-2">영문과 숫자를 모두 포함하고 10자 이상</p>
+</div>
+<!-- Password Confirmation -->
+<div class="space-y-2">
+<label class="block font-label-caps text-label-caps text-on-surface-variant ml-2">비밀번호 확인</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">verified_user</span>
+<input class="w-full pl-12 pr-4 py-4 bg-sand border-transparent rounded-2rem font-body-md text-body-md pastel-input transition-all duration-300" placeholder="비밀번호를 한 번 더 입력해 주세요" type="password"/>
+</div>
+</div>
+<!-- Consents -->
+<div class="pt-2 space-y-4">
+<label class="flex items-start gap-3 cursor-pointer group">
+<div class="relative flex items-center mt-0.5">
+<input class="peer h-5 w-5 rounded border-outline text-primary focus:ring-primary/20 transition-all cursor-pointer bg-cream" type="checkbox"/>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface group-hover:text-primary transition-colors">
+                            이용약관 및 개인정보 처리방침에 동의합니다 <span class="text-primary font-bold">(필수)</span>
+</span>
+</label>
+<label class="flex items-start gap-3 cursor-pointer group">
+<div class="relative flex items-center mt-0.5">
+<input class="peer h-5 w-5 rounded border-outline text-primary focus:ring-primary/20 transition-all cursor-pointer bg-cream" type="checkbox"/>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface group-hover:text-primary transition-colors">
+                            마케팅 정보 수신 동의 (선택)
+                        </span>
+</label>
+</div>
+<!-- CTA Button -->
+<button class="w-full py-4 bg-primary text-cream rounded-full font-headline-sm text-headline-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-sm mt-4" type="submit">
+                    회원가입
+                </button>
+</form>
+<!-- Footer -->
+<div class="mt-8 pt-8 border-t border-outline/10 text-center relative z-10">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                    이미 계정이 있으신가요? 
+                    <a class="text-primary font-bold ml-2 hover:underline decoration-2 underline-offset-4" href="#">로그인</a>
+</p>
+</div>
+</div>
+<!-- Atmospheric Footer Image -->
+<div class="mt-8 flex justify-center opacity-40">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-caps text-label-caps">MYSTICAL JOURNEY WITH YOUR PET</span>
+</div>
+</div>
+</main>
+<script>
+        // Simple micro-interaction for button
+        const button = document.querySelector('button');
+        button.addEventListener('click', (e) => {
+            const ripple = document.createElement('div');
+            ripple.classList.add('ripple');
+            // Logic for ripple effect could be added here if desired
+        });
+
+        // Form focus visual feedback enhancement
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.closest('.space-y-2').classList.add('translate-x-1');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.closest('.space-y-2').classList.remove('translate-x-1');
+            });
+        });
+    </script>
+</body></html>

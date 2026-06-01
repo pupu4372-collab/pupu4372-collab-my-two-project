@@ -13,6 +13,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Custom domain (Gabia → Vercel)
+
+See [docs/DEPLOY_DOMAIN.md](docs/DEPLOY_DOMAIN.md) for DNS, Supabase, and app URL setup.
+
+## Mobile app (Android)
+
+Capacitor wraps the deployed site in a native shell. See [docs/MOBILE_APP.md](docs/MOBILE_APP.md).
+
+```bash
+npm run cap:sync
+npm run cap:open:android
+```
+
 ## API
 
 `POST /api/saju/basic`

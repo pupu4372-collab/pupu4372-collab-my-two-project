@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko" style=""><head></head><body class="dream-sky-bg"><svg aria-hidden="true" class="inline-defs-container" style="position:absolute;width:0;height:0;overflow:hidden"></svg>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>K-Saju Pet | Cookie's Saju Analysis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'SUIT Variable';
+            src: url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.woff2') format('woff2-variations');
+            font-weight: 100 900;
+        }
+
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            background: linear-gradient(135deg, #FDFBF7 0%, #E6E1F9 50%, #E1F5F0 100%);
+            min-height: 100vh;
+            color: #3D2A4A;
+        }
+
+        .dream-sky-bg {
+            background: radial-gradient(circle at 20% 30%, rgba(230, 225, 249, 0.6), transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(225, 245, 240, 0.6), transparent 40%),
+                        radial-gradient(circle at 50% 50%, rgba(252, 225, 241, 0.4), transparent 60%);
+        }
+
+        .pastel-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(61, 42, 74, 0.08);
+            border-radius: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .pastel-card:hover {
+            box-shadow: 0 10px 30px rgba(68, 38, 86, 0.05);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .element-pill {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .chart-bar {
+            transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1abe4;
+            border-radius: 10px;
+        }
+
+        .lucky-icon-container {
+            width: 60px;
+            height: 60px;
+            overflow: hidden;
+            position: relative;
+            margin: 0 auto;
+        }
+        .lucky-icon-img {
+            position: absolute;
+            max-width: none;
+            height: auto;
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"surface-container": "#efeeea", "surface-variant": "#e4e2de", surface: "#fbf9f5", "secondary-fixed-dim": "#dfc0b0", sand: "#F5F1E9", cream: "#FDFBF7", "geum-white": "#94A3B8", "surface-tint": "#725284", "su-black": "#334155", "surface-bright": "#fbf9f5", "primary-fixed": "#f5d9ff", lavender: "#E6E1F9", "channel-cat": "#EF4444", "secondary-container": "#f9d9c8", "outline-variant": "#cec3ce", "surface-container-highest": "#e4e2de", "primary-container": "#5c3d6e", "on-primary": "#ffffff", "on-tertiary-fixed-variant": "#454b0a", mint: "#E1F5F0", "channel-saju": "#8B5CF6", "on-primary-container": "#d1abe4", "channel-community": "#22C55E", "tertiary-fixed-dim": "#c5cc7f", "surface-dim": "#dbdad6", "on-secondary": "#ffffff", "inverse-primary": "#dfb9f2", "on-error-container": "#93000a", tertiary: "#313600", "on-primary-fixed": "#2b0d3c", "on-secondary-fixed-variant": "#574236", background: "#fbf9f5", petal: "#FCE1F1", outline: "#7d747e", "surface-container-lowest": "#ffffff", "on-background": "#1b1c1a", "hwa-red": "#EF4444", "error-container": "#ffdad6", "surface-container-low": "#f5f3ef", blush: "#FDECE7", "channel-dog": "#3B82F6", "on-secondary-fixed": "#28180d", "to-yellow": "#F59E0B", "inverse-surface": "#30312e", "primary-fixed-dim": "#dfb9f2", "on-tertiary": "#ffffff", primary: "#442656", "on-tertiary-fixed": "#1a1d00", "mok-green": "#22C55E", "on-secondary-container": "#755e50", "on-error": "#ffffff", "tertiary-fixed": "#e1e999", "tertiary-container": "#474d0d", "on-surface": "#1b1c1a", secondary: "#715a4c", error: "#ba1a1a", "inverse-on-surface": "#f2f0ed", "on-surface-variant": "#4b444d", "secondary-fixed": "#fcdccb", "surface-container-high": "#eae8e4", "on-primary-fixed-variant": "#593a6b", "on-tertiary-container": "#b7be73"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {gutter: "1.5rem", "page-margin-mobile": "1.25rem", "page-margin-desktop": "4rem", "section-gap": "5rem", "card-padding": "2rem"}, fontFamily: {"body-sm": ["SUIT Variable"], "headline-md": ["SUIT Variable"], "label-caps": ["SUIT Variable"], "headline-lg": ["SUIT Variable"], "display-hero-mobile": ["SUIT Variable"], "body-lg": ["SUIT Variable"], "headline-sm": ["SUIT Variable"], "body-md": ["SUIT Variable"], "display-hero": ["SUIT Variable"], headline: ["SUIT Variable"], display: ["SUIT Variable"], body: ["SUIT Variable"], label: ["SUIT Variable"]}, fontSize: {"body-sm": ["14px", {lineHeight: "1.5", fontWeight: "400"}], "headline-md": ["24px", {lineHeight: "1.4", fontWeight: "700"}], "label-caps": ["12px", {lineHeight: "1", letterSpacing: "0.05em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.3", fontWeight: "700"}], "display-hero-mobile": ["32px", {lineHeight: "1.2", fontWeight: "800"}], "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}], "headline-sm": ["20px", {lineHeight: "1.4", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "1.6", fontWeight: "400"}], "display-hero": ["42px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "800"}]}}}};</script>
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-page-margin-mobile md:px-page-margin-desktop py-4">
+<span class="font-display-hero-mobile text-display-hero-mobile text-primary dark:text-primary-fixed-dim">K-Saju Pet</span>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-8">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors font-label-caps text-label-caps" href="#">HOME</a>
+<a class="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary font-label-caps text-label-caps" href="#">K-SAJU</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors font-label-caps text-label-caps" href="#">COMMUNITY</a>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="language">language</span>
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="notifications">notifications</span>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-7xl mx-auto px-page-margin-mobile md:px-page-margin-desktop pt-24 pb-32">
+<!-- Hero Header -->
+<section class="mb-section-gap animate-fadeIn">
+<div class="flex flex-col md:flex-row items-center gap-8">
+<div class="relative group">
+<div class="absolute inset-0 bg-primary/20 rounded-full blur-2xl group-hover:blur-3xl transition-all"></div>
+<img alt="Cookie the Puppy" class="w-48 h-48 md:w-64 md:h-64 object-cover rounded-full border-4 border-white shadow-xl relative z-10" data-alt="A high-end, professionally photographed portrait of a small, fluffy cream-colored puppy sitting gracefully. The lighting is soft and ethereal, mimicking a dream-sky aesthetic with pastel pink and lavender highlights. The background is a clean, minimalist studio setting with subtle gradients. The overall mood is sophisticated and emotional, capturing the pet's gentle character for a premium brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyi9SpMX1ob2mdKn6w91N2kAb5FTd-dYVd6zsseEEckEtnSsGWwf1O0TZyBEbNIj6aCxKTh6OeaEEoNBfotgHc9wxXINH0G4Ck6tubYV8ISiGHgxhllpaKwIFTEhA3DQIYiMFpj38x_egL3i-0kSLlVZBhqPbfAYypXTV_fo6D3Z64Uk2etJsNoFavmHzPWH7Yc5k0spmfhfcZfdYR7qEg8kPl6_Cc_jMY3aKHkGKitl4Lij1P6Kx6gW6_cvJci8NNQz1kAewkbezi"/>
+<div class="absolute -bottom-2 -right-2 bg-to-yellow text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg border-2 border-white z-20">
+<span class="font-headline-sm text-headline-sm">土</span>
+</div>
+</div>
+<div class="text-center md:text-left">
+<h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero text-primary mb-2">
+                        쿠키의 운명적인 사주 분석
+                    </h1>
+<p class="font-headline-sm text-headline-sm text-secondary">Cookie's Saju Analysis</p>
+<div class="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
+<span class="bg-primary/10 text-primary px-4 py-2 rounded-full font-label-caps text-label-caps">2023.05.12 출생</span>
+<span class="bg-primary/10 text-primary px-4 py-2 rounded-full font-label-caps text-label-caps">수(Su) 속성 집사</span>
+<button class="pastel-card bg-white/40 backdrop-blur-md border border-white/20 px-4 py-2 flex items-center gap-2 text-primary font-label-caps text-label-caps hover:scale-105 active:scale-95 transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm" data-icon="picture_as_pdf">picture_as_pdf</span>
+<span class="">PDF로 내보내기</span>
+</button></div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Elements Chart & Four Pillars -->
+<div class="lg:col-span-8 space-y-gutter">
+<!-- Five Elements Breakdown -->
+<div class="pastel-card p-card-padding">
+<div class="flex items-center justify-between mb-8">
+<h2 class="font-headline-md text-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-to-yellow" data-icon="bubble_chart">bubble_chart</span>
+                            오행 분석 (Five Elements)
+                        </h2>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Dominant: To (Earth)</span>
+</div>
+<div class="space-y-6">
+<!-- To (Earth) - Dominant -->
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="element-pill bg-to-yellow/10 text-to-yellow">TO (土) 대지</span>
+<span class="font-headline-sm text-headline-sm text-to-yellow">45%</span>
+</div>
+<div class="w-full h-4 bg-surface-container rounded-full overflow-hidden">
+<div class="chart-bar h-full bg-to-yellow rounded-full" style="width: 45%;"></div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="element-pill bg-mok-green/10 text-mok-green">MOK (木) 나무</span>
+<span class="font-label-caps text-label-caps text-mok-green">15%</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="chart-bar h-full bg-mok-green rounded-full" style="width: 15%;"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="element-pill bg-hwa-red/10 text-hwa-red">HWA (火) 불</span>
+<span class="font-label-caps text-label-caps text-hwa-red">10%</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="chart-bar h-full bg-hwa-red rounded-full" style="width: 10%;"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="element-pill bg-geum-white/10 text-su-black">GEUM (金) 금속</span>
+<span class="font-label-caps text-label-caps text-su-black">15%</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="chart-bar h-full bg-geum-white rounded-full" style="width: 15%;"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="element-pill bg-channel-dog/10 text-channel-dog">SU (水) 물</span>
+<span class="font-label-caps text-label-caps text-channel-dog">15%</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="chart-bar h-full bg-channel-dog rounded-full" style="width: 15%;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Today's Lucky Points Section -->
+<div class="pastel-card p-card-padding">
+<h2 class="font-headline-md text-headline-md mb-8 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+        오늘의 행운 포인트
+    </h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Lucky Number Card -->
+<div class="bg-lavender/30 p-6 rounded-[2rem] border border-lavender/40 text-center flex flex-col items-center">
+<div class="lucky-icon-container mb-4">
+<img alt="Lucky Number" class="lucky-icon-img" src="https://lh3.googleusercontent.com/aida/AP1WRLs3jqGtaJ57B8CpZdgMXv8BGzeQrNEjm7lZG2tBjRKbaB6GqqCrle-o-9KyJhzYfwA3tasfv8XjCQ3LJ6Pu_xgEbH2NTT9aSlbN7ygvflqlp0Z6_jvSO5AIq59G7XvjVFOqA0xI4E040IU6xRnb-7JsKOT3x9MsfWtsz60Lyuslc_bhucC_UiVh9I6_I5idxG5BW-nrqF-cx_AmJfjt4Jr2Nmh-g9g235BN5QesE6FUcmFg5Tp9jlXtkDk" style="width: 300px; left: -10px; top: -110px;"/>
+</div>
+<div class="font-label-caps text-label-caps text-primary mb-2">Lucky Number</div>
+<div class="font-display-hero-mobile text-primary">7</div>
+</div>
+<!-- Wealth Luck Card -->
+<div class="bg-mint/30 p-6 rounded-[2rem] border border-mint/40 flex flex-col justify-between">
+<div class="flex flex-col items-center">
+<div class="lucky-icon-container mb-4">
+<img alt="Wealth Luck" class="lucky-icon-img" src="https://lh3.googleusercontent.com/aida/AP1WRLs3jqGtaJ57B8CpZdgMXv8BGzeQrNEjm7lZG2tBjRKbaB6GqqCrle-o-9KyJhzYfwA3tasfv8XjCQ3LJ6Pu_xgEbH2NTT9aSlbN7ygvflqlp0Z6_jvSO5AIq59G7XvjVFOqA0xI4E040IU6xRnb-7JsKOT3x9MsfWtsz60Lyuslc_bhucC_UiVh9I6_I5idxG5BW-nrqF-cx_AmJfjt4Jr2Nmh-g9g235BN5QesE6FUcmFg5Tp9jlXtkDk" style="width: 300px; left: -110px; top: -110px;"/>
+</div>
+<div class="font-label-caps text-label-caps text-primary mb-1">Wealth Luck</div>
+<div class="font-headline-md text-primary mb-4">92 / 100</div>
+</div>
+<div class="w-full h-2.5 bg-white/50 rounded-full overflow-hidden">
+<div class="chart-bar h-full bg-to-yellow rounded-full" style="width: 92%;"></div>
+</div>
+</div>
+<!-- Health Luck Card -->
+<div class="bg-petal/30 p-6 rounded-[2rem] border border-petal/40 flex flex-col justify-between">
+<div class="flex flex-col items-center">
+<div class="lucky-icon-container mb-4">
+<img alt="Health Luck" class="lucky-icon-img" src="https://lh3.googleusercontent.com/aida/AP1WRLs3jqGtaJ57B8CpZdgMXv8BGzeQrNEjm7lZG2tBjRKbaB6GqqCrle-o-9KyJhzYfwA3tasfv8XjCQ3LJ6Pu_xgEbH2NTT9aSlbN7ygvflqlp0Z6_jvSO5AIq59G7XvjVFOqA0xI4E040IU6xRnb-7JsKOT3x9MsfWtsz60Lyuslc_bhucC_UiVh9I6_I5idxG5BW-nrqF-cx_AmJfjt4Jr2Nmh-g9g235BN5QesE6FUcmFg5Tp9jlXtkDk" style="width: 300px; left: -210px; top: -110px;"/>
+</div>
+<div class="font-label-caps text-label-caps text-primary mb-1">Health Luck</div>
+<div class="font-headline-md text-primary mb-4">85 / 100</div>
+</div>
+<div class="w-full h-2.5 bg-white/50 rounded-full overflow-hidden">
+<div class="chart-bar h-full bg-mok-green rounded-full" style="width: 85%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Personality Section -->
+<div class="pastel-card p-card-padding border-l-8 border-to-yellow"><h2 class="font-headline-md text-headline-md mb-4">성격 분석 (Personality)</h2>
+<div class="space-y-6">
+<div class="space-y-4 font-body-lg text-body-lg text-primary leading-relaxed">
+<p class="">
+            쿠키는 따뜻하고 비옥한 <span class="font-bold text-to-yellow underline decoration-to-yellow/30 underline-offset-4">'대지의 기운(To)'</span>을 품고 태어나, 주변의 변화에도 흔들리지 않는 듬직한 동반자 스타일입니다. 사람으로 치면 깊은 산속의 커다란 바위나 드넓은 평야와 같은 포용력을 지니고 있어, 다른 반려동물들에게도 안정감을 주는 리더 역할을 자처하곤 합니다. 
+        </p>
+<p class="">
+            사회적으로는 처음 보는 사람이나 동물에게는 다소 신중한 모습을 보일 수 있으나, 한 번 마음을 열면 변치 않는 깊은 신뢰를 보여줍니다. 갈등 상황을 회피하기보다는 특유의 평온함으로 중재하는 능력이 뛰어나며, 집사와 함께하는 조용한 시간에서 가장 큰 행복을 느낍니다.
+        </p>
+<p class="">
+            일상생활에서는 자기만의 규칙을 중요하게 생각하며, 규칙적인 식사와 산책 시간을 선호하는 경향이 있습니다. 건강 면에서는 소화기 계통의 안정이 심리 상태와 직결되므로, 정서적인 안정감을 유지해주는 것이 무엇보다 중요합니다.
+        </p>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/30"><div class="flex justify-start mb-4">
+<span class="inline-flex items-center gap-1.5 bg-lavender/30 text-primary px-3 py-1 rounded-full font-label-caps text-[11px] border border-lavender/50">
+<span class="material-symbols-outlined text-[14px]" data-icon="stars">stars</span>
+        물고기자리의 유연함이 성격에 녹아있어요
+    </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm mb-4 text-secondary">상세 특징 (Detailed Traits)</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-cream/50 p-4 rounded-xl border border-outline-variant/20">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-to-yellow text-sm">shield</span>
+<span class="font-bold text-sm">높은 회복 탄력성</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">스트레스 상황에서도 빠르게 평온을 되찾는 강인한 정신력을 가졌습니다.</p>
+</div>
+<div class="bg-cream/50 p-4 rounded-xl border border-outline-variant/20">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-to-yellow text-sm">psychology</span>
+<span class="font-bold text-sm">사려 깊은 관찰자</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">집사의 작은 표정 변화나 목소리 톤을 민감하게 포착하고 공감합니다.</p>
+</div>
+<div class="bg-cream/50 p-4 rounded-xl border border-outline-variant/20">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-to-yellow text-sm">model_training</span>
+<span class="font-bold text-sm">꾸준한 학습 능력</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">반복적인 교육에 지치지 않으며, 차근차근 완벽하게 습득하는 스타일입니다.</p>
+</div>
+<div class="bg-cream/50 p-4 rounded-xl border border-outline-variant/20">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-to-yellow text-sm">favorite</span>
+<span class="font-bold text-sm">한결같은 애정</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">시간이 지날수록 깊어지는 애착 관계를 형성하는 로맨티스트입니다.</p>
+</div>
+</div>
+</div>
+<div class="mt-6 flex flex-wrap gap-2">
+<span class="bg-cream border border-outline-variant px-3 py-1 rounded-lg font-body-sm text-body-sm">#신중함</span>
+<span class="bg-cream border border-outline-variant px-3 py-1 rounded-lg font-body-sm text-body-sm">#집사바라기</span>
+<span class="bg-cream border border-outline-variant px-3 py-1 rounded-lg font-body-sm text-body-sm">#인내심왕</span>
+</div>
+</div></div>
+<!-- Four Pillars Grid -->
+<div class="pastel-card p-card-padding">
+<h2 class="font-headline-md text-headline-md mb-8">사주팔자 (Four Pillars)</h2>
+<div class="grid grid-cols-4 gap-4 text-center">
+<div class="space-y-3">
+<div class="font-label-caps text-label-caps text-on-surface-variant">시주 (Hour)</div>
+<div class="bg-cream py-6 rounded-2xl border border-outline-variant shadow-sm">
+<div class="font-headline-md text-headline-md text-primary">庚</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">경 (Geum)</div>
+</div>
+<div class="bg-hwa-red/10 py-6 rounded-2xl border border-hwa-red/20">
+<div class="font-headline-md text-headline-md text-hwa-red">午</div>
+<div class="font-body-sm text-body-sm text-hwa-red">오 (Hwa)</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="font-label-caps text-label-caps text-on-surface-variant">일주 (Day)</div>
+<div class="bg-to-yellow/10 py-6 rounded-2xl border border-to-yellow/20 shadow-md">
+<div class="font-headline-md text-headline-md text-to-yellow">戊</div>
+<div class="font-body-sm text-body-sm text-to-yellow">무 (To)</div>
+</div>
+<div class="bg-mok-green/10 py-6 rounded-2xl border border-mok-green/20">
+<div class="font-headline-md text-headline-md text-mok-green">辰</div>
+<div class="font-body-sm text-body-sm text-mok-green">진 (Mok)</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="font-label-caps text-label-caps text-on-surface-variant">월주 (Month)</div>
+<div class="bg-cream py-6 rounded-2xl border border-outline-variant shadow-sm">
+<div class="font-headline-md text-headline-md text-primary">乙</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">을 (Mok)</div>
+</div>
+<div class="bg-channel-dog/10 py-6 rounded-2xl border border-channel-dog/20">
+<div class="font-headline-md text-headline-md text-channel-dog">巳</div>
+<div class="font-body-sm text-body-sm text-channel-dog">사 (Hwa)</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="font-label-caps text-label-caps text-on-surface-variant">연주 (Year)</div>
+<div class="bg-su-black/10 py-6 rounded-2xl border border-su-black/20 shadow-sm">
+<div class="font-headline-md text-headline-md text-su-black">癸</div>
+<div class="font-body-sm text-body-sm text-su-black">계 (Su)</div>
+</div>
+<div class="bg-to-yellow/10 py-6 rounded-2xl border border-to-yellow/20">
+<div class="font-headline-md text-headline-md text-to-yellow">卯</div>
+<div class="font-body-sm text-body-sm text-to-yellow">묘 (To)</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Side Sidebar (Compatibility & CTA) -->
+<div class="lg:col-span-4 space-y-gutter">
+<!-- Butler Compatibility -->
+<div class="pastel-card p-card-padding text-center relative overflow-hidden">
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+<h2 class="font-headline-sm text-headline-sm mb-6">집사 궁합 (Bond Score)</h2>
+<div class="relative inline-block mb-6">
+<svg class="w-32 h-32 transform -rotate-90">
+<circle class="text-surface-container" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+<circle class="transition-all duration-1000" cx="64" cy="64" fill="transparent" r="58" stroke="url(#bondGradient)" stroke-dasharray="364.4" stroke-dashoffset="18.2" stroke-linecap="round" stroke-width="12"></circle>
+<defs>
+<lineargradient id="bondGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" style="stop-color:#442656"></stop>
+<stop offset="100%" style="stop-color:#d1abe4"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-display-hero-mobile text-display-hero-mobile text-primary">95<span class="text-body-sm">%</span></span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-primary mb-4 font-bold">
+                        "환상의 상생 관계!"
+                    </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                        집사가 반려동물을 생해주는 상생(相生) 관계로, 함께 있는 것만으로도 서로에게 힐링이 되는 최고의 궁합입니다.
+                    </p>
+</div><div class="pastel-card p-card-padding relative overflow-hidden">
+<div class="absolute -bottom-10 -left-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+<h2 class="font-headline-sm text-headline-sm mb-6">별자리 궁합 (Zodiac Match)</h2>
+<div class="bg-lavender/20 rounded-2xl p-4 mb-6 flex flex-col items-center gap-3">
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="auto_awesome">auto_awesome</span>
+<div class="text-center">
+<div class="font-label-caps text-label-caps text-secondary mb-1">PET ZODIAC</div>
+<div class="font-headline-sm text-headline-sm text-primary">물고기자리 (Pisces)</div>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed mb-6">
+        감수성이 풍부한 물고기자리와 따뜻한 To(토) 기운이 만나 안정감 있는 매력을 뽐냅니다.
+    </p>
+<a class="w-full bg-primary/10 text-primary py-3 rounded-full font-bold text-center block text-sm hover:bg-primary/20 transition-colors" href="#">
+        별자리 상세 운세 보기
+    </a>
+</div>
+<!-- Premium CTA -->
+<div class="bg-primary text-cream p-card-padding rounded-[2rem] shadow-xl relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform">
+<div class="absolute top-0 right-0 p-4 opacity-20">
+<span class="material-symbols-outlined text-[100px]" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div class="relative z-10">
+<span class="bg-secondary-container text-primary font-label-caps text-label-caps px-3 py-1 rounded-full inline-block mb-4">프리미엄 리포트</span>
+<h3 class="font-headline-md text-headline-md mb-2">평생 전체 리포트 열람하기</h3>
+<p class="font-body-sm text-body-sm text-cream/80 mb-8">아이의 미래 운세, 건강 흐름, 타고난 운명을 심층 분석한 리포트를 만나보세요.</p>
+<div class="flex flex-col gap-3">
+<button class="w-full bg-cream text-primary py-4 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-white transition-colors"><span class="material-symbols-outlined" data-icon="payments">payments</span>전체 리포트 보기 - $29.00</button>
+<div class="flex justify-center gap-2 items-center text-[10px] opacity-60"><span class="material-symbols-outlined scale-75" data-icon="verified_user">verified_user</span>PayPal 안전 결제</div>
+</div>
+</div>
+</div>
+<!-- Simple Tip Card -->
+<div class="pastel-card p-6">
+<div class="flex items-start gap-4">
+<div class="bg-mint p-3 rounded-2xl">
+<span class="material-symbols-outlined text-primary" data-icon="lightbulb">lightbulb</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-sm mb-1">Today's Lucky Color</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">쿠키에게 오늘은 <span class="font-bold">연노란색(Soft Yellow)</span> 액세서리가 행운을 가져다줄 거예요!</p>
+</div>
+</div>
+</div>
+</div>
+</div><div class="mt-12 flex justify-center w-full gap-4"><a class="pastel-card bg-white/60 hover:bg-white px-8 py-4 flex items-center gap-3 text-primary font-headline-sm transition-all hover:scale-[1.02] active:scale-95 shadow-sm border-2 border-primary/10" href="#"><span class="material-symbols-outlined" data-icon="home">home</span><span class="">홈으로 돌아가기</span></a>
+<a class="pastel-card bg-white/60 hover:bg-white px-8 py-4 flex items-center gap-3 text-primary font-headline-sm transition-all hover:scale-[1.02] active:scale-95 shadow-sm border-2 border-primary/10" href="#"><span class="material-symbols-outlined" data-icon="pets">pets</span><span class="">다른 펫 사주 보기</span></a>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-safe pt-2 bg-surface/80 dark:bg-surface-container-low/80 backdrop-blur-lg shadow-[0_-4px_20px_rgba(68,38,86,0.05)] rounded-t-[2rem] z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant py-2" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-caps text-label-caps">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant py-2" href="#">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="font-label-caps text-label-caps">Dog</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-caps text-label-caps">K-Saju</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant py-2" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-label-caps text-label-caps">Community</span>
+</a>
+</nav>
+<!-- Footer (Web Only) -->
+<footer class="hidden md:block w-full rounded-t-[2rem] mt-section-gap bg-surface-container dark:bg-surface-container-lowest">
+<div class="w-full max-w-7xl mx-auto px-page-margin-mobile md:px-page-margin-desktop py-12 flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="flex flex-col gap-2">
+<span class="font-headline-sm text-headline-sm text-primary">K-Saju Pet</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 K-Saju Pet. All rights reserved.</p>
+</div>
+<div class="flex gap-8">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-sm text-body-sm" href="#">Terms of Service</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-sm text-body-sm" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-sm text-body-sm" href="#">Language: EN/KO</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for the chart bars on load
+        window.addEventListener('load', () => {
+            const bars = document.querySelectorAll('.chart-bar');
+            bars.forEach(bar => {
+                const targetWidth = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = targetWidth;
+                }, 300);
+            });
+        });
+    </script>
+</body></html>

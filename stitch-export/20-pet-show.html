@@ -1,0 +1,328 @@
+<!DOCTYPE html><html class="light" lang="ko" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+<title>우리아이 자랑 - K-Saju Pet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet">
+<style>
+        @import url('https://cdn.jsdelivr.net/gh/sun-n-moon/suit/package/static/SUIT-Variable.css');
+        
+        :root {
+            --dream-sky-gradient: linear-gradient(135deg, #FDFBF7 0%, #E6E1F9 50%, #E1F5F0 100%);
+        }
+
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            background: var(--dream-sky-gradient);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #1b1c1a;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(68, 38, 86, 0.05);
+        }
+
+        .pastel-card {
+            border-radius: 2rem;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .pastel-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(68, 38, 86, 0.08);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .active-dot::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: currentColor;
+            border-radius: 50%;
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {surface: "#fbf9f5", "secondary-fixed": "#fcdccb", "on-primary-fixed-variant": "#593a6b", "surface-container-lowest": "#ffffff", "on-surface": "#1b1c1a", "mok-green": "#22C55E", "su-black": "#334155", sand: "#F5F1E9", primary: "#442656", "channel-cat": "#EF4444", "surface-tint": "#725284", "on-secondary-fixed-variant": "#574236", "tertiary-container": "#474d0d", "on-secondary": "#ffffff", "on-surface-variant": "#4b444d", "tertiary-fixed-dim": "#c5cc7f", "secondary-fixed-dim": "#dfc0b0", lavender: "#E6E1F9", "on-primary-container": "#d1abe4", "surface-variant": "#e4e2de", "on-primary": "#ffffff", mint: "#E1F5F0", "tertiary-fixed": "#e1e999", secondary: "#715a4c", "hwa-red": "#EF4444", "secondary-container": "#f9d9c8", tertiary: "#313600", "inverse-on-surface": "#f2f0ed", "on-tertiary-fixed": "#1a1d00", "on-tertiary-fixed-variant": "#454b0a", "on-error": "#ffffff", "surface-dim": "#dbdad6", "inverse-primary": "#dfb9f2", "on-secondary-container": "#755e50", "channel-dog": "#3B82F6", blush: "#FDECE7", outline: "#7d747e", "on-secondary-fixed": "#28180d", "geum-white": "#94A3B8", cream: "#FDFBF7", "surface-container-low": "#f5f3ef", "on-primary-fixed": "#2b0d3c", "surface-container": "#efeeea", "on-tertiary-container": "#b7be73", "on-background": "#1b1c1a", "surface-container-highest": "#e4e2de", "primary-fixed": "#f5d9ff", "on-tertiary": "#ffffff", "primary-fixed-dim": "#dfb9f2", "surface-container-high": "#eae8e4", "outline-variant": "#cec3ce", "on-error-container": "#93000a", "error-container": "#ffdad6", error: "#ba1a1a", "surface-bright": "#fbf9f5", petal: "#FCE1F1", "inverse-surface": "#30312e", "channel-community": "#22C55E", "to-yellow": "#F59E0B", background: "#fbf9f5", "channel-saju": "#8B5CF6", "primary-container": "#5c3d6e"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {"page-margin-mobile": "1.25rem", gutter: "1.5rem", "section-gap": "5rem", "page-margin-desktop": "4rem", "card-padding": "2rem"}, fontFamily: {"headline-sm": ["SUIT Variable"], "display-hero-mobile": ["SUIT Variable"], "body-lg": ["SUIT Variable"], "label-caps": ["SUIT Variable"], "body-sm": ["SUIT Variable"], "headline-lg": ["SUIT Variable"], "display-hero": ["SUIT Variable"], "headline-md": ["SUIT Variable"], "body-md": ["SUIT Variable"], headline: ["SUIT Variable"], display: ["SUIT Variable"], body: ["SUIT Variable"], label: ["SUIT Variable"]}, fontSize: {"headline-sm": ["20px", {lineHeight: "1.4", fontWeight: "600"}], "display-hero-mobile": ["32px", {lineHeight: "1.2", fontWeight: "800"}], "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1", letterSpacing: "0.05em", fontWeight: "700"}], "body-sm": ["14px", {lineHeight: "1.5", fontWeight: "400"}], "headline-lg": ["32px", {lineHeight: "1.3", fontWeight: "700"}], "display-hero": ["42px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "800"}], "headline-md": ["24px", {lineHeight: "1.4", fontWeight: "700"}], "body-md": ["16px", {lineHeight: "1.6", fontWeight: "400"}]}}}};</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-n-moon/suit/package/static/SUIT-Variable.css" data-snapdom="injected-import"></head>
+<body class="pb-24 md:pb-0">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-surface-container-highest/80 backdrop-blur-md border-b border-on-surface/5 shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-page-margin-mobile md:px-page-margin-desktop h-16 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md-mobile md:text-headline-md font-extrabold text-primary dark:text-primary-fixed-dim">K-Saju Pet</span>
+</div>
+<!-- Desktop Nav Items -->
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-headline-sm text-headline-sm" href="#">홈</a>
+<a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary py-1 font-headline-sm text-headline-sm" href="#">우리아이 자랑</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-headline-sm text-headline-sm" href="#">커묤니티</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-primary dark:text-primary-fixed p-2 active:scale-95 duration-200">
+<span class="material-symbols-outlined">language</span>
+</button>
+<button class="text-primary dark:text-primary-fixed p-2 active:scale-95 duration-200">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="pt-24 px-page-margin-mobile md:px-page-margin-desktop max-w-7xl mx-auto space-y-12">
+<!-- Hero Title -->
+<header class="space-y-2 text-center md:text-left">
+<h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero text-primary">우리아이 자랑</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">우리 아이의 가장 예쁜 순간을 공유하고 친구들과 소통해보세요!</p>
+</header>
+<!-- Ranking Section -->
+<section class="space-y-6">
+<div class="flex justify-between items-end">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary">이번 주의 인기 펫 Top 5</h2>
+<a class="text-primary font-bold flex items-center gap-1 hover:underline" href="#">
+                    더보기 <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4 -mx-page-margin-mobile px-page-margin-mobile md:mx-0 md:px-0">
+<!-- Rank 1 Featured -->
+<div class="flex-shrink-0 w-[280px] md:w-[400px]">
+<div class="pastel-card glass-card relative overflow-hidden group">
+<div class="absolute top-4 left-4 z-10 bg-primary text-cream px-3 py-1 rounded-full font-bold text-sm shadow-lg">1위</div>
+<div class="aspect-[1.49] w-full bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A high-quality, adorable photo of a fluffy Golden Retriever puppy playing in a sunny garden with flower petals, soft lighting, professional pet photography, dream-like atmosphere, pastel tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwTGAhVCmy-uxxsX6JYBz6a3UPQVxymNR-X4Z6JODHfu7_rA1K0ukDRqBOKbGvYikIHuc6TNPDU9CoYl4Kno8DE1n2pzzkH08TaPaSSihzFJtYZPBoeuUUuYVScfwVHm0EQJIxjQNqDIBHbrmPVpKD1w5jUEYZ-LMfx6sU-jiY3aJyM8bUiTnc6sgVWFYZkSsEdAIMK4Lqly0BjCUH9Zlz7WkjJDsMXLj3AD2CDUX8TDFDrsmGWndkltXZaavRJb1vTV35mmdqLvKk">
+</div>
+<div class="p-6 space-y-2">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline-md text-primary">골디</h3>
+<p class="text-on-surface-variant font-body-sm">골든 리트리버</p>
+</div>
+<div class="flex items-center gap-1 text-hwa-red">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="font-bold">2.4k</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Other Ranks (Static Mock) -->
+<div class="flex gap-4">
+<div class="flex-shrink-0 w-[240px]">
+<div class="pastel-card bg-mint/40 relative overflow-hidden group">
+<div class="absolute top-4 left-4 z-10 bg-on-surface/80 text-cream px-3 py-1 rounded-full font-bold text-sm">2위</div>
+<div class="aspect-square bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A tiny white Pomeranian wearing a cute yellow bowtie, sitting in a field of spring flowers, bright and airy, cheerful mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwp9OxWT3b_xO-Ut4wJ7LDTi98LAfH2WFHDXcsdNaeFMKreNF2oKdgcB1niMBsv5WF-kEGaFZSMd_El3nHqdmEmLSFylmn2FM00c7lKKSIBHcF-X9zdTclGl4s6JNlW-347dlJInPx6C0ZSJ1TgOKVGUPgCUZ_0Q-3NoY3n-3qMudo7bFSx4GneMx-JH2p9W8EMKsJ9BJyJI0RbzAOe6k_9AvK96KKixJfIWuSO8Zr7gTbTKYoCMS4JoinzyNJZjrD-oDVvGdh8VY1">
+</div>
+<div class="p-4">
+<h3 class="font-headline-sm text-primary">구름이</h3>
+<p class="text-on-surface-variant font-body-sm">포메라니안 · 1.8k likes</p>
+</div>
+</div>
+</div>
+<div class="flex-shrink-0 w-[240px]">
+<div class="pastel-card bg-petal/40 relative overflow-hidden group">
+<div class="absolute top-4 left-4 z-10 bg-on-surface/80 text-cream px-3 py-1 rounded-full font-bold text-sm">3위</div>
+<div class="aspect-square bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A cute calico cat sitting on a plush velvet cushion, looking curious, soft indoor lighting, aesthetic pet photography, pastel background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOq7oPa7hyWuCjNNlJ8MV0AfReBOZWF0Ge9VClAsY2hgZRt8VvTY1JPEISOD2WhHeE51HFiDbIUnReklqdCcUI1kVWPd1giqj7MItuMpN47vSxGz-cTzplC3ffDxOt72Jhx48IcND498TG4vh_p_BemN2jFaeYqWHfkV2N6qxO3QWXy7phpFBSplDzxXhSC3hNjMJ4IMnngWC4mPpeStZetP5vpXpB9bfZua_ZSJ7jnpeoz7ScuiD0dFIm0v9WyV4Wl9KJmEP16dPI">
+</div>
+<div class="p-4">
+<h3 class="font-headline-sm text-primary">치즈</h3>
+<p class="text-on-surface-variant font-body-sm">코리안 숏헤어 · 1.5k likes</p>
+</div>
+</div>
+</div>
+<!-- Placeholder for Top 4 & 5 -->
+<div class="flex-shrink-0 w-[240px]">
+<div class="pastel-card bg-lavender/40 relative overflow-hidden group">
+<div class="absolute top-4 left-4 z-10 bg-on-surface/80 text-cream px-3 py-1 rounded-full font-bold text-sm">4위</div>
+<div class="aspect-square bg-surface-container overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant opacity-20">pets</span>
+</div>
+<div class="p-4">
+<h3 class="font-headline-sm text-primary">초코</h3>
+<p class="text-on-surface-variant font-body-sm">푸들 · 1.2k likes</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Category Tabs -->
+<nav class="flex gap-2 p-1.5 bg-sand/50 rounded-full w-fit mx-auto md:mx-0">
+<button class="px-6 py-2 rounded-full bg-primary text-cream font-bold transition-all">전체</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant hover:bg-white/50 transition-all font-bold">강아지</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant hover:bg-white/50 transition-all font-bold">고양이</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant hover:bg-white/50 transition-all font-bold">다른동물</button>
+</nav>
+<!-- Main Feed -->
+<section class="space-y-6 pb-20 md:pb-32">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary">최신 게시글</h2>
+<div class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+<!-- Post Card 1 -->
+<div class="break-inside-avoid pastel-card glass-card p-3">
+<div class="rounded-2xl overflow-hidden mb-4">
+<img class="w-full h-auto" data-alt="A tiny white Pomeranian wearing a cute yellow bowtie, sitting in a field of spring flowers, bright and airy, cheerful mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwp9OxWT3b_xO-Ut4wJ7LDTi98LAfH2WFHDXcsdNaeFMKreNF2oKdgcB1niMBsv5WF-kEGaFZSMd_El3nHqdmEmLSFylmn2FM00c7lKKSIBHcF-X9zdTclGl4s6JNlW-347dlJInPx6C0ZSJ1TgOKVGUPgCUZ_0Q-3NoY3n-3qMudo7bFSx4GneMx-JH2p9W8EMKsJ9BJyJI0RbzAOe6k_9AvK96KKixJfIWuSO8Zr7gTbTKYoCMS4JoinzyNJZjrD-oDVvGdh8VY1">
+</div>
+<div class="px-3 pb-2 space-y-3">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-lavender flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg">person</span>
+</div>
+<span class="font-bold text-primary font-body-md">뭉게뭉게</span>
+</div>
+<p class="text-on-surface font-body-sm">오늘 날씨가 너무 좋아서 산책 다녀왔어요! 우리 뭉치 너무 예쁘죠? 🌸</p>
+<div class="flex items-center gap-4 text-on-surface-variant pt-2 border-t border-on-surface/5">
+<button class="flex items-center gap-1 hover:text-hwa-red transition-colors">
+<span class="material-symbols-outlined text-xl">favorite</span>
+<span class="text-sm font-medium">128</span>
+</button>
+<button class="flex items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">chat_bubble</span>
+<span class="text-sm font-medium">12</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Post Card 2 -->
+<div class="break-inside-avoid pastel-card glass-card p-3">
+<div class="rounded-2xl overflow-hidden mb-4">
+<img class="w-full h-auto" data-alt="A cute calico cat sitting on a plush velvet cushion, looking curious, soft indoor lighting, aesthetic pet photography, pastel background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOq7oPa7hyWuCjNNlJ8MV0AfReBOZWF0Ge9VClAsY2hgZRt8VvTY1JPEISOD2WhHeE51HFiDbIUnReklqdCcUI1kVWPd1giqj7MItuMpN47vSxGz-cTzplC3ffDxOt72Jhx48IcND498TG4vh_p_BemN2jFaeYqWHfkV2N6qxO3QWXy7phpFBSplDzxXhSC3hNjMJ4IMnngWC4mPpeStZetP5vpXpB9bfZua_ZSJ7jnpeoz7ScuiD0dFIm0v9WyV4Wl9KJmEP16dPI">
+</div>
+<div class="px-3 pb-2 space-y-3">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-mint flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg">person</span>
+</div>
+<span class="font-bold text-primary font-body-md">치즈집사</span>
+</div>
+<p class="text-on-surface font-body-sm">햇살 드는 창가에서 낮잠 자기 직전! 눈이 말똥말똥해요.</p>
+<div class="flex items-center gap-4 text-on-surface-variant pt-2 border-t border-on-surface/5">
+<button class="flex items-center gap-1 text-hwa-red">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="text-sm font-medium">452</span>
+</button>
+<button class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xl">chat_bubble</span>
+<span class="text-sm font-medium">34</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Post Card 3 (Placeholder content) -->
+<div class="break-inside-avoid pastel-card glass-card p-3">
+<div class="rounded-2xl overflow-hidden mb-4 aspect-[4/5] bg-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-6xl text-primary opacity-20">photo_library</span>
+</div>
+<div class="px-3 pb-2 space-y-3">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-blush flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg">person</span>
+</div>
+<span class="font-bold text-primary font-body-md">댕댕이사랑</span>
+</div>
+<p class="text-on-surface font-body-sm">새로 산 옷이 너무 잘 어울려요 ㅎㅎ</p>
+<div class="flex items-center gap-4 text-on-surface-variant pt-2 border-t border-on-surface/5">
+<button class="flex items-center gap-1"><span class="material-symbols-outlined text-xl">favorite</span><span class="text-sm font-medium">56</span></button>
+<button class="flex items-center gap-1"><span class="material-symbols-outlined text-xl">chat_bubble</span><span class="text-sm font-medium">2</span></button>
+</div>
+</div>
+</div>
+<!-- Post Card 4 -->
+<div class="break-inside-avoid pastel-card glass-card p-3">
+<div class="rounded-2xl overflow-hidden mb-4">
+<img class="w-full h-auto" data-alt="A high-quality, adorable photo of a fluffy Golden Retriever puppy playing in a sunny garden with flower petals, soft lighting, professional pet photography, dream-like atmosphere, pastel tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwTGAhVCmy-uxxsX6JYBz6a3UPQVxymNR-X4Z6JODHfu7_rA1K0ukDRqBOKbGvYikIHuc6TNPDU9CoYl4Kno8DE1n2pzzkH08TaPaSSihzFJtYZPBoeuUUuYVScfwVHm0EQJIxjQNqDIBHbrmPVpKD1w5jUEYZ-LMfx6sU-jiY3aJyM8bUiTnc6sgVWFYZkSsEdAIMK4Lqly0BjCUH9Zlz7WkjJDsMXLj3AD2CDUX8TDFDrsmGWndkltXZaavRJb1vTV35mmdqLvKk">
+</div>
+<div class="px-3 pb-2 space-y-3">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-petal flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg">person</span>
+</div>
+<span class="font-bold text-primary font-body-md">Goldie_Mom</span>
+</div>
+<p class="text-on-surface font-body-sm">정원에서 꽃이랑 같이 노는 중! 힐링 그 자체입니다.</p>
+<div class="flex items-center gap-4 text-on-surface-variant pt-2 border-t border-on-surface/5">
+<button class="flex items-center gap-1"><span class="material-symbols-outlined text-xl">favorite</span><span class="text-sm font-medium">1.2k</span></button>
+<button class="flex items-center gap-1"><span class="material-symbols-outlined text-xl">chat_bubble</span><span class="text-sm font-medium">88</span></button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-6 md:bottom-12 md:right-12 bg-primary text-cream px-6 py-4 rounded-full shadow-2xl flex items-center gap-2 active:scale-95 transition-all z-50 group">
+<span class="material-symbols-outlined group-hover:rotate-90 transition-transform">add_a_photo</span>
+<span class="font-bold font-headline-sm">나도 자랑하기</span>
+</button>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-white/70 dark:bg-surface-container/70 backdrop-blur-xl border-t border-on-surface/5 rounded-t-[2rem] shadow-[0_-4px_20px_rgba(68,38,86,0.05)]">
+<div class="flex justify-around items-center px-2 pt-2 pb-safe-area-inset-bottom h-20">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-bold mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="text-[10px] font-bold mt-1">Dog</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="text-[10px] font-bold mt-1">Cat</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1.5 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="text-[10px] font-bold mt-1">Community</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold mt-1">Profile</span>
+</a>
+</div>
+</nav>
+<script>
+        // Micro-interaction for Like buttons
+        document.querySelectorAll('.material-symbols-outlined').forEach(icon => {
+            if (icon.textContent === 'favorite') {
+                icon.parentElement.addEventListener('click', function() {
+                    const isFilled = this.querySelector('span').style.fontVariationSettings.includes("'FILL' 1");
+                    if (isFilled) {
+                        this.querySelector('span').style.fontVariationSettings = "'FILL' 0";
+                        this.classList.remove('text-hwa-red');
+                    } else {
+                        this.querySelector('span').style.fontVariationSettings = "'FILL' 1";
+                        this.classList.add('text-hwa-red');
+                        // Small animation
+                        this.querySelector('span').classList.add('scale-125');
+                        setTimeout(() => this.querySelector('span').classList.remove('scale-125'), 200);
+                    }
+                });
+            }
+        });
+
+        // Language toggle mock
+        document.querySelector('[data-icon="language"]')?.parentElement?.addEventListener('click', () => {
+            alert('Language selection: English / Korean');
+        });
+    </script>
+
+
+</body></html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>K-사주 펫 | 다른 동물 채널</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css');
+        
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #fbf9f5; /* surface */
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(68, 38, 86, 0.05);
+        }
+
+        .dream-gradient {
+            background: linear-gradient(135deg, #FDFBF7 0%, #E1F5F0 50%, #E6E1F9 100%);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {theme: {extend: {colors: {primary: "#442656", secondary: "#715a4c", tertiary: "#313600", "channel-community": "#22C55E", surface: "#fbf9f5", "surface-container": "#efeeea", "surface-container-low": "#f5f3ef", "surface-container-high": "#eae8e4", outline: "#7d747e", "on-surface": "#1b1c1a", "on-surface-variant": "#4b444d", mint: "#E1F5F0", lavender: "#E6E1F9", sand: "#F5F1E9", cream: "#FDFBF7", "mok-green": "#22C55E", "hwa-red": "#EF4444", "to-yellow": "#F59E0B", "geum-white": "#94A3B8", "su-black": "#334155", "on-error-container": "#93000a", "on-tertiary-fixed": "#1a1d00", error: "#ba1a1a", "secondary-container": "#f9d9c8", "on-tertiary": "#ffffff", "on-primary-fixed": "#2b0d3c", "surface-tint": "#725284", "tertiary-fixed-dim": "#c5cc7f", "on-primary-container": "#d1abe4", "secondary-fixed-dim": "#dfc0b0", "on-primary-fixed-variant": "#593a6b", "primary-container": "#5c3d6e", "surface-container-lowest": "#ffffff", "primary-fixed": "#f5d9ff", "on-tertiary-container": "#b7be73", "error-container": "#ffdad6", "secondary-fixed": "#fcdccb", "tertiary-fixed": "#e1e999", "surface-container-highest": "#e4e2de", "on-secondary-fixed-variant": "#574236", "primary-fixed-dim": "#dfb9f2", "surface-dim": "#dbdad6", "on-primary": "#ffffff", "inverse-primary": "#dfb9f2", "surface-bright": "#fbf9f5", "on-secondary": "#ffffff", "inverse-on-surface": "#f2f0ed", "inverse-surface": "#30312e", "on-background": "#1b1c1a", "surface-variant": "#e4e2de", "on-tertiary-fixed-variant": "#454b0a", "on-error": "#ffffff", "tertiary-container": "#474d0d", "on-secondary-container": "#755e50", "outline-variant": "#cec3ce", background: "#fbf9f5", "on-secondary-fixed": "#28180d"}, spacing: {"page-margin-mobile": "1.25rem", "page-margin-desktop": "4rem", "section-gap": "5rem"}, fontFamily: {headline: ["SUIT Variable"], display: ["SUIT Variable"], body: ["SUIT Variable"], label: ["SUIT Variable"]}, fontSize: {}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-lg border-b border-outline/10 shadow-sm flex justify-between items-center px-page-margin-mobile md:px-page-margin-desktop py-4">
+<div class="flex items-center gap-4">
+<span class="font-display-hero-mobile text-display-hero-mobile text-primary font-extrabold tracking-tight">K-사주 펫</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant font-medium hover:bg-primary/5 transition-colors px-3 py-1 rounded-full" href="#">홈</a>
+<a class="text-on-surface-variant font-medium hover:bg-primary/5 transition-colors px-3 py-1 rounded-full" href="#">사주 분석</a>
+<a class="text-primary font-bold border-b-2 border-primary px-3 py-1" href="#">커뮤니티</a>
+<a class="text-on-surface-variant font-medium hover:bg-primary/5 transition-colors px-3 py-1 rounded-full" href="#">마이페이지</a>
+</div>
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined text-primary p-2 active:scale-95 transition-transform">language</button>
+<button class="material-symbols-outlined text-primary p-2 active:scale-95 transition-transform">account_circle</button>
+</div>
+</header>
+<main class="pt-20 pb-24 md:pb-12">
+<!-- Hero Section: Magazine Style -->
+<section class="px-page-margin-mobile md:px-page-margin-desktop mt-6 transition-all duration-1000 opacity-100 translate-y-0">
+<div class="relative w-full h-[400px] md:h-[500px] rounded-[2rem] overflow-hidden group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A close-up, high-quality photograph of a small, fluffy white rabbit sitting peacefully in a sun-drenched indoor garden. The lighting is soft and golden, creating a warm and gentle atmosphere that reflects the Dream Sky aesthetic. The background consists of soft pastel-colored plants and cream-toned textures. The rabbit looks healthy and calm, embodying a sense of premium pet care and mystical serenity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqa6NQ5Xk-D7SErgj1O0cCjhXMa4YSR6-bSHK67eRJDdPNaWejUY87BhU_E0Qd7pdWIfSPegAPaMCmTBQTnBFuKLudXnOY7S8puhBFs_Rm1RV2RsYcBQYXlL3ztf0-DYIGGYb3YpEKPxtsQhjvdvwjHoQwo1U94L35cpwBJhpqiKS0gsiD9nOVQwumUWtcqpwRCF_mI6Nmh95sMjCM4CqnlF8CbgiS0bYcv8bqQMOKL1RZfvSmoXgm5QVD9Xy-ZJScPeXSFNd636Nn"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-8 md:p-12">
+<span class="inline-block px-4 py-1 bg-mint text-channel-community rounded-full text-xs font-bold mb-4 w-fit tracking-wider">HEALTH REPORT</span>
+<h1 class="text-white font-bold text-2xl md:text-5xl leading-tight max-w-2xl mb-4">
+                        이달의 소형 반려동물 건강 리포트:<br class="hidden md:block"/> 계절별 환경 관리
+                    </h1>
+<p class="text-white/90 text-sm md:text-lg max-w-xl">
+                        민감한 소형 동물을 위한 최적의 온도와 습도 조절 가이드. 사주 오행에 따른 맞춤형 웰빙 환경을 제안합니다.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Saju Care Section (사주 맞춤 케어) -->
+<!-- Species Guide (품종별 가이드) -->
+<section class="mt-section-gap transition-all duration-1000 opacity-100 translate-y-0">
+<div class="px-page-margin-mobile md:px-page-margin-desktop mb-8">
+<h2 class="text-primary font-bold text-2xl md:text-3xl">품종별 가이드</h2>
+</div>
+<div class="no-scrollbar gap-6 px-page-margin-mobile md:px-page-margin-desktop pb-6 grid grid-cols-1 md:grid-cols-2">
+<!-- Rabbit -->
+<div class="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<img class="w-full h-48 object-cover" data-alt="A portrait of a cute lop-eared rabbit with soft, velvety brown fur sitting on a light-colored wooden floor. The setting is a minimalist, airy room with soft morning light streaming through a window. The aesthetic is clean and modern, focusing on the gentle nature of the pet. Pastel-toned accessories are blurred in the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2k_8v-M-9I-zuGAhJ_pe35aNPV8W3X1gb5Q0sYIVpdKzOzq6GWk1Hmcw7vgymTgdbGxieBl4fw4dCZvUsXiXn2JRMCnZ5MbFfeWeaozs4aZLzp8h4rp8bIjSYhnGIcXDRQj5tT2SaNjzUf5r_Jsp9t_uVtEjcWLU4jMkKeNzXJMmzSEH-j8fQy64zZe1a-sxMbWfTwbjUglxn0zv54mDaYK7jzaqf2WmdWg4P-7TLNk910XJhUQiMHh0XundgwiiYNUEv56p3Fbhm"/>
+<div class="p-6">
+<h3 class="font-bold text-xl text-primary mb-2">토끼 (Rabbit)</h3>
+<p class="text-on-surface-variant text-sm mb-4 leading-relaxed">사교적이고 예민한 토끼를 위한 건초 식단과 공간 배치 노하우를 공개합니다.</p>
+<button class="w-full py-3 bg-lavender text-primary font-bold rounded-full hover:bg-primary/10 transition-colors">가이드 보기</button>
+</div>
+</div>
+<!-- Hamster -->
+<div class="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<img class="w-full h-48 object-cover" data-alt="A macro shot of a tiny golden hamster peeking out from a bed of soft, clean wood shavings. The lighting is warm and comforting, highlighting the hamster's bright eyes and whiskers. The surroundings are pristine and aesthetically pleasing, using a soft pastel color palette of cream and mint. The overall mood is intimate and caring." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA60svth7jFmhrjLTl5_ZHxdtSH97p5gyXFOaaBy1-j4JasTTPB1Ip2_RDtXl9deObIDRSFrN-NUof7KZcPIkiitjb5zYHMvpsXf4LiFtJJcdVxLdU9puBdrHtdtc_uRR8z0Dl7lMQ6RDiBxSHB68e6bXjYUTs813z0tY4cpONUfN5eth40fjhgVBtazUgTn6ntlEqR33VhnMNf2ss6sV88m2yKUFby3KBOeC06iIFxidvW0RYJSFR19NgG3szzRJZKK-DLMsubb6Wo"/>
+<div class="p-6">
+<h3 class="font-bold text-xl text-primary mb-2">햄스터 (Hamster)</h3>
+<p class="text-on-surface-variant text-sm mb-4 leading-relaxed">야행성인 햄스터의 생체 리듬에 맞춘 케이지 인테리어와 핸들링 팁.</p>
+<button class="w-full py-3 bg-mint text-channel-community font-bold rounded-full hover:bg-channel-community/10 transition-colors">가이드 보기</button>
+</div>
+</div>
+<!-- Parrot -->
+<div class="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<img class="w-full h-48 object-cover" data-alt="A vibrant, colorful parrot with bright blue and yellow feathers perched on a natural branch. The background is a soft-focus indoor garden with high-key lighting, emphasizing a clean and tropical atmosphere. The image feels fresh and energetic, aligning with the Dream Sky brand style of light-filled, premium visuals." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJQv0wbCqtSk7QrPwFD_4kAihXrHDvu6TUKKwXwFpYSwg4dXIRfCpztCVG5JxwhGyP4-ohJ8_1uWgUxx0AODXbOlv4TeWMpSQNSLYMuN5pGQ5VegHe5CTKCvmqqOOu_x-iRvn1Rtotn7JgoP4w0dJ42Z1FF4LaMX2Tto9DmMJHRTj8sm8A7iVh-uf_eOkmq2t6SttGqW-3mZxX5-QmCA0OEFfBu0L7d7Im1g6W-rzLC7lWRMJjAUQGtXIobY_Y7SJy9FWy_7RMUDWs"/>
+<div class="p-6">
+<h3 class="font-bold text-xl text-primary mb-2">앵무새 (Parrot)</h3>
+<p class="text-on-surface-variant text-sm mb-4 leading-relaxed">지능이 높은 앵무새를 위한 두뇌 자극 놀이법과 영양 보충제 가이드.</p>
+<button class="w-full py-3 bg-sand text-primary font-bold rounded-full hover:bg-primary/10 transition-colors">가이드 보기</button>
+</div>
+</div>
+<!-- Mini Pig -->
+<div class="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<img alt="미니피그 (Mini Pig)" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl5PD1Ai0W9R9XF1WHHpBrGML3MqsYVl8iujj8nU78cZFn6lF6bmtoX0-GKS8WfcBLsgqA6XwGFD_KhyRRjwTKZWLc5yDiAW3x8xENTqEadtjoBeWIWTlc5zqv-aDn5DeF4-v6HM5zLUHLPPc1gcrIvS4skvm3UVixvBSIvdFGRuxa9BogLRUcC4xS4JMYkTaOfmlVraHfyLkCNKXs2ccWBmGXi99mI8KJF8cnVfZyG2bA6nx9S4qYLaoq7PwgHNE_iJy-S0P5uEwO"/>
+<div class="p-6">
+<h3 class="font-bold text-xl text-primary mb-2">미니피그 (Mini Pig)</h3>
+<p class="text-on-surface-variant text-sm mb-4 leading-relaxed">높은 지능과 사교성을 가진 미니피그를 위한 긍정 강화 교육법과 청결한 환경 조성 팁.</p>
+<button class="w-full py-3 bg-lavender text-primary font-bold rounded-full hover:bg-primary/10 transition-colors">가이드 보기</button>
+</div>
+</div>
+<!-- Reptiles -->
+<div class="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<img alt="파충류 (Reptiles)" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWUS1ijOZS40lO4NuhcxCbIHllO1sfyl7YMCLKiV7815qpi0_M0b_QGu18r58UfEz7U-FTbL7NNJpb7VUFx2p2uHCDgpZgLulLrDWo5bqbvXlYA_N341KxLjLvN6Blt_UDWJV2pInhcfaOmcoV4A7GZwsOI1Nb_Cg8S6sRcwAvWbYlJ4issabQamsK-R99rKBEqBijjIcpJJeLJlKvcoEfhqTIwfI2trvQb3cDLFVo__2aDZhi6zEXIBnAAtoBM3SoEjvh3fmyvzLi"/>
+<div class="p-6">
+<h3 class="font-bold text-xl text-primary mb-2">파충류 (Reptiles)</h3>
+<p class="text-on-surface-variant text-sm mb-4 leading-relaxed">도마뱀, 거북이 등 파충류를 위한 정밀한 온도·습도 제어 시스템과 사육장 인테리어 가이드.</p>
+<button class="w-full py-3 bg-mint text-channel-community font-bold rounded-full hover:bg-channel-community/10 transition-colors">가이드 보기</button>
+</div>
+</div>
+<!-- Exotic Pets -->
+<div class="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<img alt="특수 동물 (Exotic Pets)" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAu5_VkIfl_aYCyOpx1di2NXNHJBhrNYjPOzvZGjq4mZDLHf2Fmxm3lRBnysyjT8k6-Gx2FWC4kRKxk5FpaJLLRu921TUhMF86cuc8RZBrJTMEKHru1H3RRiUjin5uSIHjDAjZa1naU93SNIxf9DVXEBm9e0Xvwb2lYz-JJlzDOJP3pGvABVnJbOyUaSWNgbWBtMZb6VWuwJLyYiCdeIlGVq69Wf86jysGswNIMIcd-A1a7rHJAFVRIgkMYkEm4Vb-FC78PdIgYuEK5"/>
+<div class="p-6">
+<h3 class="font-bold text-xl text-primary mb-2">특수 동물 (Exotic Pets)</h3>
+<p class="text-on-surface-variant text-sm mb-4 leading-relaxed">고슴도치, 친칠라 등 특별한 케어가 필요한 소형 동물의 야간 활동 관리와 전용 식단 안내.</p>
+<button class="w-full py-3 bg-sand text-primary font-bold rounded-full hover:bg-primary/10 transition-colors">가이드 보기</button>
+</div>
+</div></div>
+</section>
+<!-- Expert Tips (전문가 팁) -->
+<section class="mt-section-gap px-page-margin-mobile md:px-page-margin-desktop transition-all duration-1000 opacity-100 translate-y-0">
+<div class="bg-surface-container-low rounded-[2rem] p-8 md:p-12">
+<div class="flex items-center gap-3 mb-8">
+<span class="material-symbols-outlined text-3xl text-channel-community">verified</span>
+<h2 class="text-primary font-bold text-2xl md:text-3xl">전문가 추천 팁</h2>
+</div>
+<div class="space-y-4">
+<a class="group flex items-center justify-between p-6 bg-white rounded-[1.5rem] hover:translate-x-2 transition-transform shadow-sm" href="#">
+<div class="flex items-center gap-4">
+<span class="text-channel-community font-bold text-lg">01</span>
+<span class="font-semibold text-primary group-hover:text-channel-community transition-colors">토끼의 올바른 식단 관리: 알팔파 vs 티모시</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+<a class="group flex items-center justify-between p-6 bg-white rounded-[1.5rem] hover:translate-x-2 transition-transform shadow-sm" href="#">
+<div class="flex items-center gap-4">
+<span class="text-channel-community font-bold text-lg">02</span>
+<span class="font-semibold text-primary group-hover:text-channel-community transition-colors">햄스터 케이지 배치 팁: 스트레스 없는 환경 만들기</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+<a class="group flex items-center justify-between p-6 bg-white rounded-[1.5rem] hover:translate-x-2 transition-transform shadow-sm" href="#">
+<div class="flex items-center gap-4">
+<span class="text-channel-community font-bold text-lg">03</span>
+<span class="font-semibold text-primary group-hover:text-channel-community transition-colors">앵무새 윙컷, 해야 할까 말아야 할까? 장단점 분석</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+<a class="group flex items-center justify-between p-6 bg-white rounded-[1.5rem] hover:translate-x-2 transition-transform shadow-sm" href="#">
+<div class="flex items-center gap-4">
+<span class="text-channel-community font-bold text-lg">04</span>
+<span class="font-semibold text-primary group-hover:text-channel-community transition-colors">소형 동물을 위한 겨울철 온열 기구 안전 사용법</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</a>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-section-gap bg-sand dark:bg-surface-container-lowest flex flex-col md:flex-row justify-between items-center px-page-margin-mobile md:px-page-margin-desktop py-10 gap-4">
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="font-headline-sm text-headline-sm text-primary">K-사주 펫</span>
+<p class="text-on-surface-variant font-body-sm text-body-sm">© 2024 K-Saju Pet. 모든 권리 보유.</p>
+</div>
+<div class="flex gap-6">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-sm text-body-sm" href="#">이용약관</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-sm text-body-sm" href="#">개인정보처리방침</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-sm text-body-sm" href="#">고객센터</a>
+</div>
+</footer>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-[2rem] bg-surface/90 backdrop-blur-xl border-t border-outline/5 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex justify-around items-center pb-safe pt-3 px-4">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-caps text-label-caps mt-1">홈</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="font-label-caps text-label-caps mt-1">사주 분석</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-mint text-channel-community rounded-full px-6 py-2 transition-all active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span class="font-label-caps text-label-caps mt-1">커뮤니티</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-caps text-label-caps mt-1">마이페이지</span>
+</a>
+</nav>
+<script>
+        // Simple scroll reveal interaction
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.add('transition-all', 'duration-1000', 'opacity-0', 'translate-y-10');
+            observer.observe(section);
+        });
+    </script>
+</body></html>

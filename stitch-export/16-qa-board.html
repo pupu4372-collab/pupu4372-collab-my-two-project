@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>K-Saju Pet | Q&amp;A 게시판</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'SUIT Variable';
+            src: url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css');
+        }
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .bg-dream-sky {
+            background: linear-gradient(180deg, #FDFBF7 0%, #F5F1E9 40%, #E6E1F9 100%);
+            background-attachment: fixed;
+        }
+        .pastel-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(68, 38, 86, 0.05);
+            border-radius: 2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .pastel-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 40px rgba(68, 38, 86, 0.05);
+        }
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"hwa-red": "#EF4444", "on-tertiary-container": "#b7be73", primary: "#442656", "on-tertiary": "#ffffff", "surface-variant": "#e4e2de", "on-background": "#1b1c1a", "on-tertiary-fixed": "#1a1d00", mint: "#E1F5F0", "on-secondary-container": "#755e50", "surface-bright": "#fbf9f5", petal: "#FCE1F1", "inverse-primary": "#dfb9f2", blush: "#FDECE7", "inverse-surface": "#30312e", "primary-container": "#5c3d6e", surface: "#fbf9f5", "tertiary-fixed-dim": "#c5cc7f", "surface-container-lowest": "#ffffff", background: "#fbf9f5", "secondary-fixed-dim": "#dfc0b0", "surface-container": "#efeeea", "on-primary": "#ffffff", "channel-dog": "#3B82F6", "outline-variant": "#cec3ce", "secondary-container": "#f9d9c8", lavender: "#E6E1F9", "channel-saju": "#8B5CF6", "to-yellow": "#F59E0B", tertiary: "#313600", "on-primary-fixed": "#2b0d3c", "surface-tint": "#725284", "on-primary-container": "#d1abe4", "channel-cat": "#EF4444", "surface-container-high": "#eae8e4", "on-tertiary-fixed-variant": "#454b0a", "surface-container-low": "#f5f3ef", "on-surface-variant": "#4b444d", "tertiary-container": "#474d0d", cream: "#FDFBF7", "inverse-on-surface": "#f2f0ed", "geum-white": "#94A3B8", error: "#ba1a1a", "error-container": "#ffdad6", "surface-container-highest": "#e4e2de", "on-primary-fixed-variant": "#593a6b", "on-error-container": "#93000a", "channel-community": "#22C55E", "on-secondary-fixed-variant": "#574236", "surface-dim": "#dbdad6", secondary: "#715a4c", "on-secondary-fixed": "#28180d", "secondary-fixed": "#fcdccb", sand: "#F5F1E9", "primary-fixed-dim": "#dfb9f2", "on-error": "#ffffff", "su-black": "#334155", "tertiary-fixed": "#e1e999", "mok-green": "#22C55E", "on-surface": "#1b1c1a", "on-secondary": "#ffffff", "primary-fixed": "#f5d9ff", outline: "#7d747e"}, spacing: {gutter: "1.5rem", "card-padding": "2rem", "page-margin-desktop": "4rem", "section-gap": "5rem", "page-margin-mobile": "1.25rem"}, fontFamily: {"headline-sm": ["SUIT Variable"], "body-md": ["SUIT Variable"], "label-caps": ["SUIT Variable"], "headline-lg": ["SUIT Variable"], "headline-md": ["SUIT Variable"], "body-sm": ["SUIT Variable"], "body-lg": ["SUIT Variable"], "display-hero-mobile": ["SUIT Variable"], "display-hero": ["SUIT Variable"], headline: ["SUIT Variable"], display: ["SUIT Variable"], body: ["SUIT Variable"], label: ["SUIT Variable"]}, fontSize: {"headline-sm": ["20px", {lineHeight: "1.4", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "1.6", fontWeight: "400"}], "label-caps": ["12px", {lineHeight: "1", letterSpacing: "0.05em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.3", fontWeight: "700"}], "headline-md": ["24px", {lineHeight: "1.4", fontWeight: "700"}], "body-sm": ["14px", {lineHeight: "1.5", fontWeight: "400"}], "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}], "display-hero-mobile": ["32px", {lineHeight: "1.2", fontWeight: "800"}], "display-hero": ["42px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "800"}]}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+</head>
+<body class="bg-dream-sky text-on-surface min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-gutter h-16 bg-surface/80 dark:bg-background/80 backdrop-blur-lg shadow-sm dark:shadow-none">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-primary dark:text-inverse-primary font-extrabold">K-Saju Pet</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">Dog</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">Cat</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">K-Saju</a>
+<a class="text-primary font-bold border-b-2 border-primary" href="#">Community</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-primary" data-icon="account_circle">account_circle</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 px-page-margin-mobile md:px-page-margin-desktop max-w-[1200px] mx-auto">
+<!-- Header Section -->
+<section class="mb-10 text-center md:text-left">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-2">Q&amp;A 게시판</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">궁금한 점을 집사님들과 함께 나누어 보세요!</p>
+</section>
+<!-- Search Bar Section -->
+<section class="mb-8">
+<div class="relative max-w-2xl mx-auto md:mx-0">
+<input class="w-full h-14 pl-14 pr-6 rounded-full bg-white/60 border-none shadow-sm focus:ring-2 focus:ring-channel-community/30 font-body-md text-body-md placeholder-on-surface-variant/50 backdrop-blur-sm" placeholder="궁금한 내용을 검색해보세요" type="text"/>
+<span class="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+</div>
+</section>
+<!-- Category Tabs -->
+<section class="mb-10 overflow-x-auto custom-scrollbar">
+<div class="flex gap-3 min-w-max pb-2">
+<button class="px-6 py-2.5 rounded-full bg-channel-community text-white font-bold text-body-sm shadow-md transition-all">전체</button>
+<button class="px-6 py-2.5 rounded-full bg-white/60 text-on-surface-variant font-medium text-body-sm hover:bg-white/80 transition-all">건강</button>
+<button class="px-6 py-2.5 rounded-full bg-white/60 text-on-surface-variant font-medium text-body-sm hover:bg-white/80 transition-all">행동</button>
+<button class="px-6 py-2.5 rounded-full bg-white/60 text-on-surface-variant font-medium text-body-sm hover:bg-white/80 transition-all">사주/운세</button>
+<button class="px-6 py-2.5 rounded-full bg-white/60 text-on-surface-variant font-medium text-body-sm hover:bg-white/80 transition-all">훈련</button>
+<button class="px-6 py-2.5 rounded-full bg-white/60 text-on-surface-variant font-medium text-body-sm hover:bg-white/80 transition-all">기타</button>
+</div>
+</section>
+<!-- Question Grid/List -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Question Card 1 -->
+<article class="pastel-card p-6 flex flex-col justify-between">
+<div>
+<div class="flex gap-2 mb-4">
+<span class="px-3 py-1 rounded-full bg-channel-dog/10 text-channel-dog font-label-caps text-label-caps uppercase">강아지</span>
+<span class="px-3 py-1 rounded-full bg-channel-community/10 text-channel-community font-label-caps text-label-caps uppercase">사주/운세</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-background mb-2">저희 집 강아지가 '목(木)' 기운이 강하다는데 간식은 뭐가 좋을까요?</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-6">최근에 사주를 봤는데 목의 기운이 넘친다고 하더라고요. 이런 아이들에게는 어떤 식재료가 궁합이 잘 맞는지 궁금합니다!</p>
+</div>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-lavender flex items-center justify-center overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq1UVDFWRH4EkpFrGEfXZOcIAVObjjpMY4NdYg4bKrduHdNtvC-g3EibOF_kvcjIQWT6iM1IBnht7y1IgMGnzbTfemzv0S3G58Bz4XTHPWCxosXY6h6JexJml9qVrD0zuKCfT3iGvwtHBUSDteDEzEyaPDwloKL1V7Z9u-HI59DOhuiG2ewEDba8g1ctI1bQ093hONyhZlr3GpJJlaHb92zocMjzxpQoGEXv52FAXa_L5i34mZ1TqUiDjkVGQU-1SHm2fnjc03h6oN"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-[10px] text-on-surface font-bold">초코집사</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">2시간 전</span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="forum">forum</span>
+<span class="text-label-caps">12</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="favorite">favorite</span>
+<span class="text-label-caps">8</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Question Card 2 -->
+<article class="pastel-card p-6 flex flex-col justify-between">
+<div>
+<div class="flex gap-2 mb-4">
+<span class="px-3 py-1 rounded-full bg-channel-cat/10 text-channel-cat font-label-caps text-label-caps uppercase">고양이</span>
+<span class="px-3 py-1 rounded-full bg-channel-community/10 text-channel-community font-label-caps text-label-caps uppercase">건강</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-background mb-2">이사 후에 물을 잘 안 마셔요. 어떻게 해야 할까요?</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-6">환경이 바뀌어서 그런지 평소보다 물 마시는 횟수가 확연히 줄었어요. 습식을 줘야 할까요 아니면 수중 펌프를 바꿔야 할까요?</p>
+</div>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-mint flex items-center justify-center overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxwL1E4s95dqUqXC4ASZVuv6OVdRHSduqQA6Ns01bwJG2aKpggOg-ms4-R6XS2WsbgC20lqFWi8Vrt2zT3A06btcPUJeh81e4vIcAdEOoyqUZVa67v5KjBqzDn6_u5VYcf_ytXw92yko4WHI1x8OPE_OUAgOjV3KvAFv86UaVIim1t8dIZNwQnfR9jmNGe5TTWfZXSz5h1MBg5KN82pRM_3hOFNIBrLmjImOpNtdm9WDMQw1y6Z1En4E3M6vO0DDJs1mk1kzaHz0dV"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-[10px] text-on-surface font-bold">미묘맘</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">5시간 전</span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="forum">forum</span>
+<span class="text-label-caps">5</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="favorite">favorite</span>
+<span class="text-label-caps">3</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Question Card 3 -->
+<article class="pastel-card p-6 flex flex-col justify-between">
+<div>
+<div class="flex gap-2 mb-4">
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-caps text-label-caps uppercase">공통</span>
+<span class="px-3 py-1 rounded-full bg-channel-community/10 text-channel-community font-label-caps text-label-caps uppercase">행동</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-background mb-2">분리불안 훈련 팁 공유 부탁드립니다!</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-6">혼자 있는 시간을 너무 힘들어해요. 출근할 때마다 마음이 아파서 그런데, 효과 보신 훈련법 있으면 추천 부탁드려요.</p>
+</div>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-petal flex items-center justify-center overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk2RlUhor7X5GDPaltRREImdPhRJe33bMKiGuNaAdIMdiVoUgCSHO0Y2mjv6Wxazd1cJTJC_Qb-ZTondqyj8iiFHzNGhswqDuQQft-cvMZMTS-osHvN8I-WrfiT1ieVdZZlRzVQTwivg-YZrUmDL1_xLx2kjKOng-si5lOaXb7H7gSCHj1BCVxjrg17DLp53tS8ynjQmfHIQoo5xLa4K88DSbbgBn-Jl4cQ16vf14YFtMA8rng0G7pP3H5O_ShnT3jWUI1XtUbd6c_"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-[10px] text-on-surface font-bold">워킹집사</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">어제</span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="forum">forum</span>
+<span class="text-label-caps">24</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="text-label-caps">15</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Question Card 4 -->
+<article class="pastel-card p-6 flex flex-col justify-between">
+<div>
+<div class="flex gap-2 mb-4">
+<span class="px-3 py-1 rounded-full bg-channel-dog/10 text-channel-dog font-label-caps text-label-caps uppercase">강아지</span>
+<span class="px-3 py-1 rounded-full bg-channel-community/10 text-channel-community font-label-caps text-label-caps uppercase">훈련</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-background mb-2">산책할 때 다른 강아지를 보면 너무 짖어요.</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-6">사회성이 부족한 건지, 공격적인 건지 구분이 안 돼요. 이럴 때 간식으로 주의를 돌려야 할까요 아니면 바로 자리를 피해야 할까요?</p>
+</div>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-blush flex items-center justify-center overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpQVotswW-a5PqBsQcSdWq48_Eg0f_vhBiFX0DI7M88vwRzTH60HCy6I71wBwvePXayUltXRwLQ7GPJrh7d76SF41BLzckhmd8PW5hIZ87ZF3aHS3Hpd6S1ViVQNJj4j2NnR79fkIF1CIYWoLrtSKzbss0R0wcgW-GYq9lHuNxLV425LsRrUzOn4B2M3GuHGvN58TE8P5rNi8vvL7T_PqMd-qqyfAzVd2FvLETYvzYck-N33Q6GjzZVhtNsFuaOnZltmE3gpMzsraN"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-[10px] text-on-surface font-bold">버디파파</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">2일 전</span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="forum">forum</span>
+<span class="text-label-caps">8</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="favorite">favorite</span>
+<span class="text-label-caps">2</span>
+</div>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-6 md:right-page-margin-desktop z-40 bg-primary text-cream flex items-center gap-2 px-6 py-4 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+<span class="font-bold">질문하기</span>
+</button>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-safe pt-2 bg-white/70 dark:bg-background/70 backdrop-blur-xl rounded-t-[2rem] shadow-[0_-4px_20px_rgba(68,38,86,0.05)]">
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-3">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-caps text-label-caps">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-3">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="font-label-caps text-label-caps">Dog</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-3">
+<span class="material-symbols-outlined" data-icon="cat">pets</span>
+<span class="font-label-caps text-label-caps">Cat</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-3">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-caps text-label-caps">K-Saju</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full p-3 scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="forum" style="font-variation-settings: 'FILL' 1;">forum</span>
+<span class="font-label-caps text-label-caps">Community</span>
+</div>
+</nav>
+<script>
+        // Simple micro-interactions for the cards
+        document.querySelectorAll('.pastel-card').forEach(card => {
+            card.addEventListener('touchstart', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('touchend', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+
+        // Category tab selection simulation
+        const tabs = document.querySelectorAll('section button');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('bg-channel-community', 'text-white', 'font-bold');
+                    t.classList.add('bg-white/60', 'text-on-surface-variant', 'font-medium');
+                });
+                tab.classList.remove('bg-white/60', 'text-on-surface-variant', 'font-medium');
+                tab.classList.add('bg-channel-community', 'text-white', 'font-bold');
+            });
+        });
+    </script>
+</body></html>

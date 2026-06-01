@@ -67,9 +67,12 @@ export function PetShowFeed({ refreshKey = 0 }: PetShowFeedProps) {
   }, [nextCursor, load]);
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-channel-community">📷 {isKo ? "스냅존" : "Snapzone"}</h2>
+        <div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community">Snapzone</p>
+          <h2 className="mt-2 text-2xl font-extrabold text-primary">📷 {isKo ? "최신 게시글" : "Latest posts"}</h2>
+        </div>
         {source === "mock" && (
           <span className="text-xs text-plum/50">
             {isKo ? "데모 스냅존 · Supabase 연동 시 실제 글" : "Demo Snapzone · Real posts when Supabase is connected"}
@@ -77,31 +80,33 @@ export function PetShowFeed({ refreshKey = 0 }: PetShowFeedProps) {
         )}
       </div>
 
-      <ul className="space-y-4">
+      <ul className="columns-1 gap-6 space-y-6 sm:columns-2 lg:columns-3">
         {posts.map((post) => (
-          <li key={post.id}>
-            <article className="rounded-3xl border border-channel-community/20 bg-white/60 p-5 shadow-sm transition hover:-translate-y-0.5 hover:bg-white/80">
+          <li key={post.id} className="break-inside-avoid">
+            <article className="pastel-card p-3 shadow-sm transition hover:-translate-y-1 hover:bg-white/80">
               <Link href={`/community/pet-show/${post.id}`} className="block">
-                <div className="flex aspect-video items-center justify-center overflow-hidden rounded-2xl bg-channel-community/10 text-4xl">
+                <div className="flex overflow-hidden rounded-2xl bg-channel-community/10 text-4xl">
                   {post.image_urls?.[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={supabaseImageTransformUrl(post.image_urls[0], { width: 960, height: 540 })}
+                      src={supabaseImageTransformUrl(post.image_urls[0], { width: 720, height: 960 })}
                       alt=""
-                      className="h-full w-full object-cover"
+                      className="h-auto w-full object-cover"
                     />
                   ) : (
-                    <span aria-hidden>🐾</span>
+                    <span className="flex aspect-[4/5] w-full items-center justify-center" aria-hidden>
+                      🐾
+                    </span>
                   )}
                 </div>
-                <h3 className="mt-3 font-semibold text-plum">
+                <h3 className="mt-4 px-2 font-extrabold text-primary">
                   {post.title ?? (isKo ? "무제" : "Untitled")}
                 </h3>
                 {post.content && (
-                  <p className="mt-1 text-sm text-plum/65">{post.content}</p>
+                  <p className="mt-2 px-2 text-sm leading-6 text-plum/65">{post.content}</p>
                 )}
               </Link>
-              <div className="mt-3">
+              <div className="mt-4 border-t border-primary/5 px-2 pt-3">
                 <PetShowPostActions
                   postId={post.id}
                   initialLikeCount={post.like_count}

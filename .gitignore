@@ -29,6 +29,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# Cursor local config (may contain MCP API keys)
+.cursor/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

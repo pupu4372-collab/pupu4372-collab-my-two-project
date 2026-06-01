@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>K-Saju Pet | 홈</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/suit-variable.css" rel="stylesheet"/>
+<style>
+        :root {
+            --dream-sky-gradient: linear-gradient(135deg, #FDFBF7 0%, #E6E1F9 50%, #E1F5F0 100%);
+        }
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            background: var(--dream-sky-gradient);
+            background-attachment: fixed;
+            color: #1b1c1a;
+        }
+        .bg-dream-sky {
+            background: var(--dream-sky-gradient);
+        }
+        .pastel-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(68, 38, 86, 0.08);
+            border-radius: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .pastel-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(68, 38, 86, 0.05);
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .text-gradient-hero {
+            background: linear-gradient(to right, #442656, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Shared Tailwind Config -->
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-tertiary-fixed": "#1a1d00", "tertiary-container": "#474d0d", blush: "#FDECE7", "surface-variant": "#e4e2de", lavender: "#E6E1F9", "su-black": "#334155", "channel-saju": "#8B5CF6", "tertiary-fixed-dim": "#c5cc7f", "primary-container": "#5c3d6e", outline: "#7d747e", "on-error": "#ffffff", "secondary-fixed-dim": "#dfc0b0", primary: "#442656", "on-error-container": "#93000a", "on-surface-variant": "#4b444d", "hwa-red": "#EF4444", "surface-container-high": "#eae8e4", "inverse-primary": "#dfb9f2", mint: "#E1F5F0", "surface-container-low": "#f5f3ef", "channel-cat": "#EF4444", tertiary: "#313600", "surface-dim": "#dbdad6", "surface-tint": "#725284", "error-container": "#ffdad6", "primary-fixed": "#f5d9ff", "on-primary-container": "#d1abe4", background: "#fbf9f5", "surface-container-lowest": "#ffffff", "on-primary-fixed": "#2b0d3c", "tertiary-fixed": "#e1e999", "on-surface": "#1b1c1a", "primary-fixed-dim": "#dfb9f2", secondary: "#715a4c", "inverse-surface": "#30312e", "on-secondary": "#ffffff", "to-yellow": "#F59E0B", "on-tertiary-container": "#b7be73", surface: "#fbf9f5", "secondary-container": "#f9d9c8", "on-tertiary-fixed-variant": "#454b0a", cream: "#FDFBF7", "on-secondary-fixed": "#28180d", "on-primary": "#ffffff", "mok-green": "#22C55E", "on-tertiary": "#ffffff", "surface-bright": "#fbf9f5", "inverse-on-surface": "#f2f0ed", "on-background": "#1b1c1a", error: "#ba1a1a", "channel-dog": "#3B82F6", "surface-container": "#efeeea", "on-secondary-fixed-variant": "#574236", "on-primary-fixed-variant": "#593a6b", "geum-white": "#94A3B8", "channel-community": "#22C55E", "outline-variant": "#cec3ce", petal: "#FCE1F1", "on-secondary-container": "#755e50", "secondary-fixed": "#fcdccb", sand: "#F5F1E9", "surface-container-highest": "#e4e2de"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {"page-margin-desktop": "4rem", "card-padding": "2rem", "page-margin-mobile": "1.25rem", "section-gap": "5rem", gutter: "1.5rem"}, fontFamily: {"body-lg": ["SUIT Variable"], "headline-sm": ["SUIT Variable"], "headline-md": ["SUIT Variable"], "body-md": ["SUIT Variable"], "display-hero-mobile": ["SUIT Variable"], "body-sm": ["SUIT Variable"], "display-hero": ["SUIT Variable"], "label-caps": ["SUIT Variable"], "headline-lg": ["SUIT Variable"], headline: ["SUIT Variable"], display: ["SUIT Variable"], body: ["SUIT Variable"], label: ["SUIT Variable"]}, fontSize: {"body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}], "headline-sm": ["20px", {lineHeight: "1.4", fontWeight: "600"}], "headline-md": ["24px", {lineHeight: "1.4", fontWeight: "700"}], "body-md": ["16px", {lineHeight: "1.6", fontWeight: "400"}], "display-hero-mobile": ["32px", {lineHeight: "1.2", fontWeight: "800"}], "body-sm": ["14px", {lineHeight: "1.5", fontWeight: "400"}], "display-hero": ["42px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "800"}], "label-caps": ["12px", {lineHeight: "1", letterSpacing: "0.05em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "1.3", fontWeight: "700"}]}}}};</script>
+</head>
+<body class="bg-background">
+<!-- TopAppBar -->
+<nav class="bg-white/80 dark:bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10 shadow-sm fixed top-0 w-full z-50">
+<div class="flex justify-between items-center px-page-margin-mobile md:px-page-margin-desktop py-4 max-w-[1200px] mx-auto">
+<div class="font-display-hero text-headline-lg bg-clip-text text-transparent bg-gradient-to-r from-primary to-channel-saju">
+                K-Saju Pet
+            </div>
+<!-- Desktop Nav -->
+<div class="hidden md:flex items-center gap-8">
+<a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary font-body-md py-1" href="#">홈</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-md py-1" href="#">강아지</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-md py-1" href="#">고양이</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-md py-1" href="#">댕냥사주</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors duration-200 font-body-md py-1" href="#">커뮤니티</a>
+</div>
+<div class="flex items-center gap-4">
+<!-- Language Switcher -->
+<div class="hidden sm:flex items-center border border-outline-variant/30 rounded-full px-3 py-1 bg-surface-container-low/50">
+<span class="text-primary font-bold text-label-caps cursor-pointer">KO</span>
+<span class="mx-2 text-outline-variant/50 text-[10px]">|</span>
+<span class="text-on-surface-variant font-medium text-label-caps cursor-pointer hover:text-primary transition-colors">EN</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" data-icon="pets">pets</span>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/10">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A high-quality close-up portrait of a friendly professional person with a warm smile, set against a soft, out-of-focus background. The lighting is natural and bright, conveying a clean and modern aesthetic. The colors are muted and professional, fitting into a high-end web application profile setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBn0RU6RHdRDQn1Ih1NxwwNdvwiCAOGkPPlYNBPWmwLDneiFMjFoCGv1HhaprtN2Wq6yNEXoqHlSHBvNWNqSRlzNF0wq3ud_JEPqZeYyW9VN5pxLD97qz3S5qjv24lg3KcnyvN3UWU1iTRAONXOJ84iHyfrCgI0E_v1v60fMeGYmHAIfPhebeLmPQzlPOuxCNehMnDiHfnxLNx0y0I1sECew7M62NC0X-TGiz5zjLzDdZLFRTwzD8wepv3vTnIvKSnv-52CZy2Z6v37"/>
+</div>
+</div>
+</div>
+</nav>
+<main class="pt-24 pb-32 max-w-[1200px] mx-auto px-page-margin-mobile md:px-page-margin-desktop">
+<!-- Hero Section -->
+<section class="py-12 md:py-20 text-center">
+<h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero text-gradient-hero mb-4">
+                K-Saju Pet: <br class="md:hidden"/>우리 아이의 특별한 운명
+            </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant opacity-80 max-w-2xl mx-auto">
+                반려동물의 오행 기운을 분석하여 집사님과의 깊은 교감을 도와드리는 글로벌 펫 사주 커뮤니티입니다.
+            </p>
+</section>
+<!-- Today's Fortune Section -->
+<section class="mb-section-gap">
+<div class="pastel-card p-8 md:p-12 relative overflow-hidden" style="transform: translateY(-4px);">
+<!-- Decorative background shapes -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-lavender rounded-full opacity-30 blur-3xl"></div>
+<div class="absolute -bottom-24 -left-24 w-64 h-64 bg-mint rounded-full opacity-30 blur-3xl"></div>
+<div class="relative z-10 flex flex-col md:flex-row items-center gap-8 md:items-start">
+<div class="w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-white shadow-lg overflow-hidden shrink-0">
+<img alt="Butler's Profile" class="w-full h-full object-cover" data-alt="A professional, heart-warmingly close-up shot of a cute Golden Retriever puppy looking directly at the camera with bright, expressive eyes. The background is a soft, dreamy blur of pastel cream and light lavender colors. The lighting is cinematic and soft, highlighting the silky texture of the puppy's golden fur." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBn0RU6RHdRDQn1Ih1NxwwNdvwiCAOGkPPlYNBPWmwLDneiFMjFoCGv1HhaprtN2Wq6yNEXoqHlSHBvNWNqSRlzNF0wq3ud_JEPqZeYyW9VN5pxLD97qz3S5qjv24lg3KcnyvN3UWU1iTRAONXOJ84iHyfrCgI0E_v1v60fMeGYmHAIfPhebeLmPQzlPOuxCNehMnDiHfnxLNx0y0I1sECew7M62NC0X-TGiz5zjLzDdZLFRTwzD8wepv3vTnIvKSnv-52CZy2Z6v37"/>
+</div>
+<div class="flex-1 text-center md:text-left">
+<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-4">
+<h2 class="font-headline-lg text-headline-lg text-primary">오늘의 운세</h2>
+<span class="px-4 py-1 bg-primary/10 text-primary font-label-caps text-label-caps rounded-full w-fit mx-auto md:mx-0 md:mt-1">행운을 빌어요</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-6 leading-relaxed">"오늘의 운세 총평은 '행운충전'입니다. 집사님의 마음속에 새로운 활력과 긍정적인 에너지가 가득 차오르는 하루가 될 것입니다. 평소 망설였던 일이 있다면 오늘이 바로 실행에 옮길 최적의 타이밍입니다. 반려동물과의 깊은 교감 속에서 뜻밖의 영감을 얻을 수 있으며, 주변 사람들과의 만남에서도 집사님의 밝은 기운이 좋은 결실로 이어질 것입니다. 스스로를 믿고 활기찬 걸음을 내디뎌 보세요!"</p>
+<!-- 5 Elements Breakdown -->
+<div class="grid grid-cols-3 gap-4 md:gap-8 max-w-md mx-auto md:mx-0 pt-4">
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-2 overflow-hidden">
+<img alt="Lucky Number Icon" class="w-[300%] h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzHK-QcOeNcHae6p_eASE7RZ0H7PLi0T2UeTBLXbUCv6zqX0ajCK4lVD-0mUmRaPlQmGv8Nsdt7pOftK34hM2dIzXip54I3SsRSphnYwsIqb1n7LAQsx7mBRaMeq3dUFix6qLTohCxK1awkFvQxVRP0wOu1bodaX_h4XDkOWON2Hmj7j4KVq8EtvXM2_BmBl9bRT4Nn580z1E4ONvjQ5Sg15-7yMfEJgIotFZZlbikA6zI2-JYKhk65HLwB_Lo7IlXxjDPJlOyHC-V" style="object-position: 0% center;"/>
+</div>
+<span class="font-label-caps text-[11px] text-on-surface-variant font-bold uppercase tracking-wider">행운의 수</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-to-yellow/10 flex items-center justify-center mb-2 overflow-hidden">
+<img alt="Wealth Luck Icon" class="w-[300%] h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzHK-QcOeNcHae6p_eASE7RZ0H7PLi0T2UeTBLXbUCv6zqX0ajCK4lVD-0mUmRaPlQmGv8Nsdt7pOftK34hM2dIzXip54I3SsRSphnYwsIqb1n7LAQsx7mBRaMeq3dUFix6qLTohCxK1awkFvQxVRP0wOu1bodaX_h4XDkOWON2Hmj7j4KVq8EtvXM2_BmBl9bRT4Nn580z1E4ONvjQ5Sg15-7yMfEJgIotFZZlbikA6zI2-JYKhk65HLwB_Lo7IlXxjDPJlOyHC-V" style="object-position: 50% center;"/>
+</div>
+<span class="font-label-caps text-[11px] text-on-surface-variant font-bold uppercase tracking-wider">재물운</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-mok-green/10 flex items-center justify-center mb-2 overflow-hidden">
+<img alt="Health Luck Icon" class="w-[300%] h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzHK-QcOeNcHae6p_eASE7RZ0H7PLi0T2UeTBLXbUCv6zqX0ajCK4lVD-0mUmRaPlQmGv8Nsdt7pOftK34hM2dIzXip54I3SsRSphnYwsIqb1n7LAQsx7mBRaMeq3dUFix6qLTohCxK1awkFvQxVRP0wOu1bodaX_h4XDkOWON2Hmj7j4KVq8EtvXM2_BmBl9bRT4Nn580z1E4ONvjQ5Sg15-7yMfEJgIotFZZlbikA6zI2-JYKhk65HLwB_Lo7IlXxjDPJlOyHC-V" style="object-position: 100% center;"/>
+</div>
+<span class="font-label-caps text-[11px] text-on-surface-variant font-bold uppercase tracking-wider">건강운</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Pet Show Weekly Ranking (Updated to Slider) -->
+<section class="mb-section-gap relative">
+<div class="flex items-end justify-between mb-8">
+<div>
+<h3 class="font-headline-md text-headline-md text-primary mb-1">이번 주의 우리 아이들</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">가장 많은 사랑을 받은 아이들을 만나보세요</p>
+</div>
+<button class="text-primary font-label-caps text-label-caps flex items-center gap-1 hover:gap-2 transition-all">
+                    전체 보기 <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<!-- Slider Container -->
+<div class="relative group">
+<!-- Navigation Buttons -->
+<button class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 w-12 h-12 rounded-full glass-nav shadow-lg flex items-center justify-center text-primary hover:bg-white transition-all opacity-0 group-hover:opacity-100 hidden md:flex disabled:opacity-0 pointer-events-auto" disabled="" id="prevBtn" style="opacity: 0;">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-20 w-12 h-12 rounded-full glass-nav shadow-lg flex items-center justify-center text-primary hover:bg-white transition-all opacity-0 group-hover:opacity-100 hidden md:flex pointer-events-auto" id="nextBtn" style="opacity: 1;">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+<!-- Scrollable Viewport -->
+<div class="flex gap-6 overflow-x-auto pb-8 hide-scrollbar snap-x scroll-smooth" id="rankingSlider">
+<!-- Rank 1 -->
+<div class="snap-start shrink-0 w-[240px] md:w-[280px]">
+<div class="pastel-card overflow-hidden h-full">
+<div class="relative h-[300px]">
+<img alt="Rank 1 Cat" class="w-full h-full object-cover" data-alt="A majestic Siamese cat sitting gracefully on a velvet cushion. The lighting is warm and dramatic, highlighting the cat's striking blue eyes and elegant silhouette. The background is a soft-focus interior with pastel lavender and gold accents, creating a luxurious and high-end feel for a pet ranking showcase." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvPamU7jiQneHPnfiwBxu2MHNld6Ebf2Rs6lNW-SD9N2SK3-D8TEEeF8bOcKi2AX25Zo1YS_NF1t4pJrH96cxoTdc7wkfVrjIEQUwO4DKhyWL2eKynmbG9CG6jDWZGNDmc_GA0X8gCPUK2ZxJzQrMhjYxKt6gzha0dVJNmH80sef7507MOCWWWGCzh-DznMrUDPGLkdjLN-GIcv_MgJhbhHmChgr5Vs9vXTos5JttXL7xqKSEVeCoSGyfWFG0yCoZx3EmxfxpXqJBR"/>
+<div class="absolute top-4 left-4 glass-nav px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="text-to-yellow font-bold text-headline-sm">1위</span>
+<span class="text-primary font-label-caps text-[10px]">RANK</span>
+</div>
+</div>
+<div class="p-4 text-center">
+<p class="font-headline-sm text-headline-sm text-primary">루나</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">페르시안 고양이</p>
+</div>
+</div>
+</div>
+<!-- Rank 2 -->
+<div class="snap-start shrink-0 w-[240px] md:w-[280px]">
+<div class="pastel-card overflow-hidden h-full">
+<div class="relative h-[300px]">
+<img alt="Rank 2 Dog" class="w-full h-full object-cover" data-alt="A playful French Bulldog wearing a stylish miniature scarf, sitting in a bright, modern living room filled with soft morning light. The color palette features creamy whites and gentle mint greens. The photograph captures the pet's quirky personality in a crisp, high-end editorial style suitable for a premium pet community app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjxuQ_KvFqqsj-2zMfVJKCvI4mB7gHzv7UPJX40hIlJqr9Uy_rNCSuOHR75maG2BSqMgObEA15H6Q1ixr3kJyBTXKMLKA4Gdb3JrJldNdY-2OtTPbGZ_Rl0jd_Snj4WBn5cW1R405Nbz-eCs47X3FSil9oCf2-4viQSMES_2LSh0Bf-rz38BmYflLwMbiJY23BccXbOpv5XgaHYUsC_dsIQ2_m7TiHy92Jsjd8-ZyLasIPNfffHfMrHeZ9xA0rS_RIQfhJEWGI-fjE"/>
+<div class="absolute top-4 left-4 glass-nav px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="text-geum-white font-bold text-headline-sm">2위</span>
+<span class="text-primary font-label-caps text-[10px]">RANK</span>
+</div>
+</div>
+<div class="p-4 text-center">
+<p class="font-headline-sm text-headline-sm text-primary">보비</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">프렌치 불독</p>
+</div>
+</div>
+</div>
+<!-- Rank 3 -->
+<div class="snap-start shrink-0 w-[240px] md:w-[280px]">
+<div class="pastel-card overflow-hidden h-full">
+<div class="relative h-[300px]">
+<img alt="Rank 3 Dog" class="w-full h-full object-cover" data-alt="A fluffy white Pomeranian puppy happily playing in a garden filled with soft pink petals. The lighting is bright and ethereal, creating a 'dream sky' atmosphere. The colors are dominated by soft pinks, mint greens, and cream, giving the image a gentle and welcoming vibe for a pet-centered platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB50KmCHB89NaTPZQsVxhQPCRJ4OHlXGT72hkVESlf6AFE6vnY8fWqn8h3E6fAvTWzDVVU6OcAgf2Qiyz4w8bJGEmpCrjqGzfgfkpkGbOmUE23OD658apTIwV2F9e0AavkfzdgZDQJW9jBJV7353B08gkf_H5w4KH80WQYVSQweM7bc4xdMxwKhIbbSjI7nrmsG3ZbsPfv4LwP4TkMpUC3OG3GIyIixE1w8xRPXCVrDR1-lIMqivj5kDrquhZIzh5-xTsQHxyjl6DG0"/>
+<div class="absolute top-4 left-4 glass-nav px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="text-hwa-red font-bold text-headline-sm">3위</span>
+<span class="text-primary font-label-caps text-[10px]">RANK</span>
+</div>
+</div>
+<div class="p-4 text-center">
+<p class="font-headline-sm text-headline-sm text-primary">모찌</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">포메라니안</p>
+</div>
+</div>
+</div>
+<!-- Rank 4 -->
+<div class="snap-start shrink-0 w-[240px] md:w-[280px]">
+<div class="pastel-card overflow-hidden h-full">
+<div class="relative h-[300px]">
+<img alt="Rank 4 Cat" class="w-full h-full object-cover" data-alt="A sleek black cat with mesmerizing green eyes, peeking out from behind a large indoor monstera plant. The aesthetic is clean and minimal, with soft backlighting creating a gentle glow around the fur. The mood is calm and slightly mysterious, fitting the K-Saju mystical theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzZY5pXmkclPKSc1JR0_rBvb6Zg4HIfcWyM7o86-tZkTqwgXYjw3b1o8ml4erfeZTnfk9lUFUmgBPfUaMSC9vY7h4hNWiGuImk1d90V2w1jv2LRF_3Y2TtzVoW8euJe8pg9hD5K2KphYcC7WI5w_tkr71j8Wl-RUHkpyj-VJI8tlWubR7jdShA1zN252cj_r18KwOfdhysyldtqSJyXLp-z9wUpjhIv-3ToilRRxIQiPFT-aG9YjgJ-2gM8eE134J6WBORkqr-ByFd"/>
+<div class="absolute top-4 left-4 glass-nav px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="text-primary font-bold text-headline-sm">4위</span>
+<span class="text-primary font-label-caps text-[10px]">RANK</span>
+</div>
+</div>
+<div class="p-4 text-center">
+<p class="font-headline-sm text-headline-sm text-primary">쉐도우</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">검정 숏헤어</p>
+</div>
+</div>
+</div>
+<!-- Rank 5 -->
+<div class="snap-start shrink-0 w-[240px] md:w-[280px]">
+<div class="pastel-card overflow-hidden h-full">
+<div class="relative h-[300px]">
+<img alt="Rank 5 Other" class="w-full h-full object-cover" data-alt="A cute turtle resting on a smooth river stone under soft sunlight. The water around it is crystal clear, reflecting a light blue sky. The scene is peaceful and grounded, showcasing the 'Other' species category in a high-quality, professional photography style that aligns with a premium pet app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtuB9sW3vXiV25GB68IxwRNka-RwkQRtBPT3bfpddz4jtb9ouIjj0LcOvjiCz--PH0iFpYuSZThsCoJn9YgIjhqYXKR4oGPsUc1onki-ByoOVS1ECZ_2zeTj5pr8N2CVlNLEaaubu8YIcen0cZMze_1BeYuygJcDkDlkf3KRwVHKWM3XuIu_UEXaQ52uvpGN5J0HLSJyFOrYEUGfa2I7Rm7PCwcEf5h8aH4_REgqmt924_X0VRiQixzKSvi0qFctmL_KeMUxjV_YoG"/>
+<div class="absolute top-4 left-4 glass-nav px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="text-mok-green font-bold text-headline-sm">5위</span>
+<span class="text-primary font-label-caps text-[10px]">RANK</span>
+</div>
+</div>
+<div class="p-4 text-center">
+<p class="font-headline-sm text-headline-sm text-primary">셸리</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">상자거북</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Feature Grid (2x2) -->
+<section class="mb-section-gap">
+<h3 class="font-headline-md text-headline-md text-primary mb-8 text-center md:text-left">채널 둘러보기</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Dog Channel -->
+<a class="pastel-card p-8 flex items-start gap-6 bg-mint/40 group" href="#">
+<div class="w-16 h-16 rounded-2xl bg-channel-dog/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-channel-dog text-3xl" data-icon="pets">pets</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-2">강아지 채널</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant opacity-70">전문가 팁, 사주 맞춤 훈련 등 소중한 댕댕이들을 위한 정보를 확인하세요.</p>
+</div>
+</a>
+<!-- Cat Channel -->
+<a class="pastel-card p-8 flex items-start gap-6 bg-blush/40 group" href="#">
+<div class="w-16 h-16 rounded-2xl bg-channel-cat/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-channel-cat text-3xl" data-icon="potted_plant">potted_plant</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-2">고양이 채널</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant opacity-70">신비로운 고양이 인사이트, 행동 분석 및 영양 가이드를 제공합니다.</p>
+</div>
+</a>
+<!-- Community -->
+<a class="pastel-card p-8 flex items-start gap-6 bg-lavender/40 group" href="#">
+<div class="w-16 h-16 rounded-2xl bg-channel-community/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-channel-community text-3xl" data-icon="groups">groups</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-2">커뮤니티</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant opacity-70">집사님들과 소통하고 팁을 나누며 우리 아이의 소중한 순간을 기록해보세요.</p>
+</div>
+</a>
+<!-- Profile/My Saju -->
+<a class="pastel-card p-8 flex items-start gap-6 bg-petal/40 group" href="#">
+<div class="w-16 h-16 rounded-2xl bg-channel-saju/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-channel-saju text-3xl" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-2">내 사주 결과</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant opacity-70">반려동물의 사주 리포트와 평생 궁합 리포트를 한눈에 관리하세요.</p>
+</div>
+</a>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-white/50 backdrop-blur-sm border-t border-outline-variant/10 py-12">
+<div class="max-w-[1200px] mx-auto px-page-margin-mobile md:px-page-margin-desktop">
+<div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
+<div class="max-w-xs">
+<div class="font-display-hero text-headline-md text-primary mb-4">K-Saju Pet</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">반려동물과 사람을 우주적 지혜와 커뮤니티 케어로 연결합니다. 최고의 글로벌 펫 집사 플랫폼.</p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-12">
+<div>
+<h5 class="font-label-caps text-label-caps text-primary mb-4">플랫폼</h5>
+<ul class="space-y-2">
+<li class=""><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary" href="#">회사 소개</a></li>
+<li class=""><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary" href="#">이용약관</a></li>
+<li class=""><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary" href="#">개인정보처리방침</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-caps text-label-caps text-primary mb-4">채널</h5>
+<ul class="space-y-2">
+<li class=""><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary" href="#">강아지 채널</a></li>
+<li class=""><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary" href="#">고양이 채널</a></li>
+<li class=""><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary" href="#">특수 동물</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-caps text-label-caps text-primary mb-4">연결하기</h5>
+<ul class="space-y-2">
+<li class=""><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary" href="#">Instagram</a></li>
+<li class=""><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary" href="#">Twitter</a></li>
+<li class=""><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary" href="#">Discord</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="font-label-caps text-[10px] text-on-surface-variant opacity-60">© 2024 K-SAJU PET. ALL RIGHTS RESERVED.</p>
+<div class="flex gap-4 items-center">
+<span class="material-symbols-outlined text-on-surface-variant text-xl cursor-pointer hover:text-primary">language</span>
+<span class="font-label-caps text-label-caps text-primary cursor-pointer">언어: EN / <span class="font-bold">KO</span></span>
+</div>
+</div>
+</div>
+</footer>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pt-2 pb-6 bg-white/90 dark:bg-surface-container/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(68,38,86,0.05)] rounded-t-[2rem] z-50">
+<a class="flex flex-col items-center justify-center bg-primary-fixed text-on-primary-fixed rounded-full px-4 py-1 Active: scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-caps text-[10px] mt-1">홈</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-primary-container/20 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="font-label-caps text-[10px] mt-1">강아지</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-primary-container/20 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="potted_plant">potted_plant</span>
+<span class="font-label-caps text-[10px] mt-1">고양이</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-primary-container/20 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-caps text-[10px] mt-1">댕냥사주</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-primary-container/20 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-label-caps text-[10px] mt-1">커뮤</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-primary-container/20 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-[10px] mt-1">프로필</span>
+</a>
+</nav>
+<script>
+        // Weekly Ranking Slider Logic
+        const slider = document.getElementById('rankingSlider');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        const updateButtons = () => {
+            const maxScroll = slider.scrollWidth - slider.clientWidth;
+            prevBtn.disabled = slider.scrollLeft <= 0;
+            nextBtn.disabled = slider.scrollLeft >= maxScroll - 5; // tolerance
+            
+            prevBtn.style.opacity = prevBtn.disabled ? "0" : "1";
+            nextBtn.style.opacity = nextBtn.disabled ? "0" : "1";
+        };
+
+        if (slider && prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', () => {
+                slider.scrollBy({ left: -300, behavior: 'smooth' });
+            });
+
+            nextBtn.addEventListener('click', () => {
+                slider.scrollBy({ left: 300, behavior: 'smooth' });
+            });
+
+            slider.addEventListener('scroll', updateButtons);
+            window.addEventListener('resize', updateButtons);
+            // Initial state
+            setTimeout(updateButtons, 100);
+        }
+
+        // Simple micro-interactions
+        document.querySelectorAll('.pastel-card').forEach(card => {
+            card.addEventListener('mousedown', () => card.style.transform = 'scale(0.98)');
+            card.addEventListener('mouseup', () => card.style.transform = 'translateY(-4px)');
+        });
+    </script>
+</body></html>

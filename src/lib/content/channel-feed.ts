@@ -10,6 +10,12 @@ export interface ChannelEditorialRow {
   tags: string[];
   is_featured: boolean;
   published_at: string | null;
+  category?: {
+    slug: string;
+    name_ko: string;
+    name_en: string;
+    emoji: string | null;
+  } | null;
 }
 
 type Locale = "ko" | "en";
@@ -21,11 +27,18 @@ function estimateReadTime(text: string, locale: Locale): string {
 }
 
 function rowToArticle(row: ChannelEditorialRow, index: number, locale: Locale): ChannelArticle {
-  const tag = row.tags[0] ?? (locale === "en" ? "Guide" : "가이드");
+  const fallbackTag = row.tags[0] ?? (locale === "en" ? "Guide" : "가이드");
+  const categoryName = row.category
+    ? locale === "en"
+      ? row.category.name_en
+      : row.category.name_ko
+    : fallbackTag;
   const bodyText = row.body ?? row.summary ?? "";
   return {
     id: row.id,
-    category: tag,
+    category: categoryName,
+    categorySlug: row.category?.slug,
+    categoryEmoji: row.category?.emoji ?? undefined,
     title: row.title,
     summary: row.summary ?? "",
     body: row.body ?? undefined,
@@ -64,7 +77,7 @@ export async function fetchChannelEditorial(channel: PetChannel, locale: Locale 
 
   const { data, error } = await supabase
     .from("contents")
-    .select("id, title, summary, body, tags, is_featured, published_at")
+    .select("id, title, summary, body, tags, is_featured, published_at, category:content_categories(slug, name_ko, name_en, emoji)")
     .eq("channel", channel)
     .eq("is_published", true)
     .order("is_featured", { ascending: false })
@@ -110,7 +123,7 @@ export async function fetchChannelArticle(
 
   const { data, error } = await supabase
     .from("contents")
-    .select("id, title, summary, body, tags, is_featured, published_at")
+    .select("id, title, summary, body, tags, is_featured, published_at, category:content_categories(slug, name_ko, name_en, emoji)")
     .eq("id", id)
     .eq("channel", channel)
     .eq("is_published", true)

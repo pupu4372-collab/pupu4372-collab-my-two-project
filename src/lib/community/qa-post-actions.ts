@@ -2,7 +2,7 @@ import { createUserSupabaseClient, getBearerToken, getUserIdFromRequest } from "
 import type { CommunityPost } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
-type EditableBoard = "free" | "tips";
+type EditableBoard = "free" | "tips" | "experience";
 
 const POST_SELECT =
   "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at";

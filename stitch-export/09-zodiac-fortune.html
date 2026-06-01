@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"primary-fixed": "#f5d9ff", "channel-community": "#22C55E", "inverse-on-surface": "#f2f0ed", "outline-variant": "#cec3ce", "on-tertiary": "#ffffff", "on-tertiary-container": "#b7be73", secondary: "#715a4c", outline: "#7d747e", "tertiary-fixed": "#e1e999", "on-tertiary-fixed": "#1a1d00", "surface-dim": "#dbdad6", "inverse-surface": "#30312e", cream: "#FDFBF7", petal: "#FCE1F1", blush: "#FDECE7", background: "#fbf9f5", "on-error": "#ffffff", surface: "#fbf9f5", "surface-bright": "#fbf9f5", "channel-cat": "#EF4444", lavender: "#E6E1F9", "surface-container-highest": "#e4e2de", "on-secondary": "#ffffff", "channel-dog": "#3B82F6", "channel-saju": "#8B5CF6", "to-yellow": "#F59E0B", "surface-container-lowest": "#ffffff", "error-container": "#ffdad6", "primary-container": "#5c3d6e", "tertiary-container": "#474d0d", "on-secondary-fixed": "#28180d", "surface-container": "#efeeea", "mok-green": "#22C55E", "surface-container-low": "#f5f3ef", primary: "#442656", "hwa-red": "#EF4444", "geum-white": "#94A3B8", "on-secondary-container": "#755e50", "on-primary-container": "#d1abe4", "tertiary-fixed-dim": "#c5cc7f", "secondary-container": "#f9d9c8", "on-tertiary-fixed-variant": "#454b0a", sand: "#F5F1E9", "surface-tint": "#725284", mint: "#E1F5F0", "surface-container-high": "#eae8e4", "on-secondary-fixed-variant": "#574236", "secondary-fixed": "#fcdccb", "primary-fixed-dim": "#dfb9f2", "on-background": "#1b1c1a", "inverse-primary": "#dfb9f2", "secondary-fixed-dim": "#dfc0b0", "on-surface": "#1b1c1a", "su-black": "#334155", "on-primary-fixed": "#2b0d3c", "surface-variant": "#e4e2de", "on-surface-variant": "#4b444d", error: "#ba1a1a", "on-error-container": "#93000a", "on-primary": "#ffffff", tertiary: "#313600", "on-primary-fixed-variant": "#593a6b"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {"page-margin-desktop": "4rem", "page-margin-mobile": "1.25rem", "card-padding": "2rem", gutter: "1.5rem", "section-gap": "5rem"}, fontFamily: {"body-md": ["SUIT Variable", "sans-serif"], "body-sm": ["SUIT Variable", "sans-serif"], "headline-lg": ["SUIT Variable", "sans-serif"], "headline-sm": ["SUIT Variable", "sans-serif"], "headline-md": ["SUIT Variable", "sans-serif"], "display-hero-mobile": ["SUIT Variable", "sans-serif"], "label-caps": ["SUIT Variable", "sans-serif"], "display-hero": ["SUIT Variable", "sans-serif"], "body-lg": ["SUIT Variable", "sans-serif"], headline: ["SUIT Variable"], display: ["SUIT Variable"], body: ["SUIT Variable"], label: ["SUIT Variable"]}, fontSize: {"body-md": ["16px", {lineHeight: "1.6", fontWeight: "400"}], "body-sm": ["14px", {lineHeight: "1.5", fontWeight: "400"}], "headline-lg": ["32px", {lineHeight: "1.3", fontWeight: "700"}], "headline-sm": ["20px", {lineHeight: "1.4", fontWeight: "600"}], "headline-md": ["24px", {lineHeight: "1.4", fontWeight: "700"}], "display-hero-mobile": ["32px", {lineHeight: "1.2", fontWeight: "800"}], "label-caps": ["12px", {lineHeight: "1", letterSpacing: "0.05em", fontWeight: "700"}], "display-hero": ["42px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "800"}], "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}]}}}};</script>
+<style>
+        body { background-color: #FDFBF7; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(68, 38, 86, 0.1);
+        }
+        .dream-gradient {
+            background: linear-gradient(135deg, #FCE1F1 0%, #E6E1F9 50%, #E1F5F0 100%);
+        }
+        .night-sky {
+            background: linear-gradient(180deg, #442656 0%, #6c5679 100%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/60 backdrop-blur-md border-b border-primary/10 shadow-sm flex justify-between items-center px-page-margin-mobile md:px-page-margin-desktop h-16">
+<div class="flex items-center gap-8">
+<span class="font-display-hero-mobile text-display-hero-mobile font-black text-primary">K-Saju Pet</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="font-label-caps text-label-caps text-primary font-bold border-b-2 border-primary py-1" href="#">Fortune</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors py-1" href="#">Compatibility</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors py-1" href="#">Pet Show</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors py-1" href="#">Community</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="pets">pets</span>
+<button class="hidden md:block bg-primary text-on-primary px-6 py-2 rounded-full font-label-caps text-label-caps active:scale-95 transition-transform">Consultation</button>
+</div>
+</nav>
+<main class="pt-16 overflow-hidden">
+<!-- Hero Section -->
+<section class="relative night-sky text-white py-24 md:py-32 px-page-margin-mobile md:px-page-margin-desktop text-center overflow-hidden">
+<div class="absolute inset-0 opacity-30">
+<div class="absolute top-10 left-1/4 w-2 h-2 bg-white rounded-full animate-pulse"></div>
+<div class="absolute top-40 left-1/2 w-1 h-1 bg-white rounded-full animate-pulse" style="animation-delay: 1s"></div>
+<div class="absolute top-20 right-1/4 w-3 h-3 bg-white rounded-full animate-pulse" style="animation-delay: 2s"></div>
+<div class="absolute bottom-20 left-1/3 w-2 h-2 bg-white rounded-full animate-pulse" style="animation-delay: 1.5s"></div>
+</div>
+<div class="relative z-10">
+<span class="font-label-caps text-label-caps tracking-[0.2em] text-primary-fixed mb-4 block">PET ASTROLOGY GUIDE</span>
+<h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero font-black mb-6">이번 주의 별자리 운세</h1>
+<p class="font-body-lg text-body-lg text-primary-fixed-dim max-w-2xl mx-auto opacity-90">
+                    우주의 기운이 우리 아이들에게 어떤 메시지를 보낼까요? 반려동물의 생일로 알아보는 신비로운 주간 운세 가이드입니다.
+                </p>
+</div>
+<!-- Floating Decoration -->
+<div class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-full max-w-4xl opacity-20">
+<img alt="Celestial Map" class="w-full h-auto" data-alt="A striking digital illustration of a mystical celestial map featuring stylized pet constellations in a deep purple night sky. The scene is filled with glowing nebulae in shades of lavender and soft blue, with tiny sparkling stars scattered throughout. The composition is airy and dreamlike, using a soft-focus glassmorphism aesthetic that matches the Dream Sky brand identity. The lighting is ethereal, emanating from the glowing stars." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVGNXB5kXL8cbY4_9gtWgfY9RlKjvgSBdlT6Q94S1VKdVSA0qsPsqrX9uEpls0cF1fBBPZZZB-0YjRO0I7ecrNDuSwHn5_37b_vEIYNa9Zq4p-r_gurQCkmVywZURklFr1QX5PmOtz2Qr20jqiqi-yOhnkCvHuUEAEI8OtlvBUMWreqsi47QLRoVbr1jKprFcMXiuDMIwA-0dnkqn_UDu5dcON5Zq_FWXNgx6KNJVxL4X1WHFHyltBFjHcdwpAh8BMWap2YVYKZGEk"/>
+</div>
+</section>
+<!-- Featured Fortune -->
+<section class="max-w-7xl mx-auto px-page-margin-mobile md:px-page-margin-desktop -mt-16 relative z-20 mb-20">
+<div class="glass-card rounded-[2rem] p-8 md:p-12 shadow-xl flex flex-col md:flex-row gap-10 items-center border-white/20">
+<div class="w-full md:w-1/3 aspect-square rounded-[2rem] overflow-hidden relative shadow-inner">
+<img alt="Featured Zodiac" class="w-full h-auto object-cover" data-alt="A premium 3D digital illustration of a serene cat representing the Pisces zodiac sign, gracefully floating amidst soft mint and lavender nebula clouds. The cat has a mystical aura with subtle glowing accents on its fur. The background is a clean, minimalist pastel sky that feels lightweight and ethereal. The lighting is soft and diffused, creating a high-end editorial feel consistent with a luxury pet brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARLZ_tV84YQ_BZxWsNHt5npSd8Ef_f0Z3-LZ417259f4HSGSdYl4othka2Y_DObJF5HW95FZepB5DttiZ6OztiBzAsgbxhaZZWeSzWJrA8YN6lLzKLUYfqSZRt3OsG1F3MtqVdeuw5DhQvadh_5SNB_-AxzpXd2RHZPwWO1hneSWG9Gn0PqP5rrNzjy_8eAdNHmEFADvPsKA8bwJCMqYv2wjd5FCQJ3-K_5vzDGB976gjsNIfspQTwswne-r75kpBNcaujdTBboU8C"/>
+<div class="absolute top-4 left-4 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full font-label-caps text-label-caps text-primary">
+                        이달의 별자리: 물고기자리
+                    </div>
+</div>
+<div class="w-full md:w-2/3">
+<div class="flex items-center gap-2 mb-4">
+<span class="w-10 h-[2px] bg-primary"></span>
+<span class="font-label-caps text-label-caps text-primary">3월 18일 - 3월 24일</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-primary mb-6">이번 주 행운: "새로운 친구와의 산책"</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">
+                        이번 주는 사교성이 매우 높아지는 시기입니다. 평소 낯을 가리던 아이도 새로운 산책로에서 마음이 맞는 친구를 만날 수 있어요. 물 기운(Su)이 강해지는 목요일에는 물놀이나 촉촉한 습식 간식을 추천합니다. 주인의 다정한 목소리가 아이의 정서적 안정에 큰 도움이 될 거예요.
+                    </p>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+<div class="bg-mint/40 p-4 rounded-xl border border-mint">
+<p class="font-label-caps text-label-caps text-on-secondary-fixed-variant mb-1">행운의 컬러</p>
+<p class="font-headline-sm text-headline-sm text-primary">민트 그린</p>
+</div>
+<div class="bg-lavender/40 p-4 rounded-xl border border-lavender">
+<p class="font-label-caps text-label-caps text-on-secondary-fixed-variant mb-1">행운의 장소</p>
+<p class="font-headline-sm text-headline-sm text-primary">강변 공원</p>
+</div>
+<div class="bg-petal/40 p-4 rounded-xl border border-petal col-span-2 md:col-span-1">
+<p class="font-label-caps text-label-caps text-on-secondary-fixed-variant mb-1">궁합 팁</p>
+<p class="font-headline-sm text-headline-sm text-primary">사자자리와 찰떡!</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Zodiac Grid -->
+<section class="max-w-7xl mx-auto px-page-margin-mobile md:px-page-margin-desktop mb-section-gap">
+<div class="flex justify-between items-end mb-10">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">모든 별자리 확인하기</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">아이의 생일에 맞는 별자리를 선택해 보세요.</p>
+</div>
+<button class="text-primary font-label-caps text-label-caps flex items-center gap-1 group">
+                    전체보기 <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-gutter">
+<!-- Aries -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-blush rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-hwa-red" data-icon="pets">pets</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">양자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">03.21 - 04.19</p>
+</div>
+<!-- Taurus -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-mint rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-mok-green" data-icon="forest">forest</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">황소자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">04.20 - 05.20</p>
+</div>
+<!-- Gemini -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-lavender rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-primary" data-icon="group">group</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">쌍둥이자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">05.21 - 06.21</p>
+</div>
+<!-- Cancer -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-petal rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-secondary" data-icon="home_health">home_health</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">게자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">06.22 - 07.22</p>
+</div>
+<!-- Leo -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-to-yellow/20 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-to-yellow" data-icon="sunny">sunny</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">사자자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">07.23 - 08.22</p>
+</div>
+<!-- Virgo -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-mint rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-mok-green" data-icon="spa">spa</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">처녀자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">08.23 - 09.23</p>
+</div>
+<!-- Libra -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-lavender rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-primary" data-icon="balance">balance</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">천칭자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">09.24 - 10.22</p>
+</div>
+<!-- Scorpio -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-primary" data-icon="mode_night">mode_night</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">전갈자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">10.23 - 11.22</p>
+</div>
+<!-- Sagittarius -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-blush rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-hwa-red" data-icon="explore">explore</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">사수자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">11.23 - 12.24</p>
+</div>
+<!-- Capricorn -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-sand rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-su-black" data-icon="terrain">terrain</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">염소자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">12.25 - 01.19</p>
+</div>
+<!-- Aquarius -->
+<div class="glass-card rounded-[2rem] p-6 text-center card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-mint rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-channel-dog" data-icon="water_drop">water_drop</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">물병자리</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">01.20 - 02.18</p>
+</div>
+<!-- Pisces -->
+<div class="glass-card rounded-[2rem] p-6 text-center ring-2 ring-primary bg-white/80 shadow-lg card-hover cursor-pointer group">
+<div class="w-20 h-20 bg-lavender rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-primary" data-icon="bubbles">bubbles</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary">물고기자리</h3>
+<p class="font-label-caps text-label-caps text-primary font-bold mt-2">이달의 행운 ★</p>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="max-w-7xl mx-auto px-page-margin-mobile md:px-page-margin-desktop mb-section-gap">
+<div class="dream-gradient rounded-[2rem] p-12 text-center relative overflow-hidden">
+<div class="relative z-10">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-4">우리 아이 맞춤형 사주가 궁금하신가요?</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8 max-w-xl mx-auto">
+                        생년월일시를 입력하면 전문 사주 분석가가 제공하는 정밀한 반려동물 성향 분석 리포트를 받아보실 수 있습니다.
+                    </p>
+<button class="bg-primary text-on-primary px-10 py-4 rounded-full font-headline-sm text-headline-sm active:scale-95 transition-transform shadow-lg">
+                        무료 사주 분석 시작하기
+                    </button>
+</div>
+<!-- Abstract Deco -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+<div class="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-sand w-full py-12 mt-section-gap">
+<div class="max-w-7xl mx-auto px-page-margin-mobile md:px-page-margin-desktop flex flex-col md:flex-row justify-between items-center gap-gutter">
+<div class="flex flex-col items-center md:items-start">
+<span class="font-headline-sm text-headline-sm font-bold text-primary mb-2">K-Saju Pet</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 K-Saju Pet. All rights reserved.</p>
+</div>
+<div class="flex gap-6">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors opacity-80 hover:opacity-100" href="#">About</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors opacity-80 hover:opacity-100" href="#">Terms</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors opacity-80 hover:opacity-100" href="#">Privacy</a>
+<a class="font-label-caps text-label-caps text-primary font-bold underline" href="#">Pet Astrology Guide</a>
+</div>
+</div>
+</footer>
+<script>
+        // Simple micro-interaction for cards
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                // Potential for more complex animations
+            });
+        });
+
+        // Safe area handle for mobile (though handled via padding generally)
+        window.addEventListener('load', () => {
+            console.log('K-Saju Pet Zodiac Page Loaded');
+        });
+    </script>
+</body></html>

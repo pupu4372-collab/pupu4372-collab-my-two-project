@@ -36,6 +36,7 @@ export function ChannelArticleDetail({ channel, article, source }: ChannelArticl
 
       <div>
         <p className={`text-xs font-bold ${theme.accent}`}>
+          {article.categoryEmoji ? `${article.categoryEmoji} ` : ""}
           {article.category} · {article.readTime}
         </p>
         <h2 className="mt-2 text-2xl font-bold text-plum">{article.title}</h2>

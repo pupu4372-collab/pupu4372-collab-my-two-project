@@ -58,3 +58,15 @@ export async function setPostHidden(postId: string, hidden: boolean): Promise<bo
 
   return !error;
 }
+
+export async function deletePostByAdmin(postId: string): Promise<boolean> {
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return false;
+
+  const { error } = await supabase
+    .from("community_posts")
+    .delete()
+    .eq("id", postId);
+
+  return !error;
+}

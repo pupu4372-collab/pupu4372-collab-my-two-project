@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>우리 아이 자랑하기 - K-Saju Pet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"primary-fixed": "#f5d9ff", "on-tertiary-container": "#b7be73", outline: "#7d747e", "on-secondary-fixed": "#28180d", "error-container": "#ffdad6", blush: "#FDECE7", "mok-green": "#22C55E", "channel-saju": "#8B5CF6", "channel-cat": "#EF4444", lavender: "#E6E1F9", "on-tertiary": "#ffffff", error: "#ba1a1a", secondary: "#715a4c", "secondary-container": "#f9d9c8", "tertiary-fixed-dim": "#c5cc7f", "surface-container-low": "#f5f3ef", "channel-community": "#22C55E", "primary-container": "#5c3d6e", "tertiary-container": "#474d0d", "su-black": "#334155", "on-secondary": "#ffffff", "inverse-on-surface": "#f2f0ed", "outline-variant": "#cec3ce", "surface-container-lowest": "#ffffff", primary: "#442656", "surface-dim": "#dbdad6", "on-surface-variant": "#4b444d", tertiary: "#313600", "on-secondary-fixed-variant": "#574236", "hwa-red": "#EF4444", "surface-variant": "#e4e2de", "tertiary-fixed": "#e1e999", "channel-dog": "#3B82F6", "surface-container": "#efeeea", sand: "#F5F1E9", "on-tertiary-fixed-variant": "#454b0a", "secondary-fixed": "#fcdccb", "inverse-primary": "#dfb9f2", "on-primary-container": "#d1abe4", "on-primary": "#ffffff", "to-yellow": "#F59E0B", "on-surface": "#1b1c1a", "on-secondary-container": "#755e50", mint: "#E1F5F0", "surface-bright": "#fbf9f5", "on-primary-fixed-variant": "#593a6b", "surface-container-highest": "#e4e2de", cream: "#FDFBF7", petal: "#FCE1F1", background: "#fbf9f5", "on-primary-fixed": "#2b0d3c", "primary-fixed-dim": "#dfb9f2", "on-tertiary-fixed": "#1a1d00", "secondary-fixed-dim": "#dfc0b0", "inverse-surface": "#30312e", "surface-container-high": "#eae8e4", "geum-white": "#94A3B8", "on-error-container": "#93000a", "on-background": "#1b1c1a", "on-error": "#ffffff", "surface-tint": "#725284", surface: "#fbf9f5"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {"page-margin-desktop": "4rem", "card-padding": "2rem", gutter: "1.5rem", "section-gap": "5rem", "page-margin-mobile": "1.25rem"}, fontFamily: {"body-lg": ["SUIT Variable"], "body-md": ["SUIT Variable"], "headline-sm": ["SUIT Variable"], "headline-md": ["SUIT Variable"], "headline-lg": ["SUIT Variable"], "display-hero": ["SUIT Variable"], headline: ["SUIT Variable"], display: ["SUIT Variable"], body: ["SUIT Variable"], label: ["SUIT Variable"]}, fontSize: {}}}};</script>
+<style>
+        @import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/suit-variable.css');
+        
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            background: linear-gradient(135deg, #FDFBF7 0%, #E6E1F9 50%, #E1F5F0 100%);
+            min-height: 100vh;
+        }
+
+        .pastel-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(68, 38, 86, 0.1);
+        }
+
+        .pastel-input {
+            background: #F5F1E9;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .pastel-input:focus {
+            background: #ffffff;
+            border-color: #5c3d6e;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(92, 61, 110, 0.1);
+        }
+
+        .glass-nav {
+            background: rgba(251, 249, 245, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .custom-radio:checked + label {
+            background-color: #442656;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/10 shadow-sm h-16">
+<div class="flex justify-between items-center h-full px-page-margin-desktop max-w-7xl mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-primary">K-Saju Pet</div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Home</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Dog</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Cat</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">K-Saju</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md" href="#">Community</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-primary font-body-md text-body-md cursor-pointer">EN/KO</span>
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="person">person</span>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="pt-24 pb-section-gap px-page-margin-mobile md:px-page-margin-desktop max-w-4xl mx-auto">
+<!-- Header Section -->
+<header class="mb-10 text-center">
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">우리 아이 자랑하기</h1>
+<p class="font-body-lg text-body-lg text-secondary">반려동물의 소중한 순간을 공유해주세요!</p>
+</header>
+<!-- Post Form Container -->
+<div class="pastel-card rounded-2rem p-8 md:p-12 shadow-sm">
+<form class="space-y-10" id="uploadForm">
+<!-- Photo Upload Area -->
+<section>
+<label class="block font-headline-sm text-headline-sm text-primary mb-4">사진 업로드</label>
+<div class="relative group cursor-pointer">
+<input accept="image/*" class="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer" id="petPhoto" type="file"/>
+<div class="border-2 border-dashed border-outline-variant rounded-2rem p-12 flex flex-col items-center justify-center bg-white/30 group-hover:bg-white/50 transition-all duration-300 min-h-[320px]">
+<div class="w-20 h-20 rounded-full bg-lavender flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="photo_camera">photo_camera</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-primary mb-2">사진 선택하기</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">권장 사이즈: 4:3 또는 1:1, 최대 10MB</p>
+</div>
+</div>
+</section>
+<!-- Pet Selection -->
+<section>
+<label class="block font-headline-sm text-headline-sm text-primary mb-4">반려동물 선택</label>
+<div class="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+<label class="flex-shrink-0 cursor-pointer group">
+<input checked="" class="hidden peer" name="pet_select" type="radio"/>
+<div class="flex flex-col items-center gap-2 p-3 rounded-xl peer-checked:bg-lavender transition-all">
+<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent peer-checked:border-primary">
+<img class="w-full h-full object-cover" data-alt="A portrait of a fluffy white Pomeranian dog with bright, intelligent eyes, sitting gracefully in a sunlit modern interior with soft pastel accents of mint and cream. The lighting is warm and ethereal, highlighting the texture of its fur against a clean, minimalist background. The overall mood is joyful and premium." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFTrVe7L9dy1-Pvh9PIe4QeqmQ6IBhgnPMcSp9TpsuDzdw2R1LwnIigo8v0uUL27n505fyu8AS0_fLMBZnyHNBRGq27e-fhJbzuNNO4ryeaoNc7e8pe38abcKfrWcJkHphl4iNuWsLBa4Wq9LBIBC5ciqa2KkVdfmGJQxL8FNPtaY3Udrbwoxo0HhMdxICm_vmild7PW1HVr9ZNPVOI2QCLhtC2hd6Y-nOhkqJ0VUSkkNaX7qFyFtTFkAPamFwYGEBrjQACBM_tbqg"/>
+</div>
+<span class="font-body-sm text-body-sm text-primary font-bold">초코</span>
+</div>
+</label>
+<label class="flex-shrink-0 cursor-pointer group">
+<input class="hidden peer" name="pet_select" type="radio"/>
+<div class="flex flex-col items-center gap-2 p-3 rounded-xl peer-checked:bg-lavender transition-all">
+<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent peer-checked:border-primary">
+<img class="w-full h-full object-cover" data-alt="A sleek ginger tabby cat lounging on a soft lavender-colored velvet cushion. The setting is a bright, high-end room with soft morning light streaming through large windows. The aesthetic is clean and modern, focusing on the calm and sophisticated personality of the feline subject." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTnEboJSS7QnuBzQeFfmEc7jRQeSUloxnYqOYQe-cS72_vnWX37r-Q1SZFkUgWVxzdnZqiBoV2N5n-sFovducFZ3HmBt2GSRbwPrxLtcTycm27avAu8Me6Co06ctBJElNuOq7XWuJXeei_aQTY18Ga0Qe1sX6A8mz2jcRhOS4TZ3dLZZ2r3BPm3Bf5v32JEO_qW7MFXDeeWgufkzkRnE6HChclBBXvwEWwVdG1WOImpQMaA7OuNSRp-P-7VzkqozZvrxu2Nr68-0Mf"/>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant group-hover:text-primary transition-colors">나비</span>
+</div>
+</label>
+<button class="flex-shrink-0 flex flex-col items-center gap-2 p-3" type="button">
+<div class="w-16 h-16 rounded-full border-2 border-dashed border-outline-variant flex items-center justify-center text-outline hover:text-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">추가하기</span>
+</button>
+</div>
+</section>
+<!-- Title & Story -->
+<section class="space-y-6">
+<div>
+<label class="block font-headline-sm text-headline-sm text-primary mb-2">제목</label>
+<input class="pastel-input w-full p-4 rounded-xl font-body-md text-body-md text-primary" placeholder="아이의 매력을 한 줄로 소개해주세요!" type="text"/>
+</div>
+<div>
+<label class="block font-headline-sm text-headline-sm text-primary mb-2">이야기</label>
+<textarea class="pastel-input w-full p-4 rounded-xl font-body-md text-body-md text-primary resize-none" placeholder="아이의 소중한 순간에 대한 이야기를 들려주세요 (예: 산책 다녀와서 기분이 좋아요!)" rows="5"></textarea>
+</div>
+</section>
+<!-- Species Category -->
+<section>
+<label class="block font-headline-sm text-headline-sm text-primary mb-4">카테고리</label>
+<div class="flex flex-wrap gap-3">
+<div class="relative">
+<input checked="" class="hidden custom-radio" id="species-dog" name="species" type="radio"/>
+<label class="px-6 py-2 rounded-full border border-primary text-primary font-body-md text-body-md cursor-pointer hover:bg-lavender transition-all" for="species-dog">강아지</label>
+</div>
+<div class="relative">
+<input class="hidden custom-radio" id="species-cat" name="species" type="radio"/>
+<label class="px-6 py-2 rounded-full border border-primary text-primary font-body-md text-body-md cursor-pointer hover:bg-lavender transition-all" for="species-cat">고양이</label>
+</div>
+<div class="relative">
+<input class="hidden custom-radio" id="species-other" name="species" type="radio"/>
+<label class="px-6 py-2 rounded-full border border-primary text-primary font-body-md text-body-md cursor-pointer hover:bg-lavender transition-all" for="species-other">다른 동물</label>
+</div>
+</div>
+</section>
+<!-- Action Buttons -->
+<div class="flex flex-col md:flex-row gap-4 pt-8">
+<button class="w-full md:flex-1 py-4 px-8 rounded-full bg-primary text-cream font-headline-sm text-headline-sm hover:opacity-90 active:scale-95 transition-all shadow-md" type="button">
+                        자랑하기
+                    </button>
+<button class="w-full md:w-40 py-4 px-8 rounded-full border border-primary text-primary font-headline-sm text-headline-sm hover:bg-primary/5 active:scale-95 transition-all" type="button">
+                        취소
+                    </button>
+</div>
+</form>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full rounded-t-[2rem] bg-sand bg-gradient-to-b from-lavender/20 to-mint/20 mt-12">
+<div class="flex flex-col md:flex-row justify-between items-center gap-gutter py-12 px-page-margin-desktop max-w-7xl mx-auto w-full">
+<div class="flex flex-col items-center md:items-start gap-4">
+<div class="font-headline-sm text-headline-sm font-bold text-primary">K-Saju Pet</div>
+<p class="font-body-sm text-body-sm text-secondary">© 2024 K-Saju Pet. All rights reserved.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">About Us</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interactions
+        const photoUpload = document.getElementById('petPhoto');
+        const uploadArea = photoUpload.nextElementSibling;
+
+        photoUpload.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    uploadArea.innerHTML = `
+                        <div class="w-full h-full absolute inset-0 rounded-2rem overflow-hidden">
+                            <img src="${event.target.result}" class="w-full h-full object-cover" />
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                <span class="text-white font-bold">사진 변경하기</span>
+                            </div>
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Form submission animation mock
+        document.querySelector('button.bg-primary').addEventListener('click', function() {
+            this.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="progress_activity">progress_activity</span>';
+            setTimeout(() => {
+                alert('자랑하기 글이 성공적으로 등록되었습니다!');
+                window.location.reload();
+            }, 1500);
+        });
+    </script>
+</body></html>

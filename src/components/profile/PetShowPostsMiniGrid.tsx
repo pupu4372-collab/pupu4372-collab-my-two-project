@@ -132,7 +132,7 @@ export function PetShowPostsMiniGrid() {
   if (!configured || isAnonymous) return null;
 
   return (
-    <div className="space-y-3 rounded-3xl border border-channel-community/20 bg-white/45 p-4">
+    <div className="glass-card space-y-3 rounded-[2rem] p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-channel-community">

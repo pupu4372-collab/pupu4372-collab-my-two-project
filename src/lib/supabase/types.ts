@@ -162,23 +162,54 @@ export interface Database {
       contents: TableDef<
         {
           id: string;
+          category_id: string | null;
           channel: AppChannel;
           title: string;
           summary: string | null;
           body: string | null;
+          thumbnail_url: string | null;
           tags: string[];
+          language: string;
           is_featured: boolean;
           is_published: boolean;
           published_at: string | null;
         },
         Partial<{
+          category_id: string | null;
           channel: AppChannel;
           title: string;
           summary: string;
           body: string;
+          thumbnail_url: string | null;
           tags: string[];
+          language: string;
           is_featured: boolean;
           is_published: boolean;
+        }>
+      >;
+      content_categories: TableDef<
+        {
+          id: string;
+          channel: AppChannel;
+          slug: string;
+          name_ko: string;
+          name_en: string;
+          theme_color: string | null;
+          emoji: string | null;
+          sort_order: number;
+          is_active: boolean;
+          is_coming_soon: boolean;
+        },
+        Partial<{
+          channel: AppChannel;
+          slug: string;
+          name_ko: string;
+          name_en: string;
+          theme_color: string | null;
+          emoji: string | null;
+          sort_order: number;
+          is_active: boolean;
+          is_coming_soon: boolean;
         }>
       >;
     };

@@ -1,14 +1,16 @@
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
-import { ChannelShell } from "@/components/layout/ChannelShell";
+import { AppTopNav } from "@/components/layout/AppTopNav";
+import { PageContainer } from "@/components/layout/StitchLayout";
 
 export default function AdminPage() {
   return (
-    <ChannelShell
-      theme="neutral"
-      title="관리자 대시보드"
-      subtitle="펫·게시글·사주·결제 통계 (MVP)"
-    >
-      <AdminDashboard />
-    </ChannelShell>
+    <div className="min-h-screen bg-dream-sky">
+      <AppTopNav active="profile" />
+      <PageContainer className="max-w-6xl">
+        <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-channel-saju">Admin</p>
+        <h1 className="mb-8 text-2xl font-extrabold text-primary md:text-3xl">K-Saju Pet 관리자</h1>
+        <AdminDashboard />
+      </PageContainer>
+    </div>
   );
 }

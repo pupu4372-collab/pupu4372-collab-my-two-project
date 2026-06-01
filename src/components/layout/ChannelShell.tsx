@@ -1,5 +1,8 @@
 "use client";
 
+import { AppTopNav } from "@/components/layout/AppTopNav";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { GlassCard, PageContainer } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
@@ -80,6 +83,10 @@ export function ChannelShell({
   const nav = useTranslations("nav");
   const locale = useLocale();
   const isKo = locale === "ko";
+  const active =
+    theme === "dog" || theme === "cat" || theme === "saju" || theme === "community"
+      ? theme
+      : "home";
   const links =
     rightLinks ??
     ([
@@ -90,9 +97,11 @@ export function ChannelShell({
 
   return (
     <div className="min-h-screen bg-dream-sky">
-      <header className="border-b border-white/50 bg-white/30 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-4 md:px-8">
-          <Link href={backHref} className="text-sm font-semibold text-plum hover:opacity-80">
+      <AppTopNav active={active} />
+      <PageContainer>
+        {topBar && <div className="mb-5">{topBar}</div>}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <Link href={backHref} className="rounded-full bg-white/60 px-4 py-2 text-sm font-extrabold text-plum shadow-sm transition hover:bg-white">
             {backLabel ?? tc("backHome")}
           </Link>
           <nav className="flex flex-wrap items-center justify-end gap-2">
@@ -100,29 +109,30 @@ export function ChannelShell({
               <Link
                 key={`${link.href}-${link.label}`}
                 href={link.href}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition hover:brightness-105 ${t.bg} ${t.accent}`}
+                className={`rounded-full px-3 py-1.5 text-xs font-extrabold shadow-sm transition hover:brightness-105 ${t.bg} ${t.accent}`}
               >
                 {link.label}
               </Link>
             ))}
           </nav>
         </div>
-      </header>
-
-      <main className="mx-auto max-w-5xl px-5 py-10 md:px-8 md:py-14">
-        {topBar && <div className="mb-5">{topBar}</div>}
-        <div className={`pastel-card border-2 ${t.border} px-6 py-8 md:px-10`}>
+        <GlassCard className={`relative overflow-hidden border-2 ${t.border} px-6 py-8 md:px-10`}>
+          <div className={`absolute -right-10 -top-14 h-44 w-44 rounded-full ${t.bg} blur-3xl`} />
           {beforeTitle && <div className="mb-6">{beforeTitle}</div>}
           {comingSoon && (
             <p className="mb-4 inline-block rounded-full bg-gold/40 px-3 py-1 text-xs font-medium text-plum">
               {isKo ? "준비 중" : "Coming soon"}
             </p>
           )}
-          <h1 className={`text-2xl font-bold md:text-3xl ${t.accent}`}>{title}</h1>
+          <p className={`relative text-sm font-extrabold ${t.accent}`}>
+            {t.emoji} {isKo ? t.label.ko : t.label.en}
+          </p>
+          <h1 className="relative mt-2 text-3xl font-extrabold tracking-tight text-primary md:text-5xl">{title}</h1>
           {subtitle && <p className="mt-3 text-sm leading-relaxed text-plum/70">{subtitle}</p>}
-          <div className="mt-8">{children}</div>
-        </div>
-      </main>
+        </GlassCard>
+        <div className="mt-8">{children}</div>
+      </PageContainer>
+      <MobileBottomNav active={active} />
     </div>
   );
 }

@@ -23,7 +23,7 @@ export default function CommunityTipsPage() {
         { href: "/community/free", label: isKo ? "자유게시판" : "Free Board" },
       ]}
     >
-      <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr]">
+      <div className="grid gap-8 xl:grid-cols-[0.8fr_1.2fr]">
         <QaComposer board="tips" onPosted={() => setRefreshKey((k) => k + 1)} />
         <QaBoard board="tips" refreshKey={refreshKey} />
       </div>

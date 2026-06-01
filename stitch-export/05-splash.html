@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>K-Saju Pet | Welcome</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed-variant": "#454b0a",
+                    "surface-container-highest": "#e4e2de",
+                    "on-secondary-fixed-variant": "#574236",
+                    "tertiary-fixed": "#e1e999",
+                    "surface-container": "#efeeea",
+                    "surface-dim": "#dbdad6",
+                    "secondary": "#715a4c",
+                    "on-error": "#ffffff",
+                    "surface-container-high": "#eae8e4",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#30312e",
+                    "primary-fixed": "#f5d9ff",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#474d0d",
+                    "surface-variant": "#e4e2de",
+                    "surface-container-low": "#f5f3ef",
+                    "on-primary-container": "#d1abe4",
+                    "on-surface-variant": "#4b444d",
+                    "outline": "#7d747e",
+                    "surface-bright": "#fbf9f5",
+                    "on-primary-fixed-variant": "#593a6b",
+                    "secondary-fixed-dim": "#dfc0b0",
+                    "tertiary-fixed-dim": "#c5cc7f",
+                    "on-primary-fixed": "#2b0d3c",
+                    "on-secondary-fixed": "#28180d",
+                    "surface-tint": "#725284",
+                    "primary-fixed-dim": "#dfb9f2",
+                    "inverse-on-surface": "#f2f0ed",
+                    "on-surface": "#1b1c1a",
+                    "outline-variant": "#cec3ce",
+                    "surface": "#fbf9f5",
+                    "primary": "#442656",
+                    "primary-container": "#5c3d6e",
+                    "background": "#fbf9f5",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-container": "#755e50",
+                    "on-tertiary-container": "#b7be73",
+                    "on-tertiary-fixed": "#1a1d00",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#dfb9f2",
+                    "secondary-container": "#f9d9c8",
+                    "secondary-fixed": "#fcdccb",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#313600",
+                    "on-background": "#1b1c1a",
+                    "on-error-container": "#93000a",
+                    "error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "page-margin-mobile": "1.25rem",
+                    "card-padding": "2rem",
+                    "gutter": "1.5rem",
+                    "section-gap": "5rem",
+                    "page-margin-desktop": "4rem"
+            },
+            "fontFamily": {
+                    "headline-sm": ["SUIT Variable"],
+                    "body-sm": ["SUIT Variable"],
+                    "body-lg": ["SUIT Variable"],
+                    "display-hero": ["SUIT Variable"],
+                    "headline-lg": ["SUIT Variable"],
+                    "body-md": ["SUIT Variable"],
+                    "label-caps": ["SUIT Variable"],
+                    "headline-md": ["SUIT Variable"],
+                    "display-hero-mobile": ["SUIT Variable"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "display-hero": ["42px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                    "display-hero-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5d9ff 0%, #ffffff 50%, #e1e999 100%);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dream-sky-gradient {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(245, 217, 255, 0.6) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(197, 204, 127, 0.4) 0%, transparent 50%);
+            z-index: -1;
+            animation: drift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes drift {
+            from { transform: scale(1); }
+            to { transform: scale(1.1) rotate(2deg); }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0) 0%, 
+                rgba(255,255,255,0.8) 50%, 
+                rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .loading-bar-fill {
+            width: 0%;
+            animation: load 3.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+        }
+
+        @keyframes load {
+            0% { width: 0%; }
+            10% { width: 5%; }
+            40% { width: 60%; }
+            70% { width: 85%; }
+            100% { width: 100%; }
+        }
+
+        .glass-glow {
+            box-shadow: 0 0 40px 10px rgba(223, 185, 242, 0.3);
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface">
+<!-- Atmospheric Background Layers -->
+<div class="dream-sky-gradient"></div>
+<div class="absolute inset-0 bg-white/20 backdrop-blur-[2px]"></div>
+<!-- Main Content Canvas -->
+<main class="relative z-10 flex flex-col items-center justify-center w-full h-full px-page-margin-mobile text-center">
+<!-- Logo Container -->
+<div class="fade-in-up mb-8" style="animation-delay: 0.2s;">
+<div class="relative w-32 h-32 md:w-48 md:h-48 glass-glow rounded-full overflow-hidden p-1 bg-white/40 backdrop-blur-md border border-white/50">
+<img alt="K-Saju Pet Logo" class="w-full h-full object-contain rounded-full" src="https://lh3.googleusercontent.com/aida/ADBb0ui6V9zzyB4MNf1rkl8FSeDYx7wdtSNqUnVtsDRBnF7m6Bm2xv1c9cei2iBwq--0YevGWP600KQiCnARZ0qbN3BbDpsq9rLJbM9u7CxzIubVV7j4UJ_VAenBj3FbY3pJXADLV7n-iwxY_6KV5vXVj-tMg6SmaNRqK1uFTlh6zQuMseA5j0vx_O8rIdVlxJZCoBfGPPHZaMGfyjVOJMWDzXq-vXlqXL5ibTstet_Bixy65lzgyZG525dMQ3wA"/>
+</div>
+</div>
+<!-- Brand Identity -->
+<div class="fade-in-up flex flex-col items-center space-y-3" style="animation-delay: 0.4s;">
+<h1 class="font-headline-md-mobile md:font-headline-md text-headline-md-mobile md:text-headline-md text-primary font-extrabold tracking-tight">
+                K-Saju Pet
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium tracking-wide opacity-90">
+                반려동물과 하늘이 맺어준 특별한 인연
+            </p>
+</div>
+<!-- Bottom UI Section -->
+<div class="absolute bottom-16 w-full max-w-[280px] flex flex-col items-center space-y-8 fade-in-up" style="animation-delay: 0.6s;">
+<!-- Progress Indicator -->
+<div class="w-full h-[6px] bg-white/50 backdrop-blur-sm rounded-full overflow-hidden relative border border-white/20">
+<div class="loading-bar-fill h-full bg-primary-container rounded-full relative overflow-hidden">
+<div class="shimmer absolute inset-0"></div>
+</div>
+</div>
+<!-- Footer Meta -->
+<div class="flex flex-col items-center space-y-1">
+<span class="font-label-caps text-label-caps text-outline-variant uppercase tracking-[0.2em]">
+                    Synchronizing Destiny
+                </span>
+<p class="font-label-caps text-[10px] text-outline-variant/60">
+                    © 2024 K-Saju Pet Team
+                </p>
+</div>
+</div>
+</main>
+<!-- Subtle Floating Particles Micro-interaction -->
+<div class="fixed inset-0 pointer-events-none z-0" id="particles"></div>
+<script>
+        // Simple ambient particle effect
+        const particleContainer = document.getElementById('particles');
+        const colors = ['#f5d9ff', '#e1e999', '#ffffff'];
+        
+        for (let i = 0; i < 15; i++) {
+            const dot = document.createElement('div');
+            const size = Math.random() * 6 + 4;
+            dot.style.width = `${size}px`;
+            dot.style.height = `${size}px`;
+            dot.style.background = colors[Math.floor(Math.random() * colors.length)];
+            dot.style.opacity = Math.random() * 0.4 + 0.1;
+            dot.style.borderRadius = '50%';
+            dot.style.position = 'absolute';
+            dot.style.top = `${Math.random() * 100}vh`;
+            dot.style.left = `${Math.random() * 100}vw`;
+            dot.style.filter = 'blur(2px)';
+            
+            particleContainer.appendChild(dot);
+            
+            // Subtle movement
+            const duration = Math.random() * 20 + 20;
+            const delay = Math.random() * -20;
+            
+            dot.animate([
+                { transform: 'translate(0, 0)' },
+                { transform: `translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px)` }
+            ], {
+                duration: duration * 1000,
+                delay: delay * 1000,
+                iterations: Infinity,
+                direction: 'alternate',
+                easing: 'linear'
+            });
+        }
+
+        // Logic for splash screen timeout (simulated)
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                // In a real app, this would trigger navigation
+                console.log('Splash screen complete. Navigating to Home...');
+            }, 4000);
+        });
+    </script>
+</body></html>

@@ -9,7 +9,7 @@ import { useState } from "react";
 interface QaCommentsProps {
   postId: string;
   initialComments: PostComment[];
-  board?: "qa" | "free" | "tips";
+  board?: "qa" | "free" | "tips" | "experience";
   listHref?: string;
 }
 

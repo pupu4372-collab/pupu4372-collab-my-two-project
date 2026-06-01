@@ -65,6 +65,10 @@ const UI = {
   },
 };
 
+const FIELD_LABEL_CLASS = "block text-sm font-bold text-primary";
+const STITCH_INPUT_CLASS =
+  "pastel-input mt-2 w-full rounded-[2rem] border-transparent bg-sand/50 px-4 py-3.5 text-sm text-on-surface focus:ring-primary/20";
+
 function detectTimezone(): string {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -96,10 +100,10 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const birthTimeUnknown = birthTime === "unknown";
   const inputClass = embedded
     ? "mt-1 w-full rounded-xl border border-plum/10 bg-white px-3 py-2 text-xs leading-5 text-ink outline-none transition focus:border-mint/80 focus:shadow-[0_0_0_3px_rgba(168,230,207,0.25)]"
-    : "mt-1 w-full rounded-xl border border-ink/10 bg-white px-3 py-2 text-sm";
+    : STITCH_INPUT_CLASS;
   const labelClass = embedded
     ? "block text-xs font-medium text-plum/80"
-    : "block text-xs text-ink/60";
+    : FIELD_LABEL_CLASS;
 
   const timezoneOptions = useMemo(() => {
     const set = new Set<string>([...COMMON_TIMEZONES, timezone]);
@@ -176,11 +180,11 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
 
       <form
         onSubmit={handleSubmit}
-        className={embedded ? "space-y-3" : "oriental-card space-y-4 p-5"}
+        className={embedded ? "space-y-3" : "pastel-card space-y-7 p-6 md:p-8"}
       >
-        <div className="flex gap-2.5">
+        <div className={embedded ? "flex gap-2.5" : "grid gap-4 sm:grid-cols-2"}>
           {!embedded && (
-            <label className={`${labelClass} flex-1`}>
+            <label className={labelClass}>
               {t.localeLabel}
               <select
                 value={locale}
@@ -192,17 +196,48 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
               </select>
             </label>
           )}
-          <label className={`${labelClass} flex-1`}>
-            {t.species}
-            <select
-              value={species}
-              onChange={(e) => setSpecies(e.target.value as Species)}
-              className={inputClass}
-            >
-              <option value="dog">{t.dog}</option>
-              <option value="cat">{t.cat}</option>
-            </select>
-          </label>
+          {embedded ? (
+            <label className={`${labelClass} flex-1`}>
+              {t.species}
+              <select
+                value={species}
+                onChange={(e) => setSpecies(e.target.value as Species)}
+                className={inputClass}
+              >
+                <option value="dog">{t.dog}</option>
+                <option value="cat">{t.cat}</option>
+              </select>
+            </label>
+          ) : (
+            <fieldset className="space-y-3 sm:col-span-2">
+              <legend className="flex items-center gap-2 text-sm font-bold text-primary">
+                <span aria-hidden>🐾</span>
+                {t.species}
+              </legend>
+              <div className="grid grid-cols-2 gap-3">
+                {(["dog", "cat"] as const).map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setSpecies(item)}
+                    className={
+                      species === item
+                        ? "rounded-[2rem] border border-primary bg-primary px-4 py-4 text-center text-white shadow-lg shadow-primary/15"
+                        : "rounded-[2rem] border border-outline/20 bg-white/45 px-4 py-4 text-center text-primary transition hover:bg-lavender/50"
+                    }
+                    aria-pressed={species === item}
+                  >
+                    <span className="block text-3xl" aria-hidden>
+                      {item === "dog" ? "🐶" : "🐱"}
+                    </span>
+                    <span className="mt-2 block text-xs font-extrabold uppercase tracking-wide">
+                      {item === "dog" ? t.dog : t.cat}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          )}
           {embedded && (
             <label className={`${labelClass} flex-1`}>
               {t.petGender}
@@ -229,6 +264,37 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
             maxLength={32}
           />
         </label>
+
+        {!embedded && (
+          <fieldset className="space-y-3">
+            <legend className="flex items-center gap-2 text-sm font-bold text-primary">
+              <span aria-hidden>⚥</span>
+              {t.petGender}
+            </legend>
+            <div className="grid grid-cols-2 gap-3">
+              {(["male", "female"] as const).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setPetGender(item)}
+                  className={
+                    petGender === item
+                      ? "rounded-[2rem] border border-primary bg-primary px-4 py-4 text-center text-white shadow-lg shadow-primary/15"
+                      : "rounded-[2rem] border border-outline/20 bg-white/45 px-4 py-4 text-center text-primary transition hover:bg-lavender/50"
+                  }
+                  aria-pressed={petGender === item}
+                >
+                  <span className="block text-3xl" aria-hidden>
+                    {item === "male" ? "♂" : "♀"}
+                  </span>
+                  <span className="mt-2 block text-xs font-extrabold uppercase tracking-wide">
+                    {item === "male" ? t.petMale : t.petFemale}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        )}
 
         <BirthDateSelect
           value={birthDate}
@@ -304,8 +370,9 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-ink py-3 text-sm font-medium text-cream transition hover:bg-ink/90 disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-sm font-bold text-white shadow-lg shadow-primary/15 transition hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60"
           >
+            <span aria-hidden>🐾</span>
             {loading ? t.loading : t.submit}
           </button>
         )}

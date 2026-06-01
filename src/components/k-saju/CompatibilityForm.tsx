@@ -38,6 +38,8 @@ const UI = {
     loading: "인연 계산 중…",
     errorConsent: "개인정보 동의가 필요합니다.",
     localeLabel: "언어",
+    ownerBirthNotice:
+      "생년월일 저장에 동의하시면 로그인할때마다 오늘의 운세를 점쳐드립니다",
   },
   en: {
     petSection: "Pet",
@@ -60,8 +62,14 @@ const UI = {
     loading: "Reading the bond…",
     errorConsent: "Privacy consent required.",
     localeLabel: "Language",
+    ownerBirthNotice:
+      "If you agree to save your birth date, we will show a small daily fortune whenever you log in.",
   },
 };
+
+const FIELD_LABEL_CLASS = "block text-sm font-bold text-primary";
+const STITCH_INPUT_CLASS =
+  "pastel-input mt-2 w-full rounded-[2rem] border-transparent bg-sand/50 px-4 py-3.5 text-sm text-on-surface focus:ring-primary/20";
 
 function detectTimezone(): string {
   try {
@@ -200,52 +208,69 @@ export function CompatibilityForm() {
 
   return (
     <div className="space-y-5">
-      <form onSubmit={handleSubmit} className="pastel-card space-y-6 p-6">
-        <div className="flex gap-3">
-          <label className="block flex-1 text-sm font-medium text-plum/80">
+      <form onSubmit={handleSubmit} className="pastel-card space-y-7 p-6 md:p-8">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className={FIELD_LABEL_CLASS}>
             {t.localeLabel}
             <select
               value={locale}
               onChange={(e) => setLocale(e.target.value as Locale)}
-              className="pastel-input"
+              className={STITCH_INPUT_CLASS}
             >
               <option value="ko">한국어</option>
               <option value="en">English</option>
             </select>
           </label>
-          <label className="block flex-1 text-sm font-medium text-plum/80">
-            {t.species}
-            <select
-              value={species}
-              onChange={(e) => setSpecies(e.target.value as Species)}
-              className="pastel-input"
-            >
-              <option value="dog">{t.dog}</option>
-              <option value="cat">{t.cat}</option>
-            </select>
-          </label>
+          <fieldset className="space-y-3 sm:col-span-2">
+            <legend className="flex items-center gap-2 text-sm font-bold text-primary">
+              <span aria-hidden>🐾</span>
+              {t.species}
+            </legend>
+            <div className="grid grid-cols-2 gap-3">
+              {(["dog", "cat"] as const).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setSpecies(item)}
+                  className={
+                    species === item
+                      ? "rounded-[2rem] border border-primary bg-primary px-4 py-4 text-center text-white shadow-lg shadow-primary/15"
+                      : "rounded-[2rem] border border-outline/20 bg-white/45 px-4 py-4 text-center text-primary transition hover:bg-lavender/50"
+                  }
+                  aria-pressed={species === item}
+                >
+                  <span className="block text-3xl" aria-hidden>
+                    {item === "dog" ? "🐶" : "🐱"}
+                  </span>
+                  <span className="mt-2 block text-xs font-extrabold uppercase tracking-wide">
+                    {item === "dog" ? t.dog : t.cat}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
         </div>
 
-        <fieldset className="space-y-3 rounded-2xl border border-channel-saju/20 bg-lavender/15 p-4">
-          <legend className="px-2 text-sm font-bold text-channel-saju">
+        <fieldset className="space-y-4 rounded-[2rem] border border-channel-saju/20 bg-lavender/15 p-5">
+          <legend className="px-2 text-sm font-bold text-primary">
             🐾 {t.petSection}
           </legend>
-          <label className="block text-sm font-medium text-plum/80">
+          <label className={FIELD_LABEL_CLASS}>
             {t.petName}
             <input
               value={petName}
               onChange={(e) => setPetName(e.target.value)}
-              className="pastel-input"
+              className={STITCH_INPUT_CLASS}
               required
               maxLength={32}
             />
           </label>
-          <label className="block text-sm font-medium text-plum/80">
+          <label className={FIELD_LABEL_CLASS}>
             {t.gender}
             <select
               value={petGender}
               onChange={(e) => setPetGender(e.target.value as Gender | "")}
-              className="pastel-input"
+              className={STITCH_INPUT_CLASS}
               required
             >
               <option value="">{t.selectGender}</option>
@@ -258,13 +283,15 @@ export function CompatibilityForm() {
             onChange={setPetBirthDate}
             label={t.birthDate}
             locale={locale}
+            className={FIELD_LABEL_CLASS}
+            selectClassName={STITCH_INPUT_CLASS}
           />
-          <label className="block text-sm font-medium text-plum/80">
+          <label className={FIELD_LABEL_CLASS}>
             {t.birthTime}
             <select
               value={petBirthTime}
               onChange={(e) => setPetBirthTime(e.target.value)}
-              className="pastel-input"
+              className={STITCH_INPUT_CLASS}
             >
               {BIRTH_TIME_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -275,25 +302,28 @@ export function CompatibilityForm() {
           </label>
         </fieldset>
 
-        <fieldset className="space-y-3 rounded-2xl border border-plum/15 bg-white/40 p-4">
+        <fieldset className="space-y-4 rounded-[2rem] border border-plum/15 bg-white/40 p-5">
           <legend className="px-2 text-sm font-bold text-plum">💞 {t.ownerSection}</legend>
-          <label className="block text-sm font-medium text-plum/80">
+          <p className="rounded-2xl bg-lavender/25 px-4 py-2 text-xs leading-relaxed text-plum/60">
+            {t.ownerBirthNotice}
+          </p>
+          <label className={FIELD_LABEL_CLASS}>
             {t.ownerName}
             <input
               value={ownerName}
               onChange={(e) => setOwnerName(e.target.value)}
-              className="pastel-input"
+              className={STITCH_INPUT_CLASS}
               placeholder="집사"
               required
               maxLength={32}
             />
           </label>
-          <label className="block text-sm font-medium text-plum/80">
+          <label className={FIELD_LABEL_CLASS}>
             {t.gender}
             <select
               value={ownerGender}
               onChange={(e) => setOwnerGender(e.target.value as Gender | "")}
-              className="pastel-input"
+              className={STITCH_INPUT_CLASS}
               required
             >
               <option value="">{t.selectGender}</option>
@@ -306,13 +336,15 @@ export function CompatibilityForm() {
             onChange={setOwnerBirthDate}
             label={t.birthDate}
             locale={locale}
+            className={FIELD_LABEL_CLASS}
+            selectClassName={STITCH_INPUT_CLASS}
           />
-          <label className="block text-sm font-medium text-plum/80">
+          <label className={FIELD_LABEL_CLASS}>
             {t.birthTime}
             <select
               value={ownerBirthTime}
               onChange={(e) => setOwnerBirthTime(e.target.value)}
-              className="pastel-input"
+              className={STITCH_INPUT_CLASS}
             >
               {BIRTH_TIME_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -323,12 +355,12 @@ export function CompatibilityForm() {
           </label>
         </fieldset>
 
-        <label className="block text-sm font-medium text-plum/80">
+        <label className={FIELD_LABEL_CLASS}>
           {t.timezone}
           <select
             value={timezone}
             onChange={(e) => setTimezone(e.target.value)}
-            className="pastel-input"
+            className={STITCH_INPUT_CLASS}
           >
             {timezoneOptions.map((tz) => (
               <option key={tz} value={tz}>
@@ -349,7 +381,7 @@ export function CompatibilityForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-full bg-channel-saju py-3.5 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-60"
+          className="w-full rounded-full bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/15 transition hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60"
         >
           {loading ? t.loading : t.submit}
         </button>

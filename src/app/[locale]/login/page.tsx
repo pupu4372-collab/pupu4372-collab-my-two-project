@@ -16,43 +16,38 @@ export default async function LoginPage({
   const homeHref = `/${locale}`;
 
   return (
-    <div className="min-h-screen bg-dream-sky px-4 py-10">
-      <div className="mx-auto mb-8 max-w-sm text-center">
-        <a href={homeHref} className="inline-flex items-center gap-2 text-lg font-bold text-plum">
-          <span aria-hidden>☀️</span>
-          K-Saju Pet
-        </a>
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-dream-sky px-4 py-10">
+      <div className="w-full max-w-md">
+        {error && (
+          <p
+            className="mb-4 rounded-2xl bg-petal/50 px-4 py-2 text-center text-sm text-plum"
+            role="alert"
+          >
+            {decodeURIComponent(error)}
+          </p>
+        )}
 
-      {error && (
-        <p
-          className="mx-auto mb-4 max-w-sm rounded-2xl bg-petal/50 px-4 py-2 text-center text-sm text-plum"
-          role="alert"
-        >
-          {decodeURIComponent(error)}
+        <LoginButtons homeHref={homeHref} />
+
+        <div className="mt-6 text-center">
+          <a
+            href={homeHref}
+            className="inline-flex rounded-full border border-plum/15 bg-white/70 px-5 py-2.5 text-sm font-semibold text-plum shadow-sm transition hover:bg-white"
+          >
+            {t("backHome")}
+          </a>
+        </div>
+
+        <p className="mx-auto mt-8 text-center text-xs text-plum/45">
+          <Link href="/terms" className="underline hover:text-plum">
+            {t("terms")}
+          </Link>
+          {" · "}
+          <Link href="/privacy" className="underline hover:text-plum">
+            {t("privacy")}
+          </Link>
         </p>
-      )}
-
-      <LoginButtons />
-
-      <div className="mx-auto mt-4 max-w-sm text-center">
-        <a
-          href={homeHref}
-          className="inline-flex rounded-full border border-plum/15 bg-white/70 px-5 py-2.5 text-sm font-semibold text-plum shadow-sm transition hover:bg-white"
-        >
-          {t("backHome")}
-        </a>
       </div>
-
-      <p className="mx-auto mt-8 max-w-sm text-center text-xs text-plum/45">
-        <Link href="/terms" className="underline hover:text-plum">
-          {t("terms")}
-        </Link>
-        {" · "}
-        <Link href="/privacy" className="underline hover:text-plum">
-          {t("privacy")}
-        </Link>
-      </p>
     </div>
   );
 }

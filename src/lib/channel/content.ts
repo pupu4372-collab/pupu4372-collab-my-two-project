@@ -1,8 +1,16 @@
 export type PetChannel = "dog" | "cat";
 
+export interface ChannelInfoCard {
+  title: string;
+  summary: string;
+  points: string[];
+}
+
 export interface ChannelArticle {
   id: string;
   category: string;
+  categorySlug?: string;
+  categoryEmoji?: string;
   title: string;
   summary: string;
   readTime: string;
@@ -264,6 +272,104 @@ export const CHANNEL_CONTENT_EN: Record<PetChannel, ChannelContent> = {
   },
 };
 
+export const CHANNEL_INFO_CARDS: Record<PetChannel, ChannelInfoCard[]> = {
+  dog: [
+    {
+      title: "견종별 성향 한눈에 보기",
+      summary: "같은 강아지라도 견종마다 에너지, 경계심, 애착 표현이 달라요.",
+      points: ["활동량: 낮음·보통·높음", "초보 집사 난이도", "짖음·분리불안 경향"],
+    },
+    {
+      title: "매일 건강 체크",
+      summary: "병원에 가기 전 집에서 먼저 볼 수 있는 신호를 모았습니다.",
+      points: ["식욕·음수량 변화", "눈물·귀 냄새·피부", "변 상태와 산책 후 발바닥"],
+    },
+    {
+      title: "식단과 간식 기준",
+      summary: "사료량, 간식 비율, 알레르기 의심 신호를 쉽게 확인해요.",
+      points: ["간식은 하루 열량 10% 안쪽", "새 간식은 3일 간격", "구토·설사·가려움 기록"],
+    },
+    {
+      title: "산책·놀이 루틴",
+      summary: "나이와 체력에 맞춰 산책과 노즈워크를 조절합니다.",
+      points: ["퍼피는 짧게 자주", "성견은 냄새 맡기 포함", "노견은 관절 부담 줄이기"],
+    },
+  ],
+  cat: [
+    {
+      title: "고양이 행동 신호",
+      summary: "꼬리, 귀, 눈, 울음소리로 지금 기분을 읽어보세요.",
+      points: ["꼬리 끝 탁탁은 중단 신호", "천천히 깜빡임은 안정감", "숨는 행동은 공간 필요"],
+    },
+    {
+      title: "화장실 체크",
+      summary: "실수나 모래 거부는 불만이 아니라 건강·환경 신호일 수 있어요.",
+      points: ["고양이 수 + 1개", "강한 향 모래 피하기", "소변 덩어리 크기 관찰"],
+    },
+    {
+      title: "음수량과 식단",
+      summary: "물을 잘 안 마시는 아이를 위해 그릇 위치와 습식 비율을 조절해요.",
+      points: ["밥그릇과 물그릇 분리", "넓은 그릇·정수기 테스트", "습식 급여 비율 확인"],
+    },
+    {
+      title: "사냥 놀이 루틴",
+      summary: "우다다와 새벽 활동은 낮 시간 놀이 설계로 줄일 수 있어요.",
+      points: ["숨기기-추격-성공 순서", "놀이 후 소량 급여", "레이저만 오래 쓰지 않기"],
+    },
+  ],
+};
+
+export const CHANNEL_INFO_CARDS_EN: Record<PetChannel, ChannelInfoCard[]> = {
+  dog: [
+    {
+      title: "Breed tendencies at a glance",
+      summary: "Energy, alertness, and affection can differ widely by breed.",
+      points: ["Energy level", "Beginner difficulty", "Barking and separation tendencies"],
+    },
+    {
+      title: "Daily health check",
+      summary: "Simple signs to watch before a small issue becomes urgent.",
+      points: ["Appetite and water intake", "Tears, ears, and skin", "Stool and paws after walks"],
+    },
+    {
+      title: "Food and treat basics",
+      summary: "Check portions, treat ratios, and allergy clues without overcomplicating it.",
+      points: ["Treats under 10% of calories", "Test new treats 3 days apart", "Track vomiting, diarrhea, itching"],
+    },
+    {
+      title: "Walk and play routine",
+      summary: "Adjust walking and nose work by age, body condition, and energy.",
+      points: ["Short and frequent for puppies", "Include scent time for adults", "Reduce joint load for seniors"],
+    },
+  ],
+  cat: [
+    {
+      title: "Cat behavior signals",
+      summary: "Read mood through tail, ears, eyes, and vocal cues.",
+      points: ["Tail tapping means pause", "Slow blinking shows comfort", "Hiding can mean space is needed"],
+    },
+    {
+      title: "Litter box basics",
+      summary: "Accidents may be health or environment signals, not stubbornness.",
+      points: ["Cat count plus one box", "Avoid strong scents", "Watch urine clump size"],
+    },
+    {
+      title: "Hydration and food",
+      summary: "Improve water intake with bowl placement, material, and wet food balance.",
+      points: ["Separate food and water", "Try wide bowls or fountains", "Review wet-food ratio"],
+    },
+    {
+      title: "Hunting play routine",
+      summary: "Daytime play design can reduce night zoomies and restless energy.",
+      points: ["Hide-chase-catch order", "Small meal after play", "Avoid laser-only sessions"],
+    },
+  ],
+};
+
 export function getChannelContent(channel: PetChannel, locale: "ko" | "en" = "ko"): ChannelContent {
   return locale === "en" ? CHANNEL_CONTENT_EN[channel] : CHANNEL_CONTENT[channel];
+}
+
+export function getChannelInfoCards(channel: PetChannel, locale: "ko" | "en" = "ko"): ChannelInfoCard[] {
+  return locale === "en" ? CHANNEL_INFO_CARDS_EN[channel] : CHANNEL_INFO_CARDS[channel];
 }

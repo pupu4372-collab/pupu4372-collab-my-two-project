@@ -1,0 +1,301 @@
+<!DOCTYPE html><html class="light" lang="ko" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>계정 상세 - K-Saju Pet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet">
+<style>
+        @import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/suit-variable.css');
+        
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            background: linear-gradient(135deg, #fbf9f5 0%, #f5d9ff 50%, #e1e999 100%);
+            background-attachment: fixed;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(113, 90, 76, 0.1);
+            border-radius: 2rem;
+        }
+
+        .dream-sky-bg {
+            background: linear-gradient(180deg, #fbf9f5 0%, #f5f3ef 100%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f5f3ef",
+                        "primary-fixed": "#f5d9ff",
+                        "primary-container": "#5c3d6e",
+                        "outline-variant": "#cec3ce",
+                        "surface-variant": "#e4e2de",
+                        "background": "#fbf9f5",
+                        "tertiary-fixed-dim": "#c5cc7f",
+                        "surface-container": "#efeeea",
+                        "on-secondary-fixed-variant": "#574236",
+                        "inverse-on-surface": "#f2f0ed",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#1a1d00",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#dbdad6",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#e4e2de",
+                        "on-secondary-container": "#755e50",
+                        "on-primary-fixed-variant": "#593a6b",
+                        "on-primary-container": "#d1abe4",
+                        "surface": "#fbf9f5",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#2b0d3c",
+                        "inverse-primary": "#dfb9f2",
+                        "secondary-container": "#f9d9c8",
+                        "on-secondary-fixed": "#28180d",
+                        "surface-tint": "#725284",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#1b1c1a",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#dfc0b0",
+                        "primary-fixed-dim": "#dfb9f2",
+                        "on-tertiary-container": "#b7be73",
+                        "surface-container-high": "#eae8e4",
+                        "secondary-fixed": "#fcdccb",
+                        "on-tertiary-fixed-variant": "#454b0a",
+                        "primary": "#442656",
+                        "on-surface": "#1b1c1a",
+                        "on-secondary": "#ffffff",
+                        "outline": "#7d747e",
+                        "tertiary": "#313600",
+                        "inverse-surface": "#30312e",
+                        "tertiary-container": "#474d0d",
+                        "surface-bright": "#fbf9f5",
+                        "secondary": "#715a4c",
+                        "tertiary-fixed": "#e1e999",
+                        "on-surface-variant": "#4b444d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "1.5rem",
+                        "page-margin-desktop": "4rem",
+                        "card-padding": "2rem",
+                        "section-gap": "5rem",
+                        "page-margin-mobile": "1.25rem"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["SUIT Variable"],
+                        "display-hero-mobile": ["SUIT Variable"],
+                        "body-md": ["SUIT Variable"],
+                        "headline-lg": ["SUIT Variable"],
+                        "display-hero": ["SUIT Variable"],
+                        "body-sm": ["SUIT Variable"],
+                        "label-caps": ["SUIT Variable"],
+                        "headline-md": ["SUIT Variable"],
+                        "body-lg": ["SUIT Variable"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "display-hero-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "display-hero": ["42px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/suit-variable.css" data-snapdom="injected-import"></head>
+<body class="text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-page-margin-mobile md:px-page-margin-desktop h-16 bg-surface/80 backdrop-blur-md border-b border-outline-variant/10 shadow-sm">
+<div class="flex items-center gap-3">
+<img alt="K-Saju Pet Logo" class="h-10 w-auto" src="https://lh3.googleusercontent.com/aida/ADBb0ui6V9zzyB4MNf1rkl8FSeDYx7wdtSNqUnVtsDRBnF7m6Bm2xv1c9cei2iBwq--0YevGWP600KQiCnARZ0qbN3BbDpsq9rLJbM9u7CxzIubVV7j4UJ_VAenBj3FbY3pJXADLV7n-iwxY_6KV5vXVj-tMg6SmaNRqK1uFTlh6zQuMseA5j0vx_O8rIdVlxJZCoBfGPPHZaMGfyjVOJMWDzXq-vXlqXL5ibTstet_Bixy65lzgyZG525dMQ3wA">
+<span class="font-display-hero text-headline-lg bg-gradient-to-r from-primary to-surface-tint bg-clip-text text-transparent">K-Saju Pet</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-primary/5 transition-colors rounded-full" style="transform: scale(1);">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-primary font-bold hover:bg-primary/5 transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="account_circle" style="font-variation-settings: &quot;FILL&quot; 1;">account_circle</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-section-gap px-page-margin-mobile md:px-page-margin-desktop max-w-[1000px] mx-auto">
+<!-- Page Title -->
+<div class="mb-10 text-center md:text-left">
+<h1 class="font-headline-lg text-headline-lg text-primary mb-2">계정 상세</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">소중한 회원님의 개인정보와 보안 설정을 관리하세요.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Profile Summary -->
+<aside class="lg:col-span-4 sticky top-24">
+<div class="glass-card p-card-padding text-center shadow-sm">
+<div class="relative inline-block mb-6">
+<div class="w-32 h-32 rounded-full border-4 border-white shadow-md overflow-hidden bg-surface-container mx-auto">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A warm, professional portrait of a person smiling gently, styled as a modern pet owner profile. The background is a soft, out-of-focus interior with warm lighting. The aesthetic is clean and high-end, matching the Dream Sky palette of soft purples and creams." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBrhM-1DctcVvOcEKgDDJESn5iIYolS-wrPzCtys6ZRc15VeM4o6nIFON_UGG_L3Hg-7ecBKu-AuY2sGSc6y9FzrO8g__kntBIdhea8n2Qz2PP-l555UVGxEy5acdvwJRG0CJLt5Bs7u98ETitumCFzxZa8fy7RJj6r70Dx-MYYHQYN4sUg_9pJOAXzRFZdP95SrxMnJFeIjeJSfPjSanWuO6AgPPMf9konYblva3o-L8CSUA6E-iJOuawhXq9IFPrawjUhMA35_t7">
+</div>
+<button class="absolute bottom-1 right-1 bg-primary text-white p-2 rounded-full shadow-lg active:scale-95 duration-200">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary mb-1">구름집사</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">cloud_butler@example.com</p>
+<div class="flex justify-center gap-2">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full font-label-caps text-label-caps">목(木) - 그린</span>
+<span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full font-label-caps text-label-caps">골든 집사</span>
+</div>
+</div>
+</aside>
+<!-- Right Column: Settings Sections -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<!-- Personal Info Form -->
+<section class="glass-card p-card-padding shadow-sm">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">개인정보 설정</h3>
+</div>
+<div class="space-y-5">
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2 ml-1">닉네임</label>
+<input class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 font-body-md text-body-md transition-all" type="text" value="구름집사" placeholder="닉네임을 입력해 주세요">
+</div>
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2 ml-1">닉네임</label>
+<input class="w-full bg-surface-container border-0 rounded-xl px-4 py-3 font-body-md text-body-md text-on-surface-variant cursor-not-allowed opacity-70" readonly="" type="email" value="cloud_butler@example.com">
+</div>
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2 ml-1">닉네임</label>
+<input class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 font-body-md text-body-md transition-all" placeholder="010-0000-0000" type="tel">
+</div>
+</div>
+</section>
+<!-- Security & Password -->
+<section class="glass-card p-card-padding shadow-sm">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="lock">lock</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">보안 및 비밀번호</h3>
+</div>
+<div class="space-y-5">
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2 ml-1">닉네임</label>
+<input class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 font-body-md text-body-md transition-all" placeholder="현재 비밀번호 입력" type="password">
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2 ml-1">닉네임</label>
+<input class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 font-body-md text-body-md transition-all" placeholder="새 비밀번호 입력" type="password">
+</div>
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2 ml-1">새 비밀번호 확인</label>
+<input class="w-full bg-surface-container-low border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 font-body-md text-body-md transition-all" placeholder="비밀번호 재입력" type="password">
+</div>
+</div>
+</div>
+</section>
+<!-- Service Preferences -->
+<section class="glass-card p-card-padding shadow-sm">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="settings">settings</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">서비스 설정</h3>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-white/40 rounded-2xl">
+<div>
+<p class="font-body-md text-body-md font-semibold text-primary">마케팅 정보 수신</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">이벤트 및 신규 서비스 혜택 소식을 받습니다.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox">
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4 bg-white/40 rounded-2xl">
+<div>
+<p class="font-body-md text-body-md font-semibold text-primary">커뮤니티 알림</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">내 글의 댓글이나 관심 있는 게시글의 업데이트를 알립니다.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox">
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-4 mt-4">
+<button class="w-full py-4 bg-primary text-white rounded-full font-headline-sm text-headline-sm shadow-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2" style="transform: scale(1);">
+<span class="material-symbols-outlined" data-icon="save">save</span>
+                        변경사항 저장
+                    </button>
+<button class="w-fit mx-auto text-on-surface-variant font-body-sm text-body-sm hover:text-error transition-colors flex items-center gap-1 opacity-60 hover:opacity-100">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+                        회원 탈퇴
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-section-gap px-page-margin-mobile md:px-page-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 bg-surface-container-low dark:bg-surface-dim border-t border-outline-variant/20">
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="font-headline-md text-headline-md text-primary">K-Saju Pet</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 K-Saju Pet. All rights reserved.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-x-6 gap-y-2">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">개인정보처리방침</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">이용약관</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">커뮤니티 가이드라인</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">고객지원</a>
+</div>
+</footer>
+<script>
+        // Micro-interaction for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'scale(0.95)';
+            });
+            btn.addEventListener('mouseup', () => {
+                btn.style.transform = 'scale(1)';
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+
+        // Toggle animation logic
+        document.querySelectorAll('input[type="checkbox"]').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const parent = this.closest('.bg-white\\/40');
+                if (this.checked) {
+                    parent.classList.add('bg-primary/5');
+                } else {
+                    parent.classList.remove('bg-primary/5');
+                }
+            });
+        });
+    </script>
+
+
+</body></html>

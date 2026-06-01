@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>K-Saju Pet | 마이페이지</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/suit-variable.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-container-high": "#eae8e4",
+                "secondary-fixed-dim": "#dfc0b0",
+                "background": "#fbf9f5",
+                "surface-dim": "#dbdad6",
+                "on-secondary": "#ffffff",
+                "inverse-primary": "#dfb9f2",
+                "surface": "#fbf9f5",
+                "on-tertiary": "#ffffff",
+                "on-tertiary-container": "#b7be73",
+                "surface-tint": "#725284",
+                "primary": "#442656",
+                "on-tertiary-fixed-variant": "#454b0a",
+                "tertiary": "#313600",
+                "tertiary-container": "#474d0d",
+                "on-background": "#1b1c1a",
+                "on-secondary-fixed-variant": "#574236",
+                "tertiary-fixed-dim": "#c5cc7f",
+                "on-tertiary-fixed": "#1a1d00",
+                "outline": "#7d747e",
+                "on-error-container": "#93000a",
+                "on-surface-variant": "#4b444d",
+                "on-primary": "#ffffff",
+                "surface-container-lowest": "#ffffff",
+                "tertiary-fixed": "#e1e999",
+                "outline-variant": "#cec3ce",
+                "primary-fixed-dim": "#dfb9f2",
+                "secondary": "#715a4c",
+                "on-primary-container": "#d1abe4",
+                "secondary-fixed": "#fcdccb",
+                "on-secondary-fixed": "#28180d",
+                "secondary-container": "#f9d9c8",
+                "inverse-on-surface": "#f2f0ed",
+                "on-surface": "#1b1c1a",
+                "error-container": "#ffdad6",
+                "on-primary-fixed": "#2b0d3c",
+                "inverse-surface": "#30312e",
+                "primary-fixed": "#f5d9ff",
+                "error": "#ba1a1a",
+                "on-secondary-container": "#755e50",
+                "primary-container": "#5c3d6e",
+                "surface-container-highest": "#e4e2de",
+                "surface-container": "#efeeea",
+                "on-primary-fixed-variant": "#593a6b",
+                "surface-bright": "#fbf9f5",
+                "surface-container-low": "#f5f3ef",
+                "on-error": "#ffffff",
+                "surface-variant": "#e4e2de"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px",
+                "2rem": "2rem"
+            },
+            "spacing": {
+                "page-margin-mobile": "1.25rem",
+                "section-gap": "5rem",
+                "gutter": "1.5rem",
+                "page-margin-desktop": "4rem",
+                "card-padding": "2rem"
+            },
+            "fontFamily": {
+                "display-hero": ["SUIT Variable"],
+                "headline-md": ["SUIT Variable"],
+                "body-md": ["SUIT Variable"],
+                "display-hero-mobile": ["SUIT Variable"],
+                "label-caps": ["SUIT Variable"],
+                "headline-sm": ["SUIT Variable"],
+                "headline-lg": ["SUIT Variable"],
+                "body-sm": ["SUIT Variable"],
+                "body-lg": ["SUIT Variable"]
+            },
+            "fontSize": {
+                "display-hero": ["42px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                "display-hero-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            background: linear-gradient(180deg, #fbf9f5 0%, #f5d9ff 100%);
+            min-height: 100vh;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(113, 90, 76, 0.1);
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased pb-24">
+<!-- Top AppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface/60 backdrop-blur-lg dark:bg-surface-dim/60 border-b border-outline-variant/10 shadow-sm shadow-primary/5 flex justify-between items-center px-page-margin-mobile py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary active:scale-95 transition-transform duration-200 cursor-pointer">close</span>
+</div>
+<h1 class="font-headline-md-mobile text-headline-md-mobile font-extrabold text-primary dark:text-primary-fixed-dim tracking-tight">K-Saju Pet</h1>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary active:scale-95 transition-transform duration-200 cursor-pointer">help</span>
+</div>
+</header>
+<main class="mt-20 px-page-margin-mobile max-w-2xl mx-auto space-y-6">
+<!-- Profile Header Section -->
+<section class="glass-card rounded-2rem p-6 flex flex-col items-center text-center relative overflow-hidden">
+<!-- Decorative Background Element -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="relative">
+<div class="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden mb-4">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A professional and friendly studio portrait of a young male pet owner with a warm smile, set against a soft pastel cream background. The lighting is bright and airy, reflecting a clean and modern lifestyle aesthetic with a focus on high-end grooming and professional presentation. The image is crisp and elegant, fitting for a premium mobile app interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUyqd5Rv8XXtsEoFrN2l5AH9rCs1xn3SCKT4KIBspgv-df1cvLo6LusDbsfnnBZLZNyaVymWDtIQLSzl6mE55AA5VD2zeSIMctsOjdsaarWKp3j2IAWonGrJyTX82DzJUeEkyfd6LzznyA790GTv1z6cq87_jLru8BtqDOghDWEDDcwiF1DpRaPnSUL22L2taKPsAxYaGMGEd3sGV3JquFZ6lmNHzF2h8vPonl2OUDEnYIHfrw8lc58nOE1gBaGDGJDjVr-Sz9ouqP"/>
+</div>
+<div class="absolute bottom-4 right-0 bg-primary-container text-white p-1.5 rounded-full border-2 border-white">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<h2 class="font-headline-md text-primary mb-1">구름집사</h2>
+<div class="flex gap-2 mb-4">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full font-label-caps text-label-caps">가입일: 2024.01.15</span>
+<span class="bg-tertiary-container/20 text-tertiary px-3 py-1 rounded-full font-label-caps text-label-caps">Lv.3 골드 집사</span>
+</div>
+<button class="w-full bg-primary text-surface py-3 rounded-full font-headline-sm hover:opacity-90 active:scale-95 transition-all">
+                프로필 편집
+            </button>
+</section>
+<!-- My Pets Section -->
+<section class="space-y-4">
+<div class="flex justify-between items-end px-2">
+<h3 class="font-headline-md text-primary">나의 반려동물</h3>
+<button class="text-primary font-label-caps text-label-caps flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+                    추가하기
+                </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Pet Card 1 -->
+<div class="glass-card rounded-2rem p-5 flex items-center gap-4 group cursor-pointer active:scale-98 transition-transform">
+<div class="w-16 h-16 rounded-2rem overflow-hidden bg-secondary-container">
+<img alt="Choco the Pomeranian" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A high-quality, close-up portrait of a fluffy orange Pomeranian named Choco sitting on a luxurious cream-colored cushion. The lighting is soft and warm, capturing the fine texture of the fur and the bright, intelligent eyes of the dog. The background is a gently blurred interior in soft pastel tones, creating a cozy and premium feel consistent with a high-end pet care application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDD51QYNOmKSS5mqL38Tqyn6usTXPYSHmSRKEdMOTJeuDh3nGkC5SeT6fue6DAanQSVm3entOMlUeEYDYRYrTaQRp1uc-1YiCWtRP6cRfG9abQMu4DMt6VgemSlh7gzBfrCV-kmO6-qAKydffh9l7rfnW2T1J2G1VbFuCayK4TOrQu5oq8mTmw_MJaYeA3LnhURzGLU1cGEtuv7wBFXFHA1Z_XeFuUsnwl_Ly1KlVhZ3CFSvXu84T2YSKWG2GarrKjhp8jwArVaeVU_"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-on-surface">초코</span>
+<span class="bg-on-tertiary-container/10 text-on-tertiary-container px-2 py-0.5 rounded-full text-[10px] font-bold">강아지</span>
+</div>
+<p class="text-on-surface-variant font-body-sm">포메라니안 · 🐶 개띠</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<!-- Pet Card 2 -->
+<div class="glass-card rounded-2rem p-5 flex items-center gap-4 group cursor-pointer active:scale-98 transition-transform">
+<div class="w-16 h-16 rounded-2rem overflow-hidden bg-secondary-container">
+<img alt="Nabi the Cat" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-on-surface">나비</span>
+<span class="bg-on-tertiary-container/10 text-on-tertiary-container px-2 py-0.5 rounded-full text-[10px] font-bold">고양이</span>
+</div>
+<p class="text-on-surface-variant font-body-sm">코리안 숏헤어 · 🐯 범띠</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- My Activity Dashboard -->
+<section class="space-y-4">
+<h3 class="font-headline-md text-primary px-2">나의 활동</h3>
+<div class="grid grid-cols-3 gap-3">
+<div class="glass-card rounded-2rem p-4 flex flex-col items-center justify-center text-center gap-2 active:scale-95 transition-all">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<span class="font-headline-sm text-primary">12</span>
+<span class="font-label-caps text-on-surface-variant text-[10px]">사주 리포트</span>
+</div>
+<div class="glass-card rounded-2rem p-4 flex flex-col items-center justify-center text-center gap-2 active:scale-95 transition-all">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+</div>
+<span class="font-headline-sm text-primary">28</span>
+<span class="font-label-caps text-on-surface-variant text-[10px]">커뮤니티 글</span>
+</div>
+<div class="glass-card rounded-2rem p-4 flex flex-col items-center justify-center text-center gap-2 active:scale-95 transition-all">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<span class="font-headline-sm text-primary">156</span>
+<span class="font-label-caps text-on-surface-variant text-[10px]">좋아요</span>
+</div>
+</div>
+</section>
+<!-- Settings Section -->
+<section class="glass-card rounded-2rem overflow-hidden divide-y divide-outline-variant/10">
+<div class="p-5 flex justify-between items-center group cursor-pointer hover:bg-white/40 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">person_edit</span>
+<span class="font-body-md text-on-surface">계정 정보 수정</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<div class="p-5 flex justify-between items-center group cursor-pointer hover:bg-white/40 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">translate</span>
+<span class="font-body-md text-on-surface">언어 설정 (KO/EN)</span>
+</div>
+<div class="bg-surface-container-high rounded-full p-1 flex items-center gap-1">
+<button class="bg-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm">KO</button>
+<button class="px-3 py-1 rounded-full text-[10px] font-bold text-on-surface-variant opacity-60">EN</button>
+</div>
+</div>
+<div class="p-5 flex justify-between items-center group cursor-pointer hover:bg-white/40 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">support_agent</span>
+<span class="font-body-md text-on-surface">고객센터</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<div class="p-5 flex justify-between items-center group cursor-pointer hover:bg-white/40 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">logout</span>
+<span class="font-body-md text-error">로그아웃</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-[2rem] bg-white/80 backdrop-blur-xl dark:bg-surface-container-highest/80 border-t border-outline-variant/10 shadow-[0_-4px_20px_rgba(68,38,86,0.05)] flex justify-around items-center px-4 pt-3 pb-safe-area-inset-bottom">
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:bg-primary/5 transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:bg-primary/5 transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-label-caps text-label-caps mt-1">Saju</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:bg-primary/5 transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="font-label-caps text-label-caps mt-1">Pet Show</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:bg-primary/5 transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-caps text-label-caps mt-1">Community</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/20 text-primary rounded-full px-4 py-1 hover:bg-primary/5 transition-all active:scale-90 duration-150 font-bold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+<script>
+        // Simple Interaction logic for language toggle
+        const langToggle = document.querySelectorAll('.bg-surface-container-high button');
+        langToggle.forEach(btn => {
+            btn.addEventListener('click', () => {
+                langToggle.forEach(b => {
+                    b.classList.remove('bg-white', 'shadow-sm');
+                    b.classList.add('text-on-surface-variant', 'opacity-60');
+                });
+                btn.classList.add('bg-white', 'shadow-sm');
+                btn.classList.remove('text-on-surface-variant', 'opacity-60');
+            });
+        });
+
+        // Micro-interaction for profile card shimmer on load
+        window.addEventListener('load', () => {
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+    </script>
+</body></html>

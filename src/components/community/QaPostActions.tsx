@@ -6,13 +6,13 @@ import type { CommunityBoardKind } from "@/lib/community/qa-feed";
 import { useLocale } from "next-intl";
 import { useState } from "react";
 
-type EditableBoard = Extract<CommunityBoardKind, "free" | "tips">;
+type EditableBoard = Extract<CommunityBoardKind, "free" | "tips" | "experience">;
 
 interface QaPostActionsProps {
   postId: string;
   authorId: string;
   board: EditableBoard;
-  listHref: "/community/free" | "/community/tips";
+  listHref: "/community/free" | "/community/tips" | "/community/experience";
   initialTitle: string;
   initialContent: string;
 }

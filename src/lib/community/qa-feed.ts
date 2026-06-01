@@ -10,7 +10,7 @@ export interface QaFeedQuery {
   tag?: string | null;
 }
 
-export type CommunityBoardKind = "qa" | "free" | "tips";
+export type CommunityBoardKind = "qa" | "free" | "tips" | "experience";
 
 export interface QaFeedPage {
   posts: CommunityPost[];
@@ -20,7 +20,7 @@ export interface QaFeedPage {
 }
 
 function boardTag(board: CommunityBoardKind) {
-  return board === "qa" ? "qa" : board === "tips" ? "tips" : "free";
+  return board === "qa" ? "qa" : board;
 }
 
 function matchesQuery(post: CommunityPost, q?: string | null, tag?: string | null) {
@@ -63,6 +63,9 @@ export async function fetchQaFeed(query: QaFeedQuery = {}, board: CommunityBoard
 
   if (board !== "qa") {
     dbQuery = dbQuery.contains("tags", [tag]);
+    if (query.tag && query.tag !== "all") {
+      dbQuery = dbQuery.contains("tags", [query.tag]);
+    }
   } else if (query.tag && query.tag !== "all") {
     dbQuery = dbQuery.contains("tags", [query.tag]);
   }
@@ -102,10 +105,18 @@ export async function fetchQaFeed(query: QaFeedQuery = {}, board: CommunityBoard
 
 export async function createQaPost(
   supabase: import("@supabase/supabase-js").SupabaseClient<import("@/lib/supabase/types").Database>,
-  input: { authorId: string; title: string; content: string; language?: string; board?: CommunityBoardKind }
+  input: {
+    authorId: string;
+    title: string;
+    content: string;
+    language?: string;
+    board?: CommunityBoardKind;
+    tags?: string[];
+  }
 ): Promise<CommunityPost> {
   const board = input.board ?? "qa";
   const tag = boardTag(board);
+  const tags = [...new Set([tag, ...(input.tags ?? []).filter((item) => item && item !== tag)])];
   const { data, error } = await supabase
     .from("community_posts")
     .insert({
@@ -115,7 +126,7 @@ export async function createQaPost(
       title: input.title.trim(),
       content: input.content.trim(),
       image_urls: [],
-      tags: [tag],
+      tags,
       language: input.language ?? "ko",
     } as never)
     .select(

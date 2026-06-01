@@ -43,6 +43,7 @@ export async function signUpWithEmail(params: {
   email: string;
   password: string;
   displayName: string;
+  locale: string;
 }) {
   clearSupabaseBrowserSession();
 
@@ -53,7 +54,7 @@ export async function signUpWithEmail(params: {
 
   const redirectTo =
     typeof window !== "undefined"
-      ? `${window.location.origin}/auth/callback?next=${document.documentElement.lang === "en" ? "/en" : "/ko"}`
+      ? `${window.location.origin}/auth/callback?next=${params.locale === "en" ? "/en" : "/ko"}`
       : undefined;
 
   const { data, error } = await client.auth.signUp({

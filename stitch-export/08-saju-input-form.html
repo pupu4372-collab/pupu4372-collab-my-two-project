@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>반려동물 사주 입력 - K-Saju Pet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/suit-variable.css');
+        
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .bg-dream-sky {
+            background: linear-gradient(180deg, #FDFBF7 0%, #E6E1F9 50%, #FCE1F1 100%);
+            background-attachment: fixed;
+        }
+
+        .pastel-card {
+            border-radius: 2rem;
+            border: 1px solid rgba(68, 38, 86, 0.1);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .glass-effect {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        input:focus, select:focus {
+            outline: none !important;
+            border-color: #5c3d6e !important;
+            box-shadow: 0 0 0 4px rgba(92, 61, 110, 0.1) !important;
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-tertiary-fixed-variant": "#454b0a", "secondary-container": "#f9d9c8", "surface-container-high": "#eae8e4", sand: "#F5F1E9", "surface-tint": "#725284", mint: "#E1F5F0", "on-secondary-container": "#755e50", "on-primary-container": "#d1abe4", "tertiary-fixed-dim": "#c5cc7f", "surface-container-low": "#f5f3ef", primary: "#442656", "hwa-red": "#EF4444", "geum-white": "#94A3B8", "primary-container": "#5c3d6e", "mok-green": "#22C55E", "tertiary-container": "#474d0d", "on-secondary-fixed": "#28180d", "surface-container": "#efeeea", "on-error-container": "#93000a", tertiary: "#313600", "on-primary-fixed-variant": "#593a6b", "on-primary": "#ffffff", error: "#ba1a1a", "secondary-fixed-dim": "#dfc0b0", "on-surface": "#1b1c1a", "primary-fixed-dim": "#dfb9f2", "on-background": "#1b1c1a", "inverse-primary": "#dfb9f2", "surface-variant": "#e4e2de", "on-surface-variant": "#4b444d", "su-black": "#334155", "on-primary-fixed": "#2b0d3c", "on-secondary-fixed-variant": "#574236", "secondary-fixed": "#fcdccb", "on-tertiary-fixed": "#1a1d00", "tertiary-fixed": "#e1e999", "inverse-on-surface": "#f2f0ed", "outline-variant": "#cec3ce", "on-tertiary": "#ffffff", secondary: "#715a4c", outline: "#7d747e", "on-tertiary-container": "#b7be73", "primary-fixed": "#f5d9ff", "channel-community": "#22C55E", "channel-saju": "#8B5CF6", lavender: "#E6E1F9", "surface-container-highest": "#e4e2de", "on-secondary": "#ffffff", "channel-dog": "#3B82F6", "to-yellow": "#F59E0B", "surface-container-lowest": "#ffffff", "error-container": "#ffdad6", surface: "#fbf9f5", "on-error": "#ffffff", "channel-cat": "#EF4444", "surface-bright": "#fbf9f5", blush: "#FDECE7", background: "#fbf9f5", "inverse-surface": "#30312e", "surface-dim": "#dbdad6", petal: "#FCE1F1", cream: "#FDFBF7"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {"page-margin-desktop": "4rem", "page-margin-mobile": "1.25rem", "card-padding": "2rem", gutter: "1.5rem", "section-gap": "5rem"}, fontFamily: {"body-sm": ["SUIT Variable"], "body-md": ["SUIT Variable"], "headline-sm": ["SUIT Variable"], "headline-lg": ["SUIT Variable"], "headline-md": ["SUIT Variable"], "display-hero-mobile": ["SUIT Variable"], "label-caps": ["SUIT Variable"], "display-hero": ["SUIT Variable"], "body-lg": ["SUIT Variable"], headline: ["SUIT Variable"], display: ["SUIT Variable"], body: ["SUIT Variable"], label: ["SUIT Variable"]}, fontSize: {"body-sm": ["14px", {lineHeight: "1.5", fontWeight: "400"}], "body-md": ["16px", {lineHeight: "1.6", fontWeight: "400"}], "headline-sm": ["20px", {lineHeight: "1.4", fontWeight: "600"}], "headline-lg": ["32px", {lineHeight: "1.3", fontWeight: "700"}], "headline-md": ["24px", {lineHeight: "1.4", fontWeight: "700"}], "display-hero-mobile": ["32px", {lineHeight: "1.2", fontWeight: "800"}], "label-caps": ["12px", {lineHeight: "1", letterSpacing: "0.05em", fontWeight: "700"}], "display-hero": ["42px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "800"}], "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}]}}}};</script>
+</head>
+<body class="bg-dream-sky min-h-screen text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-container/80 backdrop-blur-md border-b border-outline-variant/10 shadow-sm dark:shadow-none flex justify-between items-center px-page-margin-mobile md:px-page-margin-desktop h-16">
+<div class="flex items-center gap-8">
+<span class="font-headline-md text-headline-md font-bold text-primary cursor-pointer active:scale-95 transition-transform duration-200">K-Saju Pet</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-body-md text-body-md text-on-surface-variant hover:opacity-80 transition-opacity" href="#">Home</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:opacity-80 transition-opacity" href="#">Dog</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:opacity-80 transition-opacity" href="#">Cat</a>
+<a class="font-body-md text-body-md text-primary font-bold transition-opacity" href="#">K-Saju</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:opacity-80 transition-opacity" href="#">Community</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform duration-200" data-icon="search">search</span>
+<span class="material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform duration-200" data-icon="notifications">notifications</span>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/10">
+<img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9CRjdo1b2HtTFrqfZ4ItdeX-VFdPvPilQ5Uz5zIjJ0TrmNcIxGJkzg71wpxDK1p-QkT-MLTpP6C6bUZsmrQ1EDEOkSTyaqjuWgZzDqKpzlGKKUnUed6VxozwOp_YqfT7NSyOOzOq90JYEZD8dKNxhyR_C4exTDXdBqDU7aiemWtetAchuyWS_aKYIENCCwZ7XTVQuA97EBopSWmznw8bOC2RofkKUZiWCyRJcw-bxyDTEm3ReKZRy6Yk0R4qx_5MpOaTkO01I8OUG"/>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-page-margin-mobile md:px-page-margin-desktop flex flex-col items-center">
+<!-- Decoration Elements -->
+<div class="fixed top-20 left-10 opacity-20 pointer-events-none">
+<span class="material-symbols-outlined text-[120px] text-primary" data-icon="star_half">star_half</span>
+</div>
+<div class="fixed bottom-40 right-10 opacity-20 pointer-events-none">
+<span class="material-symbols-outlined text-[100px] text-primary" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<!-- Form Title -->
+<div class="text-center mb-10 max-w-2xl">
+<h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero text-primary mb-4">반려동물 사주 입력</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">울 애기 팔자는 어떨까? <span class="font-bold text-primary">집사님</span>의 마음을 담아 만세력을 풀어보세요.</p>
+</div>
+<!-- Main Card Container -->
+<div class="pastel-card w-full max-w-[640px] bg-white/60 backdrop-blur-xl glass-effect p-8 md:p-12 shadow-[0_8px_32px_rgba(68,38,86,0.08)]">
+<form class="space-y-8">
+<!-- 1. Pet Name -->
+<div class="space-y-3">
+<label class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="label">label</span>
+                        반려동물 이름
+                    </label>
+<input class="w-full bg-sand/50 border-transparent rounded-2rem p-4 text-body-lg font-body-lg focus:ring-primary/20 placeholder:text-outline-variant" placeholder="이름을 입력해주세요" type="text"/>
+</div>
+<!-- 2. Species Selection -->
+<div class="space-y-3">
+<label class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+                        종류 선택
+                    </label>
+<div class="grid grid-cols-3 gap-4">
+<label class="cursor-pointer group">
+<input checked="" class="hidden peer" name="species" type="radio"/>
+<div class="flex flex-col items-center justify-center p-4 bg-white/40 border border-outline-variant/30 rounded-2rem transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-lg group-hover:bg-lavender/50">
+<span class="material-symbols-outlined text-4xl mb-2" data-icon="dog">pets</span>
+<span class="font-label-caps text-label-caps">강아지</span>
+</div>
+</label>
+<label class="cursor-pointer group">
+<input class="hidden peer" name="species" type="radio"/>
+<div class="flex flex-col items-center justify-center p-4 bg-white/40 border border-outline-variant/30 rounded-2rem transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-lg group-hover:bg-lavender/50">
+<span class="material-symbols-outlined text-4xl mb-2" data-icon="cat">pets</span>
+<span class="font-label-caps text-label-caps">고양이</span>
+</div>
+</label>
+<label class="cursor-pointer group">
+<input class="hidden peer" name="species" type="radio"/>
+<div class="flex flex-col items-center justify-center p-4 bg-white/40 border border-outline-variant/30 rounded-2rem transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-lg group-hover:bg-lavender/50">
+<span class="material-symbols-outlined text-4xl mb-2" data-icon="flutter_dash">flutter_dash</span>
+<span class="font-label-caps text-label-caps">기타</span>
+</div>
+</label>
+</div>
+</div><div class="space-y-3">
+<label class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="wc">wc</span>
+                        성별
+                    </label>
+<div class="grid grid-cols-2 gap-4">
+<label class="cursor-pointer group">
+<input class="hidden peer" name="gender" type="radio" value="male"/>
+<div class="flex flex-col items-center justify-center p-4 bg-white/40 border border-outline-variant/30 rounded-2rem transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-lg group-hover:bg-lavender/50">
+<span class="material-symbols-outlined text-4xl mb-2" data-icon="male">male</span>
+<span class="font-label-caps text-label-caps">남아</span>
+</div>
+</label>
+<label class="cursor-pointer group">
+<input class="hidden peer" name="gender" type="radio" value="female"/>
+<div class="flex flex-col items-center justify-center p-4 bg-white/40 border border-outline-variant/30 rounded-2rem transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary peer-checked:shadow-lg group-hover:bg-lavender/50">
+<span class="material-symbols-outlined text-4xl mb-2" data-icon="female">female</span>
+<span class="font-label-caps text-label-caps">여아</span>
+</div>
+</label>
+</div>
+</div>
+<div class="space-y-3">
+<label class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="content_cut">content_cut</span>
+                        중성화 여부
+                    </label>
+<div class="flex items-center gap-3 p-4 bg-white/40 border border-outline-variant/30 rounded-2rem">
+<input class="rounded text-primary focus:ring-primary/20 w-6 h-6 border-outline-variant" id="neutered" type="checkbox"/>
+<label class="font-body-md text-body-md text-on-surface-variant cursor-pointer" for="neutered">중성화 했어요</label>
+</div>
+</div>
+<div class="space-y-3">
+<label class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+                        입양/만난 날
+                    </label>
+<div class="grid grid-cols-3 gap-3">
+<select class="bg-sand/50 border-transparent rounded-2rem p-4 font-body-md focus:ring-primary/20">
+<option>2024년</option>
+<option>2023년</option>
+<option>2022년</option>
+<option>2021년</option>
+<option>2020년</option>
+</select>
+<select class="bg-sand/50 border-transparent rounded-2rem p-4 font-body-md focus:ring-primary/20">
+<option>1월</option>
+<option>2월</option>
+<option>3월</option>
+</select>
+<select class="bg-sand/50 border-transparent rounded-2rem p-4 font-body-md focus:ring-primary/20">
+<option>1일</option>
+<option>2일</option>
+<option>3일</option>
+</select>
+</div>
+</div>
+<!-- 3. Birth Date -->
+<div class="space-y-3">
+<label class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+                        생년월일
+                    </label>
+<div class="grid grid-cols-3 gap-3">
+<select class="bg-sand/50 border-transparent rounded-2rem p-4 font-body-md focus:ring-primary/20">
+<option>2024년</option>
+<option>2023년</option>
+<option>2022년</option>
+<option>2021년</option>
+<option>2020년</option>
+</select>
+<select class="bg-sand/50 border-transparent rounded-2rem p-4 font-body-md focus:ring-primary/20">
+<option>1월</option>
+<option>2월</option>
+<option>3월</option>
+</select>
+<select class="bg-sand/50 border-transparent rounded-2rem p-4 font-body-md focus:ring-primary/20">
+<option>1일</option>
+<option>2일</option>
+<option>3일</option>
+</select>
+</div>
+</div>
+<!-- 4. Birth Time -->
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<label class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+                            태어난 시각
+                        </label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="rounded text-primary focus:ring-primary/20 w-5 h-5 border-outline" id="time-unknown" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant">태어난 시각 모름</span>
+</label>
+</div>
+<div class="grid grid-cols-2 gap-3 transition-opacity duration-300" id="time-inputs">
+<select class="bg-sand/50 border-transparent rounded-2rem p-4 font-body-md focus:ring-primary/20">
+<option>오전 00시</option>
+<option>오전 01시</option>
+<option>오전 02시</option>
+</select>
+<select class="bg-sand/50 border-transparent rounded-2rem p-4 font-body-md focus:ring-primary/20">
+<option>00분</option>
+<option>10분</option>
+<option>20분</option>
+</select>
+</div>
+</div>
+<!-- 5. Timezone -->
+<div class="space-y-3">
+<label class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="public">public</span>
+                        타임존 선택
+                    </label>
+<select class="w-full bg-sand/50 border-transparent rounded-2rem p-4 font-body-md focus:ring-primary/20">
+<option value="Asia/Seoul">Asia/Seoul (KST)</option>
+<option value="America/New_York">America/New_York (EST)</option>
+<option value="Europe/London">Europe/London (GMT)</option>
+<option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+</select>
+</div>
+<!-- Submit Button -->
+<div class="pt-6">
+<button class="w-full bg-primary text-white py-5 px-8 rounded-full font-headline-md text-headline-md shadow-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all hover:bg-primary-container" type="submit">
+<span class="material-symbols-outlined" data-icon="paws" style="font-variation-settings: 'FILL' 1;">pets</span>
+                        운세 확인하기
+                    </button>
+<p class="text-center mt-4 font-body-sm text-body-sm text-outline">
+                        ※ 운세는 재미로만 보세요~ ✨
+                    </p>
+</div>
+</form>
+</div>
+<!-- Featured Illustration / Visual -->
+<div class="mt-20 w-full max-w-4xl grid md:grid-cols-2 gap-8">
+<div class="bg-mint/40 p-8 pastel-card flex flex-col items-center text-center">
+<div class="w-24 h-24 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm">
+<span class="material-symbols-outlined text-4xl text-mok-green" data-icon="spa">spa</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-2">오행 분석</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">목(木), 화(火), 토(土), 금(金), 수(水) 오행으로 분석하는 댕냥사주</p>
+</div>
+<div class="bg-blush/40 p-8 pastel-card flex flex-col items-center text-center">
+<div class="w-24 h-24 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm">
+<span class="material-symbols-outlined text-4xl text-hwa-red" data-icon="favorite">favorite</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-2">집사 궁합</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">집사님과 반려동물의 찰떡궁합을 확인해보세요!</p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe-area-inset-bottom h-20 bg-surface/90 dark:bg-surface-container-high/90 backdrop-blur-lg border-t border-outline-variant/10 shadow-[0_-4px_20px_rgba(68,38,86,0.05)] rounded-t-[2rem]">
+<div class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim px-5 py-2 hover:bg-secondary-container/30 transition-colors">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-caps text-label-caps">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-5 py-2">
+<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-caps text-label-caps">Saju</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim px-5 py-2 hover:bg-secondary-container/30 transition-colors">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-label-caps text-label-caps">Community</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim px-5 py-2 hover:bg-secondary-container/30 transition-colors">
+<span class="material-symbols-outlined" data-icon="workspace_premium">workspace_premium</span>
+<span class="font-label-caps text-label-caps">Pet Show</span>
+</div>
+</nav>
+<!-- Footer -->
+<footer class="bg-surface-container py-16 px-page-margin-mobile md:px-page-margin-desktop mt-auto">
+<div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
+<div class="col-span-1 md:col-span-2">
+<h2 class="font-headline-md text-headline-md text-primary font-bold mb-4">K-Saju Pet</h2>
+<p class="font-body-md text-body-md text-outline max-w-sm">
+                    국내 최초 글로벌 펫 만세력 서비스. 인공지능과 전통 사주 명리학을 결합하여 반려생태계의 새로운 기준을 제시합니다.
+                </p>
+</div>
+<div>
+<h4 class="font-label-caps text-label-caps text-primary mb-4">플랫폼</h4>
+<ul class="space-y-2 font-body-sm text-body-sm text-on-surface-variant">
+<li class=""><a class="hover:text-primary" href="#">서비스 소개</a></li>
+<li class=""><a class="hover:text-primary" href="#">명리학 기반 알고리즘</a></li>
+<li class=""><a class="hover:text-primary" href="#">제휴 문의</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-caps text-label-caps text-primary mb-4">고객지원</h4>
+<ul class="space-y-2 font-body-sm text-body-sm text-on-surface-variant">
+<li class=""><a class="hover:text-primary" href="#">자주 묻는 질문</a></li>
+<li class=""><a class="hover:text-primary" href="#">이용 약관</a></li>
+<li class=""><a class="hover:text-primary" href="#">개인정보 처리방침</a></li>
+</ul>
+</div>
+</div>
+<div class="max-w-7xl mx-auto pt-12 mt-12 border-t border-outline-variant/30 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="font-body-sm text-body-sm text-outline">© 2024 K-Saju Pet Team. All rights reserved.</p>
+<div class="flex gap-6">
+<span class="material-symbols-outlined text-outline hover:text-primary cursor-pointer" data-icon="public">public</span>
+<span class="material-symbols-outlined text-outline hover:text-primary cursor-pointer" data-icon="share">share</span>
+</div>
+</div>
+</footer>
+<script>
+        // Interactive Logic for Birth Time Unknown
+        const timeUnknownCheckbox = document.getElementById('time-unknown');
+        const timeInputs = document.getElementById('time-inputs');
+
+        timeUnknownCheckbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                timeInputs.style.opacity = '0.3';
+                timeInputs.style.pointerEvents = 'none';
+                const selects = timeInputs.querySelectorAll('select');
+                selects.forEach(s => s.disabled = true);
+            } else {
+                timeInputs.style.opacity = '1';
+                timeInputs.style.pointerEvents = 'auto';
+                const selects = timeInputs.querySelectorAll('select');
+                selects.forEach(s => s.disabled = false);
+            }
+        });
+
+        // Micro-interactions for form inputs
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.closest('.space-y-3').querySelector('.material-symbols-outlined').style.transform = 'scale(1.2)';
+                input.parentElement.closest('.space-y-3').querySelector('.material-symbols-outlined').style.color = '#5c3d6e';
+                input.parentElement.closest('.space-y-3').querySelector('.material-symbols-outlined').style.transition = 'all 0.3s ease';
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.closest('.space-y-3').querySelector('.material-symbols-outlined').style.transform = 'scale(1)';
+                input.parentElement.closest('.space-y-3').querySelector('.material-symbols-outlined').style.color = '#442656';
+            });
+        });
+    </script>
+</body></html>

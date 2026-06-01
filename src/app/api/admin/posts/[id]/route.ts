@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/admin/auth";
-import { setPostHidden } from "@/lib/admin/moderation";
+import { deletePostByAdmin, setPostHidden } from "@/lib/admin/moderation";
 import { NextResponse } from "next/server";
 
 interface RouteContext {
@@ -30,4 +30,19 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 
   return NextResponse.json({ id, is_hidden: body.is_hidden });
+}
+
+export async function DELETE(request: Request, { params }: RouteContext) {
+  const adminId = await requireAdmin(request);
+  if (!adminId) {
+    return NextResponse.json({ error: "Admin access required." }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const ok = await deletePostByAdmin(id);
+  if (!ok) {
+    return NextResponse.json({ error: "Failed to delete post." }, { status: 500 });
+  }
+
+  return NextResponse.json({ id, deleted: true });
 }

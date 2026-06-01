@@ -61,8 +61,8 @@ function PillarRow({
     <div
       className={
         pastel
-          ? "flex items-center justify-between rounded-2xl bg-lavender/20 px-3 py-2 text-sm"
-          : "flex items-center justify-between rounded-xl bg-sand/50 px-3 py-2 text-sm"
+          ? "flex items-center justify-between rounded-2xl bg-lavender/20 px-4 py-3 text-sm"
+          : "flex items-center justify-between rounded-2xl bg-sand/50 px-4 py-3 text-sm"
       }
     >
       <span className={pastel ? "text-plum/60" : "text-ink/60"}>{label}</span>
@@ -79,11 +79,13 @@ function PillarRow({
 export function SajuResult({ result, variant = "default" }: SajuResultProps) {
   const t = LABELS[result.locale];
   const pastel = variant === "pastel";
-  const card = pastel ? "pastel-card overflow-hidden" : "oriental-card overflow-hidden";
-  const section = pastel ? "pastel-card space-y-2 p-4" : "oriental-card space-y-2 p-4";
+  const card = pastel ? "pastel-card overflow-hidden" : "pastel-card overflow-hidden";
+  const section = pastel ? "pastel-card space-y-3 p-5" : "pastel-card space-y-3 p-5";
   const heroBg = pastel
-    ? "bg-gradient-to-r from-lavender/50 via-petal/40 to-mint/40 px-5 py-4"
-    : "bg-gradient-to-r from-blush/60 to-sage/50 px-5 py-4";
+    ? "bg-gradient-to-r from-lavender/50 via-petal/40 to-mint/40 px-6 py-6"
+    : "bg-gradient-to-r from-blush/60 via-lavender/30 to-sage/50 px-6 py-6";
+  const maxElementCount = Math.max(...result.elements.map((el) => el.count), 1);
+  const elementColors = ["bg-channel-community", "bg-channel-cat", "bg-gold", "bg-slate-400", "bg-channel-dog"];
 
   const saveBanner = result.persisted
     ? t.savedDb
@@ -115,7 +117,10 @@ export function SajuResult({ result, variant = "default" }: SajuResultProps) {
       )}
       <article className={card}>
         <div className={heroBg}>
-          <h2 className="text-xl font-semibold leading-snug text-plum">{result.headline}</h2>
+          <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.18em] text-primary/60">
+            K-Saju Reading
+          </p>
+          <h2 className="text-2xl font-extrabold leading-snug text-primary">{result.headline}</h2>
           <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-plum/80">
             {result.story}
           </p>
@@ -163,23 +168,25 @@ export function SajuResult({ result, variant = "default" }: SajuResultProps) {
         </p>
       </section>
 
-      <section className={pastel ? "pastel-card p-4" : "oriental-card p-4"}>
-        <h3 className="mb-3 text-sm font-semibold text-plum/70">{t.elements}</h3>
-        <div className="flex flex-wrap gap-2">
-          {result.elements.map((el) => (
-            <div
-              key={el.key}
-              className="rounded-2xl border border-lavender/50 bg-white/80 px-3 py-2 text-center"
-            >
-              <p className="text-lg font-semibold text-plum">
-                {el.hanja}{" "}
-                <span className="text-sm font-normal text-plum/60">
-                  {el.meaning} · {el.hangul}
-                </span>
-              </p>
-              <p className="text-xs text-plum/50">×{el.count}</p>
-            </div>
-          ))}
+      <section className={pastel ? "pastel-card p-5" : "pastel-card p-5"}>
+        <h3 className="mb-5 text-lg font-bold text-primary">{t.elements}</h3>
+        <div className="space-y-4">
+          {result.elements.map((el, index) => {
+            const width = `${Math.max(10, Math.round((el.count / maxElementCount) * 100))}%`;
+            return (
+              <div key={el.key} className="space-y-2">
+                <div className="flex items-end justify-between gap-3">
+                  <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-primary">
+                    {el.hanja} {el.meaning} · {el.hangul}
+                  </span>
+                  <span className="text-sm font-bold text-primary">×{el.count}</span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-surface-container">
+                  <div className={`h-full rounded-full ${elementColors[index] ?? "bg-primary"}`} style={{ width }} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 

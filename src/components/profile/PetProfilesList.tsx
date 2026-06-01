@@ -90,9 +90,11 @@ function draftFromPet(pet: PetRow): PetEditDraft {
 export function PetProfilesList({
   editable = false,
   compact = false,
+  cardStyle = "default",
 }: {
   editable?: boolean;
   compact?: boolean;
+  cardStyle?: "default" | "glass";
 }) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -314,6 +316,7 @@ export function PetProfilesList({
   const totalReadings = pets.reduce((sum, pet) => sum + pet.readings.length, 0);
 
   const isCompactView = compact && !editable;
+  const useGlassCards = cardStyle === "glass" && isCompactView;
 
   return (
     <div className={isCompactView ? "space-y-2" : "space-y-4"}>
@@ -324,6 +327,7 @@ export function PetProfilesList({
         </div>
       )}
 
+      {!useGlassCards && (
       <div
         className={
           isCompactView
@@ -362,10 +366,15 @@ export function PetProfilesList({
           )}
         </Link>
       </div>
+      )}
 
       <ul
         className={
-          isCompactView ? "grid grid-cols-2 gap-2 sm:grid-cols-3" : "grid gap-3 lg:grid-cols-2"
+          useGlassCards
+            ? "grid gap-3"
+            : isCompactView
+              ? "grid grid-cols-2 gap-2 sm:grid-cols-3"
+              : "grid gap-3 lg:grid-cols-2"
         }
       >
         {pets.map((pet) => {
@@ -387,17 +396,21 @@ export function PetProfilesList({
             <li
               key={pet.id}
               className={
-                isCompactView
-                  ? "rounded-xl border border-plum/15 bg-white/55 px-2 py-2"
-                  : "rounded-2xl border border-plum/15 bg-white/55 px-3 py-3"
+                useGlassCards
+                  ? "glass-card flex items-center gap-4 rounded-[2rem] p-5 transition active:scale-[0.99]"
+                  : isCompactView
+                    ? "rounded-xl border border-plum/15 bg-white/55 px-2 py-2"
+                    : "rounded-2xl border border-plum/15 bg-white/55 px-3 py-3"
               }
             >
-              <div className={`flex items-start ${isCompactView ? "gap-2" : "gap-2.5"}`}>
+              <div className={`flex items-center ${useGlassCards ? "w-full gap-4" : `items-start ${isCompactView ? "gap-2" : "gap-2.5"}`}`}>
                 <div
-                  className={`relative flex shrink-0 items-center justify-center overflow-hidden bg-lavender/30 ${
-                    isCompactView
-                      ? "h-8 w-8 rounded-lg text-sm"
-                      : "h-14 w-14 rounded-2xl text-2xl"
+                  className={`relative flex shrink-0 items-center justify-center overflow-hidden ${
+                    useGlassCards
+                      ? "h-16 w-16 rounded-[2rem] bg-blush/50 text-2xl"
+                      : isCompactView
+                        ? "h-8 w-8 rounded-lg bg-lavender/30 text-sm"
+                        : "h-14 w-14 rounded-2xl bg-lavender/30 text-2xl"
                   }`}
                 >
                   {(editable ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url) ? (
@@ -437,10 +450,21 @@ export function PetProfilesList({
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className={`truncate font-bold text-plum ${isCompactView ? "text-xs" : "text-sm"}`}>
-                    {pet.name}
-                  </p>
-                  <p className={`text-plum/55 ${isCompactView ? "text-[10px] leading-snug" : "text-[11px]"}`}>
+                  <div className={`flex flex-wrap items-center gap-2 ${useGlassCards ? "mb-0.5" : ""}`}>
+                    <p
+                      className={`truncate font-bold text-on-surface ${useGlassCards ? "text-base" : isCompactView ? "text-xs text-plum" : "text-sm text-plum"}`}
+                    >
+                      {pet.name}
+                    </p>
+                    {useGlassCards && (
+                      <span className="rounded-full bg-channel-community/10 px-2 py-0.5 text-[10px] font-bold text-channel-community">
+                        {pet.species === "dog" ? (isKo ? "강아지" : "Dog") : isKo ? "고양이" : "Cat"}
+                      </span>
+                    )}
+                  </div>
+                  <p
+                    className={`text-plum/55 ${useGlassCards ? "text-sm" : isCompactView ? "text-[10px] leading-snug" : "text-[11px]"}`}
+                  >
                     {pet.species === "dog" ? (isKo ? "강아지" : "Dog") : isKo ? "고양이" : "Cat"} · {gender}
                     {isCompactView ? (
                       <>
@@ -471,6 +495,11 @@ export function PetProfilesList({
                     )}
                   </p>
                 </div>
+                {useGlassCards && !editable && (
+                  <span className="shrink-0 text-xl text-plum/35" aria-hidden>
+                    ›
+                  </span>
+                )}
               </div>
 
               {editable && drafts[pet.id] && (

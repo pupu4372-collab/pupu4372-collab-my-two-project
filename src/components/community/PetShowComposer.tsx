@@ -120,8 +120,8 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
 
   if (configured && ready && isAnonymous) {
     return (
-      <section className="rounded-3xl border border-dashed border-channel-community/30 bg-channel-community/5 p-6 text-center">
-        <h2 className="text-lg font-bold text-channel-community">
+      <section className="pastel-card border-dashed border-channel-community/30 p-8 text-center">
+        <h2 className="text-2xl font-extrabold text-primary">
           📷 {isKo ? "우리아이 자랑 올리기" : "Post to Pet Show"}
         </h2>
         <p className="mt-2 text-sm text-plum/65">
@@ -138,26 +138,31 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   }
 
   return (
-    <section className="rounded-3xl border border-channel-community/25 bg-white/60 p-6">
-      <h2 className="text-lg font-bold text-channel-community">📷 {isKo ? "우리아이 자랑 올리기" : "Post to Pet Show"}</h2>
-      <p className="mt-1 text-xs text-plum/55">
+    <section className="pastel-card p-6 shadow-sm md:p-10">
+      <h2 className="text-2xl font-extrabold text-primary">📷 {isKo ? "우리 아이 자랑하기" : "Post to Pet Show"}</h2>
+      <p className="mt-2 text-sm leading-6 text-plum/60">
         {isKo
           ? "펫사진은 개인정보 동의 범위 내에서 프로필·스냅존에 사용됩니다."
           : "Pet photos are used for profiles and Snapzone within your privacy consent."}
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-        <div className="flex flex-col gap-4 sm:flex-row">
+      <form onSubmit={handleSubmit} className="mt-8 space-y-8">
+        <section>
+          <label className="text-sm font-extrabold text-primary">{isKo ? "사진 업로드" : "Photo upload"}</label>
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="flex aspect-square w-full max-w-[140px] items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-channel-community/40 bg-channel-community/10 text-3xl transition hover:bg-channel-community/20 sm:shrink-0"
+            className="group mt-4 flex min-h-[280px] w-full items-center justify-center overflow-hidden rounded-[2rem] border-2 border-dashed border-outline/25 bg-white/35 text-center transition hover:bg-white/55"
           >
             {preview ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={preview} alt="" className="h-full w-full object-cover" />
+              <img src={preview} alt="" className="h-full max-h-[420px] w-full object-cover" />
             ) : (
-              <span>📷</span>
+              <span className="flex flex-col items-center px-6">
+                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-lavender text-4xl transition group-hover:scale-110">📷</span>
+                <span className="mt-4 text-lg font-extrabold text-primary">{isKo ? "사진 선택하기" : "Choose a photo"}</span>
+                <span className="mt-2 text-sm text-plum/50">{isKo ? "권장 사이즈: 4:3 또는 1:1, 최대 10MB" : "Recommended: 4:3 or 1:1, max 10MB"}</span>
+              </span>
             )}
           </button>
           <input
@@ -167,40 +172,55 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
             className="hidden"
             onChange={(e) => void onFileChange(e)}
           />
-          <div className="flex-1 space-y-3">
-            <select
-              value={petSpecies}
-              onChange={(e) => {
-                const value = e.target.value;
-                setPetSpecies(value === "dog" || value === "cat" || value === "other" ? value : "");
-              }}
-              className="pastel-input"
-              required
-            >
-              <option value="">
-                {isKo ? "반려동물 분류" : "Pet category"}
-              </option>
-              <option value="dog">{isKo ? "강아지" : "Dog"}</option>
-              <option value="cat">{isKo ? "고양이" : "Cat"}</option>
-              <option value="other">{isKo ? "다른동물" : "Other animal"}</option>
-            </select>
+        </section>
+
+        <section>
+          <p className="text-sm font-extrabold text-primary">{isKo ? "카테고리" : "Category"}</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            {([
+              ["dog", isKo ? "강아지" : "Dog", "🐕"],
+              ["cat", isKo ? "고양이" : "Cat", "🐈"],
+              ["other", isKo ? "다른 동물" : "Other animal", "🐾"],
+            ] as const).map(([value, label, emoji]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setPetSpecies(value)}
+                className={
+                  petSpecies === value
+                    ? "rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-sm"
+                    : "rounded-full border border-primary/15 bg-white/55 px-6 py-3 text-sm font-extrabold text-primary transition hover:bg-lavender/45"
+                }
+              >
+                {emoji} {label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-5">
+          <div>
+            <label className="text-sm font-extrabold text-primary">{isKo ? "제목" : "Title"}</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={isKo ? "제목 (예: 햇살 냥이의 오후)" : "Title (e.g. Sunny cat afternoon)"}
-              className="pastel-input"
+              placeholder={isKo ? "아이의 매력을 한 줄로 소개해주세요!" : "Introduce your pet in one line!"}
+              className="pastel-input p-4"
               maxLength={80}
               required
             />
+          </div>
+          <div>
+            <label className="text-sm font-extrabold text-primary">{isKo ? "이야기" : "Story"}</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder={isKo ? "한 줄 소개 (선택)" : "Short caption (optional)"}
-              className="pastel-input min-h-[72px] resize-y"
+              placeholder={isKo ? "아이의 소중한 순간에 대한 이야기를 들려주세요." : "Tell the story behind this special moment."}
+              className="pastel-input min-h-32 resize-y p-4"
               maxLength={300}
             />
           </div>
-        </div>
+        </section>
 
         {error && (
           <p className="text-sm text-red-700/80" role="alert">
@@ -216,7 +236,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-full bg-channel-community py-3 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-60"
+          className="w-full rounded-full bg-primary py-4 text-base font-extrabold text-white shadow-md transition hover:scale-[1.01] hover:brightness-105 disabled:opacity-60"
         >
           {loading ? (isKo ? "업로드 중…" : "Uploading…") : isKo ? "자랑하기" : "Post"}
         </button>
