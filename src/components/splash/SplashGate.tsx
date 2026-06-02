@@ -18,7 +18,7 @@ export function SplashGate({ children }: { children: ReactNode }) {
   }
 
   if (showSplash) {
-    return <AppSplash redirectTo="/" />;
+    return <AppSplash redirectTo="/" onComplete={() => setShowSplash(false)} />;
   }
 
   return <>{children}</>;

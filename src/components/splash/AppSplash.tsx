@@ -56,7 +56,7 @@ function ParticleField() {
   );
 }
 
-export function AppSplash({ redirectTo = "/" }: { redirectTo?: string }) {
+export function AppSplash({ redirectTo = "/", onComplete }: { redirectTo?: string; onComplete?: () => void }) {
   const router = useRouter();
   const locale = useLocale();
   const copy = COPY[locale === "ko" ? "ko" : "en"];
@@ -77,6 +77,7 @@ export function AppSplash({ redirectTo = "/" }: { redirectTo?: string }) {
     frame = requestAnimationFrame(tick);
     const timer = window.setTimeout(() => {
       sessionStorage.setItem(STORAGE_KEY, "1");
+      onComplete?.();
       router.replace(redirectTo);
     }, SPLASH_MS);
 
@@ -84,7 +85,7 @@ export function AppSplash({ redirectTo = "/" }: { redirectTo?: string }) {
       cancelAnimationFrame(frame);
       window.clearTimeout(timer);
     };
-  }, [redirectTo, router]);
+  }, [onComplete, redirectTo, router]);
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-lavender via-white to-mint text-center">
