@@ -1,0 +1,250 @@
+<!DOCTYPE html><html class="light" lang="ko"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>404 - K-Saju Pet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet">
+<style>
+        @font-face {
+            font-family: 'SUIT Variable';
+            src: url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.woff2') format('woff2-variations');
+            font-weight: 100 900;
+        }
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            background-attachment: fixed;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(113, 90, 76, 0.1);
+        }
+        .dream-sky-gradient {
+            background: linear-gradient(180deg, #fbf9f5 0%, #f5f3ef 50%, #fcdccb 100%);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes star-twinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+        .star {
+            position: absolute;
+            background: #dfb9f2;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#c5cc7f",
+                    "surface-container": "#efeeea",
+                    "on-tertiary-fixed": "#1a1d00",
+                    "surface-container-high": "#eae8e4",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#f9d9c8",
+                    "surface-tint": "#725284",
+                    "on-secondary-fixed": "#28180d",
+                    "inverse-surface": "#30312e",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#574236",
+                    "on-primary-fixed": "#2b0d3c",
+                    "inverse-primary": "#dfb9f2",
+                    "background": "#fbf9f5",
+                    "surface-container-low": "#f5f3ef",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#dfb9f2",
+                    "on-primary-container": "#d1abe4",
+                    "surface-container-highest": "#e4e2de",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#4b444d",
+                    "secondary": "#715a4c",
+                    "on-background": "#1b1c1a",
+                    "primary-fixed": "#f5d9ff",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#e4e2de",
+                    "surface-dim": "#dbdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed-variant": "#454b0a",
+                    "on-surface": "#1b1c1a",
+                    "inverse-on-surface": "#f2f0ed",
+                    "secondary-fixed-dim": "#dfc0b0",
+                    "on-primary-fixed-variant": "#593a6b",
+                    "on-tertiary-container": "#b7be73",
+                    "tertiary": "#313600",
+                    "primary-container": "#5c3d6e",
+                    "secondary-fixed": "#fcdccb",
+                    "outline-variant": "#cec3ce",
+                    "tertiary-container": "#474d0d",
+                    "outline": "#7d747e",
+                    "surface": "#fbf9f5",
+                    "on-secondary-container": "#755e50",
+                    "surface-bright": "#fbf9f5",
+                    "primary": "#442656",
+                    "tertiary-fixed": "#e1e999"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "page-margin-mobile": "1.25rem",
+                    "card-padding": "2rem",
+                    "section-gap": "5rem",
+                    "page-margin-desktop": "4rem",
+                    "gutter": "1.5rem"
+            },
+            "fontFamily": {
+                    "headline-md": ["SUIT Variable"],
+                    "body-lg": ["SUIT Variable"],
+                    "headline-lg": ["SUIT Variable"],
+                    "body-md": ["SUIT Variable"],
+                    "label-caps": ["SUIT Variable"],
+                    "headline-sm": ["SUIT Variable"],
+                    "display-hero": ["SUIT Variable"],
+                    "body-sm": ["SUIT Variable"],
+                    "display-hero-mobile": ["SUIT Variable"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "display-hero": ["42px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "display-hero-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface overflow-x-hidden min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md dark:bg-background/80 border-b border-secondary/10 shadow-sm shadow-primary/5 h-20">
+<div class="flex justify-between items-center px-page-margin-desktop h-full max-w-[1200px] mx-auto">
+<div class="font-headline-md text-headline-md font-bold tracking-tight text-primary dark:text-primary-fixed-dim cursor-pointer">
+                K-Saju Pet
+            </div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Ïª§Î??àÌã∞ ?åÍ∞ú</a>
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">?¨Ï£º Î∂ÑÏÑù</a>
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">?∞Î¶¨?ÑÏù¥ ?êÎûë</a>
+<div class="text-on-surface-variant cursor-pointer hover:text-primary transition-colors duration-300 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+</div>
+</nav>
+<div class="md:hidden">
+<span class="material-symbols-outlined text-primary text-3xl">menu</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-20 relative overflow-hidden flex items-center justify-center">
+<!-- Background Atmospheric Effects -->
+<div class="absolute inset-0 z-0" id="stars-container"><div class="star" style="width: 2.88252px; height: 2.88252px; left: 11.3673%; top: 14.3097%; opacity: 0.306228; animation: 4.97141s ease-in-out 3.92313s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.4019px; height: 2.4019px; left: 82.4306%; top: 33.6587%; opacity: 0.832117; animation: 2.3823s ease-in-out 2.86723s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.38158px; height: 3.38158px; left: 8.8628%; top: 65.4669%; opacity: 0.999975; animation: 3.09266s ease-in-out 4.64726s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.72177px; height: 3.72177px; left: 87.573%; top: 34.4156%; opacity: 0.730951; animation: 3.98584s ease-in-out 4.38748s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.66837px; height: 2.66837px; left: 27.3074%; top: 30.6171%; opacity: 0.823773; animation: 4.38115s ease-in-out 4.02728s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.51093px; height: 1.51093px; left: 61.5172%; top: 39.6339%; opacity: 0.86462; animation: 2.37207s ease-in-out 4.76968s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.44743px; height: 2.44743px; left: 35.1527%; top: 78.0198%; opacity: 0.774694; animation: 4.74448s ease-in-out 3.25036s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.81577px; height: 3.81577px; left: 40.96%; top: 56.7586%; opacity: 0.659458; animation: 2.43159s ease-in-out 2.46204s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.08313px; height: 3.08313px; left: 62.0509%; top: 26.8153%; opacity: 0.305261; animation: 2.79398s ease-in-out 3.25778s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.20133px; height: 3.20133px; left: 87.1158%; top: 14.4223%; opacity: 0.471728; animation: 3.66354s ease-in-out 4.56318s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.35387px; height: 1.35387px; left: 37.4436%; top: 21.9551%; opacity: 0.915452; animation: 3.09577s ease-in-out 0.840408s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.59311px; height: 2.59311px; left: 96.9195%; top: 41.6076%; opacity: 0.475744; animation: 2.60029s ease-in-out 4.10567s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.4481px; height: 3.4481px; left: 98.8374%; top: 76.2413%; opacity: 0.3519; animation: 4.16794s ease-in-out 1.13918s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.66599px; height: 2.66599px; left: 61.702%; top: 37.9609%; opacity: 0.888555; animation: 4.12603s ease-in-out 3.34913s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.04841px; height: 1.04841px; left: 81.8049%; top: 61.1148%; opacity: 0.339403; animation: 2.92733s ease-in-out 3.28424s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.82287px; height: 2.82287px; left: 64.8643%; top: 66.2098%; opacity: 0.777722; animation: 4.71517s ease-in-out 4.26651s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.2845px; height: 1.2845px; left: 54.1901%; top: 20.9923%; opacity: 0.919002; animation: 3.21547s ease-in-out 3.93315s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.20533px; height: 1.20533px; left: 44.0232%; top: 12.9521%; opacity: 0.783434; animation: 2.4787s ease-in-out 4.11613s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.74103px; height: 1.74103px; left: 44.896%; top: 95.7498%; opacity: 0.656686; animation: 2.15777s ease-in-out 0.667119s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.43581px; height: 3.43581px; left: 79.1853%; top: 80.4654%; opacity: 0.517637; animation: 4.1067s ease-in-out 2.18866s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.63484px; height: 1.63484px; left: 32.3996%; top: 95.3378%; opacity: 0.388563; animation: 3.95169s ease-in-out 1.27447s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.71095px; height: 3.71095px; left: 68.7514%; top: 82.0984%; opacity: 0.696783; animation: 2.58538s ease-in-out 1.9268s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.11301px; height: 1.11301px; left: 77.0635%; top: 52.3389%; opacity: 0.313456; animation: 2.16844s ease-in-out 3.37258s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.35799px; height: 3.35799px; left: 44.3668%; top: 25.7403%; opacity: 0.321371; animation: 4.06285s ease-in-out 3.09707s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.71669px; height: 1.71669px; left: 16.6234%; top: 98.5532%; opacity: 0.676813; animation: 2.35433s ease-in-out 2.37564s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.63255px; height: 1.63255px; left: 20.9089%; top: 4.71832%; opacity: 0.46726; animation: 4.71657s ease-in-out 2.74749s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.49064px; height: 3.49064px; left: 60.9359%; top: 60.7496%; opacity: 0.475795; animation: 4.70181s ease-in-out 1.37774s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.87717px; height: 1.87717px; left: 68.0574%; top: 42.887%; opacity: 0.614298; animation: 4.43351s ease-in-out 3.20502s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.57502px; height: 2.57502px; left: 34.1968%; top: 75.756%; opacity: 0.572683; animation: 3.34129s ease-in-out 2.29878s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.44607px; height: 2.44607px; left: 99.3387%; top: 87.8266%; opacity: 0.821076; animation: 3.34s ease-in-out 3.94391s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.07675px; height: 2.07675px; left: 60.2585%; top: 82.1593%; opacity: 0.658394; animation: 4.66338s ease-in-out 2.1559s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.00396px; height: 3.00396px; left: 16.1475%; top: 19.1061%; opacity: 0.374747; animation: 4.66056s ease-in-out 2.65644s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.47008px; height: 3.47008px; left: 41.7943%; top: 52.8802%; opacity: 0.750258; animation: 4.82357s ease-in-out 1.40634s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.63976px; height: 3.63976px; left: 97.2227%; top: 19.4409%; opacity: 0.706066; animation: 4.39777s ease-in-out 2.87416s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.89415px; height: 3.89415px; left: 97.1205%; top: 47.192%; opacity: 0.644786; animation: 2.85089s ease-in-out 4.60309s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.67119px; height: 1.67119px; left: 49.2663%; top: 8.35226%; opacity: 0.340011; animation: 4.11757s ease-in-out 1.21426s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.33545px; height: 2.33545px; left: 33.4279%; top: 77.8143%; opacity: 0.940944; animation: 2.26916s ease-in-out 2.65066s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.23186px; height: 3.23186px; left: 19.7964%; top: 19.4091%; opacity: 0.372159; animation: 3.59724s ease-in-out 2.10267s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.93619px; height: 2.93619px; left: 10.6951%; top: 73.5829%; opacity: 0.454125; animation: 2.09751s ease-in-out 4.22309s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.0036px; height: 2.0036px; left: 39.9634%; top: 34.2043%; opacity: 0.58191; animation: 4.76854s ease-in-out 3.21745s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.2085px; height: 3.2085px; left: 3.0573%; top: 24.4734%; opacity: 0.518009; animation: 4.46473s ease-in-out 3.64732s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.12007px; height: 2.12007px; left: 32.5735%; top: 9.08572%; opacity: 0.459281; animation: 2.97369s ease-in-out 2.41328s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.20629px; height: 2.20629px; left: 2.59614%; top: 86.8535%; opacity: 0.686062; animation: 2.84549s ease-in-out 0.670557s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.5094px; height: 3.5094px; left: 48.3431%; top: 40.181%; opacity: 0.327687; animation: 2.68764s ease-in-out 4.93588s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.63833px; height: 2.63833px; left: 79.937%; top: 68.3189%; opacity: 0.993428; animation: 4.29851s ease-in-out 3.59716s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.82027px; height: 1.82027px; left: 28.9684%; top: 75.244%; opacity: 0.787923; animation: 4.5775s ease-in-out 4.16286s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.77076px; height: 3.77076px; left: 47.7018%; top: 99.7425%; opacity: 0.307974; animation: 3.59253s ease-in-out 4.17932s infinite normal none running star-twinkle;"></div><div class="star" style="width: 1.45069px; height: 1.45069px; left: 94.2346%; top: 97.2231%; opacity: 0.798788; animation: 3.2953s ease-in-out 1.90047s infinite normal none running star-twinkle;"></div><div class="star" style="width: 2.2685px; height: 2.2685px; left: 39.7657%; top: 40.0702%; opacity: 0.705563; animation: 3.40091s ease-in-out 4.79331s infinite normal none running star-twinkle;"></div><div class="star" style="width: 3.17134px; height: 3.17134px; left: 61.1654%; top: 39.0657%; opacity: 0.590044; animation: 2.77672s ease-in-out 0.987854s infinite normal none running star-twinkle;"></div><div class="absolute rounded-full blur-[80px] pointer-events-none opacity-20" style="width: 239.128px; height: 239.128px; background: rgb(249, 217, 200); top: 14.9481%; left: 52.955%; animation: 11.0528s ease-in-out 0s infinite alternate none running float;"></div><div class="absolute rounded-full blur-[80px] pointer-events-none opacity-20" style="width: 184.693px; height: 184.693px; background: rgb(223, 185, 242); top: 79.5186%; left: 54.4301%; animation: 12.6733s ease-in-out 0s infinite alternate none running float;"></div><div class="absolute rounded-full blur-[80px] pointer-events-none opacity-20" style="width: 247.218px; height: 247.218px; background: rgb(225, 233, 153); top: 61.5378%; left: 6.18041%; animation: 10.8381s ease-in-out 0s infinite alternate none running float;"></div><div class="absolute rounded-full blur-[80px] pointer-events-none opacity-20" style="width: 155.777px; height: 155.777px; background: rgb(245, 217, 255); top: 49.8558%; left: 8.06435%; animation: 14.1295s ease-in-out 0s infinite alternate none running float;"></div></div>
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-fixed/20 blur-[100px] rounded-full pointer-events-none"></div>
+<div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-secondary-container/30 blur-[120px] rounded-full pointer-events-none"></div>
+<section class="relative z-10 w-full max-w-[1200px] px-page-margin-mobile md:px-page-margin-desktop flex flex-col items-center text-center py-section-gap">
+<!-- 404 Visual Content -->
+<div class="relative w-full max-w-md mx-auto mb-12 animate-float">
+<div class="absolute inset-0 bg-primary-fixed-dim/10 rounded-full blur-3xl scale-125 -z-10"></div>
+<img alt="A cute kitten wizard floating in a dreamy pastel sky, looking through a golden telescope at distant stars and floating planets. The art style is soft and whimsical with a palette of lavender, cream, and soft pinks." class="w-full h-auto drop-shadow-2xl" src="/stitch/asset-70.jpg">
+</div>
+<!-- Typography & Action -->
+<div class="max-w-2xl space-y-6">
+<div class="inline-block px-4 py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-label-caps text-label-caps mb-2 tracking-widest">404 ?§Î•ò</div>
+<h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero text-primary leading-tight">
+                    Í∏∏ÏùÑ ?ÉÏ? ?âÏÑ±??Ï∞æÍ≥† ?àÏñ¥??                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg mx-auto opacity-80">
+                    Ï∞æÏúº?úÎäî ?òÏù¥ÏßÄÍ∞Ä ?∞Ï£º ?àÎ®∏Î°??¨ÎùºÏß?Í≤?Í∞ôÏïÑ??<br>
+                    ÏßëÏÇ¨?? ?§Ïãú Î≥ÑÏùò ÏßÄ?ÑÎ? ?∞Îùº ?åÏïÑÍ∞ÄÎ≥ºÍπå??
+                </p>
+<div class="pt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
+<a class="px-10 py-4 bg-primary text-on-primary rounded-full font-headline-sm text-headline-sm shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2" href="/">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+                        ?àÏúºÎ°??åÏïÑÍ∞ÄÍ∏?                    </a>
+<button class="px-10 py-4 border-2 border-primary/20 text-primary rounded-full font-headline-sm text-headline-sm hover:bg-primary/5 active:scale-95 transition-all duration-300" onclick="history.back()">
+                        ?¥Ï†Ñ ?òÏù¥ÏßÄÎ°?                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-section-gap bg-surface-container-lowest dark:bg-surface-dim border-t border-secondary/5">
+<div class="flex flex-col items-center gap-gutter px-page-margin-desktop text-center max-w-[1200px] mx-auto">
+<div class="font-headline-sm text-headline-sm text-primary font-bold">K-Saju Pet</div>
+<div class="flex flex-wrap justify-center gap-x-8 gap-y-2">
+<a class="font-body-sm text-body-sm text-secondary/80 hover:text-primary transition-colors hover:underline decoration-tertiary-fixed-dim underline-offset-4" href="#">?úÎπÑ???åÍ∞ú</a>
+<a class="font-body-sm text-body-sm text-secondary/80 hover:text-primary transition-colors hover:underline decoration-tertiary-fixed-dim underline-offset-4" href="#">?¨Ï£º Î∂ÑÏÑù</a>
+<a class="font-body-sm text-body-sm text-secondary/80 hover:text-primary transition-colors hover:underline decoration-tertiary-fixed-dim underline-offset-4" href="#">?∞Î¶¨?ÑÏù¥ ?êÎûë</a>
+<a class="font-body-sm text-body-sm text-secondary/80 hover:text-primary transition-colors hover:underline decoration-tertiary-fixed-dim underline-offset-4" href="#">Í∞úÏù∏?ïÎ≥¥Ï≤òÎ¶¨Î∞©Ïπ®</a>
+<a class="font-body-sm text-body-sm text-secondary/80 hover:text-primary transition-colors hover:underline decoration-tertiary-fixed-dim underline-offset-4" href="#">?¥Ïö©?ΩÍ?</a>
+</div>
+<div class="font-body-sm text-body-sm text-secondary/60 mt-4">¬© 2024 K-Saju Pet. Î™®Îì† Í∂åÎ¶¨ Î≥¥Ïú†.</div>
+</div>
+</footer>
+<script>
+        // Simple star background generation
+        const container = document.getElementById('stars-container');
+        const starCount = 50;
+
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            const size = Math.random() * 3 + 1;
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            const delay = Math.random() * 5;
+            const duration = 2 + Math.random() * 3;
+
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.left = `${x}%`;
+            star.style.top = `${y}%`;
+            star.style.opacity = Math.random() * 0.7 + 0.3;
+            star.style.animation = `star-twinkle ${duration}s infinite ease-in-out ${delay}s`;
+            
+            container.appendChild(star);
+        }
+
+        // Add some random planets/blobs for atmosphere
+        for (let i = 0; i < 4; i++) {
+            const blob = document.createElement('div');
+            const colors = ['#f9d9c8', '#dfb9f2', '#e1e999', '#f5d9ff'];
+            const size = 150 + Math.random() * 150;
+            blob.className = 'absolute rounded-full blur-[80px] pointer-events-none opacity-20';
+            blob.style.width = `${size}px`;
+            blob.style.height = `${size}px`;
+            blob.style.background = colors[i % colors.length];
+            blob.style.top = `${Math.random() * 100}%`;
+            blob.style.left = `${Math.random() * 100}%`;
+            blob.style.animation = `float ${10 + Math.random() * 5}s infinite alternate ease-in-out`;
+            container.appendChild(blob);
+        }
+    </script>
+
+
+</body></html>

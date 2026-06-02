@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>K-Saju Pet Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://cdn.jsdelivr.net/gh/sun-peak/SUIT/fonts/variable/suit-variable.css');
+        
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            overflow-x: hidden;
+            background: #fbf9f5;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .dream-sky-bg {
+            background: linear-gradient(135deg, #f5d9ff 0%, #fbf9f5 50%, #fcdccb 100%);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(113, 90, 76, 0.1);
+        }
+
+        .onboarding-slider {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+            width: 500%;
+            height: 100vh;
+        }
+
+        .slide {
+            width: 20%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dot-active {
+            width: 24px;
+            background-color: #442656;
+        }
+
+        /* Roadmap Path Enhancements */
+        .roadmap-path-svg {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            transform: translateY(-50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .path-line {
+            fill: none;
+            stroke: #725284;
+            stroke-width: 3;
+            stroke-dasharray: 10, 10;
+            opacity: 0.2;
+            filter: blur(1px);
+        }
+
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .glow-accent {
+            filter: drop-shadow(0 0 15px rgba(114, 82, 132, 0.3));
+        }
+
+        .star-decoration {
+            position: absolute;
+            color: #725284;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#f9d9c8",
+                        "surface-container-highest": "#e4e2de",
+                        "on-secondary-fixed": "#28180d",
+                        "tertiary-fixed-dim": "#c5cc7f",
+                        "on-tertiary-container": "#b7be73",
+                        "inverse-primary": "#dfb9f2",
+                        "surface-dim": "#dbdad6",
+                        "surface-container-low": "#f5f3ef",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#f5d9ff",
+                        "background": "#fbf9f5",
+                        "tertiary-fixed": "#e1e999",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#d1abe4",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#1a1d00",
+                        "on-secondary-fixed-variant": "#574236",
+                        "surface": "#fbf9f5",
+                        "surface-container-high": "#eae8e4",
+                        "primary-container": "#5c3d6e",
+                        "surface-container": "#efeeea",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#2b0d3c",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e4e2de",
+                        "on-secondary-container": "#755e50",
+                        "secondary-fixed": "#fcdccb",
+                        "secondary": "#715a4c",
+                        "surface-bright": "#fbf9f5",
+                        "on-surface-variant": "#4b444d",
+                        "on-primary-fixed-variant": "#593a6b",
+                        "outline": "#7d747e",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#474d0d",
+                        "secondary-fixed-dim": "#dfc0b0",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#454b0a",
+                        "inverse-on-surface": "#f2f0ed",
+                        "primary": "#442656",
+                        "tertiary": "#313600",
+                        "surface-tint": "#725284",
+                        "on-surface": "#1b1c1a",
+                        "primary-fixed-dim": "#dfb9f2",
+                        "outline-variant": "#cec3ce",
+                        "on-error": "#ffffff",
+                        "on-background": "#1b1c1a",
+                        "inverse-surface": "#30312e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "1.5rem",
+                        "section-gap": "5rem",
+                        "page-margin-mobile": "1.25rem",
+                        "card-padding": "2rem",
+                        "page-margin-desktop": "4rem"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["SUIT Variable"],
+                        "display-hero-mobile": ["SUIT Variable"],
+                        "display-hero": ["SUIT Variable"],
+                        "body-md": ["SUIT Variable"],
+                        "headline-md": ["SUIT Variable"],
+                        "headline-lg": ["SUIT Variable"],
+                        "label-caps": ["SUIT Variable"],
+                        "body-sm": ["SUIT Variable"],
+                        "body-lg": ["SUIT Variable"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "display-hero-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                        "display-hero": ["42px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col overflow-hidden">
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 md:px-page-margin-desktop py-6 bg-transparent">
+<h1 class="text-headline-md font-extrabold text-primary">K-Saju Pet</h1>
+<button class="text-on-surface-variant font-body-md hover:opacity-80 transition-opacity bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30" onclick="skipOnboarding()">건너뛰기</button>
+</header>
+<main class="flex-grow dream-sky-bg overflow-hidden">
+<div class="onboarding-slider" id="slider">
+<!-- Step 1 -->
+<section class="slide p-gutter">
+<div class="max-w-6xl w-full flex flex-col md:flex-row items-center gap-12 md:gap-20">
+<div class="w-full md:w-3/5 rounded-[2rem] overflow-hidden shadow-2xl aspect-video glass-card glow-accent">
+<img alt="Welcome" class="w-full h-full object-cover" src="/stitch/asset-58.jpg"/>
+</div>
+<div class="w-full md:w-2/5 space-y-6 text-center md:text-left">
+<span class="inline-block px-4 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps uppercase">Step 01</span>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight md:text-[40px] md:leading-[1.2]">반려동물과 하늘이<br/>맺어준 인연</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">K-Saju Pet에 오신 것을 환영합니다.<br/>우리의 소중한 가족을 위한 운명적인 여정을 시작하세요.</p>
+</div>
+</div>
+</section>
+<!-- Step 2 -->
+<section class="slide p-gutter">
+<div class="max-w-6xl w-full flex flex-col md:flex-row-reverse items-center gap-12 md:gap-20">
+<div class="w-full md:w-3/5 rounded-[2rem] overflow-hidden shadow-2xl aspect-video glass-card glow-accent">
+<img alt="Saju Analysis" class="w-full h-full object-cover" src="/stitch/asset-59.jpg"/>
+</div>
+<div class="w-full md:w-2/5 space-y-6 text-center md:text-left">
+<span class="inline-block px-4 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-caps text-label-caps uppercase">Step 02</span>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight md:text-[40px] md:leading-[1.2]">아이의 운명적인<br/>기운 확인</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">만세력을 통해 아이의 오행 기운을 분석해 드립니다.<br/>어떤 에너지를 타고났는지 지금 확인해 보세요.</p>
+</div>
+</div>
+</section>
+<!-- Step 3 -->
+<section class="slide p-gutter">
+<div class="max-w-6xl w-full flex flex-col md:flex-row items-center gap-12 md:gap-20">
+<div class="w-full md:w-3/5 rounded-[2rem] overflow-hidden shadow-2xl aspect-video glass-card glow-accent">
+<img alt="Bond" class="w-full h-full object-cover" src="/stitch/asset-60.jpg"/>
+</div>
+<div class="w-full md:w-2/5 space-y-6 text-center md:text-left">
+<span class="inline-block px-4 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps uppercase">Step 03</span>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight md:text-[40px] md:leading-[1.2]">집사님과의<br/>특별한 궁합</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">서로를 채워주는 기운을 확인하고<br/>더욱 깊은 유대감을 쌓아보세요.</p>
+</div>
+</div>
+</section>
+<!-- Step 4 -->
+<section class="slide p-gutter">
+<div class="max-w-6xl w-full flex flex-col md:flex-row-reverse items-center gap-12 md:gap-20">
+<div class="w-full md:w-3/5 rounded-[2rem] overflow-hidden shadow-2xl aspect-video glass-card glow-accent">
+<img alt="Community" class="w-full h-full object-cover" src="/stitch/asset-61.jpg"/>
+</div>
+<div class="w-full md:w-2/5 space-y-6 text-center md:text-left">
+<span class="inline-block px-4 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps uppercase">Step 04</span>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight md:text-[40px] md:leading-[1.2]">우리아이 자랑하고<br/>소통하기</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">전 세계 집사님들과 소중한 순간을 공유하세요.<br/>함께 소통하며 추억을 만들어갑니다.</p>
+</div>
+</div>
+</section>
+<!-- Step 5 (Enhanced Success Roadmap) -->
+<section class="slide p-gutter relative overflow-hidden">
+<!-- Decorative Elements -->
+<span class="material-symbols-outlined star-decoration text-4xl top-20 left-20 floating-element">auto_awesome</span>
+<span class="material-symbols-outlined star-decoration text-2xl top-40 right-40 floating-element" style="animation-delay: 1s">star</span>
+<span class="material-symbols-outlined star-decoration text-3xl bottom-40 left-1/4 floating-element" style="animation-delay: 2s">cloud</span>
+<div class="max-w-6xl w-full text-center space-y-16 relative z-10">
+<div class="space-y-4">
+<h2 class="font-display-hero text-display-hero text-primary tracking-tight">K-Saju Pet Success Journey</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">아이와 함께하는 신비로운 여정의 단계를 확인해보세요.</p>
+</div>
+<div class="relative min-h-[450px] flex items-center justify-between px-4">
+<!-- Curved Journey Path SVG -->
+<svg class="roadmap-path-svg hidden md:block" viewbox="0 0 1000 200">
+<path class="path-line" d="M 50 100 Q 250 10 500 100 T 950 100"></path>
+</svg>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 w-full">
+<!-- Journey Step 1 -->
+<div class="relative flex flex-col items-center gap-6 group">
+<div class="w-48 h-32 md:w-56 md:h-40 rounded-2xl glass-card overflow-hidden shadow-xl border-2 border-white/50 group-hover:scale-105 transition-transform duration-500 glow-accent">
+<img alt="Profile Registration" class="w-full h-full object-cover opacity-90" src="/stitch/asset-11.jpg"/>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-lg mb-2">1</div>
+<h3 class="font-headline-md text-primary">우리 아이 프로필 등록</h3>
+<p class="font-body-sm text-on-surface-variant px-4">이름, 생년월일, 품종 등<br/>기본 정보를 입력하세요.</p>
+</div>
+</div>
+<!-- Journey Step 2 -->
+<div class="relative flex flex-col items-center gap-6 group md:translate-y-12">
+<div class="w-48 h-32 md:w-56 md:h-40 rounded-2xl glass-card overflow-hidden shadow-xl border-2 border-white/50 group-hover:scale-105 transition-transform duration-500 glow-accent">
+<img alt="Saju Analysis" class="w-full h-full object-cover opacity-90" src="/stitch/asset-59.jpg"/>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-lg mb-2">2</div>
+<h3 class="font-headline-md text-primary">신비로운 사주 분석</h3>
+<p class="font-body-sm text-on-surface-variant px-4">오행과 타고난 운명을<br/>확인할 수 있습니다.</p>
+</div>
+</div>
+<!-- Journey Step 3 -->
+<div class="relative flex flex-col items-center gap-6 group">
+<div class="w-48 h-32 md:w-56 md:h-40 rounded-2xl glass-card overflow-hidden shadow-xl border-2 border-white/50 group-hover:scale-105 transition-transform duration-500 glow-accent">
+<img alt="Bond Check" class="w-full h-full object-cover opacity-90" src="/stitch/asset-60.jpg"/>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-lg mb-2">3</div>
+<h3 class="font-headline-md text-primary">운명적인 궁합 확인</h3>
+<p class="font-body-sm text-on-surface-variant px-4">집사님과 아이 사이의<br/>기운의 조화를 체크하세요.</p>
+</div>
+</div>
+<!-- Journey Step 4 -->
+<div class="relative flex flex-col items-center gap-6 group md:translate-y-12">
+<div class="w-48 h-32 md:w-56 md:h-40 rounded-2xl glass-card overflow-hidden shadow-xl border-2 border-white/50 group-hover:scale-105 transition-transform duration-500 glow-accent">
+<div class="w-full h-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-6xl text-primary/40">emoji_events</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-lg mb-2">4</div>
+<h3 class="font-headline-md text-primary">우리아이 자랑하기</h3>
+<p class="font-body-sm text-on-surface-variant px-4">추억을 공유하고<br/>Top 5 랭킹에 도전하세요.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 w-full z-50 flex flex-col items-center gap-8 pb-12 pt-4 px-gutter">
+<div class="flex gap-3">
+<div class="h-2 w-2 rounded-full bg-outline-variant transition-all duration-300 dot-active" id="dot-0"></div>
+<div class="h-2 w-2 rounded-full bg-outline-variant transition-all duration-300" id="dot-1"></div>
+<div class="h-2 w-2 rounded-full bg-outline-variant transition-all duration-300" id="dot-2"></div>
+<div class="h-2 w-2 rounded-full bg-outline-variant transition-all duration-300" id="dot-3"></div>
+<div class="h-2 w-2 rounded-full bg-outline-variant transition-all duration-300" id="dot-4"></div>
+</div>
+<div class="flex justify-between items-center w-full max-w-4xl px-4">
+<button class="invisible flex items-center justify-center p-4 rounded-full glass-card text-primary active:scale-90 transition-all shadow-md" id="prevBtn" onclick="prevSlide()">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<button class="flex items-center justify-center px-12 py-4 bg-primary text-on-primary rounded-full font-headline-sm text-headline-sm shadow-xl active:scale-95 transition-all min-w-[160px]" id="nextBtn" onclick="nextSlide()">
+            다음
+        </button>
+</div>
+</footer>
+<script>
+    let currentSlide = 0;
+    const totalSlides = 5;
+    const slider = document.getElementById('slider');
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+
+    function updateSlider() {
+        slider.style.transform = `translateX(-${currentSlide * 20}%)`;
+        
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.getElementById(`dot-${i}`);
+            if (i === currentSlide) {
+                dot.classList.add('dot-active');
+                dot.classList.add('bg-primary');
+                dot.classList.remove('bg-outline-variant');
+            } else {
+                dot.classList.remove('dot-active');
+                dot.classList.remove('bg-primary');
+                dot.classList.add('bg-outline-variant');
+            }
+        }
+
+        prevBtn.style.visibility = currentSlide === 0 ? 'hidden' : 'visible';
+        
+        if (currentSlide === totalSlides - 1) {
+            nextBtn.textContent = '지금 시작하기';
+            nextBtn.onclick = skipOnboarding;
+        } else {
+            nextBtn.textContent = '다음';
+            nextBtn.onclick = nextSlide;
+        }
+    }
+
+    function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+            currentSlide++;
+            updateSlider();
+        }
+    }
+
+    function prevSlide() {
+        if (currentSlide > 0) {
+            currentSlide--;
+            updateSlider();
+        }
+    }
+
+    function skipOnboarding() {
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.6s ease-out';
+        setTimeout(() => {
+            alert('Welcome to K-Saju Pet Dashboard!');
+        }, 600);
+    }
+
+    updateSlider();
+</script>
+</body></html>

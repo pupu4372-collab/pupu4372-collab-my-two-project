@@ -13,6 +13,11 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Deploy (Vercel)
+
+**Production deploys go to Vercel** (`npm run build` on push or `npm run vercel:deploy`).  
+See [docs/DEPLOY.md](docs/DEPLOY.md) for the full checklist. Cloudflare (`cf-*` scripts) is optional/experimental only.
+
 ## Custom domain (Gabia → Vercel)
 
 See [docs/DEPLOY_DOMAIN.md](docs/DEPLOY_DOMAIN.md) for DNS, Supabase, and app URL setup.

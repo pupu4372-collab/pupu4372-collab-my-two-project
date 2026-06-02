@@ -4,6 +4,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 
 const TABS = [
+  { href: "/community/pet-show", ko: "허브", en: "Hub" },
   { href: "/community/pet-show/upload", ko: "자랑 올리기", en: "Upload" },
   { href: "/community/pet-show/ranking", ko: "주간 랭킹", en: "Ranking" },
   { href: "/community/pet-show/snapzone", ko: "스냅존", en: "Snapzone" },
@@ -11,7 +12,6 @@ const TABS = [
 
 function isActiveTab(pathname: string, href: (typeof TABS)[number]["href"]) {
   if (pathname === href) return true;
-  if (href === "/community/pet-show/upload" && pathname === "/community/pet-show") return true;
   return false;
 }
 
@@ -22,7 +22,7 @@ export function PetShowNav() {
 
   return (
     <nav
-      className="sticky top-3 z-20 grid grid-cols-3 gap-2 rounded-2xl border border-channel-community/20 bg-white/90 p-1.5 text-sm font-extrabold text-plum shadow-md backdrop-blur-sm"
+      className="sticky top-3 z-20 grid grid-cols-2 gap-2 rounded-2xl border border-channel-community/20 bg-white/90 p-1.5 text-sm font-extrabold text-plum shadow-md backdrop-blur-sm sm:grid-cols-4"
       aria-label={isKo ? "우리아이 자랑 메뉴" : "Pet Show menu"}
     >
       {TABS.map((tab) => {

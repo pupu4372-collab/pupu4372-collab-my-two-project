@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyStatePanel, getEmptyStatePreset } from "@/components/ui/EmptyStatePanel";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { compressImageForUpload } from "@/lib/images/upload-compression";
@@ -302,15 +303,7 @@ export function PetProfilesList({
   }
 
   if (pets.length === 0) {
-    return (
-      <p className="text-sm text-plum/70">
-        {isKo ? "아직 저장된 펫 프로필이 없어요." : "No saved pet profiles yet."}{" "}
-        <Link href="/" className="font-medium text-plum underline">
-          {isKo ? "홈에서 사주 보기" : "Read saju from Home"}
-        </Link>
-        {isKo ? "를 하면 자동으로 저장됩니다." : " to save one automatically."}
-      </p>
-    );
+    return <EmptyStatePanel {...getEmptyStatePreset("pets", isKo)} />;
   }
 
   const totalReadings = pets.reduce((sum, pet) => sum + pet.readings.length, 0);
@@ -397,7 +390,7 @@ export function PetProfilesList({
               key={pet.id}
               className={
                 useGlassCards
-                  ? "glass-card flex items-center gap-4 rounded-[2rem] p-5 transition active:scale-[0.99]"
+                  ? "glass-card rounded-[2rem] p-5 transition active:scale-[0.99]"
                   : isCompactView
                     ? "rounded-xl border border-plum/15 bg-white/55 px-2 py-2"
                     : "rounded-2xl border border-plum/15 bg-white/55 px-3 py-3"
@@ -501,6 +494,15 @@ export function PetProfilesList({
                   </span>
                 )}
               </div>
+
+              {useGlassCards && !editable && (
+                <Link
+                  href={`/profile/pets/${pet.id}`}
+                  className="mt-4 block rounded-2xl bg-primary/10 px-4 py-2.5 text-center text-xs font-bold text-primary transition hover:bg-primary hover:text-white"
+                >
+                  {isKo ? "상세 프로필 보기" : "View pet profile"}
+                </Link>
+              )}
 
               {editable && drafts[pet.id] && (
                 <div className="mt-4 grid gap-3 rounded-2xl bg-white/45 p-4 sm:grid-cols-2">

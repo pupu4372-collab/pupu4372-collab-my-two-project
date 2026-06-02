@@ -26,15 +26,14 @@ const THEME: Record<
     border: "border-channel-dog/25",
     button: "bg-channel-dog text-white hover:brightness-105",
     ring: "bg-channel-dog/15",
-    heroImage:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDJDPbSMlr5IIjOl0yaF_C7rC-6pYCX_qKCueZPr0oKXmPsCp66gbHHphpbrKJv11qEuxZd8knSHr_fpS35qeqI7VccCxVcUDCctNs1Te_FpnXHQND-pglFnptTfWS8vsymNXU3zUGRZxFXrG1POr_cHZUYThYGhFEe7EU2gvuG2AQ4CtqKLjIuaw71fpfia5kYYLGicfdVYgLo_pYYQz1NNiK167W0ehdNr05jMStXxHFDu6bjHmkNg4UVP_HO960AjPuZl-Q_kdTR",
+    heroImage: "/stitch/asset-24.jpg",
     heroLabel: "CHANNEL DOG",
     elementTitle: { ko: "사주 맞춤 훈련", en: "Saju-based training" },
     breedImages: [
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBFpb5atiGeMJWOzs-ehgEWdYF1puSZpVsL_fc-wLFZr3jwFRpelxvIHcaoqDIvoc2lxYApjoQSBeehMLkL3C8xbDXUuZObSpNenUNuC45UofDSedSGIQ3IOgVEESzYgJuvWkLDSYjLoB_HX4TQ4TcwVh61zXNAC-rMCu-JsUQXKYLgW8_K5gkKMmGBrQAQ7JmJbxoJ3BDnOd212F6JhGM7FZJnz8yQMpI7WBIaKQZNc6jFdEImiLBQltW1urFeG6FyjHJAQSYMccIy",
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAhW81a0mVSt5m_qiPgnVpHtlqWueZzzQ5TvAMfGlhD9xnOq0CXQURF1ODYf_-6Oxzaw17Dvuf7AXuEoqB-4lCrH6SuoSqwOUamxlV6azgX-d5w0xGjLegwWgxTZj8es3lR_OFBdzYzW4HSrWjt0d2fQ1uC5Vg2o6OQ8YQIMrcIg6dwqo58CthVc8UM7FADtrOl4odxFuLhSvwWiVL6X--vjvDwF6DWaNL6ac3hMDLNCWcUu12yyQRXEu219ds6x4rRHeAxS-JgwcLI",
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCs7Y10TtNO99hi1RhGmCqxqQ_iJqrxHRvhTBwQmOeWqA7G4AdFSdGT9cUiBAe1-SlYDL52ldwe57u9U-QjsbctTwBa99FamPsI1iPoi7mcVNhWdXaEw2VnAT4o9b1fqQkvqFlMH9g44pTEdp6D7l0w4llop6dBz9Bda71O9ypZ6Sx0PhY-7kYTv9G2vGkilwYCccxE8xaZ4qx6G0IXyNcfIGtoCJ-ULm5gxoBeoBjJ1W8xtxMbffBHGWG9dV7P8ZO2i7YG9AU875yE",
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuB5SwIjbjlpAmwYGx-siP_hI0kLbtPFgSaYhMjUl3IrHwrXmg5yGGvyocPH_dpBp6hyauv6NeI0Qa5EKSBA06sX7jAu0zV9LEJHFnYdTy7BQ9ZywOUurW-uXFYwHK2SOUsjIe-UqMxwr2Te-LPV-SWcIVn7yuoqGdwnfFFs9XDRsytcRMCQBI2UNyuHdyLDHljW9XGEjKFrAw9k0bhQ4xUc933l7LUUzhGdqvPlbSLuIpLjbSSKn9mera40ebBeo2MuI1Z8ROdEF9S0",
+      "/stitch/asset-26.jpg",
+      "/stitch/asset-27.jpg",
+      "/stitch/asset-28.jpg",
+      "/stitch/asset-29.jpg",
     ],
   },
   cat: {
@@ -43,15 +42,14 @@ const THEME: Record<
     border: "border-channel-cat/25",
     button: "bg-channel-cat text-white hover:brightness-105",
     ring: "bg-channel-cat/15",
-    heroImage:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCft3vuFZTk5g4dUamMX271kizRiOvBQ0iBVMJkxotHv63DHhnDSAAF6_hBs1m_PBcNpftT4CbetRV-3P5oyLdsVTCxSawupFR2gQcjI70-t0pKJDvP3DjTcM0mMhX0JnMxebi7ty2cZhs27lzJbAolzV2BhWrVDPOW_oeDkqgj1hMPYfiWgnhgDZMuuoJLuX6izbYxkCGwZiQIf8NWmLHnv5tW6TMH-O23cZcErTKKM3NhwcS4rwFChJGEQ4Rt50jGGE0NZSFAqQH4",
+    heroImage: "/stitch/asset-37.jpg",
     heroLabel: "CHANNEL CAT",
     elementTitle: { ko: "사주 맞춤 케어", en: "Saju-based care" },
     breedImages: [
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBMR1uL5pSLE7MbSSJkyf-Et6u19PPoF-jTDxOMncDHt4K56S3UFTkbw36jZHa0_gLCB3fgpOqit-1mbU69unqAbp03AstDqMG3s81Cy6K2rplNl9EndwO9pEj98kZVgROEnK0ljOCPuYOOgkpv9rti-6X6LIHSe__S47Qop8vQ25vtU_3DsBFVWltkzL-bgFc6ZKoF_CEK2--gE97OOsmRmFTKaz4CJL3E7whbF48tpW_bYp2VM3F1vjGWeeeR56jflMIDjfm1b6Xm",
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBCcsJtFVTMNYVzMqhZ-GQOSERDCW_6RtqAhV_AL0HNU4pWMV2YEawB-UYhyrpQQiX6_4YpmX6-z4heYIlTCg1Ou9A2EnH2lNI5MfBmPNWYdrHWIb4BJ4iyWpteD9O3n3HzVCizj7jM8PGB432T-3tOiSyDUrDhqu9gEGVeqsqUyWIDKiOx6kBJbEK6s1Juo5Go3SRxQYt2JmO1lNkMlsY7SXN0VnW-tmudDu_W6Uzo1mS0eaqqii2pD3esT6dLJEzO_5F3VNCXqQ9n",
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuChLO7HJgOgcahJJpWbnR_AbUlwmHOCO4qRm4ih6oCDKOcdPabduXbz8oIfh9fP1KsHO7WQeHKOW8wNh1uXYRLpMqPqZ-ADb_pNtC6ylyrAvFk_vw7py0EfQCZZf9VvJmReIXPpoCd-i-Cp5xDpOxI1jMEK0QtjtsA_xgjZ9WVDCAbRsvzmV4P1x2-mgCyiP_ac1qSDwRf-6iFcvWWUgRHbLfpO6B3gfdxskqyp8Ct5zVko5mULkoJ5Yy3JWoYS-nLEltulBbWPdswU",
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBalhp-6f2YKc_IfdLR1B0ruZTHBtm9u51j3TdEnoKs6JervpuNsHIZPi4_XLNy0hemWljGbkZJqYdRFTnDiBaJU_urECHd3cZAxk4yk_jHbeRArenq4q7GkmPFHT9vZ3xPcKFI6JjwxtDxb_oXuteLkcGylqz02cRc15M2pJLkt0YEpLDqhgLlN306HSFdOnSyZnswzR-5DUCxTt2ClCUX-fP08n_UTzgpkL5eX7C5cfx_F-WvQLixn9PbvtdO0V7Kd_WhWWvQdUQC",
+      "/stitch/asset-38.jpg",
+      "/stitch/asset-39.jpg",
+      "/stitch/asset-40.jpg",
+      "/stitch/asset-41.jpg",
     ],
   },
 };

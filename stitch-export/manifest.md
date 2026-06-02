@@ -44,3 +44,8 @@ The connected Stitch MCP exposes `get_screen_code` but does not expose a readabl
 | 21 | 프로필 - K-Saju Pet | `b9e72ff3f746418d99f6fda984e53bf5` | `21-profile.html` |
 | 22 | 관리자 대시보드 개요 - K-Saju Pet | `f293f3ad3dac4e2f87ec5907de9b22a3` | `22-admin-dashboard-overview.html` |
 | 23 | 계정 상세 - K-Saju Pet | `b8f360a5ef7c405e83f6d56f74379364` | `23-account-detail.html` |
+| 24 | 성공 로드맵 가이드 - K-Saju Pet | `4e229d85ab374a26ac956d6c0aed2f1d` | `24-success-roadmap-guide.html` |
+| 25 | 펫 상세 프로필 - K-Saju Pet | `01ed184045114b8994804fa9d7fbefa8` | `25-pet-detail-profile.html` |
+| 26 | 내 리포트 보관함 - K-Saju Pet | `80bb89f6790649c9af7cef1d783bb3a8` | `26-report-vault.html` |
+| 27 | 빈 상태 (Empty State) - K-Saju Pet | `796dd9b17f4b42ca9846e60e33ab2d32` | `27-empty-state.html` |
+| 28 | 404 오류 페이지 - K-Saju Pet | `de56cb5a28994a5a9e54fd54e724e456` | `28-404-error.html` |

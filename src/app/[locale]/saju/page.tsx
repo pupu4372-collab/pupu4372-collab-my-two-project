@@ -1,5 +1,8 @@
 import { ChannelShell } from "@/components/layout/ChannelShell";
+import { SajuElementsStrip } from "@/components/k-saju/SajuElementsStrip";
+import { SajuHubCta } from "@/components/k-saju/SajuHubCta";
 import { SajuHubGrid } from "@/components/k-saju/SajuHubGrid";
+import { SajuHubHero } from "@/components/k-saju/SajuHubHero";
 import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function SajuHubPage() {
@@ -9,7 +12,9 @@ export default async function SajuHubPage() {
 
   return (
     <ChannelShell theme="saju" title={t("hubTitle")} subtitle={t("hubSubtitle")}>
-      <SajuHubGrid
+      <div className="space-y-10">
+        <SajuHubHero isKo={isKo} />
+        <SajuHubGrid
         labels={{
           basic: isKo ? "K-사주 · 띠별 운세" : "K-Saju · Zodiac year",
           basicDesc: isKo ? "홈에서 반려동물 생일로 만세력 분석" : "Manseryeok reading from Home with your pet's birthday",
@@ -20,7 +25,10 @@ export default async function SajuHubPage() {
           premium: isKo ? "Premium 리포트" : "Premium report",
           premiumDesc: isKo ? "평생 사주 스토리와 케어 가이드" : "Lifetime saju story and care guide",
         }}
-      />
+        />
+        <SajuElementsStrip isKo={isKo} />
+        <SajuHubCta isKo={isKo} />
+      </div>
     </ChannelShell>
   );
 }

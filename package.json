@@ -8,15 +8,20 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "prestart": "node scripts/free-port.mjs",
     "start": "next start",
+    "start:clean": "node scripts/free-port.mjs && next start",
     "lint": "next lint",
+    "stitch:localize": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/localize-stitch-images.ps1",
+    "stitch:localize-html": "node scripts/localize-stitch-html.mjs",
+    "stitch:copy-public": "node scripts/copy-stitch-public.mjs",
     "cap:sync": "cap sync",
     "cap:open:android": "cap open android",
     "cap:open:ios": "cap open ios",
+    "vercel:deploy": "vercel deploy --prod",
     "cf-build": "opennextjs-cloudflare build && node scripts/cf-postbuild.mjs",
-    "cf-deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf-deploy": "opennextjs-cloudflare build && node scripts/cf-postbuild.mjs && opennextjs-cloudflare deploy",
+    "cf-preview": "opennextjs-cloudflare build && node scripts/cf-postbuild.mjs && opennextjs-cloudflare preview"
   },
   "dependencies": {
     "@capacitor/app": "^7.1.2",

@@ -62,11 +62,13 @@ function SpeciesList({
   emoji,
   title,
   emptyText,
+  locale,
 }: {
   rows: PetShowRankingRow[];
   emoji: string;
   title: string;
   emptyText: string;
+  locale: string;
 }) {
   return (
     <div className="rounded-2xl bg-white/55 p-4">
@@ -74,9 +76,15 @@ function SpeciesList({
         {emoji} {title}
       </h3>
       {rows.length === 0 ? (
-        <p className="mt-3 rounded-xl bg-channel-community/10 px-3 py-3 text-xs text-plum/55">
-          {emptyText}
-        </p>
+        <div className="mt-3 rounded-2xl border border-dashed border-channel-community/25 bg-white/60 px-4 py-4 text-center">
+          <p className="text-xs leading-relaxed text-plum/60">{emptyText}</p>
+          <Link
+            href="/community/pet-show/upload"
+            className="mt-2 inline-flex rounded-full bg-channel-community px-4 py-2 text-[11px] font-bold text-white"
+          >
+            {locale === "ko" ? "사진 올리기" : "Upload photo"}
+          </Link>
+        </div>
       ) : (
         <ol className="mt-3 space-y-2">
           {rows.slice(0, 5).map((row, i) => (
@@ -143,18 +151,21 @@ export function PetShowWeeklySpeciesRanking({
           emoji="🐕"
           title={isKo ? "강아지 Top 5" : "Dog Top 5"}
           emptyText={isKo ? "이번 주 강아지 사진을 기다리는 중이에요." : "Waiting for dog photos this week."}
+          locale={locale}
         />
         <SpeciesList
           rows={catRows}
           emoji="🐈"
           title={isKo ? "고양이 Top 5" : "Cat Top 5"}
           emptyText={isKo ? "이번 주 고양이 사진을 기다리는 중이에요." : "Waiting for cat photos this week."}
+          locale={locale}
         />
         <SpeciesList
           rows={otherRows}
           emoji="🐾"
           title={isKo ? "다른동물 Top 5" : "Other Animals Top 5"}
           emptyText={isKo ? "이번 주 다른동물 사진을 기다리는 중이에요." : "Waiting for other animal photos this week."}
+          locale={locale}
         />
       </div>
     </section>

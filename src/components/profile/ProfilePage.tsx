@@ -89,6 +89,30 @@ export function ProfilePage() {
           </span>
         </button>
         <Link
+          href="/reports"
+          className="flex items-center justify-between px-5 py-4 transition hover:bg-white/40"
+        >
+          <span className="flex items-center gap-3 text-sm font-medium text-on-surface">
+            <span aria-hidden>📁</span>
+            {isKo ? "내 리포트 보관함" : "My report vault"}
+          </span>
+          <span className="text-plum/40" aria-hidden>
+            ›
+          </span>
+        </Link>
+        <Link
+          href="/onboarding"
+          className="flex items-center justify-between px-5 py-4 transition hover:bg-white/40"
+        >
+          <span className="flex items-center gap-3 text-sm font-medium text-on-surface">
+            <span aria-hidden>🧭</span>
+            {isKo ? "성공 로드맵 가이드" : "Success roadmap"}
+          </span>
+          <span className="text-plum/40" aria-hidden>
+            ›
+          </span>
+        </Link>
+        <Link
           href="/terms"
           className="flex items-center justify-between px-5 py-4 transition hover:bg-white/40"
         >

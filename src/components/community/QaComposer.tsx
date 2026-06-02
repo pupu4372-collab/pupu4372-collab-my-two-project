@@ -79,7 +79,7 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="pastel-card space-y-5 p-6">
+    <form id="board-composer" onSubmit={handleSubmit} className="pastel-card scroll-mt-24 space-y-5 p-6">
       <div>
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community">
           Community

@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyStatePanel, getEmptyStatePreset } from "@/components/ui/EmptyStatePanel";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
@@ -172,9 +173,12 @@ export function PetShowPostsMiniGrid() {
       {loading ? (
         <p className="text-sm text-plum/55">{isKo ? "올린 사진 불러오는 중..." : "Loading photos..."}</p>
       ) : posts.length === 0 ? (
-        <p className="rounded-2xl bg-channel-community/10 px-3 py-3 text-sm text-plum/60">
-          {isKo ? "아직 우리아이 자랑에 올린 사진이 없어요." : "No Pet Show photos yet."}
-        </p>
+        <EmptyStatePanel
+          {...getEmptyStatePreset("petShow", isKo)}
+          suggestions={undefined}
+          className="py-8"
+          imageSrc="/stitch/asset-69.jpg"
+        />
       ) : (
         <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
           {posts.map((post) => (

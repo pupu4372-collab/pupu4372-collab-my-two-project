@@ -1,0 +1,231 @@
+<!DOCTYPE html><html class="light" lang="ko"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>K-Saju Pet - Empty State</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/suit-variable.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#c5cc7f",
+                    "surface-container": "#efeeea",
+                    "on-tertiary-fixed": "#1a1d00",
+                    "surface-container-high": "#eae8e4",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#f9d9c8",
+                    "surface-tint": "#725284",
+                    "on-secondary-fixed": "#28180d",
+                    "inverse-surface": "#30312e",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#574236",
+                    "on-primary-fixed": "#2b0d3c",
+                    "inverse-primary": "#dfb9f2",
+                    "background": "#fbf9f5",
+                    "surface-container-low": "#f5f3ef",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#dfb9f2",
+                    "on-primary-container": "#d1abe4",
+                    "surface-container-highest": "#e4e2de",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#4b444d",
+                    "secondary": "#715a4c",
+                    "on-background": "#1b1c1a",
+                    "primary-fixed": "#f5d9ff",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#e4e2de",
+                    "surface-dim": "#dbdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed-variant": "#454b0a",
+                    "on-surface": "#1b1c1a",
+                    "inverse-on-surface": "#f2f0ed",
+                    "secondary-fixed-dim": "#dfc0b0",
+                    "on-primary-fixed-variant": "#593a6b",
+                    "on-tertiary-container": "#b7be73",
+                    "tertiary": "#313600",
+                    "primary-container": "#5c3d6e",
+                    "secondary-fixed": "#fcdccb",
+                    "outline-variant": "#cec3ce",
+                    "tertiary-container": "#474d0d",
+                    "outline": "#7d747e",
+                    "surface": "#fbf9f5",
+                    "on-secondary-container": "#755e50",
+                    "surface-bright": "#fbf9f5",
+                    "primary": "#442656",
+                    "tertiary-fixed": "#e1e999"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "page-margin-mobile": "1.25rem",
+                    "card-padding": "2rem",
+                    "section-gap": "5rem",
+                    "page-margin-desktop": "4rem",
+                    "gutter": "1.5rem"
+            },
+            "fontFamily": {
+                    "headline-md": ["SUIT Variable"],
+                    "body-lg": ["SUIT Variable"],
+                    "headline-lg": ["SUIT Variable"],
+                    "body-md": ["SUIT Variable"],
+                    "label-caps": ["SUIT Variable"],
+                    "headline-sm": ["SUIT Variable"],
+                    "display-hero": ["SUIT Variable"],
+                    "body-sm": ["SUIT Variable"],
+                    "display-hero-mobile": ["SUIT Variable"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "display-hero": ["42px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "display-hero-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            background-color: #fbf9f5;
+        }
+        .dream-sky-bg {
+            background: linear-gradient(135deg, #fbf9f5 0%, #f5f3ef 50%, #f9d9c822 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .dream-sky-bg::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #dfb9f233 0%, transparent 70%);
+            filter: blur(60px);
+            z-index: 0;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(113, 90, 76, 0.1);
+        }
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body class="text-on-background">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md dark:bg-background/80 border-b border-secondary/10 shadow-sm shadow-primary/5">
+<div class="flex justify-between items-center px-page-margin-desktop h-20 max-w-[1200px] mx-auto">
+<div class="font-headline-md text-headline-md font-bold tracking-tight text-primary dark:text-primary-fixed-dim">
+                K-Saju Pet
+            </div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant dark:text-on-surface-variant/70 hover:text-primary transition-colors duration-300 font-body-md text-body-md" href="#">Ïª§Î??àÌã∞ ?åÍ∞ú</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/70 hover:text-primary transition-colors duration-300 font-body-md text-body-md" href="#">?¨Ï£º Î∂ÑÏÑù</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant/70 hover:text-primary transition-colors duration-300 font-body-md text-body-md" href="#">?∞Î¶¨?ÑÏù¥ ?êÎûë</a>
+<div class="flex items-center gap-2 active:scale-95 transition-transform cursor-pointer text-primary">
+<span class="material-symbols-outlined">language</span>
+</div>
+</div>
+<div class="md:hidden flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">menu</span>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="min-h-screen pt-20 pb-12 flex flex-col items-center justify-center dream-sky-bg px-page-margin-mobile">
+<!-- Empty State Container -->
+<div class="max-w-[800px] w-full text-center flex flex-col items-center z-10">
+<!-- Illustration Area -->
+<div class="relative w-full max-w-[400px] aspect-square mb-12 floating">
+<div class="absolute inset-0 bg-primary/5 rounded-full blur-3xl opacity-50 scale-110"></div>
+<img alt="K-Saju Pet Empty State Mascot" class="w-full h-full object-contain relative z-10 drop-shadow-2xl" src="/stitch/asset-69.jpg">
+</div>
+<!-- Typography & Content -->
+<div class="space-y-6">
+<h1 class="font-headline-lg text-headline-lg text-primary">
+                    ?ÑÏßÅ ?ÑÏ∞©???åÏãù???ÜÏñ¥??                </h1>
+<p class="font-body-lg text-body-lg text-secondary max-w-md mx-auto">
+                    Î∞òÎ†§?ôÎ¨º???¨Ï£ºÎ•?Î∂ÑÏÑù?òÍ±∞??Ïª§Î??àÌã∞??Ï≤?Í∏Ä???®Í≤®Î≥¥ÏÑ∏??
+                </p>
+<div class="pt-8">
+<button class="bg-primary text-on-primary font-headline-sm text-headline-sm px-10 py-4 rounded-full shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all duration-300">
+                        ?¨Ï£º Î∂ÑÏÑù ?úÏûë?òÍ∏∞
+                    </button>
+</div>
+</div>
+<!-- Suggestion Grid (Bento style hint) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-20 w-full">
+<div class="glass-card p-6 rounded-2xl text-left hover:bg-white/80 transition-colors group cursor-pointer" style="--mouse-x: 18px; --mouse-y: 127.79998779296875px;">
+<div class="w-10 h-10 bg-secondary-container rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-secondary">stars</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-2">?¨Ï£º Í∞Ä?¥Îìú Î≥¥Í∏∞</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">?∞Î¶¨ ?ÑÏù¥???¥ÏÑ∏?Ä ?±Í≤©??ÎØ∏Î¶¨ ?åÏïÑÎ≥¥Îäî Î≤ïÏùÑ Î∞∞ÏõåÎ≥¥ÏÑ∏??</p>
+</div>
+<div class="glass-card p-6 rounded-2xl text-left hover:bg-white/80 transition-colors group cursor-pointer">
+<div class="w-10 h-10 bg-tertiary-fixed rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-tertiary">pets</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-2">?∏Í∏∞ ??Íµ¨Í≤Ω?òÍ∏∞</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">?§Îäò Í∞Ä??ÎßéÏ? ?¨Îûë??Î∞õÏ? Î∞òÎ†§?ôÎ¨º?§ÏùÑ ÎßåÎÇòÎ≥¥ÏÑ∏??</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-section-gap bg-surface-container-lowest dark:bg-surface-dim border-t border-secondary/5">
+<div class="flex flex-col items-center gap-gutter px-page-margin-desktop text-center max-w-[1200px] mx-auto">
+<div class="font-headline-sm text-headline-sm text-primary mb-2">K-Saju Pet</div>
+<div class="flex flex-wrap justify-center gap-x-8 gap-y-4 mb-4">
+<a class="text-secondary/80 font-body-sm text-body-sm hover:text-primary transition-colors hover:underline decoration-tertiary-fixed-dim underline-offset-4" href="#">Ïª§Î??àÌã∞ ?åÍ∞ú</a>
+<a class="text-secondary/80 font-body-sm text-body-sm hover:text-primary transition-colors hover:underline decoration-tertiary-fixed-dim underline-offset-4" href="#">?¨Ï£º Î∂ÑÏÑù</a>
+<a class="text-secondary/80 font-body-sm text-body-sm hover:text-primary transition-colors hover:underline decoration-tertiary-fixed-dim underline-offset-4" href="#">?∞Î¶¨?ÑÏù¥ ?êÎûë</a>
+<a class="text-secondary/80 font-body-sm text-body-sm hover:text-primary transition-colors hover:underline decoration-tertiary-fixed-dim underline-offset-4" href="#">Í∞úÏù∏?ïÎ≥¥Ï≤òÎ¶¨Î∞©Ïπ®</a>
+<a class="text-secondary/80 font-body-sm text-body-sm hover:text-primary transition-colors hover:underline decoration-tertiary-fixed-dim underline-offset-4" href="#">?¥Ïö©?ΩÍ?</a>
+</div>
+<div class="text-secondary/60 font-body-sm text-body-sm">¬© 2024 K-Saju Pet. Î™®Îì† Í∂åÎ¶¨ Î≥¥Ïú†.</div>
+</div>
+</footer>
+<script>
+        // Interactive hover effects for the bento grid items
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+
+
+</body></html>

@@ -51,23 +51,29 @@ export function SajuHubGrid({ labels }: SajuHubGridProps) {
     },
   ];
 
+  const iconBg = ["bg-lavender", "bg-petal", "bg-mint", "bg-sand"] as const;
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {cards.map((card) => {
+    <div className="grid gap-5 sm:grid-cols-2">
+      {cards.map((card, index) => {
         const inner = (
           <GlassCard
-            className={`group flex h-full flex-col gap-3 transition hover:-translate-y-0.5 ${
+            className={`group flex h-full flex-col gap-4 p-6 transition duration-300 hover:-translate-y-1 hover:bg-white/80 ${
               card.featured ? "border-channel-saju/25 bg-channel-saju/10" : ""
             }`}
           >
-            <span className="text-3xl" aria-hidden>
-              {card.icon}
-            </span>
+            <div
+              className={`flex h-14 w-14 items-center justify-center rounded-2xl text-2xl transition group-hover:scale-110 ${iconBg[index] ?? "bg-lavender"}`}
+            >
+              <span aria-hidden>{card.icon}</span>
+            </div>
             <div>
               <h3 className="text-lg font-bold text-primary">{card.title}</h3>
-              <p className="mt-1 text-sm text-plum/65">{card.description}</p>
+              <p className="mt-2 text-sm leading-relaxed text-plum/65">{card.description}</p>
             </div>
-            <span className="mt-auto text-sm font-bold text-channel-saju group-hover:underline">→</span>
+            <span className="mt-auto text-sm font-bold text-primary group-hover:underline">
+              {card.featured ? "→ Home" : "→"}
+            </span>
           </GlassCard>
         );
 

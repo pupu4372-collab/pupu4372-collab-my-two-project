@@ -7,6 +7,7 @@ import {
   signUpWithEmail,
 } from "@/lib/supabase/auth-client";
 import { clearSupabaseBrowserSession, isSupabaseConfigured } from "@/lib/supabase/client";
+import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -20,18 +21,82 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-export function LoginButtons({ homeHref = "/" }: { homeHref?: string }) {
+function AuthInput({
+  label,
+  icon,
+  type,
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+  required,
+  minLength,
+  maxLength,
+  helper,
+}: {
+  label: string;
+  icon: string;
+  type: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  autoComplete?: string;
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  helper?: string;
+}) {
+  return (
+    <label className="block space-y-2">
+      <span className="ml-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">
+        {label}
+      </span>
+      <div className="relative group">
+        <span
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-outline transition-colors group-focus-within:text-primary"
+          aria-hidden
+        >
+          {icon}
+        </span>
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="pastel-input w-full rounded-[1.25rem] border-0 bg-sand/70 py-4 pl-12 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant/40 transition-all focus:ring-2 focus:ring-primary/20"
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          required={required}
+          minLength={minLength}
+          maxLength={maxLength}
+        />
+      </div>
+      {helper && <span className="block px-2 text-left text-[11px] leading-relaxed text-plum/50">{helper}</span>}
+    </label>
+  );
+}
+
+export function LoginButtons({
+  homeHref = "/",
+  initialMode = "login",
+}: {
+  homeHref?: string;
+  initialMode?: Mode;
+}) {
   const t = useTranslations("auth");
   const locale = useLocale();
-  const [mode, setMode] = useState<Mode>("login");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const configured = isSupabaseConfigured();
+  const isKo = locale === "ko";
+  const isSignup = mode === "signup";
 
   useEffect(() => {
     clearSupabaseBrowserSession();
@@ -124,6 +189,15 @@ export function LoginButtons({ homeHref = "/" }: { homeHref?: string }) {
       return;
     }
 
+    if (mode === "signup" && !termsAccepted) {
+      setError(
+        isKo
+          ? "이용약관 및 개인정보 처리방침에 동의해 주세요."
+          : "Please agree to the Terms and Privacy Policy."
+      );
+      return;
+    }
+
     setLoading(mode);
     try {
       if (mode === "signup") {
@@ -147,8 +221,11 @@ export function LoginButtons({ homeHref = "/" }: { homeHref?: string }) {
 
   if (!configured) {
     return (
-      <div className="mx-auto max-w-sm rounded-3xl bg-white/95 p-6 text-center shadow-sm">
-        <p className="text-sm font-semibold text-plum">{t("supabaseTitle")}</p>
+      <div className="glass-card mx-auto max-w-sm rounded-[2rem] border border-white/40 p-7 text-center shadow-sm shadow-primary/5">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white text-2xl shadow-sm">
+          <span aria-hidden>✨</span>
+        </div>
+        <p className="text-sm font-bold text-primary">{t("supabaseTitle")}</p>
         <p className="text-sm leading-relaxed text-plum/70">
           {t.rich("supabaseRequired", {
             code: (chunks) => <code className="text-xs">{chunks}</code>,
@@ -159,154 +236,139 @@ export function LoginButtons({ homeHref = "/" }: { homeHref?: string }) {
   }
 
   return (
-    <div className="glass-card rounded-[2rem] border border-white/40 px-6 py-8 shadow-sm shadow-primary/5 md:px-10 md:py-10">
-      <div className="text-center">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-plum/10 bg-white shadow-sm">
-          <span className="text-3xl text-primary" aria-hidden>
-            ✨
-          </span>
-        </div>
-        <a href={homeHref} className="text-2xl font-extrabold tracking-tight text-primary">
-          K-Saju Pet
-        </a>
-        <h2 className="mt-3 text-lg font-semibold leading-tight text-plum">
-          {mode === "forgot" || mode === "confirm" ? (
-            t(mode === "forgot" ? "forgotTitle" : "confirmTitle")
-          ) : (
-            <>
-              {mode === "signup" ? t("signupTitleLine1") : t("welcomeLine1")}
-              <br />
-              {mode === "signup" ? t("signupTitleLine2") : t("welcomeLine2")}
-            </>
-          )}
-        </h2>
-        <p className="mt-2 text-sm text-on-surface-variant">
-          {mode === "forgot" || mode === "confirm"
-            ? t(mode === "forgot" ? "forgotSubtitle" : "confirmSubtitle")
-            : mode === "signup"
-              ? t("signupSubtitle")
-              : t("loginSubtitle")}
-        </p>
-      </div>
+    <div className="relative">
+      <div className="glass-card relative overflow-hidden rounded-[2rem] border border-white/40 px-6 py-8 shadow-sm shadow-primary/5 md:px-10 md:py-10">
+        <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-mint/40 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-lavender/40 blur-3xl" aria-hidden />
 
-      <form onSubmit={handleEmailSubmit} className="mt-8 space-y-4" noValidate>
-        {mode === "signup" && (
-          <label className="block space-y-2">
-            <span className="ml-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">{t("displayName")}</span>
-            <input
+        <div className="relative z-10 text-center">
+          <a
+            href={homeHref}
+            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-outline-variant/10 bg-white text-3xl shadow-sm transition hover:scale-105"
+            aria-label="K-Saju Pet"
+          >
+            <span aria-hidden>✨</span>
+          </a>
+          <a href={homeHref} className="text-2xl font-extrabold tracking-tight text-primary">
+            K-Saju Pet
+          </a>
+          <h2 className="mt-3 text-xl font-bold leading-tight text-primary">
+            {mode === "forgot" || mode === "confirm" ? (
+              t(mode === "forgot" ? "forgotTitle" : "confirmTitle")
+            ) : isSignup ? (
+              <>
+                {t("signupTitleLine1")}
+                <br />
+                {t("signupTitleLine2")}
+              </>
+            ) : (
+              <>
+                {t("welcomeLine1")}
+                <br />
+                {t("welcomeLine2")}
+              </>
+            )}
+          </h2>
+          <p className="mt-2 text-sm text-on-surface-variant">
+            {mode === "forgot" || mode === "confirm"
+              ? t(mode === "forgot" ? "forgotSubtitle" : "confirmSubtitle")
+              : isSignup
+                ? t("signupSubtitle")
+                : t("loginSubtitle")}
+          </p>
+        </div>
+
+        <form onSubmit={handleEmailSubmit} className="relative z-10 mt-8 space-y-5" noValidate>
+          {isSignup && (
+            <AuthInput
+              label={t("displayName")}
+              icon="👤"
+              type="text"
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="pastel-input w-full rounded-2xl border-0 bg-sand/50 py-3.5 text-sm"
+              onChange={setDisplayName}
               placeholder={t("displayNamePlaceholder")}
+              autoComplete="nickname"
               maxLength={32}
             />
-          </label>
-        )}
+          )}
 
-        <label className="block space-y-2">
-          <span className="ml-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">{t("email")}</span>
-          <input
+          <AuthInput
+            label={t("email")}
+            icon="✉️"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="pastel-input w-full rounded-2xl border-0 bg-sand/50 py-3.5 text-sm"
+            onChange={setEmail}
             placeholder={t("emailPlaceholder")}
             autoComplete="email"
             required
           />
-        </label>
 
-        {mode !== "forgot" && mode !== "confirm" && (
-          <label className="block space-y-2">
-            <span className="ml-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">{t("password")}</span>
-            <input
+          {mode !== "forgot" && mode !== "confirm" && (
+            <AuthInput
+              label={t("password")}
+              icon="🔒"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pastel-input w-full rounded-2xl border-0 bg-sand/50 py-3.5 text-sm"
+              onChange={setPassword}
               placeholder={t("passwordPlaceholder")}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              autoComplete={isSignup ? "new-password" : "current-password"}
               required
-              minLength={mode === "signup" ? 10 : undefined}
+              minLength={isSignup ? 10 : undefined}
+              helper={isSignup ? t("passwordRule") : undefined}
             />
-            {mode === "signup" && (
-              <span className="mt-1 block px-1 text-left text-[11px] leading-relaxed text-plum/45">
-                {t("passwordRule")}
-              </span>
-            )}
-          </label>
-        )}
+          )}
 
-        {mode === "signup" && (
-          <>
-            <label className="block space-y-2">
-              <span className="ml-2 text-xs font-bold uppercase tracking-wide text-on-surface-variant">{t("passwordConfirm")}</span>
-              <input
+          {isSignup && (
+            <>
+              <AuthInput
+                label={t("passwordConfirm")}
+                icon="✅"
                 type="password"
                 value={passwordConfirm}
-                onChange={(e) => setPasswordConfirm(e.target.value)}
-                className="pastel-input w-full rounded-2xl border-0 bg-sand/50 py-3.5 text-sm"
+                onChange={setPasswordConfirm}
                 placeholder={t("passwordConfirmPlaceholder")}
                 autoComplete="new-password"
                 required
                 minLength={10}
               />
-            </label>
-            <p className="px-1 text-left text-[11px] leading-relaxed text-plum/45">
-              {t("signupEmailConfirmHelp")}
-            </p>
-          </>
-        )}
+              <p className="px-1 text-left text-[11px] leading-relaxed text-plum/50">
+                {t("signupEmailConfirmHelp")}
+              </p>
+              <div className="space-y-3 rounded-[1.25rem] bg-white/45 px-4 py-4 text-left">
+                <label className="flex cursor-pointer items-start gap-3 text-sm text-on-surface">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(event) => setTermsAccepted(event.target.checked)}
+                    className="mt-0.5 h-5 w-5 rounded border-outline text-primary focus:ring-primary/20"
+                  />
+                  <span>
+                    {isKo ? "이용약관 및 개인정보 처리방침에 동의합니다" : "I agree to the Terms and Privacy Policy"}{" "}
+                    <span className="font-bold text-primary">{isKo ? "(필수)" : "(required)"}</span>
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-3 text-sm text-on-surface">
+                  <input
+                    type="checkbox"
+                    checked={marketingConsent}
+                    onChange={(event) => setMarketingConsent(event.target.checked)}
+                    className="mt-0.5 h-5 w-5 rounded border-outline text-primary focus:ring-primary/20"
+                  />
+                  <span>{isKo ? "마케팅 정보 수신 동의 (선택)" : "Receive marketing updates (optional)"}</span>
+                </label>
+              </div>
+            </>
+          )}
 
-        {error && (
-          <p className="rounded-2xl bg-petal/45 px-4 py-2 text-sm text-red-700/85" role="alert">
-            {error}
-          </p>
-        )}
-
-        {message && (
-          <p className="rounded-2xl bg-mint/30 px-4 py-2 text-sm text-plum" role="status">
-            {message}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={!!loading}
-          className="w-full rounded-full bg-primary py-4 text-sm font-bold text-white shadow-md shadow-primary/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
-        >
-          {loading === mode
-            ? t("processing")
-            : mode === "forgot"
-              ? t("sendResetEmail")
-              : mode === "confirm"
-                ? t("checkSignupEmail")
-              : mode === "signup"
-              ? t("emailSignup")
-              : t("emailLoginSubmit")}
-        </button>
-      </form>
-
-      <div className="mt-5 text-center text-sm text-plum/60">
-        {mode === "login" ? (
-          <div className="space-y-2">
-            <p>
-              {t("signupPrompt")}{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("signup");
-                  setPassword("");
-                  setPasswordConfirm("");
-                  setError(null);
-                  setMessage(null);
-                }}
-                className="font-bold text-plum underline underline-offset-4"
-              >
-                {t("signupLink")}
-              </button>
-            </p>
-            <div className="flex items-center justify-center gap-2 text-[8px]">
+          {!isSignup && mode === "login" && (
+            <div className="flex items-center justify-between px-2 text-sm">
+              <label className="flex cursor-pointer items-center gap-2 text-on-surface-variant transition hover:text-primary">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-outline-variant/40 bg-sand/80 text-primary focus:ring-primary/20"
+                />
+                {isKo ? "로그인 상태 유지" : "Keep me signed in"}
+              </label>
               <button
                 type="button"
                 onClick={() => {
@@ -316,13 +378,61 @@ export function LoginButtons({ homeHref = "/" }: { homeHref?: string }) {
                   setError(null);
                   setMessage(null);
                 }}
-                className="font-bold text-plum underline underline-offset-2"
+                className="font-semibold text-primary hover:underline"
               >
                 {t("forgotPassword")}
               </button>
-              <span className="text-plum/25" aria-hidden>
-                |
-              </span>
+            </div>
+          )}
+
+          {error && (
+            <p className="rounded-2xl bg-petal/45 px-4 py-2 text-sm text-red-700/85" role="alert">
+              {error}
+            </p>
+          )}
+
+          {message && (
+            <p className="rounded-2xl bg-mint/30 px-4 py-2 text-sm text-plum" role="status">
+              {message}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={!!loading}
+            className="w-full rounded-full bg-primary px-6 py-4 text-sm font-bold text-white shadow-md shadow-primary/20 transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+          >
+            {loading === mode
+              ? t("processing")
+              : mode === "forgot"
+                ? t("sendResetEmail")
+                : mode === "confirm"
+                  ? t("checkSignupEmail")
+                  : isSignup
+                    ? t("emailSignup")
+                    : t("emailLoginSubmit")}
+          </button>
+        </form>
+
+        <div className="relative z-10 mt-7 border-t border-outline-variant/10 pt-6 text-center text-sm text-plum/60">
+          {mode === "login" ? (
+            <div className="space-y-4">
+              <p>
+                {t("signupPrompt")}{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("signup");
+                    setPassword("");
+                    setPasswordConfirm("");
+                    setError(null);
+                    setMessage(null);
+                  }}
+                  className="font-bold text-primary hover:underline"
+                >
+                  {t("signupLink")}
+                </button>
+              </p>
               <button
                 type="button"
                 onClick={() => {
@@ -332,31 +442,49 @@ export function LoginButtons({ homeHref = "/" }: { homeHref?: string }) {
                   setError(null);
                   setMessage(null);
                 }}
-                className="font-bold text-plum underline underline-offset-2"
+                className="text-xs font-bold text-plum/60 underline underline-offset-2 hover:text-primary"
               >
                 {t("signupConfirm")}
               </button>
             </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setMode("login");
-              setPassword("");
-              setPasswordConfirm("");
-              setError(null);
-              setMessage(null);
-            }}
-            className="font-bold text-plum underline underline-offset-4"
-          >
-            {t("backToLogin")}
-          </button>
-        )}
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setMode("login");
+                setPassword("");
+                setPasswordConfirm("");
+                setError(null);
+                setMessage(null);
+              }}
+              className="font-bold text-primary hover:underline"
+            >
+              {t("backToLogin")}
+            </button>
+          )}
+        </div>
+
+        <p className="relative z-10 mt-6 text-center text-xs leading-relaxed text-plum/45">
+          {t("termsNotice")}
+        </p>
       </div>
 
-      <p className="mt-6 text-center text-xs leading-relaxed text-plum/45">
-        {t("termsNotice")}
+      <div className="mt-8 flex justify-center gap-6 opacity-45">
+        {["🐾", "⭐", "💞"].map((icon) => (
+          <div key={icon} className="glass-card flex h-12 w-12 items-center justify-center rounded-full text-xl">
+            <span aria-hidden>{icon}</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="mt-5 text-center text-xs text-plum/45">
+        <Link href="/terms" className="underline hover:text-plum">
+          {t("terms")}
+        </Link>
+        {" · "}
+        <Link href="/privacy" className="underline hover:text-plum">
+          {t("privacy")}
+        </Link>
       </p>
     </div>
   );

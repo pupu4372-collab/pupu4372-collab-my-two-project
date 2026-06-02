@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>K-Saju Pet | 골디 프로필</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/suit-variable.css');
+        
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(113, 90, 76, 0.1);
+        }
+
+        .dream-sky-gradient {
+            background: linear-gradient(135deg, #fbf9f5 0%, #f5f3ef 50%, #f5d9ff 100%);
+        }
+
+        .safe-pb {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "surface-container-highest": "#e4e2de",
+                      "on-primary-container": "#d1abe4",
+                      "primary-fixed-dim": "#dfb9f2",
+                      "surface-container-low": "#f5f3ef",
+                      "on-tertiary": "#ffffff",
+                      "background": "#fbf9f5",
+                      "on-primary-fixed": "#2b0d3c",
+                      "inverse-primary": "#dfb9f2",
+                      "on-secondary-fixed-variant": "#574236",
+                      "error-container": "#ffdad6",
+                      "inverse-surface": "#30312e",
+                      "on-secondary-fixed": "#28180d",
+                      "surface-tint": "#725284",
+                      "secondary-container": "#f9d9c8",
+                      "surface-container-high": "#eae8e4",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#c5cc7f",
+                      "surface-container": "#efeeea",
+                      "on-tertiary-fixed": "#1a1d00",
+                      "tertiary-fixed": "#e1e999",
+                      "surface-bright": "#fbf9f5",
+                      "primary": "#442656",
+                      "surface": "#fbf9f5",
+                      "on-secondary-container": "#755e50",
+                      "tertiary-container": "#474d0d",
+                      "outline": "#7d747e",
+                      "secondary-fixed": "#fcdccb",
+                      "outline-variant": "#cec3ce",
+                      "primary-container": "#5c3d6e",
+                      "tertiary": "#313600",
+                      "on-tertiary-container": "#b7be73",
+                      "secondary-fixed-dim": "#dfc0b0",
+                      "on-primary-fixed-variant": "#593a6b",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-fixed-variant": "#454b0a",
+                      "on-surface": "#1b1c1a",
+                      "inverse-on-surface": "#f2f0ed",
+                      "surface-dim": "#dbdad6",
+                      "surface-variant": "#e4e2de",
+                      "on-primary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "primary-fixed": "#f5d9ff",
+                      "secondary": "#715a4c",
+                      "on-background": "#1b1c1a",
+                      "on-surface-variant": "#4b444d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-padding": "2rem",
+                      "page-margin-mobile": "1.25rem",
+                      "gutter": "1.5rem",
+                      "page-margin-desktop": "4rem",
+                      "section-gap": "5rem"
+              },
+              "fontFamily": {
+                      "headline-md": ["SUIT Variable"],
+                      "body-lg": ["SUIT Variable"],
+                      "headline-lg": ["SUIT Variable"],
+                      "body-md": ["SUIT Variable"],
+                      "label-caps": ["SUIT Variable"],
+                      "headline-sm": ["SUIT Variable"],
+                      "display-hero": ["SUIT Variable"],
+                      "body-sm": ["SUIT Variable"],
+                      "display-hero-mobile": ["SUIT Variable"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "display-hero": ["42px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "display-hero-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "800"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-surface overflow-x-hidden min-h-screen dream-sky-gradient">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-secondary/10 shadow-sm flex justify-between items-center px-page-margin-mobile md:px-page-margin-desktop py-4 w-full">
+<div class="text-headline-sm font-headline-sm font-bold text-primary">
+            K-Saju Pet
+        </div>
+<div class="flex gap-4">
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+</button>
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-page-margin-mobile md:px-page-margin-desktop max-w-[1200px] mx-auto space-y-8">
+<!-- Hero Section -->
+<section class="flex flex-col items-center text-center">
+<div class="relative w-40 h-40 md:w-56 md:h-56 mb-6">
+<div class="absolute inset-0 bg-primary/5 rounded-full animate-pulse"></div>
+<img alt="골디" class="w-full h-full object-cover rounded-full border-4 border-white shadow-lg" src="/stitch/asset-61.jpg"/>
+<div class="absolute bottom-2 right-2 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-caps text-label-caps shadow-sm">
+                    토(土) 기운
+                </div>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-1">골디 (Goldie)</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">골든 리트리버 • 2021년 3월 15일생 (3세)</p>
+<div class="mt-4 flex gap-2">
+<span class="bg-primary/5 text-primary px-4 py-1.5 rounded-full font-body-sm text-body-sm">#친화력갑</span>
+<span class="bg-primary/5 text-primary px-4 py-1.5 rounded-full font-body-sm text-body-sm">#산책광</span>
+</div>
+</section>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Saju Result Summary -->
+<section class="glass-card rounded-[2rem] p-card-padding flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline-md text-headline-md text-primary">사주 오행 분석</h2>
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="flex items-center gap-6 mb-8">
+<img alt="오행 분석" class="w-24 h-24 object-cover rounded-2xl shadow-sm" src="/stitch/asset-59.jpg"/>
+<div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                                골디는 따뜻하고 포용력 있는 <span class="font-bold text-primary">토(土)</span>의 기운을 타고났습니다. 주변에 안정감을 주는 평화주의자입니다.
+                            </p>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="space-y-2">
+<div class="flex justify-between font-label-caps text-label-caps text-on-surface-variant">
+<span>토 (Earth) - 주 기운</span>
+<span>85%</span>
+</div>
+<div class="h-3 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[85%] rounded-full shadow-[0_0_8px_rgba(113,90,76,0.3)]"></div>
+</div>
+</div>
+<div class="flex justify-around pt-2">
+<div class="flex flex-col items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-[#81c784]"></span>
+<span class="text-[10px] font-bold text-on-surface-variant">Mok</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-[#ef5350]"></span>
+<span class="text-[10px] font-bold text-on-surface-variant">Hwa</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-[#ffb74d]"></span>
+<span class="text-[10px] font-bold text-on-surface-variant">Geum</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-[#64b5f6]"></span>
+<span class="text-[10px] font-bold text-on-surface-variant">Su</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Luck Scores & Stats -->
+<section class="glass-card rounded-[2rem] p-card-padding">
+<div class="flex items-center justify-between mb-8">
+<h2 class="font-headline-md text-headline-md text-primary">오늘의 운세 지수</h2>
+<div class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">7</div>
+</div>
+<div class="grid grid-cols-1 gap-6">
+<div class="flex items-center gap-4 p-4 bg-white/50 rounded-2xl border border-secondary/5">
+<div class="w-12 h-12 flex items-center justify-center bg-tertiary-fixed rounded-xl">
+<span class="material-symbols-outlined text-tertiary" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<span class="font-headline-sm text-headline-sm text-primary">건강운</span>
+<span class="font-bold text-tertiary">92%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">활력이 넘치는 시기입니다. 긴 산책을 추천해요!</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 bg-white/50 rounded-2xl border border-secondary/5">
+<div class="w-12 h-12 flex items-center justify-center bg-secondary-fixed rounded-xl">
+<span class="material-symbols-outlined text-secondary" data-icon="payments" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<span class="font-headline-sm text-headline-sm text-primary">재물운</span>
+<span class="font-bold text-secondary">78%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">뜻밖의 간식이나 선물을 받을 수 있는 날입니다.</p>
+</div>
+</div>
+<div class="flex items-center justify-center pt-2">
+<img alt="행운 아이콘" class="h-16 w-auto opacity-80" src="/stitch/asset-11.jpg"/>
+</div>
+</div>
+</section>
+<!-- Zodiac & Compatibility -->
+<section class="glass-card rounded-[2rem] p-card-padding">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline-md text-headline-md text-primary">별자리 &amp; 궁합</h2>
+<span class="material-symbols-outlined text-primary" data-icon="stars">stars</span>
+</div>
+<div class="flex flex-col gap-6">
+<div class="flex items-center gap-4">
+<div class="bg-primary-fixed w-16 h-16 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="water_drop">water_drop</span>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Pet Zodiac</p>
+<h3 class="font-headline-sm text-headline-sm text-primary">물고기자리 (Pisces)</h3>
+</div>
+</div>
+<div class="p-6 bg-primary-container/10 rounded-[1.5rem] border border-primary/5">
+<p class="font-label-caps text-label-caps text-primary mb-2">집사와의 유대 지수 (Bond Score)</p>
+<div class="flex items-end gap-2">
+<span class="font-display-hero text-primary leading-none">98</span>
+<span class="font-headline-sm text-primary pb-1">%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-primary-fixed-variant mt-2">
+                            골디와 당신은 영혼의 파트너입니다. 눈빛만으로도 서로의 마음을 읽을 수 있는 완벽한 조화입니다.
+                        </p>
+</div>
+</div>
+</section>
+<!-- Pet Show Gallery (Bento Style) -->
+<section class="glass-card rounded-[2rem] p-card-padding md:col-span-1">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline-md text-headline-md text-primary">마이 모먼트</h2>
+<button class="text-body-sm text-primary font-bold hover:underline">전체보기</button>
+</div>
+<div class="grid grid-cols-2 gap-3 h-[240px]">
+<div class="row-span-2 relative overflow-hidden rounded-2xl">
+<img alt="골디 모먼트 1" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="/stitch/asset-12.jpg"/>
+<div class="absolute bottom-2 left-2 flex items-center text-white text-[10px] gap-1 bg-black/20 backdrop-blur-sm px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[12px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 1.2k
+                        </div>
+</div>
+<div class="relative overflow-hidden rounded-2xl">
+<img alt="골디 모먼트 2" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="/stitch/asset-58.jpg"/>
+</div>
+<div class="relative overflow-hidden rounded-2xl bg-surface-container-high flex items-center justify-center group cursor-pointer">
+<img alt="더보기 배경" class="absolute inset-0 w-full h-full object-cover opacity-30 blur-[2px]" src="/stitch/asset-61.jpg"/>
+<span class="relative font-bold text-primary group-hover:scale-110 transition-transform">+12</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Action Button -->
+<div class="flex justify-center pt-4">
+<button class="bg-primary text-on-primary px-10 py-4 rounded-full font-headline-sm text-headline-sm shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95">
+                오늘의 사주 조언 듣기
+            </button>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low px-page-margin-mobile md:px-page-margin-desktop py-12 border-t border-secondary/5">
+<div class="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-4">K-Saju Pet</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                    전통 사주 명리학과 현대적 반려동물 라이프스타일이 만나는 곳. 모든 생명이 조화로운 세상을 꿈꿉니다.
+                </p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<ul class="space-y-2 font-body-sm text-body-sm text-on-surface-variant">
+<li class="font-bold text-primary">서비스</li>
+<li><a class="hover:text-primary" href="#">펫 사주</a></li>
+<li><a class="hover:text-primary" href="#">펫 쇼</a></li>
+<li><a class="hover:text-primary" href="#">궁합 분석</a></li>
+</ul>
+<ul class="space-y-2 font-body-sm text-body-sm text-on-surface-variant">
+<li class="font-bold text-primary">지원</li>
+<li><a class="hover:text-primary" href="#">이용약관</a></li>
+<li><a class="hover:text-primary" href="#">개인정보처리방침</a></li>
+<li><a class="hover:text-primary" href="#">고객센터</a></li>
+</ul>
+</div>
+<div class="flex flex-col items-start md:items-end justify-end">
+<p class="font-label-caps text-label-caps text-outline">© 2024 K-Saju Pet. All rights reserved.</p>
+</div>
+</div>
+</footer>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-2 pb-safe px-4 bg-surface/90 backdrop-blur-lg border-t border-secondary/10 shadow-[0_-4px_20px_rgba(68,38,86,0.05)] rounded-t-xl md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="pets">pets</span>
+<span class="font-label-caps text-label-caps mt-1">Pet Show</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-caps text-label-caps mt-1">Saju</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/20 text-primary rounded-full px-4 py-1 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions and Atmospheric Effects
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simple parallax-like tilt effect on cards
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const xPercent = (x / rect.width - 0.5) * 4;
+                    const yPercent = (y / rect.height - 0.5) * -4;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${yPercent}deg) rotateY(${xPercent}deg) translateY(-4px)`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+                });
+            });
+        });
+    </script>
+</body></html>

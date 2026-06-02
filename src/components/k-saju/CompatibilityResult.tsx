@@ -1,7 +1,10 @@
 "use client";
 
 import { AdSlot } from "@/components/ads/AdSlot";
+import { BondScoreRing } from "@/components/k-saju/BondScoreRing";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
+import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
+import { GlassCard } from "@/components/layout/StitchLayout";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 
 const RELATION_LABEL: Record<
@@ -18,6 +21,7 @@ const RELATION_LABEL: Record<
 
 const LABELS = {
   ko: {
+    eyebrow: "집사 궁합",
     score: "인연 지수",
     relation: "오행 관계",
     petEl: "펫 오행",
@@ -33,6 +37,7 @@ const LABELS = {
     tips: "케어 팁",
   },
   en: {
+    eyebrow: "Pet-parent bond",
     score: "Bond score",
     relation: "Element relation",
     petEl: "Pet element",
@@ -49,6 +54,44 @@ const LABELS = {
   },
 };
 
+function ElementCard({
+  title,
+  name,
+  elementLabel,
+  dayPillarLabel,
+  dayPillar,
+  genderLabel,
+  genderValue,
+  elementKey,
+}: {
+  title: string;
+  name: string;
+  elementLabel: CompatibilityResponse["petElementLabel"];
+  dayPillarLabel: string;
+  dayPillar: string;
+  genderLabel: string;
+  genderValue: string;
+  elementKey: CompatibilityResponse["petElement"];
+}) {
+  const accent = ELEMENT_ACCENT[elementKey];
+
+  return (
+    <div className={`rounded-2xl border px-4 py-4 ${accent.pill}`}>
+      <p className="text-xs font-extrabold uppercase tracking-[0.12em] opacity-80">{title}</p>
+      <p className="mt-1 text-base font-bold text-primary">{name}</p>
+      <p className="mt-2 text-lg font-extrabold">
+        {elementLabel.hanja} {elementLabel.meaning} · {elementLabel.hangul}
+      </p>
+      <p className="mt-2 text-xs text-plum/60">
+        {genderLabel}: {genderValue}
+      </p>
+      <p className="text-xs text-plum/60">
+        {dayPillarLabel}: {dayPillar}
+      </p>
+    </div>
+  );
+}
+
 export function CompatibilityResult({
   result,
   isGuest,
@@ -60,84 +103,85 @@ export function CompatibilityResult({
   const rel = RELATION_LABEL[result.relation][result.locale];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <SaveStatusBanner
         locale={result.locale}
         persisted={result.persisted}
         persistError={result.persistError}
         isGuest={isGuest && !result.persisted}
       />
-      <article className="pastel-card overflow-hidden">
-        <div className="bg-gradient-to-r from-petal/50 via-lavender/40 to-mint/30 px-6 py-6 text-center">
-          <p className="text-4xl" aria-hidden>
-            {result.bondEmoji}
-          </p>
-          <p className="mt-2 text-sm text-plum/60">{t.score}</p>
-          <p className="text-4xl font-bold text-channel-saju">{result.bondScore}</p>
-          <p className="mt-1 text-lg font-semibold text-plum">{result.bondLabel}</p>
-        </div>
 
-        <div className="space-y-3 px-6 py-5">
-          <h2 className="text-lg font-bold text-plum">{result.headline}</h2>
-          <p className="text-sm leading-relaxed text-plum/80">{result.story}</p>
-        </div>
-      </article>
-
-      <article className="pastel-card p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-plum/45">
-          {t.details}
+      <GlassCard className="relative overflow-hidden text-center">
+        <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-3xl" />
+        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/50">{t.eyebrow}</p>
+        <p className="mt-2 text-4xl" aria-hidden>
+          {result.bondEmoji}
         </p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <div className="mt-4 flex justify-center">
+          <BondScoreRing score={result.bondScore} />
+        </div>
+        <p className="mt-3 text-sm font-medium text-plum/60">{t.score}</p>
+        <p className="mt-1 text-xl font-extrabold text-primary">{result.bondLabel}</p>
+        <h2 className="mt-4 text-lg font-bold text-plum">{result.headline}</h2>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-plum/80">{result.story}</p>
+      </GlassCard>
+
+      <GlassCard>
+        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/45">{t.details}</p>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
           {result.details.map((detail) => (
-            <section key={detail.title} className="rounded-2xl bg-white/45 px-4 py-3">
-              <h3 className="text-sm font-semibold text-plum">{detail.title}</h3>
+            <section
+              key={detail.title}
+              className="rounded-xl border border-outline-variant/25 bg-cream/60 px-4 py-3"
+            >
+              <h3 className="text-sm font-bold text-primary">{detail.title}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-plum/75">{detail.body}</p>
             </section>
           ))}
         </div>
-      </article>
+      </GlassCard>
 
-      <article className="pastel-card grid gap-3 p-5 sm:grid-cols-2">
-        <div className="rounded-2xl bg-lavender/25 px-4 py-3">
-          <p className="text-xs text-plum/55">{t.petEl}</p>
-          <p className="font-semibold text-plum">
-            {result.petElementLabel.meaning}({result.petElementLabel.hangul},{" "}
-            {result.petElementLabel.hanja})
-          </p>
-          <p className="mt-1 text-xs text-plum/50">
-            {t.dayPillar}: {result.petDayPillar}
-          </p>
-          <p className="mt-1 text-xs text-plum/50">
-            {t.petGender}: {result.petGender === "male" ? t.malePet : t.femalePet}
-          </p>
-        </div>
-        <div className="rounded-2xl bg-mint/25 px-4 py-3">
-          <p className="text-xs text-plum/55">{t.ownerEl}</p>
-          <p className="font-semibold text-plum">
-            {result.ownerElementLabel.meaning}({result.ownerElementLabel.hangul},{" "}
-            {result.ownerElementLabel.hanja})
-          </p>
-          <p className="mt-1 text-xs text-plum/50">
-            {t.dayPillar}: {result.ownerDayPillar}
-          </p>
-          <p className="mt-1 text-xs text-plum/50">
-            {t.ownerGender}: {result.ownerGender === "male" ? t.maleOwner : t.femaleOwner}
-          </p>
-        </div>
-        <div className="rounded-2xl bg-channel-saju/10 px-4 py-3 sm:col-span-2">
-          <p className="text-xs text-plum/55">{t.relation}</p>
-          <p className="font-medium text-channel-saju">{rel}</p>
-        </div>
-      </article>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <ElementCard
+          title={t.petEl}
+          name={result.petName}
+          elementLabel={result.petElementLabel}
+          dayPillarLabel={t.dayPillar}
+          dayPillar={result.petDayPillar}
+          genderLabel={t.petGender}
+          genderValue={result.petGender === "male" ? t.malePet : t.femalePet}
+          elementKey={result.petElement}
+        />
+        <ElementCard
+          title={t.ownerEl}
+          name={result.ownerName}
+          elementLabel={result.ownerElementLabel}
+          dayPillarLabel={t.dayPillar}
+          dayPillar={result.ownerDayPillar}
+          genderLabel={t.ownerGender}
+          genderValue={result.ownerGender === "male" ? t.maleOwner : t.femaleOwner}
+          elementKey={result.ownerElement}
+        />
+      </div>
 
-      <article className="pastel-card p-5">
-        <h3 className="font-bold text-plum">{t.tips}</h3>
-        <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-plum/80">
+      <GlassCard className="border-l-4 border-channel-saju/50 bg-channel-saju/5 text-center">
+        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/55">{t.relation}</p>
+        <p className="mt-2 text-lg font-extrabold text-channel-saju">{rel}</p>
+      </GlassCard>
+
+      <GlassCard>
+        <h3 className="font-extrabold text-primary">{t.tips}</h3>
+        <ul className="mt-4 space-y-3">
           {result.careTips.map((tip) => (
-            <li key={tip}>{tip}</li>
+            <li
+              key={tip}
+              className="rounded-xl border border-mint/30 bg-mint/20 px-4 py-3 text-sm leading-relaxed text-plum/85"
+            >
+              {tip}
+            </li>
           ))}
         </ul>
-      </article>
+      </GlassCard>
 
       <AdSlot />
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyStatePanel, getBoardEmptyState } from "@/components/ui/EmptyStatePanel";
 import { QA_FILTER_TAGS } from "@/lib/community/qa-mock-data";
 import type { CommunityBoardKind } from "@/lib/community/qa-feed";
 import type { CommunityPost } from "@/lib/supabase/types";
@@ -149,9 +150,15 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
       </div>
 
       {posts.length === 0 && (
-        <p className="rounded-2xl bg-white/50 px-4 py-6 text-center text-sm text-plum/60">
-          {isKo ? "조건에 맞는 게시글이 없어요." : "No posts match your filters."}
-        </p>
+        <EmptyStatePanel
+          {...getBoardEmptyState(board, isKo, { q, tag })}
+          compact
+          suggestions={
+            q || tag !== "all"
+              ? undefined
+              : getBoardEmptyState(board, isKo, {}).suggestions
+          }
+        />
       )}
 
       <ul className="grid gap-5 md:grid-cols-2">
