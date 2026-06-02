@@ -113,4 +113,4 @@ Without env vars, Pet Show ranking uses demo data; with Supabase configured, que
 1. PayPal premium report flow
 2. 별자리 운세 (`/saju/zodiac`) full logic
 3. 펫·집사 궁합 (`/saju/compatibility`) full logic
-4. `next-intl` (`/en`, `/ko`) routes
+4. English locale launch when copy and QA are ready

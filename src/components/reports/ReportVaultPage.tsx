@@ -207,7 +207,7 @@ export function ReportVaultPage() {
                 </div>
 
                 <Link
-                  href={pet ? `/profile/pets/${pet.id}` : "/profile"}
+                  href={`/reports/${report.id}`}
                   className={isPremium ? "mt-auto rounded-xl bg-primary py-3 text-center text-sm font-bold text-white" : "mt-auto rounded-xl bg-secondary py-3 text-center text-sm font-bold text-white"}
                 >
                   {isKo ? "다시보기" : "View again"}

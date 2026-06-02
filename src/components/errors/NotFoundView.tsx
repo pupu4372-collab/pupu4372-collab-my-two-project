@@ -57,7 +57,7 @@ export function NotFoundView() {
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/home"
+            href="/"
             className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:brightness-105"
           >
             <span aria-hidden>🏠</span>

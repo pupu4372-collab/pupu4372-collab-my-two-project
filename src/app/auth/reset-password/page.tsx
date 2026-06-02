@@ -9,14 +9,16 @@ function isStrongPassword(value: string) {
 }
 
 function getSafeNext(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/ko/login";
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/login";
+  if (value === "/ko/login" || value === "/en/login") return "/login";
+  if (value.startsWith("/ko/")) return value.replace(/^\/ko/, "") || "/";
+  if (value.startsWith("/en")) return "/login";
   return value;
 }
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const next = getSafeNext(searchParams.get("next"));
-  const isEnglish = next.startsWith("/en");
   const [ready, setReady] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -25,23 +27,7 @@ function ResetPasswordContent() {
   const [loading, setLoading] = useState(false);
 
   const copy = useMemo(
-    () =>
-      isEnglish
-        ? {
-        title: "Reset password",
-        subtitle: "Enter a new password for your account.",
-        password: "New password",
-        passwordConfirm: "Confirm new password",
-        rule: "Use at least 10 characters with both letters and numbers.",
-        mismatch: "Password confirmation does not match.",
-        weak: "Password must be at least 10 characters and include both letters and numbers.",
-        invalid: "Password reset link is invalid or expired. Please request a new link.",
-        configError: "Please check the login server configuration.",
-        success: "Password changed. Please log in again.",
-        submit: "Change password",
-        processing: "Processing...",
-          }
-        : {
+    () => ({
         title: "비밀번호 변경",
         subtitle: "계정에 사용할 새 비밀번호를 입력해 주세요.",
         password: "새 비밀번호",
@@ -54,8 +40,8 @@ function ResetPasswordContent() {
         success: "비밀번호를 변경했어요. 다시 로그인해 주세요.",
         submit: "비밀번호 변경",
         processing: "처리 중...",
-          },
-    [isEnglish]
+    }),
+    []
   );
 
   useEffect(() => {

@@ -110,10 +110,10 @@ export function OnboardingRoadmap({ locale }: OnboardingRoadmapProps) {
       </div>
 
       <div className="relative mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <Link href="/home" className="rounded-full bg-white/70 px-6 py-3 text-sm font-bold text-primary shadow-sm transition hover:bg-white">
+        <Link href="/" className="rounded-full bg-white/70 px-6 py-3 text-sm font-bold text-primary shadow-sm transition hover:bg-white">
           {t.skip}
         </Link>
-        <Link href="/home" className="rounded-full bg-primary px-8 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:brightness-110">
+        <Link href="/" className="rounded-full bg-primary px-8 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:brightness-110">
           {t.start}
         </Link>
       </div>

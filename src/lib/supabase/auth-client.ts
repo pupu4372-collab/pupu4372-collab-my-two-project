@@ -54,7 +54,7 @@ export async function signUpWithEmail(params: {
 
   const redirectTo =
     typeof window !== "undefined"
-      ? `${window.location.origin}/auth/callback?next=${params.locale === "en" ? "/en" : "/ko"}`
+      ? `${window.location.origin}/auth/callback?next=/`
       : undefined;
 
   const { data, error } = await client.auth.signUp({
@@ -101,7 +101,7 @@ export async function sendPasswordResetEmail(email: string, locale: string) {
 
   const redirectTo =
     typeof window !== "undefined"
-      ? `${window.location.origin}/auth/reset-password?next=${locale === "en" ? "/en/login" : "/ko/login"}`
+      ? `${window.location.origin}/auth/reset-password?next=/login`
       : undefined;
 
   const { error } = await client.auth.resetPasswordForEmail(email, {

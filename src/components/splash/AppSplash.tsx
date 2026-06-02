@@ -56,7 +56,7 @@ function ParticleField() {
   );
 }
 
-export function AppSplash({ redirectTo = "/home" }: { redirectTo?: string }) {
+export function AppSplash({ redirectTo = "/" }: { redirectTo?: string }) {
   const router = useRouter();
   const locale = useLocale();
   const copy = COPY[locale === "ko" ? "ko" : "en"];

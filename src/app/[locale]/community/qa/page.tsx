@@ -27,9 +27,13 @@ export default function CommunityQaPage() {
         { href: "/community/pet-show/upload", label: isKo ? "우리아이 자랑" : "Pet Show" },
       ]}
     >
-      <div className="grid gap-8 xl:grid-cols-[0.8fr_1.2fr]">
-        <QaComposer onPosted={() => setRefreshKey((k) => k + 1)} />
-        <QaBoard refreshKey={refreshKey} />
+      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="min-w-0">
+          <QaBoard refreshKey={refreshKey} />
+        </section>
+        <aside className="xl:sticky xl:top-24">
+          <QaComposer onPosted={() => setRefreshKey((k) => k + 1)} />
+        </aside>
       </div>
     </ChannelShell>
   );

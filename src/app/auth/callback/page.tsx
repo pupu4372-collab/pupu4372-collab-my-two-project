@@ -5,25 +5,24 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo } from "react";
 
 function getSafeNext(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/ko";
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
+  if (value === "/ko" || value === "/en") return "/";
+  if (value.startsWith("/ko/")) return value.replace(/^\/ko/, "") || "/";
+  if (value.startsWith("/en")) return "/";
   if (value === "/profile") return "/";
   return value;
 }
 
 function getLoginPath(next: string) {
-  return next.startsWith("/en") ? "/en/login" : "/ko/login";
+  return "/login";
 }
 
 function AuthCallbackContent() {
   const searchParams = useSearchParams();
-  const isEnglish = getSafeNext(searchParams.get("next")).startsWith("/en");
 
   const copy = useMemo(
-    () =>
-      isEnglish
-        ? { loading: "Signing you in...", configError: "Login server is not configured." }
-        : { loading: "로그인 처리 중...", configError: "로그인 서버 설정을 확인해 주세요." },
-    [isEnglish]
+    () => ({ loading: "로그인 처리 중...", configError: "로그인 서버 설정을 확인해 주세요." }),
+    []
   );
 
   useEffect(() => {

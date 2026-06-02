@@ -49,6 +49,8 @@ const AVATAR_PRESETS = [
   { x: 720, y: 414 },
   { x: 865, y: 414 },
 ] as const;
+const AVATAR_SPRITE_SIZE = { width: 1024, height: 685 };
+const AVATAR_FRAME_SIZE = 140;
 
 function avatarPresetUrl(index: number) {
   return `${AVATAR_SPRITE_URL}?preset=${index}`;
@@ -63,18 +65,24 @@ function avatarPresetIndexFromUrl(url: string | null | undefined) {
 
 function AvatarPresetVisual({ index, className = "" }: { index: number; className?: string }) {
   const preset = AVATAR_PRESETS[index] ?? AVATAR_PRESETS[0];
-  const scale = 0.4375;
 
   return (
     <span
       aria-hidden
-      className={`block h-full w-full rounded-full bg-white bg-no-repeat ${className}`}
-      style={{
-        backgroundImage: `url(${AVATAR_SPRITE_URL})`,
-        backgroundSize: `${1024 * scale}px ${685 * scale}px`,
-        backgroundPosition: `-${preset.x * scale}px -${preset.y * scale}px`,
-      }}
-    />
+      className={`relative block h-full w-full overflow-hidden rounded-full bg-white ${className}`}
+    >
+      <span
+        className="absolute bg-no-repeat"
+        style={{
+          backgroundImage: `url(${AVATAR_SPRITE_URL})`,
+          backgroundSize: "100% 100%",
+          height: `${(AVATAR_SPRITE_SIZE.height / AVATAR_FRAME_SIZE) * 100}%`,
+          left: `${-(preset.x / AVATAR_FRAME_SIZE) * 100}%`,
+          top: `${-(preset.y / AVATAR_FRAME_SIZE) * 100}%`,
+          width: `${(AVATAR_SPRITE_SIZE.width / AVATAR_FRAME_SIZE) * 100}%`,
+        }}
+      />
+    </span>
   );
 }
 
@@ -205,7 +213,7 @@ export function UserProfileCard({
       }
 
       clearSupabaseBrowserSession();
-      window.location.replace(isKo ? "/ko" : "/en");
+      window.location.replace("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : isKo ? "탈퇴 처리에 실패했어요." : "Could not delete account.");
       setDeletingAccount(false);
@@ -283,7 +291,7 @@ export function UserProfileCard({
         className={`relative flex ${dim} shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-lavender/40 shadow-lg ${
           showEditor ? "transition hover:ring-4 hover:ring-channel-saju/25" : ""
         }`}
-        aria-label={showEditor ? (isKo ? "주인 이미지 선택 열기" : "Open owner image picker") : undefined}
+        aria-label={showEditor ? (isKo ? "이미지 선택 열기" : "Open image picker") : undefined}
       >
         {shownAvatarPresetIndex !== null ? (
           <AvatarPresetVisual index={shownAvatarPresetIndex} />
@@ -314,7 +322,7 @@ export function UserProfileCard({
         </p>
         {showAvatarPicker && (
           <div className="mt-3 rounded-2xl bg-surface-container-low/80 p-3">
-            <p className="text-xs font-medium text-plum/70">{isKo ? "주인 이미지 선택" : "Choose owner image"}</p>
+            <p className="text-xs font-medium text-plum/70">{isKo ? "이미지 선택" : "Choose image"}</p>
             <div className="mt-2 grid grid-cols-6 gap-2 sm:grid-cols-9">
               {AVATAR_PRESETS.map((_, index) => {
                 const selected = avatarPresetIndexFromUrl(avatarUrl) === index;
@@ -331,7 +339,7 @@ export function UserProfileCard({
                         ? "h-12 w-12 rounded-full border-2 border-primary p-0.5 shadow-sm"
                         : "h-12 w-12 rounded-full border border-white/80 p-0.5 opacity-80 transition hover:opacity-100 hover:ring-2 hover:ring-primary/25"
                     }
-                    aria-label={isKo ? `주인 이미지 ${index + 1}` : `Owner image ${index + 1}`}
+                    aria-label={isKo ? `이미지 ${index + 1}` : `Image ${index + 1}`}
                   >
                     <AvatarPresetVisual index={index} />
                   </button>

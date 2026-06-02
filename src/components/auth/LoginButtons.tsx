@@ -210,7 +210,7 @@ export function LoginButtons({
         setMessage(t("signupSuccess", { email: cleanEmail }));
       } else {
         await signInWithEmail(cleanEmail, password);
-        window.location.replace(locale === "en" ? "/en" : "/ko");
+        window.location.replace("/");
       }
     } catch (err) {
       setError(formatAuthError(err));

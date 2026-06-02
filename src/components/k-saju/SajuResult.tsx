@@ -463,7 +463,7 @@ export function SajuResult({ result }: SajuResultProps) {
 
       <div className="flex flex-col justify-center gap-3 sm:flex-row">
         <Link
-          href="/home"
+          href="/"
           className="pastel-card inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary/10 px-8 py-4 text-sm font-bold text-primary transition hover:scale-[1.02]"
         >
           <span aria-hidden>🏠</span>
