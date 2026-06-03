@@ -3,6 +3,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const TOP_LIMIT = 5;
 const WEEK_DAYS = 7;
+const MONTH_DAYS = 30;
 
 /** SQL reference — weekly Top 5 (uses denormalized like_count + partial index). */
 export const PET_SHOW_RANKING_WEEKLY_SQL = `
@@ -63,6 +64,10 @@ export async function fetchPetShowRanking(
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - WEEK_DAYS);
     query.gte("created_at", weekAgo.toISOString());
+  } else if (period === "month") {
+    const monthAgo = new Date();
+    monthAgo.setDate(monthAgo.getDate() - MONTH_DAYS);
+    query.gte("created_at", monthAgo.toISOString());
   }
 
   const { data, error } = await query;
@@ -91,7 +96,7 @@ function speciesFromTags(tags?: string[] | null): PetShowSpecies | undefined {
     : undefined;
 }
 
-export async function fetchWeeklyPetShowSpeciesRankings(): Promise<{
+export async function fetchPetShowSpeciesRankings(period: Extract<RankingPeriod, "week" | "month"> = "week"): Promise<{
   rows: PetShowSpeciesRankings;
   source: "supabase" | "mock";
 }> {
@@ -101,15 +106,15 @@ export async function fetchWeeklyPetShowSpeciesRankings(): Promise<{
     return { rows: getMockSpeciesRankings(), source: "mock" };
   }
 
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - WEEK_DAYS);
+  const periodStart = new Date();
+  periodStart.setDate(periodStart.getDate() - (period === "month" ? MONTH_DAYS : WEEK_DAYS));
 
   const { data: posts, error } = await supabase
     .from("community_posts")
     .select("id, author_id, pet_id, title, image_urls, tags, like_count, comment_count, created_at")
     .eq("post_type", "photo_show")
     .eq("is_hidden", false)
-    .gte("created_at", weekAgo.toISOString())
+    .gte("created_at", periodStart.toISOString())
     .order("like_count", { ascending: false })
     .order("created_at", { ascending: true })
     .limit(60);
@@ -121,7 +126,7 @@ export async function fetchWeeklyPetShowSpeciesRankings(): Promise<{
 
   const grouped: PetShowSpeciesRankings = { dog: [], cat: [], other: [] };
   for (const post of postRows) {
-    // Weekly species ranking follows the upload category tag only.
+    // Species ranking follows the upload category tag only.
     // Legacy posts without pet-show:dog|cat|other stay in the feed but not species Top 5.
     const species = speciesFromTags(post.tags);
     if (species !== "dog" && species !== "cat" && species !== "other") continue;
@@ -142,6 +147,10 @@ export async function fetchWeeklyPetShowSpeciesRankings(): Promise<{
   }
 
   return { rows: grouped, source: "supabase" };
+}
+
+export function fetchWeeklyPetShowSpeciesRankings() {
+  return fetchPetShowSpeciesRankings("week");
 }
 
 /** Dev/demo fallback when Supabase env is not set. */

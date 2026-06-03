@@ -105,7 +105,7 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
             <option value="experience:dog">{isKo ? "강아지 견종" : "Dog breeds"}</option>
             <option value="experience:cat">{isKo ? "고양이 묘종" : "Cat breeds"}</option>
             <option value="experience:other">
-              {isKo ? "다른동물 (토끼·햄스터·새·파충류·물고기 등)" : "Other animals"}
+              {isKo ? "렙타일(다른동물) (토끼·햄스터·새·파충류·물고기 등)" : "Other animals"}
             </option>
           </select>
         </label>
@@ -134,7 +134,7 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
           placeholder={
             board === "experience"
               ? isKo
-                ? "품종/종, 나이, 성격, 좋았던 관리법, 조심할 점을 적어주세요. 다른동물은 종 이름을 제목이나 내용에 꼭 넣어주세요."
+                ? "품종/종, 나이, 성격, 좋았던 관리법, 조심할 점을 적어주세요. 렙타일(다른동물)은 종 이름을 제목이나 내용에 꼭 넣어주세요."
                 : "Share species/breed, age, personality, helpful care tips, and cautions."
               : isKo ? "내용을 자세히 적어주세요 (10자 이상)" : "Describe it in detail (10+ chars)"
           }

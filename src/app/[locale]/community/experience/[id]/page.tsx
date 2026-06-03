@@ -31,7 +31,7 @@ export default async function ExperiencePostDetailPage({ params }: PageProps) {
     <ChannelShell
       theme="community"
       title={post.title ?? (isKo ? "품종별 경험담" : "Breed Experience")}
-      subtitle={isKo ? "견종, 묘종, 다른동물 종별 경험담입니다." : "Breed and species experience stories."}
+      subtitle={isKo ? "견종, 묘종, 렙타일(다른동물) 종별 경험담입니다." : "Breed and species experience stories."}
       backHref="/community/experience"
       backLabel={isKo ? "← 품종별 경험담" : "← Breed Experiences"}
       rightLinks={[{ href: "/", label: isKo ? "홈" : "Home" }, { href: "/community", label: isKo ? "커뮤니티" : "Community" }]}

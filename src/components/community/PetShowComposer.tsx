@@ -180,7 +180,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
             {([
               ["dog", isKo ? "강아지" : "Dog", "🐕"],
               ["cat", isKo ? "고양이" : "Cat", "🐈"],
-              ["other", isKo ? "다른 동물" : "Other animal", "🐾"],
+              ["other", isKo ? "렙타일(다른동물)" : "Other animal", "🐾"],
             ] as const).map(([value, label, emoji]) => (
               <button
                 key={value}

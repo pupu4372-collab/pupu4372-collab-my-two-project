@@ -7,12 +7,16 @@ import { signOut } from "@/lib/supabase/auth-client";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
-type NavKey = "home" | "dog" | "cat" | "saju" | "community" | "profile";
+type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "community" | "profile";
 
-const NAV_LINKS: Array<{ key: NavKey; href: "/" | "/dog" | "/cat" | "/saju" | "/community" | "/profile" }> = [
+const NAV_LINKS: Array<{
+  key: NavKey;
+  href: "/" | "/dog" | "/cat" | "/reptile" | "/saju" | "/community" | "/profile";
+}> = [
   { key: "home", href: "/" },
   { key: "dog", href: "/dog" },
   { key: "cat", href: "/cat" },
+  { key: "reptile", href: "/reptile" },
   { key: "saju", href: "/saju" },
   { key: "community", href: "/community" },
 ];

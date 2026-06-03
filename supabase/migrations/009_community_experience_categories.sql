@@ -12,7 +12,7 @@ insert into public.content_categories (
   is_coming_soon
 ) values
   ('community', 'community-experience', '품종별 경험담', 'Breed Experiences', '#22C55E', '🧬', 5, true, false),
-  ('community', 'community-other-animals', '다른동물 경험담', 'Other Animal Stories', '#22C55E', '🐾', 6, true, false)
+  ('community', 'community-other-animals', '렙타일(다른동물) 경험담', 'Other Animal Stories', '#22C55E', '🐾', 6, true, false)
 on conflict (slug) do update set
   name_ko = excluded.name_ko,
   name_en = excluded.name_en,

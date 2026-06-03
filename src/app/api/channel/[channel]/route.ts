@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const { channel } = await context.params;
 
-  if (channel !== "dog" && channel !== "cat") {
+  if (channel !== "dog" && channel !== "cat" && channel !== "reptile") {
     return NextResponse.json({ error: "Invalid channel." }, { status: 400 });
   }
 

@@ -33,7 +33,7 @@ export function SajuHubCta({ isKo }: SajuHubCtaProps) {
         </h2>
         <Link
           href="/home"
-          className="mt-8 inline-flex rounded-full bg-secondary-fixed px-10 py-4 text-sm font-bold text-on-secondary-fixed transition hover:bg-white"
+          className="mt-8 inline-flex rounded-full border-2 border-white/70 bg-cream px-10 py-4 text-sm font-extrabold text-primary shadow-xl shadow-black/20 transition hover:bg-white hover:shadow-2xl"
         >
           {isKo ? "지금 바로 분석 시작하기" : "Start on Home"}
         </Link>

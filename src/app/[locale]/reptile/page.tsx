@@ -3,34 +3,34 @@ import { ChannelShell } from "@/components/layout/ChannelShell";
 import { getChannelContent } from "@/lib/channel/content";
 import { fetchChannelEditorial } from "@/lib/content/channel-feed";
 
-interface CatChannelPageProps {
+interface ReptileChannelPageProps {
   params: Promise<{ locale: string }>;
 }
 
-export default async function CatChannelPage({ params }: CatChannelPageProps) {
+export default async function ReptileChannelPage({ params }: ReptileChannelPageProps) {
   const { locale } = await params;
   const isKo = locale !== "en";
-  const editorial = await fetchChannelEditorial("cat", isKo ? "ko" : "en");
+  const editorial = await fetchChannelEditorial("reptile", isKo ? "ko" : "en");
 
   return (
     <ChannelShell
-      theme="cat"
-      title={isKo ? "고양이 채널" : "Cat Channel"}
+      theme="reptile"
+      title={isKo ? "렙타일(다른동물) 채널" : "Reptile & Other Pets Channel"}
       subtitle={
         isKo
-          ? "행동 심리, 화장실, 사냥 놀이, 식단까지 냥님 중심 케어 콘텐츠."
-          : "Cat-first care content for behavior, litter, hunting play, and diet."
+          ? "파충류, 앵무새(조류), 토끼·햄스터 등 환경·식단·건강 케어 가이드."
+          : "Habitat, diet, and health guides for reptiles, birds, and small pets."
       }
       backHref="/"
       backLabel={isKo ? "← 홈" : "← Home"}
       rightLinks={[
         { href: "/dog", label: isKo ? "강아지 채널" : "Dog Channel" },
-        { href: "/reptile", label: isKo ? "렙타일(다른동물)" : "Reptile" },
+        { href: "/cat", label: isKo ? "고양이 채널" : "Cat Channel" },
         { href: "/community", label: isKo ? "커뮤니티" : "Community" },
       ]}
     >
       <ChannelContentHub
-        content={getChannelContent("cat", isKo ? "ko" : "en")}
+        content={getChannelContent("reptile", isKo ? "ko" : "en")}
         featured={editorial.featured}
         articles={editorial.articles}
         source={editorial.source}

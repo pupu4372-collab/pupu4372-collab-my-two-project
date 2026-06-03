@@ -52,7 +52,48 @@ const THEME: Record<
       "/stitch/asset-41.jpg",
     ],
   },
+  reptile: {
+    accent: "text-channel-community",
+    softBg: "bg-channel-community/10",
+    border: "border-channel-community/25",
+    button: "bg-channel-community text-white hover:brightness-105",
+    ring: "bg-channel-community/15",
+    heroImage: "/stitch/asset-17.jpg",
+    heroLabel: "REPTILE & OTHER",
+    elementTitle: { ko: "환경·케어 핵심", en: "Habitat essentials" },
+    breedImages: ["/stitch/asset-22.jpg", "/stitch/asset-20.jpg", "/stitch/asset-23.jpg"],
+  },
 };
+
+const REPTILE_CARE_CARDS = [
+  {
+    key: "habitat",
+    tag: "Habitat",
+    koTitle: "온도·습도·조명",
+    enTitle: "Heat, humidity, light",
+    koDesc: "종별 목표 온도와 습도를 맞추고, 급격한 환경 변화는 피해 주세요.",
+    enDesc: "Match target heat and humidity by species and avoid sudden habitat shifts.",
+    className: "bg-mint/50 text-channel-community",
+  },
+  {
+    key: "diet",
+    tag: "Diet",
+    koTitle: "식단·급여 루틴",
+    enTitle: "Diet and feeding",
+    koDesc: "건초, 곤충, 펠릿, 습식 비율 등 종에 맞는 급여가 중요해요.",
+    enDesc: "Hay, insects, pellets, and wet food ratios depend on the species.",
+    className: "bg-sand text-to-yellow",
+  },
+  {
+    key: "health",
+    tag: "Health",
+    koTitle: "스트레스·건강 신호",
+    enTitle: "Stress and health cues",
+    koDesc: "식욕, 활동량, 탈피, 깃털, 배변 변화를 매일 가볍게 체크하세요.",
+    enDesc: "Watch appetite, activity, shedding, feathers, and droppings daily.",
+    className: "bg-lavender/55 text-su-black",
+  },
+];
 
 const ELEMENT_CARDS = [
   {
@@ -112,6 +153,13 @@ export function ChannelContentHub({
   const heroFeatured = featured ?? content.featured;
   const listArticles = articles ?? content.articles;
   const infoCards = getChannelInfoCards(content.channel, isKo ? "ko" : "en");
+  const isReptile = content.channel === "reptile";
+  const heroBadgeClass =
+    content.channel === "dog"
+      ? "bg-channel-dog"
+      : content.channel === "cat"
+        ? "bg-channel-cat"
+        : "bg-channel-community";
 
   return (
     <div className="space-y-12">
@@ -120,7 +168,7 @@ export function ChannelContentHub({
         <img src={theme.heroImage} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-700 hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
         <div className="relative z-10 flex min-h-[360px] flex-col justify-end p-7 text-white md:min-h-[500px] md:p-12">
-          <span className={`mb-4 w-fit rounded-full px-4 py-1 text-xs font-extrabold tracking-[0.18em] text-white ${content.channel === "dog" ? "bg-channel-dog" : "bg-channel-cat"}`}>
+          <span className={`mb-4 w-fit rounded-full px-4 py-1 text-xs font-extrabold tracking-[0.18em] text-white ${heroBadgeClass}`}>
             {theme.heroLabel}
           </span>
           <h2 className="max-w-3xl text-3xl font-extrabold leading-tight md:text-5xl">{content.headline}</h2>
@@ -148,9 +196,17 @@ export function ChannelContentHub({
 
       <section>
         <SectionHeader
-          eyebrow={content.channel === "dog" ? "Training" : "Care"}
+          eyebrow={isReptile ? (isKo ? "Care" : "Care") : content.channel === "dog" ? "Training" : "Care"}
           title={isKo ? theme.elementTitle.ko : theme.elementTitle.en}
-          subtitle={isKo ? "오행의 기운에 맞춰 우리 아이의 성향과 돌봄 루틴을 가볍게 살펴보세요." : "Browse care patterns inspired by the five K-Saju elements."}
+          subtitle={
+            isReptile
+              ? isKo
+                ? "파충류·조류·소동물에게 공통으로 중요한 환경과 건강 포인트를 정리했어요."
+                : "Core habitat and health points for reptiles, birds, and small pets."
+              : isKo
+                ? "오행의 기운에 맞춰 우리 아이의 성향과 돌봄 루틴을 가볍게 살펴보세요."
+                : "Browse care patterns inspired by the five K-Saju elements."
+          }
           action={
             <AuthRequiredLink
               href="/saju/compatibility"
@@ -160,11 +216,11 @@ export function ChannelContentHub({
             </AuthRequiredLink>
           }
         />
-        <div className="mt-6 grid gap-4 md:grid-cols-12">
-          {ELEMENT_CARDS.map((card, index) => (
+        <div className={`mt-6 grid gap-4 ${isReptile ? "md:grid-cols-3" : "md:grid-cols-12"}`}>
+          {(isReptile ? REPTILE_CARE_CARDS : ELEMENT_CARDS).map((card, index) => (
             <article
               key={card.key}
-              className={`pastel-card p-6 ${index === 0 ? "md:col-span-6" : index === 1 ? "md:col-span-6" : "md:col-span-4"}`}
+              className={`pastel-card p-6 ${isReptile ? "" : index === 0 ? "md:col-span-6" : index === 1 ? "md:col-span-6" : "md:col-span-4"}`}
             >
               <span className={`inline-flex rounded-full px-3 py-1 text-xs font-extrabold ${card.className}`}>{card.tag}</span>
               <h3 className="mt-4 text-xl font-extrabold text-primary">{isKo ? card.koTitle : card.enTitle}</h3>
@@ -176,9 +232,17 @@ export function ChannelContentHub({
 
       <section className="overflow-hidden">
         <SectionHeader
-          eyebrow={isKo ? "Breed Guide" : "Breed Guide"}
-          title={isKo ? "품종별 가이드" : "Breed guide"}
-          subtitle={isKo ? `${content.label} 집사가 자주 찾는 핵심 정보를 카드로 정리했어요.` : `Essential ${content.label.toLowerCase()} info in quick cards.`}
+          eyebrow={isReptile ? (isKo ? "Species" : "Species") : isKo ? "Breed Guide" : "Breed Guide"}
+          title={isReptile ? (isKo ? "종류별 가이드" : "Species guide") : isKo ? "품종별 가이드" : "Breed guide"}
+          subtitle={
+            isReptile
+              ? isKo
+                ? "파충류, 앵무새(조류), 다른동물 순으로 핵심 케어를 살펴보세요."
+                : "Explore reptiles, birds, and other small pets."
+              : isKo
+                ? `${content.label} 집사가 자주 찾는 핵심 정보를 카드로 정리했어요.`
+                : `Essential ${content.label.toLowerCase()} info in quick cards.`
+          }
         />
         <div className="-mx-5 mt-6 flex snap-x gap-5 overflow-x-auto px-5 pb-6 md:-mx-10 md:px-10 hide-scrollbar">
           {infoCards.map((card, index) => (

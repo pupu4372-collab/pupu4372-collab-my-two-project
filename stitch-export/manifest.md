@@ -30,7 +30,7 @@ The connected Stitch MCP exposes `get_screen_code` but does not expose a readabl
 
 | # | Screen | Screen ID | File |
 |---|---|---|---|
-| 10 | 다른 동물 채널 (개편) - K-Saju Pet | `d77e2f463c5e458799e85173f35b1bd5` | `10-other-animal-channel.html` |
+| 10 | 렙타일(다른동물) 채널 (개편) - K-Saju Pet | `d77e2f463c5e458799e85173f35b1bd5` | `10-other-animal-channel.html` |
 | 11 | 강아지 채널 - K-Saju Pet | `21bcafb2d740438cbb78af783701a596` | `11-dog-channel.html` |
 | 12 | 커뮤니티 - K-Saju Pet | `a0d2c3e21ddd4d6690a44f5a265e9e32` | `12-community.html` |
 | 13 | 고양이 채널 - K-Saju Pet | `a7048c4a77f740e185a21efc0f137e77` | `13-cat-channel.html` |

@@ -12,7 +12,7 @@ const EXPERIENCE_FILTER_TAGS = [
   { id: "all", ko: "전체", en: "All" },
   { id: "experience:dog", ko: "강아지 견종", en: "Dog breeds" },
   { id: "experience:cat", ko: "고양이 묘종", en: "Cat breeds" },
-  { id: "experience:other", ko: "다른동물", en: "Other animals" },
+  { id: "experience:other", ko: "렙타일(다른동물)", en: "Other animals" },
 ];
 
 interface QaFeedResponse {

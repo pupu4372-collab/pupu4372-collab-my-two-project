@@ -35,7 +35,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
       emoji: "🧬",
       title: isKo ? "품종별 경험담" : "Breed Experiences",
       desc: isKo
-        ? "견종·묘종·다른동물 종별 실제 생활 후기"
+        ? "견종·묘종·렙타일(다른동물) 종별 실제 생활 후기"
         : "Real stories by dog breed, cat breed, and other animal species",
     },
   ];
@@ -90,7 +90,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                   </h2>
                   <p className="mt-2 max-w-xl text-sm leading-6 text-white/85">
                     {isKo
-                      ? "최근 7일간 좋아요 순위로 강아지, 고양이, 다른동물 Top 5를 보여줘요."
+                      ? "최근 7일간 좋아요 순위로 강아지, 고양이, 렙타일(다른동물) Top 5를 보여줘요."
                       : "Dog, cat, and other animal Top 5 by likes from the last 7 days."}
                   </p>
                 </div>
@@ -108,7 +108,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
               {([
                 ["🐕", isKo ? "강아지" : "Dog", weeklyRanking.rows.dog],
                 ["🐈", isKo ? "고양이" : "Cat", weeklyRanking.rows.cat],
-                ["🐾", isKo ? "다른동물" : "Other Animals", weeklyRanking.rows.other],
+                ["🐾", isKo ? "렙타일(다른동물)" : "Other Animals", weeklyRanking.rows.other],
               ] as const).map(([emoji, label, rows]) => (
                 <div key={label} className="rounded-2xl bg-white/55 px-4 py-3">
                   <p className="text-xs font-extrabold text-primary">
@@ -139,6 +139,55 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
               📷 {isKo ? "사진 업로드하고 주간 랭킹 참여하기" : "Upload a photo and join the weekly ranking"}
             </AuthRequiredLink>
           </GlassCard>
+        </section>
+
+        <section>
+          <SectionHeader
+            eyebrow={isKo ? "Channels" : "Channels"}
+            title={isKo ? "종별 케어 채널" : "Species care channels"}
+            subtitle={
+              isKo
+                ? "강아지·고양이·렙타일(다른동물) 채널에서 환경·식단·건강 가이드를 모았어요."
+                : "Browse dog, cat, and reptile & other pet care guides."
+            }
+          />
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {([
+              {
+                href: "/dog" as const,
+                emoji: "🐕",
+                title: isKo ? "강아지 채널" : "Dog Channel",
+                desc: isKo ? "견종·산책·식단·훈련 케어 팁" : "Breed, walks, food, and training tips",
+                className: "bg-channel-dog/12 text-channel-dog",
+              },
+              {
+                href: "/cat" as const,
+                emoji: "🐈",
+                title: isKo ? "고양이 채널" : "Cat Channel",
+                desc: isKo ? "묘종·화장실·사냥놀이·건강 가이드" : "Breed, litter, play, and health guides",
+                className: "bg-channel-cat/12 text-channel-cat",
+              },
+              {
+                href: "/reptile" as const,
+                emoji: "🦎",
+                title: isKo ? "렙타일(다른동물)" : "Reptile & Other",
+                desc: isKo ? "파충류·앵무새(조류)·소동물 케어" : "Reptiles, birds, and small pets",
+                className: "bg-channel-community/12 text-channel-community",
+              },
+            ] as const).map((card) => (
+              <Link
+                key={card.href}
+                href={card.href}
+                className={`pastel-card block px-5 py-6 shadow-sm transition hover:-translate-y-1 hover:bg-white/80 ${card.className}`}
+              >
+                <span className="text-3xl" aria-hidden>
+                  {card.emoji}
+                </span>
+                <h2 className="mt-3 text-lg font-extrabold text-primary">{card.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-plum/65">{card.desc}</p>
+              </Link>
+            ))}
+          </div>
         </section>
 
         <section>

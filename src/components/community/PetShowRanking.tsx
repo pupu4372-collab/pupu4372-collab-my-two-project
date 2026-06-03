@@ -13,6 +13,7 @@ interface PetShowWeeklySpeciesRankingProps {
   dogRows: PetShowRankingRow[];
   catRows: PetShowRankingRow[];
   otherRows: PetShowRankingRow[];
+  period?: Extract<RankingPeriod, "week" | "month">;
   source: "supabase" | "mock";
 }
 
@@ -121,22 +122,34 @@ export function PetShowWeeklySpeciesRanking({
   dogRows,
   catRows,
   otherRows,
+  period = "week",
   source,
 }: PetShowWeeklySpeciesRankingProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const isMonthly = period === "month";
 
   return (
     <section className="rounded-3xl border border-channel-community/25 bg-channel-community/10 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-extrabold text-channel-community">
-            {isKo ? "우리아이 자랑 주간 랭킹 Top 5" : "Pet Show Weekly Top 5"}
+            {isMonthly
+              ? isKo
+                ? "우리아이 자랑 월간 랭킹 Top 5"
+                : "Pet Show Monthly Top 5"
+              : isKo
+                ? "우리아이 자랑 주간 랭킹 Top 5"
+                : "Pet Show Weekly Top 5"}
           </h2>
           <p className="mt-1 text-xs text-plum/55">
-            {isKo
-              ? "최근 7일간 좋아요 순위입니다. 동점일 때는 먼저 올린 사진이 앞에 배정돼요."
-              : "Ranked by likes from the last 7 days. Ties go to earlier uploads first."}
+            {isMonthly
+              ? isKo
+                ? "최근 30일간 좋아요 순위입니다. 동점일 때는 먼저 올린 사진이 앞에 배정돼요."
+                : "Ranked by likes from the last 30 days. Ties go to earlier uploads first."
+              : isKo
+                ? "최근 7일간 좋아요 순위입니다. 동점일 때는 먼저 올린 사진이 앞에 배정돼요."
+                : "Ranked by likes from the last 7 days. Ties go to earlier uploads first."}
           </p>
         </div>
         {source === "mock" && (
@@ -150,21 +163,45 @@ export function PetShowWeeklySpeciesRanking({
           rows={dogRows}
           emoji="🐕"
           title={isKo ? "강아지 Top 5" : "Dog Top 5"}
-          emptyText={isKo ? "이번 주 강아지 사진을 기다리는 중이에요." : "Waiting for dog photos this week."}
+          emptyText={
+            isMonthly
+              ? isKo
+                ? "이번 달 강아지 사진을 기다리는 중이에요."
+                : "Waiting for dog photos this month."
+              : isKo
+                ? "이번 주 강아지 사진을 기다리는 중이에요."
+                : "Waiting for dog photos this week."
+          }
           locale={locale}
         />
         <SpeciesList
           rows={catRows}
           emoji="🐈"
           title={isKo ? "고양이 Top 5" : "Cat Top 5"}
-          emptyText={isKo ? "이번 주 고양이 사진을 기다리는 중이에요." : "Waiting for cat photos this week."}
+          emptyText={
+            isMonthly
+              ? isKo
+                ? "이번 달 고양이 사진을 기다리는 중이에요."
+                : "Waiting for cat photos this month."
+              : isKo
+                ? "이번 주 고양이 사진을 기다리는 중이에요."
+                : "Waiting for cat photos this week."
+          }
           locale={locale}
         />
         <SpeciesList
           rows={otherRows}
           emoji="🐾"
-          title={isKo ? "다른동물 Top 5" : "Other Animals Top 5"}
-          emptyText={isKo ? "이번 주 다른동물 사진을 기다리는 중이에요." : "Waiting for other animal photos this week."}
+          title={isKo ? "렙타일(다른동물) Top 5" : "Other Animals Top 5"}
+          emptyText={
+            isMonthly
+              ? isKo
+                ? "이번 달 렙타일(다른동물) 사진을 기다리는 중이에요."
+                : "Waiting for other animal photos this month."
+              : isKo
+                ? "이번 주 렙타일(다른동물) 사진을 기다리는 중이에요."
+                : "Waiting for other animal photos this week."
+          }
           locale={locale}
         />
       </div>

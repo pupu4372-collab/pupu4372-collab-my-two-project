@@ -61,7 +61,7 @@ function RankingCard({
                   : row.pet_species === "cat"
                     ? isKo ? "고양이" : "Cat"
                     : row.pet_species === "other"
-                      ? isKo ? "다른동물" : "Other animal"
+                      ? isKo ? "렙타일(다른동물)" : "Other animal"
                       : "Pet Show"}
               </p>
             </div>
@@ -99,7 +99,7 @@ export default async function PetShowIndexPage({ params }: PageProps) {
     },
     {
       emoji: "🐰",
-      title: isKo ? "다른동물" : "Other Animals",
+      title: isKo ? "렙타일(다른동물)" : "Other Animals",
       body: isKo ? "토끼, 햄스터, 새, 파충류 친구들도 환영해요." : "Rabbits, hamsters, birds, reptiles, and more are welcome.",
       href: "/community/pet-show/upload",
       className: "bg-mint/45 border-channel-community/20",

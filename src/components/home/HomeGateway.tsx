@@ -33,6 +33,15 @@ const featureCards = [
     className: "bg-channel-cat/18 text-channel-cat",
   },
   {
+    href: "/reptile" as const,
+    emoji: "🦎",
+    koTitle: "렙타일(다른동물)",
+    enTitle: "Reptile & Other",
+    koDesc: "파충류, 앵무새(조류), 소동물 케어 가이드를 모았어요.",
+    enDesc: "Guides for reptiles, birds, and small pets.",
+    className: "bg-channel-community/18 text-channel-community",
+  },
+  {
     href: "/community" as const,
     emoji: "🏆",
     koTitle: "커뮤니티",
@@ -199,8 +208,8 @@ export function HomeGateway() {
             </h1>
             <p className="mt-5 max-w-xl text-base leading-8 text-plum/70">
               {isKo
-                ? "펫 사주로 성향을 읽고, 우리아이 자랑에서 사진을 나누고, 강아지·고양이 채널에서 오늘 필요한 케어 팁을 바로 찾아보세요."
-                : "Read your pet's saju, share photos in Pet Show, and browse dog and cat guides for today's care."}
+                ? "펫 사주로 성향을 읽고, 우리아이 자랑에서 사진을 나누고, 강아지·고양이·렙타일(다른동물) 채널에서 케어 팁을 찾아보세요."
+                : "Read your pet's saju, share photos in Pet Show, and browse dog, cat, and reptile care guides."}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <AuthRequiredLink
@@ -309,9 +318,9 @@ export function HomeGateway() {
               />
               <RankingPreviewList
                 emoji="🐾"
-                label={isKo ? "다른동물 Top 5" : "Other Animals Top 5"}
+                label={isKo ? "렙타일(다른동물) Top 5" : "Other Animals Top 5"}
                 rows={rankingRows.other}
-                emptyText={isKo ? "이번 주 다른동물 사진을 기다려요." : "Waiting for other animal photos."}
+                emptyText={isKo ? "이번 주 렙타일(다른동물) 사진을 기다려요." : "Waiting for other animal photos."}
               />
             </div>
           </GlassCard>

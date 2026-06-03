@@ -17,7 +17,7 @@ function categoryLabel(post: CommunityPost, isKo: boolean) {
   const category = post.tags.find((tag) => tag.startsWith("pet-show:"))?.replace("pet-show:", "");
   if (category === "dog") return isKo ? "강아지" : "Dog";
   if (category === "cat") return isKo ? "고양이" : "Cat";
-  if (category === "other") return isKo ? "다른동물" : "Other animal";
+  if (category === "other") return isKo ? "렙타일(다른동물)" : "Other animal";
   return isKo ? "미분류" : "Uncategorized";
 }
 

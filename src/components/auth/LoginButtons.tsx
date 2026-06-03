@@ -53,7 +53,7 @@ function AuthInput({
       </span>
       <div className="relative group">
         <span
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-outline transition-colors group-focus-within:text-primary"
+          className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg text-outline/45 transition-colors group-focus-within:text-primary/50"
           aria-hidden
         >
           {icon}
@@ -62,7 +62,7 @@ function AuthInput({
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="pastel-input w-full rounded-[1.25rem] border-0 bg-sand/70 py-4 pl-12 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant/40 transition-all focus:ring-2 focus:ring-primary/20"
+          className="pastel-input w-full rounded-[1.25rem] border-0 bg-sand/70 py-4 pl-4 pr-12 text-sm text-on-surface placeholder:text-on-surface-variant/40 transition-all focus:ring-2 focus:ring-primary/20"
           placeholder={placeholder}
           autoComplete={autoComplete}
           required={required}

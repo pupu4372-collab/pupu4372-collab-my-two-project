@@ -2,7 +2,7 @@
 
 export type PetSpecies = "dog" | "cat";
 export type PetShowSpecies = PetSpecies | "other";
-export type AppChannel = "home" | "dog" | "cat" | "community" | "pet_saju";
+export type AppChannel = "home" | "dog" | "cat" | "reptile" | "community" | "pet_saju";
 export type PostType = "photo_show" | "qa" | "free" | "saju_review";
 export type SajuType =
   | "basic"
@@ -11,7 +11,7 @@ export type SajuType =
   | "character_card"
   | "premium";
 export type AnalysisMode = "three_pillars" | "four_pillars";
-export type RankingPeriod = "realtime" | "week";
+export type RankingPeriod = "realtime" | "week" | "month";
 export type FiveElement = "mok" | "hwa" | "to" | "geum" | "su";
 
 export interface Profile {

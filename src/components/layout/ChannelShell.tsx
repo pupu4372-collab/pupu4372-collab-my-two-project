@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
 
-export type ChannelTheme = "dog" | "cat" | "saju" | "community" | "neutral";
+export type ChannelTheme = "dog" | "cat" | "reptile" | "saju" | "community" | "neutral";
 
 const THEME: Record<
   ChannelTheme,
@@ -26,6 +26,13 @@ const THEME: Record<
     accent: "text-channel-cat",
     bg: "bg-channel-cat/15",
     border: "border-channel-cat/30",
+  },
+  reptile: {
+    label: { ko: "렙타일(다른동물)", en: "Reptile & Other" },
+    emoji: "🦎",
+    accent: "text-channel-community",
+    bg: "bg-channel-community/15",
+    border: "border-channel-community/30",
   },
   saju: {
     label: { ko: "펫 사주", en: "Pet Saju" },
@@ -83,10 +90,13 @@ export function ChannelShell({
   const nav = useTranslations("nav");
   const locale = useLocale();
   const isKo = locale === "ko";
-  const active =
-    theme === "dog" || theme === "cat" || theme === "saju" || theme === "community"
+  const topNavActive =
+    theme === "dog" || theme === "cat" || theme === "reptile" || theme === "saju" || theme === "community"
       ? theme
       : "home";
+  /** 렙타일 채널은 모바일 하단 탭에 없음 — 홈 탭만 강조 */
+  const mobileNavActive =
+    theme === "dog" || theme === "cat" || theme === "saju" || theme === "community" ? theme : "home";
   const links =
     rightLinks ??
     ([
@@ -97,7 +107,7 @@ export function ChannelShell({
 
   return (
     <div className="min-h-screen bg-dream-sky">
-      <AppTopNav active={active} />
+      <AppTopNav active={topNavActive} />
       <PageContainer>
         {topBar && <div className="mb-5">{topBar}</div>}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -132,7 +142,7 @@ export function ChannelShell({
         </GlassCard>
         <div className="mt-8">{children}</div>
       </PageContainer>
-      <MobileBottomNav active={active} />
+      <MobileBottomNav active={mobileNavActive} />
     </div>
   );
 }

@@ -14,6 +14,11 @@ const THEME = {
     button: "bg-channel-cat text-white",
     back: "/cat",
   },
+  reptile: {
+    accent: "text-channel-community",
+    button: "bg-channel-community text-white",
+    back: "/reptile",
+  },
 } as const;
 
 interface ChannelArticleDetailProps {

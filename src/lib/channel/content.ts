@@ -1,4 +1,4 @@
-export type PetChannel = "dog" | "cat";
+export type PetChannel = "dog" | "cat" | "reptile";
 
 export interface ChannelInfoCard {
   title: string;
@@ -159,6 +159,63 @@ export const CHANNEL_CONTENT: Record<PetChannel, ChannelContent> = {
     keywords: ["우다다", "화장실", "사냥놀이", "골골송", "음수량", "숨숨집"],
     sajuCta: "우리 고양이 사주 보기",
   },
+  reptile: {
+    channel: "reptile",
+    label: "렙타일(다른동물)",
+    emoji: "🦎",
+    headline: "렙타일(다른동물) 생활 케어 가이드",
+    intro:
+      "파충류, 앵무새(조류), 토끼·햄스터 같은 소동물까지. 온도·습도·식단·생활 공간을 종류에 맞게 정리했어요.",
+    heroPoints: ["온도·습도·조명", "종별 식단·급여", "스트레스·건강 신호"],
+    featured: {
+      id: "reptile-habitat-basics",
+      category: "환경",
+      title: "사육장 온도·습도, 이렇게 잡으면 안정적이에요",
+      summary:
+        "파충류와 소동물은 환경이 먼저입니다. 종별로 필요한 온도 구배, 습도, 환기, 은신처를 한눈에 정리했어요.",
+      readTime: "4분",
+      badge: "오늘 추천",
+      checklist: ["온도는 구역별로 측정", "급수·탈피·배변 상태 매일 확인", "갑작스러운 환경 변화는 피하기"],
+    },
+    articles: [
+      {
+        id: "reptile-reptiles-care",
+        category: "파충류",
+        title: "도마뱀·거북이, UVB와 온도 구배 체크리스트",
+        summary: "파충류는 빛과 열이 생활 리듬의 기본입니다. 종에 맞는 바스킹·은신 온도를 확인해 보세요.",
+        readTime: "5분",
+        checklist: ["UVB·히팅 램프 주기 점검", "탈피 전후 습도 관리", "이상 행동 시 수의사 상담"],
+      },
+      {
+        id: "reptile-birds-play",
+        category: "앵무새(조류)",
+        title: "앵무새(조류) 스트레스 신호와 놀이 루틴",
+        summary: "깃털 뽑기, 과도한 울음, 공격성은 스트레스 신호일 수 있어요. 사회성과 놀이 시간을 설계해 보세요.",
+        readTime: "4분",
+        checklist: ["하루 사회적 교감 시간 확보", "장난감·훈련으로 두뇌 자극", "갑작스러운 소음·이동 최소화"],
+      },
+      {
+        id: "reptile-small-pets",
+        category: "다른동물",
+        title: "토끼·햄스터, 공간과 식단부터 챙기기",
+        summary: "소동물은 작아 보여도 섬세합니다. 건초·사료 비율, 케이지 크기, 야행 리듬을 맞춰 주세요.",
+        readTime: "4분",
+        checklist: ["종에 맞는 건초·사료 제공", "바닥재·환기·청결 유지", "무리한 핸들링 줄이기"],
+      },
+    ],
+    routines: [
+      {
+        title: "아침 환경 점검",
+        items: ["온도·습도 확인", "급수·먹이 상태 확인", "배변·탈피·깃털 상태 관찰"],
+      },
+      {
+        title: "저녁 케어 루틴",
+        items: ["사육장 청소·환기", "짧은 교감·놀이 시간", "소음·조명으로 휴식 방해 줄이기"],
+      },
+    ],
+    keywords: ["파충류", "앵무새", "온습도", "사육장", "토끼", "햄스터"],
+    sajuCta: "우리 아이 사주 보기",
+  },
 };
 
 export const CHANNEL_CONTENT_EN: Record<PetChannel, ChannelContent> = {
@@ -270,6 +327,57 @@ export const CHANNEL_CONTENT_EN: Record<PetChannel, ChannelContent> = {
     keywords: ["zoomies", "litter", "hunting play", "purring", "hydration", "hideout"],
     sajuCta: "Read my cat's saju",
   },
+  reptile: {
+    channel: "reptile",
+    label: "Reptile & Other Pets",
+    emoji: "🦎",
+    headline: "Care guide for reptiles, birds, and small pets",
+    intro:
+      "From reptiles and birds to rabbits and hamsters — practical habitat, diet, and daily care tips by species group.",
+    heroPoints: ["Temperature and humidity", "Species-specific diet", "Stress and health signals"],
+    featured: {
+      id: "reptile-habitat-basics",
+      category: "Habitat",
+      title: "Getting enclosure temperature and humidity right",
+      summary:
+        "Environment comes first for reptiles and small pets. Here is a quick guide to heat gradients, humidity, and hideouts.",
+      readTime: "4 min",
+      badge: "Today's pick",
+      checklist: ["Measure heat by zone", "Check water, shed, and droppings daily", "Avoid sudden habitat changes"],
+    },
+    articles: [
+      {
+        id: "reptile-reptiles-care",
+        category: "Reptiles",
+        title: "Lizards and turtles: UVB and heat gradient checklist",
+        summary: "Light and heat shape daily rhythm for reptiles. Match basking and cool zones to the species.",
+        readTime: "5 min",
+        checklist: ["Check UVB and heat lamps on schedule", "Manage humidity around sheds", "Ask a vet about sudden behavior changes"],
+      },
+      {
+        id: "reptile-birds-play",
+        category: "Birds",
+        title: "Bird stress signals and play routines",
+        summary: "Feather plucking, loud calls, or aggression can mean stress. Plan social time and enrichment.",
+        readTime: "4 min",
+        checklist: ["Secure daily social time", "Use toys and training for mental work", "Reduce sudden noise and moves"],
+      },
+      {
+        id: "reptile-small-pets",
+        category: "Other small pets",
+        title: "Rabbits and hamsters: space and diet first",
+        summary: "Small pets need careful setup too. Match hay, food, cage size, and activity rhythm to the species.",
+        readTime: "4 min",
+        checklist: ["Provide species-appropriate hay and food", "Keep bedding, airflow, and hygiene steady", "Limit stressful handling"],
+      },
+    ],
+    routines: [
+      { title: "Morning habitat check", items: ["Check temperature and humidity", "Check water and food", "Watch droppings, shed, and feathers"] },
+      { title: "Evening care routine", items: ["Clean and ventilate the enclosure", "Short bonding or play time", "Lower noise and harsh light at rest time"] },
+    ],
+    keywords: ["reptiles", "birds", "humidity", "enclosure", "rabbit", "hamster"],
+    sajuCta: "Read my pet's saju",
+  },
 };
 
 export const CHANNEL_INFO_CARDS: Record<PetChannel, ChannelInfoCard[]> = {
@@ -317,6 +425,23 @@ export const CHANNEL_INFO_CARDS: Record<PetChannel, ChannelInfoCard[]> = {
       points: ["숨기기-추격-성공 순서", "놀이 후 소량 급여", "레이저만 오래 쓰지 않기"],
     },
   ],
+  reptile: [
+    {
+      title: "파충류",
+      summary: "도마뱀, 거북이 등 온도·습도·UVB·은신처가 핵심이에요.",
+      points: ["온도 구배와 바스킹 구역", "탈피 전후 습도 관리", "이상 시 수의사 상담"],
+    },
+    {
+      title: "앵무새(조류)",
+      summary: "사회성과 두뇌 자극이 중요한 조류 친구들을 위한 케어 팁.",
+      points: ["하루 교감·놀이 시간", "깃털·울음·식욕 관찰", "갑작스러운 환경 변화 주의"],
+    },
+    {
+      title: "다른동물",
+      summary: "토끼, 햄스터, 고슴도치 등 소동물의 공간·식단·생활 리듬.",
+      points: ["종에 맞는 건초·사료", "케이지 크기·청결", "야행·활동성 고려"],
+    },
+  ],
 };
 
 export const CHANNEL_INFO_CARDS_EN: Record<PetChannel, ChannelInfoCard[]> = {
@@ -362,6 +487,23 @@ export const CHANNEL_INFO_CARDS_EN: Record<PetChannel, ChannelInfoCard[]> = {
       title: "Hunting play routine",
       summary: "Daytime play design can reduce night zoomies and restless energy.",
       points: ["Hide-chase-catch order", "Small meal after play", "Avoid laser-only sessions"],
+    },
+  ],
+  reptile: [
+    {
+      title: "Reptiles",
+      summary: "Lizards and turtles need heat gradients, humidity, UVB, and hideouts.",
+      points: ["Basking and cool zones", "Humidity around sheds", "Vet visit for sudden changes"],
+    },
+    {
+      title: "Birds",
+      summary: "Parrots and small birds need social time and mental enrichment.",
+      points: ["Daily bonding and play", "Watch feathers, calls, appetite", "Avoid sudden environment shifts"],
+    },
+    {
+      title: "Other small pets",
+      summary: "Rabbits, hamsters, and similar pets need space, diet, and rhythm.",
+      points: ["Species-appropriate hay and food", "Cage size and hygiene", "Respect nocturnal habits"],
     },
   ],
 };
