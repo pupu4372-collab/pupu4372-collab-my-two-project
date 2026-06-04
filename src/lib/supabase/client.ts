@@ -1,7 +1,6 @@
+import { createBrowserClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
-
-let browserClient: SupabaseClient<Database> | null = null;
 
 function readSupabaseEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
@@ -24,8 +23,8 @@ function isValidSupabaseEnv(url: string, key: string) {
   );
 }
 
-export function clearSupabaseBrowserSession() {
-  if (typeof window === "undefined") return;
+function collectSupabaseStorageKeys() {
+  if (typeof window === "undefined") return [] as string[];
 
   const { url } = readSupabaseEnv();
   const projectRef = url.match(/^https:\/\/([^.]+)\.supabase\.co/)?.[1];
@@ -37,15 +36,32 @@ export function clearSupabaseBrowserSession() {
     if (key?.startsWith("sb-")) storageKeys.add(key);
   }
 
-  for (const key of storageKeys) {
+  return [...storageKeys];
+}
+
+export function clearSupabaseBrowserSession() {
+  if (typeof window === "undefined") return;
+
+  const client = getSupabaseBrowserClient();
+  if (client) {
+    void client.auth.signOut();
+  }
+
+  for (const key of collectSupabaseStorageKeys()) {
     window.localStorage.removeItem(key);
     window.sessionStorage.removeItem(key);
   }
 
-  browserClient = null;
+  const expires = "Max-Age=0; path=/";
+  for (const cookie of document.cookie.split(";")) {
+    const name = cookie.split("=")[0]?.trim();
+    if (name?.startsWith("sb-") || name === "auth_oauth_next") {
+      document.cookie = `${name}=; ${expires}`;
+    }
+  }
 }
 
-/** Ephemeral client for login/signup — avoids corrupted browser auth storage. */
+/** Ephemeral client for email login/signup — avoids corrupted browser auth storage. */
 export function getSupabaseAuthActionClient(): SupabaseClient<Database> | null {
   const { url, key } = readSupabaseEnv();
   if (!isValidSupabaseEnv(url, key)) return null;
@@ -59,14 +75,12 @@ export function getSupabaseAuthActionClient(): SupabaseClient<Database> | null {
   });
 }
 
+/** Cookie-backed browser client (PKCE + session). Use for OAuth and session reads. */
 export function getSupabaseBrowserClient(): SupabaseClient<Database> | null {
   const { url, key } = readSupabaseEnv();
   if (!isValidSupabaseEnv(url, key)) return null;
 
-  if (!browserClient) {
-    browserClient = createClient<Database>(url, key);
-  }
-  return browserClient;
+  return createBrowserClient(url, key) as SupabaseClient<Database>;
 }
 
 export function isSupabaseConfigured(): boolean {

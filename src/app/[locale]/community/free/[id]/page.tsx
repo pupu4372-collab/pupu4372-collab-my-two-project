@@ -21,9 +21,9 @@ function formatDate(value: string) {
 export default async function FreePostDetailPage({ params }: PageProps) {
   const { id, locale } = await params;
   const isKo = locale !== "en";
-  const [post, comments] = await Promise.all([fetchQaPostDetail(id, "free"), fetchQaComments(id)]);
-
+  const post = await fetchQaPostDetail(id, "free");
   if (!post) notFound();
+  const comments = await fetchQaComments(post.id);
 
   return (
     <ChannelShell

@@ -1,5 +1,7 @@
+import { PostDetailActions } from "@/components/community/PostDetailActions";
 import { QaComments } from "@/components/community/QaComments";
 import { QaPostActions } from "@/components/community/QaPostActions";
+import { getAnimalLabel, getCategoryLabel, resolvePostAnimalType } from "@/lib/community/board-categories";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { fetchQaComments, fetchQaPostDetail } from "@/lib/community/qa-detail";
@@ -21,9 +23,12 @@ function formatDate(value: string) {
 export default async function TipsPostDetailPage({ params }: PageProps) {
   const { id, locale } = await params;
   const isKo = locale !== "en";
-  const [post, comments] = await Promise.all([fetchQaPostDetail(id, "tips"), fetchQaComments(id)]);
-
+  const post = await fetchQaPostDetail(id, "tips");
   if (!post) notFound();
+  const comments = await fetchQaComments(post.id);
+  const animal = resolvePostAnimalType(post.animal_type, post.tags);
+  const animalLabel = getAnimalLabel(animal, isKo);
+  const categoryLabel = animal ? getCategoryLabel("tips", animal, post.category, isKo) : null;
 
   return (
     <ChannelShell
@@ -36,6 +41,12 @@ export default async function TipsPostDetailPage({ params }: PageProps) {
     >
       <article className="space-y-5">
         <div className="flex flex-wrap items-center gap-2 text-xs text-plum/45">
+          {animalLabel && (
+            <span className="rounded-full bg-sand/70 px-2 py-0.5 font-bold text-plum/70">{animalLabel}</span>
+          )}
+          {categoryLabel && (
+            <span className="rounded-full bg-mint/40 px-2 py-0.5 font-bold text-plum/75">{categoryLabel}</span>
+          )}
           <span>{formatDate(post.created_at)}</span>
           <span>💬 {post.comment_count}</span>
           <span>👀 {post.view_count}</span>
@@ -51,6 +62,7 @@ export default async function TipsPostDetailPage({ params }: PageProps) {
           initialTitle={post.title ?? ""}
           initialContent={post.content ?? ""}
         />
+        <PostDetailActions post={post} board="tips" />
         {post.content && (
           <p className="whitespace-pre-wrap rounded-[1.5rem] bg-white/50 px-5 py-5 text-sm leading-relaxed text-plum/75">
             {post.content}

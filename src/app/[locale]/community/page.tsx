@@ -38,6 +38,14 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
         ? "견종·묘종·렙타일(다른동물) 종별 실제 생활 후기"
         : "Real stories by dog breed, cat breed, and other animal species",
     },
+    {
+      href: "/community/breeds" as const,
+      emoji: "📖",
+      title: isKo ? "품종별 가이드" : "Breed Guides",
+      desc: isKo
+        ? "견종·묘종 성격·건강·사주 힌트 레퍼런스 허브"
+        : "Breed reference hub: personality, health, and saju hints",
+    },
   ];
 
   return (

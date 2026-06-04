@@ -93,20 +93,25 @@ export async function signInWithEmail(email: string, password: string) {
   await persistSession(data.session);
 }
 
-export async function signInWithGoogle() {
-  clearSupabaseBrowserSession();
+function setOAuthNextCookie(path: string) {
+  if (typeof document === "undefined") return;
+  document.cookie = `auth_oauth_next=${encodeURIComponent(path)}; path=/; max-age=600; SameSite=Lax`;
+}
 
-  const client = getSupabaseAuthActionClient();
+export async function signInWithGoogle() {
+  const client = getSupabaseBrowserClient();
   if (!client) {
     throw new Error("Supabase is not configured.");
   }
 
+  setOAuthNextCookie("/");
+
   const redirectTo =
     typeof window !== "undefined"
-      ? `${window.location.origin}/auth/callback?next=/`
+      ? `${window.location.origin}/auth/callback`
       : undefined;
 
-  const { error } = await client.auth.signInWithOAuth({
+  const { data, error } = await client.auth.signInWithOAuth({
     provider: "google",
     options: {
       redirectTo,
@@ -117,6 +122,11 @@ export async function signInWithGoogle() {
   });
 
   if (error) throw error;
+  if (data?.url) {
+    window.location.assign(data.url);
+  } else {
+    throw new Error("OAuth URL was not returned.");
+  }
 }
 
 export async function sendPasswordResetEmail(email: string, locale: string) {

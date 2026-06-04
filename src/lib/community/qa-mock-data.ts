@@ -1,4 +1,6 @@
-import type { CommunityPost } from "@/lib/supabase/types";
+import type { CommunityPost, PetAnimalType } from "@/lib/supabase/types";
+import { isPetAnimalType } from "@/lib/community/board-categories";
+import { slugifyTitle } from "@/lib/community/slug";
 
 /** Matches supabase/migrations/006_qa_comments_and_seed.sql IDs */
 function qaId(n: number) {
@@ -84,9 +86,21 @@ export const QA_FILTER_TAGS = [
   { id: "saju", label: "사주" },
 ] as const;
 
+function inferQaCategory(animal: PetAnimalType, tags: string[]): string {
+  const topic = tags.filter((t) => t !== animal);
+  if (topic.some((t) => ["saju", "profile"].includes(t))) return "saju-fortune";
+  if (topic.some((t) => ["health", "grooming", "dental", "vaccine", "hairball", "vet"].includes(t))) {
+    return "health-disease";
+  }
+  if (topic.some((t) => ["food", "water", "litter", "catnip"].includes(t))) return "food-nutrition";
+  return animal === "cat" ? "behavior-habits" : "behavior-training";
+}
+
 export function buildMockQaPosts(): CommunityPost[] {
   const base = Date.now();
-  return SEED.map((row) => ({
+  return SEED.map((row) => {
+    const animal = row.tags.find((t): t is PetAnimalType => isPetAnimalType(t)) ?? "dog";
+    return {
     id: qaId(row.n),
     author_id: "00000000-0000-0000-0000-000000000101",
     pet_id: null,
@@ -96,6 +110,8 @@ export function buildMockQaPosts(): CommunityPost[] {
     content: row.content,
     image_urls: [],
     tags: row.tags,
+    animal_type: animal,
+    category: inferQaCategory(animal, row.tags),
     language: "ko",
     country_code: row.n % 3 === 0 ? "US" : "KR",
     like_count: row.likes,
@@ -103,9 +119,17 @@ export function buildMockQaPosts(): CommunityPost[] {
     view_count: row.views,
     is_hidden: false,
     is_pinned: row.pinned ?? false,
+    is_answered: row.n === 1,
+    adopted_answer_id: row.n === 1 ? `${qaId(row.n)}-comment-2` : null,
+    seo_slug: slugifyTitle(row.title) || `qa-${row.n}`,
+    difficulty: null,
+    time_required: null,
+    save_count: row.n % 5,
+    share_count: 0,
     created_at: new Date(base - row.n * 3600000).toISOString(),
     updated_at: new Date(base - row.n * 3600000).toISOString(),
-  }));
+  };
+  });
 }
 
 export const MOCK_QA_POSTS = buildMockQaPosts();

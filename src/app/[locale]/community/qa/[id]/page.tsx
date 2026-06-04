@@ -1,6 +1,8 @@
+import { PostDetailActions } from "@/components/community/PostDetailActions";
 import { QaComments } from "@/components/community/QaComments";
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { fetchQaComments, fetchQaPostDetail } from "@/lib/community/qa-detail";
+import { getAnimalLabel, getCategoryLabel, resolvePostAnimalType } from "@/lib/community/board-categories";
 import { getCountryLabel } from "@/lib/i18n/countries";
 import { notFound } from "next/navigation";
 
@@ -19,9 +21,12 @@ function formatDate(value: string) {
 export default async function QaDetailPage({ params }: QaDetailPageProps) {
   const { id, locale } = await params;
   const isKo = locale !== "en";
-  const [post, comments] = await Promise.all([fetchQaPostDetail(id), fetchQaComments(id)]);
-
+  const post = await fetchQaPostDetail(id);
   if (!post) notFound();
+  const comments = await fetchQaComments(post.id);
+  const animal = resolvePostAnimalType(post.animal_type, post.tags);
+  const animalLabel = getAnimalLabel(animal, isKo);
+  const categoryLabel = animal ? getCategoryLabel("qa", animal, post.category, isKo) : null;
 
   return (
     <ChannelShell
@@ -46,6 +51,12 @@ export default async function QaDetailPage({ params }: QaDetailPageProps) {
               {isKo ? "고정" : "Pinned"}
             </span>
           )}
+          {animalLabel && (
+            <span className="rounded-full bg-sand/70 px-2 py-0.5 font-bold text-plum/70">{animalLabel}</span>
+          )}
+          {categoryLabel && (
+            <span className="rounded-full bg-mint/40 px-2 py-0.5 font-bold text-plum/75">{categoryLabel}</span>
+          )}
           <span>{formatDate(post.created_at)}</span>
           <span>💬 {post.comment_count}</span>
           <span>👀 {post.view_count}</span>
@@ -53,6 +64,8 @@ export default async function QaDetailPage({ params }: QaDetailPageProps) {
             <span className="font-bold">{getCountryLabel(post.country_code, locale)}</span>
           )}
         </div>
+
+        <PostDetailActions post={post} board="qa" />
 
         {post.content && (
           <p className="whitespace-pre-wrap rounded-[1.5rem] bg-white/50 px-5 py-5 text-sm leading-relaxed text-plum/75">
@@ -75,7 +88,14 @@ export default async function QaDetailPage({ params }: QaDetailPageProps) {
       </article>
 
       <div className="mt-8 border-t border-plum/10 pt-6">
-        <QaComments postId={post.id} initialComments={comments} />
+        <QaComments
+          postId={post.id}
+          postAuthorId={post.author_id}
+          adoptedAnswerId={post.adopted_answer_id}
+          isAnswered={post.is_answered}
+          initialComments={comments}
+          enableAdopt
+        />
       </div>
     </ChannelShell>
   );

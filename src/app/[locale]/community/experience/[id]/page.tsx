@@ -21,12 +21,9 @@ function formatDate(value: string) {
 export default async function ExperiencePostDetailPage({ params }: PageProps) {
   const { id, locale } = await params;
   const isKo = locale !== "en";
-  const [post, comments] = await Promise.all([
-    fetchQaPostDetail(id, "experience"),
-    fetchQaComments(id),
-  ]);
-
+  const post = await fetchQaPostDetail(id, "experience");
   if (!post) notFound();
+  const comments = await fetchQaComments(post.id);
 
   return (
     <ChannelShell

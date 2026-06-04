@@ -7,6 +7,7 @@ export async function GET(request: Request) {
     cursor: searchParams.get("cursor"),
     q: searchParams.get("q"),
     tag: searchParams.get("tag"),
+    category: searchParams.get("category"),
   });
   return NextResponse.json(page);
 }

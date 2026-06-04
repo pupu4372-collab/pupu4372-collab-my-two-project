@@ -7,10 +7,10 @@ import {
   signInWithGoogle,
   signUpWithEmail,
 } from "@/lib/supabase/auth-client";
-import { clearSupabaseBrowserSession, isSupabaseConfigured } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Mode = "signup" | "login" | "forgot" | "confirm";
 
@@ -98,10 +98,6 @@ export function LoginButtons({
   const configured = isSupabaseConfigured();
   const isKo = locale === "ko";
   const isSignup = mode === "signup";
-
-  useEffect(() => {
-    clearSupabaseBrowserSession();
-  }, []);
 
   function formatAuthError(err: unknown) {
     const message = err instanceof Error ? err.message : t("genericError");

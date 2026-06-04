@@ -2,20 +2,22 @@
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import type { CommunityBoardKind } from "@/lib/community/qa-feed";
+import {
+  getBoardCategories,
+  getBoardSubcategories,
+  getPetAnimalOptions,
+  subcategoryTag,
+  TIPS_DIFFICULTY_OPTIONS,
+  type PetAnimalType,
+} from "@/lib/community/board-categories";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 interface QaComposerProps {
   onPosted: () => void;
   board?: CommunityBoardKind;
 }
-
-const PET_CATEGORY_OPTIONS = [
-  { value: "dog", ko: "강아지", en: "Dog" },
-  { value: "cat", ko: "고양이", en: "Cat" },
-  { value: "other", ko: "렙타일(다른동물)", en: "Reptile & other pets" },
-] as const;
 
 export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
   const locale = useLocale();
@@ -23,13 +25,26 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
   const { accessToken, isAnonymous, configured } = useSupabaseSession();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [petCategory, setPetCategory] = useState("");
+  const [petCategory, setPetCategory] = useState<PetAnimalType | "">("");
+  const [majorCategory, setMajorCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("");
+  const [difficulty, setDifficulty] = useState("");
   const [experienceTag, setExperienceTag] = useState("experience:dog");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputClass =
     "pastel-input mt-2 w-full rounded-[2rem] border-transparent bg-sand/50 px-4 py-3.5 text-sm text-on-surface focus:ring-primary/20";
   const labelClass = "block text-sm font-bold text-primary";
+
+  const categoryBoard = board === "tips" ? "tips" : "qa";
+  const majorCategoryOptions = useMemo(() => {
+    if (!petCategory || (board !== "qa" && board !== "tips")) return [];
+    return getBoardCategories(categoryBoard, petCategory);
+  }, [board, categoryBoard, petCategory]);
+  const subCategoryOptions = useMemo(() => {
+    if (!petCategory || !majorCategory || board !== "tips") return [];
+    return getBoardSubcategories("tips", petCategory, majorCategory);
+  }, [board, majorCategory, petCategory]);
 
   if (!configured) {
     return (
@@ -68,12 +83,20 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
           title,
           content,
           language: "ko",
-          tags:
-            board === "experience"
-              ? [experienceTag]
-              : board === "qa" || board === "tips"
-                ? petCategory ? [petCategory] : undefined
-                : undefined,
+          ...(board === "experience"
+            ? { tags: [experienceTag] }
+            : board === "qa" || board === "tips"
+              ? {
+                  animalType: petCategory,
+                  category: majorCategory,
+                  ...(board === "tips" && subCategory
+                    ? { subCategory, tags: [subcategoryTag(subCategory)] }
+                    : {}),
+                  ...(board === "tips"
+                    ? { difficulty }
+                    : {}),
+                }
+              : {}),
         }),
       });
       const data = await res.json();
@@ -82,6 +105,9 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
       setTitle("");
       setContent("");
       setPetCategory("");
+      setMajorCategory("");
+      setSubCategory("");
+      setDifficulty("");
       setExperienceTag("experience:dog");
       onPosted();
     } catch (err) {
@@ -124,22 +150,86 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
         </label>
       )}
       {(board === "qa" || board === "tips") && (
-        <label className={labelClass}>
-          {isKo ? "분류" : "Category"}
-          <select
-            value={petCategory}
-            onChange={(e) => setPetCategory(e.target.value)}
-            className={inputClass}
-            required
-          >
-            <option value="">{isKo ? "선택" : "Select"}</option>
-            {PET_CATEGORY_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {isKo ? option.ko : option.en}
-              </option>
-            ))}
-          </select>
-        </label>
+        <>
+          <label className={labelClass}>
+            {isKo ? "동물 종류" : "Pet type"}
+            <select
+              value={petCategory}
+              onChange={(e) => {
+                setPetCategory(e.target.value as PetAnimalType | "");
+                setMajorCategory("");
+                setSubCategory("");
+              }}
+              className={inputClass}
+              required
+            >
+              <option value="">{isKo ? "선택" : "Select"}</option>
+              {getPetAnimalOptions(isKo).map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={labelClass}>
+            {isKo ? "대분류" : "Topic"}
+            <select
+              value={majorCategory}
+              onChange={(e) => {
+                setMajorCategory(e.target.value);
+                setSubCategory("");
+              }}
+              className={inputClass}
+              required
+              disabled={!petCategory}
+            >
+              <option value="">{isKo ? "선택" : "Select"}</option>
+              {majorCategoryOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {isKo ? option.ko : option.en}
+                </option>
+              ))}
+            </select>
+          </label>
+          {board === "tips" && (
+            <>
+              <label className={labelClass}>
+                {isKo ? "소분류" : "Subtopic"}
+                <select
+                  value={subCategory}
+                  onChange={(e) => setSubCategory(e.target.value)}
+                  className={inputClass}
+                  required
+                  disabled={!majorCategory || subCategoryOptions.length === 0}
+                >
+                  <option value="">{isKo ? "선택" : "Select"}</option>
+                  {subCategoryOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {isKo ? option.ko : option.en}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={labelClass}>
+                {isKo ? "난이도" : "Difficulty"}
+                <select
+                  value={difficulty}
+                  onChange={(e) => setDifficulty(e.target.value)}
+                  className={inputClass}
+                  required
+                  disabled={!petCategory}
+                >
+                  <option value="">{isKo ? "선택" : "Select"}</option>
+                  {TIPS_DIFFICULTY_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {isKo ? option.ko : option.en}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          )}
+        </>
       )}
       <label className={labelClass}>
         {isKo ? "제목" : "Title"}

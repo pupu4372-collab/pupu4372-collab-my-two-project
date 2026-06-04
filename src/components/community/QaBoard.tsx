@@ -1,13 +1,24 @@
 "use client";
 
 import { EmptyStatePanel, getBoardEmptyState } from "@/components/ui/EmptyStatePanel";
-import { PET_CATEGORY_FILTER_TAGS, QA_FILTER_TAGS } from "@/lib/community/qa-mock-data";
+import { PET_CATEGORY_FILTER_TAGS } from "@/lib/community/qa-mock-data";
 import type { CommunityBoardKind } from "@/lib/community/qa-feed";
+import {
+  getAnimalLabel,
+  getBoardCategories,
+  getBoardSubcategories,
+  getCategoryLabel,
+  getSubcategoryLabel,
+  isPetAnimalType,
+  resolvePostAnimalType,
+  subcategoryIdFromTag,
+} from "@/lib/community/board-categories";
 import { getCountryLabel } from "@/lib/i18n/countries";
+import { communityPostPath } from "@/lib/community/post-path";
 import type { CommunityPost } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const EXPERIENCE_FILTER_TAGS = [
   { id: "all", ko: "전체", en: "All" },
@@ -38,8 +49,29 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [q, setQ] = useState("");
-  const [tag, setTag] = useState("all");
+  const [animalTag, setAnimalTag] = useState("all");
+  const [categoryTag, setCategoryTag] = useState("all");
+  const [subCategoryTag, setSubCategoryTag] = useState("all");
   const [searchInput, setSearchInput] = useState("");
+
+  const categoryBoard = board === "tips" ? "tips" : "qa";
+  const majorCategoryFilters = useMemo((): Array<{ id: string; ko: string; en: string }> => {
+    if ((board !== "qa" && board !== "tips") || animalTag === "all" || !isPetAnimalType(animalTag)) {
+      return [];
+    }
+    return [{ id: "all", ko: "전체", en: "All" }, ...getBoardCategories(categoryBoard, animalTag)];
+  }, [animalTag, board, categoryBoard]);
+  const subCategoryFilters = useMemo((): Array<{ id: string; ko: string; en: string }> => {
+    if (
+      board !== "tips" ||
+      animalTag === "all" ||
+      categoryTag === "all" ||
+      !isPetAnimalType(animalTag)
+    ) {
+      return [];
+    }
+    return [{ id: "all", ko: "전체", en: "All" }, ...getBoardSubcategories("tips", animalTag, categoryTag)];
+  }, [animalTag, board, categoryTag]);
 
   const load = useCallback(
     async (cursor?: string | null) => {
@@ -49,7 +81,9 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
         const params = new URLSearchParams();
         if (cursor) params.set("cursor", cursor);
         if (q) params.set("q", q);
-        if (tag !== "all") params.set("tag", tag);
+        if (animalTag !== "all") params.set("tag", animalTag);
+        if (categoryTag !== "all") params.set("category", categoryTag);
+        if (board === "tips" && subCategoryTag !== "all") params.set("subCategory", subCategoryTag);
         const res = await fetch(`/api/community/${board}/feed?${params.toString()}`);
         const data: QaFeedResponse = await res.json();
         setPosts((prev) => (cursor ? [...prev, ...(data.posts ?? [])] : data.posts ?? []));
@@ -61,7 +95,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
         setLoadingMore(false);
       }
     },
-    [board, q, tag]
+    [board, q, animalTag, categoryTag, subCategoryTag]
   );
 
   useEffect(() => {
@@ -74,7 +108,6 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
   }
 
   const isQa = board === "qa";
-  const boardPath = `/community/${board}`;
 
   if (loading) {
     return <p className="pastel-card p-6 text-center text-sm text-plum/60">{isKo ? "게시글 불러오는 중…" : "Loading posts…"}</p>;
@@ -100,34 +133,62 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
         </button>
       </form>
 
-      {isQa && <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-        {QA_FILTER_TAGS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setTag(item.id)}
-            className={
-              tag === item.id
-                ? "whitespace-nowrap rounded-full bg-channel-community px-5 py-2.5 text-xs font-extrabold text-white shadow-sm"
-                : "whitespace-nowrap rounded-full bg-white/60 px-5 py-2.5 text-xs font-bold text-plum/70 shadow-sm transition hover:bg-white"
-            }
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>}
-
-      {board === "tips" && (
+      {(isQa || board === "tips") && (
         <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
           {PET_CATEGORY_FILTER_TAGS.map((item) => (
             <button
               key={item.id}
               type="button"
-              onClick={() => setTag(item.id)}
+              onClick={() => {
+                setAnimalTag(item.id);
+                setCategoryTag("all");
+                setSubCategoryTag("all");
+              }}
               className={
-                tag === item.id
+                animalTag === item.id
                   ? "whitespace-nowrap rounded-full bg-channel-community px-5 py-2.5 text-xs font-extrabold text-white shadow-sm"
                   : "whitespace-nowrap rounded-full bg-white/60 px-5 py-2.5 text-xs font-bold text-plum/70 shadow-sm transition hover:bg-white"
+              }
+            >
+              {isKo ? item.ko : item.en}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {(isQa || board === "tips") && majorCategoryFilters.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+          {majorCategoryFilters.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                setCategoryTag(item.id);
+                setSubCategoryTag("all");
+              }}
+              className={
+                categoryTag === item.id
+                  ? "whitespace-nowrap rounded-full bg-mint/80 px-4 py-2 text-xs font-extrabold text-primary shadow-sm"
+                  : "whitespace-nowrap rounded-full bg-white/50 px-4 py-2 text-xs font-bold text-plum/65 shadow-sm transition hover:bg-white"
+              }
+            >
+              {isKo ? item.ko : item.en}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {board === "tips" && subCategoryFilters.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+          {subCategoryFilters.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setSubCategoryTag(item.id)}
+              className={
+                subCategoryTag === item.id
+                  ? "whitespace-nowrap rounded-full bg-sand px-4 py-2 text-xs font-extrabold text-primary shadow-sm"
+                  : "whitespace-nowrap rounded-full bg-white/50 px-4 py-2 text-xs font-bold text-plum/65 shadow-sm transition hover:bg-white"
               }
             >
               {isKo ? item.ko : item.en}
@@ -142,9 +203,9 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
             <button
               key={item.id}
               type="button"
-              onClick={() => setTag(item.id)}
+              onClick={() => setAnimalTag(item.id)}
               className={
-                tag === item.id
+                animalTag === item.id
                   ? "whitespace-nowrap rounded-full bg-channel-community px-5 py-2.5 text-xs font-extrabold text-white shadow-sm"
                   : "whitespace-nowrap rounded-full bg-white/60 px-5 py-2.5 text-xs font-bold text-plum/70 shadow-sm transition hover:bg-white"
               }
@@ -171,10 +232,10 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
 
       {posts.length === 0 && (
         <EmptyStatePanel
-          {...getBoardEmptyState(board, isKo, { q, tag })}
+          {...getBoardEmptyState(board, isKo, { q, tag: animalTag })}
           compact
           suggestions={
-            q || tag !== "all"
+            q || animalTag !== "all" || categoryTag !== "all" || subCategoryTag !== "all"
               ? undefined
               : getBoardEmptyState(board, isKo, {}).suggestions
           }
@@ -182,10 +243,32 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
       )}
 
       <ul className="grid gap-5 md:grid-cols-2">
-        {posts.map((post) => (
+        {posts.map((post) => {
+          const animal = resolvePostAnimalType(post.animal_type, post.tags);
+          const animalLabel = getAnimalLabel(animal, isKo);
+          const categoryLabel =
+            post.category && animal
+              ? getCategoryLabel(categoryBoard, animal, post.category, isKo)
+              : null;
+          const postSubcategory = post.tags.map(subcategoryIdFromTag).find(Boolean) ?? null;
+          const subcategoryLabel =
+            board === "tips" && post.category && animal
+              ? getSubcategoryLabel("tips", animal, post.category, postSubcategory, isKo)
+              : null;
+          const displayTags = post.tags.filter(
+            (t) =>
+              !isPetAnimalType(t) &&
+              t !== "qa" &&
+              t !== "tips" &&
+              t !== "free" &&
+              !t.startsWith("experience:") &&
+              !t.startsWith("subcategory:")
+          );
+
+          return (
           <li key={post.id}>
             <Link
-              href={`${boardPath}/${post.id}`}
+              href={communityPostPath(board, post)}
               className="pastel-card flex h-full flex-col justify-between p-5 shadow-sm transition hover:-translate-y-1 hover:bg-white/80"
             >
               <div>
@@ -198,6 +281,21 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
                   <span className="rounded-full bg-channel-community/10 px-3 py-1 text-[10px] font-extrabold text-channel-community">
                     {isQa ? "Q&A" : board}
                   </span>
+                  {animalLabel && (
+                    <span className="rounded-full bg-sand/80 px-3 py-1 text-[10px] font-bold text-plum/70">
+                      {animalLabel}
+                    </span>
+                  )}
+                  {categoryLabel && (
+                    <span className="rounded-full bg-mint/35 px-3 py-1 text-[10px] font-bold text-plum/75">
+                      {categoryLabel}
+                    </span>
+                  )}
+                  {subcategoryLabel && (
+                    <span className="rounded-full bg-sand/80 px-3 py-1 text-[10px] font-bold text-plum/70">
+                      {subcategoryLabel}
+                    </span>
+                  )}
                   <span className="text-xs font-semibold text-plum/45">
                     💬 {post.comment_count} · 👀 {post.view_count}
                   </span>
@@ -213,9 +311,9 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
                     {post.content}
                   </p>
                 )}
-                {post.tags.length > 0 && (
+                {displayTags.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-1.5">
-                    {post.tags.map((t) => (
+                    {displayTags.map((t) => (
                       <span
                         key={t}
                         className="rounded-full bg-channel-community/10 px-2.5 py-1 text-[11px] font-semibold text-channel-community"
@@ -229,7 +327,8 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
               <p className="mt-5 text-sm font-extrabold text-channel-community">{isKo ? "자세히 보기" : "Read more"} →</p>
             </Link>
           </li>
-        ))}
+          );
+        })}
       </ul>
 
       {nextCursor && (

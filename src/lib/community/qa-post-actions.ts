@@ -4,8 +4,9 @@ import { NextResponse } from "next/server";
 
 type EditableBoard = "free" | "tips" | "experience";
 
-const POST_SELECT =
-  "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, country_code, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at";
+import { COMMUNITY_POST_SELECT } from "@/lib/community/post-select";
+
+const POST_SELECT = COMMUNITY_POST_SELECT;
 
 interface RouteContext {
   params: Promise<{ id: string }>;

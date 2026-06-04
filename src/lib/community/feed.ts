@@ -1,3 +1,4 @@
+import { COMMUNITY_POST_SELECT } from "@/lib/community/post-select";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { CommunityPost } from "@/lib/supabase/types";
 
@@ -27,9 +28,7 @@ export async function fetchPetShowFeed(cursor?: string | null): Promise<PetShowF
 
   let query = supabase
     .from("community_posts")
-    .select(
-      "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, country_code, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at"
-    )
+    .select(COMMUNITY_POST_SELECT)
     .eq("post_type", "photo_show")
     .eq("is_hidden", false)
     .order("created_at", { ascending: false })
@@ -74,6 +73,8 @@ export function getMockPosts(): CommunityPost[] {
       content: "창가에서 낮잠 자는 중",
       image_urls: [],
       tags: ["cat", "nap"],
+      animal_type: null,
+      category: null,
       language: "ko",
       country_code: "KR",
       like_count: 42,
@@ -81,6 +82,13 @@ export function getMockPosts(): CommunityPost[] {
       view_count: 120,
       is_hidden: false,
       is_pinned: false,
+      is_answered: false,
+      adopted_answer_id: null,
+      seo_slug: null,
+      difficulty: null,
+      time_required: null,
+      save_count: 0,
+      share_count: 0,
       created_at: new Date(base - 3600000).toISOString(),
       updated_at: new Date(base - 3600000).toISOString(),
     },
@@ -94,6 +102,8 @@ export function getMockPosts(): CommunityPost[] {
       content: "Mok(Tree) energy pup",
       image_urls: [],
       tags: ["dog", "walk"],
+      animal_type: null,
+      category: null,
       language: "en",
       country_code: "US",
       like_count: 28,
@@ -101,6 +111,13 @@ export function getMockPosts(): CommunityPost[] {
       view_count: 88,
       is_hidden: false,
       is_pinned: false,
+      is_answered: false,
+      adopted_answer_id: null,
+      seo_slug: null,
+      difficulty: null,
+      time_required: null,
+      save_count: 0,
+      share_count: 0,
       created_at: new Date(base - 7200000).toISOString(),
       updated_at: new Date(base - 7200000).toISOString(),
     },
@@ -114,6 +131,8 @@ export function getMockPosts(): CommunityPost[] {
       content: null,
       image_urls: [],
       tags: ["saju", "hwa"],
+      animal_type: null,
+      category: null,
       language: "ko",
       country_code: null,
       like_count: 15,
@@ -121,6 +140,13 @@ export function getMockPosts(): CommunityPost[] {
       view_count: 45,
       is_hidden: false,
       is_pinned: false,
+      is_answered: false,
+      adopted_answer_id: null,
+      seo_slug: null,
+      difficulty: null,
+      time_required: null,
+      save_count: 0,
+      share_count: 0,
       created_at: new Date(base - 10800000).toISOString(),
       updated_at: new Date(base - 10800000).toISOString(),
     },

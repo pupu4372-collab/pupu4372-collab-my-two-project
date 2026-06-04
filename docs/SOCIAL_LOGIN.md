@@ -14,7 +14,7 @@ The current button calls:
 supabase.auth.signInWithOAuth({
   provider: "google",
   options: {
-    redirectTo: `${window.location.origin}/auth/callback?next=/`,
+    redirectTo: `${window.location.origin}/auth/callback`,
     queryParams: { prompt: "select_account" },
   },
 });
@@ -41,13 +41,15 @@ Supabase Dashboard:
 Supabase URL configuration:
 
 - Site URL: `https://ksajupet.com`
-- Redirect URLs:
+- Redirect URLs (exact path or wildcard; query strings are not part of the allowlist match):
   - `https://ksajupet.com/auth/callback`
   - `https://ksajupet.com/auth/reset-password`
   - `https://www.ksajupet.com/auth/callback`
   - `https://www.ksajupet.com/auth/reset-password`
   - `http://localhost:3000/auth/callback`
   - `http://localhost:3000/auth/reset-password`
+  - `http://localhost:3000/**` (optional wildcard for local ports)
+  - If you use another dev port (for example `3010`), add `http://localhost:3010/auth/callback` too
 
 ## Google Cloud Web OAuth client
 

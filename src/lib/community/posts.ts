@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { COMMUNITY_POST_SELECT } from "@/lib/community/post-select";
 import type { CommunityPost, Database, PetShowSpecies } from "@/lib/supabase/types";
 
 const BUCKET = "pet-show";
@@ -77,9 +78,7 @@ export async function createPetShowPost(
       language: input.language ?? "ko",
       country_code: countryCode,
     } as never)
-    .select(
-      "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, country_code, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at"
-    )
+    .select(COMMUNITY_POST_SELECT)
     .single();
 
   if (error || !data) {

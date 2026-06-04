@@ -56,6 +56,8 @@ export type PetInsert = Pick<
   personality_tags?: string[];
 };
 
+export type PetAnimalType = "dog" | "cat" | "other";
+
 export interface CommunityPost {
   id: string;
   author_id: string;
@@ -66,6 +68,8 @@ export interface CommunityPost {
   content: string | null;
   image_urls: string[];
   tags: string[];
+  animal_type: PetAnimalType | null;
+  category: string | null;
   language: string;
   country_code: string | null;
   like_count: number;
@@ -73,6 +77,41 @@ export interface CommunityPost {
   view_count: number;
   is_hidden: boolean;
   is_pinned: boolean;
+  is_answered: boolean;
+  adopted_answer_id: string | null;
+  seo_slug: string | null;
+  difficulty: "easy" | "medium" | "hard" | null;
+  time_required: string | null;
+  save_count: number;
+  share_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type TipsDifficulty = "easy" | "medium" | "hard";
+
+export interface BreedGuide {
+  id: string;
+  breed_name: string;
+  breed_name_en: string | null;
+  animal_type: PetAnimalType;
+  size_category: string | null;
+  lifespan: string | null;
+  personality: string | null;
+  health_notes: string | null;
+  exercise_level: string | null;
+  grooming_level: string | null;
+  beginner_friendly: boolean;
+  saju_tendency: string | null;
+  seo_slug: string;
+  thumbnail_url: string | null;
+  hero_image_url: string | null;
+  summary: string | null;
+  body: string | null;
+  tags: string[];
+  language: string;
+  is_published: boolean;
+  view_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -215,6 +254,11 @@ export interface Database {
           is_active: boolean;
           is_coming_soon: boolean;
         }>
+      >;
+      breed_guides: TableDef<BreedGuide, Partial<BreedGuide>>;
+      post_saves: TableDef<
+        { id: string; post_id: string; user_id: string; created_at: string },
+        { post_id: string; user_id: string }
       >;
     };
     Views: {
