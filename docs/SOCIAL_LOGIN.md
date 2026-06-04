@@ -122,6 +122,18 @@ Needed Kakao Developer settings later:
 - Consent items: account email, profile nickname, profile image
 - Native app key
 
+## Session policy (remember me + 3h cap)
+
+App-level policy in `src/lib/supabase/auth-session-policy.ts` (Supabase auth cookies stay on SSR defaults for OAuth PKCE).
+
+1. **Supabase Dashboard** → Authentication → Settings → JWT expiry: `10800` (3 hours).
+2. Login page **로그인 상태 유지**:
+   - Checked: session survives browser restart until 3 hours after login.
+   - Unchecked: closing the browser ends the session (`sessionStorage` alive flag).
+3. After 3 hours from login time, the app signs out regardless of the checkbox.
+
+Google OAuth stores the checkbox choice in `auth_remember_me` cookie before redirect; it is applied on the first `SIGNED_IN` event after callback.
+
 ## Play Console data safety
 
 If Google/Kakao login is enabled, reflect this in Play Console:

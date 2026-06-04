@@ -1,6 +1,11 @@
 "use client";
 
 import {
+  clearAuthSessionPolicy,
+  commitLoginPolicy,
+  prepareOAuthLogin,
+} from "@/lib/supabase/auth-session-policy";
+import {
   clearSupabaseBrowserSession,
   getSupabaseAuthActionClient,
   getSupabaseBrowserClient,
@@ -69,13 +74,18 @@ export async function signUpWithEmail(params: {
 
   if (data.session) {
     await persistSession(data.session);
+    commitLoginPolicy(false);
     if (params.displayName.trim()) {
       await saveDisplayNameAfterAuth(params.displayName.trim());
     }
   }
 }
 
-export async function signInWithEmail(email: string, password: string) {
+export async function signInWithEmail(
+  email: string,
+  password: string,
+  rememberMe = false
+) {
   clearSupabaseBrowserSession();
 
   const client = getSupabaseAuthActionClient();
@@ -91,6 +101,7 @@ export async function signInWithEmail(email: string, password: string) {
   if (error) throw error;
 
   await persistSession(data.session);
+  commitLoginPolicy(rememberMe);
 }
 
 function setOAuthNextCookie(path: string) {
@@ -98,12 +109,13 @@ function setOAuthNextCookie(path: string) {
   document.cookie = `auth_oauth_next=${encodeURIComponent(path)}; path=/; max-age=600; SameSite=Lax`;
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(rememberMe = false) {
   const client = getSupabaseBrowserClient();
   if (!client) {
     throw new Error("Supabase is not configured.");
   }
 
+  prepareOAuthLogin(rememberMe);
   setOAuthNextCookie("/");
 
   const redirectTo =
@@ -172,14 +184,19 @@ export async function checkSignupEmail(email: string) {
 
 export async function signOut() {
   const client = getSupabaseBrowserClient();
-  if (!client) return;
+  if (!client) {
+    clearAuthSessionPolicy();
+    return;
+  }
   await client.auth.signOut();
+  clearAuthSessionPolicy();
 }
 
 /** Sign out and return to guest session for continued browsing. */
 export async function signOutToGuest() {
   const client = getSupabaseBrowserClient();
   if (!client) return;
+  clearAuthSessionPolicy();
   await client.auth.signOut();
   await client.auth.signInAnonymously();
 }

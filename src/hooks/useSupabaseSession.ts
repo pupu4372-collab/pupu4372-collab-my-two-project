@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  ensurePolicyInitialized,
+  finalizeOAuthLoginPolicy,
+  markSessionAlive,
+  shouldInvalidateSession,
+} from "@/lib/supabase/auth-session-policy";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
@@ -61,6 +67,44 @@ export function useSupabaseSession(): SessionInfo {
     setProvider(info.provider);
   }, []);
 
+  const enforceSessionPolicy = useCallback(async () => {
+    const client = getSupabaseBrowserClient();
+    if (!client) return null;
+
+    let { data: { session } } = await client.auth.getSession();
+
+    if (session && !session.user.is_anonymous) {
+      finalizeOAuthLoginPolicy();
+      ensurePolicyInitialized(session.user.is_anonymous ?? false);
+
+      if (shouldInvalidateSession()) {
+        await client.auth.signOut();
+        const { data: { session: afterSignOut } } = await client.auth.getSession();
+        if (!afterSignOut) {
+          const { error } = await client.auth.signInAnonymously();
+          if (error) {
+            console.warn("[auth] anonymous sign-in failed:", error.message);
+          }
+        }
+        const { data: { session: refreshed } } = await client.auth.getSession();
+        session = refreshed;
+      } else {
+        markSessionAlive();
+      }
+    }
+
+    if (!session) {
+      const { error } = await client.auth.signInAnonymously();
+      if (error) {
+        console.warn("[auth] anonymous sign-in failed:", error.message);
+      }
+      const { data: { session: guest } } = await client.auth.getSession();
+      session = guest;
+    }
+
+    return session;
+  }, []);
+
   const refresh = useCallback(async () => {
     const client = getSupabaseBrowserClient();
     if (!client) {
@@ -68,18 +112,10 @@ export function useSupabaseSession(): SessionInfo {
       return;
     }
 
-    const { data: { session } } = await client.auth.getSession();
-    if (!session) {
-      const { error } = await client.auth.signInAnonymously();
-      if (error) {
-        console.warn("[auth] anonymous sign-in failed:", error.message);
-      }
-    }
-
-    const { data: { session: next } } = await client.auth.getSession();
-    applySession(next);
+    const session = await enforceSessionPolicy();
+    applySession(session);
     setReady(true);
-  }, [applySession]);
+  }, [applySession, enforceSessionPolicy]);
 
   useEffect(() => {
     void refresh();
@@ -87,7 +123,11 @@ export function useSupabaseSession(): SessionInfo {
     const client = getSupabaseBrowserClient();
     if (!client) return;
 
-    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session && !session.user.is_anonymous) {
+        finalizeOAuthLoginPolicy();
+        markSessionAlive();
+      }
       applySession(session);
       setReady(true);
     });

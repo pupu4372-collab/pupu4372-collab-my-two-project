@@ -92,6 +92,7 @@ export function LoginButtons({
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -206,7 +207,7 @@ export function LoginButtons({
         });
         setMessage(t("signupSuccess", { email: cleanEmail }));
       } else {
-        await signInWithEmail(cleanEmail, password);
+        await signInWithEmail(cleanEmail, password, rememberMe);
         window.location.replace("/");
       }
     } catch (err) {
@@ -222,7 +223,7 @@ export function LoginButtons({
     setLoading("google");
 
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(rememberMe);
     } catch (err) {
       setError(formatAuthError(err));
       setLoading(null);
@@ -295,6 +296,20 @@ export function LoginButtons({
 
         {mode === "login" && (
           <div className="relative z-10 mt-8 space-y-4">
+            <label className="flex cursor-pointer items-start gap-3 rounded-[1.25rem] bg-white/45 px-4 py-3 text-left text-sm text-on-surface">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.target.checked)}
+                className="mt-0.5 h-5 w-5 rounded border-outline text-primary focus:ring-primary/20"
+              />
+              <span>
+                <span className="font-semibold">{t("rememberMe")}</span>
+                <span className="mt-1 block text-xs leading-relaxed text-on-surface-variant">
+                  {t("rememberMeHint")}
+                </span>
+              </span>
+            </label>
             <button
               type="button"
               onClick={handleGoogleLogin}
@@ -408,14 +423,7 @@ export function LoginButtons({
           )}
 
           {!isSignup && mode === "login" && (
-            <div className="flex items-center justify-between px-2 text-sm">
-              <label className="flex cursor-pointer items-center gap-2 text-on-surface-variant transition hover:text-primary">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-outline-variant/40 bg-sand/80 text-primary focus:ring-primary/20"
-                />
-                {isKo ? "로그인 상태 유지" : "Keep me signed in"}
-              </label>
+            <div className="flex items-center justify-end px-2 text-sm">
               <button
                 type="button"
                 onClick={() => {

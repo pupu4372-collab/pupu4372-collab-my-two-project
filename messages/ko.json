@@ -112,6 +112,8 @@
     "passwordMismatch": "비밀번호 확인이 일치하지 않아요.",
     "signupSuccess": "{email}로 확인 메일을 보냈어요. 메일의 링크를 눌러 회원가입을 완료해 주세요.",
     "loginFailed": "로그인에 실패했어요.",
+    "rememberMe": "로그인 상태 유지",
+    "rememberMeHint": "체크하지 않으면 브라우저를 닫으면 로그아웃됩니다. 체크해도 3시간 후에는 다시 로그인해야 해요.",
     "invalidCredentials": "이메일 또는 비밀번호가 맞지 않아요.",
     "authStorageError": "브라우저에 남은 예전 로그인 정보 때문에 오류가 났어요. Ctrl+F5로 새로고침한 뒤 다시 시도해 주세요.",
     "genericError": "처리 중 오류가 발생했어요."

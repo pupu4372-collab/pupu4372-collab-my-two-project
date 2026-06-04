@@ -1,3 +1,4 @@
+import { clearAuthSessionPolicy } from "@/lib/supabase/auth-session-policy";
 import { createBrowserClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
@@ -55,10 +56,12 @@ export function clearSupabaseBrowserSession() {
   const expires = "Max-Age=0; path=/";
   for (const cookie of document.cookie.split(";")) {
     const name = cookie.split("=")[0]?.trim();
-    if (name?.startsWith("sb-") || name === "auth_oauth_next") {
+    if (name?.startsWith("sb-") || name === "auth_oauth_next" || name === "auth_remember_me") {
       document.cookie = `${name}=; ${expires}`;
     }
   }
+
+  clearAuthSessionPolicy();
 }
 
 /** Ephemeral client for email login/signup — avoids corrupted browser auth storage. */
