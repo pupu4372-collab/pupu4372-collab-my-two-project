@@ -6,7 +6,7 @@ const ANIMAL_TABS: Array<{ id: PetAnimalType | "all"; ko: string; en: string }> 
   { id: "all", ko: "전체", en: "All" },
   { id: "dog", ko: "강아지", en: "Dogs" },
   { id: "cat", ko: "고양이", en: "Cats" },
-  { id: "other", ko: "렙타일·기타", en: "Other" },
+  { id: "other", ko: "렙타일(다른동물)", en: "Other" },
 ];
 
 interface BreedGuideHubProps {
@@ -76,6 +76,18 @@ export function BreedGuideHub({ guides, source, activeAnimal, isKo }: BreedGuide
                 </h2>
                 {guide.summary && (
                   <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-plum/70">{guide.summary}</p>
+                )}
+                {guide.tags.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {guide.tags.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-channel-community/10 px-2.5 py-1 text-[10px] font-bold text-channel-community"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
                 )}
                 <div className="mt-4 flex flex-wrap gap-2 text-xs text-plum/55">
                   {guide.lifespan && <span>{isKo ? "수명" : "Lifespan"}: {guide.lifespan}</span>}

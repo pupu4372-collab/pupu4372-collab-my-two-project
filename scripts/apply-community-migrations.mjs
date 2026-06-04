@@ -1,5 +1,5 @@
 /**
- * Apply migrations 014–017 to remote Supabase Postgres.
+ * Apply migrations 014–018 to remote Supabase Postgres.
  *
  * Requires one of:
  *   DATABASE_URL=postgresql://...
@@ -51,6 +51,7 @@ const migrationFiles = [
   "015_breed_guides.sql",
   "016_breed_guides_seed_30.sql",
   "017_community_extended.sql",
+  "018_breed_guides_other_species_seed.sql",
 ];
 
 async function main() {
