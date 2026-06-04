@@ -44,15 +44,19 @@ function mockQaFeed(query: QaFeedQuery): QaFeedPage {
   };
 }
 
+function emptyBoardFeed(): QaFeedPage {
+  return { posts: [], nextCursor: null, source: "supabase", total: 0 };
+}
+
 export async function fetchQaFeed(query: QaFeedQuery = {}, board: CommunityBoardKind = "qa"): Promise<QaFeedPage> {
   const supabase = getSupabaseServerClient();
-  if (!supabase) return mockQaFeed(query);
+  if (!supabase) return board === "qa" ? mockQaFeed(query) : emptyBoardFeed();
   const tag = boardTag(board);
 
   let dbQuery = supabase
     .from("community_posts")
     .select(
-      "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at",
+      "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, country_code, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at",
       { count: "exact" }
     )
     .eq("post_type", board === "qa" ? "qa" : "free")
@@ -85,13 +89,13 @@ export async function fetchQaFeed(query: QaFeedQuery = {}, board: CommunityBoard
   }
 
   const { data, error, count } = await dbQuery;
-  if (error) return mockQaFeed(query);
+  if (error) return board === "qa" ? mockQaFeed(query) : emptyBoardFeed();
   if (!data?.length) {
     const hasFilter = Boolean(query.q?.trim() || (query.tag && query.tag !== "all"));
     if (hasFilter) {
       return { posts: [], nextCursor: null, source: "supabase", total: 0 };
     }
-    return mockQaFeed(query);
+    return board === "qa" ? mockQaFeed(query) : emptyBoardFeed();
   }
 
   const posts = data as CommunityPost[];
@@ -117,6 +121,15 @@ export async function createQaPost(
   const board = input.board ?? "qa";
   const tag = boardTag(board);
   const tags = [...new Set([tag, ...(input.tags ?? []).filter((item) => item && item !== tag)])];
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("country_code, show_country")
+    .eq("id", input.authorId)
+    .maybeSingle();
+  const countryCode =
+    (profile as { country_code?: string | null; show_country?: boolean | null } | null)?.show_country === false
+      ? null
+      : (profile as { country_code?: string | null } | null)?.country_code ?? null;
   const { data, error } = await supabase
     .from("community_posts")
     .insert({
@@ -128,9 +141,10 @@ export async function createQaPost(
       image_urls: [],
       tags,
       language: input.language ?? "ko",
+      country_code: countryCode,
     } as never)
     .select(
-      "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at"
+      "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, country_code, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at"
     )
     .single();
 

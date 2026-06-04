@@ -11,12 +11,19 @@ interface QaComposerProps {
   board?: CommunityBoardKind;
 }
 
+const PET_CATEGORY_OPTIONS = [
+  { value: "dog", ko: "강아지", en: "Dog" },
+  { value: "cat", ko: "고양이", en: "Cat" },
+  { value: "other", ko: "렙타일(다른동물)", en: "Reptile & other pets" },
+] as const;
+
 export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const { accessToken, isAnonymous, configured } = useSupabaseSession();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [petCategory, setPetCategory] = useState("");
   const [experienceTag, setExperienceTag] = useState("experience:dog");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +68,12 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
           title,
           content,
           language: "ko",
-          tags: board === "experience" ? [experienceTag] : undefined,
+          tags:
+            board === "experience"
+              ? [experienceTag]
+              : board === "qa" || board === "tips"
+                ? petCategory ? [petCategory] : undefined
+                : undefined,
         }),
       });
       const data = await res.json();
@@ -69,6 +81,7 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
 
       setTitle("");
       setContent("");
+      setPetCategory("");
       setExperienceTag("experience:dog");
       onPosted();
     } catch (err) {
@@ -107,6 +120,24 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
             <option value="experience:other">
               {isKo ? "렙타일(다른동물) (토끼·햄스터·새·파충류·물고기 등)" : "Other animals"}
             </option>
+          </select>
+        </label>
+      )}
+      {(board === "qa" || board === "tips") && (
+        <label className={labelClass}>
+          {isKo ? "분류" : "Category"}
+          <select
+            value={petCategory}
+            onChange={(e) => setPetCategory(e.target.value)}
+            className={inputClass}
+            required
+          >
+            <option value="">{isKo ? "선택" : "Select"}</option>
+            {PET_CATEGORY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {isKo ? option.ko : option.en}
+              </option>
+            ))}
           </select>
         </label>
       )}

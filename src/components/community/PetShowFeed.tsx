@@ -1,6 +1,6 @@
 "use client";
 
-import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { getCountryLabel } from "@/lib/i18n/countries";
 import type { CommunityPost } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
@@ -102,6 +102,11 @@ export function PetShowFeed({ refreshKey = 0 }: PetShowFeedProps) {
                 <h3 className="mt-4 px-2 font-extrabold text-primary">
                   {post.title ?? (isKo ? "무제" : "Untitled")}
                 </h3>
+                {getCountryLabel(post.country_code, locale) && (
+                  <p className="mt-1 px-2 text-xs font-bold text-plum/50">
+                    {getCountryLabel(post.country_code, locale)}
+                  </p>
+                )}
                 {post.content && (
                   <p className="mt-2 px-2 text-sm leading-6 text-plum/65">{post.content}</p>
                 )}

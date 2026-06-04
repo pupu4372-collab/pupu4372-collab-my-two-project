@@ -93,6 +93,32 @@ export async function signInWithEmail(email: string, password: string) {
   await persistSession(data.session);
 }
 
+export async function signInWithGoogle() {
+  clearSupabaseBrowserSession();
+
+  const client = getSupabaseAuthActionClient();
+  if (!client) {
+    throw new Error("Supabase is not configured.");
+  }
+
+  const redirectTo =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/auth/callback?next=/`
+      : undefined;
+
+  const { error } = await client.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo,
+      queryParams: {
+        prompt: "select_account",
+      },
+    },
+  });
+
+  if (error) throw error;
+}
+
 export async function sendPasswordResetEmail(email: string, locale: string) {
   const client = getSupabaseBrowserClient();
   if (!client) {

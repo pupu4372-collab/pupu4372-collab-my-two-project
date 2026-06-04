@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#7f747b",
+                    "primary-fixed": "#ffd7f3",
+                    "primary-container": "#633d5c",
+                    "inverse-on-surface": "#f2f0ed",
+                    "background": "#fbf9f5",
+                    "inverse-primary": "#e9b8dd",
+                    "surface-container-lowest": "#ffffff",
+                    "metal-gold": "#E6C994",
+                    "on-tertiary-container": "#acc089",
+                    "secondary-container": "#b3eee5",
+                    "primary": "#4a2744",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed-variant": "#3b4c20",
+                    "earth-sand": "#D9C5B2",
+                    "error": "#ba1a1a",
+                    "water-navy": "#343A40",
+                    "on-secondary-fixed": "#00201d",
+                    "tertiary-fixed-dim": "#b9ce96",
+                    "surface-dim": "#dbdad6",
+                    "fire-coral": "#F28C82",
+                    "outline-variant": "#d1c3ca",
+                    "surface-container-low": "#f5f3ef",
+                    "primary-fixed-dim": "#e9b8dd",
+                    "tertiary-fixed": "#d5eab0",
+                    "on-primary-container": "#dbabcf",
+                    "on-tertiary-fixed": "#121f00",
+                    "secondary": "#2e6861",
+                    "on-primary-fixed": "#2f0f2b",
+                    "lavender": "#D1D5F2",
+                    "surface-variant": "#e4e2de",
+                    "error-container": "#ffdad6",
+                    "tertiary-container": "#3e4f23",
+                    "secondary-fixed-dim": "#98d1c9",
+                    "surface-bright": "#fbf9f5",
+                    "on-background": "#1b1c1a",
+                    "on-secondary-container": "#356e67",
+                    "on-surface": "#1b1c1a",
+                    "on-secondary": "#ffffff",
+                    "surface": "#fbf9f5",
+                    "on-secondary-fixed-variant": "#104f49",
+                    "petal-pink": "#F2D5D5",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#28380e",
+                    "surface-container-highest": "#e4e2de",
+                    "wood-green": "#7FB8B0",
+                    "on-primary-fixed-variant": "#603a59",
+                    "inverse-surface": "#30312e",
+                    "surface-tint": "#7a5172",
+                    "on-surface-variant": "#4e444a",
+                    "surface-container": "#efeeea",
+                    "secondary-fixed": "#b3eee5",
+                    "on-error-container": "#93000a",
+                    "surface-container-high": "#eae8e4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "xl": "40px",
+                    "gutter": "20px",
+                    "container-max": "1200px",
+                    "2xl": "64px",
+                    "lg": "24px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Be Vietnam Pro"],
+                    "headline-xl": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-sm": ["Be Vietnam Pro"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "label-md": ["Be Vietnam Pro"],
+                    "body-sm": ["Be Vietnam Pro"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { -webkit-tap-highlight-color: transparent; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-shadow {
+            box-shadow: 0 4px 20px rgba(74, 39, 68, 0.04);
+        }
+        .floating-accent {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        input:focus { outline: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-background fixed top-0 w-full h-16 flex items-center justify-between px-gutter z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary font-headline-md text-headline-md" style="font-variation-settings: 'FILL' 1;">pets</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Mystic Paws</h1>
+</div>
+<button class="hover:opacity-80 transition-opacity active:scale-95 transition-transform text-on-surface-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<main class="flex-grow pt-16 pb-32">
+<!-- Hero Header -->
+<section class="px-gutter pt-8 pb-10 relative overflow-hidden">
+<!-- Decorative Elements -->
+<div class="absolute top-4 right-4 text-metal-gold opacity-30 floating-accent" style="animation-delay: 0s">
+<span class="material-symbols-outlined text-4xl">auto_awesome</span>
+</div>
+<div class="absolute bottom-10 left-[-10px] text-petal-pink opacity-40 floating-accent" style="animation-delay: 2s">
+<span class="material-symbols-outlined text-3xl">pets</span>
+</div>
+<div class="absolute top-20 right-[-5px] text-lavender opacity-30 floating-accent" style="animation-delay: 4s">
+<span class="material-symbols-outlined text-2xl">dark_mode</span>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-4">우리 아이 K-사주 보기</h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed max-w-[90%]">
+                이름과 생일 정보를 입력하면 성향, 오행 밸런스, 케어 포인트를 알려드려요. 출생 시간을 몰라도 결과를 볼 수 있어요.
+            </p>
+<!-- O-haeng Decorative Dots -->
+<div class="flex gap-2 mt-6">
+<div class="w-3 h-3 rounded-full bg-wood-green"></div>
+<div class="w-3 h-3 rounded-full bg-fire-coral"></div>
+<div class="w-3 h-3 rounded-full bg-earth-sand"></div>
+<div class="w-3 h-3 rounded-full bg-metal-gold"></div>
+<div class="w-3 h-3 rounded-full bg-water-navy"></div>
+</div>
+</section>
+<div class="px-gutter space-y-6">
+<!-- Pet Identity Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 custom-shadow">
+<h3 class="font-headline-md text-headline-md text-primary mb-6">우리 아이는 누구인가요?</h3>
+<div class="space-y-6">
+<div>
+<label class="font-label-md text-label-md text-outline block mb-2">이름</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl h-14 px-4 font-headline-md text-primary placeholder:text-outline-variant focus:ring-2 focus:ring-primary/10" placeholder="아이의 이름을 입력해주세요" type="text"/>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<button class="species-toggle h-14 rounded-xl border-2 border-surface-container flex flex-col items-center justify-center gap-1 font-label-sm text-label-sm bg-white transition-all" id="btn-dog" onclick="selectSpecies('dog')">
+<span class="material-symbols-outlined text-xl">pets</span>
+                            강아지
+                        </button>
+<button class="species-toggle h-14 rounded-xl border-2 border-surface-container flex flex-col items-center justify-center gap-1 font-label-sm text-label-sm bg-white transition-all" id="btn-cat" onclick="selectSpecies('cat')">
+<span class="material-symbols-outlined text-xl">cat</span>
+                            고양이
+                        </button>
+<button class="species-toggle h-14 rounded-xl border-2 border-surface-container flex flex-col items-center justify-center gap-1 font-label-sm text-label-sm bg-white transition-all" id="btn-other" onclick="selectSpecies('other')">
+<span class="material-symbols-outlined text-xl">pest_control_rodent</span>
+                            다른 동물
+                        </button>
+</div>
+<div class="flex gap-3">
+<button class="gender-toggle flex-1 h-12 rounded-full bg-surface-container-low text-on-surface-variant font-label-md text-label-md transition-all" id="btn-male" onclick="selectGender('male')">
+                            ♂ 수
+                        </button>
+<button class="gender-toggle flex-1 h-12 rounded-full bg-surface-container-low text-on-surface-variant font-label-md text-label-md transition-all" id="btn-female" onclick="selectGender('female')">
+                            ♀ 암
+                        </button>
+</div>
+</div>
+</div>
+<!-- Birth Info Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 custom-shadow">
+<h3 class="font-headline-md text-headline-md text-primary mb-6">언제 태어났나요?</h3>
+<div class="grid grid-cols-3 gap-2 mb-6">
+<div class="bg-surface-container-low rounded-xl p-3 text-center">
+<span class="font-label-sm text-label-sm text-outline block mb-1">년</span>
+<select class="w-full bg-transparent border-none p-0 text-center font-headline-md text-primary focus:ring-0 appearance-none">
+<option>2024</option>
+<option>2023</option>
+<option>2022</option>
+<option selected="">2021</option>
+<option>2020</option>
+</select>
+</div>
+<div class="bg-surface-container-low rounded-xl p-3 text-center">
+<span class="font-label-sm text-label-sm text-outline block mb-1">월</span>
+<select class="w-full bg-transparent border-none p-0 text-center font-headline-md text-primary focus:ring-0 appearance-none">
+<option>01</option>
+<option>02</option>
+<option selected="">03</option>
+<option>04</option>
+<option>05</option>
+</select>
+</div>
+<div class="bg-surface-container-low rounded-xl p-3 text-center">
+<span class="font-label-sm text-label-sm text-outline block mb-1">일</span>
+<select class="w-full bg-transparent border-none p-0 text-center font-headline-md text-primary focus:ring-0 appearance-none">
+<option>14</option>
+<option selected="">15</option>
+<option>16</option>
+<option>17</option>
+</select>
+</div>
+</div>
+<div class="flex p-1 bg-surface-container-low rounded-full mb-4">
+<button class="time-tab flex-1 py-3 rounded-full font-label-md text-label-md transition-all bg-white text-primary shadow-sm" id="time-know" onclick="toggleTimeKnowledge(true)">출생 시간을 알아요</button>
+<button class="time-tab flex-1 py-3 rounded-full font-label-md text-label-md transition-all text-on-surface-variant" id="time-dont-know" onclick="toggleTimeKnowledge(false)">몰라요</button>
+</div>
+<div id="time-selector-container">
+<div class="bg-surface-container-low rounded-xl p-4 flex items-center justify-between">
+<span class="font-body-md text-body-md text-primary">시간 선택</span>
+<select class="bg-transparent border-none font-label-md text-label-md text-primary focus:ring-0">
+<option>자시 (23:30 ~ 01:30)</option>
+<option>축시 (01:30 ~ 03:30)</option>
+<option>인시 (03:30 ~ 05:30)</option>
+<option>묘시 (05:30 ~ 07:30)</option>
+<option>진시 (07:30 ~ 09:30)</option>
+<option selected="">오시 (11:30 ~ 13:30)</option>
+</select>
+</div>
+</div>
+<div class="hidden bg-surface-container-low rounded-xl p-4" id="no-time-message">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        시간을 몰라도 연·월·일 기준으로 기본 사주를 볼 수 있어요.
+                    </p>
+</div>
+</div>
+<!-- Timezone Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 custom-shadow">
+<div class="flex items-center justify-between mb-2">
+<h3 class="font-headline-md text-headline-md text-primary">출생 지역 시간대</h3>
+<span class="material-symbols-outlined text-outline">public</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between bg-surface-container-low rounded-xl px-4 h-12">
+<span class="font-body-md text-body-md text-primary">Asia/Seoul</span>
+<span class="material-symbols-outlined text-outline text-sm">expand_more</span>
+</div>
+<p class="font-label-sm text-label-sm text-outline-variant px-1">태어난 지역 기준 시간으로 계산해요.</p>
+</div>
+</div>
+<!-- Privacy Consent -->
+<div class="px-1 flex items-start gap-3 py-4">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" id="consent" type="checkbox"/>
+<label class="font-body-sm text-body-sm text-on-surface-variant leading-tight" for="consent">
+                    입력한 생일 정보는 사주 계산과 저장된 리포트 확인에 사용됩니다. 
+                    <a class="text-primary underline font-label-sm" href="#">상세보기</a>
+</label>
+</div>
+</div>
+</main>
+<!-- Sticky Bottom CTA -->
+<div class="fixed bottom-0 w-full px-gutter pb-safe pt-4 bg-gradient-to-t from-background via-background to-transparent z-40">
+<button class="w-full h-14 rounded-full bg-primary text-on-primary font-headline-md text-headline-md shadow-lg active:scale-95 transition-all mb-4">
+            우리 아이 사주 보기
+        </button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface-container-lowest rounded-t-xl shadow-lg">
+<button class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-sm">Fortune</span>
+</button>
+<button class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">pets</span>
+<span class="font-label-sm">Community</span>
+</button>
+<button class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm">Profile</span>
+</button>
+</nav>
+<script>
+        function selectSpecies(type) {
+            document.querySelectorAll('.species-toggle').forEach(el => {
+                el.classList.remove('bg-primary-container', 'text-on-primary-container', 'border-primary-container');
+                el.classList.add('bg-white', 'text-on-surface-variant', 'border-surface-container');
+                el.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0";
+            });
+            const selected = document.getElementById('btn-' + type);
+            selected.classList.add('bg-primary-container', 'text-on-primary-container', 'border-primary-container');
+            selected.classList.remove('bg-white', 'text-on-surface-variant', 'border-surface-container');
+            selected.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1";
+        }
+
+        function selectGender(type) {
+            document.querySelectorAll('.gender-toggle').forEach(el => {
+                el.classList.remove('bg-primary', 'text-white');
+                el.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+            });
+            const selected = document.getElementById('btn-' + type);
+            selected.classList.add('bg-primary', 'text-white');
+            selected.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+        }
+
+        function toggleTimeKnowledge(know) {
+            const timeContainer = document.getElementById('time-selector-container');
+            const noTimeMessage = document.getElementById('no-time-message');
+            const knowBtn = document.getElementById('time-know');
+            const dontKnowBtn = document.getElementById('time-dont-know');
+
+            if (know) {
+                timeContainer.classList.remove('hidden');
+                noTimeMessage.classList.add('hidden');
+                knowBtn.classList.add('bg-white', 'text-primary', 'shadow-sm');
+                knowBtn.classList.remove('text-on-surface-variant');
+                dontKnowBtn.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+                dontKnowBtn.classList.add('text-on-surface-variant');
+            } else {
+                timeContainer.classList.add('hidden');
+                noTimeMessage.classList.remove('hidden');
+                dontKnowBtn.classList.add('bg-white', 'text-primary', 'shadow-sm');
+                dontKnowBtn.classList.remove('text-on-surface-variant');
+                knowBtn.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+                knowBtn.classList.add('text-on-surface-variant');
+            }
+        }
+        
+        // Initial state
+        selectSpecies('dog');
+        selectGender('male');
+    </script>
+</body></html>

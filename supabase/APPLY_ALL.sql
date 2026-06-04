@@ -1,4 +1,4 @@
-﻿-- Run once in Supabase SQL Editor
+-- Run once in Supabase SQL Editor
 
 
 -- ===== 001_initial_schema.sql =====
@@ -1007,4 +1007,27 @@ select
 where not exists (
   select 1 from public.contents where channel = 'reptile' and title = '토끼·햄스터, 공간과 식단부터 챙기기'
 );
+
+-- ===== 012_country_display.sql =====
+
+alter table public.profiles
+  add column if not exists country_code text,
+  add column if not exists show_country boolean not null default true;
+
+alter table public.profiles
+  drop constraint if exists profiles_country_code_format,
+  add constraint profiles_country_code_format
+    check (country_code is null or country_code ~ '^[A-Z]{2}$' or country_code = 'OTHER');
+
+alter table public.community_posts
+  add column if not exists country_code text;
+
+alter table public.community_posts
+  drop constraint if exists community_posts_country_code_format,
+  add constraint community_posts_country_code_format
+    check (country_code is null or country_code ~ '^[A-Z]{2}$' or country_code = 'OTHER');
+
+-- ===== 013_pet_species_other.sql =====
+
+alter type public.pet_species add value if not exists 'other';
 

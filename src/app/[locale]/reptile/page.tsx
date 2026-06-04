@@ -1,4 +1,4 @@
-import { ChannelContentHub } from "@/components/channel/ChannelContentHub";
+import { ReptileChannelHome } from "@/components/channel/ReptileChannelHome";
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { getChannelContent } from "@/lib/channel/content";
 import { fetchChannelEditorial } from "@/lib/content/channel-feed";
@@ -29,11 +29,12 @@ export default async function ReptileChannelPage({ params }: ReptileChannelPageP
         { href: "/community", label: isKo ? "커뮤니티" : "Community" },
       ]}
     >
-      <ChannelContentHub
+      <ReptileChannelHome
         content={getChannelContent("reptile", isKo ? "ko" : "en")}
         featured={editorial.featured}
         articles={editorial.articles}
         source={editorial.source}
+        isKo={isKo}
       />
     </ChannelShell>
   );

@@ -28,7 +28,7 @@ export async function fetchPetShowFeed(cursor?: string | null): Promise<PetShowF
   let query = supabase
     .from("community_posts")
     .select(
-      "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at"
+      "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, country_code, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at"
     )
     .eq("post_type", "photo_show")
     .eq("is_hidden", false)
@@ -75,6 +75,7 @@ export function getMockPosts(): CommunityPost[] {
       image_urls: [],
       tags: ["cat", "nap"],
       language: "ko",
+      country_code: "KR",
       like_count: 42,
       comment_count: 3,
       view_count: 120,
@@ -94,6 +95,7 @@ export function getMockPosts(): CommunityPost[] {
       image_urls: [],
       tags: ["dog", "walk"],
       language: "en",
+      country_code: "US",
       like_count: 28,
       comment_count: 1,
       view_count: 88,
@@ -113,6 +115,7 @@ export function getMockPosts(): CommunityPost[] {
       image_urls: [],
       tags: ["saju", "hwa"],
       language: "ko",
+      country_code: null,
       like_count: 15,
       comment_count: 0,
       view_count: 45,

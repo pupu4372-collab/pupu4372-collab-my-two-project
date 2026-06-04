@@ -2,6 +2,7 @@
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
+import { COUNTRY_OPTIONS, getCountryLabel, normalizeCountryCode } from "@/lib/i18n/countries";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import { clearSupabaseBrowserSession } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/supabase/types";
@@ -105,6 +106,8 @@ export function UserProfileCard({
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [profileLocale, setProfileLocale] = useState<"ko" | "en">("ko");
   const [timezone, setTimezone] = useState("Asia/Seoul");
+  const [countryCode, setCountryCode] = useState("");
+  const [showCountry, setShowCountry] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -133,6 +136,8 @@ export function UserProfileCard({
           setAvatarUrl(nextProfile.avatar_url ?? null);
           setProfileLocale(nextProfile.locale === "en" ? "en" : "ko");
           setTimezone(nextProfile.timezone ?? "Asia/Seoul");
+          setCountryCode(normalizeCountryCode(nextProfile.country_code) ?? "");
+          setShowCountry(nextProfile.show_country ?? true);
         }
       } catch {
         setError(isKo ? "네트워크 오류" : "Network error");
@@ -163,6 +168,8 @@ export function UserProfileCard({
           displayName,
           locale: profileLocale,
           timezone,
+          countryCode: countryCode || null,
+          showCountry,
           avatarUrl,
         }),
       });
@@ -178,6 +185,8 @@ export function UserProfileCard({
       setAvatarUrl(nextProfile.avatar_url ?? null);
       setProfileLocale(nextProfile.locale === "en" ? "en" : "ko");
       setTimezone(nextProfile.timezone ?? "Asia/Seoul");
+      setCountryCode(normalizeCountryCode(nextProfile.country_code) ?? "");
+      setShowCountry(nextProfile.show_country ?? true);
       setShowAvatarPicker(false);
       setMessage(isKo ? "프로필이 저장됐어요." : "Profile saved.");
       await refresh();
@@ -277,6 +286,7 @@ export function UserProfileCard({
   const shownName = profile?.display_name ?? email?.split("@")[0] ?? (isKo ? "집사님" : "Pet parent");
   const shownAvatarUrl = avatarUrl ?? profile?.avatar_url ?? null;
   const shownAvatarPresetIndex = avatarPresetIndexFromUrl(shownAvatarUrl);
+  const shownCountry = profile?.show_country ? getCountryLabel(profile.country_code, locale) : null;
   const joinedLabel = profile
     ? new Date(profile.created_at).toLocaleDateString(isKo ? "ko-KR" : "en-US")
     : null;
@@ -381,6 +391,30 @@ export function UserProfileCard({
           ))}
         </select>
       </label>
+      <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant">
+        {isKo ? "국가" : "Country"}
+        <select
+          value={countryCode}
+          onChange={(e) => setCountryCode(e.target.value)}
+          className="pastel-input mt-2 bg-sand/50"
+        >
+          <option value="">{isKo ? "선택 안 함" : "Not selected"}</option>
+          {COUNTRY_OPTIONS.map((country) => (
+            <option key={country.code} value={country.code}>
+              {country.emoji} {isKo ? country.ko : country.en}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flex items-center gap-3 rounded-2xl bg-sand/45 px-4 py-3 text-xs font-bold text-on-surface-variant">
+        <input
+          type="checkbox"
+          checked={showCountry}
+          onChange={(e) => setShowCountry(e.target.checked)}
+          className="h-4 w-4 rounded border-outline/40 text-primary focus:ring-primary/30"
+        />
+        <span>{isKo ? "작성글/사진에 국가 표시" : "Show country on posts/photos"}</span>
+      </label>
       {email && (
         <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant sm:col-span-2">
           {isKo ? "이메일" : "Email"}
@@ -429,6 +463,11 @@ export function UserProfileCard({
           <span className="rounded-full bg-mint/50 px-3 py-1 text-xs font-bold text-channel-community">
             {providerLabel}
           </span>
+          {shownCountry && (
+            <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-plum/70">
+              {shownCountry}
+            </span>
+          )}
         </div>
         {profile?.role === "admin" && (
           <Link href="/admin" className="mt-3 text-sm font-semibold text-primary underline">
@@ -464,6 +503,11 @@ export function UserProfileCard({
             {email && <p className="mt-1 text-sm text-plum/65">{email}</p>}
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{providerLabel}</span>
+              {shownCountry && (
+                <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-plum/70">
+                  {shownCountry}
+                </span>
+              )}
               {profile?.role === "admin" && (
                 <span className="rounded-full bg-channel-saju/15 px-3 py-1 text-xs font-bold text-channel-saju">
                   {isKo ? "관리자" : "Admin"}
@@ -497,6 +541,7 @@ export function UserProfileCard({
             {isKo ? "로그인" : "Login"}: {providerLabel}
             {profile?.role === "admin" ? (isKo ? " · 관리자" : " · Admin") : ""}
           </p>
+          {shownCountry && <p className="mt-1 text-sm font-semibold text-plum/65">{shownCountry}</p>}
           {profile?.role === "admin" && (
             <Link href="/admin" className="mt-2 inline-flex text-sm font-semibold text-plum underline">
               {isKo ? "관리자 대시보드" : "Admin dashboard"} →

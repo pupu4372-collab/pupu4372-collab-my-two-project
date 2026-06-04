@@ -7,7 +7,7 @@ import type { PetSpecies, SajuType } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
 function isSpecies(value: unknown): value is PetSpecies {
-  return value === "dog" || value === "cat";
+  return value === "dog" || value === "cat" || value === "other";
 }
 
 function isGender(value: unknown): value is "male" | "female" | "unknown" {

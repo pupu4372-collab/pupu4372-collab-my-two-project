@@ -6,7 +6,7 @@ create extension if not exists "pgcrypto";
 -- ---------------------------------------------------------------------------
 -- Enums
 -- ---------------------------------------------------------------------------
-create type public.pet_species as enum ('dog', 'cat');
+create type public.pet_species as enum ('dog', 'cat', 'other');
 create type public.user_role as enum ('user', 'admin');
 create type public.app_channel as enum ('home', 'dog', 'cat', 'community', 'pet_saju');
 create type public.post_type as enum ('photo_show', 'qa', 'free', 'saju_review');
@@ -26,6 +26,8 @@ create table public.profiles (
   avatar_url text,
   locale text not null default 'ko' check (locale in ('ko', 'en')),
   timezone text not null default 'Asia/Seoul',
+  country_code text check (country_code is null or country_code ~ '^[A-Z]{2}$' or country_code = 'OTHER'),
+  show_country boolean not null default true,
   provider text,
   role public.user_role not null default 'user',
   created_at timestamptz not null default now(),
@@ -137,6 +139,7 @@ create table public.community_posts (
   image_urls text[] not null default '{}',
   tags text[] not null default '{}',
   language text not null default 'ko',
+  country_code text check (country_code is null or country_code ~ '^[A-Z]{2}$' or country_code = 'OTHER'),
   like_count int not null default 0 check (like_count >= 0),
   comment_count int not null default 0 check (comment_count >= 0),
   view_count int not null default 0 check (view_count >= 0),

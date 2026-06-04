@@ -1,4 +1,4 @@
-import { ChannelContentHub } from "@/components/channel/ChannelContentHub";
+import { DogChannelHome } from "@/components/channel/DogChannelHome";
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { getChannelContent } from "@/lib/channel/content";
 import { fetchChannelEditorial } from "@/lib/content/channel-feed";
@@ -29,11 +29,12 @@ export default async function DogChannelPage({ params }: DogChannelPageProps) {
         { href: "/community", label: isKo ? "커뮤니티" : "Community" },
       ]}
     >
-      <ChannelContentHub
+      <DogChannelHome
         content={getChannelContent("dog", isKo ? "ko" : "en")}
         featured={editorial.featured}
         articles={editorial.articles}
         source={editorial.source}
+        isKo={isKo}
       />
     </ChannelShell>
   );

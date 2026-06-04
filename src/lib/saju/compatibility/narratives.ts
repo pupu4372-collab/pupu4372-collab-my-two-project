@@ -235,7 +235,8 @@ export function buildCompatibilityNarrative(
   species: Species,
   locale: Locale
 ) {
-  const speciesLabel = locale === "ko" ? (species === "dog" ? "강아지" : "고양이") : species;
+  const speciesLabel =
+    locale === "ko" ? (species === "dog" ? "강아지" : species === "cat" ? "고양이" : "반려동물") : species;
   const copy = RELATION_COPY[relation][locale];
   const petEl = fmtEl(petElement, locale);
   const ownerEl = fmtEl(ownerElement, locale);

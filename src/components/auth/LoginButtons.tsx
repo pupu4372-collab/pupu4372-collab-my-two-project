@@ -4,6 +4,7 @@ import {
   checkSignupEmail,
   sendPasswordResetEmail,
   signInWithEmail,
+  signInWithGoogle,
   signUpWithEmail,
 } from "@/lib/supabase/auth-client";
 import { clearSupabaseBrowserSession, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -219,6 +220,24 @@ export function LoginButtons({
     }
   }
 
+  async function handleGoogleLogin() {
+    setError(null);
+    setMessage(null);
+    setLoading("google");
+
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      setError(formatAuthError(err));
+      setLoading(null);
+    }
+  }
+
+  function handleKakaoLogin() {
+    setError(null);
+    setMessage(t("kakaoLoginComingSoon"));
+  }
+
   if (!configured) {
     return (
       <div className="glass-card mx-auto max-w-sm rounded-[2rem] border border-white/40 p-7 text-center shadow-sm shadow-primary/5">
@@ -278,7 +297,39 @@ export function LoginButtons({
           </p>
         </div>
 
-        <form onSubmit={handleEmailSubmit} className="relative z-10 mt-8 space-y-5" noValidate>
+        {mode === "login" && (
+          <div className="relative z-10 mt-8 space-y-4">
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={!!loading}
+              className="flex w-full items-center justify-center gap-3 rounded-full border border-outline-variant/20 bg-white px-6 py-4 text-sm font-extrabold text-on-surface shadow-sm transition hover:-translate-y-0.5 hover:bg-white/90 active:scale-[0.98] disabled:opacity-60"
+            >
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-base font-black text-[#4285F4] shadow-sm" aria-hidden>
+                G
+              </span>
+              {loading === "google" ? t("googleLoginProcessing") : t("googleLogin")}
+            </button>
+            <button
+              type="button"
+              onClick={handleKakaoLogin}
+              disabled={!!loading}
+              className="flex w-full items-center justify-center gap-3 rounded-full bg-[#FEE500] px-6 py-4 text-sm font-extrabold text-[#191919] shadow-sm transition hover:-translate-y-0.5 hover:brightness-105 active:scale-[0.98] disabled:opacity-60"
+            >
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191919] text-xs font-black text-[#FEE500]" aria-hidden>
+                K
+              </span>
+              {t("kakaoLogin")}
+            </button>
+            <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.16em] text-plum/35">
+              <span className="h-px flex-1 bg-outline-variant/15" />
+              <span>{t("or")}</span>
+              <span className="h-px flex-1 bg-outline-variant/15" />
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={handleEmailSubmit} className={`relative z-10 space-y-5 ${mode === "login" ? "mt-5" : "mt-8"}`} noValidate>
           {isSignup && (
             <AuthInput
               label={t("displayName")}

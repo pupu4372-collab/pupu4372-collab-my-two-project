@@ -6,7 +6,7 @@ The Android and iOS apps wrap the deployed web app in a WebView. Most feature wo
 
 - Node.js 20.x
 - Android Studio (SDK + emulator or USB device)
-- Java 17+
+- Java 21+ (Capacitor Android 7 build uses Java 21 source level)
 - macOS + Xcode + CocoaPods for iOS builds
 
 ## Local commands
@@ -19,6 +19,15 @@ npm run cap:open:android
 ```
 
 In Android Studio, run the `app` configuration on an emulator or device.
+For CLI builds on Windows, make sure `JAVA_HOME` points to a JDK 21 installation:
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-21.0.11.10-hotspot"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+cd android
+.\gradlew.bat assembleDebug
+.\gradlew.bat bundleRelease
+```
 
 For iOS on a Mac:
 
@@ -53,9 +62,15 @@ Add every URL users can open in the app:
 
 Also set **Site URL** to your production domain.
 
+For Google/Kakao setup details, see [SOCIAL_LOGIN.md](./SOCIAL_LOGIN.md).
+
 ## PayPal / app URL
 
 Set `NEXT_PUBLIC_APP_URL` in Vercel to the same domain users open in the app.
+
+## Play internal testing
+
+See [PLAY_INTERNAL_TEST.md](./PLAY_INTERNAL_TEST.md) for upload keystore, release AAB build, and Play Console internal test track steps.
 
 ## Android smoke test checklist
 

@@ -66,10 +66,18 @@ const SEED: Array<{
   { n: 50, title: "우리 아이 성향 태그는 어떻게 고르면 좋을까요?", content: "겁쟁이, 에너자이저, 애교쟁이처럼 여러 태그가 맞는 것 같습니다. 프로필에는 몇 개가 적당할까요?", tags: ["profile", "saju", "community"], likes: 12, views: 184 },
 ];
 
+export const PET_CATEGORY_FILTER_TAGS = [
+  { id: "all", ko: "전체", en: "All" },
+  { id: "dog", ko: "강아지", en: "Dog" },
+  { id: "cat", ko: "고양이", en: "Cat" },
+  { id: "other", ko: "렙타일(다른동물)", en: "Reptile & other pets" },
+] as const;
+
 export const QA_FILTER_TAGS = [
   { id: "all", label: "전체" },
   { id: "dog", label: "강아지" },
   { id: "cat", label: "고양이" },
+  { id: "other", label: "렙타일(다른동물)" },
   { id: "training", label: "훈련" },
   { id: "health", label: "건강" },
   { id: "food", label: "식단" },
@@ -89,6 +97,7 @@ export function buildMockQaPosts(): CommunityPost[] {
     image_urls: [],
     tags: row.tags,
     language: "ko",
+    country_code: row.n % 3 === 0 ? "US" : "KR",
     like_count: row.likes,
     comment_count: 1,
     view_count: row.views,

@@ -4,6 +4,7 @@ import type { ElementKey, Species } from "../types";
 const SPECIES_LABEL: Record<Species, string> = {
   dog: "강아지",
   cat: "고양이",
+  other: "반려동물",
 };
 
 const TEMPLATES: Record<

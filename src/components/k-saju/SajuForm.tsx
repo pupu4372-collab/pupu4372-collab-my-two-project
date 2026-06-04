@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { SajuResult } from "@/components/k-saju/SajuResult";
@@ -25,11 +25,12 @@ const UI = {
     petMale: "Male",
     dog: "Dog",
     cat: "Cat",
+    other: "Other pet",
     birthDate: "Birth date",
     birthTime: "Birth time",
     timezone: "Birth timezone",
-    submit: "Reveal their vibe",
-    loading: "Reading the stars...",
+    submit: "Read my pet's K-Saju",
+    loading: "Reading your pet's energy...",
     errorConsent: "Please agree to the privacy notice.",
     localeLabel: "Language",
     sessionPreparing: "Preparing session. Please try again soon.",
@@ -49,11 +50,12 @@ const UI = {
     petMale: "수",
     dog: "강아지",
     cat: "고양이",
+    other: "다른 동물",
     birthDate: "생년월일",
     birthTime: "출생 시간",
     timezone: "출생 지역 시간대",
-    submit: "사주 보기",
-    loading: "만세력 계산 중...",
+    submit: "우리 아이 사주 보기",
+    loading: "우리 아이 기운을 읽고 있어요...",
     errorConsent: "개인정보 동의가 필요합니다.",
     localeLabel: "언어",
     sessionPreparing: "세션 준비 중이에요. 잠시 후 다시 시도해 주세요.",
@@ -68,6 +70,20 @@ const UI = {
 const FIELD_LABEL_CLASS = "block text-sm font-bold text-primary";
 const STITCH_INPUT_CLASS =
   "pastel-input mt-2 w-full rounded-[2rem] border-transparent bg-sand/50 px-4 py-3.5 text-sm text-on-surface focus:ring-primary/20";
+
+const SPECIES_OPTIONS = [
+  { value: "dog", emoji: "🐶", icon: "🐾" },
+  { value: "cat", emoji: "🐱", icon: "🐾" },
+  { value: "other", emoji: "🐰", icon: "🦎" },
+] as const;
+
+const ELEMENT_DOTS = [
+  "bg-[#7FB8B0]",
+  "bg-[#F28C82]",
+  "bg-[#D9C5B2]",
+  "bg-[#E6C994]",
+  "bg-[#343A40]",
+] as const;
 
 function detectTimezone(): string {
   try {
@@ -170,212 +186,224 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   }
 
   return (
-    <div className={embedded ? "space-y-4" : "space-y-6"}>
+    <div className={embedded ? "space-y-4" : "space-y-8"}>
       {!embedded && (
-        <div className="space-y-1">
-          <h2 className="text-2xl font-semibold tracking-tight">{t.title}</h2>
-          <p className="text-sm text-ink/60">{t.subtitle}</p>
-        </div>
+        <section className="relative overflow-hidden rounded-[2rem] bg-surface px-6 py-8 shadow-sm md:px-8">
+          <span className="absolute right-6 top-6 text-4xl text-gold/60" aria-hidden>
+            ✨
+          </span>
+          <span className="absolute -left-2 bottom-8 text-3xl text-petal/80" aria-hidden>
+            🐾
+          </span>
+          <h2 className="max-w-xl text-3xl font-extrabold tracking-tight text-primary md:text-4xl">
+            {locale === "ko" ? "우리 아이 K-사주 보기" : "Read your pet's K-Saju"}
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-on-surface-variant md:text-base">
+            {locale === "ko"
+              ? "이름과 생일 정보를 입력하면 성향, 오행 밸런스, 케어 포인트를 알려드려요. 출생 시간을 몰라도 결과를 볼 수 있어요."
+              : "Enter your pet's name and birth data to reveal personality, elemental balance, and care cues. Unknown birth time is okay."}
+          </p>
+          <div className="mt-6 flex gap-2">
+            {ELEMENT_DOTS.map((dot) => (
+              <span key={dot} className={`h-3 w-3 rounded-full ${dot}`} />
+            ))}
+          </div>
+        </section>
       )}
 
-      <form
-        onSubmit={handleSubmit}
-        className={embedded ? "space-y-3" : "pastel-card space-y-7 p-6 md:p-8"}
-      >
-        <div className={embedded ? "flex gap-2.5" : "grid gap-4 sm:grid-cols-2"}>
-          {!embedded && (
-            <label className={labelClass}>
-              {t.localeLabel}
-              <select
-                value={locale}
-                onChange={(e) => setLocale(e.target.value as Locale)}
-                className={inputClass}
-              >
-                <option value="ko">한국어</option>
-                <option value="en">English</option>
-              </select>
-            </label>
-          )}
-          {embedded ? (
-            <label className={`${labelClass} flex-1`}>
-              {t.species}
-              <select
-                value={species}
-                onChange={(e) => setSpecies(e.target.value as Species)}
-                className={inputClass}
-              >
-                <option value="dog">{t.dog}</option>
-                <option value="cat">{t.cat}</option>
-              </select>
-            </label>
-          ) : (
-            <fieldset className="space-y-3 sm:col-span-2">
-              <legend className="flex items-center gap-2 text-sm font-bold text-primary">
-                <span aria-hidden>🐾</span>
+      <form onSubmit={handleSubmit} className={embedded ? "space-y-3" : "space-y-6"}>
+        {embedded ? (
+          <>
+            <div className="flex gap-2.5">
+              <label className={`${labelClass} flex-1`}>
                 {t.species}
-              </legend>
-              <div className="grid grid-cols-2 gap-3">
-                {(["dog", "cat"] as const).map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setSpecies(item)}
-                    className={
-                      species === item
-                        ? "rounded-[2rem] border border-primary bg-primary px-4 py-4 text-center text-white shadow-lg shadow-primary/15"
-                        : "rounded-[2rem] border border-outline/20 bg-white/45 px-4 py-4 text-center text-primary transition hover:bg-lavender/50"
-                    }
-                    aria-pressed={species === item}
-                  >
-                    <span className="block text-3xl" aria-hidden>
-                      {item === "dog" ? "🐶" : "🐱"}
-                    </span>
-                    <span className="mt-2 block text-xs font-extrabold uppercase tracking-wide">
-                      {item === "dog" ? t.dog : t.cat}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-          )}
-          {embedded && (
-            <label className={`${labelClass} flex-1`}>
-              {t.petGender}
-              <select
-                value={petGender}
-                onChange={(e) => setPetGender(e.target.value as Gender)}
-                className={inputClass}
-              >
-                <option value="female">{t.petFemale}</option>
-                <option value="male">{t.petMale}</option>
-              </select>
-            </label>
-          )}
-        </div>
-
-        <label className={labelClass}>
-          {t.petName}
-          <input
-            value={petName}
-            onChange={(e) => setPetName(e.target.value)}
-            placeholder="모찌"
-            className={inputClass}
-            required
-            maxLength={32}
-          />
-        </label>
-
-        {!embedded && (
-          <fieldset className="space-y-3">
-            <legend className="flex items-center gap-2 text-sm font-bold text-primary">
-              <span aria-hidden>⚥</span>
-              {t.petGender}
-            </legend>
-            <div className="grid grid-cols-2 gap-3">
-              {(["male", "female"] as const).map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setPetGender(item)}
-                  className={
-                    petGender === item
-                      ? "rounded-[2rem] border border-primary bg-primary px-4 py-4 text-center text-white shadow-lg shadow-primary/15"
-                      : "rounded-[2rem] border border-outline/20 bg-white/45 px-4 py-4 text-center text-primary transition hover:bg-lavender/50"
-                  }
-                  aria-pressed={petGender === item}
-                >
-                  <span className="block text-3xl" aria-hidden>
-                    {item === "male" ? "♂" : "♀"}
-                  </span>
-                  <span className="mt-2 block text-xs font-extrabold uppercase tracking-wide">
-                    {item === "male" ? t.petMale : t.petFemale}
-                  </span>
-                </button>
-              ))}
+                <select value={species} onChange={(e) => setSpecies(e.target.value as Species)} className={inputClass}>
+                  <option value="dog">{t.dog}</option>
+                  <option value="cat">{t.cat}</option>
+                  <option value="other">{t.other}</option>
+                </select>
+              </label>
+              <label className={`${labelClass} flex-1`}>
+                {t.petGender}
+                <select value={petGender} onChange={(e) => setPetGender(e.target.value as Gender)} className={inputClass}>
+                  <option value="female">{t.petFemale}</option>
+                  <option value="male">{t.petMale}</option>
+                </select>
+              </label>
             </div>
-          </fieldset>
+            <label className={labelClass}>
+              {t.petName}
+              <input value={petName} onChange={(e) => setPetName(e.target.value)} placeholder="모찌" className={inputClass} required maxLength={32} />
+            </label>
+          </>
+        ) : (
+          <section className="rounded-[2rem] bg-white p-6 shadow-sm">
+            <h3 className="text-2xl font-extrabold text-primary">
+              {locale === "ko" ? "우리 아이는 누구인가요?" : "Who is your pet?"}
+            </h3>
+            <div className="mt-6 space-y-6">
+              <label className="block text-sm font-bold uppercase tracking-[0.08em] text-outline">
+                {t.petName}
+                <input
+                  value={petName}
+                  onChange={(e) => setPetName(e.target.value)}
+                  placeholder={locale === "ko" ? "아이의 이름을 입력해주세요" : "Enter your pet's name"}
+                  className="mt-2 h-14 w-full rounded-2xl border-0 bg-surface-container-low px-4 text-lg font-bold text-primary placeholder:text-outline/60 focus:ring-4 focus:ring-primary/10"
+                  required
+                  maxLength={32}
+                />
+              </label>
+
+              <fieldset>
+                <legend className="sr-only">{t.species}</legend>
+                <div className="grid grid-cols-3 gap-2">
+                  {SPECIES_OPTIONS.map((item) => (
+                    <button
+                      key={item.value}
+                      type="button"
+                      onClick={() => setSpecies(item.value)}
+                      className={
+                        species === item.value
+                          ? "flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-primary bg-primary/10 text-primary shadow-sm"
+                          : "flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-surface-container bg-white text-on-surface-variant transition hover:border-primary/30"
+                      }
+                      aria-pressed={species === item.value}
+                    >
+                      <span className="text-2xl" aria-hidden>{item.emoji}</span>
+                      <span className="text-xs font-extrabold">{t[item.value]}</span>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend className="sr-only">{t.petGender}</legend>
+                <div className="flex gap-3">
+                  {(["male", "female"] as const).map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setPetGender(item)}
+                      className={
+                        petGender === item
+                          ? "h-12 flex-1 rounded-full bg-primary text-sm font-extrabold text-white shadow-sm"
+                          : "h-12 flex-1 rounded-full bg-surface-container-low text-sm font-extrabold text-on-surface-variant transition hover:bg-lavender/50"
+                      }
+                      aria-pressed={petGender === item}
+                    >
+                      {item === "male" ? "♂ " : "♀ "}
+                      {item === "male" ? t.petMale : t.petFemale}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+          </section>
         )}
 
-        <BirthDateSelect
-          value={birthDate}
-          onChange={setBirthDate}
-          label={t.birthDate}
-          locale={locale}
-          className={labelClass}
-          selectClassName={inputClass}
-        />
+        <section className={embedded ? "space-y-3" : "rounded-[2rem] bg-white p-6 shadow-sm"}>
+          {!embedded && (
+            <h3 className="mb-6 text-2xl font-extrabold text-primary">
+              {locale === "ko" ? "언제 태어났나요?" : "When were they born?"}
+            </h3>
+          )}
+          <BirthDateSelect
+            value={birthDate}
+            onChange={setBirthDate}
+            label={t.birthDate}
+            locale={locale}
+            className={labelClass}
+            selectClassName={
+              embedded
+                ? inputClass
+                : "w-full rounded-2xl border-0 bg-surface-container-low px-3 py-3 text-center text-sm font-bold text-primary focus:ring-4 focus:ring-primary/10"
+            }
+          />
 
-        <label className={labelClass}>
-          {t.birthTime}
-          <select
-            value={birthTime}
-            onChange={(e) => setBirthTime(e.target.value)}
-            className={inputClass}
-          >
-            {BIRTH_TIME_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {getBirthTimeOptionLabel(option, locale)}
-              </option>
-            ))}
-          </select>
-        </label>
+          <div className={embedded ? "space-y-3" : "mt-6 space-y-4"}>
+            <div className="grid grid-cols-2 rounded-full bg-surface-container-low p-1">
+              <button
+                type="button"
+                onClick={() => setBirthTime(birthTime === "unknown" ? "11:30" : birthTime)}
+                className={
+                  !birthTimeUnknown
+                    ? "rounded-full bg-white py-3 text-xs font-extrabold text-primary shadow-sm"
+                    : "rounded-full py-3 text-xs font-extrabold text-on-surface-variant"
+                }
+              >
+                {locale === "ko" ? "출생 시간을 알아요" : "I know the time"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setBirthTime("unknown")}
+                className={
+                  birthTimeUnknown
+                    ? "rounded-full bg-white py-3 text-xs font-extrabold text-primary shadow-sm"
+                    : "rounded-full py-3 text-xs font-extrabold text-on-surface-variant"
+                }
+              >
+                {locale === "ko" ? "몰라요" : "Unknown"}
+              </button>
+            </div>
 
-        <label className={labelClass}>
-          {t.timezone}
-          <select
-            value={timezone}
-            onChange={(e) => setTimezone(e.target.value)}
-            className={inputClass}
-          >
-            {timezoneOptions.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
-        </label>
+            {birthTimeUnknown ? (
+              <p className="rounded-2xl bg-surface-container-low px-4 py-3 text-sm leading-6 text-on-surface-variant">
+                {locale === "ko"
+                  ? "시간을 몰라도 연·월·일 기준으로 기본 사주를 볼 수 있어요."
+                  : "You can still read the basic K-Saju from the date alone."}
+              </p>
+            ) : (
+              <label className={labelClass}>
+                {t.birthTime}
+                <select value={birthTime} onChange={(e) => setBirthTime(e.target.value)} className={inputClass}>
+                  {BIRTH_TIME_OPTIONS.filter((option) => option.value !== "unknown").map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {getBirthTimeOptionLabel(option, locale)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
+        </section>
 
-        <PrivacyConsent
-          checked={consent}
-          onChange={setConsent}
-          locale={locale}
-          variant={embedded ? "pastelCompact" : "default"}
-        />
+        <section className={embedded ? "space-y-3" : "rounded-[2rem] bg-white p-6 shadow-sm"}>
+          <label className={labelClass}>
+            {t.timezone}
+            <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className={inputClass}>
+              {timezoneOptions.map((tz) => (
+                <option key={tz} value={tz}>{tz}</option>
+              ))}
+            </select>
+          </label>
+          {!embedded && (
+            <p className="mt-2 text-xs leading-5 text-outline">
+              {locale === "ko" ? "태어난 지역 기준 시간으로 계산해요." : "Calculated with the timezone of the birth region."}
+            </p>
+          )}
+        </section>
+
+        <div className={embedded ? "" : "px-1"}>
+          <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant={embedded ? "pastelCompact" : "default"} />
+        </div>
 
         {error && (
-          <p
-            className={
-              embedded
-                ? "rounded-2xl bg-petal/40 px-3 py-2 text-xs text-plum"
-                : "rounded-2xl bg-petal/40 px-4 py-2.5 text-sm text-plum"
-            }
-            role="alert"
-          >
+          <p className="rounded-2xl bg-petal/40 px-4 py-2.5 text-sm text-plum" role="alert">
             {error}
           </p>
         )}
 
-        {embedded ? (
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-full bg-mint px-4 py-2.5 text-center text-ink transition hover:brightness-105 disabled:opacity-60"
-          >
-            <span className="block text-xs font-bold">{loading ? t.loading : t.submit}</span>
-            <span className="mt-0.5 block text-[11px] font-semibold text-ink/65">
-              ⭐ {t.zodiacCta} · 💞 {t.compatibilityCta}
-            </span>
-          </button>
-        ) : (
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-sm font-bold text-white shadow-lg shadow-primary/15 transition hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60"
-          >
-            <span aria-hidden>🐾</span>
-            {loading ? t.loading : t.submit}
-          </button>
-        )}
+        <button
+          type="submit"
+          disabled={loading}
+          className={
+            embedded
+              ? "w-full rounded-full bg-mint px-4 py-2.5 text-center text-ink transition hover:brightness-105 disabled:opacity-60"
+              : "sticky bottom-24 z-10 flex w-full items-center justify-center rounded-full bg-primary px-8 py-4 text-base font-extrabold text-white shadow-xl shadow-primary/20 transition hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60"
+          }
+        >
+          {loading ? t.loading : t.submit}
+        </button>
       </form>
 
       {result && (

@@ -31,6 +31,7 @@ const UI = {
     selectGender: "성별 선택",
     dog: "강아지",
     cat: "고양이",
+    other: "다른 동물",
     birthDate: "생년월일",
     birthTime: "출생 시간",
     timezone: "출생 지역 시간대",
@@ -55,6 +56,7 @@ const UI = {
     selectGender: "Select gender",
     dog: "Dog",
     cat: "Cat",
+    other: "Other pet",
     birthDate: "Birth date",
     birthTime: "Birth time",
     timezone: "Birth timezone",
@@ -84,7 +86,7 @@ function isLocale(value: string | null): value is Locale {
 }
 
 function isSpecies(value: string | null): value is Species {
-  return value === "dog" || value === "cat";
+  return value === "dog" || value === "cat" || value === "other";
 }
 
 function isGender(value: string | null): value is Gender {
@@ -227,7 +229,7 @@ export function CompatibilityForm() {
               {t.species}
             </legend>
             <div className="grid grid-cols-2 gap-3">
-              {(["dog", "cat"] as const).map((item) => (
+              {(["dog", "cat", "other"] as const).map((item) => (
                 <button
                   key={item}
                   type="button"
@@ -240,10 +242,10 @@ export function CompatibilityForm() {
                   aria-pressed={species === item}
                 >
                   <span className="block text-3xl" aria-hidden>
-                    {item === "dog" ? "🐶" : "🐱"}
+                    {item === "dog" ? "🐶" : item === "cat" ? "🐱" : "🐾"}
                   </span>
                   <span className="mt-2 block text-xs font-extrabold uppercase tracking-wide">
-                    {item === "dog" ? t.dog : t.cat}
+                    {t[item]}
                   </span>
                 </button>
               ))}

@@ -78,6 +78,18 @@ function petQuery(pet: PetRow, locale: string) {
   }).toString();
 }
 
+function speciesLabel(species: string, isKo: boolean) {
+  if (species === "dog") return isKo ? "강아지" : "Dog";
+  if (species === "cat") return isKo ? "고양이" : "Cat";
+  return isKo ? "다른 동물" : "Other pet";
+}
+
+function speciesEmoji(species: string) {
+  if (species === "dog") return "🐶";
+  if (species === "cat") return "🐱";
+  return "🐾";
+}
+
 export function PetDetailPage({ petId }: PetDetailPageProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -151,7 +163,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
 
   const q = petQuery(pet, locale);
   const typeLabels = TYPE_LABELS[isKo ? "ko" : "en"];
-  const speciesLabel = pet.species === "dog" ? (isKo ? "강아지" : "Dog") : isKo ? "고양이" : "Cat";
+  const petSpeciesLabel = speciesLabel(pet.species, isKo);
   const genderLabel =
     pet.gender === "male" ? (isKo ? "수" : "Male") : pet.gender === "female" ? (isKo ? "암" : "Female") : isKo ? "미상" : "Unknown";
   const totalLikes = petPosts.reduce((sum, post) => sum + post.like_count, 0);
@@ -167,7 +179,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={supabaseImageTransformUrl(pet.profile_image_url, { width: 448, height: 448 })} alt="" className="h-full w-full object-cover" />
             ) : (
-              <span aria-hidden>{pet.species === "dog" ? "🐶" : "🐱"}</span>
+              <span aria-hidden>{speciesEmoji(pet.species)}</span>
             )}
           </div>
           <span className="absolute bottom-2 right-2 rounded-full bg-secondary-container px-3 py-1 text-xs font-bold text-secondary shadow-sm">
@@ -176,7 +188,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight text-primary md:text-4xl">{pet.name}</h1>
         <p className="mt-2 text-sm text-on-surface-variant">
-          {speciesLabel}
+          {petSpeciesLabel}
           {pet.breed ? ` · ${pet.breed}` : ""} · {pet.birth_date} ({ageLabel(pet.birth_date, isKo)}) · {genderLabel}
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">

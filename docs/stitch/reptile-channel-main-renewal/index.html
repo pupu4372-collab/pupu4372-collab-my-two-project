@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&amp;family=Work+Sans:wght@400;500&amp;family=JetBrains+Mono:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#fbfaee",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#364e03",
+                      "warm-light": "#fef9c3",
+                      "error": "#ba1a1a",
+                      "outline-variant": "#bbcabf",
+                      "on-primary-fixed-variant": "#005236",
+                      "on-secondary-container": "#00714e",
+                      "surface-bright": "#fbfaee",
+                      "secondary-fixed-dim": "#68dba9",
+                      "primary": "#006c49",
+                      "on-primary-container": "#00422b",
+                      "on-surface-variant": "#3c4a42",
+                      "surface-dim": "#dbdbcf",
+                      "on-secondary-fixed-variant": "#005137",
+                      "inverse-surface": "#303129",
+                      "primary-fixed": "#6ffbbe",
+                      "tertiary-container": "#90ad5a",
+                      "secondary": "#006c4a",
+                      "surface-container": "#efeee3",
+                      "surface-tint": "#006c49",
+                      "inverse-primary": "#4edea3",
+                      "secondary-container": "#82f5c1",
+                      "humidity-blue": "#0ea5e9",
+                      "tertiary-fixed": "#ceee93",
+                      "tertiary": "#4d661c",
+                      "on-secondary": "#ffffff",
+                      "background": "#fbfaee",
+                      "on-background": "#1b1c15",
+                      "surface-container-high": "#e9e9dd",
+                      "on-secondary-fixed": "#002114",
+                      "inverse-on-surface": "#f2f1e5",
+                      "error-container": "#ffdad6",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#85f8c4",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed": "#002113",
+                      "diet-orange": "#f97316",
+                      "on-tertiary-container": "#2b3f00",
+                      "on-tertiary-fixed": "#131f00",
+                      "on-surface": "#1b1c15",
+                      "on-primary": "#ffffff",
+                      "surface-container-highest": "#e4e3d7",
+                      "surface-container-low": "#f5f4e8",
+                      "on-tertiary": "#ffffff",
+                      "primary-fixed-dim": "#4edea3",
+                      "outline": "#6c7a71",
+                      "tertiary-fixed-dim": "#b3d17a",
+                      "primary-container": "#10b981",
+                      "sand-accent": "#f5f5dc",
+                      "surface-variant": "#e4e3d7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "gutter": "24px",
+                      "section-gap": "80px",
+                      "container-max": "1280px",
+                      "component-gap": "16px"
+              },
+              "fontFamily": {
+                      "body-md": ["Work Sans"],
+                      "label-caps": ["JetBrains Mono"],
+                      "display-lg": ["Hanken Grotesk"],
+                      "headline-md": ["Hanken Grotesk"],
+                      "body-lg": ["Work Sans"],
+                      "headline-lg": ["Hanken Grotesk"],
+                      "care-stat": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                      "care-stat": ["20px", {"lineHeight": "24px", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .bg-mesh {
+            background-color: #fbfaee;
+            background-image: radial-gradient(at 0% 0%, rgba(0, 108, 73, 0.05) 0px, transparent 50%),
+                              radial-gradient(at 100% 100%, rgba(144, 173, 90, 0.08) 0px, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased bg-mesh min-h-screen">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-gutter max-w-container-max mx-auto h-16 bg-surface dark:bg-background">
+<div class="flex items-center gap-4">
+<button class="text-primary"><span class="material-symbols-outlined">arrow_back</span></button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Reptile &amp; Other Pets</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-primary"><span class="material-symbols-outlined">search</span></button>
+</div>
+</nav>
+<main class="pt-16 pb-24">
+<!-- Hero Section -->
+<section class="relative px-margin-mobile pt-4 overflow-hidden">
+<div class="relative w-full aspect-[1.79] rounded-xl overflow-hidden shadow-lg group">
+<img alt="Crested Gecko" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCW7RXe2dgtv8ZnVQvV0dYzfViIg0p0KCfcrhMqJZWCPl7xBiV8rsleWaFR_iM8bxZ42oNa6pEYV6fegwsWk2KoMrTM4Y0L9hlqkuh8sK6CfJ_Ytv5nj3uWDtvTY53gpUK18pnK2QY7wjs1ySZvMR6Zqjy76MLd9dTGPXN7QxRMpjNrVfmOuphomPBTIobV2wxvwOttKlH31oCJy9bTr_OHqHxnlPV0Gxa9iJ0Xe_CPpph4aAsPNM1eWSkK6TkOEToJ-af2XEb_z2TV"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 text-white">
+<h2 class="font-headline-lg text-headline-lg leading-tight mb-1">렙타일(다른동물) 케어 허브</h2>
+<p class="font-body-md text-white/90">파충류, 앵무새, 토끼·햄스터까지. 온도·습도·식단 정보를 한 곳에서.</p>
+</div>
+</div>
+<!-- Quick Status Cards -->
+<div class="flex gap-3 overflow-x-auto hide-scrollbar mt-4 -mx-1 px-1">
+<div class="flex-shrink-0 bg-white shadow-sm border border-sand-accent p-3 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-diet-orange">thermostat</span>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">온도</p>
+<p class="font-care-stat text-care-stat text-primary">26~28°C</p>
+</div>
+</div>
+<div class="flex-shrink-0 bg-white shadow-sm border border-sand-accent p-3 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-humidity-blue">water_drop</span>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">습도</p>
+<p class="font-care-stat text-care-stat text-primary">60%</p>
+</div>
+</div>
+<div class="flex-shrink-0 bg-white shadow-sm border border-sand-accent p-3 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary">restaurant</span>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">식단</p>
+<p class="font-care-stat text-care-stat text-primary">급여 루틴</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Species Gateway -->
+<section class="mt-8 px-margin-mobile">
+<h3 class="font-headline-md text-headline-md mb-4 text-on-surface">우리 아이 종별 가이드</h3>
+<div class="space-y-3">
+<!-- Reptiles -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-transparent hover:border-primary/20 hover:bg-emerald-50/30 transition-all flex justify-between items-center group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined">pest_control_rodent</span>
+</div>
+<div>
+<p class="font-headline-md text-body-lg font-bold">파충류 (Lizards, Turtles)</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Focus on UVB, Temp</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<!-- Birds -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-transparent hover:border-primary/20 hover:bg-emerald-50/30 transition-all flex justify-between items-center group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined">flutter_dash</span>
+</div>
+<div>
+<p class="font-headline-md text-body-lg font-bold">앵무새 (Birds)</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Focus on Stress, Play</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<!-- Small Animals -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-transparent hover:border-primary/20 hover:bg-emerald-50/30 transition-all flex justify-between items-center group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-warm-light flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">cruelty_free</span>
+</div>
+<div>
+<p class="font-headline-md text-body-lg font-bold">소동물 (Rabbits, Hamsters)</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Focus on Space, Diet</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Habitat Checklist -->
+<section class="mt-10 px-margin-mobile">
+<div class="bg-sand-accent/30 rounded-2xl p-6 border border-sand-accent">
+<h3 class="font-headline-md text-headline-md mb-4 text-on-surface">건강한 생활 환경 체크</h3>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<div class="mt-1 w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-primary font-bold">done</span>
+</div>
+<div>
+<p class="font-body-md text-on-surface">온도 구배 확인</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">HOT &amp; COAL ZONE BALANCE</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<div class="mt-1 w-5 h-5 rounded-full border-2 border-primary/30 flex items-center justify-center"></div>
+<div>
+<p class="font-body-md text-on-surface">습도 유지</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">HYDROMETER MONITORING</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<div class="mt-1 w-5 h-5 rounded-full border-2 border-primary/30 flex items-center justify-center"></div>
+<div>
+<p class="font-body-md text-on-surface">은신처 충분 여부</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">STRESS REDUCTION</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<div class="mt-1 w-5 h-5 rounded-full border-2 border-primary/30 flex items-center justify-center"></div>
+<div>
+<p class="font-body-md text-on-surface">UVB 램프 교체 주기</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">6-12 MONTHS CYCLE</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+<!-- Featured Guides -->
+<section class="mt-10 px-margin-mobile">
+<h3 class="font-headline-md text-headline-md mb-4 text-on-surface">추천 가이드</h3>
+<div class="grid gap-4 grid-cols-2">
+<div class="relative rounded-xl overflow-hidden shadow-sm aspect-square">
+<img class="w-full h-full object-cover" data-alt="A macro shot of a terrarium interior featuring a digital hydrometer and thermometer displaying precise numbers. The foreground is blurred with lush tropical leaves in shades of emerald, creating a serene and professional ecological care guide aesthetic. Soft golden sunlight filters through the glass." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0VlX9MFkutPXST-sz9UkC7Vd2U-20k1SzfQt-VM51mDLUxuqRakyJYnJxWMSJsYL0_5EZfsp7pDmMDzGtpypyOQC_9GDa8yc-oj1ieu6YahrzuM3Vm8niUDeK65Z_IcsVxJWAXoyzkxqGIpojNGg01HESJM_vWWYCBmgBh1HMDQ0P8exHhIqG2I2OoaY-jdIMRSf2wqkyJjSFNUAQWiWiD3BejyiT0_kAQaNFjjjESZlOTZktHLV1jxOQ41BqkkIOcIs6Q-BnzV7x"/>
+<div class="absolute inset-0 bg-black/40 p-4 flex flex-col justify-end">
+<p class="font-body-lg font-bold text-white">사육장 온도·습도, 이렇게 잡으면 안정적이에요</p>
+<button class="mt-2 text-white/80 font-label-caps text-label-caps flex items-center">READ GUIDE <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span></button>
+</div>
+</div>
+<div class="relative rounded-xl overflow-hidden shadow-sm aspect-square">
+<img class="w-full h-full object-cover" data-alt="A professional top-down workspace view of a reptile care checklist on a clean white desk next to a modern smartphone. Decorative elements include a small succulent and a stylish wooden pen. The lighting is bright and airy with high-key whites and soft primary-tinted shadows, emphasizing a clean minimal design style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmMOGBzjSrb_AWlJk7GeDPA4Sm_li8ssiH-Fy5kEZgetX7l-GjUL18JABLIdZt_A57xUCfpPaZpgjRk7qCropbgX35lNFhseZR9Yflc0CUIuoqrno8BWW5vHROe1sifuhC5haFhuLwtnsXgjrshxsrKQJ3DdaYQPk5nt-AAjYwueGn5V7Ga7UwcuIsx4GbfZgZsAcnl8xtlk5BhvcuhcZ2fllI2fUHJc7eJyqfua2aZGvdxVJ_y3JMpfpA2tQEsC-W2uuWdtGzVBwt"/>
+<div class="absolute inset-0 bg-black/40 p-4 flex flex-col justify-end">
+<p class="font-body-lg font-bold text-white">초보자를 위한 도마뱀·거북이 체크리스트</p>
+<button class="mt-2 text-white/80 font-label-caps text-label-caps flex items-center">VIEW LIST <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span></button>
+</div>
+</div>
+</div>
+</section>
+<!-- Community & Pet Show -->
+<section class="mt-10 px-margin-mobile">
+<div class="flex justify-between items-end mb-4">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">커뮤니티</h3>
+<p class="font-body-md text-on-surface-variant">비슷한 보호자들과 경험을 나눠보세요</p>
+</div>
+<button class="text-primary font-label-caps">전체보기</button>
+</div>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+<div class="flex-shrink-0 w-44">
+<div class="relative rounded-xl overflow-hidden shadow-sm w-44 h-56">
+<img class="w-full h-full object-cover" data-alt="A portrait of a brightly colored chameleon against a clean white background. The lighting is crisp and detailed, highlighting every scale and texture. The overall aesthetic is professional and museum-like, with a focus on natural beauty and vibrant colors like green, yellow, and blue." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCc9kUM6A4Ajci4jiLCtim54rOuVdhs9cGj402el23am1hxFivrBL12DF7dtUyrC1KUMH5trmHw8uuTXd8OHdOUdFUiKp3g7h3VYTJFbNxu6X8dy-uQIWfD4zLs3GQUlKHN6NvLEUlGyBlu-Owwb-vn0T5Wq8lC7XXmT_V2bJg3QJwfSS4XXxHyO5e1K8ROJfg_xNuB7RiSZ_tGBszmC6jpbMMIVfeAyn2o4uFSGICGWxEsXLu_WIBUTAVYQWk3fORgYiAxwNkbHjI8"/>
+<button class="absolute top-2 right-2 bg-white/20 backdrop-blur-md rounded-full p-1 text-white">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<p class="mt-2 font-label-caps text-center">@LizardLover</p>
+</div>
+<div class="flex-shrink-0 w-44">
+<div class="relative rounded-xl overflow-hidden shadow-sm w-44 h-56">
+<img class="w-full h-full object-cover" data-alt="A charming shot of a colorful parrot perched on a natural branch inside a sunlit room. The background is softly out of focus, showing a modern interior with clean lines and plant life. The lighting is warm and inviting, capturing the bird's personality and the vibrant feathers." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHs_c_uBAp4JsZA06weSdZHQm1yWRbFZeQERNhHLYUTMQ3HkQ9sDsY2TKWFHgieQc0kCBxjfUUKvzVUBf5EJFS7FtdTeD2l465eZKml0mtqaBqHEL6uve8glf-5eFez7g9fQqEtjCEZYlqYD_UWoY4xWLs52og6QvaQNBDNbyWk-zmgNiWdntrMUwuumhUI7xvYlD1mods-p0qZRdyGyCvmOlxJYdOEpUK1_imk7X6tjQjRZp9Jhanz-3Xw99TuPYrca5syTJWoc3D"/>
+<button class="absolute top-2 right-2 bg-white/20 backdrop-blur-md rounded-full p-1 text-white">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</button>
+</div>
+<p class="mt-2 font-label-caps text-center">@BirdieLife</p>
+</div>
+<div class="flex-shrink-0 w-44">
+<div class="relative rounded-xl overflow-hidden shadow-sm w-44 h-56">
+<img class="w-full h-full object-cover" data-alt="A close-up photograph of a fluffy white rabbit in a clean, minimalist habitat with light wood shavings. The lighting is high-key and soft, creating a gentle and cozy atmosphere. The composition is simple and emphasizes the tactile quality of the rabbit's fur and the natural environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw1TQD26EABxP1DjmtbjFRpV7dX_lRpN3h5244pg6pjHFMNsDDspzfmt5DfvusHB-_xfIwHwBLEtj7qK-G8-1y3yxUAGAPfyjrk32vxRflNIKgEGXRkyfofm0D2rpVFqSJipM-jrypfqGh6assFkvmMptQC-8LDUvJV4-cRgiL0fXAOiEx77-7dToGGo8otPqdEdt9_3Ebr-bKwkzWzlI3GxtkOgEOuhdo0VcvjJjJXKLY4Qi6Fevf5JP-0X3shlCVNhViY0QkO8vI"/>
+<button class="absolute top-2 right-2 bg-white/20 backdrop-blur-md rounded-full p-1 text-white">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<p class="mt-2 font-label-caps text-center">@BunnyHome</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface-container-lowest dark:bg-surface-dim shadow-lg rounded-t-xl">
+<button class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 transition-transform duration-150 scale-90">
+<span class="material-symbols-outlined">home_pin</span>
+<span class="font-label-caps text-label-caps">"홈"</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-sand-accent dark:hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-caps text-label-caps">"가이드"</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-sand-accent dark:hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-caps text-label-caps">"커뮤니티"</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-sand-accent dark:hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">collections</span>
+<span class="font-label-caps text-label-caps">"펫쇼"</span>
+</button>
+</nav>
+</body></html>

@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Owner: ${ownerNameError}` }, { status: 400 });
   }
 
-  if (!body.species || !["dog", "cat"].includes(String(body.species))) {
+  if (!body.species || !["dog", "cat", "other"].includes(String(body.species))) {
     return NextResponse.json({ error: "Invalid species." }, { status: 400 });
   }
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { EmptyStatePanel, getBoardEmptyState } from "@/components/ui/EmptyStatePanel";
-import { QA_FILTER_TAGS } from "@/lib/community/qa-mock-data";
+import { PET_CATEGORY_FILTER_TAGS, QA_FILTER_TAGS } from "@/lib/community/qa-mock-data";
 import type { CommunityBoardKind } from "@/lib/community/qa-feed";
+import { getCountryLabel } from "@/lib/i18n/countries";
 import type { CommunityPost } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
@@ -116,6 +117,25 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
         ))}
       </div>}
 
+      {board === "tips" && (
+        <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+          {PET_CATEGORY_FILTER_TAGS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setTag(item.id)}
+              className={
+                tag === item.id
+                  ? "whitespace-nowrap rounded-full bg-channel-community px-5 py-2.5 text-xs font-extrabold text-white shadow-sm"
+                  : "whitespace-nowrap rounded-full bg-white/60 px-5 py-2.5 text-xs font-bold text-plum/70 shadow-sm transition hover:bg-white"
+              }
+            >
+              {isKo ? item.ko : item.en}
+            </button>
+          ))}
+        </div>
+      )}
+
       {board === "experience" && (
         <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
           {EXPERIENCE_FILTER_TAGS.map((item) => (
@@ -181,6 +201,11 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
                   <span className="text-xs font-semibold text-plum/45">
                     💬 {post.comment_count} · 👀 {post.view_count}
                   </span>
+                  {getCountryLabel(post.country_code, locale) && (
+                    <span className="text-xs font-bold text-plum/45">
+                      {getCountryLabel(post.country_code, locale)}
+                    </span>
+                  )}
                 </div>
                 <h4 className="mt-4 text-lg font-extrabold leading-snug text-primary">{post.title}</h4>
                 {post.content && (

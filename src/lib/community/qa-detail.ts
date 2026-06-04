@@ -7,7 +7,7 @@ import type { CommunityBoardKind } from "./qa-feed";
 type Db = SupabaseClient<Database>;
 
 const POST_SELECT =
-  "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at";
+  "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, country_code, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at";
 const COMMENT_SELECT =
   "id, post_id, author_id, parent_id, content, is_hidden, created_at, updated_at";
 
@@ -49,7 +49,7 @@ function getMockComments(postId: string): PostComment[] {
 
 export async function fetchQaPostDetail(id: string, board: CommunityBoardKind = "qa"): Promise<CommunityPost | null> {
   const supabase = getSupabaseServerClient();
-  if (!supabase) return MOCK_BY_ID[id] ?? null;
+  if (!supabase) return board === "qa" ? MOCK_BY_ID[id] ?? null : null;
 
   let query = supabase
     .from("community_posts")
@@ -65,7 +65,7 @@ export async function fetchQaPostDetail(id: string, board: CommunityBoardKind = 
   const { data, error } = await query
     .single();
 
-  if (error || !data) return MOCK_BY_ID[id] ?? null;
+  if (error || !data) return board === "qa" ? MOCK_BY_ID[id] ?? null : null;
   return data as CommunityPost;
 }
 

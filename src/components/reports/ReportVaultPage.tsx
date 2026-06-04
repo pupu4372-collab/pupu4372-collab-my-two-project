@@ -179,7 +179,7 @@ export function ReportVaultPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={supabaseImageTransformUrl(pet.profile_image_url, { width: 96, height: 96 })} alt="" className="h-full w-full object-cover" />
                       ) : (
-                        <span aria-hidden>{pet?.species === "cat" ? "🐱" : "🐶"}</span>
+                        <span aria-hidden>{pet?.species === "cat" ? "🐱" : pet?.species === "other" ? "🐾" : "🐶"}</span>
                       )}
                     </div>
                     <div className="min-w-0">

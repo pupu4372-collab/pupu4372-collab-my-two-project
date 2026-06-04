@@ -3,6 +3,7 @@ import {
   getBearerToken,
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
+import { normalizeCountryCode } from "@/lib/i18n/countries";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import type { Profile } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("id, display_name, avatar_url, locale, timezone, provider, role, created_at, updated_at")
+    .select("id, display_name, avatar_url, locale, timezone, country_code, show_country, provider, role, created_at, updated_at")
     .eq("id", userId)
     .single();
 
@@ -51,7 +52,14 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
-  let body: { displayName?: string; locale?: string; timezone?: string; avatarUrl?: string | null };
+  let body: {
+    displayName?: string;
+    locale?: string;
+    timezone?: string;
+    avatarUrl?: string | null;
+    countryCode?: string | null;
+    showCountry?: boolean;
+  };
   try {
     body = await request.json();
   } catch {
@@ -68,6 +76,10 @@ export async function PATCH(request: Request) {
   if (!isValidTimezone(timezone)) {
     return NextResponse.json({ error: "Invalid timezone." }, { status: 400 });
   }
+  const countryCode = normalizeCountryCode(body.countryCode);
+  if (body.countryCode && !countryCode) {
+    return NextResponse.json({ error: "Invalid country code." }, { status: 400 });
+  }
 
   const supabase = createUserSupabaseClient(token);
   if (!supabase) {
@@ -78,11 +90,15 @@ export async function PATCH(request: Request) {
     display_name: string;
     locale: string;
     timezone: string;
+    country_code: string | null;
+    show_country: boolean;
     avatar_url?: string | null;
   } = {
     display_name: displayName,
     locale,
     timezone,
+    country_code: countryCode,
+    show_country: body.showCountry ?? true,
   };
 
   if ("avatarUrl" in body) {
@@ -93,7 +109,7 @@ export async function PATCH(request: Request) {
     .from("profiles")
     .update(updatePayload as never)
     .eq("id", userId)
-    .select("id, display_name, avatar_url, locale, timezone, provider, role, created_at, updated_at")
+    .select("id, display_name, avatar_url, locale, timezone, country_code, show_country, provider, role, created_at, updated_at")
     .single();
 
   if (error) {

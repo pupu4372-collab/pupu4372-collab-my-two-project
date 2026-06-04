@@ -15,6 +15,7 @@ const UI = {
     species: "Species",
     dog: "Dog",
     cat: "Cat",
+    other: "Other pet",
     birthDate: "Birth date",
     submit: "Read today's stars",
     loading: "Reading the cosmos…",
@@ -25,6 +26,7 @@ const UI = {
     species: "종류",
     dog: "강아지",
     cat: "고양이",
+    other: "다른 동물",
     birthDate: "생년월일",
     submit: "오늘의 별자리 운세 보기",
     loading: "별자리 읽는 중…",
@@ -41,7 +43,7 @@ function isLocale(value: string | null): value is Locale {
 }
 
 function isSpecies(value: string | null): value is Species {
-  return value === "dog" || value === "cat";
+  return value === "dog" || value === "cat" || value === "other";
 }
 
 export function ZodiacForm() {
@@ -148,7 +150,7 @@ export function ZodiacForm() {
               {t.species}
             </legend>
             <div className="grid grid-cols-2 gap-3">
-              {(["dog", "cat"] as const).map((item) => (
+              {(["dog", "cat", "other"] as const).map((item) => (
                 <button
                   key={item}
                   type="button"
@@ -161,10 +163,10 @@ export function ZodiacForm() {
                   aria-pressed={species === item}
                 >
                   <span className="block text-3xl" aria-hidden>
-                    {item === "dog" ? "🐶" : "🐱"}
+                    {item === "dog" ? "🐶" : item === "cat" ? "🐱" : "🐾"}
                   </span>
                   <span className="mt-2 block text-xs font-extrabold uppercase tracking-wide">
-                    {item === "dog" ? t.dog : t.cat}
+                    {t[item]}
                   </span>
                 </button>
               ))}

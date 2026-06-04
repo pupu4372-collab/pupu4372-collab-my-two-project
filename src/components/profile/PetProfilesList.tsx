@@ -36,7 +36,7 @@ interface PetRow {
 
 type PetEditDraft = {
   name: string;
-  species: "dog" | "cat";
+  species: "dog" | "cat" | "other";
   gender: "male" | "female" | "unknown";
   birthDate: string;
   birthTime: string;
@@ -64,6 +64,18 @@ const TYPE_LABELS = {
 
 const MAX_PETS_PER_OWNER = 5;
 
+function speciesLabel(species: string, isKo: boolean) {
+  if (species === "dog") return isKo ? "강아지" : "Dog";
+  if (species === "cat") return isKo ? "고양이" : "Cat";
+  return isKo ? "다른 동물" : "Other pet";
+}
+
+function speciesEmoji(species: string) {
+  if (species === "dog") return "🐕";
+  if (species === "cat") return "🐈";
+  return "🐾";
+}
+
 function petQuery(pet: PetRow, locale: string) {
   return new URLSearchParams({
     petName: pet.name,
@@ -78,7 +90,7 @@ function petQuery(pet: PetRow, locale: string) {
 function draftFromPet(pet: PetRow): PetEditDraft {
   return {
     name: pet.name,
-    species: pet.species === "cat" ? "cat" : "dog",
+    species: pet.species === "cat" || pet.species === "other" ? pet.species : "dog",
     gender: pet.gender === "male" || pet.gender === "female" ? pet.gender : "unknown",
     birthDate: pet.birth_date,
     birthTime: pet.birth_time?.slice(0, 5) ?? "12:00",
@@ -417,7 +429,7 @@ export function PetProfilesList({
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <span aria-hidden>{pet.species === "dog" ? "🐕" : "🐈"}</span>
+                    <span aria-hidden>{speciesEmoji(pet.species)}</span>
                   )}
                   {editable && (
                     <>
@@ -451,14 +463,14 @@ export function PetProfilesList({
                     </p>
                     {useGlassCards && (
                       <span className="rounded-full bg-channel-community/10 px-2 py-0.5 text-[10px] font-bold text-channel-community">
-                        {pet.species === "dog" ? (isKo ? "강아지" : "Dog") : isKo ? "고양이" : "Cat"}
+                        {speciesLabel(pet.species, isKo)}
                       </span>
                     )}
                   </div>
                   <p
                     className={`text-plum/55 ${useGlassCards ? "text-sm" : isCompactView ? "text-[10px] leading-snug" : "text-[11px]"}`}
                   >
-                    {pet.species === "dog" ? (isKo ? "강아지" : "Dog") : isKo ? "고양이" : "Cat"} · {gender}
+                    {speciesLabel(pet.species, isKo)} · {gender}
                     {isCompactView ? (
                       <>
                         {" · "}
@@ -521,11 +533,17 @@ export function PetProfilesList({
                     {isKo ? "종류" : "Species"}
                     <select
                       value={drafts[pet.id].species}
-                      onChange={(e) => updateDraft(pet.id, { species: e.target.value === "cat" ? "cat" : "dog" })}
+                      onChange={(e) =>
+                        updateDraft(pet.id, {
+                          species:
+                            e.target.value === "cat" || e.target.value === "other" ? e.target.value : "dog",
+                        })
+                      }
                       className="pastel-input"
                     >
                       <option value="dog">{isKo ? "강아지" : "Dog"}</option>
                       <option value="cat">{isKo ? "고양이" : "Cat"}</option>
+                      <option value="other">{isKo ? "다른 동물" : "Other pet"}</option>
                     </select>
                   </label>
 

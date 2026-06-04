@@ -6,6 +6,8 @@ import {
 } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
 
+const ALLOWED_TAGS = new Set(["dog", "cat", "other"]);
+
 export async function POST(request: Request) {
   const userId = await getUserIdFromRequest(request);
   const token = getBearerToken(request);
@@ -19,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Supabase not configured." }, { status: 503 });
   }
 
-  let body: { title?: string; content?: string; language?: string };
+  let body: { title?: string; content?: string; language?: string; tags?: string[] };
   try {
     body = await request.json();
   } catch {
@@ -33,12 +35,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Content must be at least 10 characters." }, { status: 400 });
   }
 
+  const tags = (body.tags ?? []).filter((tag) => ALLOWED_TAGS.has(tag));
+  if (!tags.length) {
+    return NextResponse.json({ error: "Category is required." }, { status: 400 });
+  }
+
   try {
     const post = await createQaPost(supabase, {
       authorId: userId,
       title: body.title,
       content: body.content,
       language: body.language,
+      tags: tags.length ? tags : undefined,
     });
     return NextResponse.json({ post }, { status: 201 });
   } catch (err) {

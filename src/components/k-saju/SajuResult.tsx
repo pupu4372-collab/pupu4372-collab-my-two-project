@@ -191,7 +191,7 @@ export function SajuResult({ result }: SajuResultProps) {
         <div className="relative">
           <div className="absolute inset-0 scale-110 rounded-full bg-primary/10 blur-2xl" aria-hidden />
           <div className="relative flex h-36 w-36 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-lavender/50 to-mint/40 text-6xl shadow-xl md:h-44 md:w-44">
-            <span aria-hidden>{result.species === "cat" ? "🐱" : "🐶"}</span>
+            <span aria-hidden>{result.species === "cat" ? "🐱" : result.species === "other" ? "🐾" : "🐶"}</span>
           </div>
           <span
             className={`absolute -bottom-1 -right-1 flex h-12 w-12 items-center justify-center rounded-full border-2 border-white text-lg font-bold text-white shadow-lg ${accent.bar}`}

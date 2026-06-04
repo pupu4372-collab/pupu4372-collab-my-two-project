@@ -3,6 +3,7 @@ import { QaPostActions } from "@/components/community/QaPostActions";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { fetchQaComments, fetchQaPostDetail } from "@/lib/community/qa-detail";
+import { getCountryLabel } from "@/lib/i18n/countries";
 import { notFound } from "next/navigation";
 
 interface PageProps {
@@ -38,6 +39,9 @@ export default async function TipsPostDetailPage({ params }: PageProps) {
           <span>{formatDate(post.created_at)}</span>
           <span>💬 {post.comment_count}</span>
           <span>👀 {post.view_count}</span>
+          {getCountryLabel(post.country_code, locale) && (
+            <span className="font-bold">{getCountryLabel(post.country_code, locale)}</span>
+          )}
         </div>
         <QaPostActions
           postId={post.id}

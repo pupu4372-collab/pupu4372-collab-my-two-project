@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: nameError }, { status: 400 });
   }
 
-  if (!body.species || !["dog", "cat"].includes(body.species)) {
+  if (!body.species || !["dog", "cat", "other"].includes(body.species)) {
     return NextResponse.json({ error: "Invalid species." }, { status: 400 });
   }
 

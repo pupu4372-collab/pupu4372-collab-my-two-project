@@ -1,6 +1,6 @@
 /** DB types for Supabase client (sync with supabase/migrations). */
 
-export type PetSpecies = "dog" | "cat";
+export type PetSpecies = "dog" | "cat" | "other";
 export type PetShowSpecies = PetSpecies | "other";
 export type AppChannel = "home" | "dog" | "cat" | "reptile" | "community" | "pet_saju";
 export type PostType = "photo_show" | "qa" | "free" | "saju_review";
@@ -20,6 +20,8 @@ export interface Profile {
   avatar_url: string | null;
   locale: string;
   timezone: string;
+  country_code: string | null;
+  show_country: boolean;
   provider: string | null;
   role: "user" | "admin";
   created_at: string;
@@ -65,6 +67,7 @@ export interface CommunityPost {
   image_urls: string[];
   tags: string[];
   language: string;
+  country_code: string | null;
   like_count: number;
   comment_count: number;
   view_count: number;
@@ -94,6 +97,7 @@ export interface PetShowRankingRow {
   image_urls: string[];
   like_count: number;
   comment_count: number;
+  country_code?: string | null;
   created_at: string;
   rank_position?: number;
 }

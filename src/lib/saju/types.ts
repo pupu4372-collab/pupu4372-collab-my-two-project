@@ -1,5 +1,5 @@
 export type ElementKey = "wood" | "fire" | "earth" | "metal" | "water";
-export type Species = "dog" | "cat";
+export type Species = "dog" | "cat" | "other";
 export type Locale = "en" | "ko";
 export type Gender = "male" | "female";
 

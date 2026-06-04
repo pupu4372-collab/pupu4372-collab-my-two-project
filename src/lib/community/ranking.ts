@@ -53,7 +53,7 @@ export async function fetchPetShowRanking(
 
   const query = supabase
     .from("community_posts")
-    .select("id, author_id, pet_id, title, image_urls, like_count, comment_count, created_at")
+    .select("id, author_id, pet_id, title, image_urls, like_count, comment_count, country_code, created_at")
     .eq("post_type", "photo_show")
     .eq("is_hidden", false)
     .order("like_count", { ascending: false })
@@ -111,7 +111,7 @@ export async function fetchPetShowSpeciesRankings(period: Extract<RankingPeriod,
 
   const { data: posts, error } = await supabase
     .from("community_posts")
-    .select("id, author_id, pet_id, title, image_urls, tags, like_count, comment_count, created_at")
+    .select("id, author_id, pet_id, title, image_urls, tags, like_count, comment_count, country_code, created_at")
     .eq("post_type", "photo_show")
     .eq("is_hidden", false)
     .gte("created_at", periodStart.toISOString())
@@ -165,6 +165,7 @@ function getMockPetShowRanking(): PetShowRankingRow[] {
       image_urls: [],
       like_count: 128,
       comment_count: 12,
+      country_code: "KR",
       created_at: new Date(now - 86400000).toISOString(),
     },
     {
@@ -175,6 +176,7 @@ function getMockPetShowRanking(): PetShowRankingRow[] {
       image_urls: [],
       like_count: 97,
       comment_count: 8,
+      country_code: "US",
       created_at: new Date(now - 172800000).toISOString(),
     },
     {
@@ -185,6 +187,7 @@ function getMockPetShowRanking(): PetShowRankingRow[] {
       image_urls: [],
       like_count: 84,
       comment_count: 5,
+      country_code: null,
       created_at: new Date(now - 259200000).toISOString(),
     },
   ];

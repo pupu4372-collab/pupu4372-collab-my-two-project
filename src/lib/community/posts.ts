@@ -47,10 +47,22 @@ export interface CreatePetShowPostInput {
   language?: string;
 }
 
+async function getVisibleCountryCode(supabase: Db, userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("country_code, show_country")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const profile = data as { country_code?: string | null; show_country?: boolean | null } | null;
+  return profile?.show_country === false ? null : profile?.country_code ?? null;
+}
+
 export async function createPetShowPost(
   supabase: Db,
   input: CreatePetShowPostInput
 ): Promise<CommunityPost> {
+  const countryCode = await getVisibleCountryCode(supabase, input.authorId);
   const { data, error } = await supabase
     .from("community_posts")
     .insert({
@@ -63,9 +75,10 @@ export async function createPetShowPost(
       image_urls: [input.imageUrl],
       tags: ["pet-show", `pet-show:${input.petShowSpecies}`],
       language: input.language ?? "ko",
+      country_code: countryCode,
     } as never)
     .select(
-      "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at"
+      "id, author_id, pet_id, channel, post_type, title, content, image_urls, tags, language, country_code, like_count, comment_count, view_count, is_hidden, is_pinned, created_at, updated_at"
     )
     .single();
 

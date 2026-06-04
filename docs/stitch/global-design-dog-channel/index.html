@@ -1,0 +1,403 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>강아지 채널 - K-Saju Pet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet">
+<style>
+        @import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/css/suit-variable.css');
+        
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            background: linear-gradient(135deg, #FDFBF7 0%, #E6E1F9 50%, #E1F5F0 100%);
+            min-height: 100vh;
+        }
+
+        .dream-sky-bg {
+            background: linear-gradient(180deg, rgba(253, 251, 247, 0) 0%, rgba(230, 225, 249, 0.5) 100%);
+        }
+
+        .pastel-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(68, 38, 86, 0.05);
+            border-radius: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .pastel-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(114, 82, 132, 0.05);
+        }
+
+        .glass-nav {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .horizontal-scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .horizontal-scroll-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .mok-tag { background: rgba(34, 197, 94, 0.1); color: #22C55E; }
+        .hwa-tag { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+        .to-tag { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+        .geum-tag { background: rgba(148, 163, 184, 0.1); color: #94A3B8; }
+        .su-tag { background: rgba(51, 65, 85, 0.1); color: #334155; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "channel-community": "#22C55E",
+                        "on-secondary-fixed-variant": "#574236",
+                        "surface-container-highest": "#e4e2de",
+                        "on-primary-fixed-variant": "#593a6b",
+                        "on-error-container": "#93000a",
+                        error: "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#f2f0ed",
+                        "geum-white": "#94A3B8",
+                        "on-tertiary-fixed-variant": "#454b0a",
+                        "surface-container-low": "#f5f3ef",
+                        "on-surface-variant": "#4b444d",
+                        "tertiary-container": "#474d0d",
+                        cream: "#FDFBF7",
+                        "channel-cat": "#EF4444",
+                        "surface-container-high": "#eae8e4",
+                        "surface-tint": "#725284",
+                        "on-primary-container": "#d1abe4",
+                        "primary-fixed": "#f5d9ff",
+                        outline: "#7d747e",
+                        "on-surface": "#1b1c1a",
+                        "on-secondary": "#ffffff",
+                        "su-black": "#334155",
+                        "tertiary-fixed": "#e1e999",
+                        "mok-green": "#22C55E",
+                        "on-error": "#ffffff",
+                        sand: "#F5F1E9",
+                        "primary-fixed-dim": "#dfb9f2",
+                        "on-secondary-fixed": "#28180d",
+                        "secondary-fixed": "#fcdccb",
+                        "surface-dim": "#dbdad6",
+                        secondary: "#715a4c",
+                        petal: "#FCE1F1",
+                        "inverse-primary": "#dfb9f2",
+                        "surface-bright": "#fbf9f5",
+                        "on-secondary-container": "#755e50",
+                        mint: "#E1F5F0",
+                        "on-tertiary-fixed": "#1a1d00",
+                        primary: "#442656",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e4e2de",
+                        "on-background": "#1b1c1a",
+                        "on-tertiary-container": "#b7be73",
+                        "hwa-red": "#EF4444",
+                        "on-primary-fixed": "#2b0d3c",
+                        tertiary: "#313600",
+                        lavender: "#E6E1F9",
+                        "channel-saju": "#8B5CF6",
+                        "to-yellow": "#F59E0B",
+                        "on-primary": "#ffffff",
+                        "channel-dog": "#3B82F6",
+                        "outline-variant": "#cec3ce",
+                        "secondary-container": "#f9d9c8",
+                        "secondary-fixed-dim": "#dfc0b0",
+                        "surface-container": "#efeeea",
+                        "tertiary-fixed-dim": "#c5cc7f",
+                        "surface-container-lowest": "#ffffff",
+                        background: "#fbf9f5",
+                        "primary-container": "#5c3d6e",
+                        surface: "#fbf9f5",
+                        blush: "#FDECE7",
+                        "inverse-surface": "#30312e"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        "section-gap": "5rem",
+                        "page-margin-mobile": "1.25rem",
+                        "page-margin-desktop": "4rem",
+                        gutter: "1.5rem",
+                        "card-padding": "2rem"
+                    },
+                    fontFamily: {
+                        "headline-sm": ["SUIT Variable"],
+                        "body-md": ["SUIT Variable"],
+                        "headline-md": ["SUIT Variable"],
+                        "headline-lg": ["SUIT Variable"],
+                        "label-caps": ["SUIT Variable"],
+                        "display-hero": ["SUIT Variable"],
+                        "display-hero-mobile": ["SUIT Variable"],
+                        "body-sm": ["SUIT Variable"],
+                        "body-lg": ["SUIT Variable"]
+                    },
+                    fontSize: {
+                        "headline-sm": ["20px", {lineHeight: "1.4", fontWeight: "600"}],
+                        "body-md": ["16px", {lineHeight: "1.6", fontWeight: "400"}],
+                        "headline-md": ["24px", {lineHeight: "1.4", fontWeight: "700"}],
+                        "headline-lg": ["32px", {lineHeight: "1.3", fontWeight: "700"}],
+                        "label-caps": ["12px", {lineHeight: "1", letterSpacing: "0.05em", fontWeight: "700"}],
+                        "display-hero": ["42px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "800"}],
+                        "display-hero-mobile": ["32px", {lineHeight: "1.2", fontWeight: "800"}],
+                        "body-sm": ["14px", {lineHeight: "1.5", fontWeight: "400"}],
+                        "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}]
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-background text-on-background">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-md shadow-sm transition-all duration-300">
+<div class="flex justify-between items-center px-page-margin-mobile md:px-page-margin-desktop py-4 max-w-[1200px] mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-channel-dog">강아지 채널</div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-channel-dog transition-colors" href="#">건강</a>
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-channel-dog transition-colors" href="#">훈련</a>
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-channel-dog transition-colors" href="#">품종</a>
+<a class="font-headline-sm text-headline-sm text-on-surface-variant hover:text-channel-dog transition-colors" href="#">사주 팁</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:bg-surface-container-high/50 p-2 rounded-full transition-all">search</span>
+<span class="material-symbols-outlined text-primary cursor-pointer hover:bg-surface-container-high/50 p-2 rounded-full transition-all">account_circle</span>
+</div>
+</div>
+</nav>
+<main class="pt-24 pb-20 overflow-x-hidden">
+<!-- Hero Section -->
+<section class="px-page-margin-mobile md:px-page-margin-desktop max-w-[1200px] mx-auto mb-16 transition-all duration-1000 opacity-100 translate-y-0">
+<div class="relative w-full h-[400px] md:h-[550px] rounded-[3rem] overflow-hidden group shadow-2xl">
+<img alt="이번 달의 강아지 건강 리포트" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAo70HzobKMg4UF2YX1S0d6Aby3w9xs5fQBzMTsv5Ld1edqnVpxvQ5CxggR6tccRT2YYeM8EMXnyTPEv4Zj2zirxpoKZY4XPWhcxpjgQC9WBVW-2iKkixB9kjvmG5z4qJVvfJjqqPTz8gkKX6af3OvhCALhTmh2XveAFI2v2VOBE4KK9k5Tu_qjKSvWjjPUV41nX74j1-4DMPzQIn9H55CJg3OYk-QFpWepslIK_-dOgWGDiTKOVpcjD8N8jDyeGnZASaN9J07fPhRU">
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col justify-end p-8 md:p-16">
+<span class="inline-block px-4 py-1 bg-channel-dog text-white rounded-full font-label-caps text-label-caps mb-4 w-fit uppercase tracking-wider">경걍</span>
+<h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero text-white mb-6">이번 달의 강아지 건강 리포트:<br>환절기 면역력 관리</h1>
+<p class="text-white/90 font-body-lg text-body-lg max-w-2xl leading-relaxed">우리 아이를 위한 건강 정보와 맞춤형 사주 가이드를 통해 환절기 건강을 지켜주세요.</p>
+<button class="mt-8 bg-white text-primary px-10 py-4 rounded-full font-headline-sm text-headline-sm w-fit hover:bg-lavender transition-all shadow-lg active:scale-95">자세히 보기</button>
+</div>
+</div>
+</section>
+<!-- Saju-based Training (Bento Grid) -->
+<section class="px-page-margin-mobile md:px-page-margin-desktop max-w-[1200px] mx-auto mb-20 transition-all duration-1000 opacity-100 translate-y-0">
+<div class="flex items-baseline justify-between mb-8">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">사주 맞춤 훈련</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">오행의 기운에 따른 우리 아이 맞춤 교감법</p>
+</div>
+<button class="text-primary font-headline-sm text-headline-sm flex items-center gap-1 hover:underline group">모두 보기 <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">chevron_right</span></button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Mok Card -->
+<div class="md:col-span-7 pastel-card p-card-padding flex flex-col justify-between min-h-[320px] bg-mint/40">
+<div>
+<span class="mok-tag px-3 py-1 rounded-full font-label-caps text-label-caps mb-4 inline-block">Mok(木) - 나무의 기운</span>
+<h3 class="font-headline-md text-headline-md text-primary mb-3">Mok(木) 기운이 강한 아이를 위한 산책 훈련법</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">호기심이 많고 에너지가 넘치는 아이들을 위한 맞춤형 야외 활동 가이드입니다.</p>
+</div>
+
+</div>
+<!-- Hwa Card -->
+<div class="md:col-span-5 pastel-card p-card-padding flex flex-col justify-between bg-blush/40 min-h-[320px]">
+<div>
+<span class="hwa-tag px-3 py-1 rounded-full font-label-caps text-label-caps mb-4 inline-block">Hwa(火) - 불의 기운</span>
+<h3 class="font-headline-md text-headline-md text-primary mb-3">Hwa(火) 기운이 강한 아이를 위한 마사지</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">감정 표현이 확실한 아이의 마음을 차분하게 진정시켜주는 마사지와 명상법.</p>
+</div>
+<div class="mt-4 flex justify-end">
+<span class="material-symbols-outlined text-5xl text-hwa-red opacity-20">favorite</span>
+</div>
+</div>
+<!-- Other Elements -->
+<div class="md:col-span-4 pastel-card p-8 bg-lavender/40 flex items-center gap-5">
+<div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-su-black text-3xl">water_drop</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary">Su(水) 기운 안정감</h4>
+<p class="text-body-sm text-on-surface-variant opacity-80">불안이 많은 아이를 위한 솔루션</p>
+</div>
+</div>
+<div class="md:col-span-4 pastel-card p-8 bg-sand flex items-center gap-5">
+<div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-to-yellow text-3xl">terrain</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary">To(土) 기운 포용력</h4>
+<p class="text-body-sm text-on-surface-variant opacity-80">사회성을 기르는 그룹 훈련</p>
+</div>
+</div>
+<div class="md:col-span-4 pastel-card p-8 bg-geum-white/10 flex items-center gap-5">
+<div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-geum-white text-3xl">settings_brightness</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-primary">Geum(金) 기운 규칙</h4>
+<p class="text-body-sm text-on-surface-variant opacity-80">단호하고 명확한 신호 교육</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Breed Guide (Horizontal Scroll) -->
+<section class="mb-20 overflow-hidden transition-all duration-1000 opacity-100 translate-y-0">
+<div class="px-page-margin-mobile md:px-page-margin-desktop max-w-[1200px] mx-auto mb-8"><div class="flex items-baseline justify-between">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">품종별 가이드</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">내 반려견의 특징을 더 깊이 이해해보세요</p>
+</div>
+<button class="text-primary font-headline-sm text-headline-sm flex items-center gap-1 hover:underline group">모두 보기 <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">chevron_right</span></button>
+</div></div>
+<div class="flex overflow-x-auto horizontal-scroll-hide gap-6 px-page-margin-mobile md:px-page-margin-desktop pb-8">
+<!-- Breed 1: Golden Retriever -->
+<div class="flex-none w-[300px] md:w-[350px] pastel-card overflow-hidden">
+<div class="h-56 overflow-hidden">
+<img alt="Golden Retriever" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvfLHGmogXgIqP1q2TW3DdVeV_a17zghi2WeV1bMd6xfhj7C736TShWBfyy0joTALbLdeTVQtW148pzHfmKc1JsIBBSSzq18z_xDdueyyGOhm3ssZtLw_N5FkQMT6QNpdxL3zWxuV5_t2qNk6wCmpI-s_FcMTxGJDUaTMW1ivZ_C-xDUhl50-OnwAPQn-9w-Dy_p8NB3R3dL7DwGYm4qBGQ8C7GQ50tBjtfqa1yYlr6qNdCjw5y_XojJin0FE-2-OLGR0H0TCVH_Mn">
+</div>
+<div class="p-8">
+<h3 class="font-headline-md text-headline-md text-primary mb-3">골든 리트리버</h3>
+<div class="flex gap-2 mb-5">
+<span class="to-tag px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">To(土) 기운</span>
+<span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">대형견</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-relaxed">친화력이 높고 영리한 골든 리트리버는 모든 가족에게 최고의 파트너입니다.</p>
+</div>
+</div>
+<!-- Breed 2: Pomeranian -->
+<div class="flex-none w-[300px] md:w-[350px] pastel-card overflow-hidden">
+<div class="h-56 overflow-hidden">
+<img alt="Pomeranian" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKvS94dUb3FxiHYhKuzh5g1vWd1OjOaeFMAcRSSOZ2zQLSuM-68ybKEHaXjI1NdxKZ9btO3bQv4pE0I0yB8Ai9Iaz6_a5ZpAgz5y1F5lX8IkDzIPaBL-CmLKtVqbl7IKjAa-CJ1OXM43rYc8QQlHZUOWDfg-92GVz0MVPsg-v-ad1yBJJe0kDy3EOvazaUj5zGnfhUBlsBeG2b4hSyxL7vaEDFWgx-T5AXqlcIBaW7xtJUXSKC-dU1R112annfaiy5AtZAfpct-HTk">
+</div>
+<div class="p-8">
+<h3 class="font-headline-md text-headline-md text-primary mb-3">포메라니안</h3>
+<div class="flex gap-2 mb-5">
+<span class="hwa-tag px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">Hwa(火) 기운</span>
+<span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">소형견</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-relaxed">작지만 용감한 포메라니안은 화려한 외모만큼이나 풍부한 표현력을 가졌습니다.</p>
+</div>
+</div>
+<!-- Breed 3: Poodle -->
+<div class="flex-none w-[300px] md:w-[350px] pastel-card overflow-hidden">
+<div class="h-56 overflow-hidden bg-lavender/20">
+<img alt="Poodle" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIoVn6xsGI3fh4zBl4kzFz2TFr7_k4AYj_iB05nDQuTtB4Xe9tCm-A4O0UnQuKUPHDHhJxROXCyBPkRCYfvMIWsV7e7YHQGG_kql0PPBRcO0AmkexZFRf4f2ymgt22BJ16_XJk8IufFneH8sQWMzPlcVXesa9TZre4yCKNS1hljQQuLTccoKEBt0Jli6vGU1eY-gE3hZ79ouEtGqRh4YHRm9PaoY9zNhg7kObyax_LrjNZt28ZK_xRnOZnOKGrvAxvUleQxOgQd7TN">
+</div>
+<div class="p-8">
+<h3 class="font-headline-md text-headline-md text-primary mb-3">푸들</h3>
+<div class="flex gap-2 mb-5">
+<span class="su-tag px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">Su(水) 기운</span>
+<span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">다재다능</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-relaxed">지능이 매우 높고 털 빠짐이 적어 한국 가정에서 가장 사랑받는 품종 중 하나입니다.</p>
+</div>
+</div>
+<div class="flex-none w-[300px] md:w-[350px] pastel-card overflow-hidden"><div class="h-56 overflow-hidden"><img alt="Maltese" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA83m89I7fQ76xTDfLT5gTHkWgI4maww2ml6RXnY7CTHjSBjqFyTPTZgZBDDFOJbl3crtXjgO53pEh0SXMK1M69IK3Qxux3O3lTPaNsp8IJE4A1vn7GJEruwec5kGp72mo7kiI5IGfwUewxPmmPx9ymPIgS_rs0Bxg7aMaegeyJTCgingsV5AtUWuwrdkYQMfftVW0OjPfNTTHQr5RW-qqM6UtLWvpZdI3CG8V5XlzBOnnIyAMzwoYrZ43dgF4B8J7aw0MKtwjc2_CB"></div><div class="p-8"><h3 class="font-headline-md text-headline-md text-primary mb-3">말티즈</h3><div class="flex gap-2 mb-5"><span class="to-tag px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">TO(土) 기운</span><span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">온순한</span></div><p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-relaxed">작고 하얀 털이 매력적인 말티즈는 집사님 곁을 지키는 가장 사랑스러운 파트너입니다.</p></div></div><div class="flex-none w-[300px] md:w-[350px] pastel-card overflow-hidden"><div class="h-56 overflow-hidden"><img alt="Bichon Frise" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIn_anmAREPK2FtS_X8Cz7JuImGjWLuoU8RpSnVmbUWWcp4Bc1B9ir2R0ols9gKz0ro_1kQ1rc8dVxlvXvK7TUOogRCP3E4S3xAWtYcK-NJySbQWX9OrpwmKz8Saf0tpR7nHISdvGZxcMunPrgBly7tJHapRvJA6Jb0vIvMRj28hRGxlAOkL_sgDApYBYgP4ZXMooV4kMI1ScJH8gHE3uJpGS2o1D4m-XLixF3zj6J9bn_ZcWzo4gwfnJAtfBKua-EpzcUfnVoZpUY"></div><div class="p-8"><h3 class="font-headline-md text-headline-md text-primary mb-3">비숑 프리제</h3><div class="flex gap-2 mb-5"><span class="mok-tag px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">MOK(木) 기운</span><span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">활발한</span></div><p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-relaxed">솜사탕 같은 털과 밝은 성격을 가진 비숑은 주변에 긍정적인 에너지를 전해줍니다.</p></div></div><div class="flex-none w-[300px] md:w-[350px] pastel-card overflow-hidden"><div class="h-56 overflow-hidden"><img alt="Shiba Inu" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTn1vrpwrnTy8jtdEaYfmhrWBcAU5Hj2zVcU93DeUlBYBlL7r6J9RlnuewCAFKuYScfMh05ZmKu3JdyixkNXsN4CO_AoREx35T7nL7A2u7Tu1HJQ2sYflb6iLxjI0EltcaBJRlQfaqEpAHePRvNRHaoQVIKnDtAua33QaZnUQaf8LMT7dLcpkxxb6x7oPq1XOz_PPvbHnJhRJIpBsHtr_1mR2jOTfSxKq2yXnR-kAnMD2f7C4P5-Xt569k8SFpnIH2HLHklma1pcD8"></div><div class="p-8"><h3 class="font-headline-md text-headline-md text-primary mb-3">시바 Inu</h3><div class="flex gap-2 mb-5"><span class="geum-tag px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">GEUM(金) 기운</span><span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">충직한</span></div><p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-relaxed">영리하고 독립심 강한 시바견은 때로는 진중하게, 때로는 귀엽게 집사님을 미소 짓게 합니다.</p></div></div><div class="flex-none w-[300px] md:w-[350px] pastel-card overflow-hidden"><div class="h-56 overflow-hidden"><img alt="Welsh Corgi" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3VUW9IldxsR6wCLgX8Vrm4MG2YH1kEwBM4k_KVYK08kVdUg8AvjgvA76rtkjbHWimTg3erWFI0Ky-ModjwGOGVvAnm8QbwSE-BM1FpuL6CBR9BnWBduWfAKr5lY2DGXMRwc9AqOgmrAmfnTA7Gz_sBgsdgpxUepM83Fxi9kan97L6bMcDxxc6L06INhx6p623CPPowgLHflrqthVzB0w0If6x80EcsVsSYy90e7BW9a7VdzAok39koePqQIWGz6SpJ27rJ7qppEZN"></div><div class="p-8"><h3 class="font-headline-md text-headline-md text-primary mb-3">웰시 코기</h3><div class="flex gap-2 mb-5"><span class="hwa-tag px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">HWA(火) 기운</span><span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">사교적인</span></div><p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-relaxed">짧은 다리와 넘치는 애교를 가진 웰시 코기는 어디서나 활력을 불어넣는 분위기 메이커입니다.</p></div></div></div>
+</section>
+<!-- Expert Tips (Masonry-like Layout) -->
+<section class="px-page-margin-mobile md:px-page-margin-desktop max-w-[1200px] mx-auto mb-16 transition-all duration-1000 opacity-100 translate-y-0">
+<div class="mb-12 text-center">
+<h2 class="font-headline-lg text-headline-lg text-primary">전문가 팁</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">전문가들이 전하는 슬기로운 반려 생활 팁</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+<!-- Tip 1 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-[2.5rem] overflow-hidden mb-6 h-72 shadow-lg">
+<img alt="Nutrition Tip" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApQ7Q9fElTsMU9VgEpkfZKy2NPEAxuYSND5Vq6_s3XLuhaR4H4u21YyaItUFySaUAFmqobUCZmop3lhbu1sf2TXiesjgYIn-pZtW6MuNjjmAF0iQVCcFLSQ6nGdc512R-PKdgjsw6pcLNAIxIrQzaWs5bZ12e-R_o2Ac9Eu8X5t0yxqXgjR5GslMCBZZYax0dTBOb7vZJ_AAqY1Bs1Tsli6X-ndyifByhGBLXF1nEEHUqv7YJ-L62SGVsxld4CCloBbhRxcg609Vwk">
+<div class="absolute top-5 left-5 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-sm">
+<span class="text-primary font-bold text-[11px] tracking-widest uppercase">경걍</span>
+</div>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-2 group-hover:text-channel-dog transition-colors">나이별 필수 영양소 가이드</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">퍼피부터 시니어까지, 시기별로 꼭 필요한 영양소는 무엇일까요?</p>
+</div>
+<!-- Tip 2 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-[2.5rem] overflow-hidden mb-6 h-72 shadow-lg">
+<img alt="Behavior Tip" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgwevjViFu4Pu_cH34eXTgP8aExjFOjVdrVQ4niQm1RzvX-7HGKDR4NexE0ou0Q6VD4XKha1xNTKdiRExyYV100UTK4fb0ie5IhZi8vQomZk2gFzZHuYwQzmcyQn7hdXrPG01EqfBCH0Z3AY6rTMn-idNHo79wjTtkJwPR1jPAq4mWtccAWKDrW60MmUaPMYGW3y4qzPSFq3__pzQv6Wvs2X_G0xLNwYU4w_AaBr9QEOleZcuEDlqhPUNliZzzg0YK1-LlEEP3s5Gb">
+<div class="absolute top-5 left-5 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-sm">
+<span class="text-primary font-bold text-[11px] tracking-widest uppercase">행동</span>
+</div>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-2 group-hover:text-channel-dog transition-colors">분리불안을 줄이는 5가지 습관</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">보호자가 외출할 때 우리 아이가 편안하게 기다릴 수 있는 방법.</p>
+</div>
+<!-- Tip 3 -->
+<div class="group cursor-pointer">
+<div class="relative rounded-[2.5rem] overflow-hidden mb-6 h-72 shadow-lg">
+<img alt="Health Tip" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_2tFWRF4n-hzeNve2ufuA91Q4x7x1gxkfP_Ry4VimD-D1ruTZksroO6ix2Bg78PMJ3onf_fNHmO3czvRsHuDjeDu4uGzEbUFDW46mOKKEKnLuz_AJLryRcGhP3eVLfCBr-gxJVy3pNSjGAoIa0WLeR6l-neKO9ws3ZiG0xYLskCoX50c3sCUmEF033Cd85Nr2B_eYzpfkUqrkW8iWhcWmD7EZPmAy75tGR3qaZU-yA5oiZ7A2ZYK8XIdDHjEBEqfrihhuXEJPE16S">
+<div class="absolute top-5 left-5 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-sm">
+<span class="text-primary font-bold text-[11px] tracking-widest uppercase">간강</span>
+</div>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-2 group-hover:text-channel-dog transition-colors">집에서 하는 간단 건강 체크리스트</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">매일 5분, 우리 아이의 건강 이상 신호를 미리 발견하세요.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-16 bg-surface-container/50 backdrop-blur-sm">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8 px-page-margin-mobile md:px-page-margin-desktop w-full max-w-[1200px] mx-auto">
+<div class="flex flex-col items-center md:items-start">
+<div class="font-headline-sm text-headline-sm font-bold text-on-surface mb-2">K-Saju Pet</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 K-Saju Pet. All rights reserved.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">개인정보처리방침</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">이용약관</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">문의하기</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">K-사주 소개</a>
+</div>
+</div>
+</footer>
+<!-- FAB for Task-Focused action -->
+<button class="fixed bottom-10 right-10 bg-channel-dog text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-transform z-40">
+<span class="material-symbols-outlined text-3xl">edit_note</span>
+</button>
+<script>
+        // Smooth reveal animation for sections
+        const observerOptions = {
+            root: null,
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.add('transition-all', 'duration-1000', 'opacity-0', 'translate-y-10');
+            observer.observe(section);
+        });
+
+        // Sticky header logic
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('py-2', 'shadow-md', 'bg-surface/95');
+                nav.classList.remove('py-4', 'shadow-sm', 'bg-surface/80');
+            } else {
+                nav.classList.add('py-4', 'shadow-sm', 'bg-surface/80');
+                nav.classList.remove('py-2', 'shadow-md', 'bg-surface/95');
+            }
+        });
+    </script>
+
+
+</body></html>

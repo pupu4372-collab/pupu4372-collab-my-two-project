@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>K-Saju Pet - Cat Channel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=SUIT+Variable:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'SUIT Variable';
+            src: url('https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.woff2') format('woff2-variations');
+        }
+        body {
+            font-family: 'SUIT Variable', sans-serif;
+            background: linear-gradient(180deg, #fbf9f5 0%, #FDFBF7 100%);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .pastel-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(112, 90, 126, 0.1);
+            border-radius: 2rem;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .pastel-card:hover {
+            transform: translateY(-4px);
+        }
+        .glass-header {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .mok-tag { background: rgba(34, 197, 94, 0.1); color: #22C55E; }
+        .hwa-tag { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+        .to-tag { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+        .geum-tag { background: rgba(148, 163, 184, 0.1); color: #475569; }
+        .su-tag { background: rgba(51, 65, 85, 0.1); color: #1E293B; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "channel-community": "#22C55E",
+                        "channel-cat": "#EF4444",
+                        background: "#fbf9f5",
+                        surface: "#fbf9f5",
+                        primary: "#442656",
+                        "primary-container": "#5c3d6e",
+                        "on-primary-container": "#d1abe4",
+                        secondary: "#715a4c",
+                        "on-surface": "#1b1c1a",
+                        "on-surface-variant": "#4b444d",
+                        "surface-container": "#efeeea",
+                        "surface-container-low": "#f5f3ef",
+                        "surface-container-lowest": "#ffffff",
+                        cream: "#FDFBF7",
+                        sand: "#F5F1E9",
+                        "hwa-red": "#EF4444",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#1a1d00",
+                        error: "#ba1a1a",
+                        "secondary-container": "#f9d9c8",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#2b0d3c",
+                        "surface-tint": "#725284",
+                        "tertiary-fixed-dim": "#c5cc7f",
+                        "secondary-fixed-dim": "#dfc0b0",
+                        "on-primary-fixed-variant": "#593a6b",
+                        "primary-fixed": "#f5d9ff",
+                        "on-tertiary-container": "#b7be73",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#fcdccb",
+                        "tertiary-fixed": "#e1e999",
+                        "surface-container-highest": "#e4e2de",
+                        "on-secondary-fixed-variant": "#574236",
+                        "primary-fixed-dim": "#dfb9f2",
+                        "surface-dim": "#dbdad6",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#dfb9f2",
+                        "surface-bright": "#fbf9f5",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f2f0ed",
+                        outline: "#7d747e",
+                        "inverse-surface": "#30312e",
+                        "on-background": "#1b1c1a",
+                        "surface-variant": "#e4e2de",
+                        "on-tertiary-fixed-variant": "#454b0a",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#eae8e4",
+                        tertiary: "#313600",
+                        "tertiary-container": "#474d0d",
+                        "on-secondary-container": "#755e50",
+                        "outline-variant": "#cec3ce",
+                        "on-secondary-fixed": "#28180d"
+                    },
+                    spacing: {
+                        gutter: "1.5rem",
+                        "section-gap": "5rem",
+                        "page-margin-desktop": "4rem",
+                        "page-margin-mobile": "1.25rem"
+                    },
+                    fontFamily: {
+                        "headline-sm": ["SUIT Variable"],
+                        "headline-md": ["SUIT Variable"],
+                        "headline-lg": ["SUIT Variable"],
+                        "display-hero": ["SUIT Variable"],
+                        "display-hero-mobile": ["SUIT Variable"],
+                        "label-caps": ["SUIT Variable"],
+                        "body-lg": ["SUIT Variable"],
+                        "body-md": ["SUIT Variable"],
+                        "body-sm": ["SUIT Variable"]
+                    },
+                    fontSize: {
+                        "headline-sm": ["20px", {lineHeight: "1.4", fontWeight: "600"}],
+                        "headline-md": ["24px", {lineHeight: "1.4", fontWeight: "700"}],
+                        "headline-lg": ["32px", {lineHeight: "1.3", fontWeight: "700"}],
+                        "display-hero": ["42px", {lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "800"}],
+                        "display-hero-mobile": ["32px", {lineHeight: "1.2", fontWeight: "800"}],
+                        "label-caps": ["12px", {lineHeight: "1", letterSpacing: "0.05em", fontWeight: "700"}],
+                        "body-lg": ["18px", {lineHeight: "1.6", fontWeight: "400"}],
+                        "body-md": ["16px", {lineHeight: "1.6", fontWeight: "400"}],
+                        "body-sm": ["14px", {lineHeight: "1.5", fontWeight: "400"}]
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 glass-header bg-surface/80">
+<div class="flex justify-between items-center w-full px-page-margin-mobile md:px-page-margin-desktop py-4">
+<h1 class="font-display-hero-mobile text-display-hero-mobile text-primary tracking-tight">K-Saju Pet</h1>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-headline-sm text-headline-sm" href="#">홈</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-headline-sm text-headline-sm" href="#">강아지</a>
+<a class="text-primary font-bold border-b-2 border-primary font-headline-sm text-headline-sm" href="#">고양이</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-headline-sm text-headline-sm" href="#">댕땅사주</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-headline-sm text-headline-sm" href="#">개매니티</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="flex items-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined mr-1">language</span>
+<span class="font-label-caps text-label-caps">KO/EN</span>
+</button>
+<button class="text-on-surface-variant active:scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary overflow-hidden border border-primary/10">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqxAxs6bN7AnEXhoh2QZixEoIVMfTwDtCf9A4OOt9vYO01lO9OvQPPNLq30hwY4tZFpvPQYXyWtB1G_c-7Ec_NDHW3GSCugPpasZlODnDNkWDQLk0Zidjv0qklDIsX-azQChz9A71QG00aZaU-F6Ez28SR-UybBR0hCVAtHDoIeaU6P0ltcs0Qh8-axRwR50ZjSz5aeFMmW3su360ouspSpFznH_XEAE8I6bHtKLr1-YT0XN7FLy9hIiz3FrI-_Yw1HDKYCGd_xp0R"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32">
+<!-- Hero Section -->
+<section class="px-page-margin-mobile md:px-page-margin-desktop mb-section-gap">
+<div class="relative w-full aspect-[16/9] md:aspect-[21/9] rounded-[2.5rem] overflow-hidden shadow-sm">
+<img alt="Elegant Siamese cat hero image" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLsvcsJ7-HPkq5x3lNspISofVazlCwpAH_x6vONsTnv4c0_Z3lH0au44uqPHJbfop02Spc42juZhP-rDKXdbSwycLyFqKEfKEjvGpHjG4Ct5saHcZml4lSwDQjNHjT-Lmok7NDKUwwYtzOGfhgtqgplZWfydqISIPRCffPwfsEG-ptW__WkyeBuOon5AYiR5zGoOJFKPiuswkhUFMATssOgLVNMp7t7osJOCNAEokT1LMWqOFPlE03G6Zhhh"/>
+<div class="absolute inset-0 bg-gradient-to-r from-primary/60 to-transparent flex flex-col justify-center px-8 md:px-16 text-white">
+<span class="inline-block px-4 py-1 rounded-full bg-hwa-red text-white font-label-caps text-label-caps mb-4 w-fit">CHANNEL CAT</span>
+<h2 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero mb-4 max-w-2xl leading-tight">
+                    이번 달의 고양이 건강 리포트:<br/>환절기 면역력 관리
+                </h2>
+<p class="font-body-lg text-body-lg text-white/90 mb-8 max-w-lg">
+                    기온 변화에 민감한 고양이를 위한 사주 기반의 맞춤형 건강 관리 비책을 확인해보세요.
+                </p>
+<button class="w-fit px-8 py-4 bg-hwa-red text-white rounded-full font-headline-sm text-headline-sm hover:scale-105 transition-transform active:scale-95">
+                    리포트 읽어보기
+                </button>
+</div>
+</div>
+</section>
+<!-- Saju-based Care Section -->
+<section class="mb-section-gap overflow-hidden">
+<div class="px-page-margin-mobile md:px-page-margin-desktop flex justify-between items-end mb-8">
+<div>
+<h3 class="font-headline-lg text-headline-lg text-primary">사주 맞춤 케어</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">오행(五行)으로 분석하는 반려묘의 성향과 돌봄법</p>
+</div>
+<button class="text-hwa-red font-headline-sm text-headline-sm flex items-center gap-1 group">
+                전체보기 <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<div class="flex gap-6 overflow-x-auto px-page-margin-mobile md:px-page-margin-desktop pb-8 hide-scrollbar">
+<!-- Mok -->
+<div class="min-w-[280px] md:min-w-[320px] pastel-card p-8 flex flex-col">
+<span class="mok-tag px-3 py-1 rounded-full text-label-caps font-label-caps mb-4 w-fit">Mok(木) - 나무의 기운</span>
+<h4 class="font-headline-md text-headline-md text-primary mb-2">성장과 호기심</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">수직 공간 정복을 즐기며 새로운 장난감에 민감한 성향입니다.</p>
+<div class="mt-auto pt-4 border-t border-primary/5 flex items-center justify-between">
+<span class="text-xs text-secondary">행운의 색: 그린</span>
+<span class="material-symbols-outlined text-primary">info</span>
+</div>
+</div>
+<!-- Hwa -->
+<div class="min-w-[280px] md:min-w-[320px] pastel-card p-8 flex flex-col border-hwa-red/20 bg-hwa-red/5">
+<span class="hwa-tag px-3 py-1 rounded-full text-label-caps font-label-caps mb-4 w-fit">Hwa(火) - 불의 기운</span>
+<h4 class="font-headline-md text-headline-md text-primary mb-2">열정과 사교성</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">에너지가 넘치고 집사와의 교감을 강력하게 원하는 타입입니다.</p>
+<div class="mt-auto pt-4 border-t border-primary/5 flex items-center justify-between">
+<span class="text-xs text-secondary">행운의 색: 레드</span>
+<span class="material-symbols-outlined text-hwa-red" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+</div>
+<!-- To -->
+<div class="min-w-[280px] md:min-w-[320px] pastel-card p-8 flex flex-col">
+<span class="to-tag px-3 py-1 rounded-full text-label-caps font-label-caps mb-4 w-fit">To(土) - 흙의 기운</span>
+<h4 class="font-headline-md text-headline-md text-primary mb-2">안정과 신뢰</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">변화를 싫어하며 자신만의 루틴이 확실한 고양이입니다.</p>
+<div class="mt-auto pt-4 border-t border-primary/5 flex items-center justify-between">
+<span class="text-xs text-secondary">행운의 색: 옐로우</span>
+<span class="material-symbols-outlined text-primary">spa</span>
+</div>
+</div>
+<!-- Geum -->
+<div class="min-w-[280px] md:min-w-[320px] pastel-card p-8 flex flex-col">
+<span class="geum-tag px-3 py-1 rounded-full text-label-caps font-label-caps mb-4 w-fit">Geum(金) - 쇠의 기운</span>
+<h4 class="font-headline-md text-headline-md text-primary mb-2">결단과 독립성</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">깔끔한 성격으로 그루밍에 진심이며 독립적인 공간을 선호합니다.</p>
+<div class="mt-auto pt-4 border-t border-primary/5 flex items-center justify-between">
+<span class="text-xs text-secondary">행운의 색: 화이트</span>
+<span class="material-symbols-outlined text-primary">diamond</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Breed Guide Section -->
+<section class="px-page-margin-mobile md:px-page-margin-desktop mb-section-gap">
+<div class="mb-8">
+<h3 class="font-headline-lg text-headline-lg text-primary">품종별 가이드</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">묘종에 따른 유전적 특성과 사주 에너지의 조화</p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8"><!-- Persian -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="페르시안" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLv-z-LY3gWhYPBVY51TCMSNmAXMpKU15I32BJ9YeUna9negkdF0KT1Sff8H_c7rfmyVmm0nUW60NJv4wFZo7uJQoSNGLSaudl6rUaBr7rWR9t8FlYhk0jgaFQF1g3WOlm7BoHzn42KF9x3vEnOrr5binqSzoqmrqnzHTuxrXCAJUKaL3S1rEopWu5ykt8jmXsYr5h5U5cc2HMTcnJo2WdK6L0cM2dOGcWz2vmiq2L3MjotJAwgfszZ1lUw"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">페르시안 (Persian)</h5>
+<div class="flex gap-2">
+<span class="to-tag text-[10px] px-2 py-0.5 rounded-full font-bold">To(土)</span>
+<span class="su-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Su(水)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Turkish Angora -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="터키시 앙고라" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLvqcFsCEsNmnqXxmwVkFzhULwVGnhfeLAscqbVghHpMt8-IlVcXcAFOe4O289jNDm29P5CdBtBd2MOkQ63_rUyVw1-yk-LWkJo9WcnruuTPYoKC2LG-qa1KQXtu8S4EJE4OY2fSOBF9ICW8taCZcI2HPbujGNddxb1TOjbZ4cmZ1WPqRL0lH_UVxUg0cs5eQlwb8IH_QI1QzMfTrGvOrxe9zPwYJ2TTodJX7Wa2WgFkD2mVKXXO4cG3s0sH"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">터키시 앙고라 (Turkish Angora)</h5>
+<div class="flex gap-2">
+<span class="mok-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Mok(木)</span>
+<span class="hwa-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Hwa(火)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Korean Short Hair -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="코리안 쇼트헤어" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLtf-4Wr0NMOljcYGWfvNDFYzohD-ba-J6sGYxbFFaR-DVDpgRd0vufRnCRTw8LBCHz5eHX1gy6T9berWUYOwCiP3ZDgfIMurEaRC3QvyTbSZr0ygqJZ9ILZph4wkVGL-teoTJty6-_uwD2nq8AqiuwquXu5dC0K6t09sTEA10YTcvzLQ9IreRzSFq3z_PFJRoml5O5DS8BanuR6_aAp9xw4q1a81LF3M7YmBnCHyuSgy8YVoDe3ZR66JE0"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">코리안 쇼트헤어 (Korean Short Hair)</h5>
+<div class="flex gap-2">
+<span class="to-tag text-[10px] px-2 py-0.5 rounded-full font-bold">To(土)</span>
+<span class="geum-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Geum(金)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Abyssinian -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="아비시니안" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLupOKF7rjZyolqYKqBoJOJ5BUS9YNMAP5z1O6wZtiG4HjGTP-bmxAKmNFvVbfbcFqAimUo2heEbUk43vPPZNBftkQYYEU0o00pywkMQDq4ZpjflJnOK2t9h4CGsJpjnvGEvVpVP8b2qrxJq6WF4dM5_FxIyCYB0p7iCBaxKXlXGIp0yQgJVyZYFPpuyEBPjUG7FR9i5lPwyvxA72KNiu7F_Z_d8sGbQGHNwCc9DkC6KWgsddgB02dSR6b8U"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">아비시니안 (Abyssinian)</h5>
+<div class="flex gap-2">
+<span class="hwa-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Hwa(火)</span>
+<span class="mok-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Mok(木)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- American Short Hair -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="아메리칸 쇼트헤어" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLtMBqXsQFmuufS1OiVDCkYbc0djgNHFJoUngaPbODLErpiJXj_5e4tp34mWIXMyaP1yCn95FElsmUz94nD-QXlLjd1epBumBcfBSfCy-BQqMDvh55fz5yNc634awKkU2UmDX7lTylwSpFewLacOjkCkL8-PN936LIl0bMfr3KVhMOLvSEWmoya1f3SkdEhaE5Jif09kuFhnk1jFPrUK_5Mv5ssE8Uext4wS0dc9R1aFxpcC4L1DN4nBM_d2"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">아메리칸 쇼트헤어 (American Short Hair)</h5>
+<div class="flex gap-2">
+<span class="geum-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Geum(金)</span>
+<span class="to-tag text-[10px] px-2 py-0.5 rounded-full font-bold">To(土)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Scottish Fold -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="스코티시 폴드" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLuD9ZDgvTjyfQVnXOA8Ab960j6VlPk3JwNqhASl4a9yITzoBxxt1eVPhsJ2HdxEz3Zu2gptuz90BIpkpdxGNqtOrwOm9AI9MzLo4W4wH-7UpRoAYOeGRwCqqLzmoW1TuyVpFlzMC9rZq9Txx52cmXxvs2g3GAJ6OUmUD7bzPbBOnR7E7Mqd9nyTp1D5B_nqUm4D7S3FxV2FSq7t0HzAzThwEZSFZ6PAK8JTKPaAkNXUI5CNAPWL05Nn_hui"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">스코티시 폴드 (Scottish Fold)</h5>
+<div class="flex gap-2">
+<span class="su-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Su(水)</span>
+<span class="to-tag text-[10px] px-2 py-0.5 rounded-full font-bold">To(土)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Siamese -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="샴" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLuDMDB-Bv2MWiSUjCM0M9Ete1I2JKJ233_opytm2GhFpAigc92haLGoQxRJ3jT9pA4mTsie7DyY9C47ArOOOLMmhW2vKCVZmMwCXRuUNFXCQiMo6vrFqcJq3PsKHhlV_37RZFf0vyhgk6F6qTI0gYQ_1G-F38INB9x0kPOdlkAfFRI_55EicRp6Hb5T6k9nnG0J2BGbDyiyc4HWqm3fyfB5ueMk-fIasF55jOKZE28csEXsYDGWgJPsNrJ0"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">샴 (Siamese)</h5>
+<div class="flex gap-2">
+<span class="hwa-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Hwa(火)</span>
+<span class="mok-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Mok(木)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bengal -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="뱅갈" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLttUQl3SAmGzno1W6MScGEptcQ1dnhOKCwfFv-3sKYtcRoRCv8LZLxkM393CQPku74hi-nYkIhq5srDmKVg-bcpYHui19Dq6GzSOZxzRnr5sDfCuC2aWtDREfSDdXypwFvesFzq8aLIurFxcpWIQ6iS9dx4U-dSGeLqm5ZCeOaWVL1cpztGG1roMb3YBEYB9cYXrS7vmTQT1G1bjGuUsjEOEIy2w-ljM84tAIe0NmS_Rg1QHvTfxS6INGQ"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">뱅갈 (Bengal)</h5>
+<div class="flex gap-2">
+<span class="mok-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Mok(木)</span>
+<span class="hwa-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Hwa(火)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Munchkin -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="먼치킨" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLtkHXQRpojD12Nvwl8ou2sMYUl732Ok-Jhb3YT-2j0OmHqJBMTTys6nOTjh8udAJv7N4ZEFa6KzqJaEvh4r9NoRlDxoxUNU9up10JzHNlg2VhdDleU8Nty8Xa8ueVcd06-Tr4YXuoDXllaWpl50v_wUR9cw0sxufLYLHTUmm4kuY4Dlj3jw8HXkYAFJ1ZQ2xAE_HSU1CsnVWyHE1-zYa2KzulXyvZehr3fuyz7JUsIbG1CqlnrvCVFhE50"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">먼치킨 (Munchkin)</h5>
+<div class="flex gap-2">
+<span class="hwa-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Hwa(火)</span>
+<span class="su-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Su(水)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Russian Blue -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="러시안 블루" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLstzulzo3-skqzuCSXtf6R5V0wgZ4KgJeEcyy_OSOTLJwkswnCugF3s5nIJA8ubk46kenwK2nO59a2cxdezJc0Ndg-JX3VYv-kanEzvhhuhX_LHJjer6wQi4h7dlqUe9keqxNUN18z7vIGq7IYr9QmvmhQSzunrBNEhZ3X5iNEnAIDtK7Ru_oPLp6CLnrkQACKVrHnydx849jjTd9vn11Bb2SH_Mga7yAE7bYHxPrr6qT14c8XvPkdDDeUe"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">러시안 블루 (Russian Blue)</h5>
+<div class="flex gap-2">
+<span class="su-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Su(水)</span>
+<span class="geum-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Geum(金)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Norwegian Forest -->
+<div class="group cursor-pointer">
+<div class="relative overflow-hidden rounded-[2rem] aspect-[4/5] mb-4 shadow-sm border border-black/5">
+<img alt="노르웨이 숲" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida/AP1WRLsm-p6Rp6JyNQcq0Y15HBVLzBI5B0v0f10F01OajiB6Oek2LETgPbuOBM0dJy-8ioroP5TSd2CQRAJDsqEW0UGH1lPc5DHjB4jC-R33nen-KSM2E16o74ham5ihdl24o1ExkrTa6iukHzuUfshOs5gaJVbXJXDnaeMuLiddhtH4s3d6cghvS-lYIDOynG8f_0ZJIrCMtoE1t-YrHWqIYlA7QDAuqi2mQALEDZPbtxzf2GMUKQndeVJ88JsJ"/>
+<div class="absolute bottom-6 left-6 right-6 p-6 glass-header bg-white/70 rounded-2xl">
+<h5 class="font-headline-sm text-headline-sm text-primary mb-1">노르웨이 숲 (Norwegian Forest)</h5>
+<div class="flex gap-2">
+<span class="mok-tag text-[10px] px-2 py-0.5 rounded-full font-bold">Mok(木)</span>
+<span class="to-tag text-[10px] px-2 py-0.5 rounded-full font-bold">To(土)</span>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<!-- Expert Tips Section -->
+<section class="px-page-margin-mobile md:px-page-margin-desktop mb-section-gap">
+<div class="bg-primary/5 rounded-[3rem] p-8 md:p-16">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+<div>
+<h3 class="font-headline-lg text-headline-lg text-primary">전문가 팁</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">베테랑 집사들과 수의사가 제안하는 묘생 꿀팁</p>
+</div>
+<button class="bg-primary text-white px-6 py-3 rounded-full font-headline-sm text-headline-sm active:scale-95 duration-200">
+                    더 많은 팁 보기
+                </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-white p-6 rounded-[2rem] flex items-center gap-6 hover:shadow-md transition-shadow group cursor-pointer">
+<div class="w-24 h-24 rounded-2xl bg-sand overflow-hidden flex-shrink-0">
+<img alt="Cat vertical space" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalhp-6f2YKc_IfdLR1B0ruZTHBtm9u51j3TdEnoKs6JervpuNsHIZPi4_XLNy0hemWljGbkZJqYdRFTnDiBaJU_urECHd3cZAxk4yk_jHbeRArenq4q7GkmPFHT9vZ3xPcKFI6JjwxtDxb_oXuteLkcGylqz02cRc15M2pJLkt0YEpLDqhgLlN306HSFdOnSyZnswzR-5DUCxTt2ClCUX-fP08n_UTzgpkL5eX7C5cfx_F-WvQLixn9PbvtdO0V7Kd_WhWWvQdUQC"/>
+</div>
+<div>
+<h6 class="font-headline-sm text-headline-sm text-primary group-hover:text-hwa-red transition-colors">고양이 수직 공간 구성법</h6>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">좁은 공간에서도 고양이가 만족할 수 있는 효율적인 수직 동선 설계 가이드입니다.</p>
+</div>
+</div>
+<div class="bg-white p-6 rounded-[2rem] flex items-center gap-6 hover:shadow-md transition-shadow group cursor-pointer">
+<div class="w-24 h-24 rounded-2xl bg-sand overflow-hidden flex-shrink-0">
+<img alt="Cat diet tips" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6DYgp3PTOqmIMMUd-txF2-re17CHQj7e7rAhpVOEGlKbvZ_jZ41M6nt_GA2aD2OPeuYnLgmCr3jTxBjLR4zT267wRDt9Arka00kyrmEzU_mAPucX5a9HtW56sm5F0_lrQyez6KXQvzoGkjGzRq8ri52OePws1Srq9Nf6VMZNHeBy1_awl6NWM-5yCCK5r4ijzGCQEPEVDxvnymj7KpMLV22e3siA9ajgZblJbqMIKockeaWflyWxk1QqkGSflcNxjksgp_l31FIYU"/>
+</div>
+<div>
+<h6 class="font-headline-sm text-headline-sm text-primary group-hover:text-hwa-red transition-colors">식습관 체크리스트</h6>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">나이별, 체질별 맞춤 사료 선택과 음수량 관리를 위한 필수 항목들을 확인하세요.</p>
+</div>
+</div>
+<div class="bg-white p-6 rounded-[2rem] flex items-center gap-6 hover:shadow-md transition-shadow group cursor-pointer">
+<div class="w-24 h-24 rounded-2xl bg-sand overflow-hidden flex-shrink-0">
+<img alt="Cat grooming" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPo4sDiJYKxLH4nydP_fcohrOwg_lO0dpH2DhM_Sx8Il4eOERmdLKUnMb7ssXZfpa5GAFOrr8655eAehyuQuA2No-CKmA3ZHB9BaK18DX_60xvAXHytHmMNWB_EwfD-r0qZD4AWdJrtH0v-dPV2Q1oujAImA6TcJPORl-LbvrOtFwItIRmchrThkamp5zVku1nyFfpXN2Gj7VWFst6126W7jO6cdJovhMdnd_a3It1Open1rZx0rhnKMF6NjftW5yeQkQu9xvmi9Au"/>
+</div>
+<div>
+<h6 class="font-headline-sm text-headline-sm text-primary group-hover:text-hwa-red transition-colors">환절기 털 관리 비책</h6>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">헤어볼 예방과 윤기 나는 피모를 위한 브러싱 테크닉과 영양제 추천.</p>
+</div>
+</div>
+<div class="bg-white p-6 rounded-[2rem] flex items-center gap-6 hover:shadow-md transition-shadow group cursor-pointer">
+<div class="w-24 h-24 rounded-2xl bg-sand overflow-hidden flex-shrink-0">
+<img alt="Cat communication" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdGd9ar8p-SvcGa_KWYyRD9Af_4ciNg_9fr9gRXenmlERo5hbESPVNfsWYMdKdgoaQyI__tVm8eRJ3glY11RUhjowXu5De4kfTGxfCONk3RPOCCSK-r-xgpNXs1Cbt28hwohLiBqt867JEaTl2K6ZUVQG5Tky6mMb6m6R8S78HqXJ1cDPwvUxQRUQAs0o_D-1DoB4w8Cmujnv2degl_DF-Kyn69Qn-O552PSaaQ5XiIPY9Ayk6mjY0dZ8S2tvA8iAz49HELjpaCFNJ"/>
+</div>
+<div>
+<h6 class="font-headline-sm text-headline-sm text-primary group-hover:text-hwa-red transition-colors">고양이 언어 이해하기</h6>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">꼬리 모양과 울음소리로 분석하는 반려묘의 심리 상태와 대화법.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full glass-header bg-surface/80 px-4 pb-safe pt-2 flex justify-around items-center z-50 rounded-t-[2rem] shadow-[0_-4px_20px_rgba(68,38,86,0.05)]">
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-caps text-label-caps mt-1">홈</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">pets</span>
+<span class="font-label-caps text-label-caps mt-1">강아지</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="font-label-caps text-label-caps mt-0.5">고양이</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-label-caps text-label-caps mt-1">댕땅사주</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-caps text-label-caps mt-1">개매니티</span>
+</button>
+</nav>
+<!-- Footer -->
+<footer class="bg-surface-container w-full rounded-t-[2rem] mt-section-gap pb-safe">
+<div class="w-full max-w-7xl mx-auto px-page-margin-mobile md:px-page-margin-desktop py-12 flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex flex-col items-center md:items-start">
+<span class="font-headline-sm text-headline-sm text-primary mb-2">K-Saju Pet</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 K-Saju Pet. 모든 권한은 보호되어 있습니다.</p>
+</div>
+<div class="flex gap-6">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">이용약관</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">개인정보처리방침</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">고객센터</a>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary cursor-pointer hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary cursor-pointer hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">mail</span>
+</div>
+</div>
+</div>
+</footer>
+<script>
+    // Simple scroll interaction for header
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (window.scrollY > 20) {
+            header.classList.add('shadow-sm');
+        } else {
+            header.classList.remove('shadow-sm');
+        }
+    });
+
+    // Add smooth horizontal scrolling with wheel for the Saju section on desktop
+    const scrollContainer = document.querySelector('.overflow-x-auto');
+    if (scrollContainer) {
+        scrollContainer.addEventListener('wheel', (evt) => {
+            if (window.innerWidth >= 768) {
+                evt.preventDefault();
+                scrollContainer.scrollLeft += evt.deltaY;
+            }
+        });
+    }
+</script>
+</body></html>

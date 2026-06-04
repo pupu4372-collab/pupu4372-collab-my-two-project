@@ -3,6 +3,7 @@ import { PetShowPostActions } from "@/components/community/PetShowPostActions";
 import { PetShowShell } from "@/components/community/PetShowShell";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { fetchPetShowComments, fetchPetShowPost } from "@/lib/community/pet-show-detail";
+import { getCountryLabel } from "@/lib/i18n/countries";
 import { notFound } from "next/navigation";
 
 interface PetShowDetailPageProps {
@@ -43,6 +44,10 @@ export default async function PetShowDetailPage({ params }: PetShowDetailPagePro
             </span>
           )}
         </div>
+
+        {getCountryLabel(post.country_code, locale) && (
+          <p className="text-sm font-bold text-plum/55">{getCountryLabel(post.country_code, locale)}</p>
+        )}
 
         {post.content && (
           <p className="text-sm leading-relaxed text-plum/75">{post.content}</p>

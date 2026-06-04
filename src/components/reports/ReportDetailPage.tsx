@@ -49,7 +49,7 @@ function localeFrom(value: unknown): Locale {
 }
 
 function speciesFrom(report: ReportDetailRow): Species {
-  return report.pet?.species === "cat" ? "cat" : "dog";
+  return report.pet?.species === "cat" || report.pet?.species === "other" ? report.pet.species : "dog";
 }
 
 function elementFrom(report: ReportDetailRow): ElementKey {
