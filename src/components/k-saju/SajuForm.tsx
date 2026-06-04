@@ -396,6 +396,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
         <button
           type="submit"
           disabled={loading}
+          style={{ position: "static" }}
           className={
             embedded
               ? "w-full rounded-full bg-mint px-4 py-2.5 text-center text-ink transition hover:brightness-105 disabled:opacity-60"

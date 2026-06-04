@@ -18,7 +18,8 @@ const MOBILE_LINKS: Array<{
 ];
 
 interface MobileBottomNavProps {
-  active?: NavKey;
+  /** null = no tab highlighted (e.g. reptile channel has no bottom-tab route) */
+  active?: NavKey | null;
 }
 
 export function MobileBottomNav({ active = "home" }: MobileBottomNavProps) {
