@@ -37,11 +37,17 @@ function ElementTag({ element, isKo }: { element: ElementKey; isKo: boolean }) {
   );
 }
 
+function breedGuideHref(slug: string | undefined, animal: "dog" | "cat") {
+  if (!slug) return `/community/breeds?animal=${animal}`;
+  return `/community/breeds/${slug}?from=${animal}`;
+}
+
 const DOG_BREEDS = [
   {
     image: "dog-02.jpg",
     ko: "골든 리트리버",
     en: "Golden Retriever",
+    seoSlug: "golden-retriever",
     element: "to" as const,
     koSize: "대형견",
     enSize: "Large",
@@ -52,6 +58,7 @@ const DOG_BREEDS = [
     image: "dog-03.jpg",
     ko: "포메라니안",
     en: "Pomeranian",
+    seoSlug: "pomeranian",
     element: "hwa" as const,
     koSize: "소형견",
     enSize: "Small",
@@ -62,6 +69,7 @@ const DOG_BREEDS = [
     image: "dog-04.jpg",
     ko: "푸들",
     en: "Poodle",
+    seoSlug: "poodle",
     element: "su" as const,
     koSize: "다재다능",
     enSize: "Versatile",
@@ -72,6 +80,7 @@ const DOG_BREEDS = [
     image: "dog-05.jpg",
     ko: "말티즈",
     en: "Maltese",
+    seoSlug: "maltese",
     element: "to" as const,
     koSize: "온순한",
     enSize: "Gentle",
@@ -82,6 +91,7 @@ const DOG_BREEDS = [
     image: "dog-06.jpg",
     ko: "비숑 프리제",
     en: "Bichon Frise",
+    seoSlug: "bichon-frise",
     element: "mok" as const,
     koSize: "활발한",
     enSize: "Playful",
@@ -92,6 +102,7 @@ const DOG_BREEDS = [
     image: "dog-07.jpg",
     ko: "시바 Inu",
     en: "Shiba Inu",
+    seoSlug: "shiba-inu",
     element: "geum" as const,
     koSize: "충직한",
     enSize: "Loyal",
@@ -102,6 +113,7 @@ const DOG_BREEDS = [
     image: "dog-08.jpg",
     ko: "웰시 코기",
     en: "Welsh Corgi",
+    seoSlug: "welsh-corgi",
     element: "hwa" as const,
     koSize: "사교적인",
     enSize: "Social",
@@ -276,7 +288,7 @@ export function DogChannelHome({
           {DOG_BREEDS.map((breed) => (
             <Link
               key={breed.image}
-              href="/community/tips"
+              href={breedGuideHref(breed.seoSlug, "dog")}
               className="group cursor-pointer"
             >
               <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-[2rem] border border-black/5 shadow-sm">
@@ -289,7 +301,6 @@ export function DogChannelHome({
                 <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/75 p-4 backdrop-blur-md">
                   <h3 className="text-sm font-extrabold text-primary">{isKo ? breed.ko : breed.en}</h3>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    <ElementTag element={breed.element} isKo={isKo} />
                     <span className="rounded-full bg-primary/5 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">
                       {isKo ? breed.koSize : breed.enSize}
                     </span>

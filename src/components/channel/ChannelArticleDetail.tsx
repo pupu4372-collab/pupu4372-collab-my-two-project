@@ -25,9 +25,10 @@ interface ChannelArticleDetailProps {
   channel: PetChannel;
   article: ChannelArticle;
   source?: "supabase" | "static";
+  showSajuCta?: boolean;
 }
 
-export function ChannelArticleDetail({ channel, article, source }: ChannelArticleDetailProps) {
+export function ChannelArticleDetail({ channel, article, source, showSajuCta = true }: ChannelArticleDetailProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const theme = THEME[channel];
@@ -79,12 +80,14 @@ export function ChannelArticleDetail({ channel, article, source }: ChannelArticl
         </section>
       )}
 
-      <Link
-        href="/saju"
-        className={`inline-flex rounded-full px-6 py-3 text-sm font-bold ${theme.button}`}
-      >
-        {CHANNEL_CONTENT[channel].sajuCta}
-      </Link>
+      {showSajuCta && (
+        <Link
+          href="/saju"
+          className={`inline-flex rounded-full px-6 py-3 text-sm font-bold ${theme.button}`}
+        >
+          {CHANNEL_CONTENT[channel].sajuCta}
+        </Link>
+      )}
     </article>
   );
 }

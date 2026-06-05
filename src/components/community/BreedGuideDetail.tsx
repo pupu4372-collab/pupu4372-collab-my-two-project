@@ -6,18 +6,20 @@ interface BreedGuideDetailProps {
   guide: BreedGuide;
   source: "supabase" | "mock";
   isKo: boolean;
+  backHref?: "/community/breeds" | "/dog" | "/cat" | "/reptile";
+  backLabel?: string;
 }
 
-export function BreedGuideDetail({ guide, source, isKo }: BreedGuideDetailProps) {
+export function BreedGuideDetail({ guide, source, isKo, backHref = "/community/breeds", backLabel }: BreedGuideDetailProps) {
   const title = isKo ? guide.breed_name : guide.breed_name_en ?? guide.breed_name;
 
   return (
     <article className="space-y-8">
       <Link
-        href="/community/breeds"
+        href={backHref}
         className="text-sm font-semibold text-channel-community underline"
       >
-        ← {isKo ? "품종 가이드 목록" : "All breed guides"}
+        {backLabel ?? (isKo ? "← 품종 가이드 목록" : "← All breed guides")}
       </Link>
 
       <header className="pastel-card space-y-4 p-6">

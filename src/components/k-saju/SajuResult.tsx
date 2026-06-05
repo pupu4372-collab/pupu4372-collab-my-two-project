@@ -23,10 +23,10 @@ const LABELS = {
     birth: "Born",
     dominant: "Dominant",
     elements: "Five Elements",
-    luckyTitle: "Today's lucky points",
-    luckyNumber: "Lucky Number",
-    wealthLuck: "Wealth Luck",
-    healthLuck: "Health Luck",
+    luckyTitle: "Today's pet lucky points",
+    luckyNumber: "Lucky Routine",
+    wealthLuck: "Treat Luck",
+    healthLuck: "Condition Luck",
     personality: "Personality",
     detailedTraits: "Trait highlights",
     pillars: "Four Pillars",
@@ -50,6 +50,7 @@ const LABELS = {
     luckyColorTitle: "Today's lucky color",
     luckyColorBody: (name: string, color: string) =>
       `For ${name}, ${color} accessories may bring extra luck today.`,
+    routineUnit: "times",
     home: "Back to home",
     another: "Read another pet",
   },
@@ -58,10 +59,10 @@ const LABELS = {
     birth: "출생",
     dominant: "대표 오행",
     elements: "오행 분석",
-    luckyTitle: "오늘의 행운 포인트",
-    luckyNumber: "럭키 넘버",
-    wealthLuck: "재물운",
-    healthLuck: "건강운",
+    luckyTitle: "오늘의 펫 행운 포인트",
+    luckyNumber: "행운 루틴",
+    wealthLuck: "간식운",
+    healthLuck: "컨디션운",
     personality: "성격 분석",
     detailedTraits: "상세 특징",
     pillars: "사주팔자",
@@ -85,6 +86,7 @@ const LABELS = {
     luckyColorTitle: "오늘의 행운 컬러",
     luckyColorBody: (name: string, color: string) =>
       `${name}에게 오늘은 ${color} 액세서리가 행운을 가져다줄 거예요.`,
+    routineUnit: "회",
     home: "홈으로",
     another: "다른 펫 사주",
   },
@@ -284,15 +286,18 @@ export function SajuResult({ result }: SajuResultProps) {
             <div className="grid gap-4 md:grid-cols-3">
               <div className="flex flex-col items-center rounded-[2rem] border border-lavender/40 bg-lavender/30 p-6 text-center">
                 <span className="mb-3 text-3xl" aria-hidden>
-                  🔢
+                  🐾
                 </span>
                 <p className="text-xs font-extrabold uppercase tracking-wide text-primary">{t.luckyNumber}</p>
-                <p className="mt-2 text-4xl font-extrabold text-primary">{lucky.luckyNumber}</p>
+                <p className="mt-2 text-4xl font-extrabold text-primary">
+                  {lucky.luckyNumber}
+                  <span className="ml-1 text-base">{t.routineUnit}</span>
+                </p>
               </div>
               <div className="flex flex-col rounded-[2rem] border border-mint/40 bg-mint/30 p-6">
                 <div className="text-center">
                   <span className="mb-3 block text-3xl" aria-hidden>
-                    💰
+                  🦴
                   </span>
                   <p className="text-xs font-extrabold uppercase tracking-wide text-primary">{t.wealthLuck}</p>
                   <p className="mt-2 text-2xl font-bold text-primary">

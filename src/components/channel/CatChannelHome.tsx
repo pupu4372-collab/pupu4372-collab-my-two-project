@@ -80,19 +80,24 @@ const SAJU_CARE = [
   },
 ] as const;
 
-const CAT_BREEDS = [
-  { image: "cat-03.jpg", ko: "페르시안", en: "Persian" },
+function breedGuideHref(slug: string | undefined, animal: "dog" | "cat") {
+  if (!slug) return `/community/breeds?animal=${animal}`;
+  return `/community/breeds/${slug}?from=${animal}`;
+}
+
+const CAT_BREEDS: Array<{ image: string; ko: string; en: string; seoSlug?: string }> = [
+  { image: "cat-03.jpg", ko: "페르시안", en: "Persian", seoSlug: "persian" },
   { image: "cat-04.jpg", ko: "터키시 앙고라", en: "Turkish Angora" },
-  { image: "cat-05.jpg", ko: "코리안 쇼트헤어", en: "Korean Short Hair" },
+  { image: "cat-05.jpg", ko: "코리안 쇼트헤어", en: "Korean Short Hair", seoSlug: "korean-shorthair" },
   { image: "cat-06.jpg", ko: "아비시니안", en: "Abyssinian" },
   { image: "cat-07.jpg", ko: "아메리칸 쇼트헤어", en: "American Short Hair" },
-  { image: "cat-08.jpg", ko: "스코티시 폴드", en: "Scottish Fold" },
-  { image: "cat-09.jpg", ko: "샴", en: "Siamese" },
-  { image: "cat-10.jpg", ko: "뱅갈", en: "Bengal" },
+  { image: "cat-08.jpg", ko: "스코티시 폴드", en: "Scottish Fold", seoSlug: "scottish-fold" },
+  { image: "cat-09.jpg", ko: "샴", en: "Siamese", seoSlug: "siamese" },
+  { image: "cat-10.jpg", ko: "뱅갈", en: "Bengal", seoSlug: "bengal" },
   { image: "cat-11.jpg", ko: "먼치킨", en: "Munchkin" },
-  { image: "cat-12.jpg", ko: "러시안 블루", en: "Russian Blue" },
+  { image: "cat-12.jpg", ko: "러시안 블루", en: "Russian Blue", seoSlug: "russian-blue" },
   { image: "cat-13.jpg", ko: "노르웨이 숲", en: "Norwegian Forest" },
-] as const;
+];
 
 const EXPERT_TIPS = [
   {
@@ -224,7 +229,7 @@ export function CatChannelHome({
           {CAT_BREEDS.map((breed) => (
             <Link
               key={breed.image}
-              href="/community/tips"
+              href={breedGuideHref(breed.seoSlug, "cat")}
               className="group cursor-pointer"
             >
               <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-[2rem] border border-black/5 shadow-sm">

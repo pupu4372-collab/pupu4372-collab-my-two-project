@@ -23,6 +23,66 @@ function tagForBoard(board: CommunityBoardKind) {
   return board === "qa" ? "qa" : board;
 }
 
+function normalizePostIdentifier(value: string): string {
+  let normalized = value.trim();
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if (!normalized.includes("%")) break;
+    try {
+      normalized = decodeURIComponent(normalized);
+    } catch {
+      break;
+    }
+  }
+  return normalized;
+}
+
+async function queryBoardPost(
+  supabase: Db,
+  board: CommunityBoardKind,
+  column: "id" | "seo_slug",
+  value: string
+): Promise<CommunityPost | null> {
+  let query = supabase
+    .from("community_posts")
+    .select(POST_SELECT)
+    .eq(column, value)
+    .eq("post_type", postTypeForBoard(board))
+    .eq("is_hidden", false);
+
+  if (board !== "qa") {
+    query = query.contains("tags", [tagForBoard(board)]);
+  }
+
+  const { data, error } = await query.maybeSingle();
+  if (error || !data) return null;
+  return data as CommunityPost;
+}
+
+/** Fallback when PostgREST slug filters fail for non-ASCII slugs. */
+async function findBoardPostBySlug(
+  supabase: Db,
+  board: CommunityBoardKind,
+  slug: string
+): Promise<CommunityPost | null> {
+  let query = supabase
+    .from("community_posts")
+    .select(POST_SELECT)
+    .eq("post_type", postTypeForBoard(board))
+    .eq("is_hidden", false)
+    .not("seo_slug", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (board !== "qa") {
+    query = query.contains("tags", [tagForBoard(board)]);
+  }
+
+  const { data, error } = await query;
+  const posts = (data ?? []) as CommunityPost[];
+  if (error || !posts.length) return null;
+  return posts.find((post) => post.seo_slug === slug) ?? null;
+}
+
 function getMockComments(postId: string): PostComment[] {
   const base = Date.now();
   return [
@@ -53,35 +113,27 @@ export async function fetchQaPostDetail(
   identifier: string,
   board: CommunityBoardKind = "qa"
 ): Promise<CommunityPost | null> {
+  const normalized = normalizePostIdentifier(identifier);
   const supabase = getSupabaseServerClient();
   if (!supabase) {
     if (board !== "qa") return null;
-    if (isUuid(identifier)) return MOCK_BY_ID[identifier] ?? null;
-    return Object.values(MOCK_BY_ID).find((p) => p.seo_slug === identifier) ?? null;
+    if (isUuid(normalized)) return MOCK_BY_ID[normalized] ?? null;
+    return Object.values(MOCK_BY_ID).find((p) => p.seo_slug === normalized) ?? null;
   }
 
-  const idColumn = isUuid(identifier) ? "id" : "seo_slug";
-
-  let query = supabase
-    .from("community_posts")
-    .select(POST_SELECT)
-    .eq(idColumn, identifier)
-    .eq("post_type", postTypeForBoard(board))
-    .eq("is_hidden", false);
-
-  if (board !== "qa") {
-    query = query.contains("tags", [tagForBoard(board)]);
+  if (isUuid(normalized)) {
+    const byId = await queryBoardPost(supabase, board, "id", normalized);
+    if (byId) return byId;
+  } else {
+    const bySlug = await queryBoardPost(supabase, board, "seo_slug", normalized);
+    if (bySlug) return bySlug;
+    const bySlugFallback = await findBoardPostBySlug(supabase, board, normalized);
+    if (bySlugFallback) return bySlugFallback;
   }
 
-  const { data, error } = await query
-    .single();
-
-  if (error || !data) {
-    if (board !== "qa") return null;
-    if (isUuid(identifier)) return MOCK_BY_ID[identifier] ?? null;
-    return Object.values(MOCK_BY_ID).find((p) => p.seo_slug === identifier) ?? null;
-  }
-  return data as CommunityPost;
+  if (board !== "qa") return null;
+  if (isUuid(normalized)) return MOCK_BY_ID[normalized] ?? null;
+  return Object.values(MOCK_BY_ID).find((p) => p.seo_slug === normalized) ?? null;
 }
 
 export async function fetchQaComments(postId: string): Promise<PostComment[]> {

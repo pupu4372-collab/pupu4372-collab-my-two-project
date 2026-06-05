@@ -94,8 +94,7 @@ export function ChannelShell({
     theme === "dog" || theme === "cat" || theme === "reptile" || theme === "saju" || theme === "community"
       ? theme
       : "home";
-  /** 렙타일 채널은 하단 탭에 없음 — 홈을 강조하면 실제 홈(/)과 혼동됨 */
-  const mobileNavActive: "home" | "dog" | "cat" | "saju" | "community" | null =
+  const mobileNavActive: "home" | "dog" | "cat" | "reptile" | "saju" | "community" | null =
     theme === "dog"
       ? "dog"
       : theme === "cat"
@@ -105,7 +104,7 @@ export function ChannelShell({
           : theme === "community"
             ? "community"
             : theme === "reptile"
-              ? null
+              ? "reptile"
               : "home";
   const links =
     rightLinks ??

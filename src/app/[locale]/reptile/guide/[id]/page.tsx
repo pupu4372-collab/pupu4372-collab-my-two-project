@@ -25,7 +25,7 @@ export default async function ReptileGuideDetailPage({ params }: PageProps) {
         { href: "/community", label: isKo ? "커뮤니티" : "Community" },
       ]}
     >
-      <ChannelArticleDetail channel="reptile" article={article} source={source} />
+      <ChannelArticleDetail channel="reptile" article={article} source={source} showSajuCta={false} />
     </ChannelShell>
   );
 }
