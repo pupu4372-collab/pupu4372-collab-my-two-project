@@ -4,6 +4,7 @@ export type PetSpecies = "dog" | "cat" | "other";
 export type PetShowSpecies = PetSpecies | "other";
 export type AppChannel = "home" | "dog" | "cat" | "reptile" | "community" | "pet_saju";
 export type PostType = "photo_show" | "qa" | "free" | "saju_review";
+export type ReportStatus = "pending" | "reviewing" | "resolved" | "rejected";
 export type SajuType =
   | "basic"
   | "zodiac"
@@ -127,6 +128,18 @@ export interface PostComment {
   updated_at: string;
 }
 
+export interface PostReport {
+  id: string;
+  post_id: string | null;
+  comment_id: string | null;
+  reporter_id: string | null;
+  reason: string;
+  detail: string | null;
+  status: ReportStatus;
+  created_at: string;
+  resolved_at: string | null;
+}
+
 export interface PetShowRankingRow {
   id: string;
   author_id: string;
@@ -201,6 +214,18 @@ export interface Database {
           content: string;
           parent_id?: string | null;
         }
+      >;
+      post_reports: TableDef<
+        PostReport,
+        {
+          post_id?: string | null;
+          comment_id?: string | null;
+          reporter_id: string;
+          reason: string;
+          detail?: string | null;
+          status?: ReportStatus;
+        },
+        Partial<PostReport>
       >;
       contents: TableDef<
         {

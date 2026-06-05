@@ -5,6 +5,7 @@ import type { PostComment } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useState } from "react";
+import { ReportButton } from "./ReportButton";
 
 interface QaCommentsProps {
   postId: string;
@@ -154,6 +155,9 @@ export function QaComments({
                         ? "이 답변 채택"
                         : "Adopt this answer"}
                   </button>
+                )}
+                {userId !== comment.author_id && (
+                  <ReportButton commentId={comment.id} compact />
                 )}
               </div>
             </li>

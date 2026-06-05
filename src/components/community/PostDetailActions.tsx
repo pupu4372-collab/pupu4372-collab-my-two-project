@@ -6,6 +6,7 @@ import type { CommunityPost } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useState } from "react";
+import { ReportButton } from "./ReportButton";
 
 interface PostDetailActionsProps {
   post: CommunityPost;
@@ -72,6 +73,7 @@ export function PostDetailActions({ post, board, initialSaved = false }: PostDet
           {isKo ? "로그인 후 저장" : "Log in to save"}
         </Link>
       )}
+      <ReportButton postId={post.id} compact />
     </div>
   );
 }

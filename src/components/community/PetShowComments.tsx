@@ -5,6 +5,7 @@ import type { PostComment } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useState } from "react";
+import { ReportButton } from "./ReportButton";
 
 interface PetShowCommentsProps {
   postId: string;
@@ -28,7 +29,7 @@ export function PetShowComments({
 }: PetShowCommentsProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const { accessToken, configured, isAnonymous } = useSupabaseSession();
+  const { accessToken, userId, configured, isAnonymous } = useSupabaseSession();
   const [comments, setComments] = useState(initialComments);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -77,7 +78,12 @@ export function PetShowComments({
         {comments.map((comment) => (
           <li key={comment.id} className="rounded-2xl bg-white/55 px-4 py-3">
             <p className="text-sm leading-relaxed text-plum/75">{comment.content}</p>
-            <p className="mt-2 text-xs text-plum/40">{formatDate(comment.created_at)}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <p className="text-xs text-plum/40">{formatDate(comment.created_at)}</p>
+              {userId !== comment.author_id && (
+                <ReportButton commentId={comment.id} compact />
+              )}
+            </div>
           </li>
         ))}
       </ul>

@@ -4,6 +4,7 @@ import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useState } from "react";
+import { ReportButton } from "./ReportButton";
 
 interface PetShowPostActionsProps {
   postId: string;
@@ -78,6 +79,7 @@ export function PetShowPostActions({
       ) : (
         <span className="rounded-full bg-white/50 px-3 py-1.5 text-sm font-bold text-plum/55">💬 {commentCount}</span>
       )}
+      <ReportButton postId={postId} compact />
     </div>
   );
 }

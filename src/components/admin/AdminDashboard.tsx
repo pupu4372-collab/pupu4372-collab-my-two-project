@@ -1,6 +1,7 @@
 "use client";
 
 import { AdminModeration } from "@/components/admin/AdminModeration";
+import { AdminReportsInbox } from "@/components/admin/AdminReportsInbox";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { useEffect, useState } from "react";
 
@@ -15,7 +16,7 @@ interface Stats {
   sajuResults?: number;
 }
 
-type Tab = "stats" | "moderation";
+type Tab = "stats" | "reports" | "moderation";
 
 const STAT_ICONS = ["👤", "📸", "💬", "🗨️", "✨", "💳"] as const;
 
@@ -64,6 +65,7 @@ export function AdminDashboard() {
         {(
           [
             { id: "stats" as const, label: "통계" },
+            { id: "reports" as const, label: "신고함" },
             { id: "moderation" as const, label: "게시글 관리" },
           ] as const
         ).map((item) => (
@@ -102,6 +104,13 @@ export function AdminDashboard() {
             ))}
           </div>
         </div>
+      )}
+
+      {tab === "reports" && (
+        <GlassCard>
+          <h3 className="mb-4 text-lg font-bold text-primary">신고함</h3>
+          <AdminReportsInbox />
+        </GlassCard>
       )}
 
       {tab === "moderation" && (

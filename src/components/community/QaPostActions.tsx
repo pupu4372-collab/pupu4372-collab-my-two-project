@@ -5,6 +5,7 @@ import { useRouter } from "@/i18n/navigation";
 import type { CommunityBoardKind } from "@/lib/community/qa-feed";
 import { useLocale } from "next-intl";
 import { useState } from "react";
+import { ReportButton } from "./ReportButton";
 
 type EditableBoard = Extract<CommunityBoardKind, "free" | "tips" | "experience">;
 
@@ -35,7 +36,17 @@ export function QaPostActions({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!ready || isAnonymous || userId !== authorId) return null;
+  if (!ready) return null;
+
+  const canEdit = !isAnonymous && userId === authorId;
+
+  if (!canEdit) {
+    return (
+      <div className="flex justify-end">
+        <ReportButton postId={postId} compact />
+      </div>
+    );
+  }
 
   async function savePost(e: React.FormEvent) {
     e.preventDefault();
