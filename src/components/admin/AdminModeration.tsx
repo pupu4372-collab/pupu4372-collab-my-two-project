@@ -1,6 +1,11 @@
 "use client";
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import {
+  getAdminPostBoardLabel,
+  getAdminPostHref,
+  type AdminPostBoardFilter,
+} from "@/lib/admin/post-board";
 import type { CommunityPost } from "@/lib/supabase/types";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -9,9 +14,19 @@ interface AdminPostRow extends CommunityPost {
   author_name?: string;
 }
 
+const BOARD_FILTERS: Array<{ id: AdminPostBoardFilter; label: string }> = [
+  { id: "all", label: "전체" },
+  { id: "pet-show", label: "우리아이 자랑" },
+  { id: "qa", label: "Q&A" },
+  { id: "tips", label: "꿀팁" },
+  { id: "free", label: "자유게시판" },
+  { id: "experience", label: "품종별 경험담" },
+];
+
 export function AdminModeration() {
   const { accessToken, isAnonymous } = useSupabaseSession();
   const [posts, setPosts] = useState<AdminPostRow[]>([]);
+  const [selectedBoard, setSelectedBoard] = useState<AdminPostBoardFilter>("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -24,7 +39,8 @@ export function AdminModeration() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/posts", {
+      const params = new URLSearchParams({ board: selectedBoard });
+      const res = await fetch(`/api/admin/posts?${params.toString()}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
@@ -35,7 +51,7 @@ export function AdminModeration() {
     } finally {
       setLoading(false);
     }
-  }, [accessToken]);
+  }, [accessToken, selectedBoard]);
 
   useEffect(() => {
     void load();
@@ -89,15 +105,34 @@ export function AdminModeration() {
     );
   }
 
-  if (loading) return <p className="text-sm text-plum/60">게시글 불러오는 중…</p>;
-  if (error) return <p className="text-sm text-red-700/80">{error}</p>;
-
   return (
-    <div className="space-y-3">
-      {posts.length === 0 && (
-        <p className="text-sm text-plum/55">표시할 게시글이 없습니다.</p>
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {BOARD_FILTERS.map((filter) => (
+          <button
+            key={filter.id}
+            type="button"
+            onClick={() => setSelectedBoard(filter.id)}
+            className={
+              selectedBoard === filter.id
+                ? "rounded-full bg-primary px-4 py-2 text-xs font-extrabold text-white shadow-sm"
+                : "rounded-full border border-plum/10 bg-white/70 px-4 py-2 text-xs font-bold text-plum/65 transition hover:bg-white"
+            }
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
+
+      {loading && <p className="text-sm text-plum/60">게시글 불러오는 중…</p>}
+      {error && <p className="text-sm text-red-700/80">{error}</p>}
+      {!loading && !error && posts.length === 0 && (
+        <p className="text-sm text-plum/55">선택한 게시판에 표시할 게시글이 없습니다.</p>
       )}
-      {posts.map((post) => (
+      {!loading && !error && posts.map((post) => {
+        const postHref = getAdminPostHref(post);
+
+        return (
         <div
           key={post.id}
           className={`rounded-[1.25rem] border px-4 py-3 ${
@@ -105,14 +140,14 @@ export function AdminModeration() {
           }`}
         >
           <div className="flex flex-wrap items-center gap-2 text-xs text-plum/45">
-            <span className="font-bold">{post.post_type}</span>
+            <span className="font-bold">{getAdminPostBoardLabel(post)}</span>
             <span>{post.author_name ?? post.author_id.slice(0, 8)}</span>
             {post.is_hidden && <span className="text-red-700/70">숨김</span>}
           </div>
           <p className="mt-2 font-semibold text-plum">{post.title ?? "(제목 없음)"}</p>
-          {post.post_type === "qa" && (
+          {postHref && (
             <Link
-              href={`/community/qa/${post.id}`}
+              href={postHref}
               className="mt-1 inline-block text-xs text-channel-community underline"
             >
               상세 보기
@@ -136,7 +171,8 @@ export function AdminModeration() {
             </button>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

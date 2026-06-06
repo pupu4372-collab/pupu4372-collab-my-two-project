@@ -154,6 +154,15 @@ const TIPS_CATEGORIES: Record<PetAnimalType, BoardCategoryOption[]> = {
   ],
 };
 
+function withOtherSubcategories(categories: BoardCategoryOption[]): BoardCategoryOption[] {
+  return categories.map((category) => ({
+    ...category,
+    children: category.children
+      ? [...category.children, { id: `${category.id}-other`, ko: "기타", en: "Other" }]
+      : category.children,
+  }));
+}
+
 const PET_ANIMAL_OPTIONS = [
   { value: "dog" as const, ko: "강아지", en: "Dog" },
   { value: "cat" as const, ko: "고양이", en: "Cat" },
@@ -175,7 +184,7 @@ export function getBoardCategories(
   board: "qa" | "tips",
   animal: PetAnimalType
 ): BoardCategoryOption[] {
-  return board === "qa" ? QA_CATEGORIES[animal] : TIPS_CATEGORIES[animal];
+  return board === "qa" ? QA_CATEGORIES[animal] : withOtherSubcategories(TIPS_CATEGORIES[animal]);
 }
 
 export function getBoardSubcategories(

@@ -1,6 +1,14 @@
+import {
+  getAdminPostHref,
+  type AdminPostBoardFilter,
+  isAdminPostBoardFilter,
+} from "@/lib/admin/post-board";
 import { COMMUNITY_POST_SELECT } from "@/lib/community/post-select";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { CommunityPost, PostComment, PostReport, ReportStatus } from "@/lib/supabase/types";
+
+export type { AdminPostBoardFilter } from "@/lib/admin/post-board";
+export { getAdminPostBoardLabel, getAdminPostHref, isAdminPostBoardFilter } from "@/lib/admin/post-board";
 
 const POST_SELECT = COMMUNITY_POST_SELECT;
 
@@ -16,7 +24,7 @@ export interface AdminReportRow extends PostReport {
   target_href?: string | null;
 }
 
-export async function fetchAdminRecentPosts(limit = 30): Promise<{
+export async function fetchAdminRecentPosts(limit = 30, board: AdminPostBoardFilter = "all"): Promise<{
   posts: AdminPostRow[];
   source: "supabase" | "mock";
 }> {
@@ -25,9 +33,23 @@ export async function fetchAdminRecentPosts(limit = 30): Promise<{
     return { posts: [], source: "mock" };
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("community_posts")
-    .select(POST_SELECT)
+    .select(POST_SELECT);
+
+  if (board === "pet-show") {
+    query = query.eq("post_type", "photo_show");
+  } else if (board === "qa") {
+    query = query.eq("post_type", "qa");
+  } else if (board === "tips") {
+    query = query.contains("tags", ["tips"]);
+  } else if (board === "experience") {
+    query = query.contains("tags", ["experience"]);
+  } else if (board === "free") {
+    query = query.contains("tags", ["free"]);
+  }
+
+  const { data, error } = await query
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -81,11 +103,7 @@ export async function deletePostByAdmin(postId: string): Promise<boolean> {
 
 function resolvePostHref(post: CommunityPost | null | undefined) {
   if (!post) return null;
-  if (post.post_type === "photo_show") return `/community/pet-show/${post.id}`;
-  if (post.post_type === "qa") return `/community/qa/${post.id}`;
-  if (post.category === "tips") return `/community/tips/${post.id}`;
-  if (post.category === "experience") return `/community/experience/${post.id}`;
-  return `/community/free/${post.id}`;
+  return getAdminPostHref(post);
 }
 
 export async function fetchAdminReports(limit = 40): Promise<{
