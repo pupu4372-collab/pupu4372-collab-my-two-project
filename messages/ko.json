@@ -8,7 +8,7 @@
     "dog": "강아지",
     "cat": "고양이",
     "reptile": "렙타일(다른동물)",
-    "saju": "댕냥사주",
+    "saju": "우리아이사주보기",
     "community": "커뮤니티",
     "profile": "프로필",
     "login": "로그인",
@@ -16,23 +16,6 @@
     "logout": "로그아웃",
     "loggingOut": "처리중",
     "brand": "K-Saju Pet"
-  },
-  "home": {
-    "heroTitle": "반려동물의",
-    "heroHighlight": "별자리",
-    "heroTitleEnd": "와 운명을 알아보세요",
-    "heroSubtitle": "한국 전통 사주명리학을 바탕으로 반려동물의 성격과 운명을 분석합니다. 생년월일시를 입력하면 사주팔자를 확인할 수 있어요.",
-    "formTitle": "기본 사주 분석",
-    "formSubtitle": "반려동물 정보를 입력해 주세요",
-    "petShowHintBefore": "우리 아이 자랑은",
-    "petShowHintLink": "커뮤니티 사진업로드",
-    "petShowHintAfter": "에서 할 수 있어요",
-    "deeperTitle": "더 깊은 별빛 발자국",
-    "deeperSubtitle": "별자리 운세 · 펫과 집사 궁합",
-    "zodiacCta": "별자리 운세보기",
-    "compatibilityCta": "펫과 주인간 궁합보기",
-    "privacy": "개인정보처리방침",
-    "terms": "이용약관"
   },
   "saju": {
     "hubTitle": "펫 사주 · K-Saju",

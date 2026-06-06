@@ -13,7 +13,6 @@ Project ID: `11415455600019210963`
 | 4 | 회원가입 - K-Saju Pet | `9ec267aedfcb4cfabadaa3fbcc361828` | `04-signup.html` |
 | 5 | 스플래시 화면 - K-Saju Pet | `7e458522d605400c94ca693dca3611f2` | `05-splash.html` |
 | 6 | 사주 결과 분석 (별자리 궁합 추가) - K-Saju Pet | `d06cf4451a4c41358e9cf9a061aa7e44` | `06-saju-result-zodiac-compatibility.html` |
-| 7 | 댕냥사주 홈 - K-Saju Pet | `a94c00fdfa95423c8c32ea3ec049680a` | `07-saju-home.html` |
 | 8 | 사주 입력 폼 - K-Saju Pet | `b0c0730bc1e74c81bb771c9842e4849b` | `08-saju-input-form.html` |
 | 9 | 별자리 운세 - K-Saju Pet | `6f814fd634d649d6b5b85fc2b16bf910` | `09-zodiac-fortune.html` |
 

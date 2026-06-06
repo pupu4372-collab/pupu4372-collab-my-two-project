@@ -127,7 +127,7 @@ export function getEmptyStatePreset(
     pets: {
       ko: {
         title: "아직 등록된 펫이 없어요",
-        description: "홈에서 사주를 보면 반려동물 프로필이 자동으로 저장됩니다.",
+        description: "사주를 보면 반려동물 프로필이 자동으로 저장됩니다.",
         action: { href: "/saju", label: "사주 분석 시작하기" },
         suggestions: [
           {
@@ -146,7 +146,7 @@ export function getEmptyStatePreset(
       },
       en: {
         title: "No pet profiles yet",
-        description: "Run a saju reading from Home and your pet profile will be saved automatically.",
+        description: "Run a saju reading and your pet profile will be saved automatically.",
         action: { href: "/saju", label: "Start saju reading" },
         suggestions: [
           {

@@ -57,7 +57,7 @@ export function ProfilePage() {
         <div className="flex items-end justify-between gap-3 px-2">
           <h3 className="text-xl font-bold text-primary">{isKo ? "나의 반려동물" : "My pets"}</h3>
           <Link
-            href="/"
+            href="/saju"
             className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-primary"
           >
             <span aria-hidden>+</span>

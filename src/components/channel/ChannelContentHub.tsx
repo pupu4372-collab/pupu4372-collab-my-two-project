@@ -350,7 +350,7 @@ export function ChannelContentHub({
         </div>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/"
+            href="/saju"
             className={`inline-flex justify-center rounded-full px-6 py-3 text-sm font-bold transition ${theme.button}`}
           >
             {content.sajuCta}

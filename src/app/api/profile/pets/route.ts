@@ -191,3 +191,56 @@ export async function PATCH(request: Request) {
 
   return NextResponse.json({ pet });
 }
+
+export async function DELETE(request: Request) {
+  const ownerId = await getUserIdFromRequest(request);
+  const token = getBearerToken(request);
+
+  if (!ownerId || !token) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+
+  let body: { id?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  const id = body.id?.trim();
+  if (!id) {
+    return NextResponse.json({ error: "Pet id is required." }, { status: 400 });
+  }
+
+  const supabase = createUserSupabaseClient(token);
+  if (!supabase) {
+    return NextResponse.json({ error: "Supabase not configured." }, { status: 503 });
+  }
+
+  const { data: pet, error: findError } = await supabase
+    .from("pets")
+    .select("id")
+    .eq("id", id)
+    .eq("owner_id", ownerId)
+    .maybeSingle();
+
+  if (findError) {
+    return NextResponse.json({ error: findError.message }, { status: 500 });
+  }
+
+  if (!pet) {
+    return NextResponse.json({ error: "Pet not found." }, { status: 404 });
+  }
+
+  const { error } = await supabase
+    .from("pets")
+    .delete()
+    .eq("id", id)
+    .eq("owner_id", ownerId);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, id });
+}

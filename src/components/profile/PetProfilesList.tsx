@@ -119,6 +119,7 @@ export function PetProfilesList({
   const [loading, setLoading] = useState(false);
   const [savingPetId, setSavingPetId] = useState<string | null>(null);
   const [uploadingPetId, setUploadingPetId] = useState<string | null>(null);
+  const [deletingPetId, setDeletingPetId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!configured || !ready || !accessToken) return;
@@ -283,6 +284,48 @@ export function PetProfilesList({
     }
   }
 
+  async function deletePet(pet: PetRow) {
+    if (!accessToken || deletingPetId) return;
+
+    const ok = window.confirm(
+      isKo
+        ? `${pet.name} 프로필을 삭제할까요?\n저장된 사주 결과도 함께 삭제되며 복구할 수 없습니다.`
+        : `Delete ${pet.name}'s profile?\nSaved saju results will also be deleted and cannot be restored.`
+    );
+    if (!ok) return;
+
+    setDeletingPetId(pet.id);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const res = await fetch("/api/profile/pets", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: pet.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? (isKo ? "펫 프로필 삭제에 실패했어요." : "Could not delete pet profile."));
+      }
+
+      setPets((prev) => prev.filter((item) => item.id !== pet.id));
+      setDrafts((prev) => {
+        const next = { ...prev };
+        delete next[pet.id];
+        return next;
+      });
+      setMessage(isKo ? "펫 프로필을 삭제했어요." : "Pet profile deleted.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : isKo ? "펫 프로필 삭제에 실패했어요." : "Could not delete pet profile.");
+    } finally {
+      setDeletingPetId(null);
+    }
+  }
+
   if (!configured) {
     return (
       <p className="text-sm text-plum/70">
@@ -297,8 +340,8 @@ export function PetProfilesList({
     return (
       <p className="text-sm text-plum/70">
         {isKo
-          ? "로그인 후 홈에서 사주를 보면 펫 프로필이 여기에 저장돼요."
-          : "After logging in, pet profiles are saved here when you read saju from Home."}{" "}
+          ? "로그인 후 사주를 보면 펫 프로필이 여기에 저장돼요."
+          : "After logging in, pet profiles are saved here when you read saju."}{" "}
         <Link href="/login" className="font-medium text-plum underline">
           {isKo ? "로그인하기" : "Log in"}
         </Link>
@@ -356,7 +399,7 @@ export function PetProfilesList({
           <p className={isCompactView ? "font-bold text-plum" : "mt-1 text-2xl font-bold text-plum"}>{totalReadings}</p>
         </div>
         <Link
-          href="/"
+          href="/saju"
           className={
             isCompactView
               ? "rounded-xl bg-mint/45 px-2.5 py-1.5 font-bold text-ink transition hover:brightness-105"
@@ -366,7 +409,7 @@ export function PetProfilesList({
           {isKo ? "새 펫 사주" : "New pet saju"}
           {!isCompactView && (
             <span className="mt-1 block text-xs font-medium text-ink/60">
-              {isKo ? "홈에서 자동 저장" : "Saved from Home"}
+              {isKo ? "사주 입력 후 자동 저장" : "Saved after saju reading"}
             </span>
           )}
         </Link>
@@ -618,8 +661,8 @@ export function PetProfilesList({
                   <button
                     type="button"
                     onClick={() => void savePet(pet)}
-                    disabled={savingPetId === pet.id}
-                    className="rounded-full bg-channel-saju px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-60 sm:col-span-2"
+                    disabled={savingPetId === pet.id || deletingPetId === pet.id}
+                    className="rounded-full bg-channel-saju px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-60"
                   >
                     {savingPetId === pet.id
                       ? isKo
@@ -628,6 +671,20 @@ export function PetProfilesList({
                       : isKo
                         ? "펫 프로필 저장"
                         : "Save pet profile"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void deletePet(pet)}
+                    disabled={deletingPetId === pet.id || savingPetId === pet.id}
+                    className="rounded-full border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                  >
+                    {deletingPetId === pet.id
+                      ? isKo
+                        ? "삭제 중..."
+                        : "Deleting..."
+                      : isKo
+                        ? "펫 삭제"
+                        : "Delete pet"}
                   </button>
                 </div>
               )}

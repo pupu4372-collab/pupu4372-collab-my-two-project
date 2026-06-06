@@ -149,10 +149,52 @@ const EXPERT_TIPS = [
   },
 ] as const;
 
-const COMPACT_ELEMENTS = [
-  { element: "su" as const, icon: "💧", ko: "Su(水) 기운 안정감", en: "Su — calm stability", koDesc: "불안이 많은 아이를 위한 솔루션", enDesc: "For anxious dogs" },
-  { element: "to" as const, icon: "⛰️", ko: "To(土) 기운 포용력", en: "To — grounded warmth", koDesc: "사회성을 기르는 그룹 훈련", enDesc: "Group social training" },
-  { element: "geum" as const, icon: "✨", ko: "Geum(金) 기운 규칙", en: "Geum — clear structure", koDesc: "단호하고 명확한 신호 교육", enDesc: "Clear cue-based training" },
+const SAJU_TRAINING_CARDS = [
+  {
+    element: "mok" as const,
+    icon: "🌿",
+    ko: "Mok(木) 산책 훈련",
+    en: "Mok walk training",
+    koDesc: "호기심 많은 아이를 위한 야외 활동",
+    enDesc: "Outdoor routines for curious dogs",
+    className: "bg-mint/40",
+  },
+  {
+    element: "hwa" as const,
+    icon: "♥",
+    ko: "Hwa(火) 진정 마사지",
+    en: "Hwa calming massage",
+    koDesc: "표현이 큰 아이를 위한 차분한 터치",
+    enDesc: "Calming touch for expressive dogs",
+    className: "bg-blush/40",
+  },
+  {
+    element: "su" as const,
+    icon: "💧",
+    ko: "Su(水) 안정감",
+    en: "Su calm stability",
+    koDesc: "불안이 많은 아이를 위한 솔루션",
+    enDesc: "For anxious dogs",
+    className: "bg-lavender/40",
+  },
+  {
+    element: "to" as const,
+    icon: "⛰️",
+    ko: "To(土) 포용력",
+    en: "To grounded warmth",
+    koDesc: "사회성을 기르는 그룹 훈련",
+    enDesc: "Group social training",
+    className: "bg-sand",
+  },
+  {
+    element: "geum" as const,
+    icon: "✨",
+    ko: "Geum(金) 규칙",
+    en: "Geum clear structure",
+    koDesc: "단호하고 명확한 신호 교육",
+    enDesc: "Clear cue-based training",
+    className: "bg-slate-400/10",
+  },
 ] as const;
 
 export function DogChannelHome({
@@ -222,52 +264,25 @@ export function DogChannelHome({
             {isKo ? "모두 보기" : "View all"} <span aria-hidden>→</span>
           </Link>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
-          <div className="flex min-h-[320px] flex-col justify-between rounded-[2rem] border border-primary/5 bg-mint/40 p-8 md:col-span-7">
-            <div>
-              <ElementTag element="mok" isKo={isKo} />
-              <h3 className="mt-4 text-xl font-extrabold text-primary">
-                {isKo
-                  ? "Mok(木) 기운이 강한 아이를 위한 산책 훈련법"
-                  : "Walk training for strong Mok (Wood) energy"}
-              </h3>
-              <p className="mt-3 text-sm leading-6 text-plum/65">
-                {isKo
-                  ? "호기심이 많고 에너지가 넘치는 아이들을 위한 맞춤형 야외 활동 가이드입니다."
-                  : "Outdoor routines for curious, high-energy dogs."}
-              </p>
-            </div>
-          </div>
-          <div className="flex min-h-[320px] flex-col justify-between rounded-[2rem] border border-primary/5 bg-blush/40 p-8 md:col-span-5">
-            <div>
-              <ElementTag element="hwa" isKo={isKo} />
-              <h3 className="mt-4 text-xl font-extrabold text-primary">
-                {isKo ? "Hwa(火) 기운이 강한 아이를 위한 마사지" : "Massage for strong Hwa (Fire) energy"}
-              </h3>
-              <p className="mt-3 text-sm leading-6 text-plum/65">
-                {isKo
-                  ? "감정 표현이 확실한 아이의 마음을 차분하게 진정시켜주는 마사지와 명상법."
-                  : "Calming touch and quiet time for expressive dogs."}
-              </p>
-            </div>
-            <span className="mt-4 self-end text-5xl text-channel-dog/20" aria-hidden>
-              ♥
-            </span>
-          </div>
-          {COMPACT_ELEMENTS.map((item, index) => (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {SAJU_TRAINING_CARDS.map((item) => (
             <div
               key={item.element}
-              className={`flex items-center gap-5 rounded-[2rem] border border-primary/5 p-8 md:col-span-4 ${
-                index === 0 ? "bg-lavender/40" : index === 1 ? "bg-sand" : "bg-slate-400/10"
-              }`}
+              className={`flex min-h-[11rem] flex-col rounded-[1.5rem] border border-primary/5 p-5 ${item.className}`}
             >
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-3xl shadow-sm" aria-hidden>
-                {item.icon}
-              </span>
               <div>
-                <h4 className="font-extrabold text-primary">{isKo ? item.ko : item.en}</h4>
-                <p className="text-sm text-plum/65">{isKo ? item.koDesc : item.enDesc}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <ElementTag element={item.element} isKo={isKo} />
+                  <span className="text-2xl leading-none text-channel-dog/35" aria-hidden>
+                    {item.icon}
+                  </span>
+                </div>
+                <h3 className="mt-4 text-sm font-extrabold leading-snug text-primary">{isKo ? item.ko : item.en}</h3>
+                <p className="mt-2 text-xs leading-5 text-plum/65">{isKo ? item.koDesc : item.enDesc}</p>
               </div>
+              <p className="mt-auto pt-4 text-[11px] font-extrabold text-primary/60">
+                {isKo ? "준비중입니다" : "Coming soon"}
+              </p>
             </div>
           ))}
         </div>

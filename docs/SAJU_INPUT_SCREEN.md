@@ -25,16 +25,13 @@
 - 출생 시간 옵션: `src/lib/saju/birth-time-options.ts`
 - 시간대 옵션: `src/lib/saju/timezone.ts`
 
-현재 `/saju` 페이지는 사주 허브 페이지다.
+현재 `/saju` 페이지는 기본 사주 입력 페이지다.
 
 - 페이지: `src/app/[locale]/saju/page.tsx`
-- 허브 컴포넌트:
-  - `src/components/k-saju/SajuHubHero.tsx`
-  - `src/components/k-saju/SajuHubGrid.tsx`
-  - `src/components/k-saju/SajuElementsStrip.tsx`
-  - `src/components/k-saju/SajuHubCta.tsx`
+- 레이아웃: `src/components/layout/ChannelShell.tsx`
+- 입력 폼: `src/components/k-saju/SajuForm.tsx`
 
-실제 기본 사주 입력은 `SajuForm` 컴포넌트를 사용하는 흐름이다.
+기본 입력 진입은 `/saju`로 통합되어 있다.
 
 ## 현재 입력 데이터
 

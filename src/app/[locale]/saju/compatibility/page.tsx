@@ -17,7 +17,7 @@ export default async function CompatibilityPage() {
         <Link href="/saju/zodiac" className="underline hover:text-plum">
           {t("toZodiac")}
         </Link>
-        <Link href="/" className="underline hover:text-plum">
+        <Link href="/saju" className="underline hover:text-plum">
           {t("backSaju")}
         </Link>
       </div>

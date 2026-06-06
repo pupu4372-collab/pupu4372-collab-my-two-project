@@ -14,7 +14,7 @@ export default async function ZodiacPage() {
     >
       <ZodiacForm />
       <p className="mt-8 text-center text-sm text-plum/60">
-        <Link href="/" className="underline hover:text-plum">
+        <Link href="/saju" className="underline hover:text-plum">
           {t("backBasic")}
         </Link>
       </p>

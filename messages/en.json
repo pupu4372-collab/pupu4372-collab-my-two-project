@@ -17,23 +17,6 @@
     "loggingOut": "Wait",
     "brand": "K-Saju Pet"
   },
-  "home": {
-    "heroTitle": "Discover your pet's",
-    "heroHighlight": "zodiac",
-    "heroTitleEnd": "and cosmic vibe",
-    "heroSubtitle": "Traditional Korean saju meets modern pet parenting. Enter birth details to read your pet's elemental story.",
-    "formTitle": "Basic saju reading",
-    "formSubtitle": "Tell us about your furry friend",
-    "petShowHintBefore": "Pet Show is available from",
-    "petShowHintLink": "photo upload",
-    "petShowHintAfter": "",
-    "deeperTitle": "Go deeper with Cosmic Paws",
-    "deeperSubtitle": "Zodiac fortune · Pet and parent compatibility",
-    "zodiacCta": "Read zodiac fortune",
-    "compatibilityCta": "Check pet-parent bond",
-    "privacy": "Privacy Policy",
-    "terms": "Terms"
-  },
   "saju": {
     "hubTitle": "Pet Saju · K-Saju",
     "hubSubtitle": "Korean manse calendar readings, pet-parent compatibility, and character cards with elemental storytelling for global pet parents.",

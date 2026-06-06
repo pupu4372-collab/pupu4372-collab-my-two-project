@@ -22,6 +22,7 @@ const SPECIES = [
     enDesc: "Lizards, turtles, snakes",
     koMeta: "UVB · 온도 구배 · 탈피",
     enMeta: "UVB · heat gradient · shedding",
+    image: "community-chameleon.jpg",
   },
   {
     key: "birds",
@@ -32,6 +33,7 @@ const SPECIES = [
     enDesc: "Parrots and companion birds",
     koMeta: "스트레스 · 놀이 · 깃털",
     enMeta: "Stress · play · feathers",
+    image: "community-parrot.jpg",
   },
   {
     key: "small-pets",
@@ -42,6 +44,7 @@ const SPECIES = [
     enDesc: "Rabbits, hamsters, guinea pigs",
     koMeta: "공간 · 식단 · 청결",
     enMeta: "Space · diet · hygiene",
+    image: "community-rabbit.jpg",
   },
 ] as const;
 
@@ -50,12 +53,6 @@ const CHECKLIST = [
   { ko: "습도 유지", en: "Keep humidity stable", sub: "HYGROMETER MONITORING" },
   { ko: "은신처 충분 여부", en: "Enough hiding spots", sub: "STRESS REDUCTION" },
   { ko: "UVB 램프 교체 주기", en: "UVB lamp cycle", sub: "6-12 MONTHS CYCLE" },
-] as const;
-
-const COMMUNITY = [
-  { image: "community-chameleon.jpg", user: "@LizardLover", label: "Chameleon" },
-  { image: "community-parrot.jpg", user: "@BirdieLife", label: "Parrot" },
-  { image: "community-rabbit.jpg", user: "@BunnyHome", label: "Rabbit" },
 ] as const;
 
 export function ReptileChannelHome({
@@ -94,14 +91,6 @@ export function ReptileChannelHome({
                 ? "파충류, 앵무새, 토끼·햄스터까지. 온도·습도·식단 정보를 한 곳에서 확인하세요."
                 : "Reptiles, birds, rabbits, and hamsters. Check habitat, humidity, diet, and care in one place."}
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a href="#species" className="rounded-full bg-white px-5 py-3 text-sm font-extrabold text-primary shadow-sm">
-                {isKo ? "종류별 가이드" : "Species guide"}
-              </a>
-              <Link href="/community/qa" className="rounded-full bg-channel-community px-5 py-3 text-sm font-extrabold text-white shadow-sm">
-                {isKo ? "질문하기" : "Ask community"}
-              </Link>
-            </div>
           </div>
         </div>
         <div className="relative -mt-8 grid gap-3 px-2 sm:grid-cols-3 md:px-6">
@@ -135,19 +124,27 @@ export function ReptileChannelHome({
             <Link
               key={item.key}
               href="/community/experience"
-              className="group rounded-[1.75rem] border border-channel-community/15 bg-white/75 p-5 shadow-sm transition hover:-translate-y-1 hover:bg-white"
+              className="group overflow-hidden rounded-[1.75rem] border border-channel-community/15 bg-white/75 shadow-sm transition hover:-translate-y-1 hover:bg-white"
             >
-              <div className="flex items-start justify-between gap-4">
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-channel-community/15 text-3xl">
+              <div className="relative h-44 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`${IMAGE_BASE}/${item.image}`}
+                  alt={isKo ? item.koTitle : item.enTitle}
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+                <span className="absolute left-4 top-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/85 text-2xl shadow-sm backdrop-blur">
                   {item.emoji}
                 </span>
-                <span className="text-channel-community transition group-hover:translate-x-1">→</span>
+                <span className="absolute right-4 top-4 rounded-full bg-white/85 px-3 py-1 text-channel-community shadow-sm transition group-hover:translate-x-1">→</span>
               </div>
-              <h3 className="mt-5 text-xl font-extrabold text-primary">{isKo ? item.koTitle : item.enTitle}</h3>
-              <p className="mt-2 text-sm text-plum/65">{isKo ? item.koDesc : item.enDesc}</p>
-              <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.12em] text-plum/45">
-                {isKo ? item.koMeta : item.enMeta}
-              </p>
+              <div className="p-5">
+                <h3 className="text-xl font-extrabold text-primary">{isKo ? item.koTitle : item.enTitle}</h3>
+                <p className="mt-2 text-sm text-plum/65">{isKo ? item.koDesc : item.enDesc}</p>
+                <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.12em] text-plum/45">
+                  {isKo ? item.koMeta : item.enMeta}
+                </p>
+              </div>
             </Link>
           ))}
         </div>
@@ -215,32 +212,6 @@ export function ReptileChannelHome({
               </Link>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="rounded-[2rem] bg-white/65 p-6 shadow-sm">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-2xl font-extrabold text-primary">{isKo ? "커뮤니티" : "Community"}</h2>
-            <p className="mt-1 text-sm text-plum/60">
-              {isKo ? "비슷한 보호자들과 경험을 나눠보세요." : "Share notes with pet parents who care for similar animals."}
-            </p>
-          </div>
-          <Link href="/community" className="text-sm font-extrabold text-channel-community">
-            {isKo ? "전체보기" : "View all"}
-          </Link>
-        </div>
-        <div className="-mx-2 flex gap-4 overflow-x-auto px-2 pb-2 hide-scrollbar">
-          {COMMUNITY.map((item) => (
-            <Link key={item.image} href="/community/pet-show" className="w-44 shrink-0">
-              <div className="relative h-56 overflow-hidden rounded-[1.25rem] shadow-sm">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`${IMAGE_BASE}/${item.image}`} alt={item.label} className="h-full w-full object-cover" />
-                <span className="absolute right-2 top-2 rounded-full bg-white/25 px-2 py-1 text-sm text-white backdrop-blur">♥</span>
-              </div>
-              <p className="mt-2 text-center text-xs font-extrabold uppercase tracking-[0.14em] text-plum/65">{item.user}</p>
-            </Link>
-          ))}
         </div>
       </section>
 

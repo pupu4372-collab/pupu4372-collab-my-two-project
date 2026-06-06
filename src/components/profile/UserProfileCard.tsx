@@ -435,12 +435,25 @@ export function UserProfileCard({
 
   const deleteAccountBlock =
     showEditor && profile?.role !== "admin" ? (
-      <div className="mt-4 text-center">
+      <div className="rounded-[2rem] border border-red-200/80 bg-red-50/70 p-5">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5" aria-hidden>
+            ⚠️
+          </span>
+          <div>
+            <h3 className="text-base font-bold text-red-800">{isKo ? "계정 탈퇴" : "Delete account"}</h3>
+            <p className="mt-1 text-sm leading-relaxed text-red-700/75">
+              {isKo
+                ? "탈퇴하면 계정, 펫 프로필, 사주 결과, 작성한 게시글이 함께 삭제되며 복구할 수 없습니다."
+                : "Deleting your account removes your account, pet profiles, saju results, and posts. This cannot be undone."}
+            </p>
+          </div>
+        </div>
         <button
           type="button"
           onClick={() => void handleDeleteAccount()}
           disabled={deletingAccount}
-          className="inline-flex items-center gap-1 text-sm text-on-surface-variant transition hover:text-error disabled:opacity-60"
+          className="mt-4 rounded-full bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-60"
         >
           {deletingAccount ? (isKo ? "탈퇴 처리 중…" : "Deleting…") : isKo ? "회원 탈퇴" : "Delete account"}
         </button>
