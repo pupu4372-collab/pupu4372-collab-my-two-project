@@ -1,5 +1,10 @@
-import { HomeLanding } from "@/components/home/HomeLanding";
+import { redirect } from "@/i18n/navigation";
 
-export default function SecondHomePage() {
-  return <HomeLanding />;
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function LegacyHomePage({ params }: PageProps) {
+  const { locale } = await params;
+  redirect({ href: "/saju", locale });
 }

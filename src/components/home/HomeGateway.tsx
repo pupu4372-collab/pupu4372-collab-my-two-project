@@ -213,7 +213,7 @@ export function HomeGateway() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <AuthRequiredLink
-                href="/home"
+                href="/saju"
                 className="rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105"
               >
                 {isKo ? "펫 사주 바로 시작" : "Start Pet Saju"}
