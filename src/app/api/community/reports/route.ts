@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Report detail is too long." }, { status: 400 });
   }
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("post_reports")
     .insert({
       post_id: postId,
@@ -66,13 +66,11 @@ export async function POST(request: Request) {
       reporter_id: userId,
       reason,
       detail,
-    } as never)
-    .select("id, status, created_at")
-    .single();
+    } as never);
 
   if (error) {
     return NextResponse.json({ error: "Failed to submit report." }, { status: 500 });
   }
 
-  return NextResponse.json({ report: data }, { status: 201 });
+  return NextResponse.json({ ok: true }, { status: 201 });
 }

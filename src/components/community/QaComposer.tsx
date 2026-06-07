@@ -30,6 +30,7 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
   const [subCategory, setSubCategory] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [experienceTag, setExperienceTag] = useState("experience:dog");
+  const [experienceBreed, setExperienceBreed] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputClass =
@@ -75,13 +76,17 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+      const composedContent =
+        board === "experience" && experienceBreed.trim()
+          ? `${isKo ? "품종/종" : "Breed/species"}: ${experienceBreed.trim()}\n\n${content}`
+          : content;
 
       const res = await fetch(`/api/community/${board}/posts`, {
         method: "POST",
         headers,
         body: JSON.stringify({
           title,
-          content,
+          content: composedContent,
           language: "ko",
           ...(board === "experience"
             ? { tags: [experienceTag] }
@@ -109,6 +114,7 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
       setSubCategory("");
       setDifficulty("");
       setExperienceTag("experience:dog");
+      setExperienceBreed("");
       onPosted();
     } catch (err) {
       setError(err instanceof Error ? err.message : isKo ? "등록 실패" : "Post failed");
@@ -134,20 +140,37 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
         </h3>
       </div>
       {board === "experience" && (
-        <label className={labelClass}>
-          {isKo ? "분류" : "Category"}
-          <select
-            value={experienceTag}
-            onChange={(e) => setExperienceTag(e.target.value)}
-            className={inputClass}
-          >
-            <option value="experience:dog">{isKo ? "강아지 견종" : "Dog breeds"}</option>
-            <option value="experience:cat">{isKo ? "고양이 묘종" : "Cat breeds"}</option>
-            <option value="experience:other">
-              {isKo ? "렙타일(다른동물) (토끼·햄스터·새·파충류·물고기 등)" : "Other animals"}
-            </option>
-          </select>
-        </label>
+        <>
+          <label className={labelClass}>
+            {isKo ? "분류" : "Category"}
+            <select
+              value={experienceTag}
+              onChange={(e) => setExperienceTag(e.target.value)}
+              className={inputClass}
+            >
+              <option value="experience:dog">{isKo ? "강아지 견종" : "Dog breeds"}</option>
+              <option value="experience:cat">{isKo ? "고양이 묘종" : "Cat breeds"}</option>
+              <option value="experience:other">
+                {isKo ? "렙타일(다른동물) (토끼·햄스터·새·파충류·물고기 등)" : "Other animals"}
+              </option>
+            </select>
+          </label>
+          <label className={labelClass}>
+            {isKo ? "품종/종" : "Breed/species"}
+            <input
+              className={inputClass}
+              placeholder={
+                isKo
+                  ? "예: 말티즈, 코리안숏헤어, 레오파드게코처럼 품종이나 종을 적어주세요"
+                  : "Ex: Maltese, Korean shorthair, leopard gecko"
+              }
+              value={experienceBreed}
+              onChange={(e) => setExperienceBreed(e.target.value)}
+              required
+              maxLength={60}
+            />
+          </label>
+        </>
       )}
       {(board === "qa" || board === "tips") && (
         <>
@@ -255,8 +278,8 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
           placeholder={
             board === "experience"
               ? isKo
-                ? "품종/종, 나이, 성격, 좋았던 관리법, 조심할 점을 적어주세요. 렙타일(다른동물)은 종 이름을 제목이나 내용에 꼭 넣어주세요."
-                : "Share species/breed, age, personality, helpful care tips, and cautions."
+                ? "나이, 성격, 좋았던 관리법, 조심할 점을 적어주세요."
+                : "Share age, personality, helpful care tips, and cautions."
               : isKo ? "내용을 자세히 적어주세요 (10자 이상)" : "Describe it in detail (10+ chars)"
           }
           value={content}
