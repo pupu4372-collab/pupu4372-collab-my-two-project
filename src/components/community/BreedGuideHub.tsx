@@ -18,7 +18,7 @@ interface BreedGuideHubProps {
 
 export function BreedGuideHub({ guides, source, activeAnimal, isKo }: BreedGuideHubProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <nav className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar" aria-label={isKo ? "동물 종류" : "Animal type"}>
         {ANIMAL_TABS.map((tab) => {
           const href =
@@ -51,15 +51,15 @@ export function BreedGuideHub({ guides, source, activeAnimal, isKo }: BreedGuide
           {isKo ? "아직 등록된 가이드가 없어요." : "No guides published yet."}
         </p>
       ) : (
-        <ul className="grid gap-5 md:grid-cols-2">
+        <ul className="grid gap-3 md:grid-cols-2">
           {guides.map((guide) => (
             <li key={guide.id}>
               <Link
                 href={`/community/breeds/${guide.seo_slug}`}
-                className="pastel-card flex h-full flex-col p-5 shadow-sm transition hover:-translate-y-1 hover:bg-white/85"
+                className="pastel-card flex h-full flex-col p-3 shadow-sm transition hover:-translate-y-1 hover:bg-white/85"
               >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-channel-community/10 px-3 py-1 text-[10px] font-extrabold text-channel-community">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="rounded-full bg-channel-community/10 px-2.5 py-0.5 text-[10px] font-extrabold text-channel-community">
                     {getAnimalLabel(guide.animal_type, isKo)}
                   </span>
                   {guide.size_category && (
@@ -71,25 +71,25 @@ export function BreedGuideHub({ guides, source, activeAnimal, isKo }: BreedGuide
                     </span>
                   )}
                 </div>
-                <h2 className="mt-3 text-xl font-extrabold text-primary">
+                <h2 className="mt-2 text-base font-extrabold text-primary">
                   {isKo ? guide.breed_name : guide.breed_name_en ?? guide.breed_name}
                 </h2>
                 {guide.summary && (
-                  <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-plum/70">{guide.summary}</p>
+                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-plum/70">{guide.summary}</p>
                 )}
                 {guide.tags.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-1.5">
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     {guide.tags.slice(0, 3).map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full bg-channel-community/10 px-2.5 py-1 text-[10px] font-bold text-channel-community"
+                        className="rounded-full bg-channel-community/10 px-2 py-0.5 text-[10px] font-bold text-channel-community"
                       >
                         #{tag}
                       </span>
                     ))}
                   </div>
                 )}
-                <div className="mt-4 flex flex-wrap gap-2 text-xs text-plum/55">
+                <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-plum/55">
                   {guide.lifespan && <span>{isKo ? "수명" : "Lifespan"}: {guide.lifespan}</span>}
                   {guide.exercise_level && (
                     <span>
@@ -97,7 +97,7 @@ export function BreedGuideHub({ guides, source, activeAnimal, isKo }: BreedGuide
                     </span>
                   )}
                 </div>
-                <p className="mt-4 text-sm font-extrabold text-channel-community">
+                <p className="mt-2 text-xs font-extrabold text-channel-community">
                   {isKo ? "가이드 보기" : "View guide"} →
                 </p>
               </Link>

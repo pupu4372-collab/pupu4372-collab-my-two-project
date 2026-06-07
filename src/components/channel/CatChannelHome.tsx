@@ -80,24 +80,40 @@ const SAJU_CARE = [
   },
 ] as const;
 
-function breedGuideHref(slug: string | undefined, animal: "dog" | "cat") {
-  if (!slug) return `/community/breeds?animal=${animal}`;
-  return `/community/breeds/${slug}?from=${animal}`;
-}
-
-const CAT_BREEDS: Array<{ image: string; ko: string; en: string; seoSlug?: string }> = [
-  { image: "cat-03.jpg", ko: "페르시안", en: "Persian", seoSlug: "persian" },
-  { image: "cat-04.jpg", ko: "터키시 앙고라", en: "Turkish Angora" },
-  { image: "cat-05.jpg", ko: "코리안 쇼트헤어", en: "Korean Short Hair", seoSlug: "korean-shorthair" },
-  { image: "cat-06.jpg", ko: "아비시니안", en: "Abyssinian" },
-  { image: "cat-07.jpg", ko: "아메리칸 쇼트헤어", en: "American Short Hair" },
-  { image: "cat-08.jpg", ko: "스코티시 폴드", en: "Scottish Fold", seoSlug: "scottish-fold" },
-  { image: "cat-09.jpg", ko: "샴", en: "Siamese", seoSlug: "siamese" },
-  { image: "cat-10.jpg", ko: "뱅갈", en: "Bengal", seoSlug: "bengal" },
-  { image: "cat-11.jpg", ko: "먼치킨", en: "Munchkin" },
-  { image: "cat-12.jpg", ko: "러시안 블루", en: "Russian Blue", seoSlug: "russian-blue" },
-  { image: "cat-13.jpg", ko: "노르웨이 숲", en: "Norwegian Forest" },
-];
+const CAT_BREED_CATEGORIES = [
+  {
+    id: "shorthair",
+    image: "cat-05.jpg",
+    ko: "단모묘",
+    en: "Short-haired",
+    koDesc: "아비시니안, 아메리칸 숏헤어 등",
+    enDesc: "Abyssinian, American Shorthair, and more",
+  },
+  {
+    id: "longhair",
+    image: "cat-03.jpg",
+    ko: "장모묘",
+    en: "Long-haired",
+    koDesc: "터키시 앙고라, 스코티시 폴드 등",
+    enDesc: "Turkish Angora, Scottish Fold, and more",
+  },
+  {
+    id: "large",
+    image: "cat-12.jpg",
+    ko: "대형묘",
+    en: "Large breeds",
+    koDesc: "노르웨이 숲, 사바나 캣 등",
+    enDesc: "Norwegian Forest, Savannah Cat, and more",
+  },
+  {
+    id: "mixed",
+    image: "cat-08.jpg",
+    ko: "믹스묘",
+    en: "Mixed breeds",
+    koDesc: "도메스틱 숏헤어, 하이브리드 등",
+    enDesc: "Domestic Shorthair, hybrid cats, and more",
+  },
+] as const;
 
 const EXPERT_TIPS = [
   {
@@ -217,30 +233,43 @@ export function CatChannelHome({
       </section>
 
       <section className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-extrabold text-primary md:text-3xl">
-            {isKo ? "품종별 가이드" : "Breed guide"}
-          </h2>
-          <p className="mt-1 text-sm text-plum/65">
-            {isKo ? "묘종에 따른 유전적 특성과 사주 에너지의 조화" : "Traits and elemental energy by breed"}
-          </p>
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-extrabold text-primary md:text-3xl">
+              {isKo ? "품종별 가이드" : "Breed guide"}
+            </h2>
+            <p className="mt-1 text-sm text-plum/65">
+              {isKo
+                ? "털 길이·체형별로 커뮤니티 품종 가이드에서 자세히 볼 수 있어요"
+                : "Browse community breed guides by coat and size"}
+            </p>
+          </div>
+          <Link
+            href="/community/breeds?animal=cat"
+            className="text-sm font-extrabold text-channel-cat"
+          >
+            {isKo ? "전체 가이드" : "All guides"} →
+          </Link>
         </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-          {CAT_BREEDS.map((breed) => (
+          {CAT_BREED_CATEGORIES.map((category) => (
             <Link
-              key={breed.image}
-              href={breedGuideHref(breed.seoSlug, "cat")}
+              key={category.id}
+              href="/community/breeds?animal=cat"
               className="group cursor-pointer"
             >
               <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-[2rem] border border-black/5 shadow-sm">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`${IMAGE_BASE}/${breed.image}`}
-                  alt={isKo ? breed.ko : breed.en}
+                  src={`${IMAGE_BASE}/${category.image}`}
+                  alt=""
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
                 />
                 <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/70 p-4 backdrop-blur-md">
-                  <h3 className="text-sm font-extrabold text-primary">{isKo ? breed.ko : breed.en}</h3>
+                  <h3 className="text-sm font-extrabold text-primary">{isKo ? category.ko : category.en}</h3>
+                  <p className="mt-2 text-[11px] leading-relaxed text-plum/65">
+                    {isKo ? category.koDesc : category.enDesc}
+                  </p>
                 </div>
               </div>
             </Link>

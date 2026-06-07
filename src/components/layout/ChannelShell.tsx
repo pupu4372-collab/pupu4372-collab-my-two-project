@@ -71,6 +71,7 @@ interface ChannelShellProps {
     href: ComponentProps<typeof Link>["href"];
     label: string;
   }>;
+  heroMedia?: ReactNode;
 }
 
 export function ChannelShell({
@@ -84,6 +85,7 @@ export function ChannelShell({
   backHref = "/",
   backLabel,
   rightLinks,
+  heroMedia,
 }: ChannelShellProps) {
   const t = THEME[theme];
   const tc = useTranslations("common");
@@ -137,17 +139,22 @@ export function ChannelShell({
         </div>
         <GlassCard className={`relative overflow-hidden border-2 ${t.border} px-6 py-8 md:px-10`}>
           <div className={`absolute -right-10 -top-14 h-44 w-44 rounded-full ${t.bg} blur-3xl`} />
-          {beforeTitle && <div className="mb-6">{beforeTitle}</div>}
-          {comingSoon && (
-            <p className="mb-4 inline-block rounded-full bg-gold/40 px-3 py-1 text-xs font-medium text-plum">
-              {isKo ? "준비 중" : "Coming soon"}
-            </p>
-          )}
-          <p className={`relative text-sm font-extrabold ${t.accent}`}>
-            {t.emoji} {isKo ? t.label.ko : t.label.en}
-          </p>
-          <h1 className="relative mt-2 text-3xl font-extrabold tracking-tight text-primary md:text-5xl">{title}</h1>
-          {subtitle && <p className="mt-3 text-sm leading-relaxed text-plum/70">{subtitle}</p>}
+          <div className={heroMedia ? "relative grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(260px,42%)] sm:items-center" : "relative"}>
+            <div>
+              {beforeTitle && <div className="mb-6">{beforeTitle}</div>}
+              {comingSoon && (
+                <p className="mb-4 inline-block rounded-full bg-gold/40 px-3 py-1 text-xs font-medium text-plum">
+                  {isKo ? "준비 중" : "Coming soon"}
+                </p>
+              )}
+              <p className={`text-sm font-extrabold ${t.accent}`}>
+                {t.emoji} {isKo ? t.label.ko : t.label.en}
+              </p>
+              <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary md:text-5xl">{title}</h1>
+              {subtitle && <p className="mt-3 text-sm leading-relaxed text-plum/70">{subtitle}</p>}
+            </div>
+            {heroMedia && <div>{heroMedia}</div>}
+          </div>
         </GlassCard>
         <div className="mt-8">{children}</div>
       </PageContainer>

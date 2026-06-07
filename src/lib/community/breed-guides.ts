@@ -45,10 +45,18 @@ export async function fetchBreedGuides(options?: {
   return { guides: data as BreedGuide[], source: "supabase" };
 }
 
-export async function fetchBreedGuideBySlug(slug: string): Promise<{
+export async function fetchBreedGuideBySlug(
+  slug: string,
+  options?: { previewMock?: boolean },
+): Promise<{
   guide: BreedGuide | null;
   source: "supabase" | "mock";
 }> {
+  if (options?.previewMock) {
+    const guide = MOCK_BREED_GUIDES.find((g) => g.seo_slug === slug) ?? null;
+    return { guide, source: "mock" };
+  }
+
   const supabase = getSupabaseServerClient();
   if (!supabase) {
     const guide = MOCK_BREED_GUIDES.find((g) => g.seo_slug === slug) ?? null;

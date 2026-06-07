@@ -113,17 +113,30 @@ export function ReptileChannelHome({
       </section>
 
       <section id="species" className="space-y-4">
-        <div>
-          <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-channel-community">Species</p>
-          <h2 className="mt-2 text-2xl font-extrabold text-primary md:text-3xl">
-            {isKo ? "우리 아이 종별 가이드" : "Guide by species"}
-          </h2>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-channel-community">Species</p>
+            <h2 className="mt-2 text-2xl font-extrabold text-primary md:text-3xl">
+              {isKo ? "품종별 가이드" : "Breed guide"}
+            </h2>
+            <p className="mt-1 text-sm text-plum/65">
+              {isKo
+                ? "파충류·조류·소동물 가이드를 커뮤니티에서 확인하세요"
+                : "Browse reptile, bird, and small-pet guides in the community"}
+            </p>
+          </div>
+          <Link
+            href="/community/breeds?animal=other"
+            className="text-sm font-extrabold text-channel-community"
+          >
+            {isKo ? "전체 가이드" : "All guides"} →
+          </Link>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {SPECIES.map((item) => (
             <Link
               key={item.key}
-              href="/community/experience"
+              href="/community/breeds?animal=other"
               className="group overflow-hidden rounded-[1.75rem] border border-channel-community/15 bg-white/75 shadow-sm transition hover:-translate-y-1 hover:bg-white"
             >
               <div className="relative h-44 overflow-hidden">

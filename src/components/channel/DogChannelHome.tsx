@@ -37,88 +37,38 @@ function ElementTag({ element, isKo }: { element: ElementKey; isKo: boolean }) {
   );
 }
 
-function breedGuideHref(slug: string | undefined, animal: "dog" | "cat") {
-  if (!slug) return `/community/breeds?animal=${animal}`;
-  return `/community/breeds/${slug}?from=${animal}`;
-}
-
-const DOG_BREEDS = [
+const DOG_BREED_CATEGORIES = [
   {
+    id: "large",
     image: "dog-02.jpg",
-    ko: "골든 리트리버",
-    en: "Golden Retriever",
-    seoSlug: "golden-retriever",
-    element: "to" as const,
-    koSize: "대형견",
-    enSize: "Large",
-    koDesc: "친화력이 높고 영리한 골든 리트리버는 모든 가족에게 최고의 파트너입니다.",
-    enDesc: "Friendly and bright — a classic family companion.",
+    ko: "대형견",
+    en: "Large breeds",
+    koDesc: "골든 리트리버, 래브라도, 허스키 등",
+    enDesc: "Golden Retriever, Labrador, Husky, and more",
   },
   {
-    image: "dog-03.jpg",
-    ko: "포메라니안",
-    en: "Pomeranian",
-    seoSlug: "pomeranian",
-    element: "hwa" as const,
-    koSize: "소형견",
-    enSize: "Small",
-    koDesc: "작지만 용감한 포메라니안은 화려한 외모만큼이나 풍부한 표현력을 가졌습니다.",
-    enDesc: "Small but bold, with vivid personality.",
-  },
-  {
-    image: "dog-04.jpg",
-    ko: "푸들",
-    en: "Poodle",
-    seoSlug: "poodle",
-    element: "su" as const,
-    koSize: "다재다능",
-    enSize: "Versatile",
-    koDesc: "지능이 매우 높고 털 빠짐이 적어 한국 가정에서 가장 사랑받는 품종 중 하나입니다.",
-    enDesc: "Smart, low-shedding, and widely loved.",
-  },
-  {
-    image: "dog-05.jpg",
-    ko: "말티즈",
-    en: "Maltese",
-    seoSlug: "maltese",
-    element: "to" as const,
-    koSize: "온순한",
-    enSize: "Gentle",
-    koDesc: "작고 하얀 털이 매력적인 말티즈는 집사님 곁을 지키는 가장 사랑스러운 파트너입니다.",
-    enDesc: "A gentle lap companion with a soft white coat.",
-  },
-  {
-    image: "dog-06.jpg",
-    ko: "비숑 프리제",
-    en: "Bichon Frise",
-    seoSlug: "bichon-frise",
-    element: "mok" as const,
-    koSize: "활발한",
-    enSize: "Playful",
-    koDesc: "솜사탕 같은 털과 밝은 성격을 가진 비숑은 주변에 긍정적인 에너지를 전해줍니다.",
-    enDesc: "Fluffy coat and upbeat energy for the home.",
-  },
-  {
+    id: "medium",
     image: "dog-07.jpg",
-    ko: "시바 Inu",
-    en: "Shiba Inu",
-    seoSlug: "shiba-inu",
-    element: "geum" as const,
-    koSize: "충직한",
-    enSize: "Loyal",
-    koDesc: "영리하고 독립심 강한 시바견은 때로는 진중하게, 때로는 귀엽게 집사님을 미소 짓게 합니다.",
-    enDesc: "Clever, independent, and quietly charming.",
+    ko: "중형견",
+    en: "Medium breeds",
+    koDesc: "코기, 시바, 비글, 보더 콜리 등",
+    enDesc: "Corgi, Shiba, Beagle, Border Collie, and more",
   },
   {
-    image: "dog-08.jpg",
-    ko: "웰시 코기",
-    en: "Welsh Corgi",
-    seoSlug: "welsh-corgi",
-    element: "hwa" as const,
-    koSize: "사교적인",
-    enSize: "Social",
-    koDesc: "짧은 다리와 넘치는 애교를 가진 웰시 코기는 어디서나 활력을 불어넣는 분위기 메이커입니다.",
-    enDesc: "Short legs, big charm — a social mood booster.",
+    id: "small",
+    image: "dog-05.jpg",
+    ko: "소형견",
+    en: "Small breeds",
+    koDesc: "말티즈, 푸들, 포메, 치와와 등",
+    enDesc: "Maltese, Poodle, Pomeranian, Chihuahua, and more",
+  },
+  {
+    id: "mixed",
+    image: "dog-01.jpg",
+    ko: "믹스견",
+    en: "Mixed breeds",
+    koDesc: "품종보다 개체 성향과 입양 경험이 중요해요",
+    enDesc: "Individual temperament matters more than breed label",
   },
 ] as const;
 
@@ -295,31 +245,37 @@ export function DogChannelHome({
               {isKo ? "품종별 가이드" : "Breed guide"}
             </h2>
             <p className="mt-1 text-sm text-plum/65">
-              {isKo ? "내 반려견의 특징을 더 깊이 이해해보세요" : "Understand your dog's breed traits"}
+              {isKo
+                ? "크기별로 나눠 커뮤니티 품종 가이드에서 자세히 볼 수 있어요"
+                : "Browse community breed guides by size"}
             </p>
           </div>
+          <Link
+            href="/community/breeds?animal=dog"
+            className="text-sm font-extrabold text-channel-dog"
+          >
+            {isKo ? "전체 가이드" : "All guides"} →
+          </Link>
         </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-          {DOG_BREEDS.map((breed) => (
+          {DOG_BREED_CATEGORIES.map((category) => (
             <Link
-              key={breed.image}
-              href={breedGuideHref(breed.seoSlug, "dog")}
+              key={category.id}
+              href="/community/breeds?animal=dog"
               className="group cursor-pointer"
             >
               <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-[2rem] border border-black/5 shadow-sm">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`${IMAGE_BASE}/${breed.image}`}
-                  alt={isKo ? breed.ko : breed.en}
+                  src={`${IMAGE_BASE}/${category.image}`}
+                  alt=""
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
                 />
                 <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/75 p-4 backdrop-blur-md">
-                  <h3 className="text-sm font-extrabold text-primary">{isKo ? breed.ko : breed.en}</h3>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    <span className="rounded-full bg-primary/5 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">
-                      {isKo ? breed.koSize : breed.enSize}
-                    </span>
-                  </div>
+                  <h3 className="text-sm font-extrabold text-primary">{isKo ? category.ko : category.en}</h3>
+                  <p className="mt-2 text-[11px] leading-relaxed text-plum/65">
+                    {isKo ? category.koDesc : category.enDesc}
+                  </p>
                 </div>
               </div>
             </Link>

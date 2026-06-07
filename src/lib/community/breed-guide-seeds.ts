@@ -20,16 +20,377 @@ export interface BreedGuideSeed {
 
 /** Excel 품종별 가이드 시트 기준 + 렙타일(다른동물) 확장 */
 export const BREED_GUIDE_SEEDS: BreedGuideSeed[] = [
-  { breed_name: "말티즈", breed_name_en: "Maltese", animal_type: "dog", size_category: "small", lifespan: "12–15년", personality: "애착이 깊고 예민한 편.", health_notes: "눈물·슬개골·치아 관리.", exercise_level: "low", grooming_level: "high", beginner_friendly: true, saju_tendency: "수(水) — 차분한 휴식", seo_slug: "maltese", summary: "소형견 대표. 실내 생활에 적합.", body: "짧은 산책·눈 주변·치아 루틴을 꾸준히.", tags: ["소형견", "초보"] },
-  { breed_name: "푸들", breed_name_en: "Poodle", animal_type: "dog", size_category: "small", lifespan: "12–15년", personality: "똑똑하고 활동적.", health_notes: "귀·피부 알레르기 점검.", exercise_level: "medium", grooming_level: "high", beginner_friendly: true, saju_tendency: "목(木) — 탐색·놀이", seo_slug: "poodle", summary: "지능형 견종. 정신 자극이 필수.", body: "노즈워크·퍼즐 장난감을 병행하세요.", tags: ["소형견", "훈련"] },
-  { breed_name: "포메라니안", breed_name_en: "Pomeranian", animal_type: "dog", size_category: "small", lifespan: "12–16년", personality: "호기심 많고 경계심 있음.", health_notes: "슬개골·호흡기·치아.", exercise_level: "low", grooming_level: "high", beginner_friendly: true, saju_tendency: "화(火) — 짧은 놀이", seo_slug: "pomeranian", summary: "작은 체구지만 에너지 풍부.", body: "과도한 점프는 관절에 부담.", tags: ["소형견"] },
-  { breed_name: "치와와", breed_name_en: "Chihuahua", animal_type: "dog", size_category: "small", lifespan: "14–18년", personality: "대담하고 주인에게 집중.", health_notes: "저체온·치아·슬개골.", exercise_level: "low", grooming_level: "low", beginner_friendly: true, saju_tendency: "화(火) — 따뜻한 보온", seo_slug: "chihuahua", summary: "초소형. 추위에 약함.", body: "겨울 외출 시 보온 필수.", tags: ["소형견"] },
-  { breed_name: "요크셔 테리어", breed_name_en: "Yorkshire Terrier", animal_type: "dog", size_category: "small", lifespan: "13–16년", personality: "당당하고 활발.", health_notes: "치아·기관지·털 관리.", exercise_level: "low", grooming_level: "high", beginner_friendly: false, saju_tendency: "금(金) — 정돈·루틴", seo_slug: "yorkshire-terrier", summary: "장모 소형견.", body: "매일 빗질과 치아 케어.", tags: ["소형견", "그루밍"] },
-  { breed_name: "비숑 프리제", breed_name_en: "Bichon Frise", animal_type: "dog", size_category: "small", lifespan: "12–15년", personality: "밝고 사교적.", health_notes: "피부·눈·귀 염증.", exercise_level: "medium", grooming_level: "high", beginner_friendly: true, saju_tendency: "토(土) — 규칙적 루틴", seo_slug: "bichon-frise", summary: "알레르기 비교적 적은 편.", body: "정기 미용과 귀 청소.", tags: ["소형견", "초보"] },
-  { breed_name: "시츄", breed_name_en: "Shih Tzu", animal_type: "dog", size_category: "small", lifespan: "10–16년", personality: "온순하고 가족 친화.", health_notes: "눈·호흡·척추.", exercise_level: "low", grooming_level: "high", beginner_friendly: true, saju_tendency: "토(土) — 안정", seo_slug: "shih-tzu", summary: "실내견에 적합.", body: "짧은 산책과 눈 주변 관리.", tags: ["소형견"] },
-  { breed_name: "닥스훈트", breed_name_en: "Dachshund", animal_type: "dog", size_category: "small", lifespan: "12–16년", personality: "호기심·사냥 본능.", health_notes: "디스크(허리) 보호.", exercise_level: "medium", grooming_level: "low", beginner_friendly: false, saju_tendency: "토(土) — 바닥 생활", seo_slug: "dachshund", summary: "계단·점프 제한 중요.", body: "소파 오르내림 최소화.", tags: ["소형견", "허리"] },
-  { breed_name: "프렌치 불독", breed_name_en: "French Bulldog", animal_type: "dog", size_category: "small", lifespan: "10–12년", personality: "차분하고 애교 많음.", health_notes: "호흡·더위·피부 주름.", exercise_level: "low", grooming_level: "low", beginner_friendly: true, saju_tendency: "토(土) — 서늘한 휴식", seo_slug: "french-bulldog", summary: "브라키세팔릭 주의.", body: "여름 산책은 이른 아침·저녁.", tags: ["소형견", "단두"] },
-  { breed_name: "웰시 코기", breed_name_en: "Welsh Corgi", animal_type: "dog", size_category: "medium", lifespan: "12–15년", personality: "영리하고 활동적.", health_notes: "허리·비만.", exercise_level: "medium", grooming_level: "medium", beginner_friendly: true, saju_tendency: "목(木) — 지능 놀이", seo_slug: "welsh-corgi", summary: "목양견 출신.", body: "체중 관리와 허리 보호.", tags: ["중형견"] },
+  {
+    breed_name: "말티즈",
+    breed_name_en: "Maltese",
+    animal_type: "dog",
+    size_category: "small",
+    lifespan: "12–15년",
+    personality:
+      "말티즈는 일반적으로 집사에게 애정 표현이 많고 곁을 좋아하는 경향이 있어요. 외부 소음이나 낯선 환경에는 예민하게 반응하는 경우도 있어, 천천히 적응시키는 편이 도움이 될 수 있어요. 혼자 두는 시간이 길면 불안해하는 개체도 있어, 일상 루틴을 맞춰 주면 안정감을 느끼는 경우가 많아요.",
+    health_notes:
+      "눈물 자국·슬개골·치아 문제는 말티즈에서 흔히 이야기되는 편이라, 정기적인 눈 주변 닦기와 치아 관리가 권장돼요. 걸을 때 한쪽 다리를 들거나 통증 반응이 보이면 관절 이슈를 의심해 볼 수 있으니, 이상 증상은 수의사 상담을 받아 보세요. 소형견 특성상 추위에 약한 경우도 있어, 겨울철 보온에 신경 쓰면 좋아요.",
+    exercise_level: "low",
+    grooming_level: "high",
+    beginner_friendly: true,
+    saju_tendency: "수(水) — 차분한 휴식과 조용한 공간에서 기운을 회복하는 경향",
+    seo_slug: "maltese",
+    summary:
+      "소형견 대표 품종으로, 실내 생활과 가족 교감에 잘 맞는 편이에요. 다만 눈물·치아·털 관리 루틴은 꾸준히 필요해요.",
+    body: `함께 지내기
+말티즈는 실내에서 가족과 함께하는 생활에 잘 맞는 소형견이에요. 일반적으로 활동량이 높지 않아 짧은 산책과 실내 놀이로도 에너지를 발산할 수 있는 경우가 많아요. 낯선 사람에게 경계하는 성향이 있는 개체도 있어, 초기 사회화를 차분히 이어가면 도움이 될 수 있어요.
+
+일상 관리
+· 산책/놀이: 하루 15~30분 정도의 짧은 산책과 실내 노즈워크·간단한 놀이가 무난한 편이에요.
+· 식사: 소형견용 사료와 적정 급여량을 지키고, 간식은 치아 건강을 위해 과도하게 주지 않는 편이 좋아요.
+· 그루밍: 장모라 매일 빗질이 필요한 경우가 많고, 눈 주변 털 정리와 위생 관리를 꾸준히 해 주세요.
+· 치아: 작은 입 안 치아 문제가 잘 드러나지 않을 수 있어, 정기적인 치아 점검·브러싱을 권해요.
+
+환경·루틴
+바닥이 미끄럽지 않은 공간과 집사 곁에서 쉴 수 있는 쿠션 자리가 있으면 편안해하는 경향이 있어요. 혼자 있는 시간이 길어질 때는 일정한 퇴근·산책 시간 같은 루틴이 안정에 도움이 될 수 있어요.
+
+주의할 점
+눈물 색이 진해지거나, 식욕·활력이 갑자기 줄거나, 절뚝임이 지속되면 일반적인 관리 범위를 넘을 수 있어요. 건강 이상이 의심되면 수의사·전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+수(水) 기운이 강한 개체는 차분한 휴식과 조용한 공간에서 기운을 회복하는 경향을 K-Saju에서 자주 이야기해요. 실제 우리 아이 성향은 사주만으로 단정하기보다, 사주 힌트를 루틴 설계 참고용으로 활용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형견", "초보"],
+  },
+  {
+    breed_name: "푸들",
+    breed_name_en: "Poodle",
+    animal_type: "dog",
+    size_category: "small",
+    lifespan: "12–15년",
+    personality:
+      "푸들은 일반적으로 학습 속도가 빠르고 사람과 함께 무언가를 하는 시간을 좋아하는 경향이 있어요. 반복되는 산책만으로는 지루해할 수 있어, 짧은 훈련·노즈워크·퍼즐 놀이가 잘 맞는 경우가 많아요. 예민한 개체는 낯선 소리나 미용 과정에 긴장할 수 있어 천천히 적응시키는 편이 좋아요.",
+    health_notes:
+      "귀가 덮이는 구조라 귀 냄새·가려움·분비물 변화는 꾸준히 살펴보는 편이 좋아요. 피부 알레르기나 눈물, 치아 문제도 개체에 따라 나타날 수 있으니 반복되는 긁음이나 붉어짐이 있으면 수의사 상담을 권해요.",
+    exercise_level: "medium",
+    grooming_level: "high",
+    beginner_friendly: true,
+    saju_tendency: "목(木) — 탐색과 학습 놀이에서 활력이 살아나는 경향",
+    seo_slug: "poodle",
+    summary: "똑똑하고 반응이 빠른 지능형 견종이에요. 놀이와 훈련을 함께 설계하면 안정적인 일상을 만들기 좋아요.",
+    body: `함께 지내기
+푸들은 집사와의 상호작용을 좋아하는 경우가 많아, 단순히 운동량만 채우기보다 함께 배우고 맞춰 가는 시간이 중요해요. 칭찬 기반 훈련에 반응이 좋은 편이라 기본 예절, 기다리기, 짧은 트릭을 놀이처럼 이어가면 만족도가 높아질 수 있어요.
+
+일상 관리
+· 산책/놀이: 짧은 산책과 노즈워크, 퍼즐 장난감, 간단한 복종 훈련을 섞어 주세요.
+· 식사: 간식 보상 훈련을 자주 한다면 하루 급여량 안에서 조절하는 편이 좋아요.
+· 그루밍: 털이 엉키기 쉬워 정기 미용과 빗질 루틴이 필요해요.
+· 귀 관리: 목욕이나 수영 후 귀 안쪽 습기가 오래 남지 않도록 살펴봐 주세요.
+
+환경·루틴
+새로운 자극을 좋아하지만 예민해질 수도 있어, 조용히 쉴 수 있는 자리와 놀이 시간이 분리되면 도움이 돼요. 혼자 있는 시간이 길다면 급격한 분리보다 짧은 독립 연습부터 시작해 보세요.
+
+주의할 점
+귀 냄새, 피부 붉어짐, 반복적인 핥기나 긁음이 지속되면 일반 관리만으로 보기 어려울 수 있어요. 이상 증상이 반복되면 수의사·전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+목(木) 기운은 자라남과 탐색의 이미지와 잘 맞아요. 푸들처럼 배움을 즐기는 아이는 사주 힌트를 놀이·훈련 루틴을 짜는 참고로 활용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형견", "훈련"],
+  },
+  {
+    breed_name: "포메라니안",
+    breed_name_en: "Pomeranian",
+    animal_type: "dog",
+    size_category: "small",
+    lifespan: "12–16년",
+    personality:
+      "포메라니안은 작은 체구와 달리 호기심과 자기표현이 뚜렷한 경우가 많아요. 가족에게 애착을 보이면서도 낯선 소리나 방문객에는 빠르게 반응할 수 있어, 과한 짖음으로 굳어지지 않게 차분한 보상 훈련이 도움이 돼요.",
+    health_notes:
+      "소형견에서 흔히 이야기되는 슬개골, 치아, 기관지 민감성은 꾸준히 살펴보는 편이 좋아요. 기침이 반복되거나 걸음걸이가 달라지거나 통증 반응이 보이면 수의사 상담을 받아 보세요.",
+    exercise_level: "low",
+    grooming_level: "high",
+    beginner_friendly: true,
+    saju_tendency: "화(火) — 짧고 즐거운 놀이로 기분이 살아나는 경향",
+    seo_slug: "pomeranian",
+    summary: "작지만 존재감이 큰 소형견이에요. 점프·치아·털 관리 루틴을 안정적으로 잡아 주면 좋아요.",
+    body: `함께 지내기
+포메라니안은 집 안의 작은 변화에도 빠르게 반응하는 경우가 있어요. 경계심 자체를 혼내기보다, 조용히 바라보기·자리로 돌아오기 같은 대체 행동을 알려 주면 일상이 편해질 수 있어요.
+
+일상 관리
+· 산책/놀이: 긴 운동보다 짧은 산책과 실내 장난감 놀이를 여러 번 나누는 방식이 잘 맞는 편이에요.
+· 식사: 체구가 작아 간식 비율이 쉽게 높아질 수 있으니 급여량을 세심하게 조절해 주세요.
+· 그루밍: 이중모라 털갈이 시기 빗질이 중요하고, 털 엉킴을 방치하지 않는 편이 좋아요.
+· 생활 습관: 높은 소파나 침대에서 뛰어내리는 행동은 줄여 주세요.
+
+환경·루틴
+미끄럼 방지 매트, 낮은 계단, 안정적인 휴식 공간이 도움이 될 수 있어요. 외부 소리에 민감하다면 창가 자극을 줄이고 조용한 보상 훈련을 병행해 보세요.
+
+주의할 점
+반복 기침, 절뚝임, 식욕 저하, 통증 반응은 단순 성격 문제로 넘기기 어려울 수 있어요. 이상 증상이 보이면 수의사·전문가 상담을 권합니다.
+
+K-Saju 활용 팁
+화(火) 기운은 밝은 반응과 짧은 몰입 놀이에 잘 어울려요. 흥분을 키우기보다 즐겁게 시작하고 차분히 마무리하는 루틴을 참고해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형견"],
+  },
+  {
+    breed_name: "치와와",
+    breed_name_en: "Chihuahua",
+    animal_type: "dog",
+    size_category: "small",
+    lifespan: "14–18년",
+    personality:
+      "치와와는 일반적으로 보호자에게 집중도가 높고 자기 영역을 뚜렷하게 느끼는 경우가 많아요. 낯선 사람이나 큰 개에게 대담하게 반응할 수 있어, 안전거리와 차분한 사회화가 중요해요.",
+    health_notes:
+      "초소형견 특성상 추위, 치아, 슬개골, 저혈당성 컨디션 변화에 신경 쓰는 편이 좋아요. 떨림이 오래 지속되거나 식욕 저하, 보행 이상이 보이면 수의사 상담을 받아 보세요.",
+    exercise_level: "low",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "화(火) — 따뜻한 보온과 안정적인 애착 루틴이 잘 맞는 경향",
+    seo_slug: "chihuahua",
+    summary: "초소형이지만 성격 표현이 선명한 품종이에요. 보온과 안전거리, 치아 루틴을 챙겨 주세요.",
+    body: `함께 지내기
+치와와는 작은 체구 때문에 보호받아야 할 순간이 많지만, 스스로는 꽤 당당하게 행동하는 경우가 있어요. 안아 올리기만 반복하기보다 바닥에서 안정적으로 탐색하고 선택할 시간을 주면 자신감 형성에 도움이 될 수 있어요.
+
+일상 관리
+· 산책/놀이: 짧고 안전한 산책, 실내 탐색 놀이, 부드러운 장난감 놀이가 무난해요.
+· 식사: 식사 간격이 길어지면 컨디션이 흔들리는 개체도 있어 식욕 변화를 잘 봐 주세요.
+· 그루밍: 단모라 부담은 낮지만 발톱, 귀, 치아 관리는 꾸준히 필요해요.
+· 보온: 찬 바닥이나 겨울 외출에는 옷과 담요를 활용해 주세요.
+
+환경·루틴
+집 안에서 미끄럽지 않은 동선과 조용한 휴식 공간을 마련해 주세요. 큰 개나 낯선 사람과 만날 때는 억지 인사보다 충분한 거리를 두는 편이 안전해요.
+
+주의할 점
+갑작스러운 떨림, 식욕 저하, 절뚝임, 잇몸 상태 변화가 보이면 빠르게 관찰하고 필요 시 병원 상담을 받아 보세요.
+
+K-Saju 활용 팁
+화(火) 기운은 따뜻함과 표현력을 떠올리게 해요. 치와와의 작은 신호를 잘 읽고, 흥분을 안정으로 돌리는 루틴을 만들어 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형견"],
+  },
+  {
+    breed_name: "요크셔 테리어",
+    breed_name_en: "Yorkshire Terrier",
+    animal_type: "dog",
+    size_category: "small",
+    lifespan: "13–16년",
+    personality:
+      "요크셔 테리어는 작지만 당당하고 주변 변화에 민감하게 반응하는 경향이 있어요. 사람과의 교감도 좋아하지만 테리어다운 활발함이 있어, 짧은 놀이와 규칙 있는 생활이 잘 맞는 경우가 많아요.",
+    health_notes:
+      "치아, 기관지 민감성, 슬개골, 장모 관리 이슈는 꾸준히 살펴보는 편이 좋아요. 기침이 반복되거나 입 냄새·잇몸 변화, 보행 이상이 보이면 수의사 상담을 권합니다.",
+    exercise_level: "low",
+    grooming_level: "high",
+    beginner_friendly: false,
+    saju_tendency: "금(金) — 정돈된 루틴과 깔끔한 관리에서 안정되는 경향",
+    seo_slug: "yorkshire-terrier",
+    summary: "작고 우아한 장모 소형견이에요. 털·치아·기관지 관리와 일관된 루틴이 중요해요.",
+    body: `함께 지내기
+요크셔 테리어는 가족 안에서 존재감이 큰 편이라, 원하는 것을 표현하는 방식이 선명할 수 있어요. 짖음이나 요구 행동이 강해지지 않도록 기다리기, 자리 훈련, 차분한 보상 루틴을 만들어 주면 좋아요.
+
+일상 관리
+· 산책/놀이: 짧은 산책과 냄새 맡기, 장난감 찾기 놀이가 잘 맞는 편이에요.
+· 식사: 소형견 체중에 맞춰 급여량을 조절하고, 치아 건강을 고려해 간식을 관리해 주세요.
+· 그루밍: 긴 털은 매일 빗질하고 눈가·입가 털은 위생적으로 유지해 주세요.
+· 치아: 치석과 잇몸 상태를 정기적으로 살피는 편이 좋아요.
+
+환경·루틴
+깔끔한 잠자리, 미끄럽지 않은 바닥, 일정한 산책 시간이 안정에 도움이 될 수 있어요. 미용 스트레스가 있는 개체는 짧은 적응 훈련부터 시작해 주세요.
+
+주의할 점
+반복 기침, 치아 통증 반응, 갑작스러운 절뚝임은 가볍게 넘기지 않는 편이 좋아요. 이상 증상이 지속되면 수의사·전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+금(金) 기운은 정돈과 루틴의 이미지와 잘 맞아요. 요크셔 테리어에게는 예측 가능한 생활 패턴과 깔끔한 케어 루틴을 사주 힌트처럼 적용해 볼 수 있어요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형견", "그루밍"],
+  },
+  {
+    breed_name: "비숑 프리제",
+    breed_name_en: "Bichon Frise",
+    animal_type: "dog",
+    size_category: "small",
+    lifespan: "12–15년",
+    personality:
+      "비숑 프리제는 일반적으로 밝고 사교적인 분위기를 가진 경우가 많아요. 가족과 놀고 교감하는 시간을 좋아하지만, 흥분이 쉽게 올라가는 개체는 차분히 쉬는 연습도 함께 필요할 수 있어요.",
+    health_notes:
+      "피부, 귀, 눈물, 치아 문제는 비숑에서 자주 관리 포인트로 이야기돼요. 반복적인 긁음, 귀 냄새, 눈 주변 변화가 지속되면 수의사 상담을 받아 보세요.",
+    exercise_level: "medium",
+    grooming_level: "high",
+    beginner_friendly: true,
+    saju_tendency: "토(土) — 규칙적인 루틴과 안정된 가족 교감이 잘 맞는 경향",
+    seo_slug: "bichon-frise",
+    summary: "밝고 사교적인 소형견이에요. 정기 미용과 피부·귀 관리 루틴을 함께 잡아 주세요.",
+    body: `함께 지내기
+비숑 프리제는 가족과 함께하는 활동에서 에너지가 살아나는 경우가 많아요. 반가움이 큰 만큼 점프나 흥분 행동이 반복될 수 있어, 앉아서 인사하기 같은 차분한 대체 행동을 알려 주면 좋아요.
+
+일상 관리
+· 산책/놀이: 짧은 산책과 실내 공놀이, 노즈워크를 섞으면 에너지 발산에 도움이 돼요.
+· 식사: 피부 컨디션과 체중 변화를 보며 급여량과 간식을 조절해 주세요.
+· 그루밍: 곱슬 털은 엉키기 쉬워 정기 미용과 빗질이 필요해요.
+· 귀/눈 관리: 습기와 눈물 자국을 꾸준히 살펴보는 편이 좋아요.
+
+환경·루틴
+놀이 시간과 휴식 시간을 구분하면 흥분 조절에 도움이 될 수 있어요. 미용실, 목욕, 빗질은 짧고 긍정적인 경험으로 쌓아 주세요.
+
+주의할 점
+피부 붉어짐, 귀 냄새, 눈물 증가, 반복적인 핥기가 이어지면 일반 관리만으로 보기 어려울 수 있어요. 필요하면 수의사·전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+토(土) 기운은 안정과 반복 루틴의 이미지가 있어요. 비숑에게는 매일 비슷한 시간의 산책·놀이·그루밍이 안정감을 주는 힌트가 될 수 있어요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형견", "초보"],
+  },
+  {
+    breed_name: "시츄",
+    breed_name_en: "Shih Tzu",
+    animal_type: "dog",
+    size_category: "small",
+    lifespan: "10–16년",
+    personality:
+      "시츄는 일반적으로 온순하고 가족 곁에서 느긋하게 지내는 것을 좋아하는 경향이 있어요. 활동량이 과하게 높지는 않지만, 짧은 산책과 가벼운 놀이를 꾸준히 이어가면 체중과 기분 관리에 도움이 돼요.",
+    health_notes:
+      "눈, 호흡, 피부, 치아, 척추 관련 불편은 시츄에서 관리 포인트로 자주 언급돼요. 눈을 자주 비비거나 숨소리 변화, 활력 저하가 보이면 수의사 상담을 권해요.",
+    exercise_level: "low",
+    grooming_level: "high",
+    beginner_friendly: true,
+    saju_tendency: "토(土) — 안정적인 휴식과 부드러운 교감에서 편안해지는 경향",
+    seo_slug: "shih-tzu",
+    summary: "느긋하고 가족 친화적인 실내견으로 잘 알려져 있어요. 눈 주변과 털 관리, 체중 루틴을 챙겨 주세요.",
+    body: `함께 지내기
+시츄는 조용하고 안정적인 집 안 생활에 잘 맞는 경우가 많아요. 다만 느긋한 성향 때문에 운동량이 부족해지기 쉬워, 짧은 산책을 꾸준히 이어가는 것이 좋아요.
+
+일상 관리
+· 산책/놀이: 더운 시간대는 피하고, 짧고 편안한 산책을 규칙적으로 해 주세요.
+· 식사: 활동량에 맞춰 급여량을 조절하고 체중 변화를 주기적으로 확인해 주세요.
+· 그루밍: 눈 주변 털, 입 주변 털, 귀 주변 위생을 꾸준히 관리해 주세요.
+· 휴식: 숨이 차거나 더워하는 신호가 보이면 바로 쉬게 해 주세요.
+
+환경·루틴
+시원하고 통풍이 되는 휴식 공간, 미끄럽지 않은 바닥, 낮은 침대나 계단이 도움이 될 수 있어요. 무리한 점프보다 천천히 오르내리는 동선을 만들어 주세요.
+
+주의할 점
+눈 충혈, 반복적인 눈 비빔, 숨소리 변화, 갑작스러운 식욕 저하는 확인이 필요할 수 있어요. 이상 증상이 지속되면 수의사·전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+토(土) 기운은 편안함과 안정의 이미지와 어울려요. 시츄에게는 큰 변화보다 익숙한 휴식 공간과 부드러운 교감 루틴을 우선해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형견"],
+  },
+  {
+    breed_name: "닥스훈트",
+    breed_name_en: "Dachshund",
+    animal_type: "dog",
+    size_category: "small",
+    lifespan: "12–16년",
+    personality:
+      "닥스훈트는 호기심이 많고 냄새를 따라 탐색하는 것을 좋아하는 경향이 있어요. 사냥견 기질이 남아 있어 고집스럽게 느껴질 수 있지만, 명확한 규칙과 즐거운 보상 훈련에는 잘 반응하는 경우가 많아요.",
+    health_notes:
+      "긴 허리와 짧은 다리 구조 때문에 허리 부담을 줄이는 생활 관리가 중요해요. 점프 후 통증 반응, 뒷다리 힘 빠짐, 움직임 거부가 보이면 지체하지 말고 수의사 상담을 받아 보세요.",
+    exercise_level: "medium",
+    grooming_level: "low",
+    beginner_friendly: false,
+    saju_tendency: "토(土) — 낮고 안정적인 동선에서 편안해지는 경향",
+    seo_slug: "dachshund",
+    summary: "호기심 많고 탐색을 좋아하는 소형견이에요. 계단·점프를 줄이고 허리 부담을 관리해 주세요.",
+    body: `함께 지내기
+닥스훈트는 냄새 맡기와 탐색을 통해 만족감을 얻는 경우가 많아요. 산책 중 끌고 가거나 한 방향에 집착할 수 있어, 안전한 리드줄 관리와 차분한 방향 전환 연습이 도움이 돼요.
+
+일상 관리
+· 산책/놀이: 무리한 달리기보다 냄새 맡기 산책과 짧은 탐색 놀이가 잘 맞아요.
+· 식사: 체중이 늘면 허리에 부담이 커질 수 있어 급여량과 간식량을 관리해 주세요.
+· 그루밍: 털 타입에 따라 관리 강도는 다르지만 발톱과 귀 점검은 꾸준히 필요해요.
+· 허리 보호: 소파, 침대, 계단에서 뛰어내리는 행동을 줄여 주세요.
+
+환경·루틴
+낮은 계단, 미끄럼 방지 매트, 바닥 생활 중심의 휴식 공간이 도움이 될 수 있어요. 안을 때는 가슴과 엉덩이를 함께 받쳐 허리에 부담이 가지 않게 해 주세요.
+
+주의할 점
+등을 만질 때 예민해지거나, 걷기 싫어하거나, 다리에 힘이 빠지는 모습은 즉시 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 권합니다.
+
+K-Saju 활용 팁
+토(土) 기운은 안정된 바닥과 루틴의 이미지와 잘 맞아요. 닥스훈트에게는 높은 자극보다 낮고 안정적인 생활 동선을 먼저 설계해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형견", "허리"],
+  },
+  {
+    breed_name: "프렌치 불독",
+    breed_name_en: "French Bulldog",
+    animal_type: "dog",
+    size_category: "small",
+    lifespan: "10–12년",
+    personality:
+      "프렌치 불독은 일반적으로 차분하고 장난기 있으며 가족과 가까이 있는 시간을 좋아하는 경우가 많아요. 과격한 운동보다 짧은 놀이와 휴식이 잘 맞고, 더위나 흥분 상황에서는 빠르게 쉬게 해 주는 것이 좋아요.",
+    health_notes:
+      "단두종 특성상 호흡, 더위, 피부 주름, 귀, 체중 관리는 특히 신경 쓰는 편이 좋아요. 숨소리가 갑자기 거칠어지거나 더위에 힘들어하는 모습, 피부 붉어짐이 지속되면 수의사 상담을 권합니다.",
+    exercise_level: "low",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "토(土) — 서늘하고 안정적인 휴식에서 컨디션이 살아나는 경향",
+    seo_slug: "french-bulldog",
+    summary: "애교 많고 실내 생활에 잘 맞는 단두종이에요. 더위·호흡·피부 주름 관리를 우선해 주세요.",
+    body: `함께 지내기
+프렌치 불독은 가족 곁에서 느긋하게 쉬면서도 짧은 장난을 즐기는 경우가 많아요. 운동을 오래 밀어붙이기보다 컨디션을 보며 짧게 놀고 충분히 쉬는 방식이 잘 맞을 수 있어요.
+
+일상 관리
+· 산책/놀이: 더운 시간대는 피하고, 짧은 산책을 여러 번 나누는 편이 좋아요.
+· 식사: 체중 증가는 호흡과 관절 부담으로 이어질 수 있어 급여량을 관리해 주세요.
+· 그루밍: 피부 주름, 귀, 발가락 사이를 깨끗하고 건조하게 유지해 주세요.
+· 온도 관리: 여름에는 실내 온도와 산책 시간을 특히 신경 써 주세요.
+
+환경·루틴
+서늘하고 통풍이 되는 휴식 공간이 중요해요. 흥분했을 때 바로 쉴 수 있는 자리와 물을 준비하고, 무리한 공놀이·장시간 산책은 피하는 편이 안전해요.
+
+주의할 점
+호흡이 거칠어지거나 잇몸 색이 달라지거나 더위에 축 처지는 모습은 빠르게 확인해야 할 수 있어요. 이상 증상은 수의사·전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+토(土) 기운은 안정과 휴식의 이미지와 어울려요. 프렌치 불독에게는 큰 활동보다 서늘한 공간, 짧은 놀이, 충분한 회복 루틴을 사주 힌트처럼 적용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형견", "단두"],
+  },
+  {
+    breed_name: "웰시 코기",
+    breed_name_en: "Welsh Corgi",
+    animal_type: "dog",
+    size_category: "medium",
+    lifespan: "12–15년",
+    personality:
+      "웰시 코기는 영리하고 활동적인 목양견 출신으로, 가족의 움직임과 주변 상황에 관심이 많은 경향이 있어요. 에너지가 남으면 짖음이나 몰이 행동처럼 보일 수 있어, 규칙 있는 놀이와 훈련이 도움이 돼요.",
+    health_notes:
+      "체형상 허리와 관절 부담, 체중 관리는 꾸준히 살펴보는 편이 좋아요. 절뚝임, 계단 거부, 뒷다리 움직임 변화가 보이면 수의사 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "medium",
+    beginner_friendly: true,
+    saju_tendency: "목(木) — 지능 놀이와 목적 있는 활동에서 활력이 살아나는 경향",
+    seo_slug: "welsh-corgi",
+    summary: "영리하고 활발한 중형견이에요. 체중·허리 관리와 두뇌 놀이를 함께 챙겨 주세요.",
+    body: `함께 지내기
+웰시 코기는 산책만큼이나 무언가를 배우고 해내는 활동에서 만족감을 느끼는 경우가 많아요. 가족을 따라다니거나 움직임에 반응하는 행동은 목양견 성향으로 볼 수 있어, 차분한 호출·기다리기 훈련을 함께 해 주세요.
+
+일상 관리
+· 산책/놀이: 매일 산책과 함께 공 찾기, 짧은 트릭 훈련, 노즈워크를 섞어 주세요.
+· 식사: 식탐이 강한 개체도 있어 체중과 간식량을 꾸준히 관리하는 편이 좋아요.
+· 그루밍: 털갈이 시기 빗질을 자주 하고, 발바닥 털과 발톱도 점검해 주세요.
+· 허리 보호: 높은 곳에서 뛰어내리는 행동과 반복 계단 이용은 줄여 주세요.
+
+환경·루틴
+미끄럼 방지 바닥, 낮은 계단, 규칙적인 운동 시간이 도움이 될 수 있어요. 활동 후에는 흥분을 낮추는 휴식 루틴까지 이어 주세요.
+
+주의할 점
+체중 증가, 보행 변화, 허리 통증 반응, 산책 거부가 보이면 생활 관리만으로 넘기지 않는 편이 좋아요. 이상 증상이 지속되면 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+목(木) 기운은 성장과 움직임의 이미지와 잘 맞아요. 웰시 코기에게는 목적 있는 놀이와 차분한 마무리를 함께 설계하는 루틴이 잘 어울려요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["중형견"],
+  },
   { breed_name: "시바 이누", breed_name_en: "Shiba Inu", animal_type: "dog", size_category: "medium", lifespan: "12–15년", personality: "독립적·깔끔함.", health_notes: "알레르기·탈모 시즌.", exercise_level: "medium", grooming_level: "medium", beginner_friendly: false, saju_tendency: "금(金) — 자립 공간", seo_slug: "shiba-inu", summary: "고집 있을 수 있어 훈련 일관성 필요.", body: "긍정 강화 훈련 추천.", tags: ["중형견", "훈련"] },
   { breed_name: "비글", breed_name_en: "Beagle", animal_type: "dog", size_category: "medium", lifespan: "12–15년", personality: "친화적·냄새 추적.", health_notes: "비만·귀 감염.", exercise_level: "high", grooming_level: "low", beginner_friendly: true, saju_tendency: "목(木) — 노즈워크", seo_slug: "beagle", summary: "식탐·도망 주의.", body: "리드줄 필수, 간식량 조절.", tags: ["중형견"] },
   { breed_name: "보더 콜리", breed_name_en: "Border Collie", animal_type: "dog", size_category: "medium", lifespan: "12–15년", personality: "매우 영리·일하기 좋아함.", health_notes: "관절·눈 질환.", exercise_level: "high", grooming_level: "medium", beginner_friendly: false, saju_tendency: "목(木) — 업무·훈련", seo_slug: "border-collie", summary: "운동·두뇌 자극 부족 시 문제행동.", body: "아질리티·트릭 훈련 병행.", tags: ["중형견", "운동"] },
@@ -37,28 +398,1151 @@ export const BREED_GUIDE_SEEDS: BreedGuideSeed[] = [
   { breed_name: "골든 리트리버", breed_name_en: "Golden Retriever", animal_type: "dog", size_category: "large", lifespan: "10–12년", personality: "온순·가족견.", health_notes: "관절·암·비만.", exercise_level: "high", grooming_level: "medium", beginner_friendly: true, saju_tendency: "토(土) — 가족 교감", seo_slug: "golden-retriever", summary: "초보에게 인기.", body: "매일 산책·수영도 좋음.", tags: ["대형견", "초보"] },
   { breed_name: "래브라도 리트리버", breed_name_en: "Labrador Retriever", animal_type: "dog", size_category: "large", lifespan: "10–12년", personality: "친근·식욕 왕성.", health_notes: "비만·관절·귀.", exercise_level: "high", grooming_level: "low", beginner_friendly: true, saju_tendency: "수(水) — 수영·놀이", seo_slug: "labrador-retriever", summary: "가장 흔한 가족견.", body: "사료량·간식 엄격 관리.", tags: ["대형견", "초보"] },
   { breed_name: "저먼 셰퍼드", breed_name_en: "German Shepherd", animal_type: "dog", size_category: "large", lifespan: "9–13년", personality: "충성·경계·학습 빠름.", health_notes: "엉덩이·소화.", exercise_level: "high", grooming_level: "medium", beginner_friendly: false, saju_tendency: "금(金) — 임무·훈련", seo_slug: "german-shepherd", summary: "사회화·훈련 필수.", body: "초기 사회화에 시간 투자.", tags: ["대형견", "훈련"] },
-  { breed_name: "믹스견(소형)", breed_name_en: "Small Mixed Breed", animal_type: "dog", size_category: "small", lifespan: "12–16년", personality: "개체마다 다양.", health_notes: "유기견은 건강검진 먼저.", exercise_level: "medium", grooming_level: "medium", beginner_friendly: true, saju_tendency: "개별 성향 확인", seo_slug: "mixed-dog-small", summary: "품종보다 개별 성향 중시.", body: "입양 후 2–4주 루틴 관찰.", tags: ["믹스견", "입양"] },
-  { breed_name: "믹스견(중대형)", breed_name_en: "Medium-Large Mixed Breed", animal_type: "dog", size_category: "large", lifespan: "10–14년", personality: "다양.", health_notes: "관절·체중.", exercise_level: "medium", grooming_level: "medium", beginner_friendly: true, saju_tendency: "개별 성향 확인", seo_slug: "mixed-dog-large", summary: "크기에 맞는 운동량.", body: "산책·놀이 강도를 체형에 맞게.", tags: ["믹스견"] },
-  { breed_name: "코리안 숏헤어", breed_name_en: "Korean Shorthair", animal_type: "cat", size_category: "medium", lifespan: "15–20년", personality: "독립·적응력 좋음.", health_notes: "비만·방광염.", exercise_level: "low", grooming_level: "low", beginner_friendly: true, saju_tendency: "토(土) — 안정", seo_slug: "korean-shorthair", summary: "우리나라 대표 묘종.", body: "습식·캣타워·창가 자리.", tags: ["단모", "초보"] },
-  { breed_name: "페르시안", breed_name_en: "Persian", animal_type: "cat", size_category: "medium", lifespan: "12–17년", personality: "차분·조용.", health_notes: "털뭉침·눈물·호흡.", exercise_level: "low", grooming_level: "high", beginner_friendly: false, saju_tendency: "금(金) — 청결", seo_slug: "persian", summary: "장모 관리 부담 큼.", body: "매일 빗질.", tags: ["장모"] },
-  { breed_name: "브리티시 숏헤어", breed_name_en: "British Shorthair", animal_type: "cat", size_category: "medium", lifespan: "12–17년", personality: "느긋·독립.", health_notes: "비만·심장.", exercise_level: "low", grooming_level: "low", beginner_friendly: true, saju_tendency: "토(土) — 규칙", seo_slug: "british-shorthair", summary: "둥근 체형.", body: "급식량 조절.", tags: ["단모", "초보"] },
-  { breed_name: "스코티시 폴드", breed_name_en: "Scottish Fold", animal_type: "cat", size_category: "medium", lifespan: "11–14년", personality: "온순·앉기 좋아함.", health_notes: "연골·관절 이슈.", exercise_level: "low", grooming_level: "medium", beginner_friendly: false, saju_tendency: "토(土) — 낮은 가구", seo_slug: "scottish-fold", summary: "관절 건강 모니터링.", body: "높이 점프 줄이기.", tags: ["단모"] },
-  { breed_name: "러시안 블루", breed_name_en: "Russian Blue", animal_type: "cat", size_category: "medium", lifespan: "15–20년", personality: "수줍·가족에게 애정.", health_notes: "비만·스트레스.", exercise_level: "low", grooming_level: "low", beginner_friendly: true, saju_tendency: "수(水) — 조용한 공간", seo_slug: "russian-blue", summary: "낯선 이에게 경계.", body: "은신처·천천히 적응.", tags: ["단모"] },
-  { breed_name: "메인쿤", breed_name_en: "Maine Coon", animal_type: "cat", size_category: "large", lifespan: "12–15년", personality: "온화·대형.", health_notes: "심장·관절.", exercise_level: "medium", grooming_level: "high", beginner_friendly: true, saju_tendency: "목(木) — 높이·탐색", seo_slug: "maine-coon", summary: "대형묘.", body: "넓은 화장실·캣타워.", tags: ["장모", "대형묘"] },
-  { breed_name: "랙돌", breed_name_en: "Ragdoll", animal_type: "cat", size_category: "large", lifespan: "12–17년", personality: "안기 좋아함·온순.", health_notes: "비만·방광.", exercise_level: "low", grooming_level: "medium", beginner_friendly: true, saju_tendency: "수(水) — 부드러운 환경", seo_slug: "ragdoll", summary: "안아 들 때 몸 맡김.", body: "무리한 안기는 피하기.", tags: ["장모"] },
-  { breed_name: "벵갈", breed_name_en: "Bengal", animal_type: "cat", size_category: "medium", lifespan: "12–16년", personality: "활동적·호기심.", health_notes: "에너지 발산.", exercise_level: "high", grooming_level: "low", beginner_friendly: false, saju_tendency: "화(火) — 사냥 놀이", seo_slug: "bengal", summary: "야생형 외모.", body: "캣휠·인터랙티브 장난감.", tags: ["활동적"] },
-  { breed_name: "샴", breed_name_en: "Siamese", animal_type: "cat", size_category: "medium", lifespan: "15–20년", personality: "수다·애착.", health_notes: "치아·호흡·비만.", exercise_level: "medium", grooming_level: "low", beginner_friendly: true, saju_tendency: "화(火) — 교감", seo_slug: "siamese", summary: "외로움에 민감.", body: "함께 시간·놀이.", tags: ["단모", "교감"] },
-  { breed_name: "믹스묘", breed_name_en: "Mixed Breed Cat", animal_type: "cat", size_category: "medium", lifespan: "15–18년", personality: "개체마다 다양.", health_notes: "정기 검진.", exercise_level: "medium", grooming_level: "medium", beginner_friendly: true, saju_tendency: "개별 성향", seo_slug: "mixed-cat", summary: "품종보다 개성.", body: "입양 후 환경 적응 관찰.", tags: ["믹스", "입양"] },
-  { breed_name: "토끼", breed_name_en: "Rabbit", animal_type: "other", size_category: "small", lifespan: "8–12년", personality: "조용·스트레스 예민.", health_notes: "소화·이갈·발톱.", exercise_level: "medium", grooming_level: "low", beginner_friendly: false, saju_tendency: "토(土) — 넓은 케이지", seo_slug: "rabbit", summary: "건초·넓은 공간 필수.", body: "잡아 들기보다 바닥 교감.", tags: ["소동물", "초보주의"] },
-  { breed_name: "햄스터", breed_name_en: "Hamster", animal_type: "other", size_category: "small", lifespan: "2–3년", personality: "야행·단독 사육.", health_notes: "습도·탈출·치아.", exercise_level: "medium", grooming_level: "low", beginner_friendly: true, saju_tendency: "수(水) — 은신·휠", seo_slug: "hamster", summary: "짝지어 키우면 싸움.", body: "밤 활동·쳇바퀴 제공.", tags: ["소동물"] },
-  { breed_name: "레오파드 게코", breed_name_en: "Leopard Gecko", animal_type: "other", size_category: "small", lifespan: "10–20년", personality: "온순하고 야행성.", health_notes: "칼슘·탈피·온도 구배.", exercise_level: "low", grooming_level: "low", beginner_friendly: true, saju_tendency: "토(土) — 안정된 은신처", seo_slug: "leopard-gecko", summary: "초보도 접근하기 쉬운 대표 파충류.", body: "바닥재, 은신처, 핫존·쿨존 온도 차이를 안정적으로 유지하세요.", tags: ["파충류", "게코", "초보"] },
-  { breed_name: "크레스티드 게코", breed_name_en: "Crested Gecko", animal_type: "other", size_category: "small", lifespan: "15–20년", personality: "차분하지만 점프력이 좋음.", health_notes: "습도·탈수·꼬리 손상.", exercise_level: "low", grooming_level: "low", beginner_friendly: true, saju_tendency: "목(木) — 수직 공간", seo_slug: "crested-gecko", summary: "수직 사육장과 습도 관리가 핵심.", body: "높은 사육장, 코르크/식물 은신처, 저녁 분무 루틴을 맞춰주세요.", tags: ["파충류", "게코", "습도"] },
-  { breed_name: "비어디드 드래곤", breed_name_en: "Bearded Dragon", animal_type: "other", size_category: "medium", lifespan: "8–12년", personality: "사람에게 익숙해지기 쉬움.", health_notes: "UVB·칼슘·소화.", exercise_level: "medium", grooming_level: "low", beginner_friendly: false, saju_tendency: "화(火) — 햇빛과 열", seo_slug: "bearded-dragon", summary: "UVB와 바스킹존이 매우 중요한 파충류.", body: "강한 UVB, 충분한 바스킹 온도, 채소와 곤충 급여 균형을 챙기세요.", tags: ["파충류", "도마뱀", "UVB"] },
-  { breed_name: "반수생 거북", breed_name_en: "Semi-aquatic Turtle", animal_type: "other", size_category: "medium", lifespan: "20–40년", personality: "관찰형 반려동물.", health_notes: "수질·등갑·UVB.", exercise_level: "medium", grooming_level: "medium", beginner_friendly: false, saju_tendency: "수(水) — 깨끗한 물", seo_slug: "semi-aquatic-turtle", summary: "수조 여과와 일광욕 공간이 필수.", body: "강한 여과, 건조한 육지, UVB 램프와 수온 관리를 함께 해야 합니다.", tags: ["파충류", "거북", "수질"] },
-  { breed_name: "사랑앵무", breed_name_en: "Budgerigar", animal_type: "other", size_category: "small", lifespan: "5–10년", personality: "활발하고 사회적.", health_notes: "호흡기·깃털·비만.", exercise_level: "medium", grooming_level: "medium", beginner_friendly: true, saju_tendency: "목(木) — 소리와 교감", seo_slug: "budgerigar", summary: "초보에게 인기 있는 소형 앵무새.", body: "넓은 케이지, 매일 비행/놀이 시간, 균형 잡힌 씨드·펠렛 식단이 필요합니다.", tags: ["앵무새", "조류", "초보"] },
-  { breed_name: "왕관앵무", breed_name_en: "Cockatiel", animal_type: "other", size_category: "small", lifespan: "10–15년", personality: "온순하고 애착이 깊음.", health_notes: "깃털·호흡기·외로움.", exercise_level: "medium", grooming_level: "medium", beginner_friendly: true, saju_tendency: "화(火) — 노래와 교감", seo_slug: "cockatiel", summary: "교감과 루틴을 좋아하는 반려조.", body: "갑작스러운 환경 변화보다 일정한 놀이 시간과 조용한 휴식 공간이 좋습니다.", tags: ["앵무새", "조류", "교감"] },
-  { breed_name: "모란앵무", breed_name_en: "Lovebird", animal_type: "other", size_category: "small", lifespan: "10–15년", personality: "호기심 많고 애착이 강함.", health_notes: "스트레스·물림·비만.", exercise_level: "medium", grooming_level: "medium", beginner_friendly: false, saju_tendency: "화(火) — 에너지 발산", seo_slug: "lovebird", summary: "작지만 에너지가 높은 앵무새.", body: "충분한 장난감, 씹을 거리, 사람과의 상호작용을 규칙적으로 제공하세요.", tags: ["앵무새", "조류"] },
-  { breed_name: "기니피그", breed_name_en: "Guinea Pig", animal_type: "other", size_category: "small", lifespan: "5–8년", personality: "온순하고 무리 생활 선호.", health_notes: "비타민 C·치아·호흡기.", exercise_level: "low", grooming_level: "medium", beginner_friendly: true, saju_tendency: "토(土) — 넓은 바닥", seo_slug: "guinea-pig", summary: "넓은 바닥 공간과 비타민 C가 중요.", body: "건초를 항상 제공하고, 미끄럽지 않은 바닥과 숨을 공간을 충분히 주세요.", tags: ["소형동물류", "소동물", "초보"] },
-  { breed_name: "친칠라", breed_name_en: "Chinchilla", animal_type: "other", size_category: "small", lifespan: "10–15년", personality: "예민하고 활동적.", health_notes: "더위·치아·모래목욕.", exercise_level: "medium", grooming_level: "medium", beginner_friendly: false, saju_tendency: "금(金) — 건조하고 시원한 환경", seo_slug: "chinchilla", summary: "더위에 약하고 건조한 환경을 좋아함.", body: "실내 온도를 낮게 유지하고, 모래목욕과 씹을 나무를 제공하세요.", tags: ["소형동물류", "소동물"] },
-  { breed_name: "고슴도치", breed_name_en: "Hedgehog", animal_type: "other", size_category: "small", lifespan: "4–6년", personality: "야행성·독립적.", health_notes: "온도·비만·피부.", exercise_level: "medium", grooming_level: "low", beginner_friendly: false, saju_tendency: "수(水) — 조용한 밤 루틴", seo_slug: "hedgehog", summary: "야행성 습성과 보온 관리가 핵심.", body: "낮에는 조용한 은신처, 밤에는 충분한 활동 휠과 안정적인 온도를 제공하세요.", tags: ["소형동물류", "소동물", "야행성"] },
+  {
+    breed_name: "믹스견(소형)",
+    breed_name_en: "Small Mixed Breed",
+    animal_type: "dog",
+    size_category: "small",
+    lifespan: "12–16년",
+    personality:
+      "믹스견(소형)은 품종보다 개체의 경험, 사회화, 생활 환경에 따라 성향 차이가 크게 나타나요. 유기견·입양견은 처음에는 경계하다가 안정적인 루틴이 생기면 천천히 마음을 여는 경우가 많아요.",
+    health_notes:
+      "입양 초기에는 건강검진, 중성화 여부, 치아·피부·귀 상태 확인이 도움이 돼요. 식욕·활력·보행 변화, 반복 기침이나 절뚝임이 보이면 수의사 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "medium",
+    beginner_friendly: true,
+    saju_tendency: "개별 성향 — 사주보다 실제 생활 반응을 함께 보는 것이 좋은 유형",
+    seo_slug: "mixed-dog-small",
+    summary: "품종보다 개별 성향과 입양 전 경험이 중요한 소형견이에요. 입양 후 2~4주 루틴 관찰을 권해요.",
+    body: `함께 지내기
+믹스견(소형)은 정해진 품종 이미지보다 실제 반응을 보는 것이 중요해요. 입양 직후에는 억지 교감보다 안전한 공간, 일정한 산책 시간, 예측 가능한 식사 루틴을 먼저 만들어 주세요.
+
+일상 관리
+· 산책/놀이: 체구에 맞는 짧은~중간 산책과 실내 놀이를 꾸준히 이어가 주세요.
+· 식사: 체중과 활동량에 맞춰 급여량을 조절하고, 간식은 치아·체중 관리를 고려해 주세요.
+· 그루밍: 털 길이와 털갈이에 따라 빗질 빈도를 조절해 주세요.
+· 적응 관찰: 식욕, 수면, 짖음, 산책 반응을 2~4주 정도 기록해 보세요.
+
+환경·루틴
+미끄럽지 않은 바닥, 조용한 휴식 공간, 가족 모두 같은 규칙으로 천천히 다가가 주세요. 유기견은 새로운 소리·사람·차에 예민할 수 있어요.
+
+주의할 점
+식욕 저하, 지속적인 절뚝임, 반복 기침, 갑작스러운 성격 변화가 보이면 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 권합니다.
+
+K-Saju 활용 팁
+믹스견은 품종 힌트보다 실제 반응이 더 중요해요. K-Saju는 놀이·휴식·교감 방식을 관찰하는 보조 도구로 활용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["믹스견", "입양"],
+  },
+  {
+    breed_name: "믹스견(중대형)",
+    breed_name_en: "Medium-Large Mixed Breed",
+    animal_type: "dog",
+    size_category: "large",
+    lifespan: "10–14년",
+    personality:
+      "믹스견(중대형)은 체형과 성향이 개체마다 다양해요. 활동적인 아이도, 차분한 아이도 있어 입양 후 산책·놀이·휴식 패턴을 관찰하며 맞춰 가는 편이 좋아요.",
+    health_notes:
+      "체형이 클수록 관절·체중 관리가 중요해요. 절뚝임, 계단 회피, 체중 급증, 식욕·활력 변화가 보이면 수의사 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "medium",
+    beginner_friendly: true,
+    saju_tendency: "개별 성향 — 사주보다 실제 생활 반응을 함께 보는 것이 좋은 유형",
+    seo_slug: "mixed-dog-large",
+    summary: "크기와 성향이 다양한 중·대형 믹스견이에요. 체형에 맞는 운동량과 관절·체중 관리가 핵심이에요.",
+    body: `함께 지내기
+믹스견(중대형)은 산책 거리와 놀이 강도를 체형에 맞게 조절하는 것이 중요해요. 힘만 세다고 오래 끌고 가기보다, 편안한 속도와 충분한 휴식을 함께 설계해 주세요.
+
+일상 관리
+· 산책/놀이: 매일 산책과 함께 공 찾기, 노즈워크 등 체형에 맞는 놀이를 제공해 주세요.
+· 식사: 과체중은 관절 부담으로 이어질 수 있어 급여량과 간식을 관리해 주세요.
+· 그루밍: 털 타입에 따라 빗질·목욕 빈도를 조절하고, 발톱과 귀도 점검해 주세요.
+· 관절: 높은 곳에서 뛰어내리는 행동, 반복 계단 이용은 줄여 주세요.
+
+환경·루틴
+넓은 휴식 공간, 미끄럼 방지 바닥, 규칙적인 산책 시간이 도움이 될 수 있어요. 입양 초기에는 새 환경 적응을 위해 천천히 영역을 넓혀 주세요.
+
+주의할 점
+보행 변화, 허리·다리 통증 반응, 산책 거부, 급격한 체중 변화는 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+중대형 믹스견은 품종보다 개체 리듬이 중요해요. K-Saju 힌트는 운동·휴식·교감 루틴을 짜는 참고용으로 활용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["믹스견"],
+  },
+  {
+    breed_name: "코리안 숏헤어",
+    breed_name_en: "Korean Shorthair",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "15–20년",
+    personality:
+      "코리안 숏헤어는 개체 차이가 크지만, 일반적으로 환경 적응력이 좋고 독립적인 생활 리듬을 보이는 경우가 많아요. 사람과의 거리를 스스로 조절하는 편이라, 억지 교감보다 선택할 수 있는 공간을 주면 안정되는 경향이 있어요.",
+    health_notes:
+      "실내 생활에서는 비만, 방광염, 치아 관리가 자주 관리 포인트로 이야기돼요. 배뇨 횟수 변화, 화장실 밖 배뇨, 식욕 저하가 보이면 수의사 상담을 권해요.",
+    exercise_level: "low",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "토(土) — 안정적인 영역과 익숙한 루틴에서 편안해지는 경향",
+    seo_slug: "korean-shorthair",
+    summary: "우리나라에서 가장 친숙한 단모 고양이예요. 품종보다 개체 성향과 생활 루틴을 잘 보는 것이 중요해요.",
+    body: `함께 지내기
+코리안 숏헤어는 성격 폭이 넓어 애교 많은 아이도, 혼자만의 시간을 선호하는 아이도 있어요. 처음에는 스킨십보다 은신처, 창가, 캣타워처럼 선택지를 충분히 주고 반응을 관찰하는 편이 좋아요.
+
+일상 관리
+· 놀이: 낚싯대, 공, 숨은 간식 찾기처럼 짧은 사냥 놀이를 매일 나눠 주세요.
+· 식사: 체중이 쉽게 늘 수 있어 급여량과 간식량을 주기적으로 확인해 주세요.
+· 그루밍: 단모라도 털갈이 시기에는 빗질이 도움이 돼요.
+· 화장실: 모래와 위치 변화에 예민할 수 있어 청결과 접근성을 유지해 주세요.
+
+환경·루틴
+창밖을 볼 수 있는 자리, 높은 공간, 조용한 은신처를 함께 마련하면 좋아요. 갑작스러운 변화보다 천천히 영역을 넓히는 방식이 안정에 도움이 될 수 있어요.
+
+주의할 점
+소변 자세를 오래 취하거나, 화장실을 자주 들락거리거나, 식욕·활력이 떨어지면 빠른 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+토(土) 기운은 안정된 영역과 반복 루틴의 이미지와 잘 맞아요. 코리안 숏헤어에게는 편안한 영역과 예측 가능한 생활 리듬을 먼저 설계해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["단모", "초보"],
+  },
+  {
+    breed_name: "페르시안",
+    breed_name_en: "Persian",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "12–17년",
+    personality:
+      "페르시안은 일반적으로 차분하고 조용한 환경을 선호하는 경향이 있어요. 과격한 놀이보다 부드러운 교감과 안정적인 휴식 공간을 좋아하는 경우가 많아, 집 안 분위기를 차분하게 유지해 주면 좋아요.",
+    health_notes:
+      "장모라 털 엉킴과 헤어볼 관리가 중요하고, 눈물·호흡·치아 관리도 꾸준히 살펴보는 편이 좋아요. 눈 주변 염증, 숨소리 변화, 식욕 저하가 보이면 수의사 상담을 권합니다.",
+    exercise_level: "low",
+    grooming_level: "high",
+    beginner_friendly: false,
+    saju_tendency: "금(金) — 청결하고 정돈된 공간에서 안정되는 경향",
+    seo_slug: "persian",
+    summary: "차분한 장모묘로, 매일 빗질과 눈 주변 관리가 중요한 품종이에요.",
+    body: `함께 지내기
+페르시안은 조용하고 안정적인 집 안에서 편안함을 느끼는 경우가 많아요. 억지로 활발한 놀이를 시키기보다 낮은 강도의 사냥 놀이와 부드러운 스킨십을 짧게 이어가면 좋아요.
+
+일상 관리
+· 놀이: 짧은 낚싯대 놀이와 천천히 움직이는 장난감이 잘 맞는 편이에요.
+· 식사: 활동량이 낮을 수 있어 체중 변화를 꾸준히 확인해 주세요.
+· 그루밍: 매일 빗질하고, 털 엉킴이 생기기 전에 풀어 주세요.
+· 눈 관리: 눈물 자국과 눈 주변 털을 위생적으로 관리해 주세요.
+
+환경·루틴
+조용한 휴식 자리, 낮은 캣타워, 부드러운 쿠션이 도움이 될 수 있어요. 미용과 빗질은 갑작스럽게 길게 하기보다 짧고 긍정적인 경험으로 쌓아 주세요.
+
+주의할 점
+털 뭉침으로 피부가 당기거나, 눈 충혈·분비물 증가, 숨소리 변화가 지속되면 확인이 필요할 수 있어요. 이상 증상은 수의사·전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+금(金) 기운은 청결과 정돈의 이미지와 어울려요. 페르시안에게는 깨끗한 휴식 공간과 일정한 그루밍 루틴을 사주 힌트처럼 적용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["장모"],
+  },
+  {
+    breed_name: "브리티시 숏헤어",
+    breed_name_en: "British Shorthair",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "12–17년",
+    personality:
+      "브리티시 숏헤어는 일반적으로 느긋하고 독립적인 성향을 보이는 경우가 많아요. 과한 스킨십보다 곁에 머무는 방식의 교감을 선호할 수 있어, 아이가 다가오는 타이밍을 존중해 주면 좋아요.",
+    health_notes:
+      "둥근 체형 때문에 체중 관리가 중요하고, 심장·관절 관련 이슈는 정기 검진에서 확인하는 편이 좋아요. 호흡 변화, 쉽게 지침, 체중 증가가 눈에 띄면 수의사 상담을 권해요.",
+    exercise_level: "low",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "토(土) — 규칙적인 생활과 안정된 영역에서 편안해지는 경향",
+    seo_slug: "british-shorthair",
+    summary: "느긋하고 독립적인 단모묘예요. 체중 관리와 차분한 교감 루틴이 중요해요.",
+    body: `함께 지내기
+브리티시 숏헤어는 차분하게 곁에 있는 교감을 좋아하는 경우가 많아요. 안기기보다 근처에 앉아 있는 방식으로 애정을 표현할 수 있어, 표현 방식이 조용하다고 애정이 없는 것으로 보지 않는 편이 좋아요.
+
+일상 관리
+· 놀이: 짧은 사냥 놀이를 매일 반복해 활동량을 유지해 주세요.
+· 식사: 체중이 늘기 쉬운 개체는 자동급식보다 정량 급여가 도움이 될 수 있어요.
+· 그루밍: 단모지만 촘촘한 털이라 털갈이 시기 빗질을 해 주세요.
+· 검진: 체형 변화와 호흡·활동량 변화를 함께 관찰해 주세요.
+
+환경·루틴
+조용한 창가 자리와 넓은 숨숨집, 안정적인 화장실 위치가 도움이 될 수 있어요. 새로운 가족이나 가구 변화는 천천히 적응시키는 편이 좋아요.
+
+주의할 점
+활동량이 갑자기 줄거나 숨이 차 보이거나 체중이 빠르게 늘면 건강 확인이 필요할 수 있어요. 이상 증상이 지속되면 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+토(土) 기운은 안정과 반복의 이미지와 잘 맞아요. 브리티시 숏헤어에게는 과한 자극보다 일정한 놀이·식사·휴식 리듬이 잘 어울려요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["단모", "초보"],
+  },
+  {
+    breed_name: "스코티시 폴드",
+    breed_name_en: "Scottish Fold",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "11–14년",
+    personality:
+      "스코티시 폴드는 일반적으로 온순하고 사람 곁에 머무는 것을 좋아하는 경우가 많아요. 다만 움직임이 적거나 독특한 자세를 자주 보인다면 단순한 귀여움으로만 보기보다 몸 상태도 함께 살피는 편이 좋아요.",
+    health_notes:
+      "연골·관절 관련 이슈가 자주 언급되는 품종이라 보행, 점프, 자세 변화를 꾸준히 관찰해 주세요. 절뚝임, 점프 회피, 통증 반응이 보이면 수의사 상담을 권합니다.",
+    exercise_level: "low",
+    grooming_level: "medium",
+    beginner_friendly: false,
+    saju_tendency: "토(土) — 낮고 안정적인 공간에서 편안해지는 경향",
+    seo_slug: "scottish-fold",
+    summary: "온순한 성향으로 알려져 있지만, 관절·움직임 변화를 세심하게 봐야 하는 품종이에요.",
+    body: `함께 지내기
+스코티시 폴드는 차분히 곁에 있는 시간을 좋아하는 경우가 많아요. 높은 곳에 오르기보다 낮은 자리에서 쉬는 것을 선호할 수 있어, 생활 동선을 몸에 부담이 적게 구성해 주세요.
+
+일상 관리
+· 놀이: 낮은 높이의 낚싯대 놀이와 짧은 사냥 놀이가 무난해요.
+· 식사: 체중 증가는 관절 부담으로 이어질 수 있어 급여량을 관리해 주세요.
+· 그루밍: 털 길이에 따라 빗질 빈도를 조절하고, 귀 주변도 부드럽게 살펴봐 주세요.
+· 동작 관찰: 점프, 착지, 걷는 모습을 평소와 비교해 보세요.
+
+환경·루틴
+낮은 캣타워, 미끄럽지 않은 바닥, 쉽게 올라갈 수 있는 계단이 도움이 될 수 있어요. 무리한 점프를 유도하는 놀이보다 안정적인 움직임을 우선해 주세요.
+
+주의할 점
+움직이기 싫어하거나 만졌을 때 예민해지거나 걷는 자세가 달라지면 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+토(土) 기운은 안정적인 바닥과 루틴의 이미지와 어울려요. 스코티시 폴드에게는 편안한 낮은 동선과 차분한 교감 시간을 우선해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["단모", "장모"],
+  },
+  {
+    breed_name: "러시안 블루",
+    breed_name_en: "Russian Blue",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "15–20년",
+    personality:
+      "러시안 블루는 일반적으로 낯선 환경에는 조심스럽지만, 익숙한 가족에게는 깊은 애정을 보이는 경향이 있어요. 큰 소리나 갑작스러운 변화에 긴장할 수 있어 천천히 적응시키는 방식이 잘 맞아요.",
+    health_notes:
+      "비만, 스트레스성 식욕 변화, 치아 관리는 꾸준히 살펴보는 편이 좋아요. 숨어 있는 시간이 갑자기 늘거나 식사·배변 패턴이 달라지면 수의사 상담을 권합니다.",
+    exercise_level: "low",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "수(水) — 조용한 공간과 부드러운 루틴에서 안정되는 경향",
+    seo_slug: "russian-blue",
+    summary: "조용하고 섬세한 단모묘예요. 낯선 변화는 천천히, 교감은 부드럽게 이어가는 편이 좋아요.",
+    body: `함께 지내기
+러시안 블루는 처음에는 거리를 두다가 신뢰가 생기면 가족 곁에 머무는 경우가 많아요. 억지로 꺼내거나 안기보다 스스로 다가올 시간을 주는 방식이 안정에 도움이 될 수 있어요.
+
+일상 관리
+· 놀이: 조용한 공간에서 짧은 낚싯대 놀이를 반복해 주세요.
+· 식사: 체중과 식욕 변화를 관찰하고 간식은 정량 안에서 조절해 주세요.
+· 그루밍: 단모라 부담은 낮지만 털갈이 시기 빗질이 도움이 돼요.
+· 스트레스 관리: 손님 방문, 이사, 가구 이동은 천천히 적응시켜 주세요.
+
+환경·루틴
+은신처와 높은 공간, 조용한 창가 자리를 마련해 주세요. 하루 루틴이 크게 흔들리지 않으면 안정감을 느끼는 개체가 많아요.
+
+주의할 점
+숨는 시간이 급격히 늘거나, 식욕이 줄거나, 화장실 패턴이 달라지면 스트레스나 건강 이슈일 수 있어요. 이상 증상은 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+수(水) 기운은 조용함과 회복의 이미지와 잘 맞아요. 러시안 블루에게는 소란스러운 자극보다 부드럽고 반복적인 교감 루틴을 참고해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["단모"],
+  },
+  {
+    breed_name: "메인쿤",
+    breed_name_en: "Maine Coon",
+    animal_type: "cat",
+    size_category: "large",
+    lifespan: "12–15년",
+    personality:
+      "메인쿤은 큰 체구와 달리 온화하고 가족과 어울리는 것을 좋아하는 경우가 많아요. 탐색심이 있고 높은 공간을 좋아할 수 있어, 넓은 생활 동선과 튼튼한 캣타워가 잘 맞아요.",
+    health_notes:
+      "대형묘 특성상 관절과 체중 관리가 중요하고, 심장 관련 검진도 품종 관리 포인트로 자주 이야기돼요. 쉽게 지치거나 호흡 변화, 보행 이상이 보이면 수의사 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "high",
+    beginner_friendly: true,
+    saju_tendency: "목(木) — 높은 공간과 탐색 활동에서 활력이 살아나는 경향",
+    seo_slug: "maine-coon",
+    summary: "온화한 대형묘로, 넓은 공간·튼튼한 캣타워·정기 빗질이 잘 맞아요.",
+    body: `함께 지내기
+메인쿤은 가족 곁에서 여유롭게 지내면서도 집 안을 탐색하는 것을 좋아하는 경우가 많아요. 체구가 큰 만큼 생활용품도 일반 고양이보다 넉넉한 크기로 준비하는 편이 좋아요.
+
+일상 관리
+· 놀이: 짧은 사냥 놀이와 높은 공간 탐색을 함께 제공해 주세요.
+· 식사: 성장과 체중 변화에 맞춰 급여량을 관리하고 과체중을 피하는 편이 좋아요.
+· 그루밍: 장모라 털 엉킴과 헤어볼 관리를 위해 정기 빗질이 필요해요.
+· 용품: 큰 화장실, 튼튼한 스크래처, 안정적인 캣타워를 준비해 주세요.
+
+환경·루틴
+높은 곳과 넓은 동선을 좋아하는 개체가 많아, 무게를 견디는 캣타워와 안전한 점프 경로가 도움이 돼요. 쉬는 공간도 몸을 충분히 펼 수 있게 마련해 주세요.
+
+주의할 점
+쉽게 숨이 차거나, 움직임이 줄거나, 절뚝임이 보이면 확인이 필요할 수 있어요. 이상 증상이 지속되면 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+목(木) 기운은 성장과 탐색의 이미지와 잘 맞아요. 메인쿤에게는 높은 공간, 천천히 넓어지는 영역, 규칙적인 놀이 루틴을 사주 힌트처럼 적용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["장모", "대형묘"],
+  },
+  {
+    breed_name: "랙돌",
+    breed_name_en: "Ragdoll",
+    animal_type: "cat",
+    size_category: "large",
+    lifespan: "12–17년",
+    personality:
+      "랙돌은 일반적으로 온순하고 사람 곁에 머무는 것을 좋아하는 경향이 있어요. 안기는 것을 잘 받아들이는 개체도 있지만, 모든 랙돌이 스킨십을 좋아하는 것은 아니므로 신호를 존중해 주세요.",
+    health_notes:
+      "체중, 방광, 치아, 심장 관련 검진은 꾸준히 살펴보는 편이 좋아요. 배뇨 변화, 무기력, 숨이 차 보이는 모습이 있으면 수의사 상담을 권합니다.",
+    exercise_level: "low",
+    grooming_level: "medium",
+    beginner_friendly: true,
+    saju_tendency: "수(水) — 부드러운 환경과 느린 교감에서 안정되는 경향",
+    seo_slug: "ragdoll",
+    summary: "부드럽고 온순한 대형묘로 알려져 있어요. 체중과 방광, 스킨십 신호를 세심하게 봐 주세요.",
+    body: `함께 지내기
+랙돌은 가족 주변에서 느긋하게 머무는 경우가 많아요. 무리하게 안고 오래 붙잡기보다, 아이가 편안해하는 자세와 시간을 찾아주는 편이 교감에 도움이 돼요.
+
+일상 관리
+· 놀이: 낮은 강도의 사냥 놀이를 매일 짧게 반복해 주세요.
+· 식사: 활동량이 낮으면 체중이 늘 수 있어 정량 급여와 체중 확인이 필요해요.
+· 그루밍: 중장모 털은 엉킴이 생기기 전 빗질해 주세요.
+· 화장실: 배뇨 패턴과 물 섭취량을 평소와 비교해 관찰해 주세요.
+
+환경·루틴
+조용한 휴식 공간, 낮은 캣타워, 넉넉한 화장실이 도움이 될 수 있어요. 스킨십은 아이가 빠져나갈 수 있는 상태에서 부드럽게 이어가 주세요.
+
+주의할 점
+소변 횟수 변화, 식욕 저하, 급격한 체중 증가, 숨이 차 보이는 모습은 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+수(水) 기운은 부드러움과 회복의 이미지와 어울려요. 랙돌에게는 조용한 휴식, 느린 교감, 예측 가능한 루틴이 잘 맞을 수 있어요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["장모"],
+  },
+  {
+    breed_name: "벵갈",
+    breed_name_en: "Bengal",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "12–16년",
+    personality:
+      "벵갈은 일반적으로 활동량이 높고 호기심이 강한 편이에요. 사냥 놀이, 오르기, 탐색 욕구가 충분히 채워지지 않으면 문제행동처럼 보이는 행동이 늘 수 있어, 풍부한 환경 구성이 중요해요.",
+    health_notes:
+      "활동량이 높은 만큼 관절·발톱·체중 상태를 관찰하고, 스트레스성 과잉 행동도 함께 살펴보는 편이 좋아요. 식욕·활력 변화나 반복적인 과도한 핥기가 있으면 수의사 상담을 권합니다.",
+    exercise_level: "high",
+    grooming_level: "low",
+    beginner_friendly: false,
+    saju_tendency: "화(火) — 사냥 놀이와 높은 몰입 활동에서 활력이 살아나는 경향",
+    seo_slug: "bengal",
+    summary: "활동적이고 호기심 많은 고양이예요. 충분한 놀이 시간과 수직 공간이 핵심이에요.",
+    body: `함께 지내기
+벵갈은 조용히 쉬는 시간만큼 강도 있는 놀이가 필요한 경우가 많아요. 집 안을 탐색하고 높은 곳에 오르며 에너지를 쓰는 성향이 있어, 환경이 단조로우면 쉽게 지루해할 수 있어요.
+
+일상 관리
+· 놀이: 낚싯대, 터널, 캣휠, 먹이 퍼즐처럼 몰입할 수 있는 활동을 준비해 주세요.
+· 식사: 활동량에 맞춰 급여량을 조절하고 간식 놀이를 활용해도 좋아요.
+· 그루밍: 단모라 부담은 낮지만 발톱과 치아 관리는 꾸준히 필요해요.
+· 환경 enrichment: 수직 공간과 숨을 수 있는 경로를 다양하게 만들어 주세요.
+
+환경·루틴
+높은 캣타워, 창가 자리, 사냥 놀이 루틴이 도움이 돼요. 놀이 후에는 반드시 잡기와 보상, 휴식으로 마무리해 흥분을 낮춰 주세요.
+
+주의할 점
+활동성이 갑자기 줄거나, 과도한 핥기·공격성·식욕 변화가 반복되면 스트레스나 건강 이슈일 수 있어요. 이상 증상은 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+화(火) 기운은 에너지와 몰입의 이미지와 잘 맞아요. 벵갈에게는 짧고 강한 사냥 놀이 후 차분히 쉬는 루틴을 사주 힌트처럼 적용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["활동적"],
+  },
+  {
+    breed_name: "샴",
+    breed_name_en: "Siamese",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "15–20년",
+    personality:
+      "샴은 일반적으로 목소리 표현이 많고 사람과의 상호작용을 좋아하는 경향이 있어요. 혼자 있는 시간이 길면 외로움을 느끼는 개체도 있어, 놀이와 교감 루틴을 꾸준히 만들어 주면 좋아요.",
+    health_notes:
+      "치아, 호흡기, 체중 변화는 꾸준히 살펴보는 편이 좋아요. 기침, 재채기, 식욕 변화, 입 냄새가 지속되면 수의사 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "화(火) — 교감과 대화형 놀이에서 활력이 살아나는 경향",
+    seo_slug: "siamese",
+    summary: "수다스럽고 애착이 깊은 단모묘예요. 함께 노는 시간과 교감 루틴이 중요해요.",
+    body: `함께 지내기
+샴은 집사에게 말을 걸듯 울음으로 표현하는 경우가 많아요. 요구를 모두 즉시 들어주기보다, 정해진 놀이와 식사 루틴을 만들어 주면 안정적인 소통에 도움이 될 수 있어요.
+
+일상 관리
+· 놀이: 사람과 함께하는 낚싯대 놀이, 가져오기 놀이, 간단한 타깃 훈련이 잘 맞는 편이에요.
+· 식사: 활동량과 체중 변화를 보며 급여량을 조절해 주세요.
+· 그루밍: 단모라 빗질 부담은 낮지만 치아와 발톱 관리는 꾸준히 필요해요.
+· 교감: 긴 방치보다 짧더라도 매일 반응해 주는 시간이 중요해요.
+
+환경·루틴
+창가 자리, 높은 공간, 집사와 가까운 휴식 공간을 마련해 주세요. 혼자 있는 시간이 길다면 자동 장난감이나 먹이 퍼즐도 보조가 될 수 있어요.
+
+주의할 점
+울음이 갑자기 늘거나 식욕·활력·호흡 패턴이 달라지면 확인이 필요할 수 있어요. 이상 증상이 지속되면 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+화(火) 기운은 표현과 교감의 이미지와 잘 어울려요. 샴에게는 집사와 주고받는 놀이, 말 걸기, 짧은 훈련 루틴을 참고해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["단모", "교감"],
+  },
+  {
+    breed_name: "아비시니안",
+    breed_name_en: "Abyssinian",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "12–15년",
+    personality:
+      "아비시니안은 일반적으로 호기심이 많고 높은 곳을 탐색하는 것을 좋아하는 경향이 있어요. 사람 곁에 머물며 관찰하고 함께 움직이는 시간을 즐기는 개체가 많아, 단조로운 환경에서는 쉽게 지루해할 수 있어요.",
+    health_notes:
+      "활동량이 높은 편이라 체중, 치아, 관절 상태를 꾸준히 살피는 것이 좋아요. 식욕 변화, 점프 회피, 잇몸 붉어짐이나 입 냄새가 지속되면 수의사 상담을 권합니다.",
+    exercise_level: "high",
+    grooming_level: "low",
+    beginner_friendly: false,
+    saju_tendency: "목(木) — 탐색과 점프 놀이에서 활력이 살아나는 경향",
+    seo_slug: "abyssinian",
+    summary: "호기심 많고 활동적인 단모묘예요. 수직 공간과 매일의 놀이 루틴이 중요해요.",
+    body: `함께 지내기
+아비시니안은 집 안 곳곳을 탐색하고 높은 공간을 활용하는 것을 좋아하는 경우가 많아요. 조용히 안겨 있기보다 곁에서 움직임을 함께하는 방식의 교감을 선호할 수 있어요.
+
+일상 관리
+· 놀이: 낚싯대, 터널, 캣타워처럼 움직임이 큰 놀이를 짧게 여러 번 나눠 주세요.
+· 식사: 활동량과 체형 변화를 보며 급여량을 조절해 주세요.
+· 그루밍: 단모라 부담은 낮지만 털갈이 시기 빗질과 발톱 관리는 필요해요.
+· 치아: 입 냄새와 잇몸 상태를 주기적으로 확인해 주세요.
+
+환경·루틴
+튼튼한 캣타워, 창가 자리, 안전한 점프 동선이 도움이 될 수 있어요. 놀이 후에는 잡기와 보상, 휴식으로 마무리해 흥분을 낮춰 주세요.
+
+주의할 점
+활동성이 갑자기 줄거나 식욕·보행·구강 상태가 달라지면 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+목(木) 기운은 성장과 탐색의 이미지와 잘 맞아요. 아비시니안에게는 새로운 놀이와 수직 공간을 조금씩 확장하는 루틴을 참고해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["단모", "활동적"],
+  },
+  {
+    breed_name: "아메리칸 숏헤어",
+    breed_name_en: "American Shorthair",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "15–20년",
+    personality:
+      "아메리칸 숏헤어는 일반적으로 차분하고 적응력이 좋은 편으로 알려져 있어요. 가족과 함께 지내면서도 독립적인 시간을 잘 보내는 개체가 많아, 과한 자극보다 안정적인 놀이와 생활 리듬이 잘 맞는 경우가 많아요.",
+    health_notes:
+      "둥근 체형으로 살이 붙기 쉬운 개체가 있어 체중과 식사량을 꾸준히 확인해 주세요. 활동량 저하, 숨이 차 보이는 모습, 급격한 체중 변화가 있으면 수의사 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "토(土) — 규칙적인 생활과 안정된 영역에서 편안해지는 경향",
+    seo_slug: "american-shorthair",
+    summary: "적응력이 좋은 단모묘로 알려져 있어요. 체중 관리와 짧은 놀이 루틴이 중요해요.",
+    body: `함께 지내기
+아메리칸 숏헤어는 낯선 환경에도 비교적 차분하게 적응하는 경우가 많지만, 모든 고양이처럼 자기만의 안전한 공간은 필요해요. 억지 스킨십보다 다가오는 타이밍을 존중해 주세요.
+
+일상 관리
+· 놀이: 매일 짧은 사냥 놀이와 먹이 퍼즐을 섞어 주세요.
+· 식사: 간식과 사료량을 정해 체중 증가를 예방해 주세요.
+· 그루밍: 단모지만 털갈이 시기에는 빗질이 도움이 돼요.
+· 검진: 체형, 호흡, 활동량 변화를 함께 관찰해 주세요.
+
+환경·루틴
+창가 자리, 스크래처, 숨숨집처럼 기본 선택지를 충분히 마련해 주세요. 생활 리듬이 크게 흔들리지 않으면 안정감을 느끼는 개체가 많아요.
+
+주의할 점
+체중이 빠르게 늘거나 활동량이 줄면 건강 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+토(土) 기운은 안정과 반복의 이미지와 어울려요. 아메리칸 숏헤어에게는 식사·놀이·휴식 시간을 일정하게 맞추는 루틴을 참고해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["단모", "초보"],
+  },
+  {
+    breed_name: "터키시 앙고라",
+    breed_name_en: "Turkish Angora",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "12–18년",
+    personality:
+      "터키시 앙고라는 일반적으로 우아하고 영리하며 사람과의 상호작용을 좋아하는 경향이 있어요. 장난기와 독립성이 함께 보일 수 있어, 부드러운 교감과 충분한 놀이 선택지를 함께 주는 편이 좋아요.",
+    health_notes:
+      "장모 관리와 헤어볼, 치아, 귀 상태를 꾸준히 살펴보는 것이 좋아요. 특히 흰 털 개체는 청각 관련 확인이 이야기되는 경우가 있어, 반응이 둔하거나 행동 변화가 보이면 수의사 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "high",
+    beginner_friendly: false,
+    saju_tendency: "금(金) — 정돈된 공간과 섬세한 교감에서 안정되는 경향",
+    seo_slug: "turkish-angora",
+    summary: "우아한 장모묘로, 빗질과 헤어볼 관리, 부드러운 교감 루틴이 중요해요.",
+    body: `함께 지내기
+터키시 앙고라는 사람 곁에서 관심을 보이면서도 자기 페이스를 지키는 개체가 많아요. 과한 스킨십보다 짧은 놀이와 부드러운 대화를 반복하면 안정적인 교감에 도움이 될 수 있어요.
+
+일상 관리
+· 놀이: 낚싯대와 공처럼 민첩하게 반응할 수 있는 놀이를 제공해 주세요.
+· 식사: 헤어볼 관리와 체중 변화를 함께 살펴 주세요.
+· 그루밍: 장모라 털 엉킴 전 정기 빗질이 필요해요.
+· 청각·귀: 소리 반응과 귀 상태를 평소와 비교해 보세요.
+
+환경·루틴
+깨끗한 휴식 자리, 창가, 높은 공간을 함께 마련하면 좋아요. 빗질은 짧게 시작해 보상과 함께 긍정적인 경험으로 만들어 주세요.
+
+주의할 점
+털 뭉침, 피부 당김, 식욕 변화, 소리 반응 변화가 지속되면 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+금(金) 기운은 정돈과 섬세함의 이미지와 잘 맞아요. 터키시 앙고라에게는 깔끔한 휴식 공간과 일정한 그루밍 루틴을 참고해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["장모", "그루밍"],
+  },
+  {
+    breed_name: "노르웨이 숲",
+    breed_name_en: "Norwegian Forest Cat",
+    animal_type: "cat",
+    size_category: "large",
+    lifespan: "12–16년",
+    personality:
+      "노르웨이 숲은 큰 체구와 풍성한 털을 가진 고양이로, 일반적으로 차분하면서도 높은 공간과 탐색을 좋아하는 경향이 있어요. 독립적인 시간을 존중하면서도 규칙적인 놀이를 마련해 주면 안정적인 생활에 도움이 돼요.",
+    health_notes:
+      "대형묘 특성상 체중과 관절, 심장 관련 검진을 꾸준히 챙기는 편이 좋아요. 장모라 털 엉킴과 헤어볼 관리도 중요하며, 보행 변화나 쉽게 지치는 모습이 보이면 수의사 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "high",
+    beginner_friendly: true,
+    saju_tendency: "목(木) — 높은 공간과 느긋한 탐색에서 활력이 살아나는 경향",
+    seo_slug: "norwegian-forest-cat",
+    summary: "풍성한 털을 가진 대형묘예요. 튼튼한 수직 공간과 정기 빗질이 잘 맞아요.",
+    body: `함께 지내기
+노르웨이 숲은 느긋해 보여도 집 안을 넓게 탐색하고 높은 곳을 활용하는 경우가 많아요. 체구가 큰 만큼 화장실, 스크래처, 캣타워도 넉넉하고 안정적인 제품이 좋아요.
+
+일상 관리
+· 놀이: 높은 공간 탐색과 짧은 사냥 놀이를 함께 제공해 주세요.
+· 식사: 체형과 활동량에 맞춰 급여량을 관리해 주세요.
+· 그루밍: 풍성한 털은 엉킴 전 빗질하고 털갈이 시기에는 빈도를 늘려 주세요.
+· 용품: 큰 화장실과 튼튼한 캣타워를 준비해 주세요.
+
+환경·루틴
+안전한 점프 경로와 몸을 충분히 펼 수 있는 휴식 공간이 도움이 될 수 있어요. 놀이와 빗질은 일정한 시간에 반복하면 안정감을 줄 수 있어요.
+
+주의할 점
+움직임이 줄거나 숨이 차 보이거나 털 뭉침으로 피부가 당기면 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 받아 보세요.
+
+K-Saju 활용 팁
+목(木) 기운은 성장과 높은 공간의 이미지와 어울려요. 노르웨이 숲에게는 넓은 동선과 차분히 확장되는 탐색 루틴을 참고해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["장모", "대형묘"],
+  },
+  {
+    breed_name: "사바나 캣",
+    breed_name_en: "Savannah Cat",
+    animal_type: "cat",
+    size_category: "large",
+    lifespan: "12–20년",
+    personality:
+      "사바나 캣은 일반적으로 활동량과 점프력이 매우 높은 편으로 알려져 있어요. 호기심이 강하고 환경 자극이 많이 필요할 수 있어, 충분한 공간과 놀이 시간을 준비할 수 있는 집사에게 더 잘 맞는 경우가 많아요.",
+    health_notes:
+      "활동량이 큰 만큼 관절, 체중, 스트레스 신호를 꾸준히 관찰해 주세요. 지역별 사육 규정이나 세대에 따른 특성이 다를 수 있으므로 입양 전 법적·윤리적 조건과 전문 상담을 확인하는 편이 좋아요.",
+    exercise_level: "high",
+    grooming_level: "low",
+    beginner_friendly: false,
+    saju_tendency: "화(火) — 넓은 활동 반경과 몰입 놀이에서 활력이 살아나는 경향",
+    seo_slug: "savannah-cat",
+    summary: "활동량이 큰 대형묘예요. 충분한 공간, 강도 있는 놀이, 사육 조건 확인이 중요해요.",
+    body: `함께 지내기
+사바나 캣은 높은 점프와 탐색 욕구가 강하게 나타날 수 있어 일반적인 실내 고양이보다 환경 준비가 더 중요해요. 충분한 수직 공간, 안전한 놀이 시간, 일관된 규칙이 필요할 수 있어요.
+
+일상 관리
+· 놀이: 캣휠, 높은 캣타워, 먹이 퍼즐처럼 에너지를 쓸 수 있는 활동을 준비해 주세요.
+· 식사: 체형과 활동량에 맞춰 급여량을 조절해 주세요.
+· 그루밍: 단모라 부담은 낮지만 발톱과 치아 관리는 꾸준히 필요해요.
+· 규정 확인: 지역별 사육 가능 여부와 입양 조건을 먼저 확인해 주세요.
+
+환경·루틴
+단조로운 공간에서는 스트레스가 쌓일 수 있어 안전한 탐색 동선을 충분히 마련해 주세요. 놀이 후에는 보상과 휴식으로 흥분을 낮추는 루틴이 필요해요.
+
+주의할 점
+과도한 공격성, 반복적인 탈출 시도, 식욕·활력 변화가 보이면 환경 스트레스나 건강 이슈일 수 있어요. 이상 증상은 수의사·전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+화(火) 기운은 강한 에너지와 몰입의 이미지와 잘 맞아요. 사바나 캣에게는 에너지를 쓰는 시간과 차분히 쉬는 시간을 명확히 나누는 루틴을 참고해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["대형묘", "활동적"],
+  },
+  {
+    breed_name: "도메스틱 숏헤어",
+    breed_name_en: "Domestic Shorthair",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "12–18년",
+    personality:
+      "도메스틱 숏헤어는 특정 혈통보다 개체의 경험과 환경에 따라 성향 차이가 크게 나타나요. 애교가 많은 아이도, 독립적인 아이도 있어 품종 이미지보다 실제 반응을 관찰하는 것이 중요해요.",
+    health_notes:
+      "입양 초기에는 기본 건강검진, 예방접종, 중성화 여부, 치아·피부·귀 상태 확인이 도움이 돼요. 식욕, 배변, 배뇨, 활력 변화가 보이면 수의사 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "개별 성향 — 실제 생활 반응을 중심으로 루틴을 맞추는 유형",
+    seo_slug: "domestic-shorthair",
+    summary: "가장 넓은 의미의 단모 믹스묘예요. 품종보다 개체 성향과 적응 과정을 보는 것이 중요해요.",
+    body: `함께 지내기
+도메스틱 숏헤어는 유전적 배경과 생활 경험이 다양해 같은 이름 안에서도 성격 폭이 커요. 처음에는 만지기보다 은신처와 안전한 방을 마련하고 스스로 나올 시간을 주는 편이 좋아요.
+
+일상 관리
+· 놀이: 반응을 보며 낚싯대, 공, 먹이 퍼즐 중 좋아하는 방식을 찾아 주세요.
+· 식사: 체중과 식욕 변화를 관찰하고 사료 전환은 천천히 해 주세요.
+· 그루밍: 단모라도 털갈이 시기 빗질이 도움이 돼요.
+· 적응 관찰: 은신 시간, 화장실 사용, 놀이 반응을 2~4주 정도 기록해 보세요.
+
+환경·루틴
+작은 공간에서 시작해 천천히 영역을 넓히면 안정에 도움이 될 수 있어요. 가족 모두가 같은 규칙으로 접근하는 것이 좋아요.
+
+주의할 점
+식사를 거부하거나 화장실 패턴이 불안정하거나 활력이 떨어지면 빠른 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 권합니다.
+
+K-Saju 활용 팁
+도메스틱 숏헤어는 고정된 품종 이미지보다 실제 반응이 더 중요해요. K-Saju 힌트는 놀이·휴식·교감 방식을 찾는 보조 도구로 활용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["믹스", "단모", "입양"],
+  },
+  {
+    breed_name: "하이브리드",
+    breed_name_en: "Hybrid Cat",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "12–18년",
+    personality:
+      "하이브리드 고양이는 조합과 세대, 생활 경험에 따라 성향 차이가 매우 커요. 활동적이고 탐색적인 개체도, 일반 가정묘와 비슷하게 차분한 개체도 있어 품종명만으로 성향을 단정하기 어렵습니다.",
+    health_notes:
+      "혈통과 세대에 따라 필요한 관리가 달라질 수 있어 입양 전 건강 기록과 사육 조건을 확인하는 편이 좋아요. 식욕·배변·행동 변화가 반복되면 수의사나 해당 품종 경험이 있는 전문가 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "medium",
+    beginner_friendly: false,
+    saju_tendency: "개별 성향 — 혈통보다 현재 행동과 환경 반응을 우선하는 유형",
+    seo_slug: "hybrid-cat",
+    summary: "조합과 세대에 따라 차이가 큰 믹스 계열이에요. 입양 전 정보 확인과 맞춤 환경이 중요해요.",
+    body: `함께 지내기
+하이브리드 고양이는 한 가지 성격으로 묶기 어렵기 때문에 입양 전 부모묘 정보, 성장 환경, 사회화 경험을 확인하는 편이 좋아요. 처음에는 반응을 관찰하며 놀이와 휴식 강도를 조절해 주세요.
+
+일상 관리
+· 놀이: 활동량에 맞춰 낚싯대, 캣타워, 먹이 퍼즐을 조합해 주세요.
+· 식사: 체형과 소화 반응을 보며 급여량과 사료를 조절해 주세요.
+· 그루밍: 털 길이와 털 빠짐에 따라 빗질 빈도를 정해 주세요.
+· 기록 확인: 건강 기록, 예방접종, 중성화 여부를 확인해 주세요.
+
+환경·루틴
+안전한 은신처와 수직 공간, 조용한 휴식 공간을 모두 마련해 주세요. 낯선 환경에서는 작은 공간부터 천천히 적응시키는 편이 좋아요.
+
+주의할 점
+과도한 경계, 반복적인 탈출 시도, 식욕·배변 변화가 이어지면 환경 스트레스나 건강 이슈일 수 있어요. 이상 증상은 수의사·전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+하이브리드 고양이는 정해진 품종 이미지보다 실제 관찰이 중요해요. K-Saju 힌트는 에너지 사용 방식과 회복 루틴을 찾는 참고로 활용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["믹스", "하이브리드"],
+  },
+  {
+    breed_name: "믹스묘",
+    breed_name_en: "Mixed Breed Cat",
+    animal_type: "cat",
+    size_category: "medium",
+    lifespan: "15–18년",
+    personality:
+      "믹스묘는 품종보다 개체의 경험, 사회화, 생활 환경에 따라 성향 차이가 크게 나타나요. 처음에는 낯가림을 하더라도 안정적인 영역과 반복 루틴이 생기면 천천히 마음을 여는 경우가 많아요.",
+    health_notes:
+      "입양 초기에는 기본 건강검진, 예방접종, 중성화 여부, 치아·피부·귀 상태 확인이 도움이 돼요. 식욕·배변·호흡·활력 변화가 보이면 수의사 상담을 받아 보세요.",
+    exercise_level: "medium",
+    grooming_level: "medium",
+    beginner_friendly: true,
+    saju_tendency: "개별 성향 — 사주보다 실제 생활 반응을 함께 보는 것이 좋은 유형",
+    seo_slug: "mixed-cat",
+    summary: "품종보다 개성이 중요한 고양이예요. 입양 후 적응 속도와 생활 반응을 천천히 관찰해 주세요.",
+    body: `함께 지내기
+믹스묘는 이전 경험과 현재 환경에 따라 반응이 크게 달라질 수 있어요. 입양 직후에는 만지기보다 안전한 방, 은신처, 깨끗한 화장실을 먼저 마련하고 스스로 나올 시간을 주는 편이 좋아요.
+
+일상 관리
+· 놀이: 성향을 보며 낚싯대, 공, 먹이 퍼즐 중 좋아하는 방식을 찾아 주세요.
+· 식사: 기존에 먹던 사료에서 바꿀 때는 천천히 전환하는 편이 좋아요.
+· 그루밍: 털 길이와 털 빠짐에 따라 빗질 빈도를 조절해 주세요.
+· 적응 관찰: 식욕, 배변, 은신 시간, 놀이 반응을 2~4주 정도 기록해 보세요.
+
+환경·루틴
+처음부터 집 전체를 열어주기보다 작은 공간에서 시작해 영역을 넓히면 안정에 도움이 될 수 있어요. 가족 구성원 모두 같은 규칙으로 천천히 다가가 주세요.
+
+주의할 점
+식사를 거부하거나, 화장실 사용이 불안정하거나, 호흡·활력 변화가 보이면 빠른 확인이 필요할 수 있어요. 이상 증상은 수의사 상담을 권합니다.
+
+K-Saju 활용 팁
+믹스묘는 정해진 품종 이미지보다 실제 반응이 더 중요해요. K-Saju 힌트는 놀이·휴식·교감 방식을 관찰하는 보조 도구로 활용해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["믹스", "입양"],
+  },
+  {
+    breed_name: "토끼",
+    breed_name_en: "Rabbit",
+    animal_type: "other",
+    size_category: "small",
+    lifespan: "8–12년",
+    personality:
+      "토끼는 일반적으로 조용하고 스트레스에 예민한 편이에요. 잡아 들기보다 바닥에서 함께하는 교감을 선호하는 경우가 많고, 갑작스러운 소음·움직임·다른 동물 자극에는 긴장할 수 있어요.",
+    health_notes:
+      "소화(모발·변 상태), 이갈, 발톱, 체중 변화를 꾸준히 관찰하는 편이 좋아요. 먹이를 줄이거나 배변이 작아지거나, 비틀거리는 모습이 보이면 소동물 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "low",
+    beginner_friendly: false,
+    saju_tendency: "토(土) — 넓은 바닥 공간과 조용한 은신처에서 편안해지는 경향",
+    seo_slug: "rabbit",
+    summary: "건초와 넓은 바닥 공간이 필수인 소동물이에요. 잡아 들기보다 바닥 교감과 스트레스 관리가 중요해요.",
+    body: `함께 지내기
+토끼는 케이지 안만이 아니라 넓은 바닥에서 뛰고 탐색하는 시간이 필요해요. 억지로 안기보다 바닥에 앉아 천천히 다가가고, 스스로 선택할 은신처를 충분히 마련해 주세요.
+
+일상 관리
+· 먹이: 건초를 항상 제공하고, 신선한 채소와 사료는 개체 상태에 맞춰 조절해 주세요.
+· 공간: 미끄럽지 않은 넓은 바닥과 여러 은신처를 마련해 주세요.
+· 그루밍: 털갈이 시기 빗질과 발톱 점검을 꾸준히 해 주세요.
+· 관찰: 식욕, 배변량·형태, 활동량을 매일 비교해 보세요.
+
+환경·루틴
+조용한 공간, 갑작스러운 소음 최소화, 다른 반려동물과의 접촉은 신중히 설계해 주세요. 케이지는 휴식용, 바닥 활동은 운동·탐색용으로 나누면 도움이 돼요.
+
+주의할 점
+토끼는 식욕 저하가 빠르게 문제가 될 수 있어요. 먹지 않거나 배변이 줄거나 몸을 비틀면 전문가 상담을 권합니다.
+
+K-Saju 활용 팁
+토(土) 기운은 안정된 바닥과 넓은 영역의 이미지와 잘 맞아요. 토끼에게는 조용한 공간과 예측 가능한 루틴을 우선해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소동물", "초보주의"],
+  },
+  {
+    breed_name: "햄스터",
+    breed_name_en: "Hamster",
+    animal_type: "other",
+    size_category: "small",
+    lifespan: "2–3년",
+    personality:
+      "햄스터는 일반적으로 야행성에 가깝고 단독 사육을 선호하는 경우가 많아요. 낮에는 은신처에서 쉬고 밤에 활동하는 리듬이 자연스러우며, 깨우거나 자주 만지면 스트레스를 받을 수 있어요.",
+    health_notes:
+      "습도, 탈출 방지, 치아 마모, 체중과 활동량 변화를 꾸준히 확인하는 편이 좋아요. 먹이 거부, 침 흘림, 배변 감소, 축 처짐이 보이면 소동물 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "수(水) — 은신처와 밤 활동 휠에서 기운을 회복하는 경향",
+    seo_slug: "hamster",
+    summary: "야행성 소동물로 단독 사육이 일반적이에요. 넓은 케이지와 밤 활동용 휠·은신처가 필요해요.",
+    body: `함께 지내기
+햄스터는 작지만 하루 중 상당 시간을 이동하고 탐색하는 경향이 있어요. 짝을 지어 키우면 싸울 수 있어 단독 사육을 기본으로 두고, 낮에는 방해하지 않는 편이 좋아요.
+
+일상 관리
+· 케이지: 탈출이 어렵도록 넉넉한 크기와 안전한 바닥재를 준비해 주세요.
+· 운동: 밤에 사용할 수 있는 휠과 터널, 은신처를 제공해 주세요.
+· 먹이: 사료와 신선한 보조 먹이를 정량 급여하고, 체중 변화를 관찰해 주세요.
+· 치아: 씹을 거리와 치아 마모 상태를 꾸준히 확인해 주세요.
+
+환경·루틴
+습도가 너무 높거나 낮지 않게 관리하고, 직사광선과 큰 소음은 피해 주세요. 낮에는 조용히, 밤에는 활동할 수 있는 리듬을 존중해 주세요.
+
+주의할 점
+식욕 저하, 침 흘림, 활동량 급감, 배변 감소가 보이면 빠른 확인이 필요할 수 있어요. 이상 증상은 전문가 상담을 권합니다.
+
+K-Saju 활용 팁
+수(水) 기운은 은신과 밤 루틴의 이미지와 어울려요. 햄스터에게는 조용한 낮 휴식과 밤 운동 시간을 분리해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소동물"],
+  },
+  {
+    breed_name: "레오파드 게코",
+    breed_name_en: "Leopard Gecko",
+    animal_type: "other",
+    size_category: "small",
+    lifespan: "10–20년",
+    personality:
+      "레오파드 게코는 일반적으로 온순하고 관찰형 반려동물로 지내기 좋은 편이에요. 야행성에 가까운 생활 리듬을 보여 낮에는 은신처에 머무는 시간이 많고, 갑작스러운 핸들링에는 스트레스를 받을 수 있어요.",
+    health_notes:
+      "칼슘·비타민 보충, 탈피 상태, 체중과 꼬리 두께, 핫존·쿨존 온도 구배를 꾸준히 확인하는 편이 좋아요. 먹이 거부, 탈피 잔여물, 움직임 둔화가 지속되면 파충류 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "low",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "토(土) — 안정된 은신처와 일정한 온도 루틴에서 편안해지는 경향",
+    seo_slug: "leopard-gecko",
+    summary: "초보도 접근하기 쉬운 대표 파충류예요. 온도 구배, 은신처, 칼슘 관리가 핵심이에요.",
+    body: `함께 지내기
+레오파드 게코는 조용히 관찰하며 지내는 시간이 잘 맞는 반려동물이에요. 손에 올리는 시간은 짧게 시작하고, 꼬리를 잡거나 갑자기 위에서 접근하는 행동은 피하는 편이 좋아요.
+
+일상 관리
+· 사육장: 핫존과 쿨존을 나누고, 건식 은신처와 습식 은신처를 함께 마련해 주세요.
+· 먹이: 곤충 급여 시 칼슘·비타민 보충을 개체 상태에 맞춰 관리해 주세요.
+· 탈피: 발가락과 꼬리 끝에 탈피 껍질이 남지 않는지 확인해 주세요.
+· 관찰: 체중, 꼬리 두께, 배변 패턴을 평소와 비교해 보세요.
+
+환경·루틴
+바닥재는 삼킴 위험과 청결을 함께 고려해 선택하고, 낮은 스트레스 환경을 유지해 주세요. 온도계와 습도계를 사용해 감으로 관리하지 않는 편이 안전해요.
+
+주의할 점
+먹이 거부가 길어지거나, 눈을 감고 있거나, 탈피가 반복적으로 어렵다면 확인이 필요할 수 있어요. 이상 증상은 파충류 진료가 가능한 병원 상담을 권합니다.
+
+K-Saju 활용 팁
+토(土) 기운은 안정된 공간과 은신처의 이미지와 잘 맞아요. 레오파드 게코에게는 변화가 적은 사육장과 일정한 온도 루틴을 우선해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["파충류", "게코", "초보"],
+  },
+  {
+    breed_name: "크레스티드 게코",
+    breed_name_en: "Crested Gecko",
+    animal_type: "other",
+    size_category: "small",
+    lifespan: "15–20년",
+    personality:
+      "크레스티드 게코는 차분해 보이지만 점프력이 좋고 수직 공간을 활용하는 경향이 있어요. 개체에 따라 핸들링을 잘 받아들이기도 하지만, 높은 곳에서 갑자기 뛰어내릴 수 있어 낮은 위치에서 천천히 적응시키는 편이 좋아요.",
+    health_notes:
+      "습도, 탈수, 탈피, 꼬리 손상, 먹이 섭취량을 꾸준히 살펴보는 편이 좋아요. 체중 감소, 피부 주름, 반복적인 먹이 거부가 보이면 파충류 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "low",
+    grooming_level: "low",
+    beginner_friendly: true,
+    saju_tendency: "목(木) — 수직 공간과 식물 은신처에서 안정되는 경향",
+    seo_slug: "crested-gecko",
+    summary: "수직 사육장과 습도 루틴이 중요한 게코예요. 점프와 탈수 관리를 함께 신경 써 주세요.",
+    body: `함께 지내기
+크레스티드 게코는 나뭇가지와 식물 사이를 오가며 지내는 환경이 잘 맞아요. 낮에는 숨어 쉬고 저녁 이후 활동이 늘어나는 경우가 많아, 관찰 시간도 생활 리듬에 맞추면 좋아요.
+
+일상 관리
+· 사육장: 높이가 있는 사육장, 코르크, 식물 은신처, 이동 가지를 준비해 주세요.
+· 습도: 저녁 분무와 환기를 함께 관리해 과습·건조를 모두 피해 주세요.
+· 먹이: 전용 슈퍼푸드와 곤충 급여는 개체 상태에 맞춰 조절해 주세요.
+· 핸들링: 낮은 위치에서 짧게 시작하고 점프 방향을 항상 예상해 주세요.
+
+환경·루틴
+습도는 순간 수치보다 하루 중 오르내리는 패턴이 중요해요. 곰팡이나 오염이 생기지 않도록 환기와 청소 루틴을 함께 잡아 주세요.
+
+주의할 점
+체중이 줄거나 피부가 주름져 보이거나 먹이를 오래 거부하면 관리 범위를 넘을 수 있어요. 이상 증상은 전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+목(木) 기운은 나무와 수직 공간의 이미지와 잘 맞아요. 크레스티드 게코에게는 올라갈 곳과 숨을 곳이 풍부한 환경을 먼저 설계해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["파충류", "게코", "습도"],
+  },
+  {
+    breed_name: "비어디드 드래곤",
+    breed_name_en: "Bearded Dragon",
+    animal_type: "other",
+    size_category: "medium",
+    lifespan: "8–12년",
+    personality:
+      "비어디드 드래곤은 사람을 관찰하고 환경에 익숙해지는 모습을 보이는 경우가 많아요. 다만 온도, UVB, 식단 균형이 맞지 않으면 컨디션이 흔들리기 쉬워 초보라도 장비 이해가 꼭 필요해요.",
+    health_notes:
+      "UVB 램프, 바스킹 온도, 칼슘 보충, 배변과 식욕 변화를 꾸준히 확인하는 편이 좋아요. 무기력, 턱·다리 떨림, 먹이 거부가 지속되면 파충류 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "low",
+    beginner_friendly: false,
+    saju_tendency: "화(火) — 빛과 열, 규칙적인 바스킹 루틴에서 활력이 살아나는 경향",
+    seo_slug: "bearded-dragon",
+    summary: "UVB와 바스킹존이 매우 중요한 도마뱀이에요. 장비·식단·칼슘 루틴을 함께 맞춰야 해요.",
+    body: `함께 지내기
+비어디드 드래곤은 환경에 익숙해지면 사람을 두려워하지 않는 개체도 많아요. 하지만 건강의 기본은 교감보다 사육 환경이라, 온도와 빛 조건을 먼저 안정적으로 맞춰야 해요.
+
+일상 관리
+· 사육장: 충분한 크기, 바스킹존, 쿨존, UVB 램프를 준비해 주세요.
+· 먹이: 성장 단계에 맞춰 채소와 곤충 비율을 조절하고 칼슘 보충을 챙겨 주세요.
+· 관찰: 식욕, 배변, 활동량, 눈 뜨는 상태를 매일 비교해 보세요.
+· 청결: 바닥재와 먹이 그릇은 오염이 쌓이지 않게 관리해 주세요.
+
+환경·루틴
+램프는 켜짐 시간과 교체 주기가 중요해요. 온도계와 UVB 관련 장비를 사용해 눈대중 관리가 되지 않도록 해 주세요.
+
+주의할 점
+몸을 잘 들지 못하거나, 떨림이 보이거나, 오래 먹지 않으면 확인이 필요할 수 있어요. 이상 증상은 파충류 전문가·병원 상담을 권합니다.
+
+K-Saju 활용 팁
+화(火) 기운은 빛과 열의 이미지와 어울려요. 비어디드 드래곤에게는 일정한 바스킹 루틴과 안정적인 열 환경을 우선해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["파충류", "도마뱀", "UVB"],
+  },
+  {
+    breed_name: "반수생 거북",
+    breed_name_en: "Semi-aquatic Turtle",
+    animal_type: "other",
+    size_category: "medium",
+    lifespan: "20–40년",
+    personality:
+      "반수생 거북은 교감형보다는 관찰형 반려동물에 가까운 경우가 많아요. 수명이 길고 성장하면서 필요한 수조 크기와 여과 규모가 커지기 때문에 장기 계획이 중요해요.",
+    health_notes:
+      "수질, 등갑 상태, 눈·피부 변화, UVB와 일광욕 공간을 꾸준히 확인하는 편이 좋아요. 눈을 못 뜨거나 등갑이 물러 보이거나 식욕 저하가 지속되면 파충류 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "medium",
+    beginner_friendly: false,
+    saju_tendency: "수(水) — 깨끗한 물과 안정적인 일광욕 루틴에서 편안해지는 경향",
+    seo_slug: "semi-aquatic-turtle",
+    summary: "수조 여과와 일광욕 공간이 필수인 장수 반려동물이에요. 수질과 UVB 관리를 함께 해야 해요.",
+    body: `함께 지내기
+반수생 거북은 오래 함께할 수 있지만, 그만큼 장비와 관리 부담도 큰 편이에요. 자주 만지기보다 깨끗한 수조와 안정적인 육지 공간을 마련해 관찰하는 방식이 잘 맞아요.
+
+일상 관리
+· 수조: 성장 크기에 맞는 수조와 강한 여과 시스템을 준비해 주세요.
+· 일광욕: 완전히 몸을 말릴 수 있는 육지와 UVB 램프를 함께 관리해 주세요.
+· 먹이: 종과 성장 단계에 맞는 사료·보조 먹이를 조절해 주세요.
+· 수질: 물갈이, 여과기 청소, 수온 확인을 루틴화해 주세요.
+
+환경·루틴
+물만 있는 수조는 부족할 수 있어요. 물, 육지, 빛, 온도가 함께 맞아야 하며 장기 사육 시 공간 확장도 고려해야 해요.
+
+주의할 점
+눈 부음, 등갑 변색·무름, 물에만 있거나 먹지 않는 모습이 이어지면 확인이 필요할 수 있어요. 이상 증상은 전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+수(水) 기운은 깨끗한 물과 흐름의 이미지와 잘 맞아요. 반수생 거북에게는 물 관리와 일광욕 루틴을 가장 중요한 생활 리듬으로 잡아 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["파충류", "거북", "수질"],
+  },
+  {
+    breed_name: "사랑앵무",
+    breed_name_en: "Budgerigar",
+    animal_type: "other",
+    size_category: "small",
+    lifespan: "5–10년",
+    personality:
+      "사랑앵무는 활발하고 사회적인 성향을 보이는 경우가 많아요. 사람과의 교감도 가능하지만, 작은 새라도 매일 비행·놀이·소리 자극이 필요해 단순 관상용으로만 보기에는 부족할 수 있어요.",
+    health_notes:
+      "호흡기, 깃털 상태, 체중, 발바닥, 배설물 변화를 꾸준히 관찰하는 편이 좋아요. 부풀고 앉아 있거나 호흡이 거칠거나 먹이를 줄이면 조류 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "medium",
+    beginner_friendly: true,
+    saju_tendency: "목(木) — 소리와 움직임, 가벼운 교감에서 활력이 살아나는 경향",
+    seo_slug: "budgerigar",
+    summary: "초보에게 인기 있는 소형 앵무새예요. 넓은 케이지와 매일 비행·놀이 시간이 중요해요.",
+    body: `함께 지내기
+사랑앵무는 작은 몸집에 비해 호기심과 사회성이 큰 편이에요. 손타기 훈련은 짧고 긍정적으로 진행하고, 무리하게 잡기보다 스스로 다가오게 하는 방식이 좋아요.
+
+일상 관리
+· 케이지: 날개를 펼 수 있는 넓이와 여러 굵기의 횃대를 준비해 주세요.
+· 식사: 씨드만 주기보다 펠렛, 채소 등 균형을 단계적으로 맞춰 주세요.
+· 놀이: 매일 안전한 비행 시간과 씹을 장난감을 제공해 주세요.
+· 관찰: 배설물, 깃털, 체중, 호흡 소리를 평소와 비교해 보세요.
+
+환경·루틴
+주방 연기, 향초, 강한 냄새, 갑작스러운 온도 변화는 피하는 편이 좋아요. 케이지는 가족을 볼 수 있지만 과하게 소란스럽지 않은 위치가 무난해요.
+
+주의할 점
+새는 아픈 티를 늦게 보이는 경우가 있어요. 몸을 부풀리고 움직임이 줄거나 먹이를 덜 먹으면 빠르게 전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+목(木) 기운은 소리와 움직임의 이미지와 어울려요. 사랑앵무에게는 매일 비슷한 시간의 비행과 대화 루틴을 만들어 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["앵무새", "조류", "초보"],
+  },
+  {
+    breed_name: "왕관앵무",
+    breed_name_en: "Cockatiel",
+    animal_type: "other",
+    size_category: "small",
+    lifespan: "10–15년",
+    personality:
+      "왕관앵무는 온순하고 사람과의 교감을 좋아하는 개체가 많은 편이에요. 노래, 휘파람, 일정한 놀이 루틴에 반응하는 경우가 많지만, 외로움이나 환경 변화에는 예민할 수 있어요.",
+    health_notes:
+      "깃털 상태, 호흡, 체중, 배설물, 과도한 깃털 뽑기 여부를 꾸준히 살펴보는 편이 좋아요. 무기력, 호흡음 변화, 먹이 감소가 보이면 조류 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "medium",
+    beginner_friendly: true,
+    saju_tendency: "화(火) — 노래와 교감, 따뜻한 루틴에서 활력이 살아나는 경향",
+    seo_slug: "cockatiel",
+    summary: "교감과 루틴을 좋아하는 반려조예요. 조용한 휴식과 매일 놀이 시간을 함께 챙겨 주세요.",
+    body: `함께 지내기
+왕관앵무는 집사의 목소리와 일상 리듬에 익숙해지는 경우가 많아요. 다만 계속 만지거나 부르는 것보다, 쉬는 시간과 교감 시간을 분리해 주면 안정에 도움이 돼요.
+
+일상 관리
+· 케이지: 충분한 크기, 다양한 횃대, 씹을 장난감을 준비해 주세요.
+· 식사: 씨드 위주 식단은 영양 불균형이 생길 수 있어 펠렛과 신선한 먹이를 단계적으로 섞어 주세요.
+· 놀이: 안전한 실내 비행과 짧은 훈련 시간을 매일 마련해 주세요.
+· 관찰: 깃털, 배설물, 체중 변화를 주기적으로 확인해 주세요.
+
+환경·루틴
+갑작스러운 소음, 향, 온도 변화는 줄여 주세요. 밤에는 충분히 어둡고 조용한 수면 환경을 만들어 주는 편이 좋아요.
+
+주의할 점
+계속 부풀고 있거나, 바닥에 머무르거나, 깃털을 과도하게 뽑는다면 확인이 필요할 수 있어요. 이상 증상은 전문가 상담을 권합니다.
+
+K-Saju 활용 팁
+화(火) 기운은 노래와 표현의 이미지와 잘 맞아요. 왕관앵무에게는 밝은 교감 뒤 조용히 쉬는 루틴을 함께 설계해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["앵무새", "조류", "교감"],
+  },
+  {
+    breed_name: "모란앵무",
+    breed_name_en: "Lovebird",
+    animal_type: "other",
+    size_category: "small",
+    lifespan: "10–15년",
+    personality:
+      "모란앵무는 작지만 에너지가 높고 애착 표현이 강한 경우가 많아요. 호기심이 많아 씹고 탐색하려는 행동이 자연스럽게 나타날 수 있어, 안전한 장난감과 규칙적인 상호작용이 중요해요.",
+    health_notes:
+      "스트레스, 물림 행동 변화, 비만, 깃털 상태, 호흡과 배설물 변화를 꾸준히 관찰해 주세요. 식욕 저하, 부풀고 앉아 있음, 호흡 변화가 보이면 조류 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "medium",
+    beginner_friendly: false,
+    saju_tendency: "화(火) — 에너지 발산과 선명한 교감에서 활력이 살아나는 경향",
+    seo_slug: "lovebird",
+    summary: "작지만 에너지가 높은 앵무새예요. 씹을 거리, 놀이 시간, 안전한 교감 규칙이 필요해요.",
+    body: `함께 지내기
+모란앵무는 애착이 깊게 형성될 수 있지만, 경계나 질투가 물림으로 표현될 수도 있어요. 손을 강제로 넣기보다 신호를 읽고, 보상 기반으로 천천히 관계를 만드는 편이 좋아요.
+
+일상 관리
+· 케이지: 활동량을 고려해 넓은 공간과 다양한 장난감을 준비해 주세요.
+· 식사: 씨드, 펠렛, 신선한 먹이를 균형 있게 전환해 주세요.
+· 놀이: 씹을 장난감과 안전한 비행 시간을 매일 제공해 주세요.
+· 교감: 짧고 반복적인 훈련으로 손, 이동장, 귀가 신호에 익숙해지게 해 주세요.
+
+환경·루틴
+위험한 전선, 독성 식물, 작은 틈은 미리 정리해 주세요. 혼자 있는 시간이 길다면 장난감 교체와 소리 자극을 적절히 활용해 보세요.
+
+주의할 점
+공격성이 갑자기 늘거나, 깃털 상태가 나빠지거나, 먹이를 줄이면 스트레스나 건강 이슈일 수 있어요. 이상 증상은 전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+화(火) 기운은 강한 표현과 에너지의 이미지와 어울려요. 모란앵무에게는 충분히 발산하고 차분히 마무리하는 교감 루틴이 잘 맞을 수 있어요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["앵무새", "조류"],
+  },
+  {
+    breed_name: "기니피그",
+    breed_name_en: "Guinea Pig",
+    animal_type: "other",
+    size_category: "small",
+    lifespan: "5–8년",
+    personality:
+      "기니피그는 온순하고 무리 생활을 선호하는 경향이 있어요. 큰 소리와 갑작스러운 움직임에는 놀라기 쉬워, 바닥 가까이에서 천천히 다가가고 안정적인 은신처를 제공하는 편이 좋아요.",
+    health_notes:
+      "비타민 C, 치아 마모, 호흡기, 발바닥 상태, 식욕과 배변을 꾸준히 관찰해 주세요. 먹이를 줄이거나 침을 흘리거나 배변이 줄면 소동물 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "low",
+    grooming_level: "medium",
+    beginner_friendly: true,
+    saju_tendency: "토(土) — 넓은 바닥 공간과 안정적인 무리 루틴에서 편안해지는 경향",
+    seo_slug: "guinea-pig",
+    summary: "넓은 바닥 공간과 비타민 C가 중요한 소동물이에요. 건초와 은신처를 항상 챙겨 주세요.",
+    body: `함께 지내기
+기니피그는 안겨 있는 시간보다 바닥에서 안전하게 움직이고 숨어 쉬는 시간이 더 편할 수 있어요. 사회적인 동물이므로 동거 여부와 개체 궁합도 신중히 고려해 주세요.
+
+일상 관리
+· 먹이: 건초를 항상 제공하고, 비타민 C가 충분한 식단을 관리해 주세요.
+· 공간: 미끄럽지 않은 넓은 바닥과 여러 은신처를 마련해 주세요.
+· 청결: 바닥재와 화장 공간은 습기가 쌓이지 않게 자주 관리해 주세요.
+· 관찰: 식욕, 배변량, 치아 사용, 발바닥 상태를 매일 살펴봐 주세요.
+
+환경·루틴
+높은 곳보다 넓은 바닥이 중요해요. 소음이 적고 온도 변화가 크지 않은 공간에서 규칙적으로 먹이와 청소 루틴을 유지해 주세요.
+
+주의할 점
+기니피그는 식욕 저하가 빠르게 문제가 될 수 있어요. 먹지 않거나 배변이 줄거나 호흡이 거칠면 전문가 상담을 권합니다.
+
+K-Saju 활용 팁
+토(土) 기운은 안정된 바닥과 무리의 이미지와 잘 맞아요. 기니피그에게는 넓고 예측 가능한 생활 공간을 우선해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형동물류", "소동물", "초보"],
+  },
+  {
+    breed_name: "친칠라",
+    breed_name_en: "Chinchilla",
+    animal_type: "other",
+    size_category: "small",
+    lifespan: "10–15년",
+    personality:
+      "친칠라는 예민하지만 활동적이고 점프력이 좋은 소동물이에요. 더위에 약한 편이라 교감보다 먼저 온도와 건조한 환경을 안정적으로 맞추는 것이 중요해요.",
+    health_notes:
+      "더위, 치아, 소화, 모래목욕, 털 상태를 꾸준히 확인하는 편이 좋아요. 식욕 저하, 침 흘림, 배변 감소, 축 처짐이 보이면 소동물 진료가 가능한 병원 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "medium",
+    beginner_friendly: false,
+    saju_tendency: "금(金) — 건조하고 시원한 환경, 정돈된 루틴에서 안정되는 경향",
+    seo_slug: "chinchilla",
+    summary: "더위에 약하고 건조한 환경을 좋아하는 소동물이에요. 온도와 치아·소화 관리를 세심히 봐야 해요.",
+    body: `함께 지내기
+친칠라는 부드러운 털과 달리 관리 난이도가 있는 편이에요. 잡아 안기보다 안전한 공간에서 움직임을 관찰하고, 천천히 손에 익숙해지도록 하는 방식이 좋아요.
+
+일상 관리
+· 온도: 서늘하고 건조한 실내 환경을 유지해 주세요.
+· 먹이: 건초 중심 식단과 씹을 나무를 제공해 치아 마모를 도와주세요.
+· 모래목욕: 물 목욕이 아니라 전용 모래목욕을 정해진 빈도로 제공해 주세요.
+· 운동: 안전한 점프 공간과 은신처를 마련해 주세요.
+
+환경·루틴
+습기와 더위는 피하고, 케이지는 통풍이 되면서도 직사광선이 닿지 않는 곳이 좋아요. 플라스틱처럼 갉아먹기 쉬운 위험 소재는 줄여 주세요.
+
+주의할 점
+침 흘림, 먹이 거부, 배변 감소, 축 처짐은 빠른 확인이 필요할 수 있어요. 이상 증상은 전문가 상담을 받아 보세요.
+
+K-Saju 활용 팁
+금(金) 기운은 건조함과 정돈의 이미지와 잘 맞아요. 친칠라에게는 시원하고 깨끗한 환경, 반복적인 모래목욕 루틴을 우선해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형동물류", "소동물"],
+  },
+  {
+    breed_name: "고슴도치",
+    breed_name_en: "Hedgehog",
+    animal_type: "other",
+    size_category: "small",
+    lifespan: "4–6년",
+    personality:
+      "고슴도치는 야행성이고 독립적인 성향을 보이는 경우가 많아요. 낮에는 조용히 쉬고 밤에 활동하는 리듬이 자연스러우므로, 사람의 생활 리듬에 억지로 맞추기보다 안전한 밤 활동 환경을 준비해 주세요.",
+    health_notes:
+      "온도, 체중, 피부, 발톱, 활동량과 식욕 변화를 꾸준히 확인하는 편이 좋아요. 몸을 오래 말고 나오지 않거나, 비틀거림, 피부 이상, 식욕 저하가 보이면 특수동물 진료 상담을 권합니다.",
+    exercise_level: "medium",
+    grooming_level: "low",
+    beginner_friendly: false,
+    saju_tendency: "수(水) — 조용한 밤 루틴과 안정적인 보온에서 편안해지는 경향",
+    seo_slug: "hedgehog",
+    summary: "야행성 습성과 보온 관리가 핵심인 소동물이에요. 낮에는 조용히, 밤에는 안전하게 활동하게 해 주세요.",
+    body: `함께 지내기
+고슴도치는 낯선 냄새와 소리에 민감할 수 있어요. 처음부터 오래 만지기보다 같은 시간대에 짧게 손 냄새와 목소리에 익숙해지게 하는 편이 좋아요.
+
+일상 관리
+· 온도: 저온에 취약할 수 있어 안정적인 보온 환경을 유지해 주세요.
+· 운동: 밤에 사용할 수 있는 안전한 휠과 활동 공간을 준비해 주세요.
+· 식사: 체중 변화를 보며 사료와 간식량을 조절해 주세요.
+· 청결: 발과 배 쪽 오염, 발톱, 피부 상태를 주기적으로 확인해 주세요.
+
+환경·루틴
+낮에는 어둡고 조용한 은신처가 필요해요. 밤 활동 소음과 안전을 고려해 휠, 바닥재, 은신처를 안정적으로 배치해 주세요.
+
+주의할 점
+식욕이 줄거나 움직임이 둔해지거나 몸을 말고 오래 나오지 않으면 확인이 필요할 수 있어요. 이상 증상은 전문가 상담을 권합니다.
+
+K-Saju 활용 팁
+수(水) 기운은 조용한 회복과 밤 루틴의 이미지와 어울려요. 고슴도치에게는 밝은 자극보다 안정적인 보온과 조용한 관찰 시간을 우선해 보세요.
+
+※ 개체마다 차이가 있을 수 있으며, 건강 이상 시 전문가 상담을 권합니다.`,
+    tags: ["소형동물류", "소동물", "야행성"],
+  },
 ];
