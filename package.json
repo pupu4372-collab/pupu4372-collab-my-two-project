@@ -12,7 +12,9 @@
     "start": "next start",
     "start:clean": "node scripts/free-port.mjs && next start",
     "lint": "next lint",
+    "test:pdf": "tsx scripts/test-human-premium-pdf.ts",
     "db:apply-community": "node scripts/apply-community-migrations.mjs",
+    "db:apply-breed-guides": "node scripts/apply-breed-guide-migrations.mjs",
     "stitch:localize": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/localize-stitch-images.ps1",
     "stitch:localize-html": "node scripts/localize-stitch-html.mjs",
     "stitch:copy-public": "node scripts/copy-stitch-public.mjs",
@@ -37,6 +39,7 @@
     "lunisolar": "^2.5.1",
     "next": "^15.3.2",
     "next-intl": "^4.12.0",
+    "pdfmake": "^0.3.10",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
@@ -46,6 +49,7 @@
     "@capacitor/ios": "^7.6.5",
     "@opennextjs/cloudflare": "^1.19.11",
     "@types/node": "^22.15.21",
+    "@types/pdfmake": "^0.3.3",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "eslint": "^9.27.0",
@@ -53,6 +57,7 @@
     "pg": "^8.21.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.22.4",
     "typescript": "^5.8.3",
     "wrangler": "^4.93.1"
   }

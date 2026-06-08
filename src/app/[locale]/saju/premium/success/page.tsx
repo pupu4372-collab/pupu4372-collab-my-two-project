@@ -1,21 +1,23 @@
 "use client";
 
-import { PremiumReportView } from "@/components/k-saju/PremiumReportView";
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
-import type { PremiumReport } from "@/lib/saju/premium-report";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 function SuccessInner() {
   const t = useTranslations("saju");
+  const locale = useLocale();
+  const isKo = locale !== "en";
   const params = useSearchParams();
   const token = params.get("token");
   const { accessToken, ready } = useSupabaseSession();
-  const [report, setReport] = useState<PremiumReport | null>(null);
-  const [petName, setPetName] = useState("");
+  const [webUrl, setWebUrl] = useState<string | null>(null);
+  const [emailStatus, setEmailStatus] = useState<string | null>(null);
+  const [reportId, setReportId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +36,6 @@ function SuccessInner() {
     }
 
     const pending = JSON.parse(raw) as Record<string, unknown>;
-    setPetName(String(pending.petName ?? ""));
 
     async function capture() {
       try {
@@ -46,11 +47,16 @@ function SuccessInner() {
         const res = await fetch("/api/paypal/capture-order", {
           method: "POST",
           headers,
-          body: JSON.stringify({ ...pending, orderId: token }),
+          body: JSON.stringify({
+            orderId: token,
+            reportId: pending.reportId,
+          }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
-        setReport(data.report);
+        setWebUrl(data.webUrl);
+        setEmailStatus(data.report?.email_status ?? null);
+        setReportId(data.report?.id ?? null);
         sessionStorage.removeItem("premium_pending");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Capture failed");
@@ -66,10 +72,34 @@ function SuccessInner() {
     <ChannelShell theme="saju" title={t("successTitle")} subtitle={t("successSubtitle")}>
       {loading && <p className="text-plum/70">{t("creatingReport")}</p>}
       {error && <p className="text-red-700/80">{error}</p>}
-      {report && <PremiumReportView report={report} petName={petName} />}
+      {webUrl && (
+        <div className="pastel-card space-y-4 p-6 text-center">
+          <h2 className="text-xl font-extrabold text-plum">
+            {t("successTitle")}
+          </h2>
+          <p className="text-sm text-plum/70">
+            {emailStatus === "sent"
+              ? isKo
+                ? "이메일로 리포트 링크도 발송했습니다."
+                : "We also sent the report link to your email."
+              : isKo
+                ? "웹 리포트가 준비됐습니다."
+                : "Your web report is ready."}
+          </p>
+          <a
+            href={webUrl}
+            className="inline-flex rounded-full bg-channel-saju px-5 py-3 text-sm font-semibold text-white"
+          >
+            {isKo ? "웹 리포트 열기" : "Open web report"}
+          </a>
+          {reportId && (
+            <p className="break-all text-xs text-plum/50">ID: {reportId}</p>
+          )}
+        </div>
+      )}
       <p className="mt-8 text-center">
-        <Link href="/profile" className="underline">
-          {t("profileSaved")}
+        <Link href="/saju/premium" className="underline">
+          {isKo ? "Premium으로 돌아가기" : "Back to Premium"}
         </Link>
       </p>
     </ChannelShell>

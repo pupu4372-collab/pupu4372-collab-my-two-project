@@ -43,10 +43,6 @@ const LABELS = {
     zodiacBody: "See how western zodiac meets your pet's elemental vibe.",
     bondCta: "Pet-parent bond",
     bondBody: "Compare elemental harmony with your birth chart.",
-    premiumBadge: "Premium report",
-    premiumTitle: "Lifetime deep-dive report",
-    premiumBody: "Future rhythm, health flow, and destiny patterns in one report.",
-    premiumButton: "View premium report",
     luckyColorTitle: "Today's lucky color",
     luckyColorBody: (name: string, color: string) =>
       `For ${name}, ${color} accessories may bring extra luck today.`,
@@ -79,10 +75,6 @@ const LABELS = {
     zodiacBody: "서양 별자리와 오행이 만나는 오늘의 운세를 이어서 볼 수 있어요.",
     bondCta: "집사 궁합",
     bondBody: "집사와 펫의 오행 상생·상극으로 인연 지수를 확인해 보세요.",
-    premiumBadge: "프리미엄 리포트",
-    premiumTitle: "평생 전체 리포트",
-    premiumBody: "미래 운세, 건강 흐름, 타고난 기운을 심층 분석한 리포트예요.",
-    premiumButton: "프리미엄 리포트 보기",
     luckyColorTitle: "오늘의 행운 컬러",
     luckyColorBody: (name: string, color: string) =>
       `${name}에게 오늘은 ${color} 액세서리가 행운을 가져다줄 거예요.`,
@@ -435,20 +427,6 @@ export function SajuResult({ result }: SajuResultProps) {
               {t.bondCta}
             </Link>
           </GlassCard>
-
-          <div className="relative overflow-hidden rounded-[2rem] bg-primary p-6 text-cream shadow-xl">
-            <span className="rounded-full bg-secondary-container px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide text-primary">
-              {t.premiumBadge}
-            </span>
-            <h3 className="mt-4 text-lg font-bold">{t.premiumTitle}</h3>
-            <p className="mt-2 text-sm text-cream/80">{t.premiumBody}</p>
-            <Link
-              href={`/saju/premium?${continuationQuery}`}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-cream py-3.5 text-sm font-bold text-primary transition hover:bg-white"
-            >
-              {t.premiumButton}
-            </Link>
-          </div>
 
           <GlassCard className="p-5">
             <div className="flex items-start gap-4">

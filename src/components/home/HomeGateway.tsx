@@ -103,7 +103,11 @@ function RankingPreviewList({
               {rows.slice(0, 5).map((row, index) => (
                 <li key={row.id} className="w-[34vw] max-w-28 shrink-0 snap-start sm:w-28 md:w-24 lg:w-28">
                   <AuthRequiredLink
-                    href={`/community/pet-show/${row.id}`}
+                    href={
+                      row.id.startsWith("mock-")
+                        ? "/community/pet-show/snapzone"
+                        : `/community/pet-show/${row.id}`
+                    }
                     className="block rounded-2xl bg-channel-community/10 p-2 transition hover:-translate-y-0.5 hover:bg-channel-community/15"
                   >
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-channel-community text-[10px] font-bold text-white">
@@ -135,6 +139,7 @@ export function HomeGateway() {
   const isKo = locale === "ko";
   const { ready, configured, isAnonymous, accessToken } = useSupabaseSession();
   const [rankingRows, setRankingRows] = useState<WeeklyRankingRows>(emptyRankingRows);
+  const [rankingSource, setRankingSource] = useState<"supabase" | "mock" | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [dailyFortune, setDailyFortune] = useState<OwnerDailyFortune | null>(null);
 
@@ -143,14 +148,19 @@ export function HomeGateway() {
       try {
         const res = await fetch("/api/community/pet-show/ranking?period=week&group=species");
         if (!res.ok) return;
-        const data = (await res.json()) as { rows?: Partial<WeeklyRankingRows> };
+        const data = (await res.json()) as {
+          rows?: Partial<WeeklyRankingRows>;
+          source?: "supabase" | "mock";
+        };
         setRankingRows({
           dog: data.rows?.dog ?? [],
           cat: data.rows?.cat ?? [],
           other: data.rows?.other ?? [],
         });
+        setRankingSource(data.source ?? null);
       } catch {
         setRankingRows(emptyRankingRows);
+        setRankingSource(null);
       }
     }
 
@@ -293,6 +303,11 @@ export function HomeGateway() {
               title={isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
               subtitle={isKo ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요." : "Top photos by likes from the last 7 days, grouped by species."}
             />
+            {rankingSource === "mock" && (
+              <p className="mt-2 text-xs font-semibold text-plum/45">
+                {isKo ? "데모 데이터 (DB 연결 또는 이번 주 게시물 없음)" : "Demo data (no DB or no posts this week)"}
+              </p>
+            )}
             <div className="mt-5">
               <AuthRequiredLink
                 href="/community/pet-show/upload"

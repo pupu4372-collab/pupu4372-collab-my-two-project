@@ -72,6 +72,7 @@ interface ChannelShellProps {
     label: string;
   }>;
   heroMedia?: ReactNode;
+  hideThemeLabel?: boolean;
 }
 
 export function ChannelShell({
@@ -86,6 +87,7 @@ export function ChannelShell({
   backLabel,
   rightLinks,
   heroMedia,
+  hideThemeLabel = false,
 }: ChannelShellProps) {
   const t = THEME[theme];
   const tc = useTranslations("common");
@@ -147,9 +149,11 @@ export function ChannelShell({
                   {isKo ? "준비 중" : "Coming soon"}
                 </p>
               )}
-              <p className={`text-sm font-extrabold ${t.accent}`}>
-                {t.emoji} {isKo ? t.label.ko : t.label.en}
-              </p>
+              {!hideThemeLabel && (
+                <p className={`text-sm font-extrabold ${t.accent}`}>
+                  {t.emoji} {isKo ? t.label.ko : t.label.en}
+                </p>
+              )}
               <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary md:text-5xl">{title}</h1>
               {subtitle && <p className="mt-3 text-sm leading-relaxed text-plum/70">{subtitle}</p>}
             </div>

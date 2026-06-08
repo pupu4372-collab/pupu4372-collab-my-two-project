@@ -1,0 +1,89 @@
+import { computeBasicSaju } from "@/lib/saju/engine";
+import { getZodiacSignFromBirthDate } from "@/lib/saju/zodiac/signs";
+import { resolveHumanBirthBasis, resolveSolarBirthDate } from "./birth-basis";
+import {
+  buildHumanSummary,
+  buildSajuChapters,
+  buildZodiacChapters,
+  flattenChapterSections,
+  sumChapterPages,
+} from "./content";
+import type {
+  HumanPremiumReportInput,
+  HumanPremiumReportPayload,
+} from "./types";
+
+export function buildHumanPremiumReport(
+  input: HumanPremiumReportInput
+): HumanPremiumReportPayload {
+  const birthBasis = resolveHumanBirthBasis(input);
+  const solarBirthDate = resolveSolarBirthDate(input);
+
+  const saju = computeBasicSaju({
+    petName: input.personName.trim(),
+    species: "other",
+    birthDate: solarBirthDate,
+    birthTime: input.birthTime,
+    birthTimeUnknown: input.birthTimeUnknown,
+    timezone: input.timezone,
+    locale: input.locale,
+    privacyConsent: input.privacyConsent,
+  });
+
+  const summary = buildHumanSummary(input.personName, saju, input.locale);
+  const sajuChapters = buildSajuChapters(saju, input.locale);
+  const zodiacChapters = buildZodiacChapters(
+    input.personName,
+    solarBirthDate,
+    input.locale
+  );
+
+  const sign = getZodiacSignFromBirthDate(solarBirthDate);
+  const sajuSectionCount = flattenChapterSections(sajuChapters).length;
+  const zodiacSectionCount = flattenChapterSections(zodiacChapters).length;
+  const sajuEstimatedPages = sumChapterPages(sajuChapters);
+  const zodiacEstimatedPages = sumChapterPages(zodiacChapters);
+
+  const isKo = input.locale === "ko";
+
+  return {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    personName: input.personName.trim(),
+    locale: input.locale,
+    calendarType: input.calendarType,
+    birthBasis,
+    analysisMode: input.birthTimeUnknown ? "three_pillars" : "four_pillars",
+    cover: {
+      title: isKo
+        ? "지운자무애(知運者無礙) - 운명을 아는 자는 거침이 없나니."
+        : summary.headline,
+      subtitle: isKo
+        ? "지관재(知觀齋)"
+        : "Premium Lifetime Report",
+      tagline: isKo
+        ? "운명을 '아는 것(知)'에서 그치지 않고, 그 운명의 흐름을 멀리서 '관조(觀)'하며 대처하는 법을 익히는 서재와 같은 공간입니다."
+        : "K-Saju pillars + zodiac guidance",
+    },
+    summary,
+    saju: {
+      dominantElement: saju.dominantElement,
+      pillars: saju.pillars as unknown as Record<string, unknown>,
+      elements: saju.elements as unknown as Record<string, unknown>[],
+      chapters: sajuChapters,
+      sectionCount: sajuSectionCount,
+      estimatedPages: sajuEstimatedPages,
+    },
+    zodiac: {
+      signKey: sign.key,
+      signName: isKo ? sign.nameKo : sign.nameEn,
+      chapters: zodiacChapters,
+      sectionCount: zodiacSectionCount,
+      estimatedPages: zodiacEstimatedPages,
+    },
+    totals: {
+      sections: sajuSectionCount + zodiacSectionCount,
+      estimatedPages: sajuEstimatedPages + zodiacEstimatedPages,
+    },
+  };
+}

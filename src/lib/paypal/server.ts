@@ -1,5 +1,5 @@
+import { resolveAppBaseUrl } from "@/lib/app-url";
 import {
-  getAppBaseUrl,
   getPayPalApiBase,
   isPayPalConfigured,
   PREMIUM_PRICE_USD,
@@ -33,8 +33,12 @@ export interface CreateOrderResult {
   demo: boolean;
 }
 
-export async function createPremiumOrder(): Promise<CreateOrderResult> {
-  if (!isPayPalConfigured()) {
+export async function createPremiumOrder(options?: {
+  demo?: boolean;
+  locale?: "ko" | "en";
+  request?: Request;
+}): Promise<CreateOrderResult> {
+  if (options?.demo || !isPayPalConfigured()) {
     return {
       orderId: `demo-${Date.now()}`,
       approvalUrl: null,
@@ -43,7 +47,8 @@ export async function createPremiumOrder(): Promise<CreateOrderResult> {
   }
 
   const token = await getAccessToken();
-  const base = getAppBaseUrl();
+  const base = resolveAppBaseUrl(options?.request);
+  const locale = options?.locale ?? "ko";
 
   const res = await fetch(`${getPayPalApiBase()}/v2/checkout/orders`, {
     method: "POST",
@@ -59,12 +64,12 @@ export async function createPremiumOrder(): Promise<CreateOrderResult> {
             currency_code: "USD",
             value: PREMIUM_PRICE_USD.toFixed(2),
           },
-          description: "K-Saju Pet Premium Lifetime Report",
+          description: "K-Saju Human Premium Lifetime Report",
         },
       ],
       application_context: {
-        return_url: `${base}/saju/premium/success`,
-        cancel_url: `${base}/saju/premium`,
+        return_url: `${base}/${locale}/saju/premium/success`,
+        cancel_url: `${base}/${locale}/saju/premium`,
         brand_name: "K-Saju Pet",
         user_action: "PAY_NOW",
       },
@@ -93,6 +98,8 @@ export interface CaptureResult {
   captureId: string;
   status: string;
   demo: boolean;
+  amount: number;
+  currency: string;
 }
 
 export async function capturePremiumOrder(orderId: string): Promise<CaptureResult> {
@@ -101,6 +108,8 @@ export async function capturePremiumOrder(orderId: string): Promise<CaptureResul
       captureId: `demo-cap-${orderId}`,
       status: "COMPLETED",
       demo: true,
+      amount: PREMIUM_PRICE_USD,
+      currency: "USD",
     };
   }
 
@@ -119,7 +128,12 @@ export async function capturePremiumOrder(orderId: string): Promise<CaptureResul
   const data = (await res.json()) as {
     status: string;
     purchase_units?: Array<{
-      payments?: { captures?: Array<{ id: string }> };
+      payments?: {
+        captures?: Array<{
+          id: string;
+          amount?: { value?: string; currency_code?: string };
+        }>;
+      };
     }>;
   };
 
@@ -129,10 +143,13 @@ export async function capturePremiumOrder(orderId: string): Promise<CaptureResul
 
   const captureId =
     data.purchase_units?.[0]?.payments?.captures?.[0]?.id ?? orderId;
+  const amount = data.purchase_units?.[0]?.payments?.captures?.[0]?.amount;
 
   return {
     captureId,
     status: data.status,
     demo: false,
+    amount: Number(amount?.value ?? 0),
+    currency: amount?.currency_code ?? "USD",
   };
 }

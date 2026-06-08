@@ -145,3 +145,106 @@ html.native-app body {
 .star-twinkle {
   animation: twinkle 3s ease-in-out infinite;
 }
+
+/* Human premium report — Stitch stationery theme */
+.human-premium-report {
+  background-color: #161025;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(42, 23, 66, 0.45) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(53, 36, 95, 0.45) 0px, transparent 50%),
+    radial-gradient(circle at 20% 30%, rgba(213, 188, 242, 0.18) 0 1px, transparent 1px),
+    radial-gradient(circle at 80% 20%, rgba(229, 194, 113, 0.14) 0 1px, transparent 1px),
+    radial-gradient(circle at 55% 75%, rgba(233, 222, 252, 0.12) 0 1px, transparent 1px);
+  background-size: cover, cover, 140px 140px, 180px 180px, 220px 220px;
+  background-attachment: fixed;
+  background-position: center;
+  color: #e9defc;
+}
+
+.human-premium-paper {
+  background-color: #fffaf2;
+  background-image:
+    linear-gradient(rgba(61, 42, 74, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 42, 74, 0.018) 1px, transparent 1px);
+  background-size: 18px 18px, 18px 18px;
+  background-blend-mode: multiply;
+  color: #3d2a4a;
+}
+
+.human-premium-paper-warm {
+  background-color: #fdf7ef;
+  background-image:
+    linear-gradient(rgba(61, 42, 74, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 42, 74, 0.018) 1px, transparent 1px);
+  background-size: 18px 18px, 18px 18px;
+  background-blend-mode: multiply;
+  color: #3d2a4a;
+}
+
+.human-premium-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 2px solid #c9a85a;
+  color: #c9a85a;
+  font-weight: 700;
+}
+
+.human-premium-inner-frame {
+  position: relative;
+}
+
+.human-premium-inner-frame::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(230, 225, 249, 0.25);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.human-premium-report .print-report-main > section {
+  border: 2px solid rgba(201, 168, 90, 0.95);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+
+  .human-premium-report {
+    background: #ffffff !important;
+    color: #3d2a4a !important;
+  }
+
+  .no-print,
+  header,
+  nav,
+  footer {
+    display: none !important;
+  }
+
+  .print-report-main {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .print-report-main section,
+  .print-report-main article {
+    break-inside: avoid;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    border-color: #ddd !important;
+    color: #3d2a4a !important;
+  }
+
+  .human-premium-paper,
+  .human-premium-paper-warm {
+    background: #ffffff !important;
+    color: #3d2a4a !important;
+  }
+}

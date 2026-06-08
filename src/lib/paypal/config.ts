@@ -1,4 +1,4 @@
-export const PREMIUM_PRICE_USD = 4.99;
+export const PREMIUM_PRICE_USD = 10;
 
 export function isPayPalConfigured(): boolean {
   return Boolean(
@@ -14,11 +14,4 @@ export function getPayPalApiBase(): string {
     : "https://api-m.sandbox.paypal.com";
 }
 
-export function getAppBaseUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_APP_URL ??
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3010"
-  );
-}
+export { getAppBaseUrl, getConfiguredAppBaseUrl, resolveAppBaseUrl } from "@/lib/app-url";

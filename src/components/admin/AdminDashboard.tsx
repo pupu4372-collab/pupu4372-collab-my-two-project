@@ -3,6 +3,7 @@
 import { AdminModeration } from "@/components/admin/AdminModeration";
 import { AdminReportsInbox } from "@/components/admin/AdminReportsInbox";
 import { GlassCard } from "@/components/layout/StitchLayout";
+import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 
 interface Stats {
@@ -60,6 +61,23 @@ export function AdminDashboard() {
           {today}
         </div>
       </div>
+
+      <GlassCard className="p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-bold text-plum">인간용 Premium 테스트</p>
+            <p className="mt-1 text-sm text-plum/65">
+              무결제 생성, 웹 리포트 링크, 이메일 재발송 A/S
+            </p>
+          </div>
+          <Link
+            href="/admin/human-premium-test"
+            className="inline-flex rounded-full bg-channel-saju px-4 py-2 text-sm font-semibold text-white"
+          >
+            테스트 루트 열기
+          </Link>
+        </div>
+      </GlassCard>
 
       <div className="flex flex-wrap gap-2">
         {(

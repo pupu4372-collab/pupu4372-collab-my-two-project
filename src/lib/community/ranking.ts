@@ -86,14 +86,37 @@ export interface PetShowSpeciesRankings {
 
 type RankingPostRow = Omit<PetShowRankingRow, "pet_species"> & {
   tags?: string[] | null;
+  animal_type?: PetShowSpecies | null;
 };
 
-function speciesFromTags(tags?: string[] | null): PetShowSpecies | undefined {
+function isPetShowSpecies(value: string | null | undefined): value is PetShowSpecies {
+  return value === "dog" || value === "cat" || value === "other";
+}
+
+function speciesFromPetShowTag(tags?: string[] | null): PetShowSpecies | undefined {
   const tag = tags?.find((item) => item.startsWith("pet-show:"));
   const species = tag?.replace("pet-show:", "");
-  return species === "dog" || species === "cat" || species === "other"
-    ? species
-    : undefined;
+  return isPetShowSpecies(species) ? species : undefined;
+}
+
+function speciesFromLegacyTags(tags?: string[] | null): PetShowSpecies | undefined {
+  if (!tags?.length) return undefined;
+  if (tags.includes("dog")) return "dog";
+  if (tags.includes("cat")) return "cat";
+  if (tags.includes("other")) return "other";
+  return undefined;
+}
+
+function resolvePostSpecies(
+  post: RankingPostRow,
+  speciesByPetId: Map<string, PetShowSpecies>,
+): PetShowSpecies | undefined {
+  return (
+    speciesFromPetShowTag(post.tags) ??
+    (isPetShowSpecies(post.animal_type) ? post.animal_type : undefined) ??
+    speciesFromLegacyTags(post.tags) ??
+    (post.pet_id ? speciesByPetId.get(post.pet_id) : undefined)
+  );
 }
 
 export async function fetchPetShowSpeciesRankings(period: Extract<RankingPeriod, "week" | "month"> = "week"): Promise<{
@@ -109,27 +132,54 @@ export async function fetchPetShowSpeciesRankings(period: Extract<RankingPeriod,
   const periodStart = new Date();
   periodStart.setDate(periodStart.getDate() - (period === "month" ? MONTH_DAYS : WEEK_DAYS));
 
-  const { data: posts, error } = await supabase
-    .from("community_posts")
-    .select("id, author_id, pet_id, title, image_urls, tags, like_count, comment_count, country_code, created_at")
-    .eq("post_type", "photo_show")
-    .eq("is_hidden", false)
-    .gte("created_at", periodStart.toISOString())
-    .order("like_count", { ascending: false })
-    .order("created_at", { ascending: true })
-    .limit(60);
+  const buildRankingQuery = (withPeriod: boolean) => {
+    let query = supabase
+      .from("community_posts")
+      .select(
+        "id, author_id, pet_id, title, image_urls, tags, animal_type, like_count, comment_count, country_code, created_at",
+      )
+      .eq("post_type", "photo_show")
+      .eq("is_hidden", false)
+      .order("like_count", { ascending: false })
+      .order("created_at", { ascending: true })
+      .limit(60);
 
-  const postRows = (posts ?? []) as unknown as RankingPostRow[];
-  if (error || postRows.length === 0) {
+    if (withPeriod) {
+      query = query.gte("created_at", periodStart.toISOString());
+    }
+
+    return query;
+  };
+
+  const { data: periodPosts, error } = await buildRankingQuery(true);
+  if (error) {
     return { rows: getMockSpeciesRankings(), source: "mock" };
+  }
+
+  let postRows = (periodPosts ?? []) as unknown as RankingPostRow[];
+  if (postRows.length === 0) {
+    const { data: latestPosts, error: latestError } = await buildRankingQuery(false);
+    if (latestError || !latestPosts?.length) {
+      return { rows: getMockSpeciesRankings(), source: "mock" };
+    }
+    postRows = latestPosts as unknown as RankingPostRow[];
+  }
+
+  const petIds = [...new Set(postRows.map((row) => row.pet_id).filter(Boolean))] as string[];
+  const speciesByPetId = new Map<string, PetShowSpecies>();
+  if (petIds.length > 0) {
+    const { data: petRows } = await supabase.from("pets").select("id, species").in("id", petIds);
+    for (const pet of (petRows ?? []) as Array<{ id: string; species: PetShowSpecies }>) {
+      if (isPetShowSpecies(pet.species)) {
+        speciesByPetId.set(pet.id, pet.species);
+      }
+    }
   }
 
   const grouped: PetShowSpeciesRankings = { dog: [], cat: [], other: [] };
   for (const post of postRows) {
-    // Species ranking follows the upload category tag only.
-    // Legacy posts without pet-show:dog|cat|other stay in the feed but not species Top 5.
-    const species = speciesFromTags(post.tags);
-    if (species !== "dog" && species !== "cat" && species !== "other") continue;
+    const species = resolvePostSpecies(post, speciesByPetId);
+    if (!species) continue;
     if (grouped[species].length >= TOP_LIMIT) continue;
     grouped[species].push({
       ...post,

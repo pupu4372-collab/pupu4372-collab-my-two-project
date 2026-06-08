@@ -11,6 +11,7 @@ export default async function PremiumPage() {
       theme="saju"
       title={t("premiumTitle")}
       subtitle={t("premiumSubtitle")}
+      hideThemeLabel
     >
       <PremiumCheckout />
       <p className="mt-8 text-center text-sm">
