@@ -3,8 +3,9 @@
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { compressImageForUpload } from "@/lib/images/upload-compression";
+import { isNativeImagePickerAvailable, pickNativeImage } from "@/lib/mobile/native-image-picker";
 import { useLocale } from "next-intl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface PetShowComposerProps {
   onPosted?: () => void;
@@ -22,23 +23,52 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   const [content, setContent] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [nativePickerAvailable, setNativePickerAvailable] = useState(false);
+  const [showImageOptions, setShowImageOptions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const picked = e.target.files?.[0];
+  useEffect(() => {
+    setNativePickerAvailable(isNativeImagePickerAvailable());
+  }, []);
+
+  async function setPickedImage(picked: File | null) {
     if (!picked) return;
     try {
       const compressed = await compressImageForUpload(picked);
       setFile(compressed);
       setPreview(URL.createObjectURL(compressed));
       setError(null);
+      setShowImageOptions(false);
     } catch {
       setFile(null);
       setPreview(null);
       setError(isKo ? "이미지를 1MB 이하 WebP로 압축할 수 없어요." : "Could not compress the image under 1MB WebP.");
       if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    await setPickedImage(e.target.files?.[0] ?? null);
+  }
+
+  async function chooseNativeImage(source: "camera" | "photos") {
+    try {
+      const picked = await pickNativeImage(source);
+      await setPickedImage(picked);
+    } catch (err) {
+      if (source === "photos") fileRef.current?.click();
+      if (err instanceof Error && err.message === "No image was selected.") return;
+      setError(
+        source === "camera"
+          ? isKo
+            ? "카메라를 열 수 없어요. 앨범 선택을 이용해 주세요."
+            : "Could not open the camera. Please choose from your album."
+          : isKo
+            ? "앨범을 열 수 없어 파일 선택으로 전환합니다."
+            : "Could not open the album. Falling back to file picker."
+      );
     }
   }
 
@@ -151,7 +181,13 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
           <label className="text-sm font-extrabold text-primary">{isKo ? "사진 업로드" : "Photo upload"}</label>
           <button
             type="button"
-            onClick={() => fileRef.current?.click()}
+            onClick={() => {
+              if (nativePickerAvailable) {
+                setShowImageOptions((value) => !value);
+                return;
+              }
+              fileRef.current?.click();
+            }}
             className="group mt-4 flex min-h-[280px] w-full items-center justify-center overflow-hidden rounded-[2rem] border-2 border-dashed border-outline/25 bg-white/35 text-center transition hover:bg-white/55"
           >
             {preview ? (
@@ -165,6 +201,24 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
               </span>
             )}
           </button>
+          {nativePickerAvailable && showImageOptions && (
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => void chooseNativeImage("camera")}
+                className="rounded-full bg-primary px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
+              >
+                {isKo ? "카메라로 촬영" : "Take photo"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void chooseNativeImage("photos")}
+                className="rounded-full border border-primary/15 bg-white/70 px-5 py-3 text-sm font-extrabold text-primary transition hover:bg-white"
+              >
+                {isKo ? "앨범에서 선택" : "Choose from album"}
+              </button>
+            </div>
+          )}
           <input
             ref={fileRef}
             type="file"
