@@ -5,6 +5,7 @@ export type PetShowSpecies = PetSpecies | "other";
 export type AppChannel = "home" | "dog" | "cat" | "reptile" | "community" | "pet_saju";
 export type PostType = "photo_show" | "qa" | "free" | "saju_review";
 export type ReportStatus = "pending" | "reviewing" | "resolved" | "rejected";
+export type SupportInquiryStatus = "pending" | "reviewing" | "resolved" | "closed";
 export type SajuType =
   | "basic"
   | "zodiac"
@@ -137,6 +138,21 @@ export interface PostReport {
   detail: string | null;
   status: ReportStatus;
   created_at: string;
+  resolved_at: string | null;
+}
+
+export interface SupportInquiry {
+  id: string;
+  user_id: string | null;
+  name: string | null;
+  email: string;
+  category: "guide" | "account" | "payment_report" | "community" | "partnership" | "general";
+  title: string;
+  message: string;
+  status: SupportInquiryStatus;
+  admin_note: string | null;
+  created_at: string;
+  updated_at: string;
   resolved_at: string | null;
 }
 

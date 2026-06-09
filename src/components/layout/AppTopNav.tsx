@@ -7,11 +7,11 @@ import { signOut } from "@/lib/supabase/auth-client";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
-type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "community" | "profile";
+type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "community" | "support" | "profile";
 
 const NAV_LINKS: Array<{
   key: NavKey;
-  href: "/" | "/dog" | "/cat" | "/reptile" | "/saju" | "/community" | "/profile";
+  href: "/" | "/dog" | "/cat" | "/reptile" | "/saju" | "/community" | "/support" | "/profile";
 }> = [
   { key: "home", href: "/" },
   { key: "dog", href: "/dog" },
@@ -19,6 +19,7 @@ const NAV_LINKS: Array<{
   { key: "reptile", href: "/reptile" },
   { key: "saju", href: "/saju" },
   { key: "community", href: "/community" },
+  { key: "support", href: "/support" },
 ];
 
 interface AppTopNavProps {

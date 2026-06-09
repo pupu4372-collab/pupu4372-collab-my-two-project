@@ -2,6 +2,7 @@
 
 import { AdminModeration } from "@/components/admin/AdminModeration";
 import { AdminReportsInbox } from "@/components/admin/AdminReportsInbox";
+import { AdminSupportInquiries } from "@/components/admin/AdminSupportInquiries";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
@@ -17,7 +18,7 @@ interface Stats {
   sajuResults?: number;
 }
 
-type Tab = "stats" | "reports" | "moderation";
+type Tab = "stats" | "inquiries" | "reports" | "moderation";
 
 const STAT_ICONS = ["👤", "📸", "💬", "🗨️", "✨", "💳"] as const;
 
@@ -83,6 +84,7 @@ export function AdminDashboard() {
         {(
           [
             { id: "stats" as const, label: "통계" },
+            { id: "inquiries" as const, label: "고객문의" },
             { id: "reports" as const, label: "신고함" },
             { id: "moderation" as const, label: "게시글 관리" },
           ] as const
@@ -122,6 +124,13 @@ export function AdminDashboard() {
             ))}
           </div>
         </div>
+      )}
+
+      {tab === "inquiries" && (
+        <GlassCard>
+          <h3 className="mb-4 text-lg font-bold text-primary">고객문의</h3>
+          <AdminSupportInquiries />
+        </GlassCard>
       )}
 
       {tab === "reports" && (

@@ -134,7 +134,11 @@ function RankingPreviewList({
   );
 }
 
-export function HomeGateway() {
+interface HomeGatewayProps {
+  previewTheme?: "night";
+}
+
+export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const { ready, configured, isAnonymous, accessToken } = useSupabaseSession();
@@ -202,7 +206,7 @@ export function HomeGateway() {
   }, [configured, ready, isAnonymous, accessToken, locale]);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-dream-sky">
+    <div className={previewTheme === "night" ? "min-h-screen overflow-x-hidden bg-transparent" : "min-h-screen overflow-x-hidden bg-dream-sky"}>
       <AppTopNav active="home" />
       <PageContainer className="space-y-10">
         <section className="grid items-center gap-8 py-6 md:grid-cols-[1.05fr_0.95fr] md:py-12">
@@ -210,13 +214,13 @@ export function HomeGateway() {
             <p className="inline-flex rounded-full bg-white/70 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-channel-community shadow-sm">
               {isKo ? "Pet Saju · Community · Care" : "Pet saju · Community · Care"}
             </p>
-            <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-primary md:text-6xl">
+            <h1 className={`mt-6 text-4xl font-extrabold leading-tight tracking-tight md:text-6xl ${previewTheme === "night" ? "text-white drop-shadow-[0_0_20px_rgba(245,217,255,0.28)]" : "text-primary"}`}>
               {isKo ? "우리 아이의 특별한" : "Discover your pet's"}
-              <span className="block text-gradient-hero">
+              <span className={previewTheme === "night" ? "block text-[#ffd7ff]" : "block text-gradient-hero"}>
                 {isKo ? "운명과 하루" : "cosmic daily story"}
               </span>
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-8 text-plum/70">
+            <p className={`mt-5 max-w-xl text-base leading-8 ${previewTheme === "night" ? "font-semibold text-white/85 drop-shadow-[0_1px_12px_rgba(0,0,0,0.2)]" : "text-plum/70"}`}>
               {isKo
                 ? "펫 사주로 성향을 읽고, 우리아이 자랑에서 사진을 나누고, 강아지·고양이·렙타일(다른동물) 채널에서 케어 팁을 찾아보세요."
                 : "Read your pet's saju, share photos in Pet Show, and browse dog, cat, and reptile care guides."}
@@ -224,7 +228,11 @@ export function HomeGateway() {
             <div className="mt-8 flex flex-wrap gap-3">
               <AuthRequiredLink
                 href="/saju"
-                className="rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105"
+                className={`rounded-full px-6 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 hover:brightness-105 ${
+                  previewTheme === "night"
+                    ? "bg-[#ffd7ff] text-[#442656] shadow-[0_0_24px_rgba(245,217,255,0.28)]"
+                    : "bg-primary text-white"
+                }`}
               >
                 {isKo ? "펫 사주 바로 시작" : "Start Pet Saju"}
               </AuthRequiredLink>
@@ -298,20 +306,38 @@ export function HomeGateway() {
 
         <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
-            <SectionHeader
-              eyebrow={isKo ? "Pet Show" : "Pet Show"}
-              title={isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
-              subtitle={isKo ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요." : "Top photos by likes from the last 7 days, grouped by species."}
-            />
+            {previewTheme === "night" ? (
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#22c55e] drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">
+                  {isKo ? "Pet Show" : "Pet Show"}
+                </p>
+                <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white drop-shadow-[0_0_18px_rgba(245,217,255,0.2)] md:text-4xl">
+                  {isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/80 md:text-base">
+                  {isKo ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요." : "Top photos by likes from the last 7 days, grouped by species."}
+                </p>
+              </div>
+            ) : (
+              <SectionHeader
+                eyebrow={isKo ? "Pet Show" : "Pet Show"}
+                title={isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
+                subtitle={isKo ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요." : "Top photos by likes from the last 7 days, grouped by species."}
+              />
+            )}
             {rankingSource === "mock" && (
-              <p className="mt-2 text-xs font-semibold text-plum/45">
+              <p className={`mt-2 text-xs font-semibold ${previewTheme === "night" ? "text-white/60" : "text-plum/45"}`}>
                 {isKo ? "데모 데이터 (DB 연결 또는 이번 주 게시물 없음)" : "Demo data (no DB or no posts this week)"}
               </p>
             )}
             <div className="mt-5">
               <AuthRequiredLink
                 href="/community/pet-show/upload"
-                className="inline-flex rounded-full bg-channel-community px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105"
+                className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
+                  previewTheme === "night"
+                    ? "bg-[#22c55e] shadow-[0_0_22px_rgba(34,197,94,0.25)]"
+                    : "bg-channel-community"
+                }`}
               >
                 {isKo ? "사진 업로드하고 랭킹 참여" : "Upload and join ranking"}
               </AuthRequiredLink>
@@ -344,25 +370,49 @@ export function HomeGateway() {
         <AdSlot />
 
         <section>
-          <SectionHeader
-            eyebrow={isKo ? "Explore" : "Explore"}
-            title={isKo ? "어디부터 둘러볼까요?" : "Where should we go first?"}
-            subtitle={isKo ? "K-Saju Pet의 핵심 기능을 빠르게 시작하세요." : "Start with the main K-Saju Pet spaces."}
-          />
+          {previewTheme === "night" ? (
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#ffd7ff]">Explore</p>
+              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-4xl">
+                {isKo ? "어디부터 둘러볼까요?" : "Where should we go first?"}
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/80 md:text-base">
+                {isKo ? "K-Saju Pet의 핵심 기능을 빠르게 시작하세요." : "Start with the main K-Saju Pet spaces."}
+              </p>
+            </div>
+          ) : (
+            <SectionHeader
+              eyebrow={isKo ? "Explore" : "Explore"}
+              title={isKo ? "어디부터 둘러볼까요?" : "Where should we go first?"}
+              subtitle={isKo ? "K-Saju Pet의 핵심 기능을 빠르게 시작하세요." : "Start with the main K-Saju Pet spaces."}
+            />
+          )}
           <div className="mt-6 grid grid-cols-2 gap-4">
             {featureCards.map((card) => (
               <AuthRequiredLink
                 key={card.href}
                 href={card.href}
-                className={`pastel-card p-5 shadow-sm transition hover:-translate-y-1 hover:bg-white/80 ${card.className}`}
+                className={`p-5 shadow-sm transition hover:-translate-y-1 ${
+                  previewTheme === "night"
+                    ? "rounded-2xl border border-white/20 bg-white/15 backdrop-blur-sm hover:bg-white/25"
+                    : `pastel-card hover:bg-white/80 ${card.className}`
+                }`}
               >
                 <span className="text-3xl" aria-hidden>
                   {card.emoji}
                 </span>
-                <h2 className="mt-3 text-base font-extrabold">
+                <h2
+                  className={`mt-3 text-base font-extrabold ${
+                    previewTheme === "night" ? "text-white" : ""
+                  }`}
+                >
                   {isKo ? card.koTitle : card.enTitle}
                 </h2>
-                <p className="mt-2 text-xs leading-5 text-plum/62">
+                <p
+                  className={`mt-2 text-xs leading-5 ${
+                    previewTheme === "night" ? "text-white/75" : "text-plum/62"
+                  }`}
+                >
                   {isKo ? card.koDesc : card.enDesc}
                 </p>
               </AuthRequiredLink>
