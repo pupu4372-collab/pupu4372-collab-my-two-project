@@ -164,7 +164,7 @@ export async function fetchPetShowSpeciesRankings(period: Extract<RankingPeriod,
   if (postRows.length === 0) {
     const { data: latestPosts, error: latestError } = await buildRankingQuery(false);
     if (latestError || !latestPosts?.length) {
-      return { rows: grouped, source: "supabase" };
+      return { rows: { dog: [], cat: [], other: [] }, source: "supabase" };
     }
     postRows = latestPosts as unknown as RankingPostRow[];
   }
