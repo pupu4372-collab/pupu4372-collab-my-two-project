@@ -69,7 +69,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
             <Link
               key={section.href}
               href={section.href}
-              className="whitespace-nowrap rounded-full bg-white/65 px-6 py-3 text-sm font-extrabold text-primary shadow-sm transition hover:bg-mint"
+              className="whitespace-nowrap rounded-full bg-cream px-6 py-3 text-sm font-extrabold text-primary shadow-sm transition hover:bg-white"
             >
               {section.title}
             </Link>
@@ -77,7 +77,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
         </nav>
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <GlassCard className="relative overflow-hidden p-0">
+          <GlassCard className="relative overflow-hidden bg-cream p-0">
             <Link href="/community/pet-show/ranking" className="block">
               <div className="relative h-64 overflow-hidden bg-channel-community/10 md:h-80">
                 {weeklyRanking.rows.dog[0]?.image_urls?.[0] ? (
@@ -106,11 +106,12 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
             </Link>
           </GlassCard>
 
-          <GlassCard>
+          <GlassCard className="min-w-0 border border-white/20 bg-white/12 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-md sm:p-5">
             <SectionHeader
               eyebrow={isKo ? "Ranking" : "Ranking"}
               title={isKo ? "종별 Top 5" : "Top 5 by species"}
               subtitle={isKo ? "사진을 올리면 주간 랭킹에 참여할 수 있어요." : "Upload a photo to join the weekly ranking."}
+              onDark
             />
             <div className="mt-5 grid gap-3">
               {([
@@ -118,25 +119,47 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                 ["🐈", isKo ? "고양이" : "Cat", weeklyRanking.rows.cat],
                 ["🐾", isKo ? "렙타일(다른동물)" : "Other Animals", weeklyRanking.rows.other],
               ] as const).map(([emoji, label, rows]) => (
-                <div key={label} className="rounded-2xl bg-white/55 px-4 py-3">
-                  <p className="text-xs font-extrabold text-primary">
+                <div key={label} className="max-w-full overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/20 p-4 shadow-sm backdrop-blur-sm">
+                  <p className="text-xs font-extrabold text-white">
                     {emoji} {label} Top 5
                   </p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="flex -space-x-2">
-                      {rows.slice(0, 5).map((row) => (
-                        <span key={row.id} className="flex h-11 w-11 overflow-hidden rounded-full border-2 border-white bg-channel-community/10">
-                          {row.image_urls?.[0] ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={supabaseImageTransformUrl(row.image_urls[0], { width: 88, height: 88 })} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            <span className="flex h-full w-full items-center justify-center text-lg">{emoji}</span>
-                          )}
-                        </span>
-                      ))}
-                    </div>
-                    {rows.length === 0 && <span className="text-xs text-plum/45">{isKo ? "첫 사진을 기다려요" : "Waiting for photos"}</span>}
-                  </div>
+                  {rows.length === 0 ? (
+                    <p className="mt-2 rounded-xl bg-white/10 px-2 py-2 text-[11px] text-white/70">
+                      {isKo ? "첫 사진을 기다려요" : "Waiting for photos"}
+                    </p>
+                  ) : (
+                    <>
+                      <p className="mt-1 text-[10px] font-medium text-white/50">
+                        {rows.length > 3 ? "옆으로 밀어 5위까지 볼 수 있어요." : "\u00a0"}
+                      </p>
+                      <div className="-mx-1 mt-1 max-w-full touch-pan-x overflow-x-auto overscroll-x-contain px-1 pb-2 pr-8 [scrollbar-width:thin]">
+                        <ol className="flex w-max min-w-full snap-x snap-mandatory gap-2">
+                          {rows.slice(0, 5).map((row, index) => (
+                            <li key={row.id} className="w-[34vw] max-w-28 shrink-0 snap-start sm:w-28 md:w-24 lg:w-28">
+                              <AuthRequiredLink
+                                href={row.id.startsWith("mock-") ? "/community/pet-show/snapzone" : `/community/pet-show/${row.id}`}
+                                className="block rounded-2xl bg-channel-community/10 p-2 transition hover:-translate-y-0.5 hover:bg-channel-community/15"
+                              >
+                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-channel-community text-[10px] font-bold text-white">
+                                  {row.rank_position ?? index + 1}
+                                </span>
+                                <div className="mt-1 aspect-square w-full overflow-hidden rounded-xl bg-white/70">
+                                  {row.image_urls?.[0] ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={supabaseImageTransformUrl(row.image_urls[0], { width: 192, height: 192 })} alt="" className="h-full w-full object-cover" />
+                                  ) : (
+                                    <span className="flex h-full w-full items-center justify-center text-2xl">{emoji}</span>
+                                  )}
+                                </div>
+                                <p className="mt-1 truncate text-[11px] font-bold text-plum">{row.title ?? "Pet Show"}</p>
+                                <p className="text-[10px] text-plum/45">♥ {row.like_count}</p>
+                              </AuthRequiredLink>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -158,6 +181,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                 ? "강아지·고양이·렙타일(다른동물) 채널에서 환경·식단·건강 가이드를 모았어요."
                 : "Browse dog, cat, and reptile & other pet care guides."
             }
+            onDark
           />
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {([
@@ -186,7 +210,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
               <Link
                 key={card.href}
                 href={card.href}
-                className={`pastel-card block px-5 py-6 shadow-sm transition hover:-translate-y-1 hover:bg-white/80 ${card.className}`}
+                className="block rounded-[2rem] border border-white/15 bg-cream px-5 py-6 shadow-sm transition hover:-translate-y-1 hover:bg-white"
               >
                 <span className="text-3xl" aria-hidden>
                   {card.emoji}
@@ -203,13 +227,14 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
             eyebrow={isKo ? "Boards" : "Boards"}
             title={isKo ? "집사님들과 나누는 이야기" : "Stories from pet parents"}
             subtitle={isKo ? "Q&A, 꿀팁, 자유게시판, 품종별 경험담을 목적에 맞게 둘러보세요." : "Explore Q&A, tips, free board, and breed experiences."}
+            onDark
           />
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {sections.map((section) => (
               <Link
                 key={section.href}
                 href={section.href}
-                className="pastel-card block px-5 py-6 shadow-sm transition hover:-translate-y-1 hover:bg-white/80"
+                className="block rounded-[2rem] border border-white/15 bg-cream px-5 py-6 shadow-sm transition hover:-translate-y-1 hover:bg-white"
               >
                 <span className="text-3xl" aria-hidden>
                   {section.emoji}
@@ -221,8 +246,8 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
           </div>
         </section>
 
-        <p className="text-center text-sm text-plum/55">
-          <Link href="/saju" className="underline hover:text-plum">
+        <p className="text-center text-sm text-white/75">
+          <Link href="/saju" className="underline hover:text-[#ffd7ff]">
             {t("toSaju")}
           </Link>
         </p>

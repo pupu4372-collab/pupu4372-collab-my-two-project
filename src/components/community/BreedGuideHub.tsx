@@ -31,7 +31,7 @@ export function BreedGuideHub({ guides, source, activeAnimal, isKo }: BreedGuide
               className={
                 active
                   ? "whitespace-nowrap rounded-full bg-channel-community px-5 py-2.5 text-xs font-extrabold text-white shadow-sm"
-                  : "whitespace-nowrap rounded-full bg-white/60 px-5 py-2.5 text-xs font-bold text-plum/70 shadow-sm transition hover:bg-white"
+                  : "whitespace-nowrap rounded-full bg-cream px-5 py-2.5 text-xs font-bold text-plum/80 shadow-sm transition hover:bg-white"
               }
             >
               {isKo ? tab.ko : tab.en}
@@ -41,13 +41,13 @@ export function BreedGuideHub({ guides, source, activeAnimal, isKo }: BreedGuide
       </nav>
 
       {source === "mock" && (
-        <p className="text-xs text-plum/50">
+        <p className="text-xs text-white/70">
           {isKo ? "데모 품종 가이드 (DB 마이그레이션 후 Supabase 데이터)" : "Demo breed guides (Supabase after migration)"}
         </p>
       )}
 
       {guides.length === 0 ? (
-        <p className="pastel-card p-8 text-center text-sm text-plum/60">
+        <p className="rounded-[2rem] border border-white/15 bg-cream p-8 text-center text-sm text-plum/75 shadow-sm">
           {isKo ? "아직 등록된 가이드가 없어요." : "No guides published yet."}
         </p>
       ) : (
@@ -56,7 +56,7 @@ export function BreedGuideHub({ guides, source, activeAnimal, isKo }: BreedGuide
             <li key={guide.id}>
               <Link
                 href={`/community/breeds/${guide.seo_slug}`}
-                className="pastel-card flex h-full flex-col p-3 shadow-sm transition hover:-translate-y-1 hover:bg-white/85"
+                className="flex h-full flex-col rounded-[2rem] border border-white/15 bg-cream p-4 shadow-sm transition hover:-translate-y-1 hover:bg-white"
               >
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="rounded-full bg-channel-community/10 px-2.5 py-0.5 text-[10px] font-extrabold text-channel-community">

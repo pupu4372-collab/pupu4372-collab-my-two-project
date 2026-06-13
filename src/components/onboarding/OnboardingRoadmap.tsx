@@ -2,6 +2,8 @@ import { Link } from "@/i18n/navigation";
 
 interface OnboardingRoadmapProps {
   locale: string;
+  showActions?: boolean;
+  compact?: boolean;
 }
 
 const COPY = {
@@ -73,50 +75,60 @@ const COPY = {
   },
 } as const;
 
-export function OnboardingRoadmap({ locale }: OnboardingRoadmapProps) {
+export function OnboardingRoadmap({ locale, showActions = true, compact = false }: OnboardingRoadmapProps) {
   const t = COPY[locale === "en" ? "en" : "ko"];
 
   return (
-    <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary-fixed via-surface to-secondary-fixed/80 px-5 py-10 shadow-sm md:px-10 md:py-14">
+    <div
+      className={`relative overflow-hidden shadow-sm ${
+        compact
+          ? "rounded-[1.75rem] border border-white/15 bg-white/10 px-4 py-6 backdrop-blur-sm md:px-6 md:py-7"
+          : "rounded-[2.5rem] bg-gradient-to-br from-primary-fixed via-surface to-secondary-fixed/80 px-5 py-10 md:px-10 md:py-14"
+      }`}
+    >
       <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/35 blur-3xl" aria-hidden />
       <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl" aria-hidden />
 
       <div className="relative mx-auto max-w-5xl text-center">
-        <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary/70">{t.eyebrow}</p>
-        <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-primary md:text-5xl">{t.title}</h1>
-        <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-on-surface-variant md:text-lg">{t.subtitle}</p>
+        <p className={`${compact ? "text-[10px] text-white/65" : "text-xs text-primary/70"} font-extrabold uppercase tracking-[0.24em]`}>{t.eyebrow}</p>
+        <h1 className={`mt-3 font-extrabold tracking-tight ${compact ? "text-2xl text-white md:text-3xl" : "text-3xl text-primary md:text-5xl"}`}>{t.title}</h1>
+        <p className={`mx-auto mt-4 max-w-2xl leading-6 ${compact ? "text-xs text-white/75 md:text-sm" : "text-sm text-on-surface-variant md:text-lg"}`}>{t.subtitle}</p>
       </div>
 
-      <div className="relative mt-12 grid gap-5 md:grid-cols-4">
-        <div className="absolute left-[12%] right-[12%] top-20 hidden border-t-2 border-dashed border-primary/15 md:block" aria-hidden />
+      <div className={`relative grid gap-4 md:grid-cols-4 ${compact ? "mt-6" : "mt-12 gap-5"}`}>
+        <div className={`absolute left-[12%] right-[12%] top-20 hidden border-t-2 border-dashed md:block ${compact ? "border-white/20" : "border-primary/15"}`} aria-hidden />
         {t.steps.map((step, index) => (
           <article
             key={step.label}
-            className={`glass-card relative rounded-[2rem] p-5 text-center shadow-sm transition hover:-translate-y-1 md:p-6 ${
+            className={`glass-card relative text-center shadow-sm transition hover:-translate-y-1 ${
+              compact ? "rounded-[1.35rem] border border-white/20 !bg-white/80 p-3 md:p-4" : "rounded-[2rem] p-5 md:p-6"
+            } ${
               index % 2 === 1 ? "md:mt-12" : ""
             }`}
           >
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-[2rem] bg-white/75 text-4xl shadow-sm">
+            <div className={`mx-auto flex items-center justify-center bg-white/75 shadow-sm ${compact ? "h-14 w-14 rounded-[1.1rem] text-2xl" : "h-24 w-24 rounded-[2rem] text-4xl"}`}>
               <span aria-hidden>{step.icon}</span>
             </div>
-            <div className="mx-auto -mt-3 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-lg">
+            <div className={`mx-auto flex items-center justify-center rounded-full bg-primary font-bold text-white shadow-lg ${compact ? "-mt-2 h-6 w-6 text-[10px]" : "-mt-3 h-8 w-8 text-xs"}`}>
               {index + 1}
             </div>
-            <p className="mt-4 text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary/55">{step.label}</p>
-            <h2 className="mt-2 text-lg font-bold text-primary">{step.title}</h2>
-            <p className="mt-2 text-sm leading-6 text-plum/65">{step.body}</p>
+            <p className={`${compact ? "mt-3 text-[9px] text-primary/65" : "mt-4 text-[11px] text-primary/55"} font-extrabold uppercase tracking-[0.18em]`}>{step.label}</p>
+            <h2 className={`mt-2 font-bold text-primary ${compact ? "text-sm" : "text-lg"}`}>{step.title}</h2>
+            <p className={`mt-2 leading-6 ${compact ? "text-xs text-plum/75" : "text-sm text-plum/65"}`}>{step.body}</p>
           </article>
         ))}
       </div>
 
-      <div className="relative mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <Link href="/" className="rounded-full bg-white/70 px-6 py-3 text-sm font-bold text-primary shadow-sm transition hover:bg-white">
-          {t.skip}
-        </Link>
-        <Link href="/" className="rounded-full bg-primary px-8 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:brightness-110">
-          {t.start}
-        </Link>
-      </div>
+      {showActions && (
+        <div className="relative mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link href="/" className="rounded-full bg-white/70 px-6 py-3 text-sm font-bold text-primary shadow-sm transition hover:bg-white">
+            {t.skip}
+          </Link>
+          <Link href="/" className="rounded-full bg-primary px-8 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:brightness-110">
+            {t.start}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

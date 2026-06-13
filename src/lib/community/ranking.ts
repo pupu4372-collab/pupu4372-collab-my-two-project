@@ -71,8 +71,12 @@ export async function fetchPetShowRanking(
   }
 
   const { data, error } = await query;
-  if (error || !data?.length) {
+  if (error) {
     return { rows: getMockPetShowRanking(), source: "mock" };
+  }
+
+  if (!data?.length) {
+    return { rows: [], source: "supabase" };
   }
 
   return { rows: data as PetShowRankingRow[], source: "supabase" };
@@ -160,7 +164,7 @@ export async function fetchPetShowSpeciesRankings(period: Extract<RankingPeriod,
   if (postRows.length === 0) {
     const { data: latestPosts, error: latestError } = await buildRankingQuery(false);
     if (latestError || !latestPosts?.length) {
-      return { rows: getMockSpeciesRankings(), source: "mock" };
+      return { rows: grouped, source: "supabase" };
     }
     postRows = latestPosts as unknown as RankingPostRow[];
   }

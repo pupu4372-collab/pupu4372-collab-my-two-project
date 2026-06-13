@@ -25,17 +25,18 @@ interface SectionHeaderProps {
   action?: ReactNode;
   align?: "left" | "center";
   className?: string;
+  onDark?: boolean;
 }
 
-export function SectionHeader({ eyebrow, title, subtitle, action, align = "left", className = "" }: SectionHeaderProps) {
+export function SectionHeader({ eyebrow, title, subtitle, action, align = "left", className = "", onDark = false }: SectionHeaderProps) {
   const isCenter = align === "center";
 
   return (
     <div className={`flex flex-col gap-4 ${isCenter ? "items-center text-center" : "md:flex-row md:items-end md:justify-between"} ${className}`}>
       <div>
         {eyebrow && <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community">{eyebrow}</p>}
-        <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-primary md:text-4xl">{title}</h2>
-        {subtitle && <p className="mt-2 max-w-2xl text-sm leading-6 text-plum/65 md:text-base">{subtitle}</p>}
+        <h2 className={`mt-2 text-2xl font-extrabold tracking-tight md:text-4xl ${onDark ? "text-white" : "text-primary"}`}>{title}</h2>
+        {subtitle && <p className={`mt-2 max-w-2xl text-sm leading-6 md:text-base ${onDark ? "text-white/75" : "text-plum/65"}`}>{subtitle}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>

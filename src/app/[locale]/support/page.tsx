@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation";
+import { AppTopNav } from "@/components/layout/AppTopNav";
 import { SupportQuickActions } from "@/components/support/SupportQuickActions";
 
 interface SupportPageProps {
@@ -26,78 +27,15 @@ const notices = [
   },
 ] as const;
 
-const navLinks = [
-  { href: "/" as const, label: "Home" },
-  { href: "/dog" as const, label: "Dog" },
-  { href: "/cat" as const, label: "Cat" },
-  { href: "/saju" as const, label: "K-Saju" },
-  { href: "/community" as const, label: "Community" },
-] as const;
-
-const stars = [
-  ["8%", "16%", "1px", "0s"],
-  ["14%", "34%", "2px", "1.2s"],
-  ["21%", "22%", "1px", "2.1s"],
-  ["29%", "9%", "2px", "0.5s"],
-  ["36%", "29%", "1px", "1.7s"],
-  ["45%", "18%", "2px", "2.8s"],
-  ["56%", "8%", "2px", "0.9s"],
-  ["63%", "33%", "1px", "1.5s"],
-  ["72%", "15%", "2px", "2.3s"],
-  ["84%", "28%", "1px", "0.4s"],
-  ["91%", "12%", "2px", "1.9s"],
-  ["11%", "58%", "1px", "2.6s"],
-  ["23%", "72%", "2px", "0.8s"],
-  ["39%", "64%", "1px", "1.4s"],
-  ["51%", "81%", "2px", "2.2s"],
-  ["67%", "70%", "1px", "0.2s"],
-  ["78%", "56%", "2px", "1.1s"],
-  ["92%", "78%", "1px", "2.7s"],
-] as const;
-
 export default async function SupportPage({ params }: SupportPageProps) {
   const { locale } = await params;
   const isKo = locale !== "en";
 
   return (
-    <div className="min-h-screen bg-[#fbf9f5] bg-[radial-gradient(#d7d1dc_1px,transparent_1px)] [background-size:16px_16px] px-4 py-8 text-white md:px-8">
-      <main className="mx-auto max-w-7xl overflow-hidden rounded-[2.2rem] border-[10px] border-[#aeb5be] bg-[radial-gradient(circle_at_50%_18%,rgba(181,116,255,0.28),transparent_30%),linear-gradient(180deg,#1d1524_0%,#3b1d50_36%,#7a4592_100%)] shadow-[0_28px_80px_-36px_rgba(27,28,26,0.65)]">
-        <header className="flex h-16 items-center justify-between bg-[#f2f0ed]/90 px-6 text-[#442656] md:px-14">
-          <Link href="/" className="text-lg font-extrabold tracking-tight">
-            K-Saju Pet
-          </Link>
-          <nav className="hidden items-center gap-8 text-xs font-semibold text-[#1b1c1a]/70 md:flex">
-            {navLinks.map((item) => (
-              <Link key={item.href} href={item.href} className="transition hover:text-[#442656]">
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-3 text-xs font-extrabold">
-            <span>EN/KO</span>
-            <Link href="/profile" aria-label={isKo ? "프로필" : "Profile"}>
-              ♙
-            </Link>
-          </div>
-        </header>
-
-        <div className="relative overflow-hidden px-6 pb-16 pt-16 md:px-14 md:pb-20">
-          <div className="pointer-events-none absolute inset-0">
-            {stars.map(([left, top, size, delay]) => (
-              <span
-                key={`${left}-${top}`}
-                className="star-twinkle absolute rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
-                style={{
-                  left,
-                  top,
-                  width: size,
-                  height: size,
-                  animationDelay: delay,
-                }}
-              />
-            ))}
-          </div>
-
+    <div className="min-h-screen text-white">
+      <AppTopNav active="support" />
+      <main className="mx-auto mt-8 max-w-7xl">
+        <div className="relative px-6 pb-16 pt-16 md:px-14 md:pb-20">
           <div className="relative z-20 mb-8 flex justify-center gap-2 md:absolute md:right-14 md:top-28 md:mb-0 md:flex-col md:items-end">
             <Link
               href="/terms"
@@ -131,16 +69,16 @@ export default async function SupportPage({ params }: SupportPageProps) {
           <SupportQuickActions />
 
           <section className="relative z-10 mt-14 grid gap-6 lg:grid-cols-[1.4fr_0.65fr]">
-            <div className="rounded-[2rem] border border-white/18 bg-white/16 p-7 backdrop-blur-xl md:p-9">
+            <div>
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-extrabold">{isKo ? "공지사항" : "Notice"}</h2>
+                <h2 className="text-2xl font-extrabold text-white">{isKo ? "공지사항" : "Notice"}</h2>
                 <Link href="/community" className="text-xs font-extrabold text-white/70 transition hover:text-white">
                   {isKo ? "더보기" : "More"} →
                 </Link>
               </div>
               <div className="mt-6 space-y-4">
                 {notices.map((notice) => (
-                  <article key={notice.koTitle} className="rounded-2xl border border-white/14 bg-white/14 p-5">
+                  <article key={notice.koTitle} className="rounded-2xl border border-white/14 bg-white/14 p-5 backdrop-blur-xl">
                     <div className="flex items-center justify-between gap-3">
                       <span className="rounded-full bg-[#ffd7ff]/24 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#ffd7ff]">
                         {notice.type}

@@ -10,11 +10,9 @@ interface PageProps {
   params: Promise<{ locale: string }>;
 }
 
-const FALLBACK_IMAGES = ["/stitch/asset-51.jpg", "/stitch/asset-52.jpg", "/stitch/asset-53.jpg"];
-
 function rankingImage(row: PetShowRankingRow, index: number) {
   const src = row.image_urls?.[0];
-  if (!src) return FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+  if (!src) return null;
   return supabaseImageTransformUrl(src, { width: index === 0 ? 900 : 560, height: index === 0 ? 620 : 560 });
 }
 
@@ -30,6 +28,7 @@ function RankingCard({
   const rank = index + 1;
   const href = row.id.startsWith("mock-") ? "/community/pet-show/snapzone" : `/community/pet-show/${row.id}`;
   const featured = index === 0;
+  const imageUrl = rankingImage(row, index);
 
   return (
     <Link href={href} className={`shrink-0 snap-start ${featured ? "w-[280px] md:w-[400px]" : "w-[240px]"}`}>
@@ -42,12 +41,16 @@ function RankingCard({
           {isKo ? `${rank}위` : `#${rank}`}
         </div>
         <div className={featured ? "aspect-[1.49] overflow-hidden bg-surface-container" : "aspect-square overflow-hidden bg-surface-container"}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={rankingImage(row, index)}
-            alt=""
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          />
+          {imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageUrl}
+              alt=""
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-5xl">🐾</div>
+          )}
         </div>
         <div className={featured ? "space-y-2 p-6" : "p-4"}>
           <div className="flex items-start justify-between gap-3">
@@ -152,6 +155,12 @@ export default async function PetShowIndexPage({ params }: PageProps) {
               >
                 {isKo ? "랭킹 더보기" : "View ranking"}
               </Link>
+              <Link
+                href="/community/pet-show/fails"
+                className="inline-flex rounded-full bg-[#ffd7ff] px-6 py-3 text-sm font-extrabold text-primary shadow-sm transition hover:scale-105 hover:brightness-105"
+              >
+                {isKo ? "웃긴 실패 사진" : "Funny fails"}
+              </Link>
             </div>
           </div>
         </section>
@@ -160,12 +169,15 @@ export default async function PetShowIndexPage({ params }: PageProps) {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community">Weekly Ranking</p>
-              <h2 className="mt-2 text-2xl font-extrabold text-primary md:text-3xl">
+              <h2 className="mt-2 text-2xl font-extrabold text-white md:text-3xl">
                 {isKo ? "이번 주의 인기 펫 Top 5" : "Popular pets Top 5"}
               </h2>
+              <p className="mt-2 text-sm font-semibold text-white/75">
+                {isKo ? "가장 많은 사랑을 받은 사진을 가로로 넘겨보세요." : "Swipe through the photos that received the most love."}
+              </p>
             </div>
             {ranking.source === "mock" && (
-              <span className="rounded-full bg-white/70 px-3 py-1 text-xs text-plum/50">
+              <span className="rounded-full bg-white/15 px-3 py-1 text-xs text-white/70">
                 {isKo ? "데모 데이터" : "Demo data"}
               </span>
             )}
@@ -185,6 +197,9 @@ export default async function PetShowIndexPage({ params }: PageProps) {
         <nav className="flex gap-2 overflow-x-auto rounded-[2rem] bg-sand/55 p-1.5 hide-scrollbar md:w-fit" aria-label={isKo ? "Pet Show 카테고리" : "Pet Show categories"}>
           <Link href="/community/pet-show/snapzone" className="whitespace-nowrap rounded-full bg-primary px-6 py-2 text-sm font-bold text-cream">
             {isKo ? "전체" : "All"}
+          </Link>
+          <Link href="/community/pet-show/fails" className="whitespace-nowrap rounded-full px-6 py-2 text-sm font-bold text-on-surface-variant transition hover:bg-white/60">
+            {isKo ? "웃긴 실패 사진" : "Funny fails"}
           </Link>
           {categoryCards.map((category) => (
             <AuthRequiredLink

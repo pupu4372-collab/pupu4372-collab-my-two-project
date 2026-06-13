@@ -2,6 +2,7 @@ import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { PetShowFeed } from "@/components/community/PetShowFeed";
 import { PetShowShell } from "@/components/community/PetShowShell";
 import { SectionHeader } from "@/components/layout/StitchLayout";
+import { Link } from "@/i18n/navigation";
 import { fetchWeeklyPetShowSpeciesRankings } from "@/lib/community/ranking";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 
@@ -39,13 +40,22 @@ export default async function PetShowSnapzonePage({ params }: PageProps) {
             eyebrow={isKo ? "Weekly Ranking" : "Weekly Ranking"}
             title={isKo ? "이번 주의 인기 펫 Top 5" : "This week's popular pets"}
             subtitle={isKo ? "가장 많은 사랑을 받은 사진을 가로로 넘겨보세요." : "Swipe through the photos that received the most love."}
+            onDark
             action={
-              <AuthRequiredLink
-                href="/community/pet-show/upload"
-                className="inline-flex rounded-full bg-channel-community px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105"
-              >
-                {isKo ? "나도 자랑하기" : "Post my pet"}
-              </AuthRequiredLink>
+              <div className="flex flex-wrap gap-2">
+                <AuthRequiredLink
+                  href="/community/pet-show/upload"
+                  className="inline-flex rounded-full bg-channel-community px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105"
+                >
+                  {isKo ? "나도 자랑하기" : "Post my pet"}
+                </AuthRequiredLink>
+                <Link
+                  href="/community/pet-show/fails"
+                  className="inline-flex rounded-full bg-[#ffd7ff] px-5 py-3 text-sm font-extrabold text-primary shadow-sm transition hover:scale-105 hover:brightness-105"
+                >
+                  {isKo ? "웃긴 실패 사진" : "Funny fails"}
+                </Link>
+              </div>
             }
           />
           <div className="-mx-5 mt-6 flex snap-x gap-4 overflow-x-auto px-5 pb-5 hide-scrollbar md:mx-0 md:px-0">

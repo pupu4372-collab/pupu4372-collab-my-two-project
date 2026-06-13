@@ -100,42 +100,6 @@ export function ProfilePage() {
             ›
           </span>
         </Link>
-        <Link
-          href="/onboarding"
-          className="flex items-center justify-between px-5 py-4 transition hover:bg-white/40"
-        >
-          <span className="flex items-center gap-3 text-sm font-medium text-on-surface">
-            <span aria-hidden>🧭</span>
-            {isKo ? "성공 로드맵 가이드" : "Success roadmap"}
-          </span>
-          <span className="text-plum/40" aria-hidden>
-            ›
-          </span>
-        </Link>
-        <Link
-          href="/terms"
-          className="flex items-center justify-between px-5 py-4 transition hover:bg-white/40"
-        >
-          <span className="flex items-center gap-3 text-sm font-medium text-on-surface">
-            <span aria-hidden>📄</span>
-            {isKo ? "이용약관" : "Terms"}
-          </span>
-          <span className="text-plum/40" aria-hidden>
-            ›
-          </span>
-        </Link>
-        <Link
-          href="/privacy"
-          className="flex items-center justify-between px-5 py-4 transition hover:bg-white/40"
-        >
-          <span className="flex items-center gap-3 text-sm font-medium text-on-surface">
-            <span aria-hidden>🔒</span>
-            {isKo ? "개인정보처리방침" : "Privacy"}
-          </span>
-          <span className="text-plum/40" aria-hidden>
-            ›
-          </span>
-        </Link>
       </GlassCard>
     </div>
   );

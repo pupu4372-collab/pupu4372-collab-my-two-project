@@ -17,12 +17,12 @@ export function BreedGuideDetail({ guide, source, isKo, backHref = "/community/b
     <article className="space-y-8">
       <Link
         href={backHref}
-        className="text-sm font-semibold text-channel-community underline"
+        className="text-sm font-semibold text-[#ffd7ff] underline"
       >
         {backLabel ?? (isKo ? "← 품종 가이드 목록" : "← All breed guides")}
       </Link>
 
-      <header className="pastel-card space-y-4 p-6">
+      <header className="space-y-4 rounded-[2rem] border border-white/15 bg-cream p-6 shadow-sm">
         <div className="flex flex-wrap gap-2">
           <span className="rounded-full bg-channel-community/10 px-3 py-1 text-xs font-extrabold text-channel-community">
             {getAnimalLabel(guide.animal_type, isKo)}
@@ -45,31 +45,31 @@ export function BreedGuideDetail({ guide, source, isKo, backHref = "/community/b
         <h1 className="text-3xl font-extrabold text-primary">{title}</h1>
         {guide.summary && <p className="text-base leading-relaxed text-plum/75">{guide.summary}</p>}
         {source === "mock" && (
-          <p className="text-xs text-plum/45">{isKo ? "데모 콘텐츠" : "Demo content"}</p>
+          <p className="text-xs text-plum/60">{isKo ? "데모 콘텐츠" : "Demo content"}</p>
         )}
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2">
         {guide.lifespan && (
-          <div className="rounded-[1.5rem] bg-white/60 p-4">
+          <div className="rounded-[1.5rem] border border-white/20 bg-cream p-4 shadow-sm">
             <p className="text-xs font-extrabold text-channel-community">{isKo ? "평균 수명" : "Lifespan"}</p>
             <p className="mt-1 text-sm font-semibold text-plum/80">{guide.lifespan}</p>
           </div>
         )}
         {guide.exercise_level && (
-          <div className="rounded-[1.5rem] bg-white/60 p-4">
+          <div className="rounded-[1.5rem] border border-white/20 bg-cream p-4 shadow-sm">
             <p className="text-xs font-extrabold text-channel-community">{isKo ? "운동량" : "Exercise"}</p>
             <p className="mt-1 text-sm font-semibold text-plum/80">{guide.exercise_level}</p>
           </div>
         )}
         {guide.grooming_level && (
-          <div className="rounded-[1.5rem] bg-white/60 p-4">
+          <div className="rounded-[1.5rem] border border-white/20 bg-cream p-4 shadow-sm">
             <p className="text-xs font-extrabold text-channel-community">{isKo ? "그루밍" : "Grooming"}</p>
             <p className="mt-1 text-sm font-semibold text-plum/80">{guide.grooming_level}</p>
           </div>
         )}
         {guide.saju_tendency && (
-          <div className="rounded-[1.5rem] bg-white/60 p-4 sm:col-span-2">
+          <div className="rounded-[1.5rem] border border-white/20 bg-cream p-4 shadow-sm sm:col-span-2">
             <p className="text-xs font-extrabold text-channel-community">{isKo ? "사주·성향 힌트" : "Saju tendency"}</p>
             <p className="mt-1 text-sm font-semibold text-plum/80">{guide.saju_tendency}</p>
           </div>
@@ -77,21 +77,21 @@ export function BreedGuideDetail({ guide, source, isKo, backHref = "/community/b
       </section>
 
       {guide.personality && (
-        <section className="rounded-[1.5rem] bg-white/55 p-5">
+        <section className="rounded-[1.5rem] border border-white/20 bg-cream p-5 shadow-sm">
           <h2 className="font-bold text-plum">{isKo ? "성격" : "Personality"}</h2>
           <p className="mt-2 text-sm leading-relaxed text-plum/75">{guide.personality}</p>
         </section>
       )}
 
       {guide.health_notes && (
-        <section className="rounded-[1.5rem] bg-white/55 p-5">
+        <section className="rounded-[1.5rem] border border-white/20 bg-cream p-5 shadow-sm">
           <h2 className="font-bold text-plum">{isKo ? "건강·주의" : "Health notes"}</h2>
           <p className="mt-2 text-sm leading-relaxed text-plum/75">{guide.health_notes}</p>
         </section>
       )}
 
       {guide.body && (
-        <section className="whitespace-pre-wrap rounded-[1.5rem] bg-white/60 px-5 py-5 text-sm leading-relaxed text-plum/75">
+        <section className="whitespace-pre-wrap rounded-[1.5rem] border border-white/20 bg-cream px-5 py-5 text-sm leading-relaxed text-plum/80 shadow-sm">
           {guide.body}
         </section>
       )}
@@ -118,7 +118,7 @@ export function BreedGuideDetail({ guide, source, isKo, backHref = "/community/b
         </Link>
         <Link
           href={guide.animal_type === "cat" ? "/cat" : guide.animal_type === "dog" ? "/dog" : "/reptile"}
-          className="rounded-full border border-channel-community/30 bg-white/60 px-6 py-3 text-sm font-bold text-channel-community"
+          className="rounded-full border border-channel-community/30 bg-cream px-6 py-3 text-sm font-bold text-channel-community shadow-sm transition hover:bg-white"
         >
           {isKo ? "채널 홈으로" : "Channel home"}
         </Link>

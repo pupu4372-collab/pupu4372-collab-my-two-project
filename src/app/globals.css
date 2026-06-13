@@ -17,7 +17,7 @@
 body {
   color: var(--ink);
   min-height: 100vh;
-  background: var(--cream);
+  background: #0c134f;
 }
 
 .safe-area-shell {
@@ -72,7 +72,7 @@ html.native-app body {
   }
 
   .auth-dream-sky {
-    background: linear-gradient(135deg, #fdfbf7 0%, #e6e1f9 40%, #e1f5f0 70%, #fdece7 100%);
+    background: transparent;
     background-size: 400% 400%;
     animation: auth-sky-gradient 15s ease infinite;
   }
@@ -128,6 +128,15 @@ html.native-app body {
     color: transparent;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.18);
   }
+}
+
+.bg-dream-sky {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+.auth-dream-sky {
+  background: transparent !important;
 }
 
 @keyframes twinkle {

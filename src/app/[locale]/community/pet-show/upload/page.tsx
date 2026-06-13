@@ -19,6 +19,7 @@ export default async function PetShowUploadPage({ params }: PageProps) {
       rightLinks={[
         { href: "/", label: isKo ? "홈" : "Home" },
         { href: "/community", label: isKo ? "커뮤니티" : "Community" },
+        { href: "/community/pet-show/fails", label: isKo ? "실패사진" : "Fails" },
       ]}
     >
       <PetShowUploadClient />

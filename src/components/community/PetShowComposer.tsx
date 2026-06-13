@@ -175,6 +175,11 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
           ? "펫사진은 개인정보 동의 범위 내에서 프로필·스냅존에 사용됩니다."
           : "Pet photos are used for profiles and Snapzone within your privacy consent."}
       </p>
+      <p className="mt-3 rounded-2xl bg-[#ffd7ff]/40 px-4 py-3 text-sm font-semibold leading-6 text-primary">
+        {isKo
+          ? "웃긴 실패 사진이면 제목에 ‘실패샷’ 또는 ‘웃긴 사진’을 넣어 올려보세요."
+          : "For funny fails, add “fail” or “funny” to the title."}
+      </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-8">
         <section>

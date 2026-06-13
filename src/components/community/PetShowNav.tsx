@@ -7,6 +7,7 @@ const TABS = [
   { href: "/community/pet-show", ko: "메인허브", en: "Main Hub" },
   { href: "/community/pet-show/ranking", ko: "랭킹", en: "Ranking" },
   { href: "/community/pet-show/snapzone", ko: "스냅존", en: "Snapzone" },
+  { href: "/community/pet-show/fails", ko: "실패사진", en: "Fails" },
 ] as const;
 
 function isActiveTab(pathname: string, href: (typeof TABS)[number]["href"]) {
@@ -21,7 +22,7 @@ export function PetShowNav() {
 
   return (
     <nav
-      className="sticky top-3 z-20 grid grid-cols-3 gap-2 rounded-2xl border border-channel-community/20 bg-white/90 p-1.5 text-sm font-extrabold text-plum shadow-md backdrop-blur-sm"
+      className="sticky top-3 z-20 grid grid-cols-4 gap-2 rounded-2xl border border-channel-community/20 bg-white/90 p-1.5 text-sm font-extrabold text-plum shadow-md backdrop-blur-sm"
       aria-label={isKo ? "우리아이 자랑 메뉴" : "Pet Show menu"}
     >
       {TABS.map((tab) => {

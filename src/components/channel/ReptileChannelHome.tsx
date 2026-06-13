@@ -116,10 +116,10 @@ export function ReptileChannelHome({
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-channel-community">Species</p>
-            <h2 className="mt-2 text-2xl font-extrabold text-primary md:text-3xl">
+            <h2 className="mt-2 text-2xl font-extrabold text-white md:text-3xl">
               {isKo ? "품종별 가이드" : "Breed guide"}
             </h2>
-            <p className="mt-1 text-sm text-plum/65">
+            <p className="mt-1 text-sm text-white/75">
               {isKo
                 ? "파충류·조류·소동물 가이드를 커뮤니티에서 확인하세요"
                 : "Browse reptile, bird, and small-pet guides in the community"}
@@ -127,7 +127,7 @@ export function ReptileChannelHome({
           </div>
           <Link
             href="/community/breeds?animal=other"
-            className="text-sm font-extrabold text-channel-community"
+            className="text-sm font-extrabold text-[#ffd7ff]"
           >
             {isKo ? "전체 가이드" : "All guides"} →
           </Link>
@@ -137,7 +137,7 @@ export function ReptileChannelHome({
             <Link
               key={item.key}
               href="/community/breeds?animal=other"
-              className="group overflow-hidden rounded-[1.75rem] border border-channel-community/15 bg-white/75 shadow-sm transition hover:-translate-y-1 hover:bg-white"
+              className="group overflow-hidden rounded-[1.75rem] border border-white/15 bg-cream shadow-sm transition hover:-translate-y-1 hover:bg-white"
             >
               <div className="relative h-44 overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -164,8 +164,8 @@ export function ReptileChannelHome({
       </section>
 
       <section className="grid gap-6 lg:grid-cols-12">
-        <div className="rounded-[2rem] border border-sand bg-sand/40 p-6 lg:col-span-5">
-          <h2 className="text-2xl font-extrabold text-primary">
+        <div className="rounded-[2rem] border border-white/20 bg-cream p-6 shadow-sm lg:col-span-5">
+          <h2 className="text-2xl font-extrabold text-ink">
             {isKo ? "건강한 생활 환경 체크" : "Healthy habitat checklist"}
           </h2>
           <ul className="mt-6 space-y-4">
@@ -193,10 +193,10 @@ export function ReptileChannelHome({
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-channel-community">Guide</p>
-              <h2 className="mt-2 text-2xl font-extrabold text-primary">{isKo ? "추천 가이드" : "Featured guides"}</h2>
+              <h2 className="mt-2 text-2xl font-extrabold text-white">{isKo ? "추천 가이드" : "Featured guides"}</h2>
             </div>
             {source && (
-              <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-plum/50">
+              <span className="rounded-full bg-cream px-3 py-1 text-xs font-bold text-plum/60">
                 {source === "supabase" ? "DB" : "Static"}
               </span>
             )}
@@ -228,16 +228,16 @@ export function ReptileChannelHome({
         </div>
       </section>
 
-      <section className="rounded-[2rem] bg-gradient-to-br from-channel-community/15 to-gold/20 p-6 text-center">
-        <h2 className="text-2xl font-extrabold text-primary">{isKo ? "우리 아이 사주도 같이 볼까요?" : "Want to read your pet's K-Saju too?"}</h2>
-        <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-plum/65">
+      <section className="rounded-[2rem] border border-white/30 bg-cream p-6 text-center shadow-lg md:p-8">
+        <h2 className="text-2xl font-extrabold text-ink md:text-3xl">{isKo ? "우리 아이 사주도 같이 볼까요?" : "Want to read your pet's K-Saju too?"}</h2>
+        <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-plum/80">
           {isKo
             ? "강아지, 고양이, 다른 동물까지 생일 정보로 오행 밸런스와 성향을 확인할 수 있어요."
             : "Use birth data to check elemental balance and care cues for dogs, cats, and other pets."}
         </p>
         <AuthRequiredLink
           href="/saju"
-          className="mt-5 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
+          className="mt-5 inline-flex rounded-full bg-channel-community px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
         >
           {isKo ? "우리 아이 사주 보기" : "Read K-Saju"}
         </AuthRequiredLink>

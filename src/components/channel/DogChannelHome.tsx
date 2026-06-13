@@ -107,7 +107,6 @@ const SAJU_TRAINING_CARDS = [
     en: "Mok walk training",
     koDesc: "호기심 많은 아이를 위한 야외 활동",
     enDesc: "Outdoor routines for curious dogs",
-    className: "bg-mint/40",
   },
   {
     element: "hwa" as const,
@@ -116,7 +115,6 @@ const SAJU_TRAINING_CARDS = [
     en: "Hwa calming massage",
     koDesc: "표현이 큰 아이를 위한 차분한 터치",
     enDesc: "Calming touch for expressive dogs",
-    className: "bg-blush/40",
   },
   {
     element: "su" as const,
@@ -125,7 +123,6 @@ const SAJU_TRAINING_CARDS = [
     en: "Su calm stability",
     koDesc: "불안이 많은 아이를 위한 솔루션",
     enDesc: "For anxious dogs",
-    className: "bg-lavender/40",
   },
   {
     element: "to" as const,
@@ -134,7 +131,6 @@ const SAJU_TRAINING_CARDS = [
     en: "To grounded warmth",
     koDesc: "사회성을 기르는 그룹 훈련",
     enDesc: "Group social training",
-    className: "bg-sand",
   },
   {
     element: "geum" as const,
@@ -143,7 +139,6 @@ const SAJU_TRAINING_CARDS = [
     en: "Geum clear structure",
     koDesc: "단호하고 명확한 신호 교육",
     enDesc: "Clear cue-based training",
-    className: "bg-slate-400/10",
   },
 ] as const;
 
@@ -203,14 +198,14 @@ export function DogChannelHome({
       <section>
         <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-extrabold text-primary md:text-3xl">
+            <h2 className="text-2xl font-extrabold text-white md:text-3xl">
               {isKo ? "사주 맞춤 훈련" : "K-Saju tailored training"}
             </h2>
-            <p className="mt-1 text-sm text-plum/65">
+            <p className="mt-1 text-sm text-white/75">
               {isKo ? "오행의 기운에 따른 우리 아이 맞춤 교감법" : "Bonding methods aligned with elemental energy"}
             </p>
           </div>
-          <Link href="/saju" className="flex items-center gap-1 text-sm font-extrabold text-primary">
+          <Link href="/saju" className="flex items-center gap-1 text-sm font-extrabold text-[#ffd7ff]">
             {isKo ? "모두 보기" : "View all"} <span aria-hidden>→</span>
           </Link>
         </div>
@@ -218,7 +213,7 @@ export function DogChannelHome({
           {SAJU_TRAINING_CARDS.map((item) => (
             <div
               key={item.element}
-              className={`flex min-h-[11rem] flex-col rounded-[1.5rem] border border-primary/5 p-5 ${item.className}`}
+              className="flex min-h-[11rem] flex-col rounded-[1.5rem] border border-white/20 bg-cream p-5 shadow-sm"
             >
               <div>
                 <div className="flex items-center justify-between gap-2">
@@ -239,12 +234,12 @@ export function DogChannelHome({
       </section>
 
       <section className="space-y-6">
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-extrabold text-primary md:text-3xl">
+            <h2 className="text-2xl font-extrabold text-white md:text-3xl">
               {isKo ? "품종별 가이드" : "Breed guide"}
             </h2>
-            <p className="mt-1 text-sm text-plum/65">
+            <p className="mt-1 text-sm text-white/75">
               {isKo
                 ? "크기별로 나눠 커뮤니티 품종 가이드에서 자세히 볼 수 있어요"
                 : "Browse community breed guides by size"}
@@ -252,7 +247,7 @@ export function DogChannelHome({
           </div>
           <Link
             href="/community/breeds?animal=dog"
-            className="text-sm font-extrabold text-channel-dog"
+            className="text-sm font-extrabold text-[#ffd7ff]"
           >
             {isKo ? "전체 가이드" : "All guides"} →
           </Link>
@@ -264,16 +259,16 @@ export function DogChannelHome({
               href="/community/breeds?animal=dog"
               className="group cursor-pointer"
             >
-              <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-[2rem] border border-black/5 shadow-sm">
+              <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-[2rem] border border-white/15 shadow-sm">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`${IMAGE_BASE}/${category.image}`}
                   alt=""
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
                 />
-                <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/75 p-4 backdrop-blur-md">
-                  <h3 className="text-sm font-extrabold text-primary">{isKo ? category.ko : category.en}</h3>
-                  <p className="mt-2 text-[11px] leading-relaxed text-plum/65">
+                <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-cream/95 p-4 shadow-lg backdrop-blur-md transition duration-300 group-hover:-translate-y-1 group-hover:bg-white">
+                  <h3 className="text-base font-extrabold text-ink">{isKo ? category.ko : category.en}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-plum/80">
                     {isKo ? category.koDesc : category.enDesc}
                   </p>
                 </div>
@@ -285,10 +280,10 @@ export function DogChannelHome({
 
       <section>
         <div className="mb-10 text-center">
-          <h2 className="text-2xl font-extrabold text-primary md:text-3xl">
+          <h2 className="text-2xl font-extrabold text-white md:text-3xl">
             {isKo ? "전문가 팁" : "Expert tips"}
           </h2>
-          <p className="mt-2 text-sm text-plum/65">
+          <p className="mt-2 text-sm text-white/75">
             {isKo ? "전문가들이 전하는 슬기로운 반려 생활 팁" : "Smarter daily care from experienced guardians"}
           </p>
         </div>
@@ -306,10 +301,10 @@ export function DogChannelHome({
                   {isKo ? tip.tag.ko : tip.tag.en}
                 </span>
               </div>
-              <h3 className="font-extrabold text-primary transition group-hover:text-channel-dog">
+              <h3 className="font-extrabold text-white transition group-hover:text-[#ffd7ff]">
                 {isKo ? tip.ko : tip.en}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-plum/65">{isKo ? tip.koDesc : tip.enDesc}</p>
+              <p className="mt-2 text-sm leading-relaxed text-white/75">{isKo ? tip.koDesc : tip.enDesc}</p>
             </Link>
           ))}
         </div>
@@ -332,11 +327,11 @@ export function DogChannelHome({
         )}
       </section>
 
-      <section className="rounded-[2rem] bg-gradient-to-br from-channel-dog/15 to-lavender/30 p-6 text-center">
-        <h2 className="text-2xl font-extrabold text-primary">
+      <section className="rounded-[2rem] border border-white/30 bg-cream p-6 text-center shadow-lg md:p-8">
+        <h2 className="text-2xl font-extrabold text-ink md:text-3xl">
           {isKo ? "우리 댕댕이 사주도 같이 볼까요?" : "Read your dog's K-Saju too?"}
         </h2>
-        <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-plum/65">{content.sajuCta}</p>
+        <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-plum/80">{content.sajuCta}</p>
         <AuthRequiredLink
           href="/saju"
           className="mt-5 inline-flex rounded-full bg-channel-dog px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"

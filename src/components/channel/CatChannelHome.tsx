@@ -202,14 +202,14 @@ export function CatChannelHome({
       <section className="overflow-hidden">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-extrabold text-primary md:text-3xl">
+            <h2 className="text-2xl font-extrabold text-white md:text-3xl">
               {isKo ? "사주 맞춤 케어" : "K-Saju tailored care"}
             </h2>
-            <p className="mt-1 text-sm text-plum/65">
+            <p className="mt-1 text-sm text-white/75">
               {isKo ? "오행(五行)으로 분석하는 반려묘의 성향과 돌봄법" : "Care cues from the five elements"}
             </p>
           </div>
-          <Link href="/saju" className="flex items-center gap-1 text-sm font-extrabold text-channel-cat">
+          <Link href="/saju" className="flex items-center gap-1 text-sm font-extrabold text-[#ffd7ff]">
             {isKo ? "전체보기" : "View all"} <span aria-hidden>→</span>
           </Link>
         </div>
@@ -217,8 +217,10 @@ export function CatChannelHome({
           {SAJU_CARE.map((card) => (
             <div
               key={card.element}
-              className={`flex min-w-[280px] flex-col rounded-[2rem] border border-primary/10 bg-white/60 p-8 backdrop-blur-md md:min-w-[320px] ${
-                card.highlight ? "border-channel-cat/20 bg-channel-cat/5" : ""
+              className={`flex min-w-[280px] flex-col rounded-[2rem] border p-8 shadow-sm md:min-w-[320px] ${
+                card.highlight
+                  ? "border-channel-cat/30 bg-cream"
+                  : "border-white/20 bg-cream"
               }`}
             >
               <ElementTag element={card.element} isKo={isKo} />
@@ -235,10 +237,10 @@ export function CatChannelHome({
       <section className="space-y-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-extrabold text-primary md:text-3xl">
+            <h2 className="text-2xl font-extrabold text-white md:text-3xl">
               {isKo ? "품종별 가이드" : "Breed guide"}
             </h2>
-            <p className="mt-1 text-sm text-plum/65">
+            <p className="mt-1 text-sm text-white/75">
               {isKo
                 ? "털 길이·체형별로 커뮤니티 품종 가이드에서 자세히 볼 수 있어요"
                 : "Browse community breed guides by coat and size"}
@@ -246,7 +248,7 @@ export function CatChannelHome({
           </div>
           <Link
             href="/community/breeds?animal=cat"
-            className="text-sm font-extrabold text-channel-cat"
+            className="text-sm font-extrabold text-[#ffd7ff]"
           >
             {isKo ? "전체 가이드" : "All guides"} →
           </Link>
@@ -258,16 +260,16 @@ export function CatChannelHome({
               href="/community/breeds?animal=cat"
               className="group cursor-pointer"
             >
-              <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-[2rem] border border-black/5 shadow-sm">
+              <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-[2rem] border border-white/15 shadow-sm">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`${IMAGE_BASE}/${category.image}`}
                   alt=""
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
                 />
-                <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/70 p-4 backdrop-blur-md">
-                  <h3 className="text-sm font-extrabold text-primary">{isKo ? category.ko : category.en}</h3>
-                  <p className="mt-2 text-[11px] leading-relaxed text-plum/65">
+                <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-cream/95 p-4 shadow-lg backdrop-blur-md transition duration-300 group-hover:-translate-y-1 group-hover:bg-white">
+                  <h3 className="text-base font-extrabold text-ink">{isKo ? category.ko : category.en}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-plum/80">
                     {isKo ? category.koDesc : category.enDesc}
                   </p>
                 </div>
@@ -277,19 +279,19 @@ export function CatChannelHome({
         </div>
       </section>
 
-      <section className="rounded-[3rem] bg-primary/5 p-6 md:p-12">
+      <section>
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-2xl font-extrabold text-primary md:text-3xl">
+            <h2 className="text-2xl font-extrabold text-white md:text-3xl">
               {isKo ? "전문가 팁" : "Expert tips"}
             </h2>
-            <p className="mt-1 text-sm text-plum/65">
+            <p className="mt-1 text-sm text-white/75">
               {isKo ? "베테랑 집사들과 수의사가 제안하는 묘생 꿀팁" : "Practical tips from experienced cat parents"}
             </p>
           </div>
           <Link
             href="/community/tips"
-            className="w-fit rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white"
+            className="w-fit rounded-full bg-channel-cat px-6 py-3 text-sm font-extrabold text-white"
           >
             {isKo ? "더 많은 팁 보기" : "More tips"}
           </Link>
@@ -299,7 +301,7 @@ export function CatChannelHome({
             <Link
               key={tip.image}
               href="/community/tips"
-              className="group flex items-center gap-6 rounded-[2rem] bg-white p-6 transition hover:shadow-md"
+              className="group flex items-center gap-6 rounded-[2rem] border border-white/15 bg-cream p-6 shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
             >
               <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-sand">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -315,7 +317,7 @@ export function CatChannelHome({
           ))}
         </div>
         {source && guideCards.length > 0 && (
-          <div className="mt-10 border-t border-primary/10 pt-8">
+          <div className="mt-10 border-t border-white/15 pt-8">
             <div className="mb-4 flex items-end justify-between gap-3">
               <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-channel-cat">
                 {isKo ? "추천 가이드" : "Featured guides"}
@@ -343,14 +345,14 @@ export function CatChannelHome({
         )}
       </section>
 
-      <section className="rounded-[2rem] bg-gradient-to-br from-channel-cat/15 to-gold/20 p-6 text-center">
-        <h2 className="text-2xl font-extrabold text-primary">
+      <section className="rounded-[2rem] border border-white/30 bg-cream p-6 text-center shadow-lg md:p-8">
+        <h2 className="text-2xl font-extrabold text-ink md:text-3xl">
           {isKo ? "우리 냥이 사주도 같이 볼까요?" : "Read your cat's K-Saju too?"}
         </h2>
-        <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-plum/65">{content.sajuCta}</p>
+        <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-plum/80">{content.sajuCta}</p>
         <AuthRequiredLink
           href="/saju"
-          className="mt-5 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
+          className="mt-5 inline-flex rounded-full bg-channel-cat px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
         >
           {isKo ? "우리 아이 사주 보기" : "Read K-Saju"}
         </AuthRequiredLink>
