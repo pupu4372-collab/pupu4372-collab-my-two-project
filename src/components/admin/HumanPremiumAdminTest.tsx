@@ -42,6 +42,7 @@ export function HumanPremiumAdminTest() {
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("unknown");
   const [timezone, setTimezone] = useState("Asia/Seoul");
+  const [gender, setGender] = useState<"" | "male" | "female">("");
   const [consent, setConsent] = useState(false);
   const [sendEmail, setSendEmail] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -92,6 +93,7 @@ export function HumanPremiumAdminTest() {
           timezone,
           locale,
           privacyConsent: true,
+          ...(gender ? { gender } : {}),
           sendEmail,
         }),
       });
@@ -323,6 +325,16 @@ export function HumanPremiumAdminTest() {
               {tz}
             </option>
           ))}
+        </select>
+
+        <select
+          className="pastel-input"
+          value={gender}
+          onChange={(e) => setGender(e.target.value as "" | "male" | "female")}
+        >
+          <option value="">성별 미입력 (대운 순·역행 후보)</option>
+          <option value="male">남</option>
+          <option value="female">여</option>
         </select>
 
         <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant="pastel" />

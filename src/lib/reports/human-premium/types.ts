@@ -31,6 +31,7 @@ export interface HumanPremiumBirthBasis {
   locale: Locale;
   birthUtc?: string;
   convertedSolarDate?: string;
+  gender?: "male" | "female" | null;
 }
 
 export interface HumanPremiumReportInput {
@@ -43,6 +44,7 @@ export interface HumanPremiumReportInput {
   calendarType: HumanPremiumCalendarType;
   locale: Locale;
   privacyConsent: boolean;
+  gender?: "male" | "female" | null;
   userId?: string | null;
 }
 
@@ -145,6 +147,18 @@ export interface HumanPremiumReportChapter {
   pageEstimate: number;
 }
 
+export type HumanPremiumLlmSectionSource = "gemini" | "template";
+
+export interface HumanPremiumLlmSectionMeta {
+  source: HumanPremiumLlmSectionSource;
+  error?: string | null;
+}
+
+export interface HumanPremiumLlmMeta {
+  enabled: boolean;
+  sections: Record<string, HumanPremiumLlmSectionMeta>;
+}
+
 export interface HumanPremiumReportPayload {
   version: 1;
   generatedAt: string;
@@ -153,6 +167,7 @@ export interface HumanPremiumReportPayload {
   calendarType: HumanPremiumCalendarType;
   birthBasis: HumanPremiumBirthBasis;
   analysisMode: "three_pillars" | "four_pillars";
+  llm?: HumanPremiumLlmMeta;
   cover: {
     title: string;
     subtitle: string;

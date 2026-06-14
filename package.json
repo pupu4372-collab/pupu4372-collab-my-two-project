@@ -13,6 +13,7 @@
     "start:clean": "node scripts/free-port.mjs && next start",
     "lint": "next lint",
     "test:pdf": "tsx scripts/test-human-premium-pdf.ts",
+    "test:hybrid": "tsx scripts/test-human-premium-hybrid.ts",
     "db:apply-community": "node scripts/apply-community-migrations.mjs",
     "db:apply-breed-guides": "node scripts/apply-breed-guide-migrations.mjs",
     "stitch:localize": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/localize-stitch-images.ps1",

@@ -25,7 +25,7 @@ interface CheckoutResult {
 const UI = {
   ko: {
     title: "Premium 평생 리포트",
-    subtitle: "사주 100장급 웹 리포트와 별자리 운세를 결제 후 바로 확인하세요.",
+    subtitle: "사주 평생 리포트를 결제 후 바로 확인하세요.",
     originalPrice: "USD $50",
     price: `USD $${PREMIUM_PRICE_USD}`,
     submit: "PayPal로 결제하기",
@@ -43,10 +43,14 @@ const UI = {
     solar: "양력",
     lunar: "음력",
     timezone: "출생지 타임존",
+    gender: "성별 (대운 산정, 선택)",
+    genderUnknown: "미입력",
+    genderMale: "남",
+    genderFemale: "여",
   },
   en: {
     title: "Premium Lifetime Report",
-    subtitle: "Unlock a premium web report with K-Saju chapters and zodiac guidance.",
+    subtitle: "Unlock your premium lifetime K-Saju web report after checkout.",
     originalPrice: "USD $50",
     price: `USD $${PREMIUM_PRICE_USD}`,
     submit: "Pay with PayPal",
@@ -64,6 +68,10 @@ const UI = {
     solar: "Solar",
     lunar: "Lunar",
     timezone: "Birth timezone",
+    gender: "Gender for daewoon (optional)",
+    genderUnknown: "Not provided",
+    genderMale: "Male",
+    genderFemale: "Female",
   },
 };
 
@@ -77,6 +85,7 @@ export function PremiumCheckout() {
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("unknown");
   const [timezone, setTimezone] = useState("Asia/Seoul");
+  const [gender, setGender] = useState<"" | "male" | "female">("");
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -111,6 +120,7 @@ export function PremiumCheckout() {
         timezone,
         locale,
         privacyConsent: true,
+        ...(gender ? { gender } : {}),
         demo: useDemo,
       };
 
@@ -253,6 +263,19 @@ export function PremiumCheckout() {
                   {tz}
                 </option>
               ))}
+            </select>
+          </label>
+
+          <label className="block text-sm font-medium text-plum/80">
+            <span className="mb-2 block">{t.gender}</span>
+            <select
+              className="pastel-input"
+              value={gender}
+              onChange={(e) => setGender(e.target.value as "" | "male" | "female")}
+            >
+              <option value="">{t.genderUnknown}</option>
+              <option value="male">{t.genderMale}</option>
+              <option value="female">{t.genderFemale}</option>
             </select>
           </label>
 

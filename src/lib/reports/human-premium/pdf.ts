@@ -1,31 +1,30 @@
-import path from "node:path";
 import pdfMake from "pdfmake";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
+import { ensurePdfFontsAsync, PDF_FONT_FAMILY } from "./pdf-fonts";
 import type {
   HumanPremiumReportPayload,
   HumanPremiumReportSection,
 } from "./types";
 
-const FONT_ROOT = path.join(process.cwd(), "src/assets/fonts");
-const FONT_DIR = path.join(FONT_ROOT, "NotoSansCJKkr");
-const FONT_FAMILY = "NotoSansCJKkr";
+const JIG_HANJI = "#F4F1EA";
+const JIG_INK = "#222222";
+const JIG_SEAL = "#B22222";
+const JIG_MUTED = "#747878";
 
-let fontsReady = false;
+const OBANG_COLORS: Record<string, string> = {
+  wood: "#3E5C76",
+  fire: "#9A3B3B",
+  earth: "#D4A373",
+  metal: "#BDBDBD",
+  water: "#3D3D3D",
+};
 
-function ensurePdfFonts(): void {
-  if (fontsReady) return;
-
-  pdfMake.setUrlAccessPolicy(() => false);
-  pdfMake.setLocalAccessPolicy((fontPath) => fontPath.startsWith(FONT_ROOT));
-  pdfMake.addFonts({
-    [FONT_FAMILY]: {
-      normal: path.join(FONT_DIR, "NotoSansCJKkr-Regular.otf"),
-      bold: path.join(FONT_DIR, "NotoSansCJKkr-Bold.otf"),
-      italics: path.join(FONT_DIR, "NotoSansCJKkr-Regular.otf"),
-      bolditalics: path.join(FONT_DIR, "NotoSansCJKkr-Bold.otf"),
-    },
-  });
-  fontsReady = true;
+interface ElementRow {
+  key: string;
+  hanja: string;
+  hangul: string;
+  romanized: string;
+  count: number;
 }
 
 function pdfSafeText(value: string): string {
@@ -39,6 +38,16 @@ function pdfSafeText(value: string): string {
 
 function paragraph(text: string, style: string = "body"): Content {
   return { text: pdfSafeText(text), style, margin: [0, 0, 0, 8] };
+}
+
+function asElements(raw: Record<string, unknown>[]): ElementRow[] {
+  return raw.map((item) => ({
+    key: String(item.key ?? ""),
+    hanja: String(item.hanja ?? ""),
+    hangul: String(item.hangul ?? ""),
+    romanized: String(item.romanized ?? ""),
+    count: Number(item.count ?? 0),
+  }));
 }
 
 function sectionBlocks(section: HumanPremiumReportSection): Content[] {
@@ -67,17 +76,141 @@ function sectionBlocks(section: HumanPremiumReportSection): Content[] {
   return blocks;
 }
 
+function elementSummaryBlocks(
+  report: HumanPremiumReportPayload,
+  isKo: boolean
+): Content[] {
+  const elements = asElements(report.saju.elements);
+  const total = elements.reduce((sum, item) => sum + item.count, 0) || 1;
+
+  const title = isKo ? "오행 에너지 균형" : "Element Balance";
+  const subtitle = isKo
+    ? "오행 분포의 구조적 분석"
+    : "Structural analysis of five-element distribution";
+
+  const rows: Content[] = elements.map((item) => {
+    const pct = Math.round((item.count / total) * 100);
+    const label = isKo
+      ? `${item.hangul} (${item.hanja})`
+      : `${item.romanized} (${item.hanja})`;
+    return {
+      columns: [
+        {
+          width: "*",
+          text: pdfSafeText(label),
+          style: "body",
+          color: OBANG_COLORS[item.key] ?? JIG_INK,
+        },
+        {
+          width: 40,
+          text: `${pct}%`,
+          alignment: "right",
+          style: "body",
+          bold: true,
+        },
+      ],
+      margin: [0, 0, 0, 4],
+    };
+  });
+
+  const dominant = elements.reduce((best, item) =>
+    item.count > best.count ? item : best
+  , elements[0]);
+
+  const dominantLabel = dominant
+    ? isKo
+      ? `${dominant.hangul} (${dominant.hanja})`
+      : `${dominant.romanized} (${dominant.hanja})`
+    : "-";
+
+  return [
+    { text: title, style: "chapterTitle", pageBreak: "before" },
+    { text: subtitle, style: "chapterSubtitle", margin: [0, 0, 0, 10] },
+    paragraph(
+      isKo
+        ? `주된 기운은 ${dominantLabel}입니다. 아래는 사주팔자 기준 오행 분포입니다.`
+        : `Dominant element: ${dominantLabel}. Distribution from the four pillars:`,
+      "body"
+    ),
+    ...rows,
+    { text: "", margin: [0, 0, 0, 12] },
+  ];
+}
+
+function formatIssuedDate(iso: string, isKo: boolean): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso.slice(0, 10);
+  if (isKo) {
+    return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, "0")}. ${String(date.getDate()).padStart(2, "0")}`;
+  }
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDefinitions {
   const isKo = report.locale === "ko";
   const footerLabel = isKo
     ? "지관재(知觀齋) Premium Report"
     : "Jigwanjae Premium Report";
+  const brandLine = isKo ? "知觀齋" : "Jigwanjae (知觀齋)";
+  const motto = isKo
+    ? "운명을 아는 것(知)에서 그치지 않고, 그 흐름을 멀리서 관조(觀)하며 대처하는 법을 익히는 서재"
+    : "A study where knowing fate (知) meets observing its flow (觀).";
+  const maxim = isKo
+    ? "[知運者無礙 - 운명을 아는 자는 거침이 없나니.]"
+    : "[He who knows his destiny is without obstacles.]";
+  const recipientLabel = isKo ? "수신" : "RECIPIENT";
+  const issuedLabel = isKo ? "발행일" : "ISSUED DATE";
+  const reportType = isKo ? "평생 사주 리포트" : "Lifetime Saju Report";
 
   const content: Content[] = [
-    { text: pdfSafeText(report.cover.subtitle), style: "coverBrand" },
-    { text: pdfSafeText(report.cover.title), style: "coverTitle", margin: [0, 8, 0, 10] },
-    paragraph(report.cover.tagline),
-    paragraph(`${report.personName}${isKo ? "님" : ""}`, "personName"),
+    { text: brandLine, style: "coverBrand", alignment: "center" },
+    {
+      text: pdfSafeText(report.cover.subtitle),
+      style: "coverSubtitle",
+      alignment: "center",
+      margin: [0, 4, 0, 12],
+    },
+    { text: motto, style: "coverMotto", alignment: "center", margin: [0, 0, 0, 8] },
+    { text: maxim, style: "coverMaxim", alignment: "center", margin: [0, 0, 0, 20] },
+    {
+      columns: [
+        {
+          width: "*",
+          stack: [
+            { text: recipientLabel, style: "labelCaps" },
+            {
+              text: pdfSafeText(`${report.personName}${isKo ? "님" : ""}`),
+              style: "personName",
+              margin: [0, 4, 0, 0],
+            },
+            { text: reportType, style: "bodyMuted", margin: [0, 2, 0, 0] },
+          ],
+        },
+        {
+          width: "*",
+          stack: [
+            { text: issuedLabel, style: "labelCaps", alignment: "right" },
+            {
+              text: formatIssuedDate(report.generatedAt, isKo),
+              style: "personName",
+              alignment: "right",
+              margin: [0, 4, 0, 0],
+            },
+            {
+              text: pdfSafeText(report.cover.tagline),
+              style: "bodyMuted",
+              alignment: "right",
+              margin: [0, 2, 0, 0],
+            },
+          ],
+        },
+      ],
+      margin: [0, 0, 0, 16],
+    },
     paragraph(report.summary.story),
   ];
 
@@ -89,22 +222,14 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
     });
   }
 
-  for (const chapter of report.saju.chapters) {
-    content.push({ text: pdfSafeText(chapter.title), style: "chapterTitle", pageBreak: "before" });
-    if (chapter.subtitle) {
-      content.push({
-        text: pdfSafeText(chapter.subtitle),
-        style: "chapterSubtitle",
-        margin: [0, 0, 0, 8],
-      });
-    }
-    for (const section of chapter.sections) {
-      content.push(...sectionBlocks(section));
-    }
-  }
+  content.push(...elementSummaryBlocks(report, isKo));
 
-  for (const chapter of report.zodiac.chapters) {
-    content.push({ text: pdfSafeText(chapter.title), style: "chapterTitle", pageBreak: "before" });
+  for (const chapter of report.saju.chapters) {
+    content.push({
+      text: pdfSafeText(chapter.title),
+      style: "chapterTitle",
+      pageBreak: "before",
+    });
     if (chapter.subtitle) {
       content.push({
         text: pdfSafeText(chapter.subtitle),
@@ -119,7 +244,9 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
 
   content.push(
     paragraph(
-      isKo ? "운세는 재미로만 보세요~" : "Enjoy fortunes lightly — for fun only.",
+      isKo
+        ? "사주란 2,000년전부터 내려오는 통계학에 가까운 학문입니다.\n맹신하기보단 삶의 지침서나 이정표 정도로 삼으시길 바랍니다."
+        : "Saju is closer to a statistical discipline handed down for nearly 2,000 years. Rather than blind belief, please use it as a guidepost for life.",
       "disclaimer"
     )
   );
@@ -127,27 +254,31 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
   return {
     info: {
       title: pdfSafeText(report.cover.subtitle),
-      author: "K-Saju Pet",
+      author: "Jigwanjae",
       subject: pdfSafeText(report.personName),
     },
     pageSize: "A4",
-    pageMargins: [48, 56, 48, 56],
+    pageMargins: [56, 56, 56, 56],
     defaultStyle: {
-      font: FONT_FAMILY,
+      font: PDF_FONT_FAMILY,
       fontSize: 10.5,
-      color: "#3d2a4a",
+      color: JIG_INK,
       lineHeight: 1.45,
     },
     styles: {
-      coverBrand: { fontSize: 20, bold: true, color: "#5c3d6e" },
-      coverTitle: { fontSize: 14, color: "#c9a85a" },
-      personName: { fontSize: 11, bold: true, color: "#5c3d6e" },
-      chapterTitle: { fontSize: 15, bold: true, color: "#5c3d6e", margin: [0, 0, 0, 4] },
-      chapterSubtitle: { fontSize: 11, color: "#c9a85a" },
-      sectionTitle: { fontSize: 12, bold: true, color: "#5c3d6e", margin: [0, 10, 0, 4] },
-      sectionSubtitle: { fontSize: 10.5, color: "#c9a85a" },
-      body: { fontSize: 10.5, color: "#3d2a4a" },
-      disclaimer: { fontSize: 10, color: "#958e98", alignment: "center" },
+      coverBrand: { fontSize: 22, bold: true, color: JIG_INK },
+      coverSubtitle: { fontSize: 14, color: JIG_SEAL },
+      coverMotto: { fontSize: 11, color: JIG_INK, lineHeight: 1.5 },
+      coverMaxim: { fontSize: 9, color: JIG_MUTED },
+      labelCaps: { fontSize: 8, bold: true, color: JIG_MUTED },
+      personName: { fontSize: 12, bold: true, color: JIG_INK },
+      bodyMuted: { fontSize: 9.5, color: JIG_MUTED },
+      chapterTitle: { fontSize: 15, bold: true, color: JIG_INK, margin: [0, 0, 0, 4] },
+      chapterSubtitle: { fontSize: 10.5, color: JIG_SEAL },
+      sectionTitle: { fontSize: 12, bold: true, color: JIG_INK, margin: [0, 10, 0, 4] },
+      sectionSubtitle: { fontSize: 10, color: JIG_MUTED },
+      body: { fontSize: 10.5, color: JIG_INK },
+      disclaimer: { fontSize: 10, color: JIG_MUTED, alignment: "center" },
     },
     background(_currentPage, pageSize) {
       return {
@@ -158,7 +289,7 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
             y: 0,
             w: pageSize.width,
             h: pageSize.height,
-            color: "#161025",
+            color: JIG_HANJI,
           },
           {
             type: "rect",
@@ -166,23 +297,22 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
             y: 40,
             w: pageSize.width - 80,
             h: pageSize.height - 80,
-            color: "#fffaf2",
-            lineColor: "#c9a85a",
-            lineWidth: 2,
+            lineColor: "rgba(34,34,34,0.12)",
+            lineWidth: 1,
           },
         ],
       };
     },
-    footer(currentPage, pageCount) {
+    footer(currentPage) {
       return {
-        margin: [48, 0, 48, 24],
+        margin: [56, 0, 56, 28],
         columns: [
-          { text: footerLabel, alignment: "left", fontSize: 8, color: "#958e98" },
+          { text: footerLabel, alignment: "left", fontSize: 8, color: JIG_MUTED },
           {
             text: String(currentPage),
             alignment: "right",
             fontSize: 8,
-            color: "#958e98",
+            color: JIG_MUTED,
           },
         ],
       };
@@ -194,7 +324,7 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
 export async function renderHumanPremiumReportPdf(
   report: HumanPremiumReportPayload
 ): Promise<Buffer> {
-  ensurePdfFonts();
+  await ensurePdfFontsAsync();
   const docDefinition = buildDocumentDefinition(report);
   const pdfDoc = pdfMake.createPdf(docDefinition);
   return pdfDoc.getBuffer();

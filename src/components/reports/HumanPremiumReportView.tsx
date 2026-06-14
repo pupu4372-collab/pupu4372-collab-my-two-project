@@ -3,18 +3,22 @@
 import { AppTopNav } from "@/components/layout/AppTopNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import type {
-  HumanPremiumReportChapter,
   HumanPremiumReportPayload,
   HumanPremiumReportSection,
 } from "@/lib/reports/human-premium/types";
 import type { PillarDisplay } from "@/lib/saju/types";
+import {
+  BRANCH_META,
+  formatTenGodLabel,
+  STEM_META,
+} from "@/lib/saju/sipseong";
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 const UI = {
   ko: {
     toc: "목차",
     saju: "사주 리포트",
-    zodiac: "서비스 별자리 운세",
     share: "리포트 공유하기",
     copyLink: "링크 복사",
     shared: "링크를 복사했어요",
@@ -26,7 +30,8 @@ const UI = {
     emailSending: "이메일 발송 중…",
     emailSent: "이메일을 발송했어요",
     emailFailed: "이메일 발송에 실패했습니다",
-    disclaimer: "운세는 재미로만 보세요~",
+    disclaimer:
+      "사주란 2,000년전부터 내려오는 통계학에 가까운 학문입니다.\n맹신하기보단 삶의 지침서나 이정표 정도로 삼으시길 바랍니다.",
     copyright: "본 리포트는 지관재(知觀齋)의 고유 자산이며 무단 복제를 금합니다.",
     manseTitle: "사주 만세력 (四柱)",
     stemRow: "천간",
@@ -39,11 +44,23 @@ const UI = {
     introFrom: "Message from Sim-won",
     introSign: "원장 심원 올림",
     maximEn: "He who knows his destiny is without obstacles",
+    coverMotto:
+      "운명을 아는 것(知)에서 그치지 않고,\n그 흐름을 멀리서 관조(觀)하며 대처하는 법을 익히는 서재",
+    coverMaxim: "[知運者無礙 - 운명을 아는 자는 거침이 없나니.]",
+    recipient: "수신",
+    issued: "발행일",
+    reportType: "평생 사주 리포트",
+    elementsTitle: "오행 에너지 균형 분석",
+    elementsSubtitle: "오행 분포의 구조적 분석",
+    elementsSummary: "종합 분석 요약",
+    elementsTotal: "총 에너지",
+    elementsDetail: "오행별 상세 역학",
+    elementsDominant: "주된 기운",
+    brand: "知觀齋",
   },
   en: {
     toc: "Contents",
     saju: "K-Saju report",
-    zodiac: "Service zodiac fortune",
     share: "Share report",
     copyLink: "Copy link",
     shared: "Link copied",
@@ -68,8 +85,40 @@ const UI = {
     introFrom: "Message from Sim-won",
     introSign: "Director Sim-won",
     maximEn: "He who knows his destiny is without obstacles",
+    coverMotto:
+      "A study where knowing fate (知) meets\nobserving its flow (觀) and learning to respond.",
+    coverMaxim: "[He who knows his destiny is without obstacles.]",
+    recipient: "RECIPIENT",
+    issued: "ISSUED DATE",
+    reportType: "Lifetime Saju Report",
+    elementsTitle: "Element Balance Analysis",
+    elementsSubtitle: "Structural analysis of five-element distribution",
+    elementsSummary: "Summary",
+    elementsTotal: "Total energy",
+    elementsDetail: "Element dynamics",
+    elementsDominant: "Dominant element",
+    brand: "Jigwanjae",
   },
 } as const;
+
+type UiStrings = (typeof UI)["ko"] | (typeof UI)["en"];
+
+const OBANG_COLORS: Record<string, string> = {
+  wood: "#3E5C76",
+  fire: "#9A3B3B",
+  earth: "#D4A373",
+  metal: "#BDBDBD",
+  water: "#3D3D3D",
+};
+
+interface ElementBreakdown {
+  key: string;
+  hanja: string;
+  hangul: string;
+  romanized: string;
+  meaning: string;
+  count: number;
+}
 
 interface HumanPremiumReportViewProps {
   report: HumanPremiumReportPayload;
@@ -104,58 +153,23 @@ type SajuPillars = {
   hour: PillarDisplay | null;
 };
 
-type FiveElement = "wood" | "fire" | "earth" | "metal" | "water";
-type Polarity = "yang" | "yin";
-
-const STEM_META: Record<string, { element: FiveElement; polarity: Polarity }> = {
-  甲: { element: "wood", polarity: "yang" },
-  乙: { element: "wood", polarity: "yin" },
-  丙: { element: "fire", polarity: "yang" },
-  丁: { element: "fire", polarity: "yin" },
-  戊: { element: "earth", polarity: "yang" },
-  己: { element: "earth", polarity: "yin" },
-  庚: { element: "metal", polarity: "yang" },
-  辛: { element: "metal", polarity: "yin" },
-  壬: { element: "water", polarity: "yang" },
-  癸: { element: "water", polarity: "yin" },
-};
-
-const BRANCH_META: Record<string, { element: FiveElement; polarity: Polarity }> = {
-  子: { element: "water", polarity: "yang" },
-  丑: { element: "earth", polarity: "yin" },
-  寅: { element: "wood", polarity: "yang" },
-  卯: { element: "wood", polarity: "yin" },
-  辰: { element: "earth", polarity: "yang" },
-  巳: { element: "fire", polarity: "yin" },
-  午: { element: "fire", polarity: "yang" },
-  未: { element: "earth", polarity: "yin" },
-  申: { element: "metal", polarity: "yang" },
-  酉: { element: "metal", polarity: "yin" },
-  戌: { element: "earth", polarity: "yang" },
-  亥: { element: "water", polarity: "yin" },
-};
-
-const GENERATES: Record<FiveElement, FiveElement> = {
-  wood: "fire",
-  fire: "earth",
-  earth: "metal",
-  metal: "water",
-  water: "wood",
-};
-
-const CONTROLS: Record<FiveElement, FiveElement> = {
-  wood: "earth",
-  fire: "metal",
-  earth: "water",
-  metal: "wood",
-  water: "fire",
-};
-
 const STEM_ORDER = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
 const BRANCH_ORDER = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+const BODY_PARAGRAPH_MAX = 140;
 
 function asPillars(raw: Record<string, unknown>): SajuPillars {
   return raw as SajuPillars;
+}
+
+function asElements(raw: Record<string, unknown>[]): ElementBreakdown[] {
+  return raw.map((item) => ({
+    key: String(item.key ?? ""),
+    hanja: String(item.hanja ?? ""),
+    hangul: String(item.hangul ?? ""),
+    romanized: String(item.romanized ?? ""),
+    meaning: String(item.meaning ?? ""),
+    count: Number(item.count ?? 0),
+  }));
 }
 
 function safePdfFilename(name: string): string {
@@ -163,21 +177,17 @@ function safePdfFilename(name: string): string {
   return `jigwanjae-${safe || "report"}.pdf`;
 }
 
-function tenGodLabel(
-  dayStem: string,
-  target: { element: FiveElement; polarity: Polarity } | undefined,
-  isKo: boolean
-): string {
-  const day = STEM_META[dayStem];
-  if (!day || !target) return "-";
-
-  const samePolarity = day.polarity === target.polarity;
-  if (day.element === target.element) return isKo ? (samePolarity ? "비견" : "겁재") : samePolarity ? "Peer" : "Rob Wealth";
-  if (GENERATES[day.element] === target.element) return isKo ? (samePolarity ? "식신" : "상관") : samePolarity ? "Eating God" : "Hurting Officer";
-  if (GENERATES[target.element] === day.element) return isKo ? (samePolarity ? "편인" : "정인") : samePolarity ? "Indirect Resource" : "Direct Resource";
-  if (CONTROLS[day.element] === target.element) return isKo ? (samePolarity ? "편재" : "정재") : samePolarity ? "Indirect Wealth" : "Direct Wealth";
-  if (CONTROLS[target.element] === day.element) return isKo ? (samePolarity ? "편관" : "정관") : samePolarity ? "Seven Killings" : "Direct Officer";
-  return "-";
+function formatIssuedDate(iso: string, isKo: boolean): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso.slice(0, 10);
+  if (isKo) {
+    return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, "0")}. ${String(date.getDate()).padStart(2, "0")}`;
+  }
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function emptyBranchesForDay(dayPillar: PillarDisplay): string[] {
@@ -187,11 +197,279 @@ function emptyBranchesForDay(dayPillar: PillarDisplay): string[] {
   const branchIndex = BRANCH_ORDER.indexOf(branch);
   if (stemIndex < 0 || branchIndex < 0) return [];
 
-  const cycleStartBranchIndex = (branchIndex - stemIndex + BRANCH_ORDER.length) % BRANCH_ORDER.length;
+  const cycleStartBranchIndex =
+    (branchIndex - stemIndex + BRANCH_ORDER.length) % BRANCH_ORDER.length;
   return [
     BRANCH_ORDER[(cycleStartBranchIndex + 10) % BRANCH_ORDER.length],
     BRANCH_ORDER[(cycleStartBranchIndex + 11) % BRANCH_ORDER.length],
   ];
+}
+
+function splitReadableParagraphs(body: string): string[] {
+  return body
+    .split(/\n{2,}/)
+    .flatMap((block) => {
+      const normalized = block.replace(/\n/g, " ").replace(/\s+/g, " ").trim();
+      if (!normalized) return [];
+      if (normalized.length <= BODY_PARAGRAPH_MAX) return [normalized];
+
+      const sentences =
+        normalized.match(/[^.!?。！？.]+[.!?。！？.]?/g) ?? [normalized];
+      const paragraphs: string[] = [];
+      let current = "";
+
+      for (const sentence of sentences) {
+        const next = sentence.trim();
+        if (!next) continue;
+        if (current && current.length + next.length > BODY_PARAGRAPH_MAX) {
+          paragraphs.push(current);
+          current = next;
+          continue;
+        }
+        current = current ? `${current} ${next}` : next;
+      }
+
+      if (current) paragraphs.push(current);
+      return paragraphs;
+    });
+}
+
+function BodyText({
+  body,
+  className = "",
+}: {
+  body: string;
+  className?: string;
+}) {
+  const paragraphs = splitReadableParagraphs(body);
+
+  return (
+    <div className={`space-y-5 text-base leading-[1.9] text-[var(--jig-ink)]/90 ${className}`}>
+      {paragraphs.map((paragraph, index) => (
+        <p key={`${paragraph.slice(0, 32)}-${index}`}>{paragraph}</p>
+      ))}
+    </div>
+  );
+}
+
+function CoverPage({
+  report,
+  isKo,
+  t,
+}: {
+  report: HumanPremiumReportPayload;
+  isKo: boolean;
+  t: UiStrings;
+}) {
+  return (
+    <section className="human-premium-frame relative py-8 text-center sm:py-12">
+      <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center px-4">
+        <Image
+          src="/stitch/jigwanjae/jigwanjae-cover-logo.png"
+          alt={t.brand}
+          width={280}
+          height={120}
+          className="mb-10 h-32 w-auto object-contain sm:h-40"
+          priority
+        />
+
+        <p className="human-premium-serif whitespace-pre-line text-lg leading-relaxed tracking-tight text-[var(--jig-ink)] sm:text-xl">
+          {t.coverMotto}
+        </p>
+
+        <div className="my-6 h-px w-24 bg-[var(--jig-seal)]/30" />
+
+        <p className="human-premium-label-caps text-[var(--jig-muted)]">{t.coverMaxim}</p>
+
+        <div className="mt-16 grid w-full max-w-xl grid-cols-1 gap-10 md:grid-cols-2 md:gap-12">
+          <div className="border-l border-[var(--jig-ink)]/10 pl-6 text-left">
+            <p className="human-premium-label-caps mb-1 text-[var(--jig-muted)]">
+              {t.recipient}
+            </p>
+            <p className="human-premium-serif text-xl font-semibold text-[var(--jig-ink)]">
+              {report.personName}
+              {isKo ? "님" : ""}
+            </p>
+            <p className="mt-1 text-sm text-[var(--jig-muted)]">{t.reportType}</p>
+          </div>
+          <div className="border-l border-[var(--jig-ink)]/10 pl-6 text-left md:text-left">
+            <p className="human-premium-label-caps mb-1 text-[var(--jig-muted)]">
+              {t.issued}
+            </p>
+            <p className="human-premium-serif text-xl font-semibold text-[var(--jig-ink)]">
+              {formatIssuedDate(report.generatedAt, isKo)}
+            </p>
+            <p className="mt-1 text-sm text-[var(--jig-muted)]">{report.cover.tagline}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="pointer-events-none absolute bottom-4 right-4 sm:bottom-8 sm:right-8">
+        <div className="human-premium-seal human-premium-serif p-1">
+          <div className="human-premium-seal-inner">
+            <span>知</span>
+            <span>觀</span>
+            <span>齋</span>
+            <span>印</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ElementsSection({
+  elements,
+  dominantElement,
+  summaryStory,
+  isKo,
+  t,
+}: {
+  elements: ElementBreakdown[];
+  dominantElement: string;
+  summaryStory: string;
+  isKo: boolean;
+  t: UiStrings;
+}) {
+  const total = elements.reduce((sum, item) => sum + item.count, 0) || 1;
+  const dominant = elements.find(
+    (item) =>
+      item.key === dominantElement ||
+      item.hangul === dominantElement ||
+      item.romanized === dominantElement
+  );
+
+  let offset = 0;
+  const segments = elements.map((item) => {
+    const pct = (item.count / total) * 100;
+    const segment = { ...item, pct, offset };
+    offset -= pct;
+    return segment;
+  });
+
+  return (
+    <section id="chapter-elements" className="scroll-mt-24">
+      <div className="human-premium-lattice bg-white/40 p-6 sm:p-10">
+        <header className="mb-8 border-b border-[var(--jig-ink)]/5 pb-6">
+          <p className="human-premium-label-caps mb-2 text-[var(--jig-seal)]">
+            {isKo ? "전략적 내부 분석 보고서" : "Strategic analysis report"}
+          </p>
+          <h2 className="human-premium-serif text-2xl font-bold text-[var(--jig-ink)] sm:text-3xl">
+            {t.elementsTitle}
+          </h2>
+          <p className="mt-2 text-sm italic text-[var(--jig-muted)]">{t.elementsSubtitle}</p>
+        </header>
+
+        <div className="mb-10 grid grid-cols-1 gap-10 md:grid-cols-12">
+          <div className="md:col-span-7">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="human-premium-accent-bar" />
+              <h3 className="human-premium-serif text-xl font-semibold">{t.elementsSummary}</h3>
+            </div>
+            <BodyText body={summaryStory} className="text-[var(--jig-ink)]/85" />
+            {dominant && (
+              <div className="mt-6 rounded-lg border border-[var(--jig-ink)]/10 bg-[#f6f3ec]/80 p-5">
+                <p className="human-premium-label-caps text-xs text-[var(--jig-muted)]">
+                  {t.elementsDominant}
+                </p>
+                <p className="mt-1 font-semibold text-[var(--jig-ink)]">
+                  {isKo
+                    ? `${dominant.hangul} (${dominant.hanja}) · ${dominant.meaning}`
+                    : `${dominant.romanized} (${dominant.hanja}) · ${dominant.meaning}`}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col items-center justify-center border-[var(--jig-ink)]/5 md:col-span-5 md:border-l md:pl-10">
+            <div className="relative h-56 w-56">
+              <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15.915"
+                  fill="transparent"
+                  stroke="#E9E5D9"
+                  strokeWidth="3"
+                />
+                {segments.map((item) =>
+                  item.pct > 0 ? (
+                    <circle
+                      key={item.key}
+                      cx="18"
+                      cy="18"
+                      r="15.915"
+                      fill="transparent"
+                      stroke={OBANG_COLORS[item.key] ?? "#888"}
+                      strokeWidth="3.5"
+                      strokeDasharray={`${item.pct} ${100 - item.pct}`}
+                      strokeDashoffset={item.offset}
+                    />
+                  ) : null
+                )}
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="human-premium-label-caps text-[10px] text-[var(--jig-muted)]">
+                  {t.elementsTotal}
+                </span>
+                <span className="text-3xl font-semibold tabular-nums">100%</span>
+              </div>
+            </div>
+            <div className="mt-6 grid w-full max-w-xs grid-cols-2 gap-x-6 gap-y-2">
+              {elements.map((item) => {
+                const pct = Math.round((item.count / total) * 100);
+                return (
+                  <div key={item.key} className="flex items-center gap-2">
+                    <div
+                      className="h-3 w-3 shrink-0"
+                      style={{ backgroundColor: OBANG_COLORS[item.key] }}
+                    />
+                    <span className="human-premium-label-caps text-[10px]">
+                      {isKo ? item.hangul : item.romanized} ({pct}%)
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <h3 className="human-premium-serif mb-6 text-xl font-semibold">{t.elementsDetail}</h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {elements.map((item) => {
+            const pct = Math.round((item.count / total) * 100);
+            const color = OBANG_COLORS[item.key] ?? "#888";
+            const isDominant = dominant?.key === item.key;
+            return (
+              <div
+                key={item.key}
+                className={`human-premium-paper p-5 transition-colors ${
+                  isDominant ? "border-2" : ""
+                }`}
+                style={isDominant ? { borderColor: `${color}40` } : undefined}
+              >
+                <div className="mb-3 flex items-start justify-between">
+                  <span className="human-premium-label-caps" style={{ color }}>
+                    {isKo ? `${item.hangul} (${item.hanja})` : `${item.romanized} (${item.hanja})`}
+                  </span>
+                  <span className="text-lg font-semibold tabular-nums">{pct}%</span>
+                </div>
+                <p className="human-premium-serif text-lg font-semibold text-[var(--jig-ink)]">
+                  {item.meaning}
+                </p>
+                <div className="mt-4 h-1 w-full bg-[#f1eee7]">
+                  <div
+                    className="human-premium-chart-bar h-full"
+                    style={{ width: `${pct}%`, backgroundColor: color }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function ManseTable({
@@ -253,10 +531,10 @@ function ManseTable({
   ];
 
   return (
-    <div className="overflow-x-auto rounded-xl bg-[#d8d3cd] p-4 shadow-xl sm:p-6">
+    <div className="human-premium-lattice overflow-x-auto bg-white/50 p-4 sm:p-6">
       <div className="min-w-[620px]">
         <div
-          className="grid gap-0 pl-12 text-center text-sm font-semibold text-ink"
+          className="grid gap-0 pl-12 text-center text-sm font-semibold text-[var(--jig-ink)]"
           style={{ gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}
         >
           {cols.map((col) => (
@@ -267,7 +545,7 @@ function ManseTable({
         </div>
 
         <div className="grid grid-cols-[3rem_1fr] items-stretch">
-          <div className="grid grid-rows-[74px_74px_38px_74px_38px_38px] text-sm font-semibold text-ink">
+          <div className="grid grid-rows-[74px_74px_38px_74px_38px_38px] text-sm font-semibold text-[var(--jig-ink)]">
             <div />
             <div className="flex items-center">{t.stemRow}</div>
             <div className="flex items-center">{isKo ? "십성" : "Ten god"}</div>
@@ -277,7 +555,7 @@ function ManseTable({
           </div>
 
           <div
-            className="human-premium-paper grid overflow-hidden rounded-lg border border-[#b9b0a8] text-center text-ink"
+            className="human-premium-paper grid overflow-hidden rounded-lg border border-[var(--jig-ink)]/15 text-center"
             style={{ gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}
           >
             {cols.map((col) => {
@@ -286,12 +564,10 @@ function ManseTable({
               return (
                 <div
                   key={`${col.key}-fortune`}
-                  className="border-b border-r border-[#b9b0a8] p-3 last:border-r-0"
+                  className="border-b border-r border-[var(--jig-ink)]/10 p-3 last:border-r-0"
                 >
-                  <p className="font-serif text-lg font-semibold text-[#3d2a4a]">
-                    {col.fortune}
-                  </p>
-                  <p className="mt-1 text-xs text-[#8d7d72]">{col.hint}</p>
+                  <p className="human-premium-serif text-lg font-semibold">{col.fortune}</p>
+                  <p className="mt-1 text-xs text-[var(--jig-muted)]">{col.hint}</p>
                 </div>
               );
             })}
@@ -302,29 +578,21 @@ function ManseTable({
               return (
                 <div
                   key={`${col.key}-stem`}
-                  className={`relative border-b border-r border-[#b9b0a8] p-3 last:border-r-0 ${
-                    col.emphasis ? "bg-[#e5c271]/10" : ""
+                  className={`relative border-b border-r border-[var(--jig-ink)]/10 p-3 last:border-r-0 ${
+                    col.emphasis ? "bg-[var(--jig-seal)]/5" : ""
                   }`}
                 >
                   <div className="flex items-end justify-center gap-2">
                     <span
-                      className={`font-serif text-3xl font-bold sm:text-4xl ${
-                        col.emphasis ? "text-[#3d2a4a]" : "text-[#9b8978]"
+                      className={`human-premium-serif text-3xl font-bold sm:text-4xl ${
+                        col.emphasis ? "text-[var(--jig-ink)]" : "text-[var(--jig-muted)]"
                       }`}
                     >
                       {pillar.stemHanja}
                     </span>
-                    <span
-                      className={`text-sm font-bold ${col.emphasis ? "text-[#3d2a4a]" : "text-[#8d7d72]"}`}
-                    >
-                      {pillar.stemLabel}
-                    </span>
+                    <span className="text-sm font-bold">{pillar.stemLabel}</span>
                   </div>
-                  <span
-                    className={`absolute bottom-2 right-3 text-xs font-bold ${
-                      col.emphasis ? "text-[#3d2a4a]" : "text-[#8d7d72]"
-                    }`}
-                  >
+                  <span className="absolute bottom-2 right-3 text-xs font-bold text-[var(--jig-muted)]">
                     {col.relation}
                   </span>
                 </div>
@@ -337,11 +605,15 @@ function ManseTable({
               return (
                 <div
                   key={`${col.key}-stem-ten-god`}
-                  className={`border-b border-r border-[#b9b0a8] px-3 py-2 text-sm font-medium last:border-r-0 ${
-                    col.emphasis ? "bg-[#e5c271]/10 text-[#3d2a4a]" : "text-[#3d2a4a]"
+                  className={`border-b border-r border-[var(--jig-ink)]/10 px-3 py-2 text-sm font-medium last:border-r-0 ${
+                    col.emphasis ? "bg-[var(--jig-seal)]/5" : ""
                   }`}
                 >
-                  {tenGodLabel(pillars.day.stemHanja, STEM_META[pillar.stemHanja], isKo)}
+                  {formatTenGodLabel(
+                    pillars.day.stemHanja,
+                    STEM_META[pillar.stemHanja],
+                    isKo ? "ko" : "en"
+                  )}
                 </div>
               );
             })}
@@ -352,23 +624,17 @@ function ManseTable({
               return (
                 <div
                   key={`${col.key}-branch`}
-                  className={`relative border-b border-r border-[#b9b0a8] p-3 last:border-r-0 ${
-                    col.emphasis ? "bg-[#e5c271]/10" : ""
+                  className={`relative border-b border-r border-[var(--jig-ink)]/10 p-3 last:border-r-0 ${
+                    col.emphasis ? "bg-[var(--jig-seal)]/5" : ""
                   }`}
                 >
                   <div className="flex items-end justify-center gap-2">
-                    <span className="font-serif text-3xl font-bold text-[#3d2a4a] sm:text-4xl">
+                    <span className="human-premium-serif text-3xl font-bold sm:text-4xl">
                       {pillar.branchHanja}
                     </span>
-                    <span className="text-sm font-bold text-[#3d2a4a]">
-                      {pillar.branchLabel}
-                    </span>
+                    <span className="text-sm font-bold">{pillar.branchLabel}</span>
                   </div>
-                  <span
-                    className={`absolute bottom-2 right-3 text-xs font-bold ${
-                      col.emphasis ? "text-[#3d2a4a]" : "text-[#8d7d72]"
-                    }`}
-                  >
+                  <span className="absolute bottom-2 right-3 text-xs font-bold text-[var(--jig-muted)]">
                     {col.emphasis ? (isKo ? "배우자" : "Partner") : col.relation}
                   </span>
                 </div>
@@ -381,11 +647,15 @@ function ManseTable({
               return (
                 <div
                   key={`${col.key}-branch-ten-god`}
-                  className={`border-b border-r border-[#b9b0a8] px-3 py-2 text-sm font-medium last:border-r-0 ${
-                    col.emphasis ? "bg-[#e5c271]/10 text-[#3d2a4a]" : "text-[#3d2a4a]"
+                  className={`border-b border-r border-[var(--jig-ink)]/10 px-3 py-2 text-sm font-medium last:border-r-0 ${
+                    col.emphasis ? "bg-[var(--jig-seal)]/5" : ""
                   }`}
                 >
-                  {tenGodLabel(pillars.day.stemHanja, BRANCH_META[pillar.branchHanja], isKo)}
+                  {formatTenGodLabel(
+                    pillars.day.stemHanja,
+                    BRANCH_META[pillar.branchHanja],
+                    isKo ? "ko" : "en"
+                  )}
                 </div>
               );
             })}
@@ -398,8 +668,8 @@ function ManseTable({
               return (
                 <div
                   key={`${col.key}-void`}
-                  className={`border-r border-[#b9b0a8] px-3 py-2 text-sm font-medium last:border-r-0 ${
-                    isVoid ? "bg-[#3d2a4a] text-[#fffaf2]" : "text-[#8d7d72]"
+                  className={`border-r border-[var(--jig-ink)]/10 px-3 py-2 text-sm font-medium last:border-r-0 ${
+                    isVoid ? "bg-[var(--jig-ink)] text-[var(--jig-hanji)]" : "text-[var(--jig-muted)]"
                   }`}
                 >
                   {isVoid ? (isKo ? "공망 해당" : "Void hit") : emptyBranchText}
@@ -408,7 +678,7 @@ function ManseTable({
             })}
           </div>
         </div>
-        <p className="mt-3 text-right text-xs font-medium text-ink/65">
+        <p className="mt-3 text-right text-xs font-medium text-[var(--jig-muted)]">
           {isKo ? "일주 기준 공망" : "Void branches from day pillar"}: {emptyBranchText}
         </p>
       </div>
@@ -428,83 +698,44 @@ function IntroLetter({
 
   return (
     <section id="chapter-introduction" className="scroll-mt-24">
-      <div className="human-premium-paper-warm rounded-xl border-l-8 border-[#593a6b] p-8 shadow-lg sm:p-12">
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.15em] text-[#593a6b]/60">
-          {t.introFrom}
-        </p>
+      <div className="human-premium-paper-warm border-l-4 border-[var(--jig-seal)] p-8 sm:p-10">
+        <p className="human-premium-label-caps mb-6 text-[var(--jig-muted)]">{t.introFrom}</p>
         {paragraphs.length > 0 && (
-          <p className="mb-8 font-serif text-lg leading-[1.8] text-ink">
-            {paragraphs[0]}
-          </p>
+          <BodyText
+            body={paragraphs[0]}
+            className="human-premium-serif mb-8 text-lg leading-[1.9]"
+          />
         )}
         {paragraphs.length > 1 && (
-          <div className="space-y-4 text-base leading-relaxed text-ink/90">
-            {paragraphs.slice(1).map((p) => (
-              <p key={p.slice(0, 24)}>{p}</p>
-            ))}
-          </div>
+          <BodyText body={paragraphs.slice(1).join("\n\n")} />
         )}
         <div className="mt-10 flex justify-end">
-          <p className="font-serif text-xl text-ink">{t.introSign}</p>
+          <p className="human-premium-serif text-xl">{t.introSign}</p>
         </div>
       </div>
     </section>
   );
 }
 
-function ReadingCard({
-  section,
-  variant = "paper",
-}: {
-  section: HumanPremiumReportSection;
-  variant?: "paper" | "zodiac";
-}) {
-  const isZodiac = variant === "zodiac";
-
+function ReadingCard({ section }: { section: HumanPremiumReportSection }) {
   return (
     <article
       id={`section-${section.id}`}
-      className={`scroll-mt-24 ${
-        isZodiac
-          ? "rounded-xl border border-[#d5bcf2]/20 bg-[#35245F]/20 p-6 shadow-inner backdrop-blur-sm sm:p-10"
-          : "human-premium-inner-frame human-premium-paper rounded-xl border border-[#e5c271]/30 p-6 shadow-xl sm:p-10"
-      }`}
+      className="human-premium-inner-frame human-premium-paper scroll-mt-24 rounded-lg p-6 sm:p-8"
     >
-      <header
-        className={`mb-6 border-b pb-4 ${isZodiac ? "border-[#d5bcf2]/20" : "border-ink/10"}`}
-      >
+      <header className="mb-6 border-b border-[var(--jig-ink)]/10 pb-4">
         {section.subtitle && (
-          <p
-            className={`mb-1 text-sm ${isZodiac ? "text-[#d5bcf2]" : "text-[#e5c271]"}`}
-          >
-            {section.subtitle}
-          </p>
+          <p className="mb-1 text-sm text-[var(--jig-seal)]">{section.subtitle}</p>
         )}
-        <h3
-          className={`font-serif text-xl font-semibold sm:text-2xl ${
-            isZodiac ? "text-[#d5bcf2]" : "text-ink"
-          }`}
-        >
-          {section.title}
-        </h3>
+        <h3 className="human-premium-serif text-xl font-semibold sm:text-2xl">{section.title}</h3>
       </header>
-      <p
-        className={`whitespace-pre-line text-base leading-relaxed ${
-          isZodiac ? "text-[#ccc4cf]" : "text-ink/90"
-        }`}
-      >
-        {section.body}
-      </p>
+      <BodyText body={section.body} />
       {section.bullets && section.bullets.length > 0 && (
         <ul className="mt-6 flex flex-wrap gap-2">
           {section.bullets.map((item) => (
             <li
               key={item}
-              className={`rounded-full border px-3 py-1 text-xs font-medium ${
-                isZodiac
-                  ? "border-[#d5bcf2]/20 bg-[#d5bcf2]/10 text-[#d5bcf2]"
-                  : "border-[#593a6b]/15 bg-[#FDF7EF] text-[#593a6b]"
-              }`}
+              className="rounded-full border border-[var(--jig-ink)]/10 bg-[#f6f3ec] px-3 py-1 text-xs font-medium text-[var(--jig-ink)]"
             >
               {item}
             </li>
@@ -526,11 +757,75 @@ function ChapterHeading({
 }) {
   return (
     <header id={`chapter-${id}`} className="scroll-mt-24">
-      <h2 className="font-serif text-2xl font-semibold text-[#d5bcf2] sm:text-3xl">
-        {title}
-      </h2>
-      {subtitle && <p className="mt-1 text-sm text-[#ccc4cf]/80">{subtitle}</p>}
+      <div className="flex items-start gap-3">
+        <div className="human-premium-accent-bar mt-1" />
+        <div>
+          <h2 className="human-premium-serif text-2xl font-bold sm:text-3xl">{title}</h2>
+          {subtitle && (
+            <p className="mt-1 text-sm text-[var(--jig-muted)]">{subtitle}</p>
+          )}
+        </div>
+      </div>
     </header>
+  );
+}
+
+function ReportToc({
+  items,
+  t,
+  compact = false,
+}: {
+  items: Array<{ id: string; title: string; group: string }>;
+  t: UiStrings;
+  compact?: boolean;
+}) {
+  if (compact) {
+    return (
+      <nav className="no-print human-premium-paper rounded-lg p-4 lg:hidden">
+        <p className="human-premium-label-caps mb-3 text-[var(--jig-muted)]">{t.toc}</p>
+        <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3 sm:grid-cols-4">
+          {items.map((item) => (
+            <a
+              key={item.id}
+              href={`#chapter-${item.id}`}
+              className="min-w-0 rounded-full border border-[var(--jig-ink)]/10 bg-white/60 px-3 py-2 text-center text-xs font-semibold leading-snug text-[var(--jig-ink)]"
+            >
+              <span className="line-clamp-2 break-keep">{item.title}</span>
+            </a>
+          ))}
+        </div>
+      </nav>
+    );
+  }
+
+  return (
+    <nav className="human-premium-paper rounded-lg p-4">
+      <div className="mb-3 flex items-center gap-2 border-b border-[var(--jig-seal)]/20 pb-3">
+        <Image
+          src="/stitch/jigwanjae/jigwanjae-small-logo.png"
+          alt={t.brand}
+          width={80}
+          height={32}
+          className="h-8 w-auto object-contain"
+        />
+      </div>
+      <p className="human-premium-label-caps text-[var(--jig-muted)]">{t.toc}</p>
+      <ul className="mt-3 max-h-[60vh] space-y-1 overflow-y-auto text-sm">
+        {items.map((item) => (
+          <li key={item.id}>
+            <a
+              href={`#chapter-${item.id}`}
+              className="block rounded px-2 py-1.5 text-[var(--jig-ink)]/80 transition hover:bg-[var(--jig-seal)]/5 hover:text-[var(--jig-ink)]"
+            >
+              <span className="block text-[10px] uppercase tracking-wide text-[var(--jig-muted)]">
+                {item.group}
+              </span>
+              {item.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }
 
@@ -550,30 +845,30 @@ export function HumanPremiumReportView({
   const [pdfError, setPdfError] = useState<string | null>(null);
 
   const pillars = asPillars(report.saju.pillars);
+  const elements = asElements(report.saju.elements);
   const hasHour = report.analysisMode === "four_pillars" && Boolean(pillars.hour);
 
   const introChapter = report.saju.chapters.find((c) => c.id === "introduction");
   const prefaceChapter = report.saju.chapters.find((c) => c.id === "preface");
   const manseChapter = report.saju.chapters.find((c) => c.id === "manse-calendar");
   const sajuResultChapter = report.saju.chapters.find((c) => c.id === "saju-result");
+  const luckCyclesChapter = report.saju.chapters.find((c) => c.id === "luck-cycles");
 
   const toc = useMemo(
     () => [
+      {
+        id: "elements",
+        title: t.elementsTitle,
+        group: t.saju,
+      },
       ...report.saju.chapters.map((chapter) => ({
         id: chapter.id,
         title: chapter.title,
         group: t.saju,
       })),
-      ...report.zodiac.chapters.map((chapter) => ({
-        id: chapter.id,
-        title: chapter.title,
-        group: t.zodiac,
-      })),
     ],
-    [report.saju.chapters, report.zodiac.chapters, t.saju, t.zodiac]
+    [report.saju.chapters, t.elementsTitle, t.saju]
   );
-
-  const maximLine = report.cover.title.split(" - ")[0] ?? report.cover.title;
 
   async function copyLink() {
     try {
@@ -668,65 +963,27 @@ export function HumanPremiumReportView({
   return (
     <div className="human-premium-report safe-area-shell flex min-h-dvh flex-col">
       <AppTopNav active="saju" />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-5 pb-28 pt-6 sm:px-6">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-32 pt-4 sm:px-6 sm:pt-6">
         <div className="grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)] lg:gap-10">
-          <aside className="no-print lg:sticky lg:top-24 lg:self-start">
-            <nav className="rounded-xl border border-[#d5bcf2]/15 bg-[#221c32]/80 p-4 backdrop-blur-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#ccc4cf]/60">
-                {t.toc}
-              </p>
-              <ul className="mt-3 max-h-[60vh] space-y-1 overflow-y-auto text-sm">
-                {toc.map((item) => (
-                  <li key={item.id}>
-                    <a
-                      href={`#chapter-${item.id}`}
-                      className="block rounded-lg px-2 py-1.5 text-[#e9defc]/80 transition hover:bg-[#d5bcf2]/10 hover:text-[#e9defc]"
-                    >
-                      <span className="block text-[10px] uppercase tracking-wide text-[#ccc4cf]/45">
-                        {item.group}
-                      </span>
-                      {item.title}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+          <aside className="no-print hidden lg:sticky lg:top-24 lg:block lg:self-start">
+            <ReportToc items={toc} t={t} />
           </aside>
 
-          <div className="print-report-main space-y-12 sm:space-y-16">
-            {/* Hero */}
-            <section className="relative text-center">
-              <div className="human-premium-paper relative overflow-hidden rounded-xl border-2 border-[#e5c271] p-8 shadow-2xl sm:p-10">
-                <div className="absolute left-0 top-0 h-1 w-full bg-[#e5c271]" />
-                <div className="absolute bottom-0 left-0 h-1 w-full bg-[#e5c271]" />
-                <div className="flex flex-col items-center gap-4">
-                  <div className="human-premium-seal font-serif text-2xl">知</div>
-                  <h1 className="font-serif text-2xl font-semibold tracking-widest text-[#593a6b] sm:text-3xl">
-                    {report.cover.subtitle}
-                  </h1>
-                  <div className="my-2 h-px w-16 bg-[#e5c271]/50" />
-                  <p className="font-serif text-lg text-[#593a6b]">{maximLine}</p>
-                  {isKo && (
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#958e98]">
-                      {t.maximEn}
-                    </p>
-                  )}
-                  <p className="max-w-lg text-sm leading-relaxed text-ink/80 sm:text-base">
-                    {report.cover.tagline}
-                  </p>
-                  <p className="text-sm font-medium text-[#593a6b]">
-                    {report.personName}
-                    {isKo ? "님" : ""}
-                  </p>
-                </div>
-              </div>
-              <div className="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full bg-[#d5bcf2]/10 blur-[80px]" />
-              <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-[#e5c271]/10 blur-[80px]" />
-            </section>
+          <div className="print-report-main min-w-0 space-y-10 sm:space-y-16">
+            <CoverPage report={report} isKo={isKo} t={t} />
+            <ReportToc items={toc} t={t} compact />
 
             {introChapter?.sections[0] && (
               <IntroLetter section={introChapter.sections[0]} isKo={isKo} />
             )}
+
+            <ElementsSection
+              elements={elements}
+              dominantElement={report.saju.dominantElement}
+              summaryStory={report.summary.story}
+              isKo={isKo}
+              t={t}
+            />
 
             {prefaceChapter && (
               <section className="space-y-6">
@@ -768,36 +1025,32 @@ export function HumanPremiumReportView({
               </section>
             )}
 
-            {report.zodiac.chapters.map((chapter: HumanPremiumReportChapter) => (
-              <section key={chapter.id} className="space-y-6">
+            {luckCyclesChapter && (
+              <section className="space-y-6">
                 <ChapterHeading
-                  id={chapter.id}
-                  title={chapter.title}
-                  subtitle={chapter.subtitle ?? report.zodiac.signName}
+                  id={luckCyclesChapter.id}
+                  title={luckCyclesChapter.title}
+                  subtitle={luckCyclesChapter.subtitle}
                 />
-                {chapter.sections.map((section, index) => (
-                  <ReadingCard
-                    key={section.id}
-                    section={section}
-                    variant={index === 0 ? "zodiac" : "paper"}
-                  />
+                {luckCyclesChapter.sections.map((section) => (
+                  <ReadingCard key={section.id} section={section} />
                 ))}
               </section>
-            ))}
+            )}
 
             <section className="no-print space-y-4">
               <button
                 type="button"
                 onClick={() => void shareReport()}
-                className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#593a6b] font-bold text-[#FFFaf2] shadow-lg transition hover:opacity-90"
+                className="flex h-14 w-full items-center justify-center gap-2 rounded-lg bg-[var(--jig-ink)] font-bold text-[var(--jig-hanji)] shadow transition hover:opacity-90"
               >
                 {t.share}
               </button>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <button
                   type="button"
                   onClick={() => void copyLink()}
-                  className="human-premium-paper flex h-14 flex-col items-center justify-center gap-1 rounded-xl border border-[#593a6b] text-ink transition hover:bg-[#E6E1F9]"
+                  className="human-premium-paper flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-[var(--jig-ink)]/20 transition hover:border-[var(--jig-seal)]/40"
                 >
                   <span className="text-[11px] font-semibold">
                     {copied ? t.shared : t.copyLink}
@@ -808,7 +1061,7 @@ export function HumanPremiumReportView({
                   onClick={() => void downloadPdf()}
                   disabled={pdfState === "downloading"}
                   title={t.pdfReady}
-                  className="human-premium-paper flex h-14 flex-col items-center justify-center gap-1 rounded-xl border border-[#593a6b] text-ink transition hover:bg-[#E6E1F9] disabled:opacity-60"
+                  className="human-premium-paper flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-[var(--jig-ink)]/20 transition hover:border-[var(--jig-seal)]/40 disabled:opacity-60"
                 >
                   <span className="text-[11px] font-semibold">
                     {pdfState === "downloading" ? t.pdfDownloading : t.downloadChoice}
@@ -818,7 +1071,7 @@ export function HumanPremiumReportView({
                   type="button"
                   onClick={() => void sendEmail()}
                   disabled={emailState === "sending"}
-                  className="human-premium-paper flex h-14 flex-col items-center justify-center gap-1 rounded-xl border border-[#593a6b] text-ink transition hover:bg-[#E6E1F9] disabled:opacity-60"
+                  className="human-premium-paper flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-[var(--jig-ink)]/20 transition hover:border-[var(--jig-seal)]/40 disabled:opacity-60"
                 >
                   <span className="text-[11px] font-semibold">
                     {emailState === "sending"
@@ -830,18 +1083,20 @@ export function HumanPremiumReportView({
                 </button>
               </div>
               {emailState === "failed" && (
-                <p className="text-center text-xs text-red-300">{t.emailFailed}</p>
+                <p className="text-center text-xs text-[var(--jig-seal)]">{t.emailFailed}</p>
               )}
               {pdfState === "failed" && (
-                <p className="text-center text-xs text-red-300">
+                <p className="text-center text-xs text-[var(--jig-seal)]">
                   {t.pdfFailed}
                   {pdfError ? `: ${pdfError.slice(0, 120)}` : ""}
                 </p>
               )}
-              <p className="text-center text-xs text-[#958e98]/60">{t.copyright}</p>
+              <p className="text-center text-xs text-[var(--jig-muted)]">{t.copyright}</p>
             </section>
 
-            <p className="pb-4 text-center text-sm text-[#ccc4cf]/70">{t.disclaimer}</p>
+            <p className="whitespace-pre-line pb-4 text-center text-sm leading-relaxed text-[var(--jig-muted)]">
+              {t.disclaimer}
+            </p>
           </div>
         </div>
       </main>

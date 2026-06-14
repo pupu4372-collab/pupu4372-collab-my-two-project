@@ -1,9 +1,6 @@
-import { renderHumanPremiumReportPdf } from "@/lib/reports/human-premium/pdf";
+import { getOrRenderHumanPremiumPdf } from "@/lib/reports/human-premium/pdf-cache";
 import { resolveHumanPremiumReportByToken } from "@/lib/reports/human-premium/resolve";
-import {
-  markHumanPremiumReportFailed,
-  uploadHumanPremiumPdf,
-} from "@/lib/reports/human-premium/storage";
+import { markHumanPremiumReportFailed } from "@/lib/reports/human-premium/storage";
 import { NextResponse } from "next/server";
 
 /** HTTP header filenames must be ASCII (ByteString). Korean name goes via client save picker. */
@@ -26,12 +23,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const pdf = await renderHumanPremiumReportPdf(resolved.payload);
-
-    // Download should not fail just because storage cache upload fails.
-    uploadHumanPremiumPdf(resolved.row.id, pdf).catch((error) => {
-      console.error("PDF cache upload failed", error);
-    });
+    const pdf = await getOrRenderHumanPremiumPdf(resolved.row, resolved.payload);
 
     return new NextResponse(new Uint8Array(pdf), {
       headers: {

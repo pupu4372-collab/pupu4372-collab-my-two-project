@@ -1,4 +1,4 @@
-import { buildHumanPremiumReport } from "./generator";
+import { buildHumanPremiumReportHybrid } from "./hybrid";
 import { sendHumanPremiumReportEmail, buildHumanPremiumReportUrl } from "./email";
 import {
   createHumanPremiumReportDraft,
@@ -6,6 +6,7 @@ import {
   markHumanPremiumReportReady,
 } from "./storage";
 import type {
+  HumanPremiumBirthBasis,
   HumanPremiumPaymentProvider,
   HumanPremiumReportInput,
   HumanPremiumReportPayload,
@@ -14,6 +15,12 @@ import type {
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function parseGender(body: Record<string, unknown>): "male" | "female" | null {
+  if (body.gender === "male") return "male";
+  if (body.gender === "female") return "female";
+  return null;
 }
 
 export function parseHumanPremiumReportInput(
@@ -45,6 +52,7 @@ export function parseHumanPremiumReportInput(
     calendarType,
     locale,
     privacyConsent: true,
+    gender: parseGender(body),
     userId: userId ?? null,
   };
 }
@@ -52,6 +60,7 @@ export function parseHumanPremiumReportInput(
 export function humanPremiumRowToInput(
   row: HumanPremiumReportRow
 ): HumanPremiumReportInput {
+  const basis = row.birth_basis as HumanPremiumBirthBasis | null;
   return {
     personName: row.person_name,
     email: row.email,
@@ -62,6 +71,7 @@ export function humanPremiumRowToInput(
     calendarType: row.calendar_type,
     locale: row.locale,
     privacyConsent: row.privacy_consent,
+    gender: basis?.gender ?? null,
     userId: row.user_id,
   };
 }
@@ -95,7 +105,7 @@ export async function completeHumanPremiumPayment(
 
   const paid = await markHumanPremiumReportPaid(row.id, payment);
   const input = humanPremiumRowToInput(paid);
-  const payload = buildHumanPremiumReport(input);
+  const payload = await buildHumanPremiumReportHybrid(input);
   let ready = await markHumanPremiumReportReady(
     paid.id,
     payload as unknown as Record<string, unknown>,

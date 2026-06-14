@@ -49,5 +49,6 @@ export function resolveHumanBirthBasis(
     locale: input.locale,
     birthUtc,
     convertedSolarDate,
+    gender: input.gender ?? null,
   };
 }

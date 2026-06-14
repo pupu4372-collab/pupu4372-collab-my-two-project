@@ -1,4 +1,4 @@
-import { buildHumanPremiumReport } from "./generator";
+import { buildHumanPremiumReportHybrid } from "./hybrid";
 import {
   getHumanPremiumReportByWebToken,
   incrementHumanPremiumWebViewCount,
@@ -22,6 +22,7 @@ function rowToInput(row: HumanPremiumReportRow): HumanPremiumReportInput {
     calendarType: row.calendar_type,
     locale: row.locale,
     privacyConsent: row.privacy_consent,
+    gender: row.birth_basis?.gender ?? null,
     userId: row.user_id,
   };
 }
@@ -32,7 +33,17 @@ function isAccessExpired(row: HumanPremiumReportRow): boolean {
 }
 
 function isCurrentReportTemplate(payload: HumanPremiumReportPayload): boolean {
-  return payload.saju.chapters[0]?.id === "introduction";
+  const hasIntro = payload.saju.chapters[0]?.id === "introduction";
+  const luckCycle = payload.saju.chapters.find(
+    (chapter) => chapter.id === "luck-cycles"
+  );
+  const sectionIds = new Set(luckCycle?.sections.map((section) => section.id));
+  return (
+    hasIntro &&
+    Boolean(luckCycle) &&
+    sectionIds.has("cycle-daewoon") &&
+    sectionIds.has("cycle-shinsal")
+  );
 }
 
 export async function resolveHumanPremiumReportByToken(
@@ -47,7 +58,7 @@ export async function resolveHumanPremiumReportByToken(
   if (row.report_payload) {
     const payload = row.report_payload as unknown as HumanPremiumReportPayload;
     if (!isCurrentReportTemplate(payload)) {
-      const rebuilt = buildHumanPremiumReport(rowToInput(row));
+      const rebuilt = await buildHumanPremiumReportHybrid(rowToInput(row));
       const saved = await markHumanPremiumReportReady(
         row.id,
         rebuilt as unknown as Record<string, unknown>,
@@ -79,7 +90,7 @@ export async function resolveHumanPremiumReportByToken(
   await updateHumanPremiumReport(row.id, { status: "generating" });
 
   try {
-    const payload = buildHumanPremiumReport(rowToInput(row));
+    const payload = await buildHumanPremiumReportHybrid(rowToInput(row));
     const saved = await markHumanPremiumReportReady(
       row.id,
       payload as unknown as Record<string, unknown>,

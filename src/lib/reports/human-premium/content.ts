@@ -1,4 +1,12 @@
 import { ELEMENT_META, ELEMENT_ORDER } from "@/lib/saju/elements";
+import {
+  computeDaewoonCandidates,
+  computeMonthLuckPillar,
+  computeSeunNatalInteractions,
+  computeSeunPillar,
+  describeLuckPillar,
+} from "@/lib/saju/luck-pillars";
+import { computeRepresentativeShinsal } from "@/lib/saju/shinsal";
 import type { ElementKey, Locale, PillarDisplay, SajuBasicResponse } from "@/lib/saju/types";
 import { getZodiacSignFromBirthDate } from "@/lib/saju/zodiac/signs";
 import type { ZodiacSignKey } from "@/lib/saju/zodiac/signs";
@@ -413,6 +421,130 @@ function domainSections(
   return sections;
 }
 
+function luckCycleSections(
+  saju: SajuBasicResponse,
+  locale: Locale
+): HumanPremiumReportSection[] {
+  const year = new Date().getFullYear();
+  const dayStem = saju.pillars.day.stemHanja;
+  const seunPillar = computeSeunPillar(year);
+  const seun = describeLuckPillar(dayStem, seunPillar, locale);
+  const daewoonCandidates = computeDaewoonCandidates({
+    birthUtc: saju.birthUtc,
+    yearStem: saju.pillars.year.stemHanja,
+    monthPillar: saju.pillars.month,
+    dayStem,
+    locale,
+  });
+  const shinsal = computeRepresentativeShinsal(saju.pillars, locale);
+  const interactions = computeSeunNatalInteractions(
+    seunPillar.branchHanja,
+    saju.pillars,
+    locale
+  );
+
+  const summerMonths = [6, 7, 8];
+  const monthSections = summerMonths.map((month) => {
+    const monthPillar = computeMonthLuckPillar(year, month, saju.timezone);
+    const reading = describeLuckPillar(dayStem, monthPillar, locale);
+    const label =
+      locale === "ko"
+        ? `${year}년 ${month}월`
+        : new Date(year, month - 1, 15).toLocaleString("en", {
+            month: "long",
+            year: "numeric",
+          });
+
+    return section({
+      id: `cycle-month-${month}`,
+      chapterId: "luck-cycles",
+      chapterTitle: locale === "ko" ? "대운·신살·세운" : "Daewoon, spirit stars & seun",
+      kind: "cycle",
+      title: locale === "ko" ? `${label} 월운` : `${label} monthly luck`,
+      body:
+        locale === "ko"
+          ? `${label} 월운은 ${pillarText(monthPillar)}입니다. 천간 십성 ${reading.stemTenGod}, 지지 십성 ${reading.branchTenGod}의 흐름으로 한 달의 리듬을 읽습니다.`
+          : `${label} monthly luck is ${pillarText(monthPillar)}. Stem ${reading.stemTenGod}, branch ${reading.branchTenGod}.`,
+      pageEstimate: 2,
+    });
+  });
+
+  return [
+    section({
+      id: "cycle-daewoon",
+      chapterId: "luck-cycles",
+      chapterTitle: locale === "ko" ? "대운·신살·세운" : "Daewoon, spirit stars & seun",
+      kind: "cycle",
+      title: locale === "ko" ? "대운의 큰 흐름" : "Major luck cycles",
+      body:
+        locale === "ko"
+          ? `대운은 한 사람의 삶에서 10년 단위로 바뀌는 큰 계절을 보는 좌표입니다. 현재 입력값에는 성별이 없어 전통 방식의 순행·역행을 하나로 단정하지 않고 두 후보를 함께 봅니다. ${daewoonCandidates
+              .map(
+                (candidate) =>
+                  `${candidate.directionLabel}은 약 ${candidate.startAge}세에 시작하며, 첫 대운은 ${pillarText(candidate.cycles[0].pillar)}입니다`
+              )
+              .join(" / ")}.
+
+순행 후보는 바깥으로 펼치고 확장하는 흐름을, 역행 후보는 안쪽으로 정리하고 되짚는 흐름을 보여주는 참고선으로 사용할 수 있습니다. 실제 상담에서는 성별과 절기 기준을 확정해 한 방향을 선택하지만, 지금 단계에서는 두 흐름을 비교하면서 어느 시기에 어떤 십성이 반복되는지 살피는 것이 좋습니다. 대운은 사건을 단정하는 표식이 아니라 긴 호흡의 환경 변화입니다. 좋은 시기에는 기회를 크게 쓰고, 무거운 시기에는 공부와 정비로 기반을 다지는 방식으로 활용해야 합니다.`
+          : `Daewoon is the ten-year seasonal rhythm of a life. Gender is not provided, so this report does not force one traditional direction. ${daewoonCandidates
+              .map(
+                (candidate) =>
+                  `${candidate.directionLabel} starts around age ${candidate.startAge}, with the first cycle at ${pillarText(candidate.cycles[0].pillar)}`
+              )
+              .join(" / ")}.
+
+Use the forward and reverse candidates as comparison lines until direction is confirmed. Daewoon does not guarantee events; it shows the broader environment in which choices mature.`,
+      bullets: daewoonCandidates.flatMap((candidate) =>
+        candidate.cycles.slice(0, 3).map((cycle) =>
+          locale === "ko"
+            ? `${candidate.directionLabel} ${cycle.startAge}~${cycle.endAge}세: ${pillarText(cycle.pillar)}`
+            : `${candidate.directionLabel} age ${cycle.startAge}-${cycle.endAge}: ${pillarText(cycle.pillar)}`
+        )
+      ),
+      pageEstimate: 3,
+    }),
+    section({
+      id: "cycle-shinsal",
+      chapterId: "luck-cycles",
+      chapterTitle: locale === "ko" ? "대운·신살·세운" : "Daewoon, spirit stars & seun",
+      kind: "cycle",
+      title: locale === "ko" ? "대표 신살" : "Representative spirit stars",
+      body:
+        locale === "ko"
+          ? `${saju.petName}님의 원국에서 대표 신살은 길흉을 단정하는 표식이 아니라, 어떤 기질이 어느 자리에서 드러나는지 살피는 보조 좌표입니다.`
+          : `Representative spirit stars are supporting coordinates, not fixed good-or-bad verdicts.`,
+      bullets: shinsal.map((item) => {
+        const matched = item.matchedSlots.length
+          ? item.matchedSlots.map((slot) => slot.label).join(", ")
+          : locale === "ko"
+            ? "원국 지지에 없음"
+            : "not present";
+        return `${item.name}: ${matched}`;
+      }),
+      pageEstimate: 2,
+    }),
+    section({
+      id: "cycle-annual-seun",
+      chapterId: "luck-cycles",
+      chapterTitle: locale === "ko" ? "대운·신살·세운" : "Daewoon, spirit stars & seun",
+      kind: "cycle",
+      title: locale === "ko" ? `${year}년 세운` : `${year} annual luck`,
+      body:
+        locale === "ko"
+          ? `${year}년 세운은 ${pillarText(seunPillar)}입니다. 천간 십성 ${seun.stemTenGod}, 지지 십성 ${seun.branchTenGod}의 기운이 한 해의 큰 줄기를 만듭니다.`
+          : `${year} seun is ${pillarText(seunPillar)}. Stem ${seun.stemTenGod}, branch ${seun.branchTenGod} set the year's main tone.`,
+      bullets:
+        interactions.length > 0
+          ? interactions.map((line) => line.label)
+          : locale === "ko"
+            ? ["원국과 세운 간 뚜렷한 충·합 신호 없음"]
+            : ["No strong clash/harmony signals with natal chart"],
+      pageEstimate: 3,
+    }),
+    ...monthSections,
+  ];
+}
+
 function monthlySections(
   name: string,
   locale: Locale
@@ -740,6 +872,12 @@ From here, we move through the calendar pillars, lifetime result, and zodiac ser
       locale === "ko" ? "사주결과" : "Saju Result",
       fortuneSections(saju, locale),
       locale === "ko" ? "년사주 · 평생사주 총평" : "Year and lifetime reading"
+    ),
+    chapter(
+      "luck-cycles",
+      locale === "ko" ? "대운·신살·세운" : "Daewoon, spirit stars & seun",
+      luckCycleSections(saju, locale),
+      locale === "ko" ? "대운 후보와 올해 흐름" : "Major cycles and current year"
     ),
   ];
 }

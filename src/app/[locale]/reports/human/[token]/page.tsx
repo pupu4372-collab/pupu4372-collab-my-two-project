@@ -1,8 +1,10 @@
 import { HumanPremiumReportView } from "@/components/reports/HumanPremiumReportView";
 import { Link } from "@/i18n/navigation";
+import { scheduleHumanPremiumPdfPrewarm } from "@/lib/reports/human-premium/pdf-cache";
 import { resolveHumanPremiumReportByToken } from "@/lib/reports/human-premium/resolve";
 import { resolveAppBaseUrlFromHeaders } from "@/lib/app-url";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { notFound } from "next/navigation";
 
 interface HumanPremiumReportRouteProps {
@@ -36,6 +38,10 @@ export default async function HumanPremiumReportRoute({
   }
 
   if (!resolved) notFound();
+
+  after(() => {
+    scheduleHumanPremiumPdfPrewarm(resolved!.row, resolved!.payload);
+  });
 
   const baseUrl = resolveAppBaseUrlFromHeaders(await headers());
   const shareUrl = `${baseUrl}/${locale}/reports/human/${token}`;

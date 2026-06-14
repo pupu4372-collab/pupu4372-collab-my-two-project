@@ -31,6 +31,7 @@ function toBirthBasis(input: HumanPremiumReportInput): HumanPremiumBirthBasis {
     timezone: input.timezone,
     calendarType: input.calendarType,
     locale: input.locale,
+    gender: input.gender ?? null,
   };
 }
 

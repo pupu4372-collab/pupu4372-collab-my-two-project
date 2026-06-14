@@ -1,10 +1,8 @@
 import { computeBasicSaju } from "@/lib/saju/engine";
-import { getZodiacSignFromBirthDate } from "@/lib/saju/zodiac/signs";
 import { resolveHumanBirthBasis, resolveSolarBirthDate } from "./birth-basis";
 import {
   buildHumanSummary,
   buildSajuChapters,
-  buildZodiacChapters,
   flattenChapterSections,
   sumChapterPages,
 } from "./content";
@@ -32,17 +30,9 @@ export function buildHumanPremiumReport(
 
   const summary = buildHumanSummary(input.personName, saju, input.locale);
   const sajuChapters = buildSajuChapters(saju, input.locale);
-  const zodiacChapters = buildZodiacChapters(
-    input.personName,
-    solarBirthDate,
-    input.locale
-  );
 
-  const sign = getZodiacSignFromBirthDate(solarBirthDate);
   const sajuSectionCount = flattenChapterSections(sajuChapters).length;
-  const zodiacSectionCount = flattenChapterSections(zodiacChapters).length;
   const sajuEstimatedPages = sumChapterPages(sajuChapters);
-  const zodiacEstimatedPages = sumChapterPages(zodiacChapters);
 
   const isKo = input.locale === "ko";
 
@@ -63,7 +53,7 @@ export function buildHumanPremiumReport(
         : "Premium Lifetime Report",
       tagline: isKo
         ? "운명을 '아는 것(知)'에서 그치지 않고, 그 운명의 흐름을 멀리서 '관조(觀)'하며 대처하는 법을 익히는 서재와 같은 공간입니다."
-        : "K-Saju pillars + zodiac guidance",
+        : "K-Saju pillars and lifetime guidance",
     },
     summary,
     saju: {
@@ -75,15 +65,15 @@ export function buildHumanPremiumReport(
       estimatedPages: sajuEstimatedPages,
     },
     zodiac: {
-      signKey: sign.key,
-      signName: isKo ? sign.nameKo : sign.nameEn,
-      chapters: zodiacChapters,
-      sectionCount: zodiacSectionCount,
-      estimatedPages: zodiacEstimatedPages,
+      signKey: "",
+      signName: "",
+      chapters: [],
+      sectionCount: 0,
+      estimatedPages: 0,
     },
     totals: {
-      sections: sajuSectionCount + zodiacSectionCount,
-      estimatedPages: sajuEstimatedPages + zodiacEstimatedPages,
+      sections: sajuSectionCount,
+      estimatedPages: sajuEstimatedPages,
     },
   };
 }
