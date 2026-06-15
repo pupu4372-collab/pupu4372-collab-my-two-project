@@ -199,7 +199,7 @@ export function CatChannelHome({
         </div>
       </section>
 
-      <section className="overflow-hidden">
+      <section className="overflow-visible">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-2xl font-extrabold text-white md:text-3xl">
@@ -213,11 +213,11 @@ export function CatChannelHome({
             {isKo ? "전체보기" : "View all"} <span aria-hidden>→</span>
           </Link>
         </div>
-        <div className="-mx-2 flex gap-4 overflow-x-auto px-2 pb-4 hide-scrollbar">
+        <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-4 pr-8 hide-scrollbar sm:-mx-6 sm:px-6 sm:pr-10">
           {SAJU_CARE.map((card) => (
             <div
               key={card.element}
-              className={`flex min-w-[280px] flex-col rounded-[2rem] border p-8 shadow-sm md:min-w-[320px] ${
+              className={`flex min-w-[280px] snap-start scroll-ml-4 flex-col rounded-[2rem] border p-8 shadow-sm md:min-w-[320px] ${
                 card.highlight
                   ? "border-channel-cat/30 bg-cream"
                   : "border-white/20 bg-cream"
@@ -225,8 +225,8 @@ export function CatChannelHome({
             >
               <ElementTag element={card.element} isKo={isKo} />
               <h3 className="mt-4 text-xl font-extrabold text-primary">{isKo ? card.koTitle : card.enTitle}</h3>
-              <p className="mt-2 flex-1 text-sm leading-6 text-plum/65">{isKo ? card.koDesc : card.enDesc}</p>
-              <p className="mt-6 border-t border-primary/5 pt-4 text-xs text-plum/55">
+              <p className="mt-2 flex-1 text-sm font-semibold leading-6 text-plum/80">{isKo ? card.koDesc : card.enDesc}</p>
+              <p className="mt-6 border-t border-primary/5 pt-4 text-xs font-semibold text-plum/70">
                 {isKo ? card.koLuck : card.enLuck}
               </p>
             </div>
@@ -319,7 +319,7 @@ export function CatChannelHome({
         {source && guideCards.length > 0 && (
           <div className="mt-10 border-t border-white/15 pt-8">
             <div className="mb-4 flex items-end justify-between gap-3">
-              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-channel-cat">
+              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#d9c6ff]">
                 {isKo ? "추천 가이드" : "Featured guides"}
               </p>
               <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-plum/50">
@@ -333,7 +333,7 @@ export function CatChannelHome({
                   href={`/cat/guide/${article.id}`}
                   className="rounded-[1.5rem] border border-channel-cat/15 bg-white/80 p-5 shadow-sm transition hover:-translate-y-0.5"
                 >
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-channel-cat">
+                  <span className="text-xs font-extrabold uppercase tracking-wider text-[#7c5ea6]">
                     {article.category}
                   </span>
                   <h3 className="mt-2 line-clamp-2 font-extrabold text-primary">{article.title}</h3>
@@ -352,7 +352,7 @@ export function CatChannelHome({
         <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-plum/80">{content.sajuCta}</p>
         <AuthRequiredLink
           href="/saju"
-          className="mt-5 inline-flex rounded-full bg-channel-cat px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
+          className="mt-5 inline-flex rounded-full bg-[#6f4b8b] px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-110"
         >
           {isKo ? "우리 아이 사주 보기" : "Read K-Saju"}
         </AuthRequiredLink>

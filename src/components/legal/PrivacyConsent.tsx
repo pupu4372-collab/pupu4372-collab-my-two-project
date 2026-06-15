@@ -42,14 +42,14 @@ export function PrivacyConsent({
       : "oriental-card space-y-2 p-4";
   const labelText =
     variant === "pastelCompact"
-      ? "text-xs leading-relaxed text-plum/90"
-      : "text-sm leading-relaxed text-plum/90";
+      ? "text-xs font-semibold leading-relaxed text-plum"
+      : "text-sm font-semibold leading-relaxed text-plum";
   const detailText =
     variant === "pastelCompact"
-      ? "pl-6 text-[11px] leading-relaxed text-plum/55"
-      : "pl-7 text-xs leading-relaxed text-plum/55";
+      ? "pl-6 text-[11px] font-medium leading-relaxed text-plum/75"
+      : "pl-7 text-xs font-medium leading-relaxed text-plum/75";
   const linkText =
-    variant === "pastelCompact" ? "pl-6 text-[11px] text-plum/55" : "pl-7 text-xs text-plum/55";
+    variant === "pastelCompact" ? "pl-6 text-[11px] font-semibold text-plum/75" : "pl-7 text-xs font-semibold text-plum/75";
 
   return (
     <div className={wrap}>

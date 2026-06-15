@@ -7,7 +7,6 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { GlassCard, PageContainer, SectionHeader } from "@/components/layout/StitchLayout";
 import { OnboardingRoadmap } from "@/components/onboarding/OnboardingRoadmap";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
-import { Link } from "@/i18n/navigation";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import type { OwnerDailyFortune } from "@/lib/saju/owner-daily-fortune";
 import type { PetShowRankingRow } from "@/lib/supabase/types";
@@ -394,7 +393,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                     <span className="rounded-full bg-[#efe6f2] px-3 py-1 text-xs font-extrabold text-primary">
                       {commonPetFortune.yearLabel}
                     </span>
-                    <span className={`text-xs font-semibold ${isNight ? "text-plum/55" : "text-plum/45"}`}>
+                    <span className={`text-xs font-bold ${isNight ? "text-plum/80" : "text-plum/70"}`}>
                       {commonPetFortune.scopeLabel}
                     </span>
                   </div>
@@ -406,7 +405,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                   <h3 className={`mt-4 text-lg font-extrabold ${isNight ? "text-primary" : "text-primary"}`}>
                     {commonPetFortune.headline}
                   </h3>
-                  <p className={`mt-3 text-sm leading-7 ${isNight ? "text-plum/70" : "text-plum/65"}`}>
+                  <p className={`mt-3 text-sm font-semibold leading-7 ${isNight ? "text-plum/85" : "text-plum/75"}`}>
                     {commonPetFortune.body}
                   </p>
                   <AuthRequiredLink
@@ -472,7 +471,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
               >
                 {isKo ? "우리아이 자랑 보기" : "View Pet Show"}
               </AuthRequiredLink>
-              <Link
+              <AuthRequiredLink
                 href="/community/pet-show/fails"
                 className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 ${
                   isNight
@@ -481,7 +480,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                 }`}
               >
                 {isKo ? "웃긴 실패 사진" : "Funny fails"}
-              </Link>
+              </AuthRequiredLink>
             </div>
           </div>
           <GlassCard className={`min-w-0 p-4 sm:p-5 ${nightGlassCard}`}>

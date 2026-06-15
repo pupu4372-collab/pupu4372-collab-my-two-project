@@ -56,16 +56,16 @@ export function SupportQuickActions() {
           const isActive = "panel" in card && activePanel === card.panel;
           const className = `rounded-[1.5rem] border p-7 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_18px_42px_-34px_rgba(0,0,0,0.55)] backdrop-blur-xl transition ${
             isActive
-              ? "border-[#ffd7ff]/70 bg-white/24"
-              : "border-white/18 bg-white/16 hover:bg-white/22"
+              ? "border-[#ffe6c7]/80 bg-[#fff4e7]/28"
+              : "border-[#ffe6c7]/45 bg-[#fff4e7]/18 hover:bg-[#fff4e7]/28"
           }`;
           const content = (
             <>
-              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#ffd7ff]/28 text-2xl text-[#ffd7ff] shadow-[0_0_24px_rgba(245,217,255,0.18)]">
+              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#fff1d8]/85 text-2xl text-[#5c3d2e] shadow-[0_0_24px_rgba(255,230,199,0.22)]">
                 {card.icon}
               </span>
               <h2 className="mt-5 text-lg font-extrabold text-white">{isKo ? card.koTitle : card.enTitle}</h2>
-              {desc && <p className="mt-2 text-xs font-semibold leading-5 text-white/68">{desc}</p>}
+              {desc && <p className="mt-2 text-xs font-bold leading-5 text-white/82">{desc}</p>}
             </>
           );
 

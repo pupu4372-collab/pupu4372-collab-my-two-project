@@ -30,7 +30,7 @@ const THEME: Record<
   reptile: {
     label: { ko: "렙타일(다른동물)", en: "Reptile & Other" },
     emoji: "🦎",
-    accent: "text-channel-community",
+    accent: "text-[#3d8b64]",
     bg: "bg-channel-community/15",
     border: "border-channel-community/30",
   },
@@ -44,9 +44,9 @@ const THEME: Record<
   community: {
     label: { ko: "커뮤니티", en: "Community" },
     emoji: "💬",
-    accent: "text-channel-community",
-    bg: "bg-channel-community/15",
-    border: "border-channel-community/30",
+    accent: "text-[#6f4b8b]",
+    bg: "bg-[#efe6ff]",
+    border: "border-[#6f4b8b]/25",
   },
   neutral: {
     label: { ko: "K-Saju Pet", en: "K-Saju Pet" },
@@ -132,7 +132,7 @@ export function ChannelShell({
               <Link
                 key={`${link.href}-${link.label}`}
                 href={link.href}
-                className={`rounded-full px-3 py-1.5 text-xs font-extrabold shadow-sm transition hover:brightness-105 ${t.bg} ${t.accent}`}
+                className="rounded-full bg-[#efe6ff] px-3 py-1.5 text-xs font-extrabold text-[#56326f] shadow-sm transition hover:bg-white hover:text-primary"
               >
                 {link.label}
               </Link>
@@ -155,7 +155,7 @@ export function ChannelShell({
                 </p>
               )}
               <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary md:text-5xl">{title}</h1>
-              {subtitle && <p className="mt-3 text-sm leading-relaxed text-plum/70">{subtitle}</p>}
+              {subtitle && <p className="mt-3 text-sm font-extrabold leading-relaxed text-plum">{subtitle}</p>}
             </div>
             {heroMedia && <div>{heroMedia}</div>}
           </div>

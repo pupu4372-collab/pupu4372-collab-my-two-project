@@ -76,10 +76,10 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
           ))}
         </nav>
 
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <GlassCard className="relative overflow-hidden bg-cream p-0">
-            <Link href="/community/pet-show/ranking" className="block">
-              <div className="relative h-64 overflow-hidden bg-channel-community/10 md:h-80">
+        <section className="grid items-stretch gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+          <GlassCard className="relative min-h-[560px] overflow-hidden bg-cream p-0">
+            <Link href="/community/pet-show/ranking" className="block h-full">
+              <div className="relative h-full min-h-[560px] overflow-hidden bg-channel-community/10">
                 {weeklyRanking.rows.dog[0]?.image_urls?.[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -106,14 +106,14 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
             </Link>
           </GlassCard>
 
-          <GlassCard className="min-w-0 border border-white/20 bg-white/12 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-md sm:p-5">
+          <GlassCard className="flex min-h-[560px] min-w-0 flex-col border border-white/20 bg-white/12 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-md sm:p-5">
             <SectionHeader
               eyebrow={isKo ? "Ranking" : "Ranking"}
               title={isKo ? "종별 Top 5" : "Top 5 by species"}
               subtitle={isKo ? "사진을 올리면 주간 랭킹에 참여할 수 있어요." : "Upload a photo to join the weekly ranking."}
               onDark
             />
-            <div className="mt-5 grid gap-3">
+            <div className="mt-5 grid flex-1 gap-3 overflow-y-auto pr-1">
               {([
                 ["🐕", isKo ? "강아지" : "Dog", weeklyRanking.rows.dog],
                 ["🐈", isKo ? "고양이" : "Cat", weeklyRanking.rows.cat],
@@ -216,7 +216,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                   {card.emoji}
                 </span>
                 <h2 className="mt-3 text-lg font-extrabold text-primary">{card.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-plum/65">{card.desc}</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-plum/80">{card.desc}</p>
               </Link>
             ))}
           </div>
@@ -240,14 +240,17 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                   {section.emoji}
                 </span>
                 <h2 className="mt-3 text-lg font-extrabold text-primary">{section.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-plum/65">{section.desc}</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-plum/80">{section.desc}</p>
               </Link>
             ))}
           </div>
         </section>
 
-        <p className="text-center text-sm text-white/75">
-          <Link href="/saju" className="underline hover:text-[#ffd7ff]">
+        <p className="text-center">
+          <Link
+            href="/saju"
+            className="inline-flex rounded-full bg-white/85 px-5 py-2.5 text-sm font-extrabold text-primary shadow-sm transition hover:bg-white hover:brightness-105"
+          >
             {t("toSaju")}
           </Link>
         </p>

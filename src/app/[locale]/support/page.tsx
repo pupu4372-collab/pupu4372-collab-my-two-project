@@ -39,13 +39,13 @@ export default async function SupportPage({ params }: SupportPageProps) {
           <div className="relative z-20 mb-8 flex justify-center gap-2 md:absolute md:right-14 md:top-28 md:mb-0 md:flex-col md:items-end">
             <Link
               href="/terms"
-              className="w-36 rounded-full border border-white/18 bg-white/12 px-4 py-2 text-center text-xs font-extrabold text-white/78 backdrop-blur-xl transition hover:bg-white/22 hover:text-white"
+              className="w-36 rounded-full border border-[#dff7ea]/55 bg-[#dff7ea]/20 px-4 py-2 text-center text-xs font-extrabold text-[#e7fff0] backdrop-blur-xl transition hover:bg-[#dff7ea]/35 hover:text-white"
             >
               {isKo ? "이용약관" : "Terms"}
             </Link>
             <Link
               href="/privacy"
-              className="w-36 rounded-full border border-white/18 bg-white/12 px-4 py-2 text-center text-xs font-extrabold text-white/78 backdrop-blur-xl transition hover:bg-white/22 hover:text-white"
+              className="w-36 rounded-full border border-[#dff7ea]/55 bg-[#dff7ea]/20 px-4 py-2 text-center text-xs font-extrabold text-[#e7fff0] backdrop-blur-xl transition hover:bg-[#dff7ea]/35 hover:text-white"
             >
               {isKo ? "개인정보처리방침" : "Privacy"}
             </Link>
@@ -78,15 +78,15 @@ export default async function SupportPage({ params }: SupportPageProps) {
               </div>
               <div className="mt-6 space-y-4">
                 {notices.map((notice) => (
-                  <article key={notice.koTitle} className="rounded-2xl border border-white/14 bg-white/14 p-5 backdrop-blur-xl">
+                  <article key={notice.koTitle} className="rounded-2xl border border-[#ffe6c7]/45 bg-[#fff4e7]/14 p-5 backdrop-blur-xl">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="rounded-full bg-[#ffd7ff]/24 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#ffd7ff]">
+                      <span className="rounded-full bg-[#fff1d8]/85 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#5c3d2e]">
                         {notice.type}
                       </span>
-                      <span className="text-xs font-bold text-white/50">{notice.date}</span>
+                      <span className="text-xs font-extrabold text-[#ffe6c7]/85">{notice.date}</span>
                     </div>
-                    <h3 className="mt-3 text-base font-extrabold text-white">{isKo ? notice.koTitle : notice.enTitle}</h3>
-                    <p className="mt-2 text-sm font-semibold text-white/58">
+                    <h3 className="mt-3 text-base font-extrabold text-[#fff8ef]">{isKo ? notice.koTitle : notice.enTitle}</h3>
+                    <p className="mt-2 text-sm font-bold text-[#fff1d8]/88">
                       {isKo
                         ? "더욱 빠르고 정확해진 반려동물 사주 분석 로직이 적용되었습니다."
                         : "Updated support details for K-Saju Pet users."}
@@ -96,26 +96,26 @@ export default async function SupportPage({ params }: SupportPageProps) {
               </div>
             </div>
 
-            <aside className="relative min-h-[380px] overflow-hidden rounded-[2rem] border border-white/18 bg-[#271649] p-7 shadow-[0_24px_55px_-36px_rgba(0,0,0,0.7)]">
+            <aside className="relative min-h-[380px] overflow-hidden rounded-[2rem] border border-[#ffe6c7]/45 bg-[#271649] p-7 shadow-[0_24px_55px_-36px_rgba(0,0,0,0.7)]">
               <img
                 src="/stitch/global-design-system/dog/dog-02.jpg"
                 alt=""
                 className="absolute inset-0 h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(39,22,73,0.26)_0%,rgba(39,22,73,0.24)_36%,rgba(68,38,86,0.82)_100%)]" />
-              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#442656]/95 to-transparent" />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(34,20,48,0.18)_0%,rgba(34,20,48,0.18)_34%,rgba(68,38,86,0.78)_100%)]" />
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#2e1744]/95 via-[#4d2a65]/70 to-transparent" />
               <div className="relative z-10 flex h-full flex-col">
                 <h2 className="text-2xl font-extrabold">{isKo ? "이달의 이벤트" : "Monthly Event"}</h2>
                 <div className="mt-auto">
-                  <h3 className="mt-5 text-xl font-extrabold text-[#ffd7ff]">
+                  <h3 className="mt-5 text-xl font-extrabold text-[#fff1d8]">
                     {isKo ? "우리 아이 팔자랑 대회" : "Pet Saju Story Event"}
                   </h3>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-white/76">
+                  <p className="mt-2 text-sm font-bold leading-6 text-white/90">
                     {isKo ? "사주 분석 결과를 공유하고 특별한 경품을 받아가세요!" : "Share your pet's saju story and join the event."}
                   </p>
                   <Link
                     href="/community/pet-show/upload"
-                    className="mt-6 inline-flex w-full justify-center rounded-full bg-[#5a2477] px-6 py-4 text-sm font-extrabold text-white shadow-[0_12px_30px_-18px_rgba(255,215,255,0.5)] transition hover:bg-[#743396]"
+                    className="mt-6 inline-flex w-full justify-center rounded-full border border-[#ffe6c7]/65 bg-[#6f4b8b] px-6 py-4 text-sm font-extrabold text-white shadow-[0_14px_30px_-18px_rgba(255,230,199,0.65)] transition hover:border-white hover:bg-[#5f3f78]"
                   >
                     {isKo ? "참여하기" : "Join now"}
                   </Link>
@@ -126,22 +126,22 @@ export default async function SupportPage({ params }: SupportPageProps) {
         </div>
       </main>
 
-      <section className="mx-auto mt-8 max-w-7xl rounded-[2rem] bg-[#ffd1bd] px-6 py-9 text-[#28180d] shadow-sm md:px-12">
+      <section className="mx-auto mt-3 max-w-6xl rounded-[1.5rem] bg-[#ffd1bd] px-5 py-6 text-[#28180d] shadow-sm md:px-9 md:py-7">
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="text-center md:text-left">
-            <h2 className="text-2xl font-extrabold">{isKo ? "새로운 소식을 가장 먼저 확인하세요" : "Get updates first"}</h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-[#574236]">
+            <h2 className="text-xl font-extrabold md:text-2xl">{isKo ? "새로운 소식을 가장 먼저 확인하세요" : "Get updates first"}</h2>
+            <p className="mt-2 max-w-xl text-xs font-semibold leading-5 text-[#574236] md:text-sm">
               {isKo
                 ? "집사님과 반려동물을 위한 특별한 팁과 운세 소식을 뉴스레터로 보내드립니다."
                 : "Pet care tips and K-Saju updates, delivered by newsletter."}
             </p>
           </div>
-          <div className="flex w-full max-w-md flex-col gap-3 sm:flex-row">
+          <div className="flex w-full max-w-sm flex-col gap-3 sm:flex-row md:max-w-md">
             <input
-              className="min-w-0 flex-1 rounded-full border-none bg-white px-5 py-4 text-sm text-[#1b1c1a] placeholder:text-[#574236]/45 focus:ring-2 focus:ring-[#442656]/35"
+              className="min-w-0 flex-1 rounded-full border-none bg-white px-5 py-3 text-sm text-[#1b1c1a] placeholder:text-[#574236]/45 focus:ring-2 focus:ring-[#442656]/35"
               placeholder={isKo ? "이메일 주소를 입력하세요" : "Email address"}
             />
-            <button className="rounded-full bg-[#442656] px-7 py-4 text-sm font-extrabold text-white transition hover:bg-[#5c3d6e]">
+            <button className="rounded-full bg-[#442656] px-6 py-3 text-sm font-extrabold text-white transition hover:bg-[#5c3d6e]">
               {isKo ? "구독하기" : "Subscribe"}
             </button>
           </div>

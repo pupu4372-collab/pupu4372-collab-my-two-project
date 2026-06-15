@@ -86,6 +86,7 @@ export function OnboardingRoadmap({ locale, showActions = true, compact = false 
           : "rounded-[2.5rem] bg-gradient-to-br from-primary-fixed via-surface to-secondary-fixed/80 px-5 py-10 md:px-10 md:py-14"
       }`}
     >
+      <div className="absolute -left-10 -top-12 h-44 w-44 rounded-full bg-[#f5d9ff]/35 blur-3xl" aria-hidden />
       <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/35 blur-3xl" aria-hidden />
       <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl" aria-hidden />
 

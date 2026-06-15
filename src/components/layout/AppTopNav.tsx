@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
@@ -57,19 +58,26 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
         </Link>
 
         <nav className="hidden items-center gap-2 md:flex" aria-label={isKo ? "주요 메뉴" : "Main navigation"}>
-          {NAV_LINKS.map((item) => (
-            <Link
-              key={item.key}
-              href={item.href}
-              className={
-                active === item.key
-                  ? "rounded-full bg-primary px-4 py-2 text-sm font-extrabold text-white shadow-sm"
-                  : "rounded-full px-4 py-2 text-sm font-bold text-plum/65 transition hover:bg-white/65 hover:text-primary"
-              }
-            >
-              {nav(item.key)}
-            </Link>
-          ))}
+          {NAV_LINKS.map((item) => {
+            const className =
+              active === item.key
+                ? "rounded-full bg-primary px-4 py-2 text-sm font-extrabold text-white shadow-sm"
+                : "rounded-full px-4 py-2 text-sm font-bold text-plum/65 transition hover:bg-white/65 hover:text-primary";
+
+            if (item.key === "home") {
+              return (
+                <Link key={item.key} href={item.href} className={className}>
+                  {nav(item.key)}
+                </Link>
+              );
+            }
+
+            return (
+              <AuthRequiredLink key={item.key} href={item.href} className={className}>
+                {nav(item.key)}
+              </AuthRequiredLink>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2">

@@ -400,7 +400,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
           className={
             embedded
               ? "w-full rounded-full bg-mint px-4 py-2.5 text-center text-ink transition hover:brightness-105 disabled:opacity-60"
-              : "mt-2 flex w-full items-center justify-center rounded-full bg-primary px-8 py-4 text-base font-extrabold text-white shadow-xl shadow-primary/20 transition hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60"
+              : "mt-2 flex w-full items-center justify-center rounded-full bg-[#6f4b8b] px-8 py-4 text-base font-extrabold text-white shadow-xl shadow-[#6f4b8b]/25 transition hover:bg-[#5f3f78] active:scale-[0.98] disabled:opacity-60"
           }
         >
           {loading ? t.loading : t.submit}
