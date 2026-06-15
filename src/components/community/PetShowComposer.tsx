@@ -148,7 +148,21 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
     }
   }
 
-  if (configured && ready && isAnonymous) {
+  if (!configured || !ready) {
+    return (
+      <section className="pastel-card border-dashed border-channel-community/20 p-8 text-center">
+        <h2 className="text-2xl font-extrabold text-primary">
+          📷 {isKo ? "우리아이 자랑 올리기" : "Post to Pet Show"}
+        </h2>
+        <div className="mx-auto mt-6 h-10 w-10 animate-spin rounded-full border-4 border-channel-community/20 border-t-channel-community" />
+        <p className="mt-4 text-sm text-plum/65">
+          {isKo ? "로그인 상태를 확인하는 중이에요." : "Checking your login status."}
+        </p>
+      </section>
+    );
+  }
+
+  if (isAnonymous) {
     return (
       <section className="pastel-card border-dashed border-channel-community/30 p-8 text-center">
         <h2 className="text-2xl font-extrabold text-primary">

@@ -6,9 +6,29 @@ import type { ComponentProps } from "react";
 
 type LinkProps = ComponentProps<typeof Link>;
 
-export function AuthRequiredLink({ href, ...props }: LinkProps) {
+export function AuthRequiredLink({ href, onClick, className, tabIndex, ...props }: LinkProps) {
   const { ready, configured, isAnonymous } = useSupabaseSession();
-  const nextHref = configured && ready && isAnonymous ? "/login" : href;
+  const isPending = !configured || !ready;
+  const nextHref = isPending ? "#" : isAnonymous ? "/login" : href;
+  const pendingClassName =
+    typeof className === "string" && isPending
+      ? `${className} cursor-wait opacity-60`
+      : className;
 
-  return <Link href={nextHref} {...props} />;
+  return (
+    <Link
+      {...props}
+      href={nextHref as LinkProps["href"]}
+      aria-disabled={isPending || undefined}
+      tabIndex={isPending ? -1 : tabIndex}
+      className={pendingClassName}
+      onClick={(event) => {
+        if (isPending) {
+          event.preventDefault();
+          return;
+        }
+        onClick?.(event);
+      }}
+    />
+  );
 }
