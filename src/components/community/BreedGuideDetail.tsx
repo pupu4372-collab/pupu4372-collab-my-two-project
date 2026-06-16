@@ -1,4 +1,5 @@
 import type { BreedGuide } from "@/lib/supabase/types";
+import { getBreedGuideArticles } from "@/lib/community/breed-guide-articles";
 import { getAnimalLabel } from "@/lib/community/board-categories";
 import { Link } from "@/i18n/navigation";
 
@@ -12,6 +13,7 @@ interface BreedGuideDetailProps {
 
 export function BreedGuideDetail({ guide, source, isKo, backHref = "/community/breeds", backLabel }: BreedGuideDetailProps) {
   const title = isKo ? guide.breed_name : guide.breed_name_en ?? guide.breed_name;
+  const relatedArticles = getBreedGuideArticles(guide.seo_slug);
 
   return (
     <article className="space-y-8">
@@ -75,6 +77,48 @@ export function BreedGuideDetail({ guide, source, isKo, backHref = "/community/b
           </div>
         )}
       </section>
+
+      {relatedArticles.length > 0 && (
+        <section className="rounded-[2rem] border border-channel-community/30 bg-mint/30 p-5 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-extrabold text-channel-community">
+                {isKo ? "관련 가이드" : "Related guides"}
+              </p>
+              <h2 className="mt-1 text-xl font-extrabold text-primary">
+                {isKo ? `${title} 관리 목차` : `${title} care index`}
+              </h2>
+            </div>
+            <p className="text-xs font-bold leading-relaxed text-plum/65">
+              {isKo
+                ? "품종 페이지는 짧게 유지하고, 자세한 관리는 개별 글에서 확인해요."
+                : "Keep this breed page concise and open detailed care topics as separate guides."}
+            </p>
+          </div>
+          <ul className="mt-4 grid gap-3 md:grid-cols-2">
+            {relatedArticles.map((article, index) => {
+              const localizedArticle = isKo ? article.ko : article.en;
+              return (
+                <li key={article.slug}>
+                  <Link
+                    href={`/community/breeds/${guide.seo_slug}/guides/${article.slug}`}
+                    className="block h-full rounded-[1.5rem] border border-white/70 bg-cream/95 p-4 shadow-sm transition hover:-translate-y-0.5 hover:bg-white"
+                  >
+                    <p className="text-[11px] font-extrabold text-channel-community">
+                      {isKo ? `가이드 #${index + 1}` : `Guide #${index + 1}`}
+                    </p>
+                    <h3 className="mt-1 text-sm font-extrabold text-plum">{localizedArticle.title}</h3>
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-plum/65">{localizedArticle.summary}</p>
+                    <p className="mt-3 text-xs font-extrabold text-channel-community">
+                      {isKo ? "자세히 보기" : "Read guide"} →
+                    </p>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {guide.personality && (
         <section className="rounded-[1.5rem] border border-white/20 bg-cream p-5 shadow-sm">
