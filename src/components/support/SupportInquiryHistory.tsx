@@ -63,52 +63,52 @@ export function SupportInquiryHistory() {
   }, [load]);
 
   return (
-    <section id="support-history" className="relative z-10 mt-10 rounded-[2rem] border border-white/18 bg-white/16 p-6 backdrop-blur-xl md:p-8">
+    <section id="support-history" className="relative z-10 mt-10 rounded-[2rem] border border-[#c5c8d6] bg-[#eef0f7] p-6 shadow-[0_12px_28px_rgba(61,42,74,0.14)] md:p-8">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#ffd7ff]">Inquiry History</p>
-          <h2 className="mt-2 text-2xl font-extrabold text-white">{isKo ? "문의내역" : "Inquiry history"}</h2>
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum">Inquiry History</p>
+          <h2 className="mt-2 text-2xl font-extrabold text-primary">{isKo ? "문의내역" : "Inquiry history"}</h2>
         </div>
         <button
           type="button"
           onClick={() => void load()}
           disabled={loading || !accessToken || isAnonymous}
-          className="self-start rounded-full border border-white/18 bg-white/12 px-4 py-2 text-xs font-extrabold text-white/78 transition hover:bg-white/22 disabled:opacity-50"
+          className="self-start rounded-full border border-[#c5c8d6] bg-white px-4 py-2 text-xs font-extrabold text-primary transition hover:bg-[#f8f9fc] disabled:opacity-50"
         >
           {isKo ? "새로고침" : "Refresh"}
         </button>
       </div>
 
       {!accessToken || isAnonymous ? (
-        <p className="mt-6 rounded-2xl bg-white/10 px-4 py-4 text-sm font-semibold text-white/68">
+        <p className="mt-6 rounded-2xl bg-white px-4 py-4 text-sm font-semibold text-plum">
           {isKo ? "로그인하면 내 문의 진행 현황을 확인할 수 있어요." : "Log in to view your inquiry history."}{" "}
-          <Link href="/login" className="font-extrabold text-[#ffd7ff] underline">
+          <Link href="/login" className="font-extrabold text-primary underline">
             {isKo ? "로그인" : "Log in"}
           </Link>
         </p>
       ) : loading ? (
-        <p className="mt-6 text-sm font-semibold text-white/62">{isKo ? "문의내역 불러오는 중..." : "Loading inquiries..."}</p>
+        <p className="mt-6 text-sm font-semibold text-plum">{isKo ? "문의내역 불러오는 중..." : "Loading inquiries..."}</p>
       ) : error ? (
-        <p className="mt-6 text-sm font-bold text-red-200">{error}</p>
+        <p className="mt-6 text-sm font-bold text-red-600">{error}</p>
       ) : inquiries.length === 0 ? (
-        <p className="mt-6 rounded-2xl bg-white/10 px-4 py-4 text-sm font-semibold text-white/62">
+        <p className="mt-6 rounded-2xl bg-white px-4 py-4 text-sm font-semibold text-plum">
           {isKo ? "아직 접수된 문의가 없습니다." : "No inquiries yet."}
         </p>
       ) : (
         <div className="mt-6 space-y-3">
           {inquiries.map((inquiry) => (
-            <article key={inquiry.id} className="rounded-2xl border border-white/14 bg-white/12 p-4">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-white/50">
-                <span className="rounded-full bg-[#ffd7ff]/24 px-3 py-1 text-[#ffd7ff]">
+            <article key={inquiry.id} className="rounded-2xl border border-[#c5c8d6] bg-white p-4">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-plum/70">
+                <span className="rounded-full bg-[#dde0ea] px-3 py-1 text-primary">
                   {isKo ? STATUS_LABELS[inquiry.status].ko : STATUS_LABELS[inquiry.status].en}
                 </span>
                 <span>{isKo ? CATEGORY_LABELS[inquiry.category].ko : CATEGORY_LABELS[inquiry.category].en}</span>
                 <span>{formatDate(inquiry.created_at)}</span>
               </div>
-              <h3 className="mt-3 text-base font-extrabold text-white">{inquiry.title}</h3>
-              <p className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-white/62">{inquiry.message}</p>
+              <h3 className="mt-3 text-base font-extrabold text-primary">{inquiry.title}</h3>
+              <p className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-plum">{inquiry.message}</p>
               {inquiry.admin_note && (
-                <p className="mt-3 rounded-xl bg-[#ffd7ff]/12 px-3 py-2 text-sm font-semibold leading-6 text-[#ffd7ff]">
+                <p className="mt-3 rounded-xl bg-[#f3edf8] px-3 py-2 text-sm font-semibold leading-6 text-primary">
                   {inquiry.admin_note}
                 </p>
               )}

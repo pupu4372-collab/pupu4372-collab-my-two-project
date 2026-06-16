@@ -12,18 +12,39 @@ const notices = [
     koTitle: "K-사주 펫 모바일 앱 버전 2.1 업데이트 안내",
     enTitle: "K-Saju Pet mobile app v2.1 update",
     date: "2024.05.20",
+    tone: {
+      card: "border-[#d9c7e6] bg-[#f3edf8] hover:bg-[#fbf7ff]",
+      badge: "bg-[#e4d7ee] text-[#5a3a6f]",
+      date: "text-[#5a3a6f]",
+      text: "text-primary",
+      body: "text-plum",
+    },
   },
   {
     type: "Service",
     koTitle: "서버 점검 및 안정화 작업 공지 (5월 22일)",
     enTitle: "Server maintenance notice (May 22)",
     date: "2024.05.15",
+    tone: {
+      card: "border-[#c5c8d6] bg-[#eef0f7] hover:bg-[#f8f9fc]",
+      badge: "bg-[#dde0ea] text-[#4c5268]",
+      date: "text-[#4c5268]",
+      text: "text-primary",
+      body: "text-plum",
+    },
   },
   {
     type: "Notice",
     koTitle: "개인정보 처리방침 개정 안내",
     enTitle: "Privacy policy update notice",
     date: "2024.05.10",
+    tone: {
+      card: "border-[#e9bbc9] bg-[#fff0f4] hover:bg-[#fff8fa]",
+      badge: "bg-[#f5dbe4] text-[#7a4058]",
+      date: "text-[#7a4058]",
+      text: "text-primary",
+      body: "text-plum",
+    },
   },
 ] as const;
 
@@ -36,18 +57,18 @@ export default async function SupportPage({ params }: SupportPageProps) {
       <AppTopNav active="support" />
       <main className="mx-auto mt-8 max-w-7xl">
         <div className="relative px-6 pb-16 pt-16 md:px-14 md:pb-20">
-          <div className="relative z-20 mb-8 flex justify-center gap-2 md:absolute md:right-14 md:top-28 md:mb-0 md:flex-col md:items-end">
+          <div className="relative z-20 mb-8 flex flex-wrap justify-center gap-3 md:mb-10">
             <Link
               href="/terms"
-              className="w-36 rounded-full border border-[#dff7ea]/55 bg-[#dff7ea]/20 px-4 py-2 text-center text-xs font-extrabold text-[#e7fff0] backdrop-blur-xl transition hover:bg-[#dff7ea]/35 hover:text-white"
+              className="w-36 rounded-full border border-[#d9c7e6] bg-[#f3edf8] px-4 py-2 text-center text-xs font-extrabold text-primary shadow-[0_8px_20px_rgba(61,42,74,0.12)] transition hover:bg-[#fbf7ff]"
             >
-              {isKo ? "이용약관" : "Terms"}
+              {isKo ? "📄 이용약관" : "📄 Terms"}
             </Link>
             <Link
               href="/privacy"
-              className="w-36 rounded-full border border-[#dff7ea]/55 bg-[#dff7ea]/20 px-4 py-2 text-center text-xs font-extrabold text-[#e7fff0] backdrop-blur-xl transition hover:bg-[#dff7ea]/35 hover:text-white"
+              className="w-36 rounded-full border border-[#c5c8d6] bg-[#eef0f7] px-4 py-2 text-center text-xs font-extrabold text-primary shadow-[0_8px_20px_rgba(61,42,74,0.12)] transition hover:bg-[#f8f9fc]"
             >
-              {isKo ? "개인정보처리방침" : "Privacy"}
+              {isKo ? "🔒 개인정보처리방침" : "🔒 Privacy"}
             </Link>
           </div>
 
@@ -78,15 +99,18 @@ export default async function SupportPage({ params }: SupportPageProps) {
               </div>
               <div className="mt-6 space-y-4">
                 {notices.map((notice) => (
-                  <article key={notice.koTitle} className="rounded-2xl border border-[#ffe6c7]/45 bg-[#fff4e7]/14 p-5 backdrop-blur-xl">
+                  <article
+                    key={notice.koTitle}
+                    className={`rounded-2xl border p-5 shadow-[0_12px_28px_rgba(61,42,74,0.14)] transition hover:-translate-y-0.5 ${notice.tone.card}`}
+                  >
                     <div className="flex items-center justify-between gap-3">
-                      <span className="rounded-full bg-[#fff1d8]/85 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#5c3d2e]">
+                      <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider ${notice.tone.badge}`}>
                         {notice.type}
                       </span>
-                      <span className="text-xs font-extrabold text-[#ffe6c7]/85">{notice.date}</span>
+                      <span className={`text-xs font-extrabold ${notice.tone.date}`}>{notice.date}</span>
                     </div>
-                    <h3 className="mt-3 text-base font-extrabold text-[#fff8ef]">{isKo ? notice.koTitle : notice.enTitle}</h3>
-                    <p className="mt-2 text-sm font-bold text-[#fff1d8]/88">
+                    <h3 className={`mt-3 text-base font-extrabold ${notice.tone.text}`}>{isKo ? notice.koTitle : notice.enTitle}</h3>
+                    <p className={`mt-2 text-sm font-extrabold ${notice.tone.body}`}>
                       {isKo
                         ? "더욱 빠르고 정확해진 반려동물 사주 분석 로직이 적용되었습니다."
                         : "Updated support details for K-Saju Pet users."}
@@ -100,10 +124,10 @@ export default async function SupportPage({ params }: SupportPageProps) {
               <img
                 src="/stitch/global-design-system/dog/dog-02.jpg"
                 alt=""
-                className="absolute inset-0 h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover brightness-110 contrast-110 saturate-125"
               />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(34,20,48,0.18)_0%,rgba(34,20,48,0.18)_34%,rgba(68,38,86,0.78)_100%)]" />
-              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#2e1744]/95 via-[#4d2a65]/70 to-transparent" />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(34,20,48,0.04)_0%,rgba(34,20,48,0.02)_38%,rgba(68,38,86,0.38)_100%)]" />
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#2e1744]/82 via-[#4d2a65]/38 to-transparent" />
               <div className="relative z-10 flex h-full flex-col">
                 <h2 className="text-2xl font-extrabold">{isKo ? "이달의 이벤트" : "Monthly Event"}</h2>
                 <div className="mt-auto">

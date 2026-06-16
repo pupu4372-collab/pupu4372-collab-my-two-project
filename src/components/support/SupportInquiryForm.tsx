@@ -61,13 +61,13 @@ export function SupportInquiryForm() {
   }
 
   return (
-    <section id="support-inquiry" className="relative z-10 mt-10 rounded-[2rem] border border-white/18 bg-white/16 p-6 backdrop-blur-xl md:p-8">
+    <section id="support-inquiry" className="relative z-10 mt-10 rounded-[2rem] border border-[#d9c7e6] bg-[#f3edf8] p-6 shadow-[0_12px_28px_rgba(61,42,74,0.14)] md:p-8">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#ffd7ff]">1:1 Inquiry</p>
-          <h2 className="mt-2 text-2xl font-extrabold text-white">{isKo ? "사이트 내부 문의 접수" : "Submit an inquiry"}</h2>
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum">1:1 Inquiry</p>
+          <h2 className="mt-2 text-2xl font-extrabold text-primary">{isKo ? "사이트 내부 문의 접수" : "Submit an inquiry"}</h2>
         </div>
-        <p className="max-w-md text-sm font-semibold leading-6 text-white/62">
+        <p className="max-w-md text-sm font-semibold leading-6 text-plum">
           {isKo ? "접수된 문의는 관리자 문의함에 저장됩니다." : "Submitted inquiries are saved to the admin inbox."}
         </p>
       </div>
@@ -76,7 +76,7 @@ export function SupportInquiryForm() {
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className="rounded-2xl border border-white/14 bg-white/12 px-4 py-3 text-sm font-semibold text-white placeholder:text-white/45 focus:border-[#ffd7ff]/60 focus:ring-[#ffd7ff]/25"
+          className="rounded-2xl border border-[#d9c7e6] bg-white px-4 py-3 text-sm font-semibold text-primary placeholder:text-plum/45 focus:border-[#c5b0d8] focus:ring-[#e4d7ee]"
           placeholder={isKo ? "이름 또는 닉네임 (선택)" : "Name or nickname (optional)"}
         />
         <input
@@ -84,13 +84,13 @@ export function SupportInquiryForm() {
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="rounded-2xl border border-white/14 bg-white/12 px-4 py-3 text-sm font-semibold text-white placeholder:text-white/45 focus:border-[#ffd7ff]/60 focus:ring-[#ffd7ff]/25"
+          className="rounded-2xl border border-[#d9c7e6] bg-white px-4 py-3 text-sm font-semibold text-primary placeholder:text-plum/45 focus:border-[#c5b0d8] focus:ring-[#e4d7ee]"
           placeholder={isKo ? "답변 받을 이메일" : "Reply email"}
         />
         <select
           value={category}
           onChange={(event) => setCategory(event.target.value)}
-          className="rounded-2xl border border-white/14 bg-white/12 px-4 py-3 text-sm font-semibold text-white focus:border-[#ffd7ff]/60 focus:ring-[#ffd7ff]/25"
+          className="rounded-2xl border border-[#d9c7e6] bg-white px-4 py-3 text-sm font-semibold text-primary focus:border-[#c5b0d8] focus:ring-[#e4d7ee]"
         >
           {CATEGORY_OPTIONS.map((option) => (
             <option key={option.value} value={option.value} className="text-[#1b1c1a]">
@@ -104,7 +104,7 @@ export function SupportInquiryForm() {
           maxLength={120}
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          className="rounded-2xl border border-white/14 bg-white/12 px-4 py-3 text-sm font-semibold text-white placeholder:text-white/45 focus:border-[#ffd7ff]/60 focus:ring-[#ffd7ff]/25"
+          className="rounded-2xl border border-[#d9c7e6] bg-white px-4 py-3 text-sm font-semibold text-primary placeholder:text-plum/45 focus:border-[#c5b0d8] focus:ring-[#e4d7ee]"
           placeholder={isKo ? "문의 제목" : "Subject"}
         />
         <textarea
@@ -113,12 +113,12 @@ export function SupportInquiryForm() {
           maxLength={2000}
           value={message}
           onChange={(event) => setMessage(event.target.value)}
-          className="min-h-36 rounded-2xl border border-white/14 bg-white/12 px-4 py-3 text-sm font-semibold leading-6 text-white placeholder:text-white/45 focus:border-[#ffd7ff]/60 focus:ring-[#ffd7ff]/25 md:col-span-2"
+          className="min-h-36 rounded-2xl border border-[#d9c7e6] bg-white px-4 py-3 text-sm font-semibold leading-6 text-primary placeholder:text-plum/45 focus:border-[#c5b0d8] focus:ring-[#e4d7ee] md:col-span-2"
           placeholder={isKo ? "문의 내용을 자세히 적어주세요." : "Tell us what happened."}
         />
         <div className="flex flex-col gap-3 md:col-span-2 md:flex-row md:items-center md:justify-between">
           {feedback && (
-            <p className={status === "success" ? "text-sm font-bold text-[#ffd7ff]" : "text-sm font-bold text-red-200"}>
+            <p className={status === "success" ? "text-sm font-bold text-primary" : "text-sm font-bold text-red-600"}>
               {feedback}
             </p>
           )}

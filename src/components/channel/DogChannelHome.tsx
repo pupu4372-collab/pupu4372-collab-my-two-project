@@ -1,6 +1,7 @@
 import type { ChannelContent } from "@/lib/channel/content";
 import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { Link } from "@/i18n/navigation";
+import { SAJU_TRAINING_CARDS, type SajuTrainingElement } from "@/lib/channel/saju-training";
 
 interface DogChannelHomeProps {
   content: ChannelContent;
@@ -12,9 +13,7 @@ interface DogChannelHomeProps {
 
 const IMAGE_BASE = "/stitch/global-design-system/dog";
 
-type ElementKey = "mok" | "hwa" | "to" | "geum" | "su";
-
-const ELEMENT_TAG_CLASS: Record<ElementKey, string> = {
+const ELEMENT_TAG_CLASS: Record<SajuTrainingElement, string> = {
   mok: "bg-green-500/10 text-green-500",
   hwa: "bg-red-500/10 text-red-500",
   to: "bg-amber-500/10 text-amber-500",
@@ -22,8 +21,8 @@ const ELEMENT_TAG_CLASS: Record<ElementKey, string> = {
   su: "bg-slate-800/10 text-slate-800",
 };
 
-function ElementTag({ element, isKo }: { element: ElementKey; isKo: boolean }) {
-  const labels: Record<ElementKey, { ko: string; en: string }> = {
+function ElementTag({ element, isKo }: { element: SajuTrainingElement; isKo: boolean }) {
+  const labels: Record<SajuTrainingElement, { ko: string; en: string }> = {
     mok: { ko: "Mok(木) 기운", en: "Mok (Wood)" },
     hwa: { ko: "Hwa(火) 기운", en: "Hwa (Fire)" },
     to: { ko: "To(土) 기운", en: "To (Earth)" },
@@ -99,49 +98,6 @@ const EXPERT_TIPS = [
   },
 ] as const;
 
-const SAJU_TRAINING_CARDS = [
-  {
-    element: "mok" as const,
-    icon: "🌿",
-    ko: "Mok(木) 산책 훈련",
-    en: "Mok walk training",
-    koDesc: "호기심 많은 아이를 위한 야외 활동",
-    enDesc: "Outdoor routines for curious dogs",
-  },
-  {
-    element: "hwa" as const,
-    icon: "♥",
-    ko: "Hwa(火) 진정 마사지",
-    en: "Hwa calming massage",
-    koDesc: "표현이 큰 아이를 위한 차분한 터치",
-    enDesc: "Calming touch for expressive dogs",
-  },
-  {
-    element: "su" as const,
-    icon: "💧",
-    ko: "Su(水) 안정감",
-    en: "Su calm stability",
-    koDesc: "불안이 많은 아이를 위한 솔루션",
-    enDesc: "For anxious dogs",
-  },
-  {
-    element: "to" as const,
-    icon: "⛰️",
-    ko: "To(土) 포용력",
-    en: "To grounded warmth",
-    koDesc: "사회성을 기르는 그룹 훈련",
-    enDesc: "Group social training",
-  },
-  {
-    element: "geum" as const,
-    icon: "✨",
-    ko: "Geum(金) 규칙",
-    en: "Geum clear structure",
-    koDesc: "단호하고 명확한 신호 교육",
-    enDesc: "Clear cue-based training",
-  },
-] as const;
-
 export function DogChannelHome({
   content,
   featured,
@@ -209,26 +165,31 @@ export function DogChannelHome({
             {isKo ? "모두 보기" : "View all"} <span aria-hidden>→</span>
           </Link>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {SAJU_TRAINING_CARDS.map((item) => (
-            <div
+            <Link
               key={item.element}
-              className="flex min-h-[11rem] flex-col rounded-[1.5rem] border border-white/20 bg-cream p-5 shadow-sm"
+              href={`/dog/training/${item.element}`}
+              className="group flex min-h-[13rem] flex-col rounded-[1.5rem] border border-white/20 bg-cream p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl"
             >
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <ElementTag element={item.element} isKo={isKo} />
-                  <span className="text-2xl leading-none text-channel-dog/35" aria-hidden>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-channel-dog/10 text-xl font-extrabold leading-none text-channel-dog/45 transition group-hover:bg-channel-dog/15" aria-hidden>
                     {item.icon}
                   </span>
                 </div>
-                <h3 className="mt-4 text-sm font-extrabold leading-snug text-primary">{isKo ? item.ko : item.en}</h3>
-                <p className="mt-2 text-xs leading-5 text-plum/65">{isKo ? item.koDesc : item.enDesc}</p>
+                <h3 className="mt-4 text-lg font-extrabold leading-snug text-primary">{isKo ? item.ko : item.en}</h3>
+                <p className="mt-3 text-sm font-semibold leading-7 text-plum/80">{isKo ? item.koDesc : item.enDesc}</p>
               </div>
-              <p className="mt-auto pt-4 text-[11px] font-extrabold text-primary/60">
-                {isKo ? "준비중입니다" : "Coming soon"}
-              </p>
-            </div>
+              <div className="mt-auto flex flex-wrap gap-2 pt-5">
+                {(isKo ? item.koActions : item.enActions).map((action) => (
+                  <span key={action} className="rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-plum shadow-sm">
+                    {action}
+                  </span>
+                ))}
+              </div>
+            </Link>
           ))}
         </div>
       </section>
