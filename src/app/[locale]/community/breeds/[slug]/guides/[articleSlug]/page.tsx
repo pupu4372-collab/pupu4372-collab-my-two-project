@@ -36,7 +36,7 @@ export default async function BreedGuideArticlePage({ params }: PageProps) {
       <article className="mx-auto max-w-4xl space-y-6">
         <header className="rounded-[2rem] border border-white/20 bg-cream p-6 shadow-sm">
           <p className="text-xs font-extrabold text-channel-community">
-            {isKo ? "말티즈 개별 관리 글" : "Maltese care article"}
+            {isKo ? `${breedName} 개별 관리 글` : `${breedName} care article`}
           </p>
           <h1 className="mt-2 text-3xl font-extrabold text-primary">{content.title}</h1>
           <p className="mt-3 text-sm font-bold leading-relaxed text-plum/70">{content.summary}</p>
@@ -80,8 +80,8 @@ export default async function BreedGuideArticlePage({ params }: PageProps) {
           </section>
         ))}
 
-        <section className="rounded-[2rem] border border-channel-community/25 bg-mint/30 p-5 shadow-sm">
-          <div className="space-y-3 text-sm font-bold leading-relaxed text-plum/75">
+        <section className="rounded-[2rem] border border-white/20 bg-cream p-5 shadow-sm">
+          <div className="space-y-3 text-sm font-extrabold leading-relaxed text-plum">
             {content.closing.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}

@@ -137,23 +137,23 @@ function RankingPreviewList({
   return (
     <div
       className={`max-w-full overflow-hidden rounded-[1.75rem] p-4 shadow-sm ${
-        isNight ? "border border-white/20 bg-white/20 backdrop-blur-sm" : "bg-white/55"
+        isNight ? "border border-white/30 bg-white/32 backdrop-blur-sm" : "bg-white/55"
       }`}
     >
-      <p className={`text-xs font-extrabold ${isNight ? "text-white" : "text-primary"}`}>
+      <p className={`text-xs font-extrabold ${isNight ? "text-primary" : "text-primary"}`}>
         {emoji} {label}
       </p>
       {rows.length === 0 ? (
         <p
           className={`mt-2 rounded-xl px-2 py-2 text-[11px] ${
-            isNight ? "bg-white/10 text-white/70" : "bg-channel-community/10 text-plum/45"
+            isNight ? "bg-white/45 font-bold text-plum" : "bg-channel-community/10 text-plum/45"
           }`}
         >
           {emptyText}
         </p>
       ) : (
         <>
-          <p className={`mt-1 text-[10px] font-medium ${isNight ? "text-white/50" : "text-plum/40"}`}>
+          <p className={`mt-1 text-[10px] font-extrabold ${isNight ? "text-plum/80" : "text-plum/40"}`}>
             {rows.length > 3 ? "옆으로 밀어 5위까지 볼 수 있어요." : "\u00a0"}
           </p>
           <div className="-mx-1 mt-1 max-w-full touch-pan-x overflow-x-auto overscroll-x-contain px-1 pb-2 pr-8 [scrollbar-width:thin]">
@@ -180,7 +180,7 @@ function RankingPreviewList({
                       )}
                     </div>
                     <p className="mt-1 truncate text-[11px] font-bold text-plum">{row.title ?? "Pet Show"}</p>
-                    <p className="text-[10px] text-plum/45">♥ {row.like_count}</p>
+                    <p className="text-[10px] font-bold text-plum/70">♥ {row.like_count}</p>
                   </AuthRequiredLink>
                 </li>
               ))}
@@ -275,6 +275,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
     : "bg-white/55";
   const commonPetFortune = getCommonPetDailyFortune(locale);
   const shouldShowMemberFortune = configured && ready && !isAnonymous && dailyFortune;
+  const shouldShowCompatibilityNotice = configured && ready && !isAnonymous && !dailyFortune;
 
   return (
     <div className={isNight ? "min-h-screen overflow-x-hidden bg-transparent" : "min-h-screen overflow-x-hidden bg-dream-sky"}>
@@ -408,15 +409,26 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                   <p className={`mt-3 text-sm font-semibold leading-7 ${isNight ? "text-plum/85" : "text-plum/75"}`}>
                     {commonPetFortune.body}
                   </p>
+                  {shouldShowCompatibilityNotice && (
+                    <p className="mt-4 rounded-2xl bg-white/65 px-4 py-3 text-xs font-extrabold leading-5 text-primary shadow-sm">
+                      {isKo
+                        ? "펫·집사 궁합을 저장하면 내 생년월일 기반 맞춤 운세가 나옵니다."
+                        : "Save a pet-parent compatibility reading to unlock a personalized fortune based on your birth details."}
+                    </p>
+                  )}
                   <AuthRequiredLink
-                    href="/saju"
+                    href={shouldShowCompatibilityNotice ? "/saju/compatibility" : "/saju"}
                     className={`mt-5 inline-flex rounded-full px-4 py-2 text-xs font-extrabold shadow-sm transition hover:scale-105 ${
                       isNight
                         ? "bg-primary text-white shadow-[0_8px_20px_rgba(61,22,79,0.22)] hover:brightness-105"
                         : "bg-primary text-white hover:brightness-105"
                     }`}
                   >
-                    {commonPetFortune.cta}
+                    {shouldShowCompatibilityNotice
+                      ? isKo
+                        ? "궁합 저장하고 맞춤운세 보기"
+                        : "Save compatibility for custom fortune"
+                      : commonPetFortune.cta}
                   </AuthRequiredLink>
                 </div>
               )}
