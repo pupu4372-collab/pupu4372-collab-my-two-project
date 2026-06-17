@@ -104,3 +104,10 @@ export function computeBasicSaju(input: SajuBasicRequest): SajuBasicResponse {
     traits: narrative.traits,
   };
 }
+
+/** KST calendar date (YYYY-MM-DD) → that day's 日柱 pillar (noon KST). */
+export function computeKstDayPillar(dateKst: string): PillarDisplay {
+  const birthUtc = localBirthToUtc(dateKst, "12:00", "Asia/Seoul");
+  const lsr = lunisolar(new Date(birthUtc));
+  return pillarFromChar8(lsr.char8.day);
+}

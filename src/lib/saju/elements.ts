@@ -1,4 +1,4 @@
-import type { ElementDisplay, ElementKey } from "./types";
+import type { ElementDisplay, ElementKey, Locale } from "./types";
 
 const HANJA_TO_ELEMENT: Record<string, ElementKey> = {
   木: "wood",
@@ -128,4 +128,10 @@ export function formatStemBranchLabels(stem: string, branch: string): {
     stemLabel: s ? `${s.hangul} (${s.romanized})` : stem,
     branchLabel: b ? `${b.hangul} (${b.romanized})` : branch,
   };
+}
+
+export function formatBranchSign(branchHanja: string, locale: Locale): string {
+  const b = BRANCH_LABEL[branchHanja];
+  if (!b) return branchHanja;
+  return locale === "ko" ? `${b.hangul}(${branchHanja})` : `${b.romanized} (${branchHanja})`;
 }

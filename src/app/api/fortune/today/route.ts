@@ -1,5 +1,11 @@
-import { buildOwnerDailyFortune } from "@/lib/saju/owner-daily-fortune";
+import {
+  buildCommonPetDailyFortune,
+  buildPetDailyFortune,
+  buildPetFortunePetMeta,
+  type PetProfileForFortune,
+} from "@/lib/saju/pet-daily-fortune";
 import type { Locale } from "@/lib/saju/types";
+import type { PetSpecies } from "@/lib/supabase/types";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -7,36 +13,92 @@ import {
 } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
 
+function isSpecies(value: unknown): value is PetSpecies {
+  return value === "dog" || value === "cat" || value === "other";
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const locale: Locale = searchParams.get("locale") === "en" ? "en" : "ko";
+  const petIdParam = searchParams.get("petId");
   const userId = await getUserIdFromRequest(request);
   const token = getBearerToken(request);
 
   if (!userId || !token) {
-    return NextResponse.json({ fortune: null }, { status: 401 });
+    return NextResponse.json({
+      mode: "common" as const,
+      hasRegisteredPets: false,
+      fortune: buildCommonPetDailyFortune(locale),
+    });
   }
 
   const supabase = createUserSupabaseClient(token);
   if (!supabase) {
-    return NextResponse.json({ fortune: null }, { status: 503 });
+    return NextResponse.json({
+      mode: "common" as const,
+      hasRegisteredPets: false,
+      fortune: buildCommonPetDailyFortune(locale),
+    });
   }
 
-  const { data, error } = await supabase
-    .from("saju_results")
-    .select("birth_basis")
+  const { data: pets, error: petsError } = await supabase
+    .from("pets")
+    .select(
+      "id, name, species, birth_date, birth_time, birth_time_unknown, birth_timezone, profile_image_url"
+    )
     .eq("owner_id", userId)
-    .eq("saju_type", "compatibility")
     .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(5);
 
-  if (error || !data) {
-    return NextResponse.json({ fortune: null });
+  if (petsError || !pets?.length) {
+    return NextResponse.json({
+      mode: "common" as const,
+      hasRegisteredPets: false,
+      fortune: buildCommonPetDailyFortune(locale),
+    });
   }
 
-  const birthBasis = (data as { birth_basis?: Record<string, unknown> }).birth_basis;
-  const fortune = birthBasis ? buildOwnerDailyFortune(birthBasis, locale) : null;
+  type PetRow = {
+    id: string;
+    name: string;
+    species: string;
+    birth_date: string;
+    birth_time: string | null;
+    birth_time_unknown: boolean;
+    birth_timezone: string;
+    profile_image_url: string | null;
+  };
 
-  return NextResponse.json({ fortune });
+  const petList = (pets as PetRow[]).filter((pet) => isSpecies(pet.species));
+  if (petList.length === 0) {
+    return NextResponse.json({
+      mode: "common" as const,
+      hasRegisteredPets: false,
+      fortune: buildCommonPetDailyFortune(locale),
+    });
+  }
+
+  const selected =
+    (petIdParam ? petList.find((pet) => pet.id === petIdParam) : null) ?? petList[0];
+
+  const profiles: PetProfileForFortune[] = petList.map((pet) => ({
+    id: pet.id,
+    name: pet.name,
+    species: pet.species,
+    birthDate: pet.birth_date,
+    birthTime: pet.birth_time,
+    birthTimeUnknown: pet.birth_time_unknown,
+    birthTimezone: pet.birth_timezone,
+    profileImageUrl: pet.profile_image_url,
+  }));
+
+  const selectedProfile = profiles.find((pet) => pet.id === selected.id)!;
+
+  return NextResponse.json({
+    mode: "personalized" as const,
+    hasRegisteredPets: true,
+    petId: selected.id,
+    pets: profiles.map((pet) => buildPetFortunePetMeta(pet, locale)),
+    fortune: buildPetDailyFortune(selectedProfile, locale),
+  });
 }

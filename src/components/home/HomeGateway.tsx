@@ -6,9 +6,9 @@ import { AppTopNav } from "@/components/layout/AppTopNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { GlassCard, PageContainer, SectionHeader } from "@/components/layout/StitchLayout";
 import { OnboardingRoadmap } from "@/components/onboarding/OnboardingRoadmap";
+import { PetDailyFortunePanel, type FortuneTodayState } from "@/components/home/PetDailyFortunePanel";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
-import type { OwnerDailyFortune } from "@/lib/saju/owner-daily-fortune";
 import type { PetShowRankingRow } from "@/lib/supabase/types";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
@@ -72,54 +72,6 @@ const emptyRankingRows: WeeklyRankingRows = {
   cat: [],
   other: [],
 };
-
-const commonPetDailyFortunes = [
-  {
-    koHeadline: "기분 좋은 루틴이 행운을 불러요",
-    koBody: "오늘은 평소 좋아하던 산책길, 놀이, 간식처럼 익숙한 리듬이 아이의 마음을 편안하게 해주는 날이에요. 작은 칭찬을 자주 건네면 교감이 더 깊어집니다.",
-    enHeadline: "A familiar rhythm brings luck",
-    enBody: "Today, pets feel steadier with familiar walks, play, and gentle routines. Offer small praise often, and the bond will feel warmer.",
-  },
-  {
-    koHeadline: "새로운 냄새와 소리에 호기심이 커져요",
-    koBody: "아이들이 주변 변화를 더 민감하게 느낄 수 있어요. 낯선 자극은 천천히 보여주고, 편히 쉴 수 있는 자리를 먼저 챙겨주세요.",
-    enHeadline: "Curiosity rises with new sounds and scents",
-    enBody: "Pets may notice small changes more strongly today. Introduce new stimuli slowly and make sure they have a calm place to rest.",
-  },
-  {
-    koHeadline: "부드러운 말투가 최고의 케어예요",
-    koBody: "오늘은 큰 변화보다 안정감이 중요해요. 이름을 다정하게 불러주고 눈을 맞춰주면 아이가 보호자의 마음을 더 잘 느낍니다.",
-    enHeadline: "A soft voice is the best care",
-    enBody: "Stability matters more than big changes today. Call your pet gently and meet their eyes so they can feel your care clearly.",
-  },
-  {
-    koHeadline: "놀이 시간이 마음을 환하게 해요",
-    koBody: "짧아도 집중해서 놀아주는 시간이 좋은 운을 만들어줘요. 장난감, 노즈워크, 가벼운 움직임으로 에너지를 예쁘게 풀어주세요.",
-    enHeadline: "Playtime brightens the mood",
-    enBody: "Even a short, focused play session can lift the day. Toys, scent games, or light movement help pets release energy in a happy way.",
-  },
-  {
-    koHeadline: "천천히 쉬어가는 날도 좋아요",
-    koBody: "컨디션을 살피며 무리한 외출이나 훈련은 줄여도 괜찮아요. 포근한 자리와 깨끗한 물이 오늘의 작은 행운입니다.",
-    enHeadline: "A slower day can be lucky too",
-    enBody: "It is okay to keep outings or training light while you watch their condition. A cozy spot and fresh water are today's small luck.",
-  },
-];
-
-function getCommonPetDailyFortune(locale: string) {
-  const todayKey = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const seed = [...todayKey].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
-  const item = commonPetDailyFortunes[seed % commonPetDailyFortunes.length];
-  const isKo = locale === "ko";
-
-  return {
-    yearLabel: isKo ? "병오년" : "Byeong-o Year",
-    scopeLabel: isKo ? "오늘 모든 펫에게 공통운세" : "Today's shared fortune for every pet",
-    headline: isKo ? item.koHeadline : item.enHeadline,
-    body: isKo ? item.koBody : item.enBody,
-    cta: isKo ? "내 아이 맞춤운세 보기" : "See my pet's custom fortune",
-  };
-}
 
 function RankingPreviewList({
   emoji,
@@ -203,7 +155,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   const [rankingRows, setRankingRows] = useState<WeeklyRankingRows>(emptyRankingRows);
   const [rankingSource, setRankingSource] = useState<"supabase" | "mock" | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
-  const [dailyFortune, setDailyFortune] = useState<OwnerDailyFortune | null>(null);
+  const [fortuneData, setFortuneData] = useState<FortuneTodayState | null>(null);
 
   useEffect(() => {
     async function loadWeeklyRanking() {
@@ -230,38 +182,65 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   }, []);
 
   useEffect(() => {
-    if (!configured || !ready || isAnonymous || !accessToken) {
-      setDisplayName(null);
-      setDailyFortune(null);
-      return;
-    }
+    if (!ready) return;
 
-    async function loadMemberHomeData() {
+    async function loadFortune() {
       try {
-        const [profileRes, fortuneRes] = await Promise.all([
-          fetch("/api/profile", {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
-          fetch(`/api/fortune/today?locale=${locale}`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
-        ]);
-
-        const data = await profileRes.json();
-        setDisplayName(data.profile?.display_name ?? null);
-
-        if (fortuneRes.ok) {
-          const fortuneData = (await fortuneRes.json()) as { fortune?: OwnerDailyFortune | null };
-          setDailyFortune(fortuneData.fortune ?? null);
+        const params = new URLSearchParams({ locale });
+        const headers: HeadersInit = {};
+        if (accessToken) {
+          headers.Authorization = `Bearer ${accessToken}`;
         }
+
+        const fortuneRes = await fetch(`/api/fortune/today?${params.toString()}`, { headers });
+        if (!fortuneRes.ok) return;
+
+        const data = (await fortuneRes.json()) as FortuneTodayState;
+        setFortuneData(data);
       } catch {
-        setDisplayName(null);
-        setDailyFortune(null);
+        setFortuneData(null);
       }
     }
 
-    void loadMemberHomeData();
-  }, [configured, ready, isAnonymous, accessToken, locale]);
+    void loadFortune();
+  }, [ready, accessToken, locale]);
+
+  async function handleSelectPet(petId: string) {
+    try {
+      const params = new URLSearchParams({ locale, petId });
+      const headers: HeadersInit = {};
+      if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+      }
+      const fortuneRes = await fetch(`/api/fortune/today?${params.toString()}`, { headers });
+      if (!fortuneRes.ok) return;
+      const data = (await fortuneRes.json()) as FortuneTodayState;
+      setFortuneData(data);
+    } catch {
+      // keep previous fortune visible
+    }
+  }
+
+  useEffect(() => {
+    if (!configured || !ready || isAnonymous || !accessToken) {
+      setDisplayName(null);
+      return;
+    }
+
+    async function loadProfile() {
+      try {
+        const profileRes = await fetch("/api/profile", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const data = await profileRes.json();
+        setDisplayName(data.profile?.display_name ?? null);
+      } catch {
+        setDisplayName(null);
+      }
+    }
+
+    void loadProfile();
+  }, [configured, ready, isAnonymous, accessToken]);
 
   const isNight = previewTheme === "night";
   const nightGlassCard = isNight
@@ -273,9 +252,6 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   const nightFortunePanel = isNight
     ? "relative max-w-[470px] border border-[#ddd2e4]/70 bg-[#c9c1d2] pr-24 text-primary shadow-[0_10px_26px_rgba(18,10,29,0.16)]"
     : "bg-white/55";
-  const commonPetFortune = getCommonPetDailyFortune(locale);
-  const shouldShowMemberFortune = configured && ready && !isAnonymous && dailyFortune;
-  const shouldShowCompatibilityNotice = configured && ready && !isAnonymous && !dailyFortune;
 
   return (
     <div className={isNight ? "min-h-screen overflow-x-hidden bg-transparent" : "min-h-screen overflow-x-hidden bg-dream-sky"}>
@@ -341,95 +317,18 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                 </span>
               </div>
 
-              {shouldShowMemberFortune ? (
-                <div className="mt-6">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-extrabold ${
-                        isNight ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary"
-                      }`}
-                    >
-                      {dailyFortune.title}
-                    </span>
-                    <span className={`text-xs font-semibold ${isNight ? "text-plum/50" : "text-plum/45"}`}>
-                      {dailyFortune.dayPillar} · {dailyFortune.elementLabel}
-                    </span>
-                  </div>
-                  <p className={`mt-4 text-base leading-8 md:text-lg ${isNight ? "text-plum/72" : "text-plum/72"}`}>
-                    {dailyFortune.message}
-                  </p>
-                  <div className="mt-5 grid grid-cols-3 gap-3 text-center text-xs">
-                    <div className={`rounded-2xl px-3 py-3 ${isNight ? "bg-lavender/45" : "bg-lavender/45"}`}>
-                      <p className={`font-extrabold ${isNight ? "text-primary" : "text-primary"}`}>
-                        {isKo ? "행운의 수" : "Number"}
-                      </p>
-                      <p className={`mt-1 ${isNight ? "text-channel-saju" : "text-channel-saju"}`}>
-                        {dailyFortune.luckyNumber}
-                      </p>
-                    </div>
-                    <div className={`rounded-2xl px-3 py-3 ${isNight ? "bg-mint/55" : "bg-mint/55"}`}>
-                      <p className={`font-extrabold ${isNight ? "text-primary" : "text-primary"}`}>
-                        {isKo ? "색상" : "Color"}
-                      </p>
-                      <p className={`mt-1 ${isNight ? "text-channel-saju" : "text-channel-saju"}`}>
-                        {dailyFortune.luckyColor}
-                      </p>
-                    </div>
-                    <div className={`rounded-2xl px-3 py-3 ${isNight ? "bg-petal/45" : "bg-petal/45"}`}>
-                      <p className={`font-extrabold ${isNight ? "text-primary" : "text-primary"}`}>
-                        {isKo ? "방향" : "Direction"}
-                      </p>
-                      <p className={`mt-1 ${isNight ? "text-channel-saju" : "text-channel-saju"}`}>
-                        {dailyFortune.luckyDirection}
-                      </p>
-                    </div>
-                  </div>
-                  <p className={`mt-3 text-xs font-semibold ${isNight ? "text-plum/40" : "text-plum/40"}`}>
-                    {dailyFortune.disclaimer}
-                  </p>
-                </div>
+              {fortuneData ? (
+                <PetDailyFortunePanel
+                  data={fortuneData}
+                  isKo={isKo}
+                  isNight={isNight}
+                  onSelectPet={handleSelectPet}
+                />
               ) : (
                 <div className={`mt-6 rounded-[1.5rem] p-5 ${nightFortunePanel}`}>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-[#efe6f2] px-3 py-1 text-xs font-extrabold text-primary">
-                      {commonPetFortune.yearLabel}
-                    </span>
-                    <span className={`text-xs font-bold ${isNight ? "text-plum/80" : "text-plum/70"}`}>
-                      {commonPetFortune.scopeLabel}
-                    </span>
-                  </div>
-                  {isNight && (
-                    <span className="absolute right-7 top-6 flex h-16 w-16 items-center justify-center rounded-full bg-white/80 text-2xl font-semibold tracking-tight text-plum shadow-sm">
-                      <span className="-mr-1 text-base text-[#6b5a48]">♥</span>RK
-                    </span>
-                  )}
-                  <h3 className={`mt-4 text-lg font-extrabold ${isNight ? "text-primary" : "text-primary"}`}>
-                    {commonPetFortune.headline}
-                  </h3>
-                  <p className={`mt-3 text-sm font-semibold leading-7 ${isNight ? "text-plum/85" : "text-plum/75"}`}>
-                    {commonPetFortune.body}
+                  <p className={`text-sm font-semibold ${isNight ? "text-white/75" : "text-plum/60"}`}>
+                    {isKo ? "오늘의 운세를 불러오는 중이에요…" : "Loading today's fortune…"}
                   </p>
-                  {shouldShowCompatibilityNotice && (
-                    <p className="mt-4 rounded-2xl bg-white/65 px-4 py-3 text-xs font-extrabold leading-5 text-primary shadow-sm">
-                      {isKo
-                        ? "펫·집사 궁합을 저장하면 내 생년월일 기반 맞춤 운세가 나옵니다."
-                        : "Save a pet-parent compatibility reading to unlock a personalized fortune based on your birth details."}
-                    </p>
-                  )}
-                  <AuthRequiredLink
-                    href={shouldShowCompatibilityNotice ? "/saju/compatibility" : "/saju"}
-                    className={`mt-5 inline-flex rounded-full px-4 py-2 text-xs font-extrabold shadow-sm transition hover:scale-105 ${
-                      isNight
-                        ? "bg-primary text-white shadow-[0_8px_20px_rgba(61,22,79,0.22)] hover:brightness-105"
-                        : "bg-primary text-white hover:brightness-105"
-                    }`}
-                  >
-                    {shouldShowCompatibilityNotice
-                      ? isKo
-                        ? "궁합 저장하고 맞춤운세 보기"
-                        : "Save compatibility for custom fortune"
-                      : commonPetFortune.cta}
-                  </AuthRequiredLink>
                 </div>
               )}
             </div>
