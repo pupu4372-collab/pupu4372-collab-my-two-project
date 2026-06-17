@@ -61,7 +61,7 @@ export async function GET(request: Request) {
   type PetRow = {
     id: string;
     name: string;
-    species: string;
+    species: PetSpecies;
     birth_date: string;
     birth_time: string | null;
     birth_time_unknown: boolean;
@@ -69,7 +69,9 @@ export async function GET(request: Request) {
     profile_image_url: string | null;
   };
 
-  const petList = (pets as PetRow[]).filter((pet) => isSpecies(pet.species));
+  const petList = (pets as Array<Omit<PetRow, "species"> & { species: string }>).filter(
+    (pet): pet is PetRow => isSpecies(pet.species)
+  );
   if (petList.length === 0) {
     return NextResponse.json({
       mode: "common" as const,
