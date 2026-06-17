@@ -2,6 +2,7 @@
 
 import { AdSlot } from "@/components/ads/AdSlot";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
+import { SajuResultShareRow } from "@/components/k-saju/SajuResultShareRow";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
@@ -209,6 +210,8 @@ export function ZodiacResult({ result, isGuest, onBack }: ZodiacResultProps) {
           </div>
         </dl>
       </GlassCard>
+
+      <SajuResultShareRow kind="zodiac" result={result} />
 
       <AdSlot />
 

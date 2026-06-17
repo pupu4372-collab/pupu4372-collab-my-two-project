@@ -230,11 +230,6 @@ export function LoginButtons({
     }
   }
 
-  function handleKakaoLogin() {
-    setError(null);
-    setMessage(t("kakaoLoginComingSoon"));
-  }
-
   if (!configured) {
     return (
       <div className="glass-card mx-auto max-w-sm rounded-[2rem] border border-white/40 p-7 text-center shadow-sm shadow-primary/5">
@@ -323,9 +318,9 @@ export function LoginButtons({
             </button>
             <button
               type="button"
-              onClick={handleKakaoLogin}
-              disabled={!!loading}
-              className="flex w-full items-center justify-center gap-3 rounded-full bg-[#FEE500] px-6 py-4 text-sm font-extrabold text-[#191919] shadow-sm transition hover:-translate-y-0.5 hover:brightness-105 active:scale-[0.98] disabled:opacity-60"
+              disabled
+              aria-disabled="true"
+              className="flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-full bg-[#FEE500]/55 px-6 py-4 text-sm font-extrabold text-[#191919]/55 shadow-sm"
             >
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191919] text-xs font-black text-[#FEE500]" aria-hidden>
                 K

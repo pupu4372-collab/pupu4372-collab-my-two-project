@@ -43,33 +43,33 @@ function CommonFortunePanel({
 
   if (isJigwanjae(variant)) {
     return (
-      <div className="mt-2 space-y-6">
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <span className="human-premium-label-caps rounded-full border border-[var(--jig-ink)]/10 bg-white/60 px-3 py-1 text-[var(--jig-seal)]">
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
+          <span className="human-premium-label-caps rounded-full border border-[var(--jig-ink)]/10 bg-white/60 px-2.5 py-0.5 text-[var(--jig-seal)]">
             {fortune.dateLabel}
           </span>
-          <span className="text-xs font-semibold text-[var(--jig-muted)]">{fortune.scopeLabel}</span>
+          <span className="text-[11px] font-semibold text-[var(--jig-muted)]">{fortune.scopeLabel}</span>
         </div>
 
         {revealed ? (
-          <JigFortuneContentBox>
-            <JigFortuneWatermark />
-            <div className="relative z-10 space-y-3">
-              <p className="human-premium-label-caps text-[var(--jig-muted)]">
-                {isKo ? "공통 운세" : "Common fortune"}
-              </p>
-              <h3 className="human-premium-serif text-2xl font-semibold text-[var(--jig-ink)]">{fortune.headline}</h3>
-              <p className="text-sm leading-7 text-[var(--jig-muted)]">{fortune.body}</p>
-            </div>
-          </JigFortuneContentBox>
-        ) : (
           <JigFortuneContentBox>
             <JigFortuneWatermark />
             <div className="relative z-10 space-y-2">
               <p className="human-premium-label-caps text-[var(--jig-muted)]">
                 {isKo ? "공통 운세" : "Common fortune"}
               </p>
-              <p className="human-premium-serif text-2xl font-semibold leading-snug text-[var(--jig-ink)]">
+              <h3 className="human-premium-serif text-xl font-semibold text-[var(--jig-ink)]">{fortune.headline}</h3>
+              <p className="text-sm leading-6 text-[var(--jig-muted)]">{fortune.body}</p>
+            </div>
+          </JigFortuneContentBox>
+        ) : (
+          <JigFortuneContentBox>
+            <JigFortuneWatermark />
+            <div className="relative z-10 space-y-1.5">
+              <p className="human-premium-label-caps text-[var(--jig-muted)]">
+                {isKo ? "공통 운세" : "Common fortune"}
+              </p>
+              <p className="human-premium-serif text-xl font-semibold leading-snug text-[var(--jig-ink)]">
                 {isKo ? (
                   <>
                     오늘의 운세를
@@ -89,7 +89,7 @@ function CommonFortunePanel({
         )}
 
         {revealed && showRegisterCta && (
-          <p className="jig-fortune-notice px-4 py-3 text-center text-xs font-semibold leading-5 text-[var(--jig-muted)]">
+          <p className="jig-fortune-notice text-center text-[11px] font-semibold leading-5 text-[var(--jig-muted)]">
             {isKo
               ? "K-사주를 저장하면 내 아이 맞춤 운세가 열려요."
               : "Save a K-Saju reading to unlock your pet's personalized fortune."}
@@ -100,12 +100,12 @@ function CommonFortunePanel({
           <>
             <AuthRequiredLink
               href="/saju"
-              className="jig-fortune-reveal-btn mx-auto flex w-full max-w-xs items-center justify-center gap-4 bg-[var(--jig-ink)] px-8 py-4 text-white transition hover:opacity-90 active:scale-[0.98]"
+              className="jig-fortune-reveal-btn mx-auto flex w-full max-w-xs items-center justify-center gap-3 bg-[var(--jig-ink)] text-white transition hover:opacity-90 active:scale-[0.98]"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-[var(--jig-seal)]">
-                <span className="human-premium-serif text-lg italic text-white">知</span>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center bg-[var(--jig-seal)]">
+                <span className="human-premium-serif text-base italic text-white">知</span>
               </span>
-              <span className="human-premium-label-caps text-base tracking-widest">{fortune.cta}</span>
+              <span className="human-premium-label-caps text-sm tracking-widest">{fortune.cta}</span>
             </AuthRequiredLink>
             <button
               type="button"
@@ -275,7 +275,7 @@ function PersonalizedFortunePanel({
 
   if (jig) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-3">
         <p className="text-center text-sm text-[var(--jig-muted)]">{fortune.dateLabel}</p>
 
         {pets.length > 1 && <JigPetCarousel pets={pets} selectedPetId={selectedPetId} isKo={isKo} onSelectPet={onSelectPet} />}

@@ -28,7 +28,7 @@ export function JigFortuneContentBox({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={`jig-fortune-content-box relative p-8 text-center ${className}`}>{children}</div>;
+  return <div className={`jig-fortune-content-box relative text-center ${className}`}>{children}</div>;
 }
 
 export function JigFortuneWatermark() {
@@ -60,12 +60,12 @@ export function JigFortuneToggleButton({
     <button
       type="button"
       onClick={onClick}
-      className="jig-fortune-reveal-btn mx-auto flex w-full max-w-xs items-center justify-center gap-4 bg-[var(--jig-ink)] px-8 py-4 text-white transition hover:opacity-90 active:scale-[0.98]"
+      className="jig-fortune-reveal-btn mx-auto flex w-full max-w-xs items-center justify-center gap-3 bg-[var(--jig-ink)] text-white transition hover:opacity-90 active:scale-[0.98]"
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-[var(--jig-seal)]">
-        <span className="human-premium-serif text-lg italic text-white">{expanded ? "卷" : "知"}</span>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center bg-[var(--jig-seal)]">
+        <span className="human-premium-serif text-base italic text-white">{expanded ? "卷" : "知"}</span>
       </span>
-      <span className="human-premium-label-caps text-base tracking-widest">{label}</span>
+      <span className="human-premium-label-caps text-sm tracking-widest">{label}</span>
     </button>
   );
 }

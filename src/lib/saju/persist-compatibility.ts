@@ -29,6 +29,7 @@ export async function persistCompatibilityResult(
     birthTimeUnknown: request.petBirthTimeUnknown,
     timezone: request.timezone,
     gender: request.petGender,
+    locale: request.locale,
   });
 
   const petSaju = computeBasicSaju({

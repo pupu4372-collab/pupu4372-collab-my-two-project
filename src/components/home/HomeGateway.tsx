@@ -281,37 +281,41 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             </p>
           </div>
 
-          <div className="pet-fortune-jigwanjae relative overflow-visible p-6 shadow-lg md:p-8">
-            <JigFortuneOrnateCorners />
+          <div className="pet-fortune-jigwanjae relative overflow-visible p-4 shadow-lg md:p-5">
+            <div className="jig-fortune-body">
+              <JigFortuneOrnateCorners />
 
-            <div className="relative mb-6 text-center">
-              <p className="human-premium-label-caps text-[var(--jig-seal)] tracking-widest">
-                {isKo ? "지관재 (知觀齋)" : "Jigwanjae (知觀齋)"}
-              </p>
-              <h2 className="human-premium-serif mt-2 text-3xl font-bold text-[var(--jig-ink)] md:text-4xl">
-                {isKo ? "오늘의 운세" : "Today's fortune"}
-              </h2>
-              <div className="mx-auto my-3 h-0.5 w-12 bg-[var(--jig-ink)]/20" />
-              <p className="text-sm text-[var(--jig-muted)]">
-                {displayName ? `${displayName}${isKo ? "님" : ""}` : isKo ? "집사님" : "Pet parent"}{" "}
-                {isKo ? "행운을 빌어요" : "wishing you luck"}
-              </p>
-            </div>
-
-            {fortuneData ? (
-              <PetDailyFortunePanel
-                data={fortuneData}
-                isKo={isKo}
-                variant="jigwanjae"
-                onSelectPet={handleSelectPet}
-              />
-            ) : (
-              <div className="jig-fortune-content-box relative p-8 text-center">
-                <p className="text-sm font-semibold text-[var(--jig-muted)]">
-                  {isKo ? "오늘의 운세를 불러오는 중이에요…" : "Loading today's fortune…"}
+              <div className="relative z-[2] mb-2 text-center">
+                <p className="human-premium-label-caps text-[var(--jig-seal)] tracking-widest">
+                  {isKo ? "지관재 (知觀齋)" : "Jigwanjae (知觀齋)"}
+                </p>
+                <h2 className="human-premium-serif mt-1.5 text-2xl font-bold text-[var(--jig-ink)] md:text-3xl">
+                  {isKo ? "오늘의 운세" : "Today's fortune"}
+                </h2>
+                <div className="mx-auto my-2 h-0.5 w-10 bg-[var(--jig-ink)]/20" />
+                <p className="text-xs text-[var(--jig-muted)] md:text-sm">
+                  {displayName ? `${displayName}${isKo ? "님" : ""}` : isKo ? "집사님" : "Pet parent"}{" "}
+                  {isKo ? "행운을 빌어요" : "wishing you luck"}
                 </p>
               </div>
-            )}
+
+              {fortuneData ? (
+                <div className="relative z-[2]">
+                  <PetDailyFortunePanel
+                    data={fortuneData}
+                    isKo={isKo}
+                    variant="jigwanjae"
+                    onSelectPet={handleSelectPet}
+                  />
+                </div>
+              ) : (
+                <div className="jig-fortune-content-box relative z-[2] text-center">
+                  <p className="text-sm font-semibold text-[var(--jig-muted)]">
+                    {isKo ? "오늘의 운세를 불러오는 중이에요…" : "Loading today's fortune…"}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 

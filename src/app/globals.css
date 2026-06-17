@@ -371,6 +371,17 @@ html.native-app body {
     0 0 20px rgba(178, 34, 34, 0.2);
 }
 
+.pet-fortune-jigwanjae .jig-fortune-body {
+  position: relative;
+  padding: 1rem 0.7rem 0.45rem;
+}
+
+@media (min-width: 768px) {
+  .pet-fortune-jigwanjae .jig-fortune-body {
+    padding: 1.15rem 0.85rem 0.5rem;
+  }
+}
+
 .pet-fortune-jigwanjae .jig-fortune-frame-corner {
   position: absolute;
   width: 1.65rem;
@@ -497,28 +508,56 @@ html.native-app body {
   }
 }
 
+.pet-fortune-jigwanjae .jig-fortune-body .jig-fortune-frame-corner--tl {
+  left: 0;
+  top: 0;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-body .jig-fortune-frame-corner--tr {
+  right: 0;
+  top: 0;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-body .jig-fortune-frame-corner--bl {
+  left: 0;
+  bottom: 0;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-body .jig-fortune-frame-corner--br {
+  right: 0;
+  bottom: 0;
+}
+
 .pet-fortune-jigwanjae .jig-fortune-content-box {
   isolation: isolate;
   background-color: var(--jig-surface);
   border: 1px solid rgba(34, 34, 34, 0.1);
+  padding: 1rem 1.1rem;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.72),
     0 4px 20px rgba(34, 34, 34, 0.06);
 }
 
+@media (min-width: 768px) {
+  .pet-fortune-jigwanjae .jig-fortune-content-box {
+    padding: 1.15rem 1.25rem;
+  }
+}
+
 .pet-fortune-jigwanjae .jig-fortune-content-box::after {
   content: "";
   position: absolute;
-  inset: 7px;
+  inset: 5px;
   border: 1px solid rgba(34, 34, 34, 0.06);
   pointer-events: none;
 }
 
 .pet-fortune-jigwanjae .jig-fortune-notice {
-  border-radius: 1rem;
+  border-radius: 0.85rem;
   border: 1px solid rgba(34, 34, 34, 0.06);
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 2px 12px rgba(34, 34, 34, 0.04);
+  padding: 0.55rem 0.75rem;
 }
 
 .pet-fortune-jigwanjae .jig-fortune-share-btn {
@@ -562,7 +601,8 @@ html.native-app body {
 
 .pet-fortune-jigwanjae .jig-fortune-reveal-btn {
   position: relative;
-  box-shadow: 0 10px 28px rgba(34, 34, 34, 0.18);
+  padding: 0.7rem 1.35rem;
+  box-shadow: 0 8px 22px rgba(34, 34, 34, 0.16);
 }
 
 .pet-fortune-jigwanjae .jig-fortune-reveal-btn::after {
@@ -615,4 +655,98 @@ html.native-app body {
     background: #ffffff !important;
     color: var(--jig-ink) !important;
   }
+}
+
+/* Compatibility — pet / butler five-element cards */
+.element-compatibility-card {
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 2px 14px rgba(15, 19, 79, 0.08);
+}
+
+.element-compatibility-card--wood {
+  background-color: #e5f4ec;
+  border-color: rgba(74, 155, 110, 0.42);
+}
+
+.element-compatibility-card--fire {
+  background-color: #fceae7;
+  border-color: rgba(199, 92, 92, 0.42);
+}
+
+.element-compatibility-card--earth {
+  background-color: #f7f0e4;
+  border-color: rgba(201, 149, 106, 0.45);
+}
+
+.element-compatibility-card--metal {
+  background-color: #f2f0ed;
+  border-color: rgba(154, 148, 136, 0.45);
+}
+
+.element-compatibility-card--water {
+  background-color: #e6eff6;
+  border-color: rgba(62, 107, 138, 0.42);
+}
+
+.element-compatibility-card__label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.element-compatibility-card--wood .element-compatibility-card__label,
+.element-compatibility-card--wood .element-compatibility-card__element {
+  color: #3d8b62;
+}
+
+.element-compatibility-card--fire .element-compatibility-card__label,
+.element-compatibility-card--fire .element-compatibility-card__element {
+  color: #b84a4a;
+}
+
+.element-compatibility-card--earth .element-compatibility-card__label,
+.element-compatibility-card--earth .element-compatibility-card__element {
+  color: #9a7040;
+}
+
+.element-compatibility-card--metal .element-compatibility-card__label,
+.element-compatibility-card--metal .element-compatibility-card__element {
+  color: #6f6a62;
+}
+
+.element-compatibility-card--water .element-compatibility-card__label,
+.element-compatibility-card--water .element-compatibility-card__element {
+  color: #356889;
+}
+
+.element-compatibility-card__name {
+  margin-top: 0.25rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #3d2a4a;
+}
+
+.element-compatibility-card__element {
+  margin-top: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.element-compatibility-card__meta {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(92, 61, 110, 0.78);
+}
+
+.element-compatibility-card__note {
+  margin-top: 0.75rem;
+  border-top: 1px solid rgba(61, 42, 74, 0.1);
+  padding-top: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: #3d2a4a;
 }

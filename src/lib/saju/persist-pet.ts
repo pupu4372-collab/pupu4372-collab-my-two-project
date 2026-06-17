@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, PetInsert, PetSpecies } from "@/lib/supabase/types";
-import type { Gender } from "./types";
+import type { Gender, Locale } from "./types";
 
 type DbClient = SupabaseClient<Database>;
 export const MAX_PETS_PER_OWNER = 5;
@@ -14,6 +14,13 @@ export interface PetProfileInput {
   birthTimeUnknown: boolean;
   timezone: string;
   gender?: Gender | null;
+  locale?: Locale;
+}
+
+export function petLimitMessage(locale: Locale = "ko"): string {
+  return locale === "en"
+    ? `Pet registration is limited to ${MAX_PETS_PER_OWNER} pets per owner.`
+    : `펫 등록은 집사 1명당 최대 ${MAX_PETS_PER_OWNER}마리까지 가능해요.`;
 }
 
 export async function findOrCreatePet(
@@ -42,7 +49,7 @@ export async function findOrCreatePet(
   }
 
   if ((count ?? 0) >= MAX_PETS_PER_OWNER) {
-    throw new Error(`Pet registration is limited to ${MAX_PETS_PER_OWNER} pets per owner.`);
+    throw new Error(petLimitMessage(input.locale ?? "ko"));
   }
 
   const petPayload: PetInsert = {

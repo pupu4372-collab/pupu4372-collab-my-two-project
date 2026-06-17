@@ -109,7 +109,11 @@ function setOAuthNextCookie(path: string) {
   document.cookie = `auth_oauth_next=${encodeURIComponent(path)}; path=/; max-age=600; SameSite=Lax`;
 }
 
-export async function signInWithGoogle(rememberMe = false) {
+async function signInWithOAuthProvider(
+  provider: "google" | "kakao",
+  rememberMe: boolean,
+  queryParams?: Record<string, string>
+) {
   const client = getSupabaseBrowserClient();
   if (!client) {
     throw new Error("Supabase is not configured.");
@@ -124,12 +128,10 @@ export async function signInWithGoogle(rememberMe = false) {
       : undefined;
 
   const { data, error } = await client.auth.signInWithOAuth({
-    provider: "google",
+    provider,
     options: {
       redirectTo,
-      queryParams: {
-        prompt: "select_account",
-      },
+      ...(queryParams ? { queryParams } : {}),
     },
   });
 
@@ -139,6 +141,14 @@ export async function signInWithGoogle(rememberMe = false) {
   } else {
     throw new Error("OAuth URL was not returned.");
   }
+}
+
+export async function signInWithGoogle(rememberMe = false) {
+  await signInWithOAuthProvider("google", rememberMe, { prompt: "select_account" });
+}
+
+export async function signInWithKakao(rememberMe = false) {
+  await signInWithOAuthProvider("kakao", rememberMe);
 }
 
 export async function sendPasswordResetEmail(email: string, locale: string) {

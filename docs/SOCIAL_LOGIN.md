@@ -2,9 +2,9 @@
 
 K-Saju Pet currently shows Google and Kakao buttons on `/login`.
 
-- Google button: wired to Supabase Google OAuth fallback now.
-- Kakao button: UI placeholder now, native/server login can be wired later.
-- Target app UX: replace Google fallback with native Google sign-in + Supabase `signInWithIdToken`.
+- Google button: Supabase Google OAuth (`signInWithOAuth`).
+- Kakao button: Supabase Kakao OAuth (`signInWithOAuth`), same callback as Google.
+- Target app UX later: native Google/Kakao sign-in + Supabase `signInWithIdToken` on mobile.
 
 ## Current Google fallback
 
@@ -101,11 +101,48 @@ Google native account chooser
 -> existing Supabase session / DB / RLS
 ```
 
-## Kakao placeholder now
+## Kakao (Supabase OAuth)
 
-Kakao currently only displays a "coming soon" message. This avoids a broken redirect flow while we prepare a proper native/server-backed implementation.
+### Enable in Supabase
 
-Future Kakao native flow:
+1. Authentication -> Providers
+2. Enable **Kakao**
+3. **Client ID**: Kakao Developers **REST API key**
+4. **Client Secret**: Kakao Developers -> App -> Security -> **Client secret** (generate if needed)
+5. Save
+
+Uses the same Supabase redirect URL as Google:
+
+```txt
+https://jvvduburvqfcualzmwig.supabase.co/auth/v1/callback
+```
+
+### Kakao Developers
+
+1. [developers.kakao.com](https://developers.kakao.com) -> your app
+2. **카카오 로그인** product ON
+3. **Redirect URI** (exact):
+
+```txt
+https://jvvduburvqfcualzmwig.supabase.co/auth/v1/callback
+```
+
+4. **Web** platform: site domains `https://ksajupet.com`, `http://localhost:3000` (same as Kakao Share)
+5. Consent items: profile (nickname), optional account email
+
+### App code
+
+```ts
+await signInWithKakao(rememberMe);
+// -> supabase.auth.signInWithOAuth({ provider: "kakao", ... })
+// -> /auth/callback (PKCE)
+```
+
+If the browser shows `Unsupported provider: provider is not enabled`, enable Kakao in Supabase Dashboard.
+
+Share uses **JavaScript key** (`NEXT_PUBLIC_KAKAO_JS_KEY`). Login uses **REST API key + Client secret** in Supabase only — no extra env var in the Next.js app.
+
+## Kakao native (later)
 
 ```txt
 Kakao native login

@@ -1,11 +1,13 @@
 "use client";
 
 import { AdSlot } from "@/components/ads/AdSlot";
+import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { BondScoreRing } from "@/components/k-saju/BondScoreRing";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
-import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
+import { SajuResultShareRow } from "@/components/k-saju/SajuResultShareRow";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
+import type { ElementKey } from "@/lib/saju/types";
 
 const RELATION_LABEL: Record<
   CompatibilityResponse["relation"],
@@ -74,25 +76,23 @@ function ElementCard({
   dayPillar: string;
   genderLabel: string;
   genderValue: string;
-  elementKey: CompatibilityResponse["petElement"];
+  elementKey: ElementKey;
   note?: string;
 }) {
-  const accent = ELEMENT_ACCENT[elementKey];
-
   return (
-    <div className={`rounded-2xl border px-4 py-4 ${accent.pill}`}>
-      <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-primary/70">{title}</p>
-      <p className="mt-1 text-base font-bold text-primary">{name}</p>
-      <p className="mt-2 text-lg font-extrabold text-ink">
+    <div className={`element-compatibility-card element-compatibility-card--${elementKey}`}>
+      <p className="element-compatibility-card__label">{title}</p>
+      <p className="element-compatibility-card__name">{name}</p>
+      <p className="element-compatibility-card__element">
         {elementLabel.hanja} {elementLabel.meaning} · {elementLabel.hangul}
       </p>
-      <p className="mt-2 text-xs font-semibold text-plum/75">
+      <p className="element-compatibility-card__meta">
         {genderLabel}: {genderValue}
       </p>
-      <p className="text-xs font-semibold text-plum/75">
+      <p className="element-compatibility-card__meta">
         {dayPillarLabel}: {dayPillar}
       </p>
-      {note && <p className="mt-3 border-t border-primary/10 pt-3 text-xs leading-relaxed text-ink">{note}</p>}
+      {note && <p className="element-compatibility-card__note">{note}</p>}
     </div>
   );
 }
@@ -111,7 +111,7 @@ export function CompatibilityResult({
     result.relationDescription ?? details.find((d) => d.title)?.body ?? result.story;
 
   return (
-    <div className="space-y-5">
+    <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-5 p-6 md:p-8`}>
       <SaveStatusBanner
         locale={result.locale}
         persisted={result.persisted}
@@ -198,6 +198,8 @@ export function CompatibilityResult({
           ))}
         </ul>
       </GlassCard>
+
+      <SajuResultShareRow kind="compatibility" result={result} />
 
       <AdSlot />
     </div>

@@ -67,7 +67,7 @@ export function resolveShareImageUrl(profileImageUrl?: string | null) {
   return `${appBase}${DEFAULT_SHARE_IMAGE_PATH}`;
 }
 
-async function loadKakaoSdk() {
+export async function loadKakaoSdk() {
   const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
   if (!key || typeof window === "undefined") {
     throw new Error("KAKAO_SDK_UNAVAILABLE");

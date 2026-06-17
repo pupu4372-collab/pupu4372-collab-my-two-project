@@ -56,6 +56,7 @@
     "googleLogin": "Continue with Google",
     "googleLoginProcessing": "Opening Google login…",
     "kakaoLogin": "Continue with Kakao",
+    "kakaoLoginProcessing": "Opening Kakao login…",
     "kakaoLoginComingSoon": "Kakao login is coming soon. Please use Google or email login for now.",
     "emailSignup": "Sign up with email",
     "emailLogin": "Email login",
