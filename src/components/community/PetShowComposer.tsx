@@ -1,5 +1,6 @@
 "use client";
 
+import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { compressImageForUpload } from "@/lib/images/upload-compression";
@@ -150,7 +151,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
 
   if (!configured || !ready) {
     return (
-      <section className="pastel-card border-dashed border-channel-community/20 p-8 text-center">
+      <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} border border-dashed border-channel-community/20 p-8 text-center`}>
         <h2 className="text-2xl font-extrabold text-primary">
           📷 {isKo ? "우리아이 자랑 올리기" : "Post to Pet Show"}
         </h2>
@@ -164,7 +165,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
 
   if (isAnonymous) {
     return (
-      <section className="pastel-card border-dashed border-channel-community/30 p-8 text-center">
+      <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} border border-dashed border-channel-community/30 p-8 text-center`}>
         <h2 className="text-2xl font-extrabold text-primary">
           📷 {isKo ? "우리아이 자랑 올리기" : "Post to Pet Show"}
         </h2>
@@ -182,7 +183,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   }
 
   return (
-    <section className="pastel-card p-6 shadow-sm md:p-10">
+    <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6 md:p-10`}>
       <h2 className="text-2xl font-extrabold text-primary">📷 {isKo ? "우리 아이 자랑하기" : "Post to Pet Show"}</h2>
       <p className="mt-2 text-sm leading-6 text-plum/60">
         {isKo
@@ -207,7 +208,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
               }
               fileRef.current?.click();
             }}
-            className="group mt-4 flex min-h-[280px] w-full items-center justify-center overflow-hidden rounded-[2rem] border-2 border-dashed border-outline/25 bg-white/35 text-center transition hover:bg-white/55"
+            className="group mt-4 flex min-h-[280px] w-full items-center justify-center overflow-hidden rounded-[2rem] border-2 border-dashed border-outline/25 bg-white text-center transition hover:bg-sand/40"
           >
             {preview ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -232,7 +233,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
               <button
                 type="button"
                 onClick={() => void chooseNativeImage("photos")}
-                className="rounded-full border border-primary/15 bg-white/70 px-5 py-3 text-sm font-extrabold text-primary transition hover:bg-white"
+                className="rounded-full border border-primary/15 bg-white px-5 py-3 text-sm font-extrabold text-primary transition hover:bg-sand/40"
               >
                 {isKo ? "앨범에서 선택" : "Choose from album"}
               </button>
@@ -262,7 +263,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
                 className={
                   petSpecies === value
                     ? "rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-sm"
-                    : "rounded-full border border-primary/15 bg-white/55 px-6 py-3 text-sm font-extrabold text-primary transition hover:bg-lavender/45"
+                    : "rounded-full border border-primary/15 bg-white px-6 py-3 text-sm font-extrabold text-primary transition hover:bg-sand/50"
                 }
               >
                 {emoji} {label}

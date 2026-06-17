@@ -1,3 +1,4 @@
+import { COMMUNITY_SOLID_CARD_CLASS, COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import type { PetShowRankingRow, RankingPeriod } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
@@ -23,7 +24,7 @@ export function PetShowRanking({ rows, period, source }: PetShowRankingProps) {
   const label = period === "week" ? (isKo ? "주간 Top 5" : "Weekly Top 5") : isKo ? "실시간 Top 5" : "Realtime Top 5";
 
   return (
-    <section className="rounded-3xl border border-channel-community/25 bg-white/50 p-6">
+    <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6`}>
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-lg font-bold text-channel-community">
           📸 Pet Show · {label}
@@ -72,12 +73,12 @@ function SpeciesList({
   locale: string;
 }) {
   return (
-    <div className="rounded-2xl bg-white/55 p-4">
+    <div className={`${COMMUNITY_SOLID_CARD_CLASS} rounded-2xl p-4`}>
       <h3 className="text-sm font-bold text-plum">
         {emoji} {title}
       </h3>
       {rows.length === 0 ? (
-        <div className="mt-3 rounded-2xl border border-dashed border-channel-community/25 bg-white/60 px-4 py-4 text-center">
+        <div className="mt-3 rounded-2xl border border-dashed border-channel-community/25 bg-white px-4 py-4 text-center">
           <p className="text-xs leading-relaxed text-plum/60">{emptyText}</p>
           <Link
             href="/community/pet-show/upload"
@@ -130,7 +131,7 @@ export function PetShowWeeklySpeciesRanking({
   const isMonthly = period === "month";
 
   return (
-    <section className="rounded-3xl border border-channel-community/25 bg-channel-community/10 p-5">
+    <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-5`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-extrabold text-channel-community">
@@ -153,7 +154,7 @@ export function PetShowWeeklySpeciesRanking({
           </p>
         </div>
         {source === "mock" && (
-          <span className="rounded-full bg-white/70 px-3 py-1 text-xs text-plum/50">
+          <span className="rounded-full border border-white/35 bg-white px-3 py-1 text-xs text-plum/60">
             {isKo ? "데모 데이터" : "Demo data"}
           </span>
         )}

@@ -1,5 +1,6 @@
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
+import { COMMUNITY_SOLID_CARD_CLASS } from "@/components/community/CommunityDetailSurface";
 import { GlassCard, SectionHeader } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
 import { fetchWeeklyPetShowSpeciesRankings } from "@/lib/community/ranking";
@@ -69,7 +70,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
             <Link
               key={section.href}
               href={section.href}
-              className="whitespace-nowrap rounded-full bg-cream px-6 py-3 text-sm font-extrabold text-primary shadow-sm transition hover:bg-white"
+              className="whitespace-nowrap rounded-full border border-white/35 bg-white/95 px-6 py-3 text-sm font-extrabold text-primary shadow-sm transition hover:bg-white"
             >
               {section.title}
             </Link>
@@ -106,12 +107,11 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
             </Link>
           </GlassCard>
 
-          <GlassCard className="flex min-h-[560px] min-w-0 flex-col border border-white/20 bg-white/12 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-md sm:p-5">
+          <GlassCard variant="solid" className="flex min-h-[560px] min-w-0 flex-col p-4 sm:p-5">
             <SectionHeader
               eyebrow={isKo ? "Ranking" : "Ranking"}
               title={isKo ? "종별 Top 5" : "Top 5 by species"}
               subtitle={isKo ? "사진을 올리면 주간 랭킹에 참여할 수 있어요." : "Upload a photo to join the weekly ranking."}
-              onDark
             />
             <div className="mt-5 grid flex-1 gap-3 overflow-y-auto pr-1">
               {([
@@ -119,17 +119,17 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                 ["🐈", isKo ? "고양이" : "Cat", weeklyRanking.rows.cat],
                 ["🐾", isKo ? "렙타일(다른동물)" : "Other Animals", weeklyRanking.rows.other],
               ] as const).map(([emoji, label, rows]) => (
-                <div key={label} className="max-w-full overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/20 p-4 shadow-sm backdrop-blur-sm">
-                  <p className="text-xs font-extrabold text-white">
+                <div key={label} className="max-w-full overflow-hidden rounded-[1.75rem] border border-white/35 bg-sand/40 p-4 shadow-sm">
+                  <p className="text-xs font-extrabold text-primary">
                     {emoji} {label} Top 5
                   </p>
                   {rows.length === 0 ? (
-                    <p className="mt-2 rounded-xl bg-white/10 px-2 py-2 text-[11px] text-white/70">
+                    <p className="mt-2 rounded-xl bg-white px-2 py-2 text-[11px] text-plum/65">
                       {isKo ? "첫 사진을 기다려요" : "Waiting for photos"}
                     </p>
                   ) : (
                     <>
-                      <p className="mt-1 text-[10px] font-medium text-white/50">
+                      <p className="mt-1 text-[10px] font-medium text-plum/50">
                         {rows.length > 3 ? "옆으로 밀어 5위까지 볼 수 있어요." : "\u00a0"}
                       </p>
                       <div className="-mx-1 mt-1 max-w-full touch-pan-x overflow-x-auto overscroll-x-contain px-1 pb-2 pr-8 [scrollbar-width:thin]">
@@ -181,7 +181,6 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                 ? "강아지·고양이·렙타일(다른동물) 채널에서 환경·식단·건강 가이드를 모았어요."
                 : "Browse dog, cat, and reptile & other pet care guides."
             }
-            onDark
           />
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {([
@@ -210,7 +209,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
               <Link
                 key={card.href}
                 href={card.href}
-                className="block rounded-[2rem] border border-white/15 bg-cream px-5 py-6 shadow-sm transition hover:-translate-y-1 hover:bg-white"
+                className={`block ${COMMUNITY_SOLID_CARD_CLASS} px-5 py-6 transition hover:-translate-y-1 hover:bg-white`}
               >
                 <span className="text-3xl" aria-hidden>
                   {card.emoji}
@@ -227,14 +226,13 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
             eyebrow={isKo ? "Boards" : "Boards"}
             title={isKo ? "집사님들과 나누는 이야기" : "Stories from pet parents"}
             subtitle={isKo ? "Q&A, 꿀팁, 자유게시판, 품종별 경험담을 목적에 맞게 둘러보세요." : "Explore Q&A, tips, free board, and breed experiences."}
-            onDark
           />
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {sections.map((section) => (
               <Link
                 key={section.href}
                 href={section.href}
-                className="block rounded-[2rem] border border-white/15 bg-cream px-5 py-6 shadow-sm transition hover:-translate-y-1 hover:bg-white"
+                className={`block ${COMMUNITY_SOLID_CARD_CLASS} px-5 py-6 transition hover:-translate-y-1 hover:bg-white`}
               >
                 <span className="text-3xl" aria-hidden>
                   {section.emoji}
@@ -249,7 +247,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
         <p className="text-center">
           <Link
             href="/saju"
-            className="inline-flex rounded-full bg-white/85 px-5 py-2.5 text-sm font-extrabold text-primary shadow-sm transition hover:bg-white hover:brightness-105"
+            className="inline-flex rounded-full border border-white/35 bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-sm transition hover:brightness-105"
           >
             {t("toSaju")}
           </Link>

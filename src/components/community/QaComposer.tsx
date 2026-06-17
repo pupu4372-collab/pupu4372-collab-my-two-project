@@ -1,5 +1,6 @@
 "use client";
 
+import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import type { CommunityBoardKind } from "@/lib/community/qa-feed";
 import {
@@ -57,7 +58,7 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
 
   if (isAnonymous) {
     return (
-      <div className="glass-card rounded-[2rem] border border-dashed border-channel-community/30 px-5 py-5 text-center">
+      <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} border border-dashed border-channel-community/30 px-5 py-5 text-center`}>
         <p className="text-sm text-plum/70">{isKo ? "글을 남기려면 로그인이 필요해요." : "Please log in to post."}</p>
         <Link
           href="/login"
@@ -124,7 +125,7 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
   }
 
   return (
-    <form id="board-composer" onSubmit={handleSubmit} className="pastel-card scroll-mt-24 space-y-5 p-6">
+    <form id="board-composer" onSubmit={handleSubmit} className={`${COMMUNITY_SOLID_SURFACE_CLASS} scroll-mt-24 space-y-5 p-6`}>
       <div>
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community">
           Community

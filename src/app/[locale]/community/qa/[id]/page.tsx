@@ -1,3 +1,4 @@
+import { CommunityDetailSurface, COMMUNITY_DETAIL_BODY_CLASS, COMMUNITY_DETAIL_META_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PostDetailActions } from "@/components/community/PostDetailActions";
 import { QaComments } from "@/components/community/QaComments";
 import { ChannelShell } from "@/components/layout/ChannelShell";
@@ -44,8 +45,9 @@ export default async function QaDetailPage({ params }: QaDetailPageProps) {
         { href: "/community", label: isKo ? "커뮤니티" : "Community" },
       ]}
     >
-      <article className="space-y-5">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-plum/45">
+      <CommunityDetailSurface>
+        <article className="space-y-5">
+          <div className={COMMUNITY_DETAIL_META_CLASS}>
           {post.is_pinned && (
             <span className="rounded-full bg-gold/40 px-2 py-0.5 font-bold text-plum">
               {isKo ? "고정" : "Pinned"}
@@ -68,9 +70,7 @@ export default async function QaDetailPage({ params }: QaDetailPageProps) {
         <PostDetailActions post={post} board="qa" />
 
         {post.content && (
-          <p className="whitespace-pre-wrap rounded-[1.5rem] bg-white/50 px-5 py-5 text-sm leading-relaxed text-plum/75">
-            {post.content}
-          </p>
+          <p className={COMMUNITY_DETAIL_BODY_CLASS}>{post.content}</p>
         )}
 
         {post.tags.length > 0 && (
@@ -85,18 +85,19 @@ export default async function QaDetailPage({ params }: QaDetailPageProps) {
             ))}
           </div>
         )}
-      </article>
+        </article>
 
-      <div className="mt-8 border-t border-plum/10 pt-6">
-        <QaComments
-          postId={post.id}
-          postAuthorId={post.author_id}
-          adoptedAnswerId={post.adopted_answer_id}
-          isAnswered={post.is_answered}
-          initialComments={comments}
-          enableAdopt
-        />
-      </div>
+        <div className="mt-8 border-t border-plum/10 pt-6">
+          <QaComments
+            postId={post.id}
+            postAuthorId={post.author_id}
+            adoptedAnswerId={post.adopted_answer_id}
+            isAnswered={post.is_answered}
+            initialComments={comments}
+            enableAdopt
+          />
+        </div>
+      </CommunityDetailSurface>
     </ChannelShell>
   );
 }

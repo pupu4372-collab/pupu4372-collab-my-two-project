@@ -10,9 +10,18 @@ export function PageContainer({ className = "", children, ...props }: DivProps) 
   );
 }
 
-export function GlassCard({ className = "", children, ...props }: DivProps) {
+type GlassCardProps = DivProps & {
+  variant?: "glass" | "solid";
+};
+
+export function GlassCard({ className = "", variant = "glass", children, ...props }: GlassCardProps) {
+  const surface =
+    variant === "solid"
+      ? "rounded-[2rem] border border-white/35 bg-white/95 p-5 shadow-[0_12px_40px_rgba(15,19,79,0.16)] md:p-7"
+      : "glass-card rounded-[2rem] p-5 shadow-sm md:p-7";
+
   return (
-    <div className={`glass-card rounded-[2rem] p-5 shadow-sm md:p-7 ${className}`} {...props}>
+    <div className={`${surface} ${className}`} {...props}>
       {children}
     </div>
   );

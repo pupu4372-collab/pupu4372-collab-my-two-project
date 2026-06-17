@@ -1,5 +1,6 @@
 "use client";
 
+import { COMMUNITY_SOLID_CARD_CLASS } from "@/components/community/CommunityDetailSurface";
 import { getCountryLabel } from "@/lib/i18n/countries";
 import type { CommunityPost } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
@@ -83,7 +84,7 @@ export function PetShowFeed({ refreshKey = 0 }: PetShowFeedProps) {
       <ul className="columns-1 gap-6 space-y-6 sm:columns-2 lg:columns-3">
         {posts.map((post) => (
           <li key={post.id} className="break-inside-avoid">
-            <article className="pastel-card p-3 shadow-sm transition hover:-translate-y-1 hover:bg-white/80">
+            <article className={`${COMMUNITY_SOLID_CARD_CLASS} p-3 transition hover:-translate-y-1 hover:bg-white`}>
               <Link href={`/community/pet-show/${post.id}`} className="block">
                 <div className="flex overflow-hidden rounded-2xl bg-channel-community/10 text-4xl">
                   {post.image_urls?.[0] ? (

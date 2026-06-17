@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  COMMUNITY_CHIP_IDLE_CLASS,
+  COMMUNITY_CHIP_IDLE_SM_CLASS,
+  COMMUNITY_SOLID_CARD_CLASS,
+  COMMUNITY_SOLID_SURFACE_CLASS,
+} from "@/components/community/CommunityDetailSurface";
 import { EmptyStatePanel, getBoardEmptyState } from "@/components/ui/EmptyStatePanel";
 import { PET_CATEGORY_FILTER_TAGS } from "@/lib/community/qa-mock-data";
 import type { CommunityBoardKind } from "@/lib/community/qa-feed";
@@ -110,7 +116,11 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
   const isQa = board === "qa";
 
   if (loading) {
-    return <p className="pastel-card p-6 text-center text-sm text-plum/60">{isKo ? "게시글 불러오는 중…" : "Loading posts…"}</p>;
+    return (
+      <p className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6 text-center text-sm text-plum/70`}>
+        {isKo ? "게시글 불러오는 중…" : "Loading posts…"}
+      </p>
+    );
   }
 
   return (
@@ -120,7 +130,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
           🔎
         </span>
         <input
-          className="w-full rounded-full border border-white/70 bg-white/65 py-4 pl-12 pr-28 text-sm font-semibold text-primary shadow-sm outline-none backdrop-blur focus:border-channel-community/30 focus:ring-4 focus:ring-mint/60"
+          className="w-full rounded-full border border-white/35 bg-white py-4 pl-12 pr-28 text-sm font-semibold text-primary shadow-sm outline-none focus:border-channel-community/30 focus:ring-4 focus:ring-mint/60"
           placeholder={isKo ? "궁금한 내용을 검색해보세요" : "Search title or content"}
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
@@ -147,7 +157,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
               className={
                 animalTag === item.id
                   ? "whitespace-nowrap rounded-full bg-channel-community px-5 py-2.5 text-xs font-extrabold text-white shadow-sm"
-                  : "whitespace-nowrap rounded-full bg-white/60 px-5 py-2.5 text-xs font-bold text-plum/70 shadow-sm transition hover:bg-white"
+                  : COMMUNITY_CHIP_IDLE_CLASS
               }
             >
               {isKo ? item.ko : item.en}
@@ -169,7 +179,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
               className={
                 categoryTag === item.id
                   ? "whitespace-nowrap rounded-full bg-mint/80 px-4 py-2 text-xs font-extrabold text-primary shadow-sm"
-                  : "whitespace-nowrap rounded-full bg-white/50 px-4 py-2 text-xs font-bold text-plum/65 shadow-sm transition hover:bg-white"
+                  : COMMUNITY_CHIP_IDLE_SM_CLASS
               }
             >
               {isKo ? item.ko : item.en}
@@ -188,7 +198,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
               className={
                 subCategoryTag === item.id
                   ? "whitespace-nowrap rounded-full bg-sand px-4 py-2 text-xs font-extrabold text-primary shadow-sm"
-                  : "whitespace-nowrap rounded-full bg-white/50 px-4 py-2 text-xs font-bold text-plum/65 shadow-sm transition hover:bg-white"
+                  : COMMUNITY_CHIP_IDLE_SM_CLASS
               }
             >
               {isKo ? item.ko : item.en}
@@ -207,7 +217,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
               className={
                 animalTag === item.id
                   ? "whitespace-nowrap rounded-full bg-channel-community px-5 py-2.5 text-xs font-extrabold text-white shadow-sm"
-                  : "whitespace-nowrap rounded-full bg-white/60 px-5 py-2.5 text-xs font-bold text-plum/70 shadow-sm transition hover:bg-white"
+                  : COMMUNITY_CHIP_IDLE_CLASS
               }
             >
               {isKo ? item.ko : item.en}
@@ -216,7 +226,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2 text-xs text-plum/50">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
         {source === "mock" && (
           <span>{isKo ? "데모 게시글 (Supabase 연동 시 DB 데이터)" : "Demo posts (DB data when Supabase is connected)"}</span>
         )}
@@ -234,6 +244,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
         <EmptyStatePanel
           {...getBoardEmptyState(board, isKo, { q, tag: animalTag })}
           compact
+          solidSurface
           suggestions={
             q || animalTag !== "all" || categoryTag !== "all" || subCategoryTag !== "all"
               ? undefined
@@ -269,7 +280,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
           <li key={post.id}>
             <Link
               href={communityPostPath(board, post)}
-              className="pastel-card flex h-full flex-col justify-between p-5 shadow-sm transition hover:-translate-y-1 hover:bg-white/80"
+              className={`${COMMUNITY_SOLID_CARD_CLASS} flex h-full flex-col justify-between p-5 transition hover:-translate-y-1 hover:bg-white`}
             >
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -336,7 +347,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
           type="button"
           onClick={() => void load(nextCursor)}
           disabled={loadingMore}
-          className="w-full rounded-full border border-channel-community/30 bg-white/55 py-3 text-sm font-semibold text-channel-community disabled:opacity-60"
+          className="w-full rounded-full border border-channel-community/30 bg-white py-3 text-sm font-semibold text-channel-community shadow-sm disabled:opacity-60"
         >
           {loadingMore ? (isKo ? "불러오는 중..." : "Loading...") : isKo ? "더 보기" : "Load more"}
         </button>

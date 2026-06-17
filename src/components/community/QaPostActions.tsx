@@ -97,7 +97,7 @@ export function QaPostActions({
 
   if (editing) {
     return (
-      <form onSubmit={savePost} className="rounded-[1.5rem] bg-white/65 p-4 shadow-sm">
+      <form onSubmit={savePost} className="rounded-[1.5rem] border border-white/35 bg-white p-4 shadow-sm">
         <div className="space-y-3">
           <input
             className="pastel-input"
@@ -127,7 +127,7 @@ export function QaPostActions({
                 setError(null);
               }}
               disabled={loading}
-              className="rounded-full bg-white/70 px-4 py-2 text-sm font-bold text-plum/65"
+              className="rounded-full border border-white/35 bg-white px-4 py-2 text-sm font-bold text-plum/75"
             >
               {isKo ? "취소" : "Cancel"}
             </button>
@@ -151,7 +151,7 @@ export function QaPostActions({
         type="button"
         onClick={() => setEditing(true)}
         disabled={loading}
-        className="rounded-full bg-white/70 px-4 py-2 text-sm font-bold text-channel-community shadow-sm"
+        className="rounded-full border border-white/35 bg-white px-4 py-2 text-sm font-bold text-channel-community shadow-sm"
       >
         {isKo ? "수정" : "Edit"}
       </button>

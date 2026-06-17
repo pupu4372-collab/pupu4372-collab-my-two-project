@@ -42,7 +42,7 @@ export default async function PetShowRankingPage({ params, searchParams }: PageP
         { href: "/community", label: isKo ? "커뮤니티" : "Community" },
       ]}
     >
-      <div className="mb-5 inline-flex rounded-full bg-white/75 p-1.5 shadow-sm">
+      <div className="mb-5 inline-flex rounded-full border border-white/35 bg-white/95 p-1.5 shadow-sm">
         <Link
           href="/community/pet-show/ranking?period=week"
           className={`rounded-full px-5 py-2.5 text-sm font-extrabold transition ${

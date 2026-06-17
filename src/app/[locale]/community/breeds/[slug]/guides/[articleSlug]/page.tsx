@@ -1,3 +1,4 @@
+import { COMMUNITY_SOLID_CARD_CLASS, COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { Link } from "@/i18n/navigation";
 import { getBreedGuideArticle } from "@/lib/community/breed-guide-articles";
@@ -34,7 +35,7 @@ export default async function BreedGuideArticlePage({ params }: PageProps) {
       ]}
     >
       <article className="mx-auto max-w-4xl space-y-6">
-        <header className="rounded-[2rem] border border-white/20 bg-cream p-6 shadow-sm">
+        <header className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6`}>
           <p className="text-xs font-extrabold text-channel-community">
             {isKo ? `${breedName} 개별 관리 글` : `${breedName} care article`}
           </p>
@@ -42,14 +43,14 @@ export default async function BreedGuideArticlePage({ params }: PageProps) {
           <p className="mt-3 text-sm font-bold leading-relaxed text-plum/70">{content.summary}</p>
         </header>
 
-        <nav className="rounded-[2rem] border border-channel-community/25 bg-mint/30 p-5 shadow-sm" aria-label={isKo ? "글 목차" : "Article contents"}>
+        <nav className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-5`} aria-label={isKo ? "글 목차" : "Article contents"}>
           <p className="text-xs font-extrabold text-channel-community">{isKo ? "목차" : "Contents"}</p>
           <ol className="mt-3 grid gap-2 md:grid-cols-2">
             {content.sections.map((section, index) => (
               <li key={section.heading}>
                 <a
                   href={`#section-${index + 1}`}
-                  className="block rounded-2xl bg-cream/95 px-4 py-3 text-sm font-extrabold text-plum shadow-sm transition hover:bg-white"
+                  className="block rounded-2xl border border-white/35 bg-sand/45 px-4 py-3 text-sm font-extrabold text-plum transition hover:bg-white"
                 >
                   {section.heading}
                 </a>
@@ -59,7 +60,7 @@ export default async function BreedGuideArticlePage({ params }: PageProps) {
         </nav>
 
         {content.sections.map((section, index) => (
-          <section key={section.heading} id={`section-${index + 1}`} className="rounded-[2rem] border border-white/20 bg-cream p-6 shadow-sm">
+          <section key={section.heading} id={`section-${index + 1}`} className={`${COMMUNITY_SOLID_CARD_CLASS} p-6`}>
             <h2 className="text-2xl font-extrabold text-primary">{section.heading}</h2>
             {section.children && (
               <ul className="mt-4 grid gap-2 sm:grid-cols-3">
@@ -80,7 +81,7 @@ export default async function BreedGuideArticlePage({ params }: PageProps) {
           </section>
         ))}
 
-        <section className="rounded-[2rem] border border-white/20 bg-cream p-5 shadow-sm">
+        <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-5`}>
           <div className="space-y-3 text-sm font-extrabold leading-relaxed text-plum">
             {content.closing.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
@@ -90,7 +91,7 @@ export default async function BreedGuideArticlePage({ params }: PageProps) {
             <Link href={breedHref} className="rounded-full bg-channel-community px-5 py-3 text-sm font-extrabold text-white shadow-sm">
               {isKo ? `${breedName} 품종 페이지로 돌아가기` : `Back to ${breedName} breed page`}
             </Link>
-            <Link href="/saju" className="rounded-full border border-channel-community/30 bg-cream px-5 py-3 text-sm font-extrabold text-channel-community shadow-sm transition hover:bg-white">
+            <Link href="/saju" className="rounded-full border border-channel-community/30 bg-white px-5 py-3 text-sm font-extrabold text-channel-community shadow-sm transition hover:bg-sand/40">
               {isKo ? "우리 아이 사주 보기" : "Pet Saju reading"}
             </Link>
           </div>

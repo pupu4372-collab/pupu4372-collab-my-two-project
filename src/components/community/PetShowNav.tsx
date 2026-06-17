@@ -22,7 +22,7 @@ export function PetShowNav() {
 
   return (
     <nav
-      className="sticky top-3 z-20 grid grid-cols-4 gap-2 rounded-2xl border border-channel-community/20 bg-white/90 p-1.5 text-sm font-extrabold text-plum shadow-md backdrop-blur-sm"
+      className="sticky top-3 z-20 grid grid-cols-4 gap-2 rounded-2xl border border-white/35 bg-white/95 p-1.5 text-sm font-extrabold text-plum shadow-md"
       aria-label={isKo ? "우리아이 자랑 메뉴" : "Pet Show menu"}
     >
       {TABS.map((tab) => {

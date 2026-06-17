@@ -55,7 +55,7 @@ export function PostDetailActions({ post, board, initialSaved = false }: PostDet
           {isKo ? difficultyLabel.ko : difficultyLabel.en}
         </span>
       )}
-      <span className="text-xs text-plum/45">
+      <span className="text-xs font-semibold text-plum/65">
         {isKo ? `저장 ${saveCount}` : `${saveCount} saves`}
       </span>
       {configured && !isAnonymous && (board === "qa" || board === "tips") && (
@@ -63,7 +63,7 @@ export function PostDetailActions({ post, board, initialSaved = false }: PostDet
           type="button"
           disabled={loading}
           onClick={() => void toggleSave()}
-          className="rounded-full border border-channel-community/25 bg-white/60 px-4 py-1.5 text-xs font-bold text-channel-community disabled:opacity-60"
+          className="rounded-full border border-channel-community/25 bg-white px-4 py-1.5 text-xs font-bold text-channel-community disabled:opacity-60"
         >
           {saved ? (isKo ? "저장됨 ★" : "Saved ★") : isKo ? "저장하기" : "Save"}
         </button>

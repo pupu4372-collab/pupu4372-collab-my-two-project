@@ -383,8 +383,13 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
           )}
         </section>
 
-        <div className={embedded ? "" : "px-1"}>
-          <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant={embedded ? "pastelCompact" : "default"} />
+        <div className={embedded ? "" : "rounded-[2rem] bg-white p-6 shadow-sm"}>
+          <PrivacyConsent
+            checked={consent}
+            onChange={setConsent}
+            locale={locale}
+            variant={embedded ? "pastelCompact" : "plain"}
+          />
         </div>
 
         {error && (

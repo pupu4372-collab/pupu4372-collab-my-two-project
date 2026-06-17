@@ -72,12 +72,12 @@ export function PetShowPostActions({
       {commentsHref ? (
         <Link
           href={commentsHref}
-          className="rounded-full bg-white/65 px-3 py-1.5 text-sm font-bold text-plum/65 transition hover:bg-white hover:text-plum"
+          className="rounded-full border border-white/35 bg-white px-3 py-1.5 text-sm font-bold text-plum/75 transition hover:bg-sand/50 hover:text-primary"
         >
           💬 {isKo ? "댓글 보기" : "Comments"} {commentCount}
         </Link>
       ) : (
-        <span className="rounded-full bg-white/50 px-3 py-1.5 text-sm font-bold text-plum/55">💬 {commentCount}</span>
+        <span className="rounded-full border border-white/35 bg-white px-3 py-1.5 text-sm font-bold text-plum/65">💬 {commentCount}</span>
       )}
       <ReportButton postId={postId} compact />
     </div>

@@ -6,7 +6,7 @@ interface PrivacyConsentProps {
   checked: boolean;
   onChange: (value: boolean) => void;
   locale: "en" | "ko";
-  variant?: "default" | "pastel" | "pastelCompact";
+  variant?: "default" | "pastel" | "pastelCompact" | "card" | "plain";
   /** pet: 반려동물 사주·펫사진 / human: 본인 프리미엄 리포트 */
   audience?: "pet" | "human";
 }
@@ -56,22 +56,27 @@ export function PrivacyConsent({
   audience = "pet",
 }: PrivacyConsentProps) {
   const t = (audience === "human" ? HUMAN_COPY : PET_COPY)[locale];
-  const wrap =
-    variant === "pastelCompact"
-      ? "space-y-1.5 rounded-2xl bg-lavender/25 p-3"
-      : variant === "pastel"
-      ? "space-y-2 rounded-2xl bg-lavender/25 p-4"
-      : "oriental-card space-y-2 p-4";
-  const labelText =
-    variant === "pastelCompact"
-      ? "text-xs font-semibold leading-relaxed text-plum"
-      : "text-sm font-semibold leading-relaxed text-plum";
-  const detailText =
-    variant === "pastelCompact"
-      ? "pl-6 text-[11px] font-medium leading-relaxed text-plum/75"
-      : "pl-7 text-xs font-medium leading-relaxed text-plum/75";
-  const linkText =
-    variant === "pastelCompact" ? "pl-6 text-[11px] font-semibold text-plum/75" : "pl-7 text-xs font-semibold text-plum/75";
+  const isCompact = variant === "pastelCompact";
+  const isPlain = variant === "plain";
+  const isCard = variant === "default" || variant === "card";
+  const wrap = isPlain
+    ? "space-y-2"
+    : isCompact
+      ? "space-y-1.5 rounded-2xl border border-plum/10 bg-cream/95 p-3 shadow-sm"
+      : isCard
+        ? "space-y-2 rounded-[2rem] bg-white p-4 shadow-sm"
+        : "space-y-2 rounded-2xl border border-plum/10 bg-cream/95 p-4 shadow-sm";
+  const labelText = isCompact
+    ? "text-xs font-semibold leading-relaxed text-primary"
+    : "text-sm font-semibold leading-relaxed text-primary";
+  const detailText = isPlain
+    ? "pl-7 text-xs font-medium leading-relaxed text-on-surface-variant"
+    : isCompact
+      ? "pl-6 text-[11px] font-medium leading-relaxed text-on-surface-variant"
+      : "pl-7 text-xs font-medium leading-relaxed text-on-surface-variant";
+  const linkText = isCompact
+    ? "pl-6 text-[11px] font-semibold text-plum/80"
+    : "pl-7 text-xs font-semibold text-plum/80";
 
   return (
     <div className={wrap}>
@@ -87,11 +92,11 @@ export function PrivacyConsent({
       </label>
       <p className={detailText}>{t.detail}</p>
       <p className={linkText}>
-        <Link href="/privacy" className="underline hover:text-plum">
+        <Link href="/privacy" className="underline decoration-plum/30 hover:text-primary">
           {t.privacy}
         </Link>
         {" · "}
-        <Link href="/terms" className="underline hover:text-plum">
+        <Link href="/terms" className="underline decoration-plum/30 hover:text-primary">
           {t.terms}
         </Link>
       </p>

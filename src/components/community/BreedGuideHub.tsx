@@ -1,3 +1,4 @@
+import { COMMUNITY_CHIP_IDLE_CLASS, COMMUNITY_SOLID_CARD_CLASS } from "@/components/community/CommunityDetailSurface";
 import type { BreedGuide, PetAnimalType } from "@/lib/supabase/types";
 import { getAnimalLabel } from "@/lib/community/board-categories";
 import { Link } from "@/i18n/navigation";
@@ -31,7 +32,7 @@ export function BreedGuideHub({ guides, source, activeAnimal, isKo }: BreedGuide
               className={
                 active
                   ? "whitespace-nowrap rounded-full bg-channel-community px-5 py-2.5 text-xs font-extrabold text-white shadow-sm"
-                  : "whitespace-nowrap rounded-full bg-cream px-5 py-2.5 text-xs font-bold text-plum/80 shadow-sm transition hover:bg-white"
+                  : COMMUNITY_CHIP_IDLE_CLASS
               }
             >
               {isKo ? tab.ko : tab.en}
@@ -47,16 +48,16 @@ export function BreedGuideHub({ guides, source, activeAnimal, isKo }: BreedGuide
       )}
 
       {guides.length === 0 ? (
-        <p className="rounded-[2rem] border border-white/15 bg-cream p-8 text-center text-sm text-plum/75 shadow-sm">
+        <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-8 text-center text-sm text-plum/75`}>
           {isKo ? "아직 등록된 가이드가 없어요." : "No guides published yet."}
-        </p>
+        </div>
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {guides.map((guide) => (
             <li key={guide.id}>
               <Link
                 href={`/community/breeds/${guide.seo_slug}`}
-                className="flex h-full flex-col rounded-[2rem] border border-white/15 bg-cream p-4 shadow-sm transition hover:-translate-y-1 hover:bg-white"
+                className={`flex h-full flex-col ${COMMUNITY_SOLID_CARD_CLASS} p-4 transition hover:-translate-y-1 hover:bg-white`}
               >
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="rounded-full bg-channel-community/10 px-2.5 py-0.5 text-[10px] font-extrabold text-channel-community">

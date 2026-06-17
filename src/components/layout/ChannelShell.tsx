@@ -110,6 +110,7 @@ export function ChannelShell({
             : theme === "reptile"
               ? "reptile"
               : "home";
+  const heroSolid = theme === "community";
   const links =
     rightLinks ??
     ([
@@ -124,7 +125,14 @@ export function ChannelShell({
       <PageContainer>
         {topBar && <div className="mb-5">{topBar}</div>}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <Link href={backHref} className="rounded-full bg-white/60 px-4 py-2 text-sm font-extrabold text-plum shadow-sm transition hover:bg-white">
+          <Link
+            href={backHref}
+            className={
+              heroSolid
+                ? "rounded-full border border-white/35 bg-white/95 px-4 py-2 text-sm font-extrabold text-primary shadow-sm transition hover:bg-white"
+                : "rounded-full bg-white/60 px-4 py-2 text-sm font-extrabold text-plum shadow-sm transition hover:bg-white"
+            }
+          >
             {backLabel ?? tc("backHome")}
           </Link>
           <nav className="flex flex-wrap items-center justify-end gap-2">
@@ -132,14 +140,21 @@ export function ChannelShell({
               <Link
                 key={`${link.href}-${link.label}`}
                 href={link.href}
-                className="rounded-full bg-[#efe6ff] px-3 py-1.5 text-xs font-extrabold text-[#56326f] shadow-sm transition hover:bg-white hover:text-primary"
+                className={
+                  heroSolid
+                    ? "rounded-full border border-white/30 bg-white/95 px-3 py-1.5 text-xs font-extrabold text-primary shadow-sm transition hover:bg-white"
+                    : "rounded-full bg-[#efe6ff] px-3 py-1.5 text-xs font-extrabold text-[#56326f] shadow-sm transition hover:bg-white hover:text-primary"
+                }
               >
                 {link.label}
               </Link>
             ))}
           </nav>
         </div>
-        <GlassCard className={`relative overflow-hidden border-2 ${t.border} px-6 py-8 md:px-10`}>
+        <GlassCard
+          variant={heroSolid ? "solid" : "glass"}
+          className={`relative overflow-hidden ${heroSolid ? "" : `border-2 ${t.border}`} px-6 py-8 md:px-10`}
+        >
           <div className={`absolute -right-10 -top-14 h-44 w-44 rounded-full ${t.bg} blur-3xl`} />
           <div className={heroMedia ? "relative grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(260px,42%)] sm:items-center" : "relative"}>
             <div>
@@ -155,7 +170,13 @@ export function ChannelShell({
                 </p>
               )}
               <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary md:text-5xl">{title}</h1>
-              {subtitle && <p className="mt-3 text-sm font-extrabold leading-relaxed text-plum">{subtitle}</p>}
+              {subtitle && (
+                <p
+                  className={`mt-3 text-sm font-semibold leading-relaxed ${heroSolid ? "text-on-surface-variant" : "text-plum"}`}
+                >
+                  {subtitle}
+                </p>
+              )}
             </div>
             {heroMedia && <div>{heroMedia}</div>}
           </div>

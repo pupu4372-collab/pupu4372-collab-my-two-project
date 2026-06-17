@@ -102,7 +102,7 @@ export function QaComments({
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-plum">
+        <h2 className="font-bold text-primary">
           {isKo ? "댓글" : "Comments"} {comments.length}
           {isAnswered && (
             <span className="ml-2 text-xs font-normal text-mint">
@@ -110,14 +110,14 @@ export function QaComments({
             </span>
           )}
         </h2>
-        <Link href={listHref} className="text-sm text-plum/55 underline hover:text-plum">
+        <Link href={listHref} className="text-sm font-semibold text-plum/70 underline hover:text-primary">
           {isKo ? "목록으로" : "Back to list"}
         </Link>
       </div>
 
       <ul className="space-y-3">
         {comments.length === 0 && (
-          <li className="rounded-2xl border border-dashed border-plum/15 bg-white/40 px-4 py-5 text-sm text-plum/55">
+          <li className="rounded-2xl border border-dashed border-plum/15 bg-sand/40 px-4 py-5 text-sm text-on-surface-variant">
             {isKo ? "아직 댓글이 없어요. 첫 답변을 남겨보세요." : "No comments yet. Be the first to answer."}
           </li>
         )}
@@ -128,8 +128,8 @@ export function QaComments({
               key={comment.id}
               className={
                 isAdopted
-                  ? "rounded-2xl border-2 border-mint/50 bg-mint/15 px-4 py-3"
-                  : "rounded-2xl bg-white/55 px-4 py-3"
+                  ? "rounded-2xl border-2 border-mint/50 bg-mint/20 px-4 py-3"
+                  : "rounded-2xl border border-plum/8 bg-white px-4 py-3 shadow-sm"
               }
             >
               {isAdopted && (
@@ -137,9 +137,9 @@ export function QaComments({
                   {isKo ? "채택된 답변" : "Adopted answer"}
                 </p>
               )}
-              <p className="text-sm leading-relaxed text-plum/75">{comment.content}</p>
+              <p className="text-sm leading-relaxed text-ink">{comment.content}</p>
               <div className="mt-2 flex flex-wrap items-center gap-3">
-                <p className="text-xs text-plum/40">{formatDate(comment.created_at)}</p>
+                <p className="text-xs text-plum/55">{formatDate(comment.created_at)}</p>
                 {canAdopt && !isAdopted && (
                   <button
                     type="button"
@@ -168,7 +168,7 @@ export function QaComments({
       {configured && !isAnonymous ? (
         <form onSubmit={handleSubmit} className="space-y-3">
           <textarea
-            className="pastel-input min-h-[100px] w-full resize-y rounded-[1.5rem] border-transparent bg-sand/50 px-4 py-3 text-sm"
+            className="pastel-input min-h-[100px] w-full resize-y rounded-[1.5rem] border border-plum/10 bg-white px-4 py-3 text-sm text-ink"
             placeholder={isKo ? "답변을 입력해 주세요" : "Write your answer"}
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -186,7 +186,7 @@ export function QaComments({
           </button>
         </form>
       ) : (
-        <p className="text-sm text-plum/55">
+        <p className="text-sm text-on-surface-variant">
           {isKo ? "답변을 남기려면 " : "Please "}
           <Link href="/login" className="font-semibold text-channel-community underline">
             {isKo ? "로그인" : "log in"}

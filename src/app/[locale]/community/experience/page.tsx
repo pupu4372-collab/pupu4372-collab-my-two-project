@@ -1,5 +1,6 @@
 "use client";
 
+import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { QaBoard } from "@/components/community/QaBoard";
 import { QaComposer } from "@/components/community/QaComposer";
 import { ChannelShell } from "@/components/layout/ChannelShell";
@@ -27,7 +28,7 @@ export default function CommunityExperiencePage() {
         { href: "/community/tips", label: isKo ? "꿀팁" : "Tips" },
       ]}
     >
-      <div className="mb-6 rounded-[1.5rem] bg-white/55 p-4 text-sm leading-relaxed text-plum/70 shadow-sm">
+      <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} mb-6 p-4 text-sm leading-relaxed text-plum/75`}>
         {isKo
           ? "렙타일(다른동물)은 토끼, 햄스터, 새, 파충류, 물고기, 소동물처럼 여러 종을 포괄합니다. 제목이나 내용에 종 이름을 함께 적어주면 검색과 분류에 도움이 됩니다."
           : "Other animals include rabbits, hamsters, birds, reptiles, fish, and small pets. Add the species name in the title or body for easier discovery."}

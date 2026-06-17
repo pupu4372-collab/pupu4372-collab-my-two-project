@@ -1,4 +1,5 @@
 import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
+import { COMMUNITY_SOLID_CARD_CLASS, COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PetShowFeed } from "@/components/community/PetShowFeed";
 import { PetShowShell } from "@/components/community/PetShowShell";
 import { SectionHeader } from "@/components/layout/StitchLayout";
@@ -40,7 +41,6 @@ export default async function PetShowSnapzonePage({ params }: PageProps) {
             eyebrow={isKo ? "Weekly Ranking" : "Weekly Ranking"}
             title={isKo ? "이번 주의 인기 펫 Top 5" : "This week's popular pets"}
             subtitle={isKo ? "가장 많은 사랑을 받은 사진을 가로로 넘겨보세요." : "Swipe through the photos that received the most love."}
-            onDark
             action={
               <div className="flex flex-wrap gap-2">
                 <AuthRequiredLink
@@ -60,7 +60,7 @@ export default async function PetShowSnapzonePage({ params }: PageProps) {
           />
           <div className="-mx-5 mt-6 flex snap-x gap-4 overflow-x-auto px-5 pb-5 hide-scrollbar md:mx-0 md:px-0">
             {rankingRows.map((row, index) => (
-              <article key={row.id} className={`pastel-card shrink-0 snap-start overflow-hidden ${index === 0 ? "w-[280px] md:w-[400px]" : "w-[240px]"}`}>
+              <article key={row.id} className={`${COMMUNITY_SOLID_CARD_CLASS} shrink-0 snap-start overflow-hidden ${index === 0 ? "w-[280px] md:w-[400px]" : "w-[240px]"}`}>
                 <div className={index === 0 ? "aspect-[1.45] overflow-hidden bg-channel-community/10" : "aspect-square overflow-hidden bg-channel-community/10"}>
                   {row.image_urls?.[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -77,7 +77,7 @@ export default async function PetShowSnapzonePage({ params }: PageProps) {
               </article>
             ))}
             {rankingRows.length === 0 && (
-              <div className="pastel-card w-full p-8 text-center text-sm text-plum/60">
+              <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} w-full p-8 text-center text-sm text-plum/70`}>
                 {isKo ? "이번 주 첫 사진을 기다리고 있어요." : "Waiting for the first photo this week."}
               </div>
             )}

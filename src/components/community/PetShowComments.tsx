@@ -63,21 +63,21 @@ export function PetShowComments({
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-plum">{isKo ? "댓글" : "Comments"} {comments.length}</h2>
-        <Link href={backHref} className="text-sm text-plum/55 underline hover:text-plum">
+        <h2 className="font-bold text-primary">{isKo ? "댓글" : "Comments"} {comments.length}</h2>
+        <Link href={backHref} className="text-sm text-plum/70 underline hover:text-primary">
           {isKo ? "목록으로" : "Back to list"}
         </Link>
       </div>
 
       <ul className="space-y-3">
         {comments.length === 0 && (
-          <li className="rounded-2xl border border-dashed border-plum/15 bg-white/40 px-4 py-5 text-sm text-plum/55">
+          <li className="rounded-2xl border border-dashed border-plum/15 bg-sand/40 px-4 py-5 text-sm text-plum/70">
             {isKo ? "첫 댓글을 남겨보세요." : "Leave the first comment."}
           </li>
         )}
         {comments.map((comment) => (
-          <li key={comment.id} className="rounded-2xl bg-white/55 px-4 py-3">
-            <p className="text-sm leading-relaxed text-plum/75">{comment.content}</p>
+          <li key={comment.id} className="rounded-2xl border border-white/35 bg-sand/45 px-4 py-3">
+            <p className="text-sm leading-relaxed text-ink">{comment.content}</p>
             <div className="mt-2 flex flex-wrap items-center gap-3">
               <p className="text-xs text-plum/40">{formatDate(comment.created_at)}</p>
               {userId !== comment.author_id && (
@@ -101,7 +101,7 @@ export function PetShowComments({
       )}
 
       {configured && !isAnonymous && (
-        <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl bg-white/55 p-4">
+        <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-white/35 bg-white p-4 shadow-sm">
           <textarea
             className="pastel-input min-h-[90px] resize-y"
             value={content}

@@ -1,3 +1,4 @@
+import { CommunityDetailSurface, COMMUNITY_DETAIL_BODY_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PetShowComments } from "@/components/community/PetShowComments";
 import { PetShowPostActions } from "@/components/community/PetShowPostActions";
 import { PetShowShell } from "@/components/community/PetShowShell";
@@ -29,6 +30,7 @@ export default async function PetShowDetailPage({ params }: PetShowDetailPagePro
         { href: "/community", label: isKo ? "커뮤니티" : "Community" },
       ]}
     >
+      <CommunityDetailSurface>
       <article className="space-y-5">
         <div className="flex aspect-video items-center justify-center overflow-hidden rounded-[1.75rem] bg-channel-community/10">
           {post.image_urls?.[0] ? (
@@ -50,7 +52,7 @@ export default async function PetShowDetailPage({ params }: PetShowDetailPagePro
         )}
 
         {post.content && (
-          <p className="text-sm leading-relaxed text-plum/75">{post.content}</p>
+          <p className={COMMUNITY_DETAIL_BODY_CLASS}>{post.content}</p>
         )}
 
         <div className="flex flex-wrap items-center gap-3">
@@ -61,13 +63,14 @@ export default async function PetShowDetailPage({ params }: PetShowDetailPagePro
             commentsHref="#comments"
             disabled={post.id.startsWith("mock-")}
           />
-          <span className="rounded-full bg-white/50 px-3 py-1.5 text-sm font-bold text-plum/55">👀 {post.view_count}</span>
+          <span className="rounded-full border border-white/35 bg-white px-3 py-1.5 text-sm font-bold text-plum/65">👀 {post.view_count}</span>
         </div>
       </article>
 
       <div id="comments" className="mt-8 scroll-mt-24 border-t border-plum/10 pt-6">
         <PetShowComments postId={post.id} initialComments={comments} />
       </div>
+      </CommunityDetailSurface>
     </PetShowShell>
   );
 }

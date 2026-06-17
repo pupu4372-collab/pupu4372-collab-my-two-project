@@ -26,6 +26,7 @@ interface EmptyStatePanelProps {
   suggestions?: EmptyStateSuggestion[];
   className?: string;
   compact?: boolean;
+  solidSurface?: boolean;
 }
 
 export function getBoardEmptyState(
@@ -292,12 +293,15 @@ export function EmptyStatePanel({
   suggestions,
   className = "",
   compact = false,
+  solidSurface = false,
 }: EmptyStatePanelProps) {
   return (
     <section
-      className={`relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-cream via-surface-container-low to-secondary-container/20 text-center ${
-        compact ? "px-5 py-8" : "px-6 py-10 md:px-10"
-      } ${className}`}
+      className={`relative overflow-hidden rounded-[2rem] text-center ${
+        solidSurface
+          ? "border border-white/35 bg-white/95 shadow-[0_12px_40px_rgba(15,19,79,0.16)]"
+          : "bg-gradient-to-br from-cream via-surface-container-low to-secondary-container/20"
+      } ${compact ? "px-5 py-8" : "px-6 py-10 md:px-10"} ${className}`}
     >
       <div
         className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-lavender/30 blur-3xl"
@@ -335,7 +339,7 @@ export function EmptyStatePanel({
           <div className="mt-10 grid w-full gap-4 md:grid-cols-2">
             {suggestions.map((item) => (
               <Link key={item.href} href={item.href} className="text-left">
-                <GlassCard className="h-full p-5 transition hover:-translate-y-0.5 hover:bg-white/80">
+                <GlassCard variant={solidSurface ? "solid" : "glass"} className="h-full p-5 transition hover:-translate-y-0.5 hover:bg-white">
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-secondary-container text-lg">
                     <span aria-hidden>{item.icon}</span>
                   </div>

@@ -1,3 +1,4 @@
+import { CommunityDetailSurface, COMMUNITY_DETAIL_BODY_CLASS, COMMUNITY_DETAIL_META_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PostDetailActions } from "@/components/community/PostDetailActions";
 import { QaComments } from "@/components/community/QaComments";
 import { QaPostActions } from "@/components/community/QaPostActions";
@@ -39,8 +40,9 @@ export default async function TipsPostDetailPage({ params }: PageProps) {
       backLabel={isKo ? "← 꿀팁게시판" : "← Tips Board"}
       rightLinks={[{ href: "/", label: isKo ? "홈" : "Home" }, { href: "/community", label: isKo ? "커뮤니티" : "Community" }]}
     >
-      <article className="space-y-5">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-plum/45">
+      <CommunityDetailSurface>
+        <article className="space-y-5">
+          <div className={COMMUNITY_DETAIL_META_CLASS}>
           {animalLabel && (
             <span className="rounded-full bg-sand/70 px-2 py-0.5 font-bold text-plum/70">{animalLabel}</span>
           )}
@@ -63,17 +65,14 @@ export default async function TipsPostDetailPage({ params }: PageProps) {
           initialContent={post.content ?? ""}
         />
         <PostDetailActions post={post} board="tips" />
-        {post.content && (
-          <p className="whitespace-pre-wrap rounded-[1.5rem] bg-white/50 px-5 py-5 text-sm leading-relaxed text-plum/75">
-            {post.content}
-          </p>
-        )}
-      </article>
+        {post.content && <p className={COMMUNITY_DETAIL_BODY_CLASS}>{post.content}</p>}
+        </article>
+        <div className="mt-8 border-t border-plum/10 pt-6">
+          <QaComments postId={post.id} initialComments={comments} board="tips" listHref="/community/tips" />
+        </div>
+      </CommunityDetailSurface>
       <div className="mt-8">
         <AdSlot />
-      </div>
-      <div className="mt-8 border-t border-plum/10 pt-6">
-        <QaComments postId={post.id} initialComments={comments} board="tips" listHref="/community/tips" />
       </div>
     </ChannelShell>
   );
