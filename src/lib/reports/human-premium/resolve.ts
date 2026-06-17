@@ -37,12 +37,24 @@ function isCurrentReportTemplate(payload: HumanPremiumReportPayload): boolean {
   const luckCycle = payload.saju.chapters.find(
     (chapter) => chapter.id === "luck-cycles"
   );
-  const sectionIds = new Set(luckCycle?.sections.map((section) => section.id));
+  const sajuResult = payload.saju.chapters.find(
+    (chapter) => chapter.id === "saju-result"
+  );
+  const luckSectionIds = new Set(luckCycle?.sections.map((section) => section.id));
+  const resultSectionIds = new Set(sajuResult?.sections.map((section) => section.id));
   return (
     hasIntro &&
     Boolean(luckCycle) &&
-    sectionIds.has("cycle-daewoon") &&
-    sectionIds.has("cycle-shinsal")
+    Boolean(sajuResult) &&
+    luckSectionIds.has("cycle-daewoon") &&
+    luckSectionIds.has("cycle-shinsal") &&
+    luckSectionIds.has("cycle-month-12") &&
+    !luckSectionIds.has("result-lifetime") &&
+    resultSectionIds.has("result-year-fortune") &&
+    resultSectionIds.has("result-temperament") &&
+    resultSectionIds.has("result-final-advice") &&
+    !resultSectionIds.has("result-year") &&
+    !resultSectionIds.has("result-year-summary")
   );
 }
 

@@ -337,7 +337,7 @@ export function HumanPremiumAdminTest() {
           <option value="female">여</option>
         </select>
 
-        <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant="pastel" />
+        <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant="pastel" audience="human" />
 
         <label className="flex items-center gap-2 text-sm text-plum/80">
           <input

@@ -100,6 +100,8 @@ export interface HumanPremiumFactsBlock {
 export interface BuildHumanPremiumFactsOptions {
   timezone: string;
   fortuneYear?: number;
+  fortuneMonths?: number[];
+  /** @deprecated use fortuneMonths */
   summerMonths?: number[];
   gender?: DaewoonGender | null;
 }
@@ -164,7 +166,10 @@ export function buildHumanPremiumFacts(
 
   const { strong, weak } = pickStrongWeak(elements);
   const fortuneYear = options.fortuneYear ?? new Date().getFullYear();
-  const summerMonths = options.summerMonths ?? [6, 7, 8];
+  const fortuneMonths =
+    options.fortuneMonths ??
+    options.summerMonths ??
+    Array.from({ length: 12 }, (_, index) => index + 1);
 
   const chartSipseong = computeChartSipseong(dayStem, saju.pillars, locale);
   const sipseong: HumanPremiumSipseongFact[] = (
@@ -185,7 +190,7 @@ export function buildHumanPremiumFacts(
     locale
   );
 
-  const monthlyLuck = summerMonths.map((month) => {
+  const monthlyLuck = fortuneMonths.map((month) => {
     const pillar = computeMonthLuckPillar(
       fortuneYear,
       month,
@@ -343,7 +348,7 @@ export function formatFactsBlockForPrompt(facts: HumanPremiumFactsBlock): string
         ? "세운-원국 상호작용: 특이 합·충·형·해·파 없음"
         : "Seun–natal interactions: no major clash/harmony signals",
     "",
-    isKo ? "[여름 월운]" : "[Summer monthly luck]",
+    isKo ? "[월운 1~12월]" : "[Monthly luck Jan–Dec]",
     ...facts.monthlyLuck.map(
       (row) =>
         `- ${row.label}: ${row.pillar} | ${isKo ? "천간" : "Stem"} ${row.stemTenGod}, ${isKo ? "지지" : "Branch"} ${row.branchTenGod}`

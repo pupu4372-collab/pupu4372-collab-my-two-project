@@ -7,9 +7,11 @@ interface PrivacyConsentProps {
   onChange: (value: boolean) => void;
   locale: "en" | "ko";
   variant?: "default" | "pastel" | "pastelCompact";
+  /** pet: 반려동물 사주·펫사진 / human: 본인 프리미엄 리포트 */
+  audience?: "pet" | "human";
 }
 
-const COPY = {
+const PET_COPY = {
   en: {
     label:
       "I agree to the collection and use of my pet's birth data and pet photos for K-Saju analysis and service features.",
@@ -27,13 +29,33 @@ const COPY = {
   },
 };
 
+const HUMAN_COPY = {
+  en: {
+    label:
+      "I agree to the collection and use of my birth data and email for premium K-Saju analysis and report delivery.",
+    detail:
+      "Birth date/time is stored in your selected birth-region timezone and used for chart analysis and lifetime report generation. Email is used to send your report link and related notices. We never sell personal data, and you can request deletion anytime.",
+    privacy: "Privacy Policy",
+    terms: "Terms of Service",
+  },
+  ko: {
+    label:
+      "프리미엄 사주 리포트 이용을 위해 본인 생년월일시·이메일 등 개인정보 수집·이용에 동의합니다.",
+    detail:
+      "생년월일시는 선택한 출생 지역 시간대 기준으로 저장되어 사주 분석 및 리포트 생성에 사용됩니다. 이메일은 리포트 링크 발송 안내에 사용됩니다. 개인정보는 판매하지 않으며, 언제든 삭제를 요청할 수 있습니다.",
+    privacy: "개인정보처리방침",
+    terms: "이용약관",
+  },
+};
+
 export function PrivacyConsent({
   checked,
   onChange,
   locale,
   variant = "default",
+  audience = "pet",
 }: PrivacyConsentProps) {
-  const t = COPY[locale];
+  const t = (audience === "human" ? HUMAN_COPY : PET_COPY)[locale];
   const wrap =
     variant === "pastelCompact"
       ? "space-y-1.5 rounded-2xl bg-lavender/25 p-3"

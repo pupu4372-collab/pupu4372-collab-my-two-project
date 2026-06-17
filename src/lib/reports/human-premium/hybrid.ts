@@ -1,6 +1,7 @@
 import { computeBasicSaju } from "@/lib/saju/engine";
 import { resolveSolarBirthDate } from "./birth-basis";
 import { buildHumanPremiumFacts } from "./facts";
+import { FORTUNE_MONTHS } from "./luck-narratives";
 import { buildHumanPremiumReport } from "./generator";
 import { generateHumanPremiumSectionBody, isHumanPremiumLlmEnabled } from "./llm";
 import { HUMAN_PREMIUM_LLM_SECTIONS } from "./prompts";
@@ -76,7 +77,7 @@ export async function buildHumanPremiumReportHybrid(
     {
       timezone: input.timezone,
       fortuneYear: new Date().getFullYear(),
-      summerMonths: [6, 7, 8],
+      fortuneMonths: FORTUNE_MONTHS,
       gender: input.gender ?? payload.birthBasis.gender ?? null,
     }
   );

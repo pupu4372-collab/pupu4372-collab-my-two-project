@@ -14,6 +14,17 @@ import type {
   HumanPremiumReportChapter,
   HumanPremiumReportSection,
 } from "./types";
+import {
+  buildAnnualSeunNarrative,
+  buildMonthlyLuckNarrative,
+  FORTUNE_MONTHS,
+  monthLuckLabel,
+} from "./luck-narratives";
+import {
+  buildYearFortuneSections,
+  fortuneYearForReport,
+  yearFortuneTitle,
+} from "./year-fortune-narratives";
 
 const LIFE_DOMAINS: Array<{ id: string; ko: string; en: string }> = [
   { id: "career", ko: "커리어와 일", en: "Career & Work" },
@@ -443,17 +454,11 @@ function luckCycleSections(
     locale
   );
 
-  const summerMonths = [6, 7, 8];
+  const summerMonths = FORTUNE_MONTHS;
   const monthSections = summerMonths.map((month) => {
     const monthPillar = computeMonthLuckPillar(year, month, saju.timezone);
     const reading = describeLuckPillar(dayStem, monthPillar, locale);
-    const label =
-      locale === "ko"
-        ? `${year}년 ${month}월`
-        : new Date(year, month - 1, 15).toLocaleString("en", {
-            month: "long",
-            year: "numeric",
-          });
+    const label = monthLuckLabel(year, month, locale);
 
     return section({
       id: `cycle-month-${month}`,
@@ -461,11 +466,14 @@ function luckCycleSections(
       chapterTitle: locale === "ko" ? "대운·신살·세운" : "Daewoon, spirit stars & seun",
       kind: "cycle",
       title: locale === "ko" ? `${label} 월운` : `${label} monthly luck`,
-      body:
-        locale === "ko"
-          ? `${label} 월운은 ${pillarText(monthPillar)}입니다. 천간 십성 ${reading.stemTenGod}, 지지 십성 ${reading.branchTenGod}의 흐름으로 한 달의 리듬을 읽습니다.`
-          : `${label} monthly luck is ${pillarText(monthPillar)}. Stem ${reading.stemTenGod}, branch ${reading.branchTenGod}.`,
-      pageEstimate: 2,
+      body: buildMonthlyLuckNarrative({
+        year,
+        month,
+        pillarLabel: pillarText(monthPillar),
+        reading,
+        locale,
+      }),
+      pageEstimate: 1,
     });
   });
 
@@ -529,10 +537,13 @@ Use the forward and reverse candidates as comparison lines until direction is co
       chapterTitle: locale === "ko" ? "대운·신살·세운" : "Daewoon, spirit stars & seun",
       kind: "cycle",
       title: locale === "ko" ? `${year}년 세운` : `${year} annual luck`,
-      body:
-        locale === "ko"
-          ? `${year}년 세운은 ${pillarText(seunPillar)}입니다. 천간 십성 ${seun.stemTenGod}, 지지 십성 ${seun.branchTenGod}의 기운이 한 해의 큰 줄기를 만듭니다.`
-          : `${year} seun is ${pillarText(seunPillar)}. Stem ${seun.stemTenGod}, branch ${seun.branchTenGod} set the year's main tone.`,
+      body: buildAnnualSeunNarrative({
+        year,
+        pillarLabel: pillarText(seunPillar),
+        reading: seun,
+        interactions: interactions.map((line) => line.label),
+        locale,
+      }),
       bullets:
         interactions.length > 0
           ? interactions.map((line) => line.label)
@@ -637,139 +648,11 @@ function dominantElementImage(element: ElementKey, locale: Locale): string {
   return images[element];
 }
 
-function yearLuckTheme(pillar: PillarDisplay, dominant: ElementKey, locale: Locale): string {
-  if (locale !== "ko") {
-    return `Your year pillar, ${pillarText(pillar)}, describes the social weather around your life path. It shows how your outer story meets your inner element.`;
-  }
-
-  return `년주는 한 사람의 사회적 배경, 바깥으로 드러나는 첫인상, 세상과 만나는 방식의 뿌리를 보여줍니다. ${pillarText(pillar)}로 놓인 이 기둥은 ${elLabel(dominant, locale)} 기운과 맞물려, 타고난 기질이 사회적 무대에서 어떤 방식으로 드러나는지를 설명합니다.`;
-}
-
 function fortuneSections(
   saju: SajuBasicResponse,
   locale: Locale
 ): HumanPremiumReportSection[] {
-  const name = saju.petName;
-  const summary = humanElementStory(name, saju.dominantElement, locale);
-  const year = saju.pillars.year;
-  const month = saju.pillars.month;
-  const day = saju.pillars.day;
-  const hour = saju.pillars.hour;
-  const dominant = elLabel(saju.dominantElement, locale);
-  const image = dominantElementImage(saju.dominantElement, locale);
-
-  if (locale !== "ko") {
-    return [
-      section({
-        id: "result-year",
-        chapterId: "saju-result",
-        chapterTitle: "Saju Result",
-        kind: "pillar",
-        title: "Year Saju",
-        body: yearLuckTheme(year, saju.dominantElement, locale),
-        bullets: [`Year: ${pillarText(year)}`, `Core element: ${dominant}`],
-        pageEstimate: 2,
-      }),
-      section({
-        id: "result-year-summary",
-        chapterId: "saju-result",
-        chapterTitle: "Saju Result",
-        kind: "summary",
-        title: "Year Saju Summary",
-        body: `Your year pillar gives the report its first frame: how the outside world reads your energy before it knows your inner story.`,
-        pageEstimate: 2,
-      }),
-      section({
-        id: "result-lifetime",
-        chapterId: "saju-result",
-        chapterTitle: "Saju Result",
-        kind: "domain",
-        title: "Lifetime Saju",
-        body: summary.story,
-        bullets: summary.traits,
-        pageEstimate: 3,
-      }),
-      section({
-        id: "result-lifetime-summary",
-        chapterId: "saju-result",
-        chapterTitle: "Saju Result",
-        kind: "summary",
-        title: "Lifetime Saju Summary",
-        body: `Your life is not a fixed sentence but a weather map. Read the signs, choose timing, and move before the current moves you.`,
-        pageEstimate: 2,
-      }),
-    ];
-  }
-
-  return [
-    section({
-      id: "result-year",
-      chapterId: "saju-result",
-      chapterTitle: "사주결과",
-      kind: "pillar",
-      title: "년사주",
-      subtitle: `${pillarText(year)}로 보는 바깥 운의 뿌리`,
-      body: `${yearLuckTheme(year, saju.dominantElement, locale)}
-
-${name}님의 년사주는 단순한 출생연도의 표시가 아니라, 어린 시절부터 사회가 ${name}님을 어떤 결로 받아들이는지를 보여주는 첫 관문입니다. 년주의 천간 ${year.stemLabel}과 지지 ${year.branchLabel}은 바깥 환경, 조상·가문적 분위기, 사회적 첫인상에 영향을 줍니다.
-
-이 흐름은 일주 ${pillarText(day)}와 만나면서 더 선명해집니다. 바깥으로는 년주의 기운이 먼저 보이지만, 실제 선택의 중심에는 일주의 힘이 있습니다. 따라서 ${name}님은 겉으로 드러나는 모습과 실제 내면의 추진 방식 사이를 잘 이해할수록 삶의 방향을 더 안정적으로 잡을 수 있습니다.`,
-      bullets: [
-        `년주: ${pillarText(year)}`,
-        `일주: ${pillarText(day)}`,
-        `대표 오행: ${dominant}`,
-      ],
-      pageEstimate: 4,
-    }),
-    section({
-      id: "result-year-summary",
-      chapterId: "saju-result",
-      chapterTitle: "사주결과",
-      kind: "summary",
-      title: "년사주 총평",
-      body: `${name}님의 년사주는 세상과 처음 맞닿는 문입니다. 이 문을 통해 들어오는 운은 때로는 보호막처럼 작용하고, 때로는 사회적 기준과 책임으로 다가옵니다.
-
-중요한 점은 년주의 운을 절대 숙명처럼만 받아들이지 않는 것입니다. 년주는 출발점이지 결론이 아닙니다. 바깥 환경이 어떠했든, 일주와 월주의 흐름이 함께 움직이며 ${name}님만의 방향을 만들어갑니다.
-
-특히 ${dominant} 기운이 강하게 작동할 때는 스스로의 장점을 과신하기보다, 주변의 반응을 읽고 한 박자 늦춰 판단하는 태도가 좋습니다. 운명을 아는 사람은 서두르지 않습니다. 흐름을 먼저 보고, 그다음 움직입니다.`,
-      pageEstimate: 3,
-    }),
-    section({
-      id: "result-lifetime",
-      chapterId: "saju-result",
-      chapterTitle: "사주결과",
-      kind: "domain",
-      title: "평생사주",
-      subtitle: `${image}`,
-      body: `당신의 사주는 한마디로 '${image}'의 형상입니다.
-
-월주 ${pillarText(month)}는 사회적 역할과 일의 무대를, 일주 ${pillarText(day)}는 가장 깊은 자기 자신과 배우자·관계의 축을 보여줍니다.${hour ? ` 시주 ${pillarText(hour)}는 말년의 방향과 숨은 재능, 자녀·후대와의 인연까지 비춥니다.` : " 출생 시간을 모르는 경우에는 시주를 제외하고 삼주 중심으로 해석하므로, 큰 흐름을 중심으로 보는 것이 좋습니다."}
-
-${summary.story}
-
-평생의 흐름으로 보면 ${name}님은 한 가지 모습에 고정되기보다 상황에 따라 자기 전략을 바꾸며 성장하는 타입입니다. 운이 좋을 때는 과감하게 움직이고, 운이 무거울 때는 공부와 정비로 시간을 채워야 합니다. 이것이 피흉추길, 즉 흉을 피하고 길한 흐름을 찾아가는 가장 현실적인 방법입니다.
-
-직업과 재물에서는 '속도'보다 '깊이'가 중요합니다. 단기적인 한 방보다 오래 쌓이는 전문성, 반복 가능한 시스템, 신뢰를 만드는 태도가 결국 큰 성취로 이어집니다. 인간관계에서는 넓게 품되 선을 분명히 해야 합니다. 베풂이 지나치면 운이 흩어지고, 기준이 분명하면 좋은 인연만 남습니다.`,
-      bullets: summary.traits,
-      pageEstimate: 6,
-    }),
-    section({
-      id: "result-lifetime-summary",
-      chapterId: "saju-result",
-      chapterTitle: "사주결과",
-      kind: "summary",
-      title: "평생사주 총평",
-      body: `${name}님의 평생 사주는 '흐름을 읽고 먼저 정비하는 사람'에게 길이 열린다고 말합니다.
-
-좋은 운은 갑자기 하늘에서 떨어지는 것이 아니라, 준비된 사람에게 기회처럼 보입니다. 반대로 어려운 운도 무너짐이 아니라 조정기입니다. 내가 가진 힘이 과해지거나, 방향 없이 흩어질 때 잠시 멈추고 물길을 다시 내라는 신호입니다.
-
-앞으로의 핵심 전략은 세 가지입니다. 첫째, 유연함을 잃지 마십시오. 둘째, 전문성을 무기로 삼으십시오. 셋째, 부족한 기운은 생활 습관과 환경으로 보완하십시오. 사주는 예언이 아니라 날씨 예보입니다. 태풍이 올 때는 집을 정비하고, 햇볕이 좋을 때는 힘껏 꽃을 피우면 됩니다.
-
-지운자무애(知運者無礙). 운명을 아는 자는 거침이 없습니다. 알고 움직이는 사람에게 운은 두려움이 아니라 길잡이가 됩니다.`,
-      bullets: ["유연함", "전문성", "생활 속 보완", "선택의 주도권"],
-      pageEstimate: 4,
-    }),
-  ];
+  return buildYearFortuneSections(saju, locale, fortuneYearForReport());
 }
 
 export function buildHumanSummary(
@@ -786,6 +669,9 @@ export function buildSajuChapters(
 ): HumanPremiumReportChapter[] {
   const name = saju.petName;
   const summary = humanElementStory(name, saju.dominantElement, locale);
+  const month = saju.pillars.month;
+  const day = saju.pillars.day;
+  const hour = saju.pillars.hour;
 
   const introSections: HumanPremiumReportSection[] = [
     section({
@@ -810,15 +696,20 @@ export function buildSajuChapters(
       chapterId: "preface",
       chapterTitle: locale === "ko" ? "서두" : "Preface",
       kind: "intro",
-      title: locale === "ko" ? "운명을 읽는 첫 문장" : "First reading",
+      title: locale === "ko" ? "평생사주 총평-운명을 알아가는 긴 여정" : "Lifetime overview — a long journey of knowing your fate",
+      subtitle: locale === "ko" ? dominantElementImage(saju.dominantElement, locale) : summary.story.slice(0, 80),
       body:
         locale === "ko"
           ? `${name}님의 사주는 한마디로 '${dominantElementImage(saju.dominantElement, locale)}'의 형상입니다.
 
-이제부터 ${name}님의 평생 사주와 다가오는 운의 흐름을 명쾌하게 풀어드리겠습니다. 좋은 운은 어떻게 붙잡고, 무거운 운은 어떻게 비켜가야 하는지, 만세력의 기둥을 하나씩 짚으며 살펴보겠습니다.`
+이 리포트는 단번에 운명을 단정하는 글이 아니라, 평생사주를 차분히 읽어 가며 스스로의 선택권을 넓혀 가는 긴 여정입니다. 월주 ${pillarText(month)}는 사회적 역할과 일의 무대를, 일주 ${pillarText(day)}는 가장 깊은 자기 자신과 관계의 축을 보여줍니다.${hour ? ` 시주 ${pillarText(hour)}는 말년의 방향과 숨은 재능까지 비춥니다.` : " 시주가 없는 경우에는 삼주 중심으로 큰 흐름을 읽습니다."}
+
+${summary.story}
+
+좋은 운은 준비된 사람에게 기회처럼 보이고, 무거운 운은 조정을 요구하는 계절입니다. 유연함과 전문성, 생활 속 보완을 함께 가져가면 운명을 아는 자는 거침이 없다는 말이 삶의 태도가 됩니다.`
           : `${summary.story}
 
-From here, we move through the calendar pillars, lifetime result, and zodiac service reading.`,
+This report is not a fixed verdict but a long journey of reading your chart and widening your choices. From here we move through the calendar pillars, yearly rhythm, and monthly flow.`,
       bullets: summary.traits,
       pageEstimate: 2,
     }),
@@ -871,7 +762,7 @@ From here, we move through the calendar pillars, lifetime result, and zodiac ser
       "saju-result",
       locale === "ko" ? "사주결과" : "Saju Result",
       fortuneSections(saju, locale),
-      locale === "ko" ? "년사주 · 평생사주 총평" : "Year and lifetime reading"
+      yearFortuneTitle(fortuneYearForReport(), locale)
     ),
     chapter(
       "luck-cycles",

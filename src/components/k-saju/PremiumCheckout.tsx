@@ -284,6 +284,7 @@ export function PremiumCheckout() {
             onChange={setConsent}
             locale={locale}
             variant="pastel"
+            audience="human"
           />
 
           {error && (

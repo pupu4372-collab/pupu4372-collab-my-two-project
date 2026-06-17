@@ -27,13 +27,14 @@ async function main() {
 
   const sectionIds = [
     "preface",
-    "result-lifetime",
-    "cycle-daewoon",
-    "cycle-shinsal",
+    "result-year-fortune",
+    "result-temperament",
+    "result-gyeokguk-yongsin",
+    "result-wealth",
+    "result-final-advice",
     "cycle-annual-seun",
-    "cycle-month-6",
-    "cycle-month-7",
-    "cycle-month-8",
+    "cycle-month-1",
+    "cycle-month-12",
   ] as const;
   for (const id of sectionIds) {
     for (const chapter of report.saju.chapters) {
