@@ -12,6 +12,7 @@ import {
   formatTenGodLabel,
   STEM_META,
 } from "@/lib/saju/sipseong";
+import { shareHumanPremiumReportToKakao } from "@/lib/share/pet-fortune-share";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
@@ -19,7 +20,11 @@ const UI = {
   ko: {
     toc: "목차",
     saju: "사주 리포트",
-    share: "리포트 공유하기",
+    share: "카카오 공유",
+    shareSectionLabel: "지관재 · 나눔",
+    shareSectionHint: "소중한 리포트를 카카오로 전해 보세요",
+    shareFailed:
+      "카카오 공유 검증 실패예요. developers.kakao.com 에서 Web 도메인(ksajupet.com, localhost) 등록을 확인해 주세요.",
     copyLink: "링크 복사",
     shared: "링크를 복사했어요",
     pdfReady: "한글 폰트가 포함된 PDF를 바로 저장합니다",
@@ -61,7 +66,11 @@ const UI = {
   en: {
     toc: "Contents",
     saju: "K-Saju report",
-    share: "Share report",
+    share: "Kakao",
+    shareSectionLabel: "Jigwanjae · Share",
+    shareSectionHint: "Send your report to friends on Kakao",
+    shareFailed:
+      "Kakao share verification failed. Register ksajupet.com in Kakao Developers.",
     copyLink: "Copy link",
     shared: "Link copied",
     pdfReady: "Download a PDF with embedded Korean fonts",
@@ -110,6 +119,49 @@ const OBANG_COLORS: Record<string, string> = {
   metal: "#BDBDBD",
   water: "#3D3D3D",
 };
+
+const TOC_CHIP_STYLES: Record<string, { bg: string; border: string; text: string }> = {
+  elements: {
+    bg: "color-mix(in srgb, var(--jig-obang-blue) 16%, var(--jig-hanji))",
+    border: "var(--jig-obang-blue)",
+    text: "var(--jig-obang-blue)",
+  },
+  introduction: {
+    bg: "color-mix(in srgb, var(--jig-obang-yellow) 22%, var(--jig-hanji))",
+    border: "var(--jig-obang-yellow)",
+    text: "#6f4f2c",
+  },
+  preface: {
+    bg: "color-mix(in srgb, var(--jig-obang-white) 72%, white)",
+    border: "rgba(34, 34, 34, 0.16)",
+    text: "var(--jig-ink)",
+  },
+  "manse-calendar": {
+    bg: "color-mix(in srgb, var(--jig-obang-black) 10%, var(--jig-hanji))",
+    border: "var(--jig-obang-black)",
+    text: "var(--jig-obang-black)",
+  },
+  "saju-result": {
+    bg: "color-mix(in srgb, var(--jig-seal) 12%, var(--jig-hanji))",
+    border: "var(--jig-seal)",
+    text: "var(--jig-seal)",
+  },
+  "luck-cycles": {
+    bg: "color-mix(in srgb, var(--jig-obang-red) 14%, var(--jig-hanji))",
+    border: "var(--jig-obang-red)",
+    text: "var(--jig-obang-red)",
+  },
+};
+
+const TOC_CHIP_DEFAULT = {
+  bg: "color-mix(in srgb, white 55%, var(--jig-hanji))",
+  border: "rgba(34, 34, 34, 0.12)",
+  text: "var(--jig-ink)",
+};
+
+function tocChipStyle(id: string) {
+  return TOC_CHIP_STYLES[id] ?? TOC_CHIP_DEFAULT;
+}
 
 interface ElementBreakdown {
   key: string;
@@ -781,26 +833,39 @@ function ReportToc({
 }) {
   if (compact) {
     return (
-      <nav className="no-print human-premium-paper rounded-lg p-4 lg:hidden">
-        <p className="human-premium-label-caps mb-3 text-[var(--jig-muted)]">{t.toc}</p>
-        <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3 sm:grid-cols-4">
-          {items.map((item) => (
-            <a
-              key={item.id}
-              href={`#chapter-${item.id}`}
-              className="min-w-0 rounded-full border border-[var(--jig-ink)]/10 bg-white/60 px-3 py-2 text-center text-xs font-semibold leading-snug text-[var(--jig-ink)]"
-            >
-              <span className="line-clamp-2 break-keep">{item.title}</span>
-            </a>
-          ))}
+      <nav className="no-print human-premium-lattice human-premium-paper-warm rounded-sm p-4 lg:hidden">
+        <p className="human-premium-label-caps mb-3 text-[var(--jig-seal)]">{t.toc}</p>
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+          {items.map((item, index) => {
+            const chip = tocChipStyle(item.id);
+            return (
+              <a
+                key={item.id}
+                href={`#chapter-${item.id}`}
+                className="group min-w-0 rounded-sm border px-2.5 py-2.5 text-center transition hover:shadow-sm"
+                style={{
+                  backgroundColor: chip.bg,
+                  borderColor: chip.border,
+                  color: chip.text,
+                }}
+              >
+                <span className="human-premium-label-caps mb-1 block text-[9px] opacity-75">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="human-premium-serif block text-xs font-semibold leading-snug break-keep">
+                  {item.title}
+                </span>
+              </a>
+            );
+          })}
         </div>
       </nav>
     );
   }
 
   return (
-    <nav className="human-premium-paper rounded-lg p-4">
-      <div className="mb-3 flex items-center gap-2 border-b border-[var(--jig-seal)]/20 pb-3">
+    <nav className="human-premium-lattice human-premium-paper-warm rounded-sm p-4">
+      <div className="mb-3 flex items-center gap-2 border-b border-[var(--jig-seal)]/15 pb-3">
         <Image
           src="/stitch/jigwanjae/jigwanjae-small-logo.png"
           alt={t.brand}
@@ -809,21 +874,32 @@ function ReportToc({
           className="h-8 w-auto object-contain"
         />
       </div>
-      <p className="human-premium-label-caps text-[var(--jig-muted)]">{t.toc}</p>
-      <ul className="mt-3 max-h-[60vh] space-y-1 overflow-y-auto text-sm">
-        {items.map((item) => (
-          <li key={item.id}>
-            <a
-              href={`#chapter-${item.id}`}
-              className="block rounded px-2 py-1.5 text-[var(--jig-ink)]/80 transition hover:bg-[var(--jig-seal)]/5 hover:text-[var(--jig-ink)]"
-            >
-              <span className="block text-[10px] uppercase tracking-wide text-[var(--jig-muted)]">
-                {item.group}
-              </span>
-              {item.title}
-            </a>
-          </li>
-        ))}
+      <p className="human-premium-label-caps text-[var(--jig-seal)]">{t.toc}</p>
+      <ul className="mt-3 max-h-[60vh] space-y-1.5 overflow-y-auto text-sm">
+        {items.map((item, index) => {
+          const chip = tocChipStyle(item.id);
+          return (
+            <li key={item.id}>
+              <a
+                href={`#chapter-${item.id}`}
+                className="block rounded-sm border px-2.5 py-2 transition hover:shadow-sm"
+                style={{
+                  backgroundColor: chip.bg,
+                  borderColor: chip.border,
+                  color: chip.text,
+                  borderLeftWidth: 3,
+                }}
+              >
+                <span className="human-premium-label-caps block text-[9px] opacity-75">
+                  {String(index + 1).padStart(2, "0")} · {item.group}
+                </span>
+                <span className="human-premium-serif mt-0.5 block font-semibold leading-snug">
+                  {item.title}
+                </span>
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );
@@ -843,6 +919,8 @@ export function HumanPremiumReportView({
   );
   const [pdfState, setPdfState] = useState<"idle" | "downloading" | "failed">("idle");
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
 
   const pillars = asPillars(report.saju.pillars);
   const elements = asElements(report.saju.elements);
@@ -880,16 +958,21 @@ export function HumanPremiumReportView({
     }
   }
 
-  async function shareReport() {
-    if (navigator.share) {
-      await navigator.share({
-        title: report.cover.subtitle,
-        text: report.cover.tagline,
-        url: shareUrl,
+  async function shareReportToKakao() {
+    setShareBusy(true);
+    setShareError(null);
+    try {
+      await shareHumanPremiumReportToKakao({
+        shareUrl,
+        personName: report.personName,
+        tagline: report.cover.tagline,
+        locale: report.locale,
       });
-      return;
+    } catch {
+      setShareError(t.shareFailed);
+    } finally {
+      setShareBusy(false);
     }
-    await copyLink();
   }
 
   async function sendEmail() {
@@ -1038,48 +1121,52 @@ export function HumanPremiumReportView({
               </section>
             )}
 
-            <section className="no-print space-y-4">
+            <section className="no-print human-premium-share-panel space-y-3">
+              <p className="human-premium-label-caps text-center text-[var(--jig-seal)]">
+                {t.shareSectionLabel}
+              </p>
+              <p className="human-premium-serif text-center text-sm font-semibold text-[var(--jig-ink)]">
+                {t.shareSectionHint}
+              </p>
               <button
                 type="button"
-                onClick={() => void shareReport()}
-                className="flex h-14 w-full items-center justify-center gap-2 rounded-lg bg-[var(--jig-ink)] font-bold text-[var(--jig-hanji)] shadow transition hover:opacity-90"
+                disabled={shareBusy}
+                onClick={() => void shareReportToKakao()}
+                className="human-premium-share-btn human-premium-share-btn--kakao disabled:opacity-60"
               >
-                {t.share}
+                {shareBusy ? "…" : t.share}
               </button>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {shareError ? (
+                <p className="text-center text-xs text-[var(--jig-seal)]">{shareError}</p>
+              ) : null}
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                 <button
                   type="button"
                   onClick={() => void copyLink()}
-                  className="human-premium-paper flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-[var(--jig-ink)]/20 transition hover:border-[var(--jig-seal)]/40"
+                  className="human-premium-share-btn human-premium-share-btn--link"
                 >
-                  <span className="text-[11px] font-semibold">
-                    {copied ? t.shared : t.copyLink}
-                  </span>
+                  {copied ? t.shared : t.copyLink}
                 </button>
                 <button
                   type="button"
                   onClick={() => void downloadPdf()}
                   disabled={pdfState === "downloading"}
                   title={t.pdfReady}
-                  className="human-premium-paper flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-[var(--jig-ink)]/20 transition hover:border-[var(--jig-seal)]/40 disabled:opacity-60"
+                  className="human-premium-share-btn human-premium-share-btn--pdf disabled:opacity-60"
                 >
-                  <span className="text-[11px] font-semibold">
-                    {pdfState === "downloading" ? t.pdfDownloading : t.downloadChoice}
-                  </span>
+                  {pdfState === "downloading" ? t.pdfDownloading : t.downloadChoice}
                 </button>
                 <button
                   type="button"
                   onClick={() => void sendEmail()}
                   disabled={emailState === "sending"}
-                  className="human-premium-paper flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-[var(--jig-ink)]/20 transition hover:border-[var(--jig-seal)]/40 disabled:opacity-60"
+                  className="human-premium-share-btn human-premium-share-btn--email disabled:opacity-60"
                 >
-                  <span className="text-[11px] font-semibold">
-                    {emailState === "sending"
-                      ? t.emailSending
-                      : emailState === "sent"
-                        ? t.emailSent
-                        : t.email}
-                  </span>
+                  {emailState === "sending"
+                    ? t.emailSending
+                    : emailState === "sent"
+                      ? t.emailSent
+                      : t.email}
                 </button>
               </div>
               {emailState === "failed" && (

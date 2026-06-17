@@ -7,6 +7,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { GlassCard, PageContainer, SectionHeader } from "@/components/layout/StitchLayout";
 import { OnboardingRoadmap } from "@/components/onboarding/OnboardingRoadmap";
 import { PetDailyFortunePanel, type FortuneTodayState } from "@/components/home/PetDailyFortunePanel";
+import { JigFortuneOrnateCorners } from "@/components/home/jig-fortune/JigFortuneDecor";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import type { PetShowRankingRow } from "@/lib/supabase/types";
@@ -280,11 +281,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             </p>
           </div>
 
-          <div className="pet-fortune-jigwanjae relative overflow-hidden p-6 shadow-lg md:p-8">
-            <span className="jig-fortune-frame-corner left-4 top-4 hidden border-r-0 border-b-0 md:block" aria-hidden />
-            <span className="jig-fortune-frame-corner right-4 top-4 hidden border-b-0 border-l-0 md:block" aria-hidden />
-            <span className="jig-fortune-frame-corner bottom-4 left-4 hidden border-r-0 border-t-0 md:block" aria-hidden />
-            <span className="jig-fortune-frame-corner bottom-4 right-4 hidden border-l-0 border-t-0 md:block" aria-hidden />
+          <div className="pet-fortune-jigwanjae relative overflow-visible p-6 shadow-lg md:p-8">
+            <JigFortuneOrnateCorners />
 
             <div className="relative mb-6 text-center">
               <p className="human-premium-label-caps text-[var(--jig-seal)] tracking-widest">
@@ -308,7 +306,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                 onSelectPet={handleSelectPet}
               />
             ) : (
-              <div className="relative border border-[var(--jig-ink)]/10 bg-white/40 p-8 text-center">
+              <div className="jig-fortune-content-box relative p-8 text-center">
                 <p className="text-sm font-semibold text-[var(--jig-muted)]">
                   {isKo ? "오늘의 운세를 불러오는 중이에요…" : "Loading today's fortune…"}
                 </p>

@@ -22,6 +22,17 @@ const STORY_H = 1920;
 const PAD_X = 56;
 const CONTENT_W = STORY_W - PAD_X * 2;
 
+const JIG_STORY = {
+  hanji: "#f4f1ea",
+  surface: "#fcf9f2",
+  ink: "#222222",
+  seal: "#b22222",
+  muted: "#444748",
+  border: "rgba(34, 34, 34, 0.12)",
+  cardBorder: "rgba(34, 34, 34, 0.1)",
+  obangWhite: "#e9e5d9",
+};
+
 let kakaoLoadPromise: Promise<NonNullable<typeof window.Kakao>> | null = null;
 
 function appShareBaseUrl() {
@@ -111,7 +122,7 @@ export async function sharePetFortuneToKakao(input: {
   Kakao.Share.sendDefault({
     objectType: "feed",
     content: {
-      title: `${input.petName}의 오늘 운세 🔮`.slice(0, 200),
+      title: `지관재 · ${input.petName}의 오늘 운세`.slice(0, 200),
       description: fortuneText,
       imageUrl,
       link: {
@@ -125,6 +136,46 @@ export async function sharePetFortuneToKakao(input: {
         link: {
           mobileWebUrl: shareUrl,
           webUrl: shareUrl,
+        },
+      },
+    ],
+  });
+}
+
+const REPORT_SHARE_IMAGE_PATH = "/stitch/jigwanjae/jigwanjae-cover-logo.png";
+
+export async function shareHumanPremiumReportToKakao(input: {
+  shareUrl: string;
+  personName: string;
+  tagline: string;
+  locale?: "ko" | "en";
+}) {
+  const Kakao = await loadKakaoSdk();
+  const isKo = (input.locale ?? "ko") === "ko";
+  const imageUrl = `${appShareBaseUrl()}${REPORT_SHARE_IMAGE_PATH}`;
+  const title = (
+    isKo
+      ? `지관재 · ${input.personName} 평생 사주 리포트`
+      : `Jigwanjae · ${input.personName} lifetime K-Saju report`
+  ).slice(0, 200);
+
+  Kakao.Share.sendDefault({
+    objectType: "feed",
+    content: {
+      title,
+      description: input.tagline.slice(0, 200),
+      imageUrl,
+      link: {
+        mobileWebUrl: input.shareUrl,
+        webUrl: input.shareUrl,
+      },
+    },
+    buttons: [
+      {
+        title: isKo ? "리포트 보기" : "View report",
+        link: {
+          mobileWebUrl: input.shareUrl,
+          webUrl: input.shareUrl,
         },
       },
     ],
@@ -203,11 +254,28 @@ function drawSectionTitle(
   title: string,
   _isKo: boolean
 ) {
-  ctx.fillStyle = "#ffd7ff";
+  ctx.fillStyle = JIG_STORY.seal;
   ctx.font = `700 26px ${SHARE_FONT}`;
   ctx.textAlign = "left";
   ctx.fillText(title, PAD_X, y);
   return y + 40;
+}
+
+function fillJigCard(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number
+) {
+  roundRect(ctx, x, y, w, h, r);
+  ctx.fillStyle = JIG_STORY.surface;
+  ctx.fill();
+  ctx.strokeStyle = JIG_STORY.cardBorder;
+  ctx.lineWidth = 2;
+  roundRect(ctx, x, y, w, h, r);
+  ctx.stroke();
 }
 
 function drawStoryChrome(
@@ -218,26 +286,30 @@ function drawStoryChrome(
   isKo: boolean
 ) {
   ctx.textAlign = "center";
-  ctx.fillStyle = "#ffd7ff";
-  ctx.font = `700 34px ${SHARE_FONT}`;
-  ctx.fillText("K-Saju Pet", STORY_W / 2, 72);
+  ctx.fillStyle = JIG_STORY.seal;
+  ctx.font = `700 30px ${SHARE_FONT}`;
+  ctx.fillText(isKo ? "지관재 (知觀齋)" : "Jigwanjae (知觀齋)", STORY_W / 2, 64);
 
-  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.fillStyle = JIG_STORY.ink;
+  ctx.font = `800 36px ${SHARE_FONT}`;
+  ctx.fillText("K-Saju Pet", STORY_W / 2, 108);
+
+  ctx.fillStyle = JIG_STORY.muted;
   ctx.font = `600 22px ${SHARE_FONT}`;
   ctx.fillText(
     isKo ? `${petName} · ${slideIndex + 1}/${totalSlides}` : `${petName} · ${slideIndex + 1}/${totalSlides}`,
     STORY_W / 2,
-    108
+    144
   );
 }
 
 function drawStoryFooter(ctx: CanvasRenderingContext2D, fortune: PetDailyFortune) {
   ctx.textAlign = "left";
-  ctx.fillStyle = "rgba(233,213,255,0.85)";
+  ctx.fillStyle = JIG_STORY.muted;
   ctx.font = `400 20px ${SHARE_FONT}`;
   wrapCanvasText(ctx, fortune.disclaimer, PAD_X, STORY_H - 120, CONTENT_W, 28, 2);
 
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = JIG_STORY.ink;
   ctx.textAlign = "center";
   ctx.font = `600 28px ${SHARE_FONT}`;
   try {
@@ -247,14 +319,52 @@ function drawStoryFooter(ctx: CanvasRenderingContext2D, fortune: PetDailyFortune
   }
 }
 
+function drawHanjiStoryBackground(ctx: CanvasRenderingContext2D) {
+  ctx.fillStyle = JIG_STORY.hanji;
+  ctx.fillRect(0, 0, STORY_W, STORY_H);
+
+  const grad = ctx.createLinearGradient(0, 0, STORY_W, STORY_H);
+  grad.addColorStop(0, "rgba(255,255,255,0.35)");
+  grad.addColorStop(1, "rgba(0,0,0,0.03)");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, STORY_W, STORY_H);
+
+  ctx.strokeStyle = JIG_STORY.border;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(36, 36, STORY_W - 72, STORY_H - 72);
+
+  ctx.strokeStyle = JIG_STORY.seal;
+  ctx.lineWidth = 3;
+  const corner = 48;
+  ctx.beginPath();
+  ctx.moveTo(36, 36 + corner);
+  ctx.lineTo(36, 36);
+  ctx.lineTo(36 + corner, 36);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(STORY_W - 36 - corner, 36);
+  ctx.lineTo(STORY_W - 36, 36);
+  ctx.lineTo(STORY_W - 36, 36 + corner);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(36, STORY_H - 36 - corner);
+  ctx.lineTo(36, STORY_H - 36);
+  ctx.lineTo(36 + corner, STORY_H - 36);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(STORY_W - 36 - corner, STORY_H - 36);
+  ctx.lineTo(STORY_W - 36, STORY_H - 36);
+  ctx.lineTo(STORY_W - 36, STORY_H - 36 - corner);
+  ctx.stroke();
+}
+
 function createStorySlideCanvas() {
   const canvas = document.createElement("canvas");
   canvas.width = STORY_W;
   canvas.height = STORY_H;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("CANVAS_UNAVAILABLE");
-  ctx.fillStyle = "#260d35";
-  ctx.fillRect(0, 0, STORY_W, STORY_H);
+  drawHanjiStoryBackground(ctx);
   return { canvas, ctx };
 }
 
@@ -265,23 +375,17 @@ function drawHeroExpanded(
 ) {
   const { pet, fortune, isKo } = input;
   const boxH = 320;
-  roundRect(ctx, PAD_X, y, CONTENT_W, boxH, 28);
-  ctx.fillStyle = "#351445";
-  ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,0.2)";
-  ctx.lineWidth = 2;
-  roundRect(ctx, PAD_X, y, CONTENT_W, boxH, 28);
-  ctx.stroke();
+  fillJigCard(ctx, PAD_X, y, CONTENT_W, boxH, 12);
 
   ctx.textAlign = "center";
-  ctx.fillStyle = "#ffd7ff";
+  ctx.fillStyle = JIG_STORY.seal;
   ctx.font = `700 24px ${SHARE_FONT}`;
   ctx.fillText(fortune.dateLabel, STORY_W / 2, y + 44);
 
   ctx.font = `56px ${SHARE_FONT}`;
   ctx.fillText(pet.icon, STORY_W / 2, y + 108);
 
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = JIG_STORY.ink;
   ctx.font = `800 42px ${SHARE_FONT}`;
   ctx.fillText(
     isKo ? `${pet.name}의 오늘 운세` : `${pet.name}'s fortune`,
@@ -289,11 +393,11 @@ function drawHeroExpanded(
     y + 162
   );
 
-  ctx.fillStyle = "#f3e8ff";
+  ctx.fillStyle = JIG_STORY.ink;
   ctx.font = `700 34px ${SHARE_FONT}`;
   ctx.fillText(fortune.title, STORY_W / 2, y + 210);
 
-  ctx.fillStyle = "#ffd7ff";
+  ctx.fillStyle = JIG_STORY.muted;
   ctx.font = `700 26px ${SHARE_FONT}`;
   ctx.fillText(
     `${pet.speciesLabel} · ${pet.dayBranchSign} ${starsString(fortune.overall)}`,
@@ -301,7 +405,7 @@ function drawHeroExpanded(
     y + 248
   );
 
-  ctx.fillStyle = "#e9d5ff";
+  ctx.fillStyle = JIG_STORY.muted;
   ctx.font = `400 26px ${SHARE_FONT}`;
   ctx.textAlign = "left";
   wrapCanvasText(ctx, fortune.subtitle, PAD_X + 40, y + 286, CONTENT_W - 80, 34, 2);
@@ -326,19 +430,13 @@ function drawCategoriesExpanded(
     const x = PAD_X + col * (cellW + gap);
     const cy = y + row * (cellH + gap);
 
-    roundRect(ctx, x, cy, cellW, cellH, 20);
-    ctx.fillStyle = "#351445";
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.15)";
-    ctx.lineWidth = 1.5;
-    roundRect(ctx, x, cy, cellW, cellH, 20);
-    ctx.stroke();
+    fillJigCard(ctx, x, cy, cellW, cellH, 10);
 
     ctx.textAlign = "center";
     ctx.font = `40px ${SHARE_FONT}`;
     ctx.fillText(cat.icon, x + cellW / 2, cy + 46);
 
-    ctx.fillStyle = "#e9d5ff";
+    ctx.fillStyle = JIG_STORY.muted;
     ctx.font = `600 24px ${SHARE_FONT}`;
     ctx.fillText(cat.label, x + cellW / 2, cy + 82);
 
@@ -348,7 +446,7 @@ function drawCategoriesExpanded(
 
     const barX = x + 24;
     const barW = cellW - 48;
-    ctx.fillStyle = "rgba(255,255,255,0.2)";
+    ctx.fillStyle = "rgba(34,34,34,0.1)";
     roundRect(ctx, barX, cy + 132, barW, 10, 5);
     ctx.fill();
     ctx.fillStyle = cat.color;
@@ -365,20 +463,14 @@ function drawMessagesExpanded(ctx: CanvasRenderingContext2D, y: number, fortune:
 
   for (const msg of fortune.messages) {
     const boxH = 148;
-    roundRect(ctx, PAD_X, y, CONTENT_W, boxH, 20);
-    ctx.fillStyle = "#351445";
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.15)";
-    ctx.lineWidth = 1.5;
-    roundRect(ctx, PAD_X, y, CONTENT_W, boxH, 20);
-    ctx.stroke();
+    fillJigCard(ctx, PAD_X, y, CONTENT_W, boxH, 10);
 
     ctx.textAlign = "left";
-    ctx.fillStyle = "#ffd7ff";
+    ctx.fillStyle = JIG_STORY.seal;
     ctx.font = `700 26px ${SHARE_FONT}`;
     ctx.fillText(`${msg.icon} ${msg.label}`, PAD_X + 24, y + 42);
 
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = JIG_STORY.ink;
     ctx.font = `400 26px ${SHARE_FONT}`;
     wrapCanvasText(ctx, msg.body, PAD_X + 24, y + 78, CONTENT_W - 48, 34, 3);
     y += boxH + 16;
@@ -391,16 +483,10 @@ function drawLuckyExpanded(ctx: CanvasRenderingContext2D, y: number, fortune: Pe
   y = drawSectionTitle(ctx, y, isKo ? "오늘의 럭키 아이템" : "Lucky items", isKo);
 
   const boxH = 28 + fortune.lucky.length * 40;
-  roundRect(ctx, PAD_X, y, CONTENT_W, boxH, 20);
-  ctx.fillStyle = "#351445";
-  ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,0.15)";
-  ctx.lineWidth = 1.5;
-  roundRect(ctx, PAD_X, y, CONTENT_W, boxH, 20);
-  ctx.stroke();
+  fillJigCard(ctx, PAD_X, y, CONTENT_W, boxH, 10);
 
   ctx.textAlign = "left";
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = JIG_STORY.ink;
   ctx.font = `600 26px ${SHARE_FONT}`;
   let lineY = y + 44;
   for (const item of fortune.lucky) {
@@ -426,16 +512,16 @@ function drawWeekExpanded(
 
   fortune.week.forEach((day, index) => {
     const x = PAD_X + index * (cellW + gap);
-    roundRect(ctx, x, y, cellW, cellH, 14);
-    ctx.fillStyle = day.isToday ? "#6b4a82" : "#351445";
+    roundRect(ctx, x, y, cellW, cellH, 10);
+    ctx.fillStyle = day.isToday ? JIG_STORY.obangWhite : JIG_STORY.surface;
     ctx.fill();
-    ctx.strokeStyle = day.isToday ? "#ffd7ff" : "rgba(255,255,255,0.15)";
+    ctx.strokeStyle = day.isToday ? JIG_STORY.seal : JIG_STORY.cardBorder;
     ctx.lineWidth = day.isToday ? 2 : 1.5;
-    roundRect(ctx, x, y, cellW, cellH, 14);
+    roundRect(ctx, x, y, cellW, cellH, 10);
     ctx.stroke();
 
     ctx.textAlign = "center";
-    ctx.fillStyle = day.isToday ? "#ffd7ff" : "#e9d5ff";
+    ctx.fillStyle = day.isToday ? JIG_STORY.seal : JIG_STORY.muted;
     ctx.font = `600 20px ${SHARE_FONT}`;
     ctx.fillText(day.dayLabel, x + cellW / 2, y + 30);
 
@@ -454,16 +540,10 @@ function drawTipsExpanded(ctx: CanvasRenderingContext2D, y: number, fortune: Pet
   y = drawSectionTitle(ctx, y, isKo ? "오늘 이렇게 해주세요" : "Care tips", isKo);
 
   const boxH = 28 + fortune.tips.length * 42;
-  roundRect(ctx, PAD_X, y, CONTENT_W, boxH, 20);
-  ctx.fillStyle = "#351445";
-  ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,0.15)";
-  ctx.lineWidth = 1.5;
-  roundRect(ctx, PAD_X, y, CONTENT_W, boxH, 20);
-  ctx.stroke();
+  fillJigCard(ctx, PAD_X, y, CONTENT_W, boxH, 10);
 
   ctx.textAlign = "left";
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = JIG_STORY.ink;
   ctx.font = `600 26px ${SHARE_FONT}`;
   let lineY = y + 44;
   for (const tip of fortune.tips) {
@@ -482,7 +562,7 @@ function renderStorySlide(
   const { canvas, ctx } = createStorySlideCanvas();
   drawStoryChrome(ctx, slideIndex, totalSlides, input.pet.name, input.isKo);
 
-  let y = 132;
+  let y = 168;
   if (slideIndex === 0) {
     y = drawHeroExpanded(ctx, y, input);
     drawCategoriesExpanded(ctx, y, input.fortune, input.isKo);

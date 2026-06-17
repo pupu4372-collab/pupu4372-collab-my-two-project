@@ -28,16 +28,26 @@ export function PetFortuneShareRow({
 
   const jig = variant === "jigwanjae";
   const boxClass = jig
-    ? "human-premium-paper-warm border border-[var(--jig-ink)]/12"
+    ? "jig-fortune-content-box !p-5"
     : isNight
-      ? "border border-white/25 bg-[#351445]"
-      : "border border-channel-saju/25 bg-channel-saju/8";
+      ? "rounded-[1.5rem] border border-white/25 bg-[#351445] p-4"
+      : "rounded-[1.5rem] border border-channel-saju/25 bg-channel-saju/8 p-4";
   const textClass = jig ? "text-[var(--jig-ink)]" : isNight ? "text-[#f3e8ff]" : "text-primary";
-  const buttonClass = jig
-    ? "border border-[var(--jig-ink)]/15 bg-white/80 text-[var(--jig-ink)] hover:bg-white"
+  const subtextClass = jig ? "text-[var(--jig-muted)]" : isNight ? "text-[#e9d5ff]/90" : "text-plum/70";
+  const kakaoBtnClass = jig
+    ? "jig-fortune-share-btn jig-fortune-share-btn--kakao"
     : isNight
       ? "border border-white/30 bg-[#6b4a82] text-white hover:bg-[#7a5892]"
       : "border border-channel-saju/30 bg-white text-primary hover:bg-white/90";
+  const instagramBtnClass = jig
+    ? "jig-fortune-share-btn jig-fortune-share-btn--instagram"
+    : kakaoBtnClass;
+  const linkBtnClass = jig
+    ? "jig-fortune-share-btn jig-fortune-share-btn--link"
+    : kakaoBtnClass;
+  const buttonBase = jig
+    ? ""
+    : "flex-1 rounded-full px-3 py-2.5 text-xs font-extrabold transition disabled:opacity-60";
 
   async function handleKakaoShare() {
     setBusy("kakao");
@@ -101,18 +111,23 @@ export function PetFortuneShareRow({
   }
 
   return (
-    <div className={`rounded-[1.5rem] p-4 ${boxClass}`}>
-      <p className={`text-center text-sm font-extrabold leading-6 ${textClass}`}>
+    <div className={boxClass}>
+      {jig && (
+        <p className="human-premium-label-caps text-center text-[var(--jig-seal)]">
+          {isKo ? "지관재 · 나눔" : "Jigwanjae · Share"}
+        </p>
+      )}
+      <p className={`text-center text-sm font-extrabold leading-6 ${jig ? "human-premium-serif mt-2 text-base font-semibold" : ""} ${textClass}`}>
         {isKo
           ? "오늘 운세가 너무 맞았개…! 친구 펫도 봐줄게요"
           : "Today's fortune was spot on! Share with a friend."}
       </p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className={`mt-3 flex flex-wrap gap-2 ${jig ? "grid grid-cols-1 gap-2.5 sm:grid-cols-3" : ""}`}>
         <button
           type="button"
           disabled={busy !== null}
           onClick={() => void handleKakaoShare()}
-          className={`flex-1 rounded-full px-3 py-2.5 text-xs font-extrabold transition disabled:opacity-60 ${buttonClass}`}
+          className={`${jig ? kakaoBtnClass : buttonBase} ${!jig ? kakaoBtnClass : ""} disabled:opacity-60`}
         >
           {busy === "kakao" ? "…" : isKo ? "카카오 공유" : "Kakao"}
         </button>
@@ -120,7 +135,7 @@ export function PetFortuneShareRow({
           type="button"
           disabled={busy !== null}
           onClick={() => void handleInstagramShare()}
-          className={`flex-1 rounded-full px-3 py-2.5 text-xs font-extrabold transition disabled:opacity-60 ${buttonClass}`}
+          className={`${jig ? instagramBtnClass : buttonBase} ${!jig ? instagramBtnClass : ""} disabled:opacity-60`}
         >
           {busy === "instagram" ? "…" : isKo ? "인스타 스토리" : "Instagram"}
         </button>
@@ -128,13 +143,13 @@ export function PetFortuneShareRow({
           type="button"
           disabled={busy !== null}
           onClick={() => void handleCopyLink()}
-          className={`flex-1 rounded-full px-3 py-2.5 text-xs font-extrabold transition disabled:opacity-60 ${buttonClass}`}
+          className={`${jig ? linkBtnClass : buttonBase} ${!jig ? linkBtnClass : ""} disabled:opacity-60`}
         >
           {busy === "link" ? "…" : isKo ? "링크 복사" : "Copy link"}
         </button>
       </div>
       {status && (
-        <p className={`mt-3 text-center text-[11px] font-semibold ${jig ? "text-[var(--jig-muted)]" : isNight ? "text-[#ffd7ff]" : "text-plum/70"}`}>
+        <p className={`mt-3 text-center text-[11px] font-semibold ${subtextClass}`}>
           {status}
         </p>
       )}

@@ -15,7 +15,7 @@ export default async function PremiumPage() {
     >
       <PremiumCheckout />
       <p className="mt-8 text-center text-sm">
-        <Link href="/saju" className="text-plum underline">
+        <Link href="/saju" className="font-semibold text-white/88 underline underline-offset-4 transition hover:text-white">
           {t("backHub")}
         </Link>
       </p>

@@ -99,7 +99,7 @@ export function SharedPetFortuneLanding({
         </div>
       </div>
 
-      <PetFortuneShareRow pet={pet} fortune={fortune} isKo={isKo} isNight={false} />
+      <PetFortuneShareRow pet={pet} fortune={fortune} isKo={isKo} variant="jigwanjae" />
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <Link

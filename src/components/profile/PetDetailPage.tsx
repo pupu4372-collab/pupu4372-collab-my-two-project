@@ -150,7 +150,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
   }
 
   if (loading || !ready) {
-    return <p className="text-sm text-plum/60">{isKo ? "펫 상세 불러오는 중..." : "Loading pet detail..."}</p>;
+    return <p className="text-sm text-white/75">{isKo ? "펫 상세 불러오는 중..." : "Loading pet detail..."}</p>;
   }
 
   if (error) {
@@ -173,8 +173,8 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
     <div className="space-y-8">
       <section className="flex flex-col items-center text-center">
         <div className="relative mb-6 h-40 w-40 md:h-56 md:w-56">
-          <div className="absolute inset-0 rounded-full bg-primary/5 animate-pulse" aria-hidden />
-          <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-4 border-white bg-blush/50 text-6xl shadow-lg">
+          <div className="absolute inset-0 animate-pulse rounded-full bg-white/10" aria-hidden />
+          <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-4 border-white/85 bg-[#f4f1ea]/90 text-6xl shadow-[0_12px_40px_rgba(0,0,0,0.22)]">
             {pet.profile_image_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={supabaseImageTransformUrl(pet.profile_image_url, { width: 448, height: 448 })} alt="" className="h-full w-full object-cover" />
@@ -182,18 +182,18 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
               <span aria-hidden>{speciesEmoji(pet.species)}</span>
             )}
           </div>
-          <span className="absolute bottom-2 right-2 rounded-full bg-secondary-container px-3 py-1 text-xs font-bold text-secondary shadow-sm">
+          <span className="absolute bottom-2 right-2 rounded-full border border-[#b22222]/25 bg-[#fcf9f2]/95 px-3 py-1 text-xs font-bold text-[#222222] shadow-sm">
             {pet.latestSaju ? typeLabels[pet.latestSaju.saju_type] : isKo ? "새 사주 대기" : "Ready"}
           </span>
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-primary md:text-4xl">{pet.name}</h1>
-        <p className="mt-2 text-sm text-on-surface-variant">
+        <h1 className="human-premium-serif text-3xl font-bold tracking-tight text-white md:text-4xl">{pet.name}</h1>
+        <p className="mt-2 text-sm font-medium text-white/82">
           {petSpeciesLabel}
           {pet.breed ? ` · ${pet.breed}` : ""} · {pet.birth_date} ({ageLabel(pet.birth_date, isKo)}) · {genderLabel}
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           {(pet.personality_tags.length ? pet.personality_tags : [isKo ? "사주대기" : "Ready", isKo ? "집사바라기" : "Pet parent bond"]).map((tag) => (
-            <span key={tag} className="rounded-full bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+            <span key={tag} className="rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white/92 backdrop-blur-sm">
               #{tag}
             </span>
           ))}
@@ -201,7 +201,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
       </section>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <GlassCard className="flex flex-col justify-between">
+        <GlassCard className="flex flex-col justify-between text-primary">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-2xl font-bold text-primary">{isKo ? "사주 리포트 요약" : "Saju summary"}</h2>
             <span className="text-2xl" aria-hidden>
@@ -222,28 +222,28 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
               <span>{isKo ? "리포트 누적" : "Saved reports"}</span>
               <span>{pet.readings.length}</span>
             </div>
-            <div className="h-3 overflow-hidden rounded-full bg-surface-container">
-              <div className="h-full rounded-full bg-secondary" style={{ width: `${Math.min(100, pet.readings.length * 25)}%` }} />
+            <div className="h-3 overflow-hidden rounded-full bg-[#e9e5d9]">
+              <div className="h-full rounded-full bg-[#b22222]" style={{ width: `${Math.min(100, pet.readings.length * 25)}%` }} />
             </div>
           </div>
         </GlassCard>
 
-        <GlassCard>
+        <GlassCard className="text-primary">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-bold text-primary">{isKo ? "오늘의 펫 지수" : "Today's pet index"}</h2>
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">{moodScore}</div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#b22222] text-sm font-bold text-white">{moodScore}</div>
           </div>
           <div className="space-y-4">
             {[
               { title: isKo ? "케어 운" : "Care luck", value: `${moodScore}%`, body: isKo ? "오늘은 교감 루틴을 이어가기 좋아요." : "A good day to continue bonding routines.", icon: "💚" },
               { title: isKo ? "Pet Show 반응" : "Pet Show reaction", value: String(totalLikes), body: isKo ? "받은 좋아요를 기준으로 한 모먼트 지수예요." : "Moment score from received likes.", icon: "📸" },
             ].map((item) => (
-              <div key={item.title} className="flex items-center gap-4 rounded-2xl border border-secondary/5 bg-white/50 p-4">
+              <div key={item.title} className="flex items-center gap-4 rounded-2xl border border-[#222222]/8 bg-[#fcf9f2]/80 p-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-tertiary-fixed text-xl">{item.icon}</div>
                 <div className="flex-1">
                   <div className="flex justify-between gap-3">
                     <span className="font-bold text-primary">{item.title}</span>
-                    <span className="font-bold text-secondary">{item.value}</span>
+                    <span className="font-bold text-[#b22222]">{item.value}</span>
                   </div>
                   <p className="mt-1 text-xs leading-5 text-plum/60">{item.body}</p>
                 </div>
@@ -252,7 +252,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
           </div>
         </GlassCard>
 
-        <GlassCard>
+        <GlassCard className="text-primary">
           <h2 className="mb-5 text-2xl font-bold text-primary">{isKo ? "사주 이어보기" : "Continue reading"}</h2>
           <div className="grid gap-3">
             <Link href={`/saju/zodiac?${q}`} className="rounded-2xl bg-channel-saju/10 px-4 py-3 text-sm font-bold text-channel-saju transition hover:bg-channel-saju/20">
@@ -267,7 +267,7 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
           </div>
         </GlassCard>
 
-        <GlassCard>
+        <GlassCard className="text-primary">
           <SectionHeader
             title={isKo ? "마이 모먼트" : "My moments"}
             subtitle={isKo ? "이 펫으로 올린 Pet Show 사진" : "Pet Show photos connected to this pet"}

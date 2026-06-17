@@ -10,6 +10,11 @@ import type {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PetFortuneShareRow } from "@/components/home/PetFortuneShareRow";
+import {
+  JigFortuneContentBox,
+  JigFortuneToggleButton,
+  JigFortuneWatermark,
+} from "@/components/home/jig-fortune/JigFortuneDecor";
 
 export type PetFortuneVisualVariant = "jigwanjae" | "default";
 
@@ -34,6 +39,8 @@ function CommonFortunePanel({
   isNight: boolean;
   showRegisterCta: boolean;
 }) {
+  const [revealed, setRevealed] = useState(true);
+
   if (isJigwanjae(variant)) {
     return (
       <div className="mt-2 space-y-6">
@@ -44,33 +51,73 @@ function CommonFortunePanel({
           <span className="text-xs font-semibold text-[var(--jig-muted)]">{fortune.scopeLabel}</span>
         </div>
 
-        <div className="relative border border-[var(--jig-ink)]/10 bg-white/40 p-8 text-center">
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden opacity-[0.06]">
-            <span className="human-premium-serif text-8xl">福</span>
-          </div>
-          <div className="relative z-10 space-y-3">
-            <p className="human-premium-label-caps text-[var(--jig-muted)]">
-              {isKo ? "공통 운세" : "Common fortune"}
-            </p>
-            <h3 className="human-premium-serif text-2xl font-semibold text-[var(--jig-ink)]">{fortune.headline}</h3>
-            <p className="text-sm leading-7 text-[var(--jig-muted)]">{fortune.body}</p>
-          </div>
-        </div>
+        {revealed ? (
+          <JigFortuneContentBox>
+            <JigFortuneWatermark />
+            <div className="relative z-10 space-y-3">
+              <p className="human-premium-label-caps text-[var(--jig-muted)]">
+                {isKo ? "공통 운세" : "Common fortune"}
+              </p>
+              <h3 className="human-premium-serif text-2xl font-semibold text-[var(--jig-ink)]">{fortune.headline}</h3>
+              <p className="text-sm leading-7 text-[var(--jig-muted)]">{fortune.body}</p>
+            </div>
+          </JigFortuneContentBox>
+        ) : (
+          <JigFortuneContentBox>
+            <JigFortuneWatermark />
+            <div className="relative z-10 space-y-2">
+              <p className="human-premium-label-caps text-[var(--jig-muted)]">
+                {isKo ? "공통 운세" : "Common fortune"}
+              </p>
+              <p className="human-premium-serif text-2xl font-semibold leading-snug text-[var(--jig-ink)]">
+                {isKo ? (
+                  <>
+                    오늘의 운세를
+                    <br />
+                    확인하세요
+                  </>
+                ) : (
+                  <>
+                    Check today&apos;s
+                    <br />
+                    fortune
+                  </>
+                )}
+              </p>
+            </div>
+          </JigFortuneContentBox>
+        )}
 
-        {showRegisterCta && (
-          <p className="rounded-sm border border-[var(--jig-ink)]/8 bg-[var(--jig-surface)] px-4 py-3 text-center text-xs font-semibold leading-5 text-[var(--jig-muted)]">
+        {revealed && showRegisterCta && (
+          <p className="jig-fortune-notice px-4 py-3 text-center text-xs font-semibold leading-5 text-[var(--jig-muted)]">
             {isKo
               ? "K-사주를 저장하면 내 아이 맞춤 운세가 열려요."
               : "Save a K-Saju reading to unlock your pet's personalized fortune."}
           </p>
         )}
 
-        <AuthRequiredLink href="/saju" className="jig-fortune-reveal-btn mx-auto flex w-full max-w-xs items-center justify-center gap-4 bg-[var(--jig-ink)] px-8 py-4 text-white transition hover:opacity-90 active:scale-[0.98]">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-[var(--jig-seal)]">
-            <span className="human-premium-serif text-lg italic text-white">知</span>
-          </span>
-          <span className="human-premium-label-caps text-base tracking-widest">{fortune.cta}</span>
-        </AuthRequiredLink>
+        {revealed ? (
+          <>
+            <AuthRequiredLink
+              href="/saju"
+              className="jig-fortune-reveal-btn mx-auto flex w-full max-w-xs items-center justify-center gap-4 bg-[var(--jig-ink)] px-8 py-4 text-white transition hover:opacity-90 active:scale-[0.98]"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-[var(--jig-seal)]">
+                <span className="human-premium-serif text-lg italic text-white">知</span>
+              </span>
+              <span className="human-premium-label-caps text-base tracking-widest">{fortune.cta}</span>
+            </AuthRequiredLink>
+            <button
+              type="button"
+              onClick={() => setRevealed(false)}
+              className="mx-auto text-xs font-bold text-[var(--jig-muted)] transition hover:text-[var(--jig-seal)]"
+            >
+              {isKo ? "접기" : "Fold"}
+            </button>
+          </>
+        ) : (
+          <JigFortuneToggleButton expanded={false} isKo={isKo} onClick={() => setRevealed(true)} />
+        )}
       </div>
     );
   }
@@ -235,10 +282,8 @@ function PersonalizedFortunePanel({
 
         {!revealed ? (
           <>
-            <div className="relative border border-[var(--jig-ink)]/10 bg-white/40 p-8 text-center">
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden opacity-[0.06]">
-                <span className="human-premium-serif text-8xl">福</span>
-              </div>
+            <JigFortuneContentBox>
+              <JigFortuneWatermark />
               <div className="relative z-10 space-y-2">
                 <span className="human-premium-label-caps text-[var(--jig-muted)]">
                   {isKo ? `분석 대상: ${selectedPet.name}` : `Reading for: ${selectedPet.name}`}
@@ -264,18 +309,9 @@ function PersonalizedFortunePanel({
                     : `How will ${selectedPet.name}'s day go?`}
                 </p>
               </div>
-            </div>
+            </JigFortuneContentBox>
 
-            <button
-              type="button"
-              onClick={() => setRevealed(true)}
-              className="jig-fortune-reveal-btn mx-auto flex w-full max-w-xs items-center justify-center gap-4 bg-[var(--jig-ink)] px-8 py-4 text-white transition hover:opacity-90 active:scale-[0.98]"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-[var(--jig-seal)]">
-                <span className="human-premium-serif text-lg italic text-white">知</span>
-              </span>
-              <span className="human-premium-label-caps text-base tracking-widest">{isKo ? "운세 보기" : "Reveal fortune"}</span>
-            </button>
+            <JigFortuneToggleButton expanded={false} isKo={isKo} onClick={() => setRevealed(true)} />
           </>
         ) : (
           <div className="space-y-4">
@@ -382,6 +418,14 @@ function PersonalizedFortunePanel({
             <PetFortuneShareRow pet={selectedPet} fortune={fortune} isKo={isKo} variant="jigwanjae" />
 
             <p className={`text-center text-xs font-semibold ${textMuted}`}>{fortune.disclaimer}</p>
+
+            <button
+              type="button"
+              onClick={() => setRevealed(false)}
+              className="mx-auto text-xs font-bold text-[var(--jig-muted)] transition hover:text-[var(--jig-seal)]"
+            >
+              {isKo ? "접기" : "Fold"}
+            </button>
           </div>
         )}
       </div>

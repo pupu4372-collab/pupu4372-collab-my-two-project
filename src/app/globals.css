@@ -278,6 +278,75 @@ html.native-app body {
   transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.human-premium-report .human-premium-share-panel {
+  padding: 1.25rem 1rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(34, 34, 34, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(252, 249, 242, 0.92) 100%),
+    var(--jig-hanji);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 20px rgba(34, 34, 34, 0.06);
+}
+
+.human-premium-report .human-premium-share-btn {
+  display: flex;
+  width: 100%;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  transition:
+    opacity 0.2s ease,
+    transform 0.15s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.human-premium-report .human-premium-share-btn:hover:not(:disabled) {
+  opacity: 0.94;
+  box-shadow: 0 2px 12px rgba(34, 34, 34, 0.08);
+}
+
+.human-premium-report .human-premium-share-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.human-premium-report .human-premium-share-btn--kakao {
+  min-height: 3.5rem;
+  border: 1px solid rgba(34, 34, 34, 0.12);
+  background: linear-gradient(180deg, #fde85a 0%, #fae100 52%, #e6cf00 100%);
+  color: #191919;
+  font-size: 0.8125rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 2px 10px rgba(250, 225, 0, 0.28);
+}
+
+.human-premium-report .human-premium-share-btn--link {
+  border: 1px solid color-mix(in srgb, var(--jig-obang-blue) 30%, transparent);
+  background: color-mix(in srgb, var(--jig-obang-blue) 11%, white);
+  color: var(--jig-obang-blue);
+}
+
+.human-premium-report .human-premium-share-btn--pdf {
+  border: 1px solid rgba(34, 34, 34, 0.12);
+  background: color-mix(in srgb, var(--jig-obang-white) 68%, white);
+  color: var(--jig-ink);
+}
+
+.human-premium-report .human-premium-share-btn--email {
+  border: 1px solid color-mix(in srgb, var(--jig-seal) 30%, transparent);
+  background: color-mix(in srgb, var(--jig-seal) 9%, white);
+  color: var(--jig-seal);
+}
+
 /* Home pet daily fortune — Jigwanjae (Stitch) */
 .pet-fortune-jigwanjae {
   --jig-hanji: #f4f1ea;
@@ -286,6 +355,7 @@ html.native-app body {
   --jig-muted: #444748;
   --jig-surface: #fcf9f2;
   --jig-obang-white: #e9e5d9;
+  --jig-ornate-gold: #ddb944;
   background-color: var(--jig-hanji);
   background-image:
     url("/stitch/jigwanjae/natural-paper.png"),
@@ -303,10 +373,191 @@ html.native-app body {
 
 .pet-fortune-jigwanjae .jig-fortune-frame-corner {
   position: absolute;
-  width: 2rem;
-  height: 2rem;
-  border: 2px solid var(--jig-seal);
+  width: 1.65rem;
+  height: 1.65rem;
   pointer-events: none;
+  z-index: 4;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--jig-seal);
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-ornament {
+  position: absolute;
+  width: 1.45rem;
+  height: 1.45rem;
+  background-color: var(--jig-ink);
+  opacity: 0.78;
+  mask: url("/stitch/jigwanjae/corner-bracket.png") center / contain no-repeat;
+  -webkit-mask: url("/stitch/jigwanjae/corner-bracket.png") center / contain no-repeat;
+}
+
+@media (min-width: 768px) {
+  .pet-fortune-jigwanjae .jig-fortune-frame-corner {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .pet-fortune-jigwanjae .jig-fortune-frame-ornament {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--tl {
+  left: 0.45rem;
+  top: 0.45rem;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--tl::before {
+  border-right: none;
+  border-bottom: none;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--tl .jig-fortune-frame-ornament {
+  left: -0.2rem;
+  top: -0.2rem;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--tr {
+  right: 0.45rem;
+  top: 0.45rem;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--tr::before {
+  border-left: none;
+  border-bottom: none;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--tr .jig-fortune-frame-ornament {
+  right: -0.2rem;
+  top: -0.2rem;
+  left: auto;
+  transform: scaleX(-1);
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--bl {
+  left: 0.45rem;
+  bottom: 0.45rem;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--bl::before {
+  border-right: none;
+  border-top: none;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--bl .jig-fortune-frame-ornament {
+  left: -0.2rem;
+  bottom: -0.2rem;
+  top: auto;
+  transform: scaleY(-1);
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--br {
+  right: 0.45rem;
+  bottom: 0.45rem;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--br::before {
+  border-left: none;
+  border-top: none;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-frame-corner--br .jig-fortune-frame-ornament {
+  right: -0.2rem;
+  bottom: -0.2rem;
+  left: auto;
+  top: auto;
+  transform: scale(-1, -1);
+}
+
+@media (min-width: 768px) {
+  .pet-fortune-jigwanjae .jig-fortune-frame-corner--tl {
+    left: 0.65rem;
+    top: 0.65rem;
+  }
+
+  .pet-fortune-jigwanjae .jig-fortune-frame-corner--tr {
+    right: 0.65rem;
+    top: 0.65rem;
+  }
+
+  .pet-fortune-jigwanjae .jig-fortune-frame-corner--bl {
+    left: 0.65rem;
+    bottom: 0.65rem;
+  }
+
+  .pet-fortune-jigwanjae .jig-fortune-frame-corner--br {
+    right: 0.65rem;
+    bottom: 0.65rem;
+  }
+}
+
+.pet-fortune-jigwanjae .jig-fortune-content-box {
+  isolation: isolate;
+  background-color: var(--jig-surface);
+  border: 1px solid rgba(34, 34, 34, 0.1);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.72),
+    0 4px 20px rgba(34, 34, 34, 0.06);
+}
+
+.pet-fortune-jigwanjae .jig-fortune-content-box::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(34, 34, 34, 0.06);
+  pointer-events: none;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-notice {
+  border-radius: 1rem;
+  border: 1px solid rgba(34, 34, 34, 0.06);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 2px 12px rgba(34, 34, 34, 0.04);
+}
+
+.pet-fortune-jigwanjae .jig-fortune-share-btn {
+  width: 100%;
+  border-radius: 0.25rem;
+  padding: 0.7rem 0.75rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-share-btn:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.pet-fortune-jigwanjae .jig-fortune-share-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.pet-fortune-jigwanjae .jig-fortune-share-btn--kakao {
+  border: 1px solid rgba(34, 34, 34, 0.14);
+  background: #fae100;
+  color: #191919;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.pet-fortune-jigwanjae .jig-fortune-share-btn--instagram {
+  border: 1px solid rgba(178, 34, 34, 0.25);
+  background: linear-gradient(135deg, #feda75 0%, #fa7e1e 38%, #d62976 72%, #962fbf 100%);
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.pet-fortune-jigwanjae .jig-fortune-share-btn--link {
+  border: 1px solid rgba(34, 34, 34, 0.14);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--jig-ink);
 }
 
 .pet-fortune-jigwanjae .jig-fortune-reveal-btn {

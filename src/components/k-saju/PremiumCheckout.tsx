@@ -310,7 +310,7 @@ export function PremiumCheckout() {
             type="button"
             disabled={loading}
             onClick={() => runCheckout(true)}
-            className="w-full rounded-full border border-plum/20 py-3 text-sm text-plum"
+            className="w-full rounded-full border border-[#222222]/14 bg-[#fcf9f2] py-3 text-sm font-semibold text-[#222222] transition hover:bg-white disabled:opacity-60"
           >
             {t.demo}
           </button>
