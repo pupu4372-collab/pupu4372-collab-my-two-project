@@ -21,11 +21,22 @@ function isSpecies(value: unknown): value is PetSpecies {
   return value === "dog" || value === "cat" || value === "other";
 }
 
+type PetRow = {
+  id: string;
+  name: string;
+  species: PetSpecies;
+  birth_date: string;
+  birth_time: string | null;
+  birth_time_unknown: boolean;
+  birth_timezone: string;
+  profile_image_url: string | null;
+};
+
 async function loadSharedFortune(petId: string, locale: Locale) {
   const supabase = getSupabaseServerClient();
   if (!supabase) return null;
 
-  const { data: pet, error } = await supabase
+  const { data: rawPet, error } = await supabase
     .from("pets")
     .select(
       "id, name, species, birth_date, birth_time, birth_time_unknown, birth_timezone, profile_image_url"
@@ -33,6 +44,7 @@ async function loadSharedFortune(petId: string, locale: Locale) {
     .eq("id", petId)
     .maybeSingle();
 
+  const pet = rawPet as (Omit<PetRow, "species"> & { species: string }) | null;
   if (error || !pet || !isSpecies(pet.species)) return null;
 
   const profile: PetProfileForFortune = {
