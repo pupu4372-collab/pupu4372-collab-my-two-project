@@ -73,22 +73,22 @@ export function ProfileActivitySummary() {
 
   return (
     <section className="space-y-4">
-      <h3 className="px-2 text-xl font-bold text-primary">{isKo ? "나의 활동" : "My activity"}</h3>
+      <h3 className="px-2 text-xl font-bold text-white">{isKo ? "나의 활동" : "My activity"}</h3>
       <div className="grid grid-cols-3 gap-3">
         {items.map((item) => (
           item.href ? (
             <Link key={item.label} href={item.href} className="block">
-              <GlassCard className="flex h-full flex-col items-center gap-2 p-4 text-center transition hover:-translate-y-0.5 hover:bg-white/75">
+              <GlassCard className="flex h-full flex-col items-center gap-2 p-4 text-center text-primary transition hover:-translate-y-0.5 hover:bg-white/75">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-lg">{item.icon}</div>
                 <span className="text-xl font-bold text-primary">{item.value}</span>
-                <span className="text-[10px] font-bold uppercase tracking-wide text-plum/55">{item.label}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide text-plum/70">{item.label}</span>
               </GlassCard>
             </Link>
           ) : (
-            <GlassCard key={item.label} className="flex flex-col items-center gap-2 p-4 text-center">
+            <GlassCard key={item.label} className="flex flex-col items-center gap-2 p-4 text-center text-primary">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-lg">{item.icon}</div>
               <span className="text-xl font-bold text-primary">{item.value}</span>
-              <span className="text-[10px] font-bold uppercase tracking-wide text-plum/55">{item.label}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-plum/70">{item.label}</span>
             </GlassCard>
           )
         ))}

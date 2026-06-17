@@ -328,7 +328,7 @@ export function PetProfilesList({
 
   if (!configured) {
     return (
-      <p className="text-sm text-plum/70">
+      <p className="text-sm text-white/75">
         {isKo
           ? "Supabase 연동 후 저장된 펫 프로필이 여기에 표시됩니다."
           : "Saved pet profiles will appear here after Supabase is connected."}
@@ -338,11 +338,11 @@ export function PetProfilesList({
 
   if (isAnonymous) {
     return (
-      <p className="text-sm text-plum/70">
+      <p className="text-sm text-white/75">
         {isKo
           ? "로그인 후 사주를 보면 펫 프로필이 여기에 저장돼요."
           : "After logging in, pet profiles are saved here when you read saju."}{" "}
-        <Link href="/login" className="font-medium text-plum underline">
+        <Link href="/login" className="font-medium text-[#ffd7ff] underline hover:text-white">
           {isKo ? "로그인하기" : "Log in"}
         </Link>
       </p>
@@ -350,7 +350,7 @@ export function PetProfilesList({
   }
 
   if (!ready || loading) {
-    return <p className="text-sm text-plum/60">{isKo ? "펫 프로필 불러오는 중…" : "Loading pet profiles…"}</p>;
+    return <p className="text-sm text-white/70">{isKo ? "펫 프로필 불러오는 중…" : "Loading pet profiles…"}</p>;
   }
 
   if (error && pets.length === 0) {
@@ -445,7 +445,7 @@ export function PetProfilesList({
               key={pet.id}
               className={
                 useGlassCards
-                  ? "glass-card rounded-[2rem] p-5 transition active:scale-[0.99]"
+                  ? "glass-card rounded-[2rem] p-5 text-primary transition active:scale-[0.99]"
                   : isCompactView
                     ? "rounded-xl border border-plum/15 bg-white/55 px-2 py-2"
                     : "rounded-2xl border border-plum/15 bg-white/55 px-3 py-3"
@@ -511,7 +511,7 @@ export function PetProfilesList({
                     )}
                   </div>
                   <p
-                    className={`text-plum/55 ${useGlassCards ? "text-sm" : isCompactView ? "text-[10px] leading-snug" : "text-[11px]"}`}
+                    className={`text-plum/75 ${useGlassCards ? "text-sm" : isCompactView ? "text-[10px] leading-snug" : "text-[11px]"}`}
                   >
                     {speciesLabel(pet.species, isKo)} · {gender}
                     {isCompactView ? (
@@ -544,7 +544,7 @@ export function PetProfilesList({
                   </p>
                 </div>
                 {useGlassCards && !editable && (
-                  <span className="shrink-0 text-xl text-plum/35" aria-hidden>
+                  <span className="shrink-0 text-xl text-plum/50" aria-hidden>
                     ›
                   </span>
                 )}
@@ -553,7 +553,7 @@ export function PetProfilesList({
               {useGlassCards && !editable && (
                 <Link
                   href={`/profile/pets/${pet.id}`}
-                  className="mt-4 block rounded-2xl bg-primary/10 px-4 py-2.5 text-center text-xs font-bold text-primary transition hover:bg-primary hover:text-white"
+                  className="mt-4 block rounded-2xl bg-primary/15 px-4 py-2.5 text-center text-xs font-bold text-primary transition hover:bg-primary hover:text-white"
                 >
                   {isKo ? "상세 프로필 보기" : "View pet profile"}
                 </Link>
@@ -561,7 +561,7 @@ export function PetProfilesList({
 
               {editable && drafts[pet.id] && (
                 <div className="mt-4 grid gap-3 rounded-2xl bg-white/45 p-4 sm:grid-cols-2">
-                  <label className="block text-xs font-medium text-plum/70 sm:col-span-2">
+                  <label className="block text-xs font-medium text-plum/80 sm:col-span-2">
                     {isKo ? "펫 이름" : "Pet name"}
                     <input
                       value={drafts[pet.id].name}
@@ -572,7 +572,7 @@ export function PetProfilesList({
                     />
                   </label>
 
-                  <label className="block text-xs font-medium text-plum/70">
+                  <label className="block text-xs font-medium text-plum/80">
                     {isKo ? "종류" : "Species"}
                     <select
                       value={drafts[pet.id].species}
@@ -590,7 +590,7 @@ export function PetProfilesList({
                     </select>
                   </label>
 
-                  <label className="block text-xs font-medium text-plum/70">
+                  <label className="block text-xs font-medium text-plum/80">
                     {isKo ? "성별" : "Gender"}
                     <select
                       value={drafts[pet.id].gender}
@@ -610,7 +610,7 @@ export function PetProfilesList({
                     </select>
                   </label>
 
-                  <label className="block text-xs font-medium text-plum/70">
+                  <label className="block text-xs font-medium text-plum/80">
                     {isKo ? "생일" : "Birthday"}
                     <input
                       type="date"
@@ -621,7 +621,7 @@ export function PetProfilesList({
                     />
                   </label>
 
-                  <label className="block text-xs font-medium text-plum/70">
+                  <label className="block text-xs font-medium text-plum/80">
                     {isKo ? "태어난 시간" : "Birth time"}
                     <input
                       type="time"
@@ -643,7 +643,7 @@ export function PetProfilesList({
                     {isKo ? "태어난 시간 모름" : "Birth time unknown"}
                   </label>
 
-                  <label className="block text-xs font-medium text-plum/70">
+                  <label className="block text-xs font-medium text-plum/80">
                     {isKo ? "시간대" : "Timezone"}
                     <select
                       value={drafts[pet.id].timezone}
@@ -711,8 +711,8 @@ export function PetProfilesList({
                 <p
                   className={
                     isCompactView
-                      ? "mt-1 line-clamp-1 text-[10px] text-plum/55"
-                      : "mt-3 line-clamp-2 text-xs leading-relaxed text-plum/60"
+                      ? "mt-1 line-clamp-1 text-[10px] text-plum/72"
+                      : "mt-3 line-clamp-2 text-xs leading-relaxed text-plum/75"
                   }
                 >
                   {isKo ? "최근" : "Latest"}: {pet.latestSaju.title ?? (isKo ? "K-Saju 결과" : "K-Saju result")}

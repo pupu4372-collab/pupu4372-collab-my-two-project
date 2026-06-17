@@ -27,16 +27,16 @@ function CommonFortunePanel({
   showRegisterCta: boolean;
 }) {
   const panelClass = isNight
-    ? "relative max-w-[470px] border border-[#ddd2e4]/70 bg-[#c9c1d2] pr-24 text-primary shadow-[0_10px_26px_rgba(18,10,29,0.16)]"
+    ? "relative max-w-[470px] border border-white/30 bg-[#351445] pr-24 text-white shadow-[0_10px_26px_rgba(18,10,29,0.16)]"
     : "bg-white/55";
 
   return (
     <div className={`mt-6 rounded-[1.5rem] p-5 ${panelClass}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-[#efe6f2] px-3 py-1 text-xs font-extrabold text-primary">
+        <span className={`rounded-full px-3 py-1 text-xs font-extrabold ${isNight ? "bg-[#4a2d5c] text-[#ffd7ff]" : "bg-[#efe6f2] text-primary"}`}>
           {fortune.dateLabel}
         </span>
-        <span className={`text-xs font-bold ${isNight ? "text-plum/80" : "text-plum/70"}`}>
+        <span className={`text-xs font-bold ${isNight ? "text-[#f3e8ff]/85" : "text-plum/70"}`}>
           {fortune.scopeLabel}
         </span>
       </div>
@@ -45,8 +45,8 @@ function CommonFortunePanel({
           <span className="-mr-1 text-base text-[#6b5a48]">♥</span>RK
         </span>
       )}
-      <h3 className="mt-4 text-lg font-extrabold text-primary">{fortune.headline}</h3>
-      <p className={`mt-3 text-sm font-semibold leading-7 ${isNight ? "text-plum/85" : "text-plum/75"}`}>
+      <h3 className={`mt-4 text-lg font-extrabold ${isNight ? "text-white" : "text-primary"}`}>{fortune.headline}</h3>
+      <p className={`mt-3 text-sm font-semibold leading-7 ${isNight ? "text-[#f3e8ff]/90" : "text-plum/75"}`}>
         {fortune.body}
       </p>
       {showRegisterCta && (
@@ -106,11 +106,11 @@ function PersonalizedFortunePanel({
   const textBody = isNight ? "text-white" : "text-plum/85";
   const textMuted = isNight ? "text-[#e9d5ff]/90" : "text-plum/60";
   const cardBg = isNight
-    ? "border border-white/30 bg-[#4a2d5c]/72"
+    ? "border border-white/30 bg-[#351445]"
     : "border border-lavender/35 bg-white/72";
-  const innerCardBg = isNight ? "bg-[#5c3d6e]/88 border border-white/15" : "bg-white/80 border border-lavender/20";
+  const innerCardBg = isNight ? "bg-[#4a2d5c] border border-white/15" : "bg-white/80 border border-lavender/20";
   const chipInactive = isNight
-    ? "border-white/35 bg-[#5c3d6e]/70 text-white"
+    ? "border-white/35 bg-[#4a2d5c] text-white"
     : "border-lavender/40 bg-white/75 text-plum/80";
   const chipActive = isNight
     ? "border-[#ffd7ff] bg-[#6b4a82] text-white"
@@ -278,7 +278,7 @@ function PersonalizedFortunePanel({
                         ? "border-[#ffd7ff] bg-[#6b4a82] text-white"
                         : "border-channel-saju bg-channel-saju/10"
                       : isNight
-                        ? "border-white/25 bg-[#5c3d6e]/75 text-[#f3e8ff]"
+                        ? "border-white/25 bg-[#4a2d5c] text-[#f3e8ff]"
                         : "border-lavender/30 bg-white/70"
                   }`}
                 >

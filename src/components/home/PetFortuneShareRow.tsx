@@ -2,12 +2,11 @@
 
 import type { PetDailyFortune, PetFortunePetMeta } from "@/lib/saju/pet-daily-fortune";
 import {
-  buildFortuneShareImageBase64,
+  buildFortuneShareStorySlides,
   copyPetFortuneShareLink,
+  saveFortuneStorySlidesToDevice,
   sharePetFortuneToKakao,
-  shareToInstagramStory,
 } from "@/lib/share/pet-fortune-share";
-import { Capacitor } from "@capacitor/core";
 import { useState } from "react";
 
 export function PetFortuneShareRow({
@@ -25,7 +24,7 @@ export function PetFortuneShareRow({
   const [busy, setBusy] = useState<"kakao" | "instagram" | "link" | null>(null);
 
   const boxClass = isNight
-    ? "border border-white/25 bg-[#5c3d6e]/88"
+    ? "border border-white/25 bg-[#351445]"
     : "border border-channel-saju/25 bg-channel-saju/8";
   const textClass = isNight ? "text-[#f3e8ff]" : "text-primary";
   const buttonClass = isNight
@@ -58,25 +57,16 @@ export function PetFortuneShareRow({
     setBusy("instagram");
     setStatus(null);
     try {
-      const imageBase64 = await buildFortuneShareImageBase64({
-        petName: pet.name,
+      const slides = await buildFortuneShareStorySlides({
+        pet,
         fortune,
         isKo,
       });
-
-      if (Capacitor.isNativePlatform()) {
-        await shareToInstagramStory(imageBase64);
-        return;
-      }
-
-      const anchor = document.createElement("a");
-      anchor.href = imageBase64;
-      anchor.download = `${pet.name}-fortune.png`;
-      anchor.click();
+      const count = await saveFortuneStorySlidesToDevice(slides, pet.name);
       setStatus(
         isKo
-          ? "스토리용 이미지를 저장했어요. 인스타 앱에서 불러와 주세요."
-          : "Saved a story image. Open Instagram and upload it."
+          ? `스토리용 이미지 ${count}장을 저장했어요. 인스타에서 1→${count} 순서로 올려 주세요.`
+          : `Saved ${count} story images. Upload them in order on Instagram.`
       );
     } catch {
       setStatus(

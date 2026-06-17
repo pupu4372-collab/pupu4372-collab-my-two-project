@@ -133,13 +133,13 @@ export function PetShowPostsMiniGrid() {
   if (!configured || isAnonymous) return null;
 
   return (
-    <div className="glass-card space-y-3 rounded-[2rem] p-5">
+    <div className="glass-card space-y-3 rounded-[2rem] p-5 text-primary">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-channel-community">
             {isKo ? "우리아이 자랑에 올린 사진" : "Pet Show Photos"}
           </h3>
-          <p className="mt-1 text-xs text-plum/55">
+          <p className="mt-1 text-xs text-plum/70">
             {isKo ? "최근 올린 사진을 모아 보여줘요." : "A gallery of your recent uploads."}
           </p>
         </div>

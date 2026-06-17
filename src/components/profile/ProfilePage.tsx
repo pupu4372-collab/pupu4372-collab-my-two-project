@@ -23,15 +23,15 @@ export function ProfilePage() {
         <button
           type="button"
           onClick={() => setView("overview")}
-          className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:opacity-80"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-white/90 transition hover:text-white"
         >
           <span aria-hidden>←</span>
           {isKo ? "마이페이지로" : "Back to profile"}
         </button>
 
         <div className="text-center md:text-left">
-          <h1 className="text-3xl font-extrabold tracking-tight text-primary">{isKo ? "계정 상세" : "Account settings"}</h1>
-          <p className="mt-2 text-sm text-plum/65">
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">{isKo ? "계정 상세" : "Account settings"}</h1>
+          <p className="mt-2 text-sm text-white/80">
             {isKo ? "닉네임, 언어, 시간대와 계정 보안을 관리하세요." : "Manage your display name, language, timezone, and account."}
           </p>
         </div>
@@ -39,8 +39,8 @@ export function ProfilePage() {
         <UserProfileCard showEditor presentation="settings" />
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-primary">{isKo ? "펫 프로필 수정" : "Edit pet profiles"}</h2>
-          <p className="text-sm text-plum/60">
+          <h2 className="text-lg font-bold text-white">{isKo ? "펫 프로필 수정" : "Edit pet profiles"}</h2>
+          <p className="text-sm text-white/75">
             {isKo ? "반려동물 이름, 종류, 성별, 생일 정보를 수정할 수 있어요." : "Update your pet's name, species, gender, and birth details."}
           </p>
           <PetProfilesList editable cardStyle="glass" />
@@ -55,10 +55,10 @@ export function ProfilePage() {
 
       <section className="space-y-4">
         <div className="flex items-end justify-between gap-3 px-2">
-          <h3 className="text-xl font-bold text-primary">{isKo ? "나의 반려동물" : "My pets"}</h3>
+          <h3 className="text-xl font-bold text-white">{isKo ? "나의 반려동물" : "My pets"}</h3>
           <Link
             href="/saju"
-            className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-primary"
+            className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-[#ffd7ff] transition hover:text-white"
           >
             <span aria-hidden>+</span>
             {isKo ? "사주로 추가" : "Add via saju"}
@@ -74,7 +74,7 @@ export function ProfilePage() {
         <AdSlot />
       </section>
 
-      <GlassCard className="divide-y divide-plum/10 overflow-hidden p-0">
+      <GlassCard className="divide-y divide-plum/10 overflow-hidden p-0 text-primary">
         <button
           type="button"
           onClick={() => setView("edit")}

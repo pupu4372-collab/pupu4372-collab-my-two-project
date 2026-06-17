@@ -231,7 +231,7 @@ export function UserProfileCard({
 
   if (!configured) {
     return (
-      <p className="text-sm text-plum/70">
+      <p className="text-sm text-white/75">
         {isKo ? (
           <>
             <code>.env.local</code>에 Supabase 키를 설정하면 내 프로필이 표시됩니다.
@@ -246,7 +246,7 @@ export function UserProfileCard({
   }
 
   if (!ready || loading) {
-    return <p className="text-sm text-plum/60">{isKo ? "내 정보 불러오는 중…" : "Loading my info…"}</p>;
+    return <p className="text-sm text-white/70">{isKo ? "내 정보 불러오는 중…" : "Loading my info…"}</p>;
   }
 
   if (isAnonymous) {
@@ -462,11 +462,11 @@ export function UserProfileCard({
 
   if (presentation === "hero") {
     return (
-      <GlassCard className="relative flex flex-col items-center overflow-hidden text-center">
+      <GlassCard className="relative flex flex-col items-center overflow-hidden text-center text-primary">
         <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl" aria-hidden />
         <div className="relative mb-4">{avatarButton("lg")}</div>
         <h2 className="text-2xl font-bold text-primary">{shownName}</h2>
-        {email && <p className="mt-1 text-sm text-plum/65">{email}</p>}
+        {email && <p className="mt-1 text-sm text-plum/75">{email}</p>}
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           {joinedLabel && (
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
@@ -510,10 +510,10 @@ export function UserProfileCard({
     return (
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
         <aside className="lg:col-span-4">
-          <GlassCard className="sticky top-24 text-center">
+          <GlassCard className="sticky top-24 text-center text-primary">
             <div className="mb-4 flex justify-center">{avatarButton("lg")}</div>
             <h2 className="text-xl font-bold text-primary">{shownName}</h2>
-            {email && <p className="mt-1 text-sm text-plum/65">{email}</p>}
+            {email && <p className="mt-1 text-sm text-plum/75">{email}</p>}
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{providerLabel}</span>
               {shownCountry && (
@@ -530,7 +530,7 @@ export function UserProfileCard({
           </GlassCard>
         </aside>
         <div className="space-y-6 lg:col-span-8">
-          <GlassCard>
+          <GlassCard className="text-primary">
             <div className="mb-6 flex items-center gap-2">
               <span aria-hidden>👤</span>
               <h3 className="text-lg font-semibold text-primary">{isKo ? "개인정보 설정" : "Personal info"}</h3>

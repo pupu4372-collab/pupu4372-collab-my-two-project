@@ -247,10 +247,10 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
     ? "border border-white/20 bg-white/12 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-md"
     : "";
   const nightFortuneCard = isNight
-    ? "!border-0 !bg-[radial-gradient(circle_at_78%_18%,rgba(112,61,130,0.8),transparent_34%),linear-gradient(135deg,#4b255d_0%,#351445_58%,#260d35_100%)] shadow-[0_18px_48px_rgba(26,10,38,0.32)]"
+    ? "!border-0 !bg-[#260d35] shadow-[0_18px_48px_rgba(26,10,38,0.32)]"
     : "";
   const nightFortunePanel = isNight
-    ? "relative max-w-[470px] border border-[#ddd2e4]/70 bg-[#c9c1d2] pr-24 text-primary shadow-[0_10px_26px_rgba(18,10,29,0.16)]"
+    ? "relative max-w-[470px] border border-white/30 bg-[#351445] text-white shadow-[0_10px_26px_rgba(18,10,29,0.16)]"
     : "bg-white/55";
 
   return (
