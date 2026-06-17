@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>知觀齋 (Jigwanjae) - 오늘의 운세</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Noto+Serif+KR:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#e5e2db",
+                        "surface-container-low": "#f6f3ec",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#222222",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#0b0c0c",
+                        "error": "#ba1a1a",
+                        "on-surface": "#1c1c18",
+                        "on-primary": "#ffffff",
+                        "on-background": "#1c1c18",
+                        "surface-container-high": "#ebe8e1",
+                        "secondary-fixed": "#ffdad6",
+                        "tertiary-fixed": "#e6e2e0",
+                        "surface-dim": "#dcdad3",
+                        "on-secondary-fixed-variant": "#92030f",
+                        "surface-container": "#f1eee7",
+                        "hanji-base": "#F4F1EA",
+                        "tertiary": "#0c0c0b",
+                        "background": "#fcf9f2",
+                        "outline-variant": "#c4c7c7",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#c9c6c4",
+                        "surface-variant": "#e5e2db",
+                        "obang-blue": "#3E5C76",
+                        "on-primary-container": "#8a8989",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "on-surface-variant": "#444748",
+                        "on-tertiary-container": "#8c8987",
+                        "tertiary-container": "#232221",
+                        "surface": "#fcf9f2",
+                        "on-secondary-container": "#600006",
+                        "inverse-primary": "#c8c6c5",
+                        "surface-bright": "#fcf9f2",
+                        "obang-black": "#3D3D3D",
+                        "outline": "#747878",
+                        "obang-red": "#9A3B3B",
+                        "on-tertiary-fixed-variant": "#484645",
+                        "obang-yellow": "#D4A373",
+                        "secondary-fixed-dim": "#ffb4ac",
+                        "inverse-on-surface": "#f3f0e9",
+                        "seal-cinnabar": "#B22222",
+                        "primary-fixed": "#e5e2e1",
+                        "on-secondary-fixed": "#410003",
+                        "secondary": "#b52424",
+                        "on-tertiary-fixed": "#1c1b1a",
+                        "mokseok-ink": "#222222",
+                        "surface-tint": "#5f5e5e",
+                        "secondary-container": "#ff5a52",
+                        "on-primary-fixed-variant": "#474746",
+                        "on-error": "#ffffff",
+                        "obang-white": "#E9E5D9",
+                        "inverse-surface": "#31312c",
+                        "on-primary-fixed": "#1b1c1c"
+                    },
+                    "spacing": {
+                        "section-gap": "3rem",
+                        "base-unit": "0.5rem",
+                        "component-padding": "1.5rem",
+                        "page-margin": "2.5rem",
+                        "grid-gutter": "1rem"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Noto Serif KR", "serif"],
+                        "data-numeric": ["Hanken Grotesk", "sans-serif"],
+                        "body-md": ["Hanken Grotesk", "sans-serif"],
+                        "headline-lg": ["Noto Serif KR", "serif"],
+                        "display-title": ["Noto Serif KR", "serif"],
+                        "body-lg": ["Hanken Grotesk", "sans-serif"],
+                        "label-caps": ["Hanken Grotesk", "sans-serif"],
+                        "body-sm": ["Hanken Grotesk", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "data-numeric": ["20px", {"lineHeight": "1", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "display-title": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .hanji-texture {
+            background-color: #fcf9f2;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .pet-ring-active {
+            box-shadow: 0 0 0 2px #B22222, 0 0 20px rgba(178, 34, 34, 0.2);
+        }
+        .frame-border {
+            position: fixed;
+            inset: 1.5rem;
+            border: 1px solid rgba(34, 34, 34, 0.1);
+            pointer-events: none;
+            z-index: 50;
+        }
+        .frame-corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #B22222;
+        }
+        .top-left { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+        .top-right { top: -2px; right: -2px; border-left: 0; border-bottom: 0; }
+        .bottom-left { bottom: -2px; left: -2px; border-right: 0; border-top: 0; }
+        .bottom-right { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="hanji-texture min-h-screen text-mokseok-ink font-body-md selection:bg-seal-cinnabar selection:text-white">
+<!-- Premium Template Frame -->
+<div class="frame-border hidden md:block">
+<div class="frame-corner top-left"></div>
+<div class="frame-corner top-right"></div>
+<div class="frame-corner bottom-left"></div>
+<div class="frame-corner bottom-right"></div>
+</div>
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 left-0 w-full z-40 bg-hanji-base/80 backdrop-blur-sm border-b border-mokseok-ink/10">
+<div class="max-w-7xl mx-auto px-page-margin py-4 flex justify-between items-center">
+<div class="flex items-center gap-4">
+<span class="font-headline-lg text-headline-lg text-mokseok-ink italic border-r-2 border-seal-cinnabar pr-4">知觀齋</span>
+<nav class="hidden md:flex gap-6">
+<a class="font-label-caps text-label-caps text-mokseok-ink border-b-2 border-seal-cinnabar transition-all" href="#">내 사주</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-seal-cinnabar transition-all" href="#">운세</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-seal-cinnabar transition-all" href="#">달력</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-mokseok-ink hover:text-seal-cinnabar transition-all">account_balance</button>
+<button class="material-symbols-outlined text-mokseok-ink hover:text-seal-cinnabar transition-all">settings</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="relative pt-24 pb-32 min-h-screen flex flex-col items-center justify-center max-w-2xl mx-auto px-page-margin">
+<!-- Header Section -->
+<div class="text-center mb-12 space-y-4">
+<p class="font-label-caps text-label-caps text-seal-cinnabar tracking-widest uppercase">지관재 (知觀齋)</p>
+<h1 class="font-display-title text-display-title md:text-6xl text-mokseok-ink leading-tight">오늘의 운세</h1>
+<div class="w-12 h-0.5 bg-mokseok-ink/20 mx-auto"></div>
+<p class="font-body-lg text-body-lg text-on-surface-variant opacity-80">2024년 5월 22일, 목요일의 기운</p>
+</div>
+<!-- Pet Selection Carousel -->
+<div class="w-full mb-16">
+<div class="flex items-center justify-center gap-4 md:gap-8 overflow-x-auto pb-4 scrollbar-hide">
+<!-- Pet Item 1 -->
+<div class="group flex flex-col items-center gap-3 cursor-pointer">
+<div class="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-mokseok-ink/10 overflow-hidden bg-white p-1 transition-all group-hover:scale-105">
+<div class="w-full h-full rounded-full overflow-hidden bg-hanji-base">
+<img alt="Golden retriever" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASH6mwJd0lNzzSzUpShdY4ImU0ZCpyTnvj6yoZ9BcA5ildL17byXY8oZH_BF0OMxo0gBzuP3lGKm0mkXA_qmSj2FdK_ICfTO7tlWccf4tt8NwGOCHO5TVOrjHSI4etUCO2ViIXsQH1CV-kfOvwwabr5aTa_6QVvC7Cw2NGXsT8-f-UtoaOWeCRi4xAjQtp7GthUZFz1bDupukkcxRj_uWAieyp_7ZaWjFa5tIuXlA5esenVU8wxGZyvFqB7BDwqVxh3On8G-Szhrc"/>
+</div>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-seal-cinnabar">골든</span>
+</div>
+<!-- Pet Item 2 -->
+<div class="group flex flex-col items-center gap-3 cursor-pointer">
+<div class="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-mokseok-ink/10 overflow-hidden bg-white p-1 transition-all group-hover:scale-105">
+<div class="w-full h-full rounded-full overflow-hidden bg-hanji-base">
+<img alt="Tabby cat" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsI_kVgQ4UG9doOCww4b6rJXZ5MDu9_aY62swTvwllyUr_xzZEHcAmS96l9kwq51AYJOmqtsikocWBkW7TgCAhZVRfK9aoAe0t_SXI4kCEFdmCLj7YKkhjjv93sAtUYnlDRWVKI-1SgR-rP4P4mPjMm1-9WVx7cki_DDxKkdUS2hWr5ZwOlE2ge2Bjvp0JDCexzRCI0jm0lokImHXPf4q_c9qnavAlPsEJtrEQGprR7RobEQIE4tnlZqLx92S6hEPrqGSInSh99_0"/>
+</div>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-seal-cinnabar">태비</span>
+</div>
+<!-- Active Pet Item (Selected) -->
+<div class="flex flex-col items-center gap-3 cursor-pointer scale-110">
+<div class="relative w-20 h-20 md:w-24 md:h-24 rounded-full pet-ring-active overflow-hidden bg-white p-1.5 transition-all">
+<div class="w-full h-full rounded-full overflow-hidden bg-hanji-base border border-seal-cinnabar/20">
+<img alt="Shiba Inu" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPCsaBMhfOP-E0JhqU5rUQSWvui3UjzhJPftYQPxy8HO3hou9OXuukExgQD4I7jcXPulNTLCTQobDsxPhrFWdq33lkVA9MnpV94DvZQIO2UmLclctSi4R12t2dPURULaWwPM-fL9RSvYjfc96zTpK1FGVHrbF2lZ3aHeYy2kVUzLqRoDtDQZFH3a_P9vqrZK4CWJ7uWmpiFk-8YBFtxnR2gcM7Rl4gKEVg5F78qyKX6eah3mz8HStnuUmVgKy6zLwCzYL107G7E3Q"/>
+</div>
+<div class="absolute inset-0 bg-seal-cinnabar/5 animate-pulse rounded-full pointer-events-none"></div>
+</div>
+<span class="font-label-caps text-[12px] text-seal-cinnabar font-bold text-center">시바 (선택됨)</span>
+</div>
+<!-- Pet Item 4 -->
+<div class="group flex flex-col items-center gap-3 cursor-pointer">
+<div class="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-mokseok-ink/10 overflow-hidden bg-white p-1 transition-all group-hover:scale-105">
+<div class="w-full h-full rounded-full overflow-hidden bg-hanji-base">
+<img alt="Persian cat" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyqEk_WFAvLU7yMZYRHcBCi0NLZX_50P4zK60_2zxlAG5c0YEYmscaPsNDW2CgW57emV-6zUk2QNImrZMCz2YxNE_xHtZ_1vPRJ-XkxgVdg44CElnJBr-S7zM26D-pon7akLAH5saIie1Q256h_npS4N_FV2tAhl247zKLK96QCfi6oHRuNrHmtmNgqwKnXjdjSQP4KzULLHat9TwcPhDtlcZqfP-04ZS3kljqxaIdFFmQF6UuyXtpDvSgAb8Qm66u5jC1os1Mouw"/>
+</div>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-seal-cinnabar">페르시안</span>
+</div>
+<!-- Pet Item 5 -->
+<div class="group flex flex-col items-center gap-3 cursor-pointer">
+<div class="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-mokseok-ink/10 overflow-hidden bg-white p-1 transition-all group-hover:scale-105">
+<div class="w-full h-full rounded-full overflow-hidden bg-hanji-base">
+<img alt="Beagle" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChsLTdqWcDxDsywDwWFahvp62b2Y5nnmy4YCd_Y4jX7Plhf2sXGVZj_sNCSXV9L7AlFdBQmUqh1NiwA0I8bMpl4bvmK2xghqasnU_c0vrO2G_4C1v3QHQHxm3F6PN9xoIbIWbBB_ssD9BUWExsE5xXfd-gk9jFY0N4pWMdxKbYV5NRRjIlMXEaORR25r5tYOkpv5S_uJunko1ScjnCWYKFad8CE9bQ6umruHrNBhUWENd3bljTpM_W7gAGKrLbolv6M1FxfVWHqbE"/>
+</div>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-seal-cinnabar">비글</span>
+</div>
+</div>
+</div>
+<!-- Status Message Section -->
+<div class="w-full max-w-md bg-white/40 border border-mokseok-ink/5 p-8 text-center relative mb-12">
+<div class="absolute inset-0 opacity-5 pointer-events-none overflow-hidden flex items-center justify-center">
+<span class="text-9xl font-display-title">福</span>
+</div>
+<div class="relative z-10 space-y-2">
+<span class="font-label-caps text-label-caps text-on-tertiary-fixed-variant tracking-tighter">분석 대상: JGDKJE</span>
+<p class="font-headline-md text-headline-md text-mokseok-ink">오늘의 운세를<br/>확인하세요</p>
+</div>
+</div>
+<!-- Call to Action -->
+<button class="group relative flex items-center justify-center gap-4 bg-mokseok-ink text-white px-10 py-5 w-full max-w-xs hover:opacity-90 active:scale-95 transition-all shadow-xl">
+<div class="w-10 h-10 flex-shrink-0 bg-seal-cinnabar flex items-center justify-center">
+<span class="font-headline-md text-white text-lg italic">知</span>
+</div>
+<span class="font-label-caps text-lg tracking-widest">운세 보기</span>
+<div class="absolute inset-0 border border-white/20 translate-x-1 translate-y-1 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform"></div>
+</button>
+</main>
+<!-- Side Navigation (Desktop Only) -->
+<aside class="fixed left-0 top-0 h-full w-20 md:w-64 bg-surface-container border-r border-mokseok-ink/5 hidden lg:flex flex-col py-page-margin">
+<div class="px-6 mb-12">
+<div class="w-12 h-12 bg-seal-cinnabar mb-4 flex items-center justify-center">
+<span class="text-white font-display-title text-2xl">齋</span>
+</div>
+<h2 class="font-headline-md text-headline-md leading-tight text-mokseok-ink">지관재 서고</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">전략적 운명 관리</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-4 px-6 py-4 bg-obang-white text-mokseok-ink font-bold border-l-4 border-seal-cinnabar transition-all translate-x-1" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-body-md">내 사주</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:bg-obang-white/50 transition-all" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-body-md">운세</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:bg-obang-white/50 transition-all" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-body-md">달력</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:bg-obang-white/50 transition-all" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-body-md">기록</span>
+</a>
+</nav>
+</aside>
+<!-- Footer Cluster -->
+<footer class="w-full bg-hanji-base border-t border-mokseok-ink/10 mt-auto">
+<div class="max-w-7xl mx-auto px-page-margin py-12 flex flex-col md:flex-row justify-between items-center gap-8 border-4 border-double border-mokseok-ink/5">
+<div class="text-center md:text-left">
+<h3 class="font-headline-md text-headline-md text-mokseok-ink mb-2">知觀齋 (Jigwanjae)</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 知觀齋 Oriental Strategy Lab. All Rights Reserved.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-seal-cinnabar transition-colors" href="#">이용약관</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-seal-cinnabar transition-colors" href="#">개인정보처리방침</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-seal-cinnabar transition-colors" href="#">방법론</a>
+</div>
+</div>
+</footer>
+<!-- Bottom Nav (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full bg-white border-t border-mokseok-ink/5 flex lg:hidden justify-around py-3 px-4 z-40">
+<button class="flex flex-col items-center gap-1 text-seal-cinnabar">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-[10px] font-label-caps">운세</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="text-[10px] font-label-caps">내 사주</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="text-[10px] font-label-caps">날짜</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-label-caps">설정</span>
+</button>
+</nav>
+<script>
+        document.querySelectorAll('.group.cursor-pointer').forEach(item => {
+            item.addEventListener('click', () => {
+                console.log('Pet Selected');
+            });
+        });
+    </script>
+</body></html>

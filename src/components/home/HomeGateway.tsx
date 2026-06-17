@@ -246,12 +246,6 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   const nightGlassCard = isNight
     ? "border border-white/20 bg-white/12 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-md"
     : "";
-  const nightFortuneCard = isNight
-    ? "!border-0 !bg-[#260d35] shadow-[0_18px_48px_rgba(26,10,38,0.32)]"
-    : "";
-  const nightFortunePanel = isNight
-    ? "relative max-w-[470px] border border-white/30 bg-[#351445] text-white shadow-[0_10px_26px_rgba(18,10,29,0.16)]"
-    : "bg-white/55";
 
   return (
     <div className={isNight ? "min-h-screen overflow-x-hidden bg-transparent" : "min-h-screen overflow-x-hidden bg-dream-sky"}>
@@ -286,53 +280,41 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             </p>
           </div>
 
-          <GlassCard className={`relative overflow-hidden p-6 md:p-8 ${nightFortuneCard}`}>
-            {!isNight && (
-              <>
-                <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-lavender/60 blur-3xl" />
-                <div className="absolute -bottom-24 -left-20 h-56 w-56 rounded-full bg-mint/70 blur-3xl" />
-              </>
-            )}
-            <div className="relative">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p
-                    className={`text-xs font-extrabold uppercase tracking-[0.18em] ${
-                      isNight ? "text-white/85" : "text-channel-saju"
-                    }`}
-                  >
-                    {isKo ? "오늘의 운세" : "Today's fortune"}
-                  </p>
-                  <h2 className={`mt-2 text-2xl font-extrabold ${isNight ? "text-white" : "text-primary"}`}>
-                    {displayName ? `${displayName}${isKo ? "님" : ""}` : isKo ? "집사님" : "Pet parent"}{" "}
-                    {isKo ? "행운을 빌어요" : "wishing you luck"}
-                  </h2>
-                </div>
-                <span
-                  className={`h-16 w-16 items-center justify-center rounded-full border-4 text-3xl shadow-sm ${
-                    isNight ? "hidden" : "flex border-white bg-lavender/45"
-                  }`}
-                >
-                  ✨
-                </span>
-              </div>
+          <div className="pet-fortune-jigwanjae relative overflow-hidden p-6 shadow-lg md:p-8">
+            <span className="jig-fortune-frame-corner left-4 top-4 hidden border-r-0 border-b-0 md:block" aria-hidden />
+            <span className="jig-fortune-frame-corner right-4 top-4 hidden border-b-0 border-l-0 md:block" aria-hidden />
+            <span className="jig-fortune-frame-corner bottom-4 left-4 hidden border-r-0 border-t-0 md:block" aria-hidden />
+            <span className="jig-fortune-frame-corner bottom-4 right-4 hidden border-l-0 border-t-0 md:block" aria-hidden />
 
-              {fortuneData ? (
-                <PetDailyFortunePanel
-                  data={fortuneData}
-                  isKo={isKo}
-                  isNight={isNight}
-                  onSelectPet={handleSelectPet}
-                />
-              ) : (
-                <div className={`mt-6 rounded-[1.5rem] p-5 ${nightFortunePanel}`}>
-                  <p className={`text-sm font-semibold ${isNight ? "text-white/75" : "text-plum/60"}`}>
-                    {isKo ? "오늘의 운세를 불러오는 중이에요…" : "Loading today's fortune…"}
-                  </p>
-                </div>
-              )}
+            <div className="relative mb-6 text-center">
+              <p className="human-premium-label-caps text-[var(--jig-seal)] tracking-widest">
+                {isKo ? "지관재 (知觀齋)" : "Jigwanjae (知觀齋)"}
+              </p>
+              <h2 className="human-premium-serif mt-2 text-3xl font-bold text-[var(--jig-ink)] md:text-4xl">
+                {isKo ? "오늘의 운세" : "Today's fortune"}
+              </h2>
+              <div className="mx-auto my-3 h-0.5 w-12 bg-[var(--jig-ink)]/20" />
+              <p className="text-sm text-[var(--jig-muted)]">
+                {displayName ? `${displayName}${isKo ? "님" : ""}` : isKo ? "집사님" : "Pet parent"}{" "}
+                {isKo ? "행운을 빌어요" : "wishing you luck"}
+              </p>
             </div>
-          </GlassCard>
+
+            {fortuneData ? (
+              <PetDailyFortunePanel
+                data={fortuneData}
+                isKo={isKo}
+                variant="jigwanjae"
+                onSelectPet={handleSelectPet}
+              />
+            ) : (
+              <div className="relative border border-[var(--jig-ink)]/10 bg-white/40 p-8 text-center">
+                <p className="text-sm font-semibold text-[var(--jig-muted)]">
+                  {isKo ? "오늘의 운세를 불러오는 중이에요…" : "Loading today's fortune…"}
+                </p>
+              </div>
+            )}
+          </div>
         </section>
 
         <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">

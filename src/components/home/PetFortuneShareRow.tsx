@@ -1,5 +1,6 @@
 "use client";
 
+import type { PetFortuneVisualVariant } from "@/components/home/PetDailyFortunePanel";
 import type { PetDailyFortune, PetFortunePetMeta } from "@/lib/saju/pet-daily-fortune";
 import {
   buildFortuneShareStorySlides,
@@ -13,23 +14,30 @@ export function PetFortuneShareRow({
   pet,
   fortune,
   isKo,
-  isNight,
+  isNight = false,
+  variant = "default",
 }: {
   pet: PetFortunePetMeta;
   fortune: PetDailyFortune;
   isKo: boolean;
-  isNight: boolean;
+  isNight?: boolean;
+  variant?: PetFortuneVisualVariant;
 }) {
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState<"kakao" | "instagram" | "link" | null>(null);
 
-  const boxClass = isNight
-    ? "border border-white/25 bg-[#351445]"
-    : "border border-channel-saju/25 bg-channel-saju/8";
-  const textClass = isNight ? "text-[#f3e8ff]" : "text-primary";
-  const buttonClass = isNight
-    ? "border border-white/30 bg-[#6b4a82] text-white hover:bg-[#7a5892]"
-    : "border border-channel-saju/30 bg-white text-primary hover:bg-white/90";
+  const jig = variant === "jigwanjae";
+  const boxClass = jig
+    ? "human-premium-paper-warm border border-[var(--jig-ink)]/12"
+    : isNight
+      ? "border border-white/25 bg-[#351445]"
+      : "border border-channel-saju/25 bg-channel-saju/8";
+  const textClass = jig ? "text-[var(--jig-ink)]" : isNight ? "text-[#f3e8ff]" : "text-primary";
+  const buttonClass = jig
+    ? "border border-[var(--jig-ink)]/15 bg-white/80 text-[var(--jig-ink)] hover:bg-white"
+    : isNight
+      ? "border border-white/30 bg-[#6b4a82] text-white hover:bg-[#7a5892]"
+      : "border border-channel-saju/30 bg-white text-primary hover:bg-white/90";
 
   async function handleKakaoShare() {
     setBusy("kakao");
@@ -126,7 +134,7 @@ export function PetFortuneShareRow({
         </button>
       </div>
       {status && (
-        <p className={`mt-3 text-center text-[11px] font-semibold ${isNight ? "text-[#ffd7ff]" : "text-plum/70"}`}>
+        <p className={`mt-3 text-center text-[11px] font-semibold ${jig ? "text-[var(--jig-muted)]" : isNight ? "text-[#ffd7ff]" : "text-plum/70"}`}>
           {status}
         </p>
       )}
