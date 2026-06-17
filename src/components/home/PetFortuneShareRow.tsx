@@ -93,7 +93,7 @@ export function PetFortuneShareRow({
     setBusy("link");
     setStatus(null);
     try {
-      await copyPetFortuneShareLink(pet.id, isKo ? "ko" : "en");
+      await copyPetFortuneShareLink(pet.id);
       setStatus(isKo ? "링크를 복사했어요!" : "Link copied!");
     } catch {
       setStatus(isKo ? "링크 복사에 실패했어요." : "Failed to copy link.");

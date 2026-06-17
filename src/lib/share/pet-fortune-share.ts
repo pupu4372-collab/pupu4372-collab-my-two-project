@@ -1,5 +1,6 @@
 import type { PetDailyFortune } from "@/lib/saju/pet-daily-fortune";
 import type { Locale } from "@/lib/saju/types";
+import { getConfiguredAppBaseUrl } from "@/lib/app-url";
 
 declare global {
   interface Window {
@@ -15,35 +16,15 @@ declare global {
 
 const DEFAULT_SHARE_IMAGE_PATH = "/api/fortune/share-og";
 const KAKAO_SDK_URL = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js";
-const KAKAO_PUBLIC_ORIGIN = "https://ksajupet.com";
 
 let kakaoLoadPromise: Promise<NonNullable<typeof window.Kakao>> | null = null;
 
-/** Kakao scraper requires public HTTPS URLs (localhost fails verification). */
-export function getKakaoPublicBaseUrl() {
-  if (typeof window === "undefined") {
-    const raw = process.env.NEXT_PUBLIC_APP_URL ?? KAKAO_PUBLIC_ORIGIN;
-    const base = raw.replace(/\/$/, "");
-    if (base.includes("localhost") || base.includes("127.0.0.1")) {
-      return KAKAO_PUBLIC_ORIGIN;
-    }
-    return base;
-  }
-
-  const origin = window.location.origin.replace(/\/$/, "");
-  if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
-    return KAKAO_PUBLIC_ORIGIN;
-  }
-  return origin;
+function appShareBaseUrl() {
+  return getConfiguredAppBaseUrl();
 }
 
-export function getShareBaseUrl() {
-  const raw = process.env.NEXT_PUBLIC_APP_URL ?? KAKAO_PUBLIC_ORIGIN;
-  return raw.replace(/\/$/, "");
-}
-
-export function getPetFortuneShareUrl(petId: string, locale: "ko" | "en" = "ko") {
-  return `${getKakaoPublicBaseUrl()}/${locale}/profile/pets/${petId}`;
+export function getPetFortuneShareUrl(petId: string) {
+  return `${appShareBaseUrl()}/saju/result/${petId}`;
 }
 
 export function buildFortuneShareDescription(
@@ -57,11 +38,8 @@ export function buildFortuneShareDescription(
 }
 
 export function resolveShareImageUrl(profileImageUrl?: string | null) {
-  const publicBase = getKakaoPublicBaseUrl();
-  if (profileImageUrl?.startsWith("https://")) {
-    if (profileImageUrl.includes("supabase.co")) return profileImageUrl;
-    return profileImageUrl;
-  }
+  const appBase = appShareBaseUrl();
+  if (profileImageUrl?.startsWith("https://")) return profileImageUrl;
   if (profileImageUrl?.startsWith("http://")) {
     try {
       const url = new URL(profileImageUrl);
@@ -70,7 +48,7 @@ export function resolveShareImageUrl(profileImageUrl?: string | null) {
       // fall through to default
     }
   }
-  return `${publicBase}${DEFAULT_SHARE_IMAGE_PATH}`;
+  return `${appBase}${DEFAULT_SHARE_IMAGE_PATH}`;
 }
 
 async function loadKakaoSdk() {
@@ -117,19 +95,18 @@ export async function sharePetFortuneToKakao(input: {
   locale?: "ko" | "en";
 }) {
   const Kakao = await loadKakaoSdk();
-  const locale = input.locale ?? "ko";
-  const shareUrl = getPetFortuneShareUrl(input.petId, locale);
+  const shareUrl = getPetFortuneShareUrl(input.petId);
   const fortuneText = buildFortuneShareDescription(
     input.fortune,
     input.petName,
-    /[가-힣]/.test(input.fortune.title)
+    (input.locale ?? "ko") === "ko"
   );
   const imageUrl = resolveShareImageUrl(input.imageUrl);
 
   Kakao.Share.sendDefault({
     objectType: "feed",
     content: {
-      title: `${input.petName}의 오늘 운세`.slice(0, 200),
+      title: `${input.petName}의 오늘 운세 🔮`.slice(0, 200),
       description: fortuneText,
       imageUrl,
       link: {
@@ -197,7 +174,11 @@ export async function buildFortuneShareImageBase64(input: {
 
   ctx.fillStyle = "#ffffff";
   ctx.font = "32px sans-serif";
-  ctx.fillText("ksajupet.com", 540, 1680);
+  try {
+    ctx.fillText(new URL(appShareBaseUrl()).hostname, 540, 1680);
+  } catch {
+    ctx.fillText("K-Saju Pet", 540, 1680);
+  }
 
   return canvas.toDataURL("image/png");
 }
@@ -260,8 +241,8 @@ export async function shareToInstagramStory(imageBase64: string) {
     `S.android.intent.extra.STREAM=${fileUri.uri};end`;
 }
 
-export async function copyPetFortuneShareLink(petId: string, locale: "ko" | "en" = "ko") {
-  const url = getPetFortuneShareUrl(petId, locale);
+export async function copyPetFortuneShareLink(petId: string) {
+  const url = getPetFortuneShareUrl(petId);
   await navigator.clipboard.writeText(url);
   return url;
 }
