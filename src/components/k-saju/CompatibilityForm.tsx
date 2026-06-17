@@ -1,6 +1,7 @@
 "use client";
 
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
+import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { CompatibilityResult } from "@/components/k-saju/CompatibilityResult";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
@@ -143,7 +144,7 @@ export function CompatibilityForm() {
 
   if (configured && ready && isAnonymous) {
     return (
-      <div className="pastel-card p-6 text-center">
+      <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6 text-center`}>
         <p className="text-sm text-plum/70">
           {locale === "ko" ? "궁합을 보려면 로그인이 필요해요." : "Please log in to check compatibility."}
         </p>
@@ -210,7 +211,7 @@ export function CompatibilityForm() {
 
   return (
     <div className="space-y-5">
-      <form onSubmit={handleSubmit} className="pastel-card space-y-7 p-6 md:p-8">
+      <form onSubmit={handleSubmit} className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-7 p-6 md:p-8`}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
             {t.localeLabel}
@@ -237,7 +238,7 @@ export function CompatibilityForm() {
                   className={
                     species === item
                       ? "rounded-[2rem] border border-primary bg-primary px-4 py-4 text-center text-white shadow-lg shadow-primary/15"
-                      : "rounded-[2rem] border border-outline/20 bg-white/45 px-4 py-4 text-center text-primary transition hover:bg-lavender/50"
+                      : "rounded-[2rem] border border-white/35 bg-white px-4 py-4 text-center text-primary transition hover:bg-sand/40"
                   }
                   aria-pressed={species === item}
                 >
@@ -253,7 +254,7 @@ export function CompatibilityForm() {
           </fieldset>
         </div>
 
-        <fieldset className="space-y-4 rounded-[2rem] border border-channel-saju/20 bg-lavender/15 p-5">
+        <fieldset className="space-y-4 rounded-[2rem] border border-channel-saju/20 bg-sand/40 p-5">
           <legend className="px-2 text-sm font-bold text-primary">
             🐾 {t.petSection}
           </legend>
@@ -304,9 +305,9 @@ export function CompatibilityForm() {
           </label>
         </fieldset>
 
-        <fieldset className="space-y-4 rounded-[2rem] border border-plum/15 bg-white/40 p-5">
-          <legend className="px-2 text-sm font-bold text-plum">💞 {t.ownerSection}</legend>
-          <p className="rounded-2xl bg-lavender/25 px-4 py-2 text-xs leading-relaxed text-plum/60">
+        <fieldset className="space-y-4 rounded-[2rem] border border-plum/15 bg-white p-5">
+          <legend className="px-2 text-sm font-bold text-primary">💞 {t.ownerSection}</legend>
+          <p className="rounded-2xl bg-sand/50 px-4 py-2 text-xs leading-relaxed text-on-surface-variant">
             {t.ownerBirthNotice}
           </p>
           <label className={FIELD_LABEL_CLASS}>
@@ -372,7 +373,9 @@ export function CompatibilityForm() {
           </select>
         </label>
 
-        <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant="pastel" />
+        <div className="rounded-[2rem] border border-white/35 bg-white p-5">
+          <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant="plain" />
+        </div>
 
         {error && (
           <p className="rounded-2xl bg-petal/40 px-4 py-2 text-sm text-plum" role="alert">

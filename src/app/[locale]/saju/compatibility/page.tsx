@@ -13,11 +13,11 @@ export default async function CompatibilityPage() {
       subtitle={t("compatibilitySubtitle")}
     >
       <CompatibilityForm />
-      <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-plum/60">
-        <Link href="/saju/zodiac" className="underline hover:text-plum">
+      <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-white/75">
+        <Link href="/saju/zodiac" className="underline hover:text-white">
           {t("toZodiac")}
         </Link>
-        <Link href="/saju" className="underline hover:text-plum">
+        <Link href="/saju" className="underline hover:text-white">
           {t("backSaju")}
         </Link>
       </div>

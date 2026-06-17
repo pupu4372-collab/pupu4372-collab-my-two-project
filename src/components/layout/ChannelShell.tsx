@@ -110,7 +110,7 @@ export function ChannelShell({
             : theme === "reptile"
               ? "reptile"
               : "home";
-  const heroSolid = theme === "community";
+  const heroSolid = theme === "community" || theme === "saju";
   const links =
     rightLinks ??
     ([

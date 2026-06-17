@@ -111,7 +111,7 @@ export function CompatibilityResult({
         isGuest={isGuest && !result.persisted}
       />
 
-      <GlassCard className="relative overflow-hidden text-center">
+      <GlassCard variant="solid" className="relative overflow-hidden text-center">
         <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-3xl" />
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/50">{t.eyebrow}</p>
         <p className="mt-2 text-4xl" aria-hidden>
@@ -126,13 +126,13 @@ export function CompatibilityResult({
         <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-plum/80">{result.story}</p>
       </GlassCard>
 
-      <GlassCard>
+      <GlassCard variant="solid">
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/45">{t.details}</p>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           {result.details.map((detail) => (
             <section
               key={detail.title}
-              className="rounded-xl border border-outline-variant/25 bg-cream/60 px-4 py-3"
+              className="rounded-xl border border-white/35 bg-sand/45 px-4 py-3"
             >
               <h3 className="text-sm font-bold text-primary">{detail.title}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-plum/75">{detail.body}</p>
@@ -164,18 +164,18 @@ export function CompatibilityResult({
         />
       </div>
 
-      <GlassCard className="border-l-4 border-channel-saju/50 bg-channel-saju/5 text-center">
+      <GlassCard variant="solid" className="border-l-4 border-channel-saju/50 text-center">
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/55">{t.relation}</p>
         <p className="mt-2 text-lg font-extrabold text-channel-saju">{rel}</p>
       </GlassCard>
 
-      <GlassCard>
+      <GlassCard variant="solid">
         <h3 className="font-extrabold text-primary">{t.tips}</h3>
         <ul className="mt-4 space-y-3">
           {result.careTips.map((tip) => (
             <li
               key={tip}
-              className="rounded-xl border border-mint/30 bg-mint/20 px-4 py-3 text-sm leading-relaxed text-plum/85"
+              className="rounded-xl border border-mint/35 bg-sand/45 px-4 py-3 text-sm leading-relaxed text-ink"
             >
               {tip}
             </li>

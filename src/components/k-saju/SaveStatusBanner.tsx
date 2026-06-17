@@ -34,7 +34,7 @@ export function SaveStatusBanner({
 
   if (isGuest) {
     return (
-      <p className="rounded-2xl bg-lavender/25 px-4 py-2.5 text-sm text-plum/75">
+      <p className="rounded-2xl border border-white/35 bg-white/95 px-4 py-2.5 text-sm text-on-surface-variant shadow-sm">
         {t.guest}{" "}
         <Link href="/login" className="font-semibold underline">
           {t.login}
@@ -45,7 +45,7 @@ export function SaveStatusBanner({
 
   if (persisted) {
     return (
-      <p className="rounded-2xl bg-mint/30 px-4 py-2.5 text-sm font-medium text-plum" role="status">
+      <p className="rounded-2xl border border-white/35 bg-white/95 px-4 py-2.5 text-sm font-medium text-primary shadow-sm" role="status">
         🐾 {t.saved}
       </p>
     );
@@ -53,7 +53,7 @@ export function SaveStatusBanner({
 
   if (persistError) {
     return (
-      <p className="rounded-2xl bg-petal/40 px-4 py-2.5 text-sm text-plum/80" role="alert">
+      <p className="rounded-2xl border border-white/35 bg-white/95 px-4 py-2.5 text-sm text-plum/80 shadow-sm" role="alert">
         {t.saveFailed}: {persistError}
       </p>
     );
