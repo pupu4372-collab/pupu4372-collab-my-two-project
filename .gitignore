@@ -38,3 +38,13 @@ next-env.d.ts
 .vercel
 .wrangler/
 supabase/.temp/
+
+# local temp / samples
+tmp/
+.git-tmp-callback-head.ts
+
+# duplicate font downloads (tracked copies live in subfolders)
+src/assets/fonts/*.otf
+src/assets/fonts/*.ttf
+src/assets/fonts/*.zip
+src/assets/fonts/NanumGothic*

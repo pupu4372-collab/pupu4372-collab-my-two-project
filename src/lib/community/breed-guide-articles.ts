@@ -1373,6 +1373,28 @@ export const BREED_GUIDE_ARTICLES: BreedGuideArticle[] = [
       "레오파드게코 탈피부전은 대부분 사육 환경 점검에서 답을 찾는 경우가 많습니다.",
       "우리 아이의 생활 리듬과 케어 포인트까지 함께 보고 싶다면, 맞춤 성향 콘텐츠와 연결해보세요.",
     ],
+    enSectionBodies: [
+      [
+        "Leopard geckos shed regularly as they grow. Shedding usually completes without issue, but skin can remain on toes, tail tips, or around the eyes. This is commonly called stuck shed, and it is one of the most frequent care concerns for new owners.",
+        "Low humidity is the first thing to check. During shedding, skin needs to separate smoothly, and an overly dry environment can prevent old skin from coming off. Unstable hides, poor nutrition, or stress before and after shedding can also make shedding less clean.",
+      ],
+      [
+        "Watch closely if thin skin rings remain on toe tips, white shed sticks to the tail tip, or the eye area looks messy. What looks minor at first can become a problem if it stays too long. Toes are especially easy to miss.",
+      ],
+      [
+        "Start with a proper humid hide. It should not be soaking wet, but humid enough to support shedding. Reduce handling when shedding begins and keep the habitat stable. Adjust the environment first rather than pulling shed off by force.",
+      ],
+      [
+        "Stuck shed is often solved by reviewing habitat setup. Check humidity, hides, nutrition, and stress together, and build a routine so the same issue does not repeat.",
+      ],
+      [
+        "See a vet if shed remains around the eyes, toe color changes, or the same problem keeps happening. It helps to tell whether this was a one-time shed issue or a condition that needs ongoing care.",
+      ],
+    ],
+    enClosing: [
+      "Leopard gecko stuck shed is often solved by reviewing habitat setup.",
+      "If you also want to understand daily rhythm and care points, continue with personalized temperament content.",
+    ],
   }),
   createReptileOutlineArticle({
     breedSlug: "leopard-gecko",
@@ -1410,6 +1432,28 @@ export const BREED_GUIDE_ARTICLES: BreedGuideArticle[] = [
       "레오파드게코 식욕부진은 온도, 탈피, 스트레스처럼 기본 환경에서 시작되는 경우가 많습니다.",
       "사육 루틴과 생활 패턴까지 함께 정리하고 싶다면, 맞춤 케어 콘텐츠와 이어서 활용해보세요.",
     ],
+    enSectionBodies: [
+      [
+        "When a leopard gecko that usually eats well refuses food, owners often worry about illness first. But appetite loss is not always disease-related. It can also come from shedding cycles, temperature shifts, or stress.",
+        "Leopard geckos are very sensitive to temperature. If hot-zone and cool-zone temperatures are off, digestion and activity can drop together. Appetite may also fall temporarily before or after shedding, after a move, or with frequent handling.",
+      ],
+      [
+        "Do not look at appetite alone. Check tail thickness, activity level, and stool patterns too. A smaller appetite with no major body or behavior change may be temporary, but overlapping changes need closer attention.",
+      ],
+      [
+        "Recheck enclosure temperatures and whether feeder type recently changed. Make sure hides are not too bright or unstable. When security drops, feeder response can become more sensitive.",
+      ],
+      [
+        "Keep the habitat stable and record feeding times and feeder types. If shedding is near, observe calmly rather than forcing food response before condition returns.",
+      ],
+      [
+        "Vet care is needed if your gecko barely eats for a long time, the tail becomes noticeably thin, or lethargy and weight loss appear together. The key is telling a simple appetite dip from a state that needs further checks.",
+      ],
+    ],
+    enClosing: [
+      "Leopard gecko appetite loss often starts with basic environment checks such as temperature, shedding, and stress.",
+      "If you want to organize care routines and daily patterns too, continue with personalized care content.",
+    ],
   }),
   createReptileOutlineArticle({
     breedSlug: "leopard-gecko",
@@ -1445,6 +1489,27 @@ export const BREED_GUIDE_ARTICLES: BreedGuideArticle[] = [
     koClosing: [
       "레오파드게코 꼬리 변화는 “조금 마른 것 같다”로 넘기기보다 전체 컨디션 신호로 보는 것이 좋습니다.",
       "생활 패턴과 케어 포인트를 함께 정리하고 싶다면, 성향 기반 콘텐츠와 연결해보세요.",
+    ],
+    enSectionBodies: [
+      [
+        "A leopard gecko's tail is not just appearance. It is an important clue to overall condition. If the tail looks noticeably thinner than usual, check food intake, stress, and digestion together.",
+      ],
+      [
+        "The most common reason is not eating enough. If your gecko refuses food or has trouble digesting and absorbing nutrients, body changes may show in the tail first. Lower condition around shedding, stress, and unstable habitat can also play a role.",
+      ],
+      [
+        "Do not look at the tail alone. Check stool and activity too. If your gecko stays in hides, eats less, or the whole body feels thinner, connect those signs with tail changes.",
+      ],
+      [
+        "Recheck feeder response and feeding schedule, and stabilize temperature and hide setup. Photos of weight and tail shape help track changes. Reduce handling if stress is likely.",
+      ],
+      [
+        "See a vet if the tail thins quickly, eating stops for a long time, or lethargy and possible dehydration appear together.",
+      ],
+    ],
+    enClosing: [
+      "Tail changes in leopard geckos are better treated as whole-condition signals than as “maybe a little thin.”",
+      "If you want to organize daily patterns and care points together, continue with temperament-based content.",
     ],
   }),
   createReptileOutlineArticle({
@@ -1483,6 +1548,28 @@ export const BREED_GUIDE_ARTICLES: BreedGuideArticle[] = [
       "레오파드게코의 눈 문제는 작은 이상처럼 보여도 빠르게 불편이 커질 수 있습니다.",
       "사육 환경과 루틴까지 함께 점검하고 싶다면, 맞춤 케어 콘텐츠와 연결해보세요.",
     ],
+    enSectionBodies: [
+      [
+        "If a leopard gecko keeps one or both eyes closed, owners understandably get worried. Eye issues can range from minor irritation to shedding discomfort and possible infection, so they need careful review.",
+        "Retained shed around the eyes is the most common suspect. Substrate irritation, tiny foreign material, poor hygiene, and dryness around the eyes can also contribute. Recent shedding is an important clue.",
+      ],
+      [
+        "Check whether shed is stuck around the eyes and whether one or both eyes are affected. Swelling, discharge, or constant eye closing can mean significant discomfort. Observe first rather than forcing the eyes open.",
+      ],
+      [
+        "Do not force removal or handle the area roughly. Keep the enclosure clean, and if shedding is involved, review humidity and hide setup first. Reduce handling and minimize stress.",
+      ],
+      [
+        "Watch eye condition regularly around shedding periods, and review substrate and enclosure hygiene that may irritate the eyes. Repeated minor irritation can become ongoing eye discomfort.",
+      ],
+      [
+        "See a vet if the eyes stay closed for days, look swollen, or have discharge. If retained shed is around the eyes, avoid trying to solve it forcefully at home.",
+      ],
+    ],
+    enClosing: [
+      "Eye problems in leopard geckos can worsen quickly even when they first look minor.",
+      "If you want to review habitat and routine together, continue with personalized care content.",
+    ],
   }),
   createReptileOutlineArticle({
     breedSlug: "leopard-gecko",
@@ -1519,6 +1606,28 @@ export const BREED_GUIDE_ARTICLES: BreedGuideArticle[] = [
     koClosing: [
       "레오파드게코 배변 문제는 먹이보다 환경에서 원인을 찾게 되는 경우가 많습니다.",
       "기록 중심의 케어 루틴을 만들고 싶다면, 생활 패턴 콘텐츠와 함께 정리해보세요.",
+    ],
+    enSectionBodies: [
+      [
+        "Leopard gecko bowel patterns vary with food intake, temperature, and activity. Missing stool for a day or two is not always abnormal, but a clear change from your gecko's usual pattern needs review.",
+        "Low temperature is the first thing to check. Poor temperature can slow digestion. Reduced food intake, lower appetite around shedding, stress, and habitat changes can also shift bowel timing.",
+      ],
+      [
+        "Check appetite, belly comfort, and activity together with stool changes. If the belly looks unusually swollen or your gecko stays in hides for long periods, be more cautious.",
+      ],
+      [
+        "Confirm hot-zone temperature and record recent feeding amount and frequency. Check hydration and environmental stress, and review basic enclosure cleanliness.",
+      ],
+      [
+        "Maintain proper temperature, reduce stress, and recheck feeder type and feeding schedule. Bowel issues in leopard geckos are often traced back to habitat rather than food alone.",
+      ],
+      [
+        "See a vet if there is no stool for a long time along with lower appetite, a hard-looking belly, or sluggish movement.",
+      ],
+    ],
+    enClosing: [
+      "Bowel issues in leopard geckos are often traced back to habitat rather than food alone.",
+      "If you want a record-based care routine, organize it together with daily-pattern content.",
     ],
   }),
   createReptileOutlineArticle({
@@ -1557,6 +1666,28 @@ export const BREED_GUIDE_ARTICLES: BreedGuideArticle[] = [
       "크레스티드게코 탈피 실패는 대개 환경 세팅을 다시 보는 것에서 출발합니다.",
       "사육 루틴과 아이 성향을 함께 정리하고 싶다면, 맞춤 관리 콘텐츠와 연결해보세요.",
     ],
+    enSectionBodies: [
+      [
+        "Crested geckos may look like they shed all at once, but the process depends heavily on environment. Shed stuck on toes, tail tips, or around the eyes suggests shedding failure.",
+        "Humidity is usually the first issue. Long exposure to dry conditions can prevent clean shedding. Stress, nutrition imbalance, and awkward enclosure setup can make the same problem repeat.",
+      ],
+      [
+        "Toe tips are a common place for retained shed. Also check tail tips and eye areas. If climbing becomes harder, toe-pad condition deserves extra attention.",
+      ],
+      [
+        "Review misting routine and maintain proper humidity. Provide hides and vertical structures that support shedding, and avoid excessive handling while shedding is in progress.",
+      ],
+      [
+        "Keep humidity stable and arrange hides and climbing structures consistently. Recording shed condition helps identify repeating problem areas or habitat issues.",
+      ],
+      [
+        "See a vet if shed keeps returning in the same area, toe condition looks abnormal, or eye issues appear together.",
+      ],
+    ],
+    enClosing: [
+      "Crested gecko shedding failure usually starts with reviewing habitat setup again.",
+      "If you want to organize care routines and temperament together, continue with personalized care content.",
+    ],
   }),
   createReptileOutlineArticle({
     breedSlug: "crested-gecko",
@@ -1593,6 +1724,28 @@ export const BREED_GUIDE_ARTICLES: BreedGuideArticle[] = [
     koClosing: [
       "크레스티드게코 식욕부진은 환경과 스트레스 점검에서 실마리를 찾는 경우가 많습니다.",
       "우리 아이의 루틴과 케어 패턴을 더 체계적으로 정리하고 싶다면, 맞춤 콘텐츠와 이어보세요.",
+    ],
+    enSectionBodies: [
+      [
+        "Crested geckos are sensitive to environmental change, so when appetite drops, check enclosure conditions before assuming it is just pickiness. Temperature, humidity, and handling stress are common factors.",
+        "If temperature is too low or too high, condition and feeder response can change together. Appetite may fall temporarily around shedding, after a move, or when frequent handling reduces security.",
+      ],
+      [
+        "Take appetite loss more seriously if climbing decreases, your gecko stays in hides, or weight drops with lethargy. Look at the pattern over several days rather than one skipped meal.",
+      ],
+      [
+        "Recheck enclosure temperature and humidity, feeder freshness, and feeding times. Reduce handling and improve hide security. Stabilize basics before changing food too often.",
+      ],
+      [
+        "Keep the habitat stable and feeding times consistent. Simply reducing excessive handling can restore feeder response in some cases.",
+      ],
+      [
+        "See a vet if your gecko barely eats for a long time, loses weight, or shows dehydration or lethargy together.",
+      ],
+    ],
+    enClosing: [
+      "Crested gecko appetite loss is often found through environment and stress checks.",
+      "If you want a more structured care routine, continue with personalized content.",
     ],
   }),
   createReptileOutlineArticle({
@@ -1631,6 +1784,28 @@ export const BREED_GUIDE_ARTICLES: BreedGuideArticle[] = [
       "크레스티드게코의 벽 타기 변화는 사육 환경 이상을 알려주는 꽤 민감한 신호일 수 있습니다.",
       "환경 세팅과 생활 패턴을 함께 정리하고 싶다면, 맞춤 케어 콘텐츠와 연결해보세요.",
     ],
+    enSectionBodies: [
+      [
+        "One hallmark of crested geckos is strong climbing ability. If a gecko that usually climbs well suddenly struggles on walls, think about body condition or habitat changes before dismissing it as mood.",
+        "Retained shed around the toes can reduce grip. Dirty glass, poor humidity, or overall condition decline can cause similar behavior. Toe-pad condition matters.",
+      ],
+      [
+        "Check whether food intake and activity also dropped, and whether shedding happened recently. A sense that your gecko is “slipping” can itself be an important clue.",
+      ],
+      [
+        "Keep glass and interior surfaces clean and maintain proper humidity. If shedding was recent, watch for retained shed on toes and reduce handling to restore security.",
+      ],
+      [
+        "Be more cautious if climbing trouble comes with lower activity, reduced appetite, or shedding failure. Climbing changes can be a sensitive signal of habitat or health issues.",
+      ],
+      [
+        "Consider vet care if climbing trouble lasts, feet look abnormal, or appetite and activity drop together.",
+      ],
+    ],
+    enClosing: [
+      "Changes in crested gecko climbing can be a sensitive signal of habitat issues.",
+      "If you want to organize habitat setup and daily patterns together, continue with personalized care content.",
+    ],
   }),
   createReptileOutlineArticle({
     breedSlug: "bearded-dragon",
@@ -1668,6 +1843,28 @@ export const BREED_GUIDE_ARTICLES: BreedGuideArticle[] = [
       "비어디드래곤 식욕부진은 사육 환경 재점검이 가장 먼저입니다.",
       "사육 루틴과 상태 기록을 체계화하고 싶다면, 맞춤 관리 콘텐츠와 이어서 활용해보세요.",
     ],
+    enSectionBodies: [
+      [
+        "Bearded dragons often show clear behavior, so appetite loss can feel alarming quickly. But reduced eating is often tied to lighting, temperature, shedding, and stress rather than taste alone.",
+        "Basking-zone temperature and UVB are especially important. If temperatures are low or lighting is inadequate, activity and appetite can fall together. Review bulb replacement timing and seasonal temperature changes first.",
+      ],
+      [
+        "Look more closely if appetite loss comes with lethargy, reduced bowel movements, or frequent eye closing. A short appetite dip around shedding can happen, but overlapping signs should not be ignored.",
+      ],
+      [
+        "Measure basking and cool-zone temperatures again, and review lighting replacement schedule and placement. Reduce handling and record feeder type and feeding times to compare response.",
+      ],
+      [
+        "Reset the habitat first, then review food type and feeding schedule. Checking hydration also helps track appetite recovery.",
+      ],
+      [
+        "See a vet if your dragon barely eats for a long time, loses weight, keeps eyes closed, or looks lethargic.",
+      ],
+    ],
+    enClosing: [
+      "Bearded dragon appetite loss should start with a habitat reset.",
+      "If you want structured care routines and condition records, continue with personalized care content.",
+    ],
   }),
   createReptileOutlineArticle({
     breedSlug: "bearded-dragon",
@@ -1704,6 +1901,28 @@ export const BREED_GUIDE_ARTICLES: BreedGuideArticle[] = [
     koClosing: [
       "비어디드래곤 변비는 먹이뿐 아니라 온도와 수분, 활동성까지 함께 봐야 해결 실마리가 보입니다.",
       "우리 아이의 사육 패턴과 관리 포인트를 더 구조적으로 정리하고 싶다면, 맞춤 케어 콘텐츠와 연결해보세요.",
+    ],
+    enSectionBodies: [
+      [
+        "Bearded dragon bowel issues are not about food alone. Hydration, temperature, activity, and diet composition all matter. A few days without stool is not always serious, but a clear change from the usual pattern needs review.",
+        "Low hydration, insufficient basking temperature, and unbalanced diet are common causes. Reduced activity or lower condition can also change bowel patterns. Recent diet changes should be reviewed together.",
+      ],
+      [
+        "Be more cautious if fewer bowel movements come with lower appetite, belly discomfort, or lethargy. Repeated straining posture or long gaps after eating are also important patterns.",
+      ],
+      [
+        "Reset proper temperature and review hydration. Avoid an overly narrow diet and record current response. If movement is low, modest environmental stimulation may help activity.",
+      ],
+      [
+        "Consistent temperature management, balanced feeding, and condition records are the basics of prevention. Clues often appear when temperature, hydration, and activity are reviewed together.",
+      ],
+      [
+        "See a vet if there is no stool for a long time along with appetite loss or lethargy. Do not delay if belly discomfort looks severe or condition worsens quickly.",
+      ],
+    ],
+    enClosing: [
+      "Bearded dragon constipation is often clearer when temperature, hydration, and activity are reviewed together.",
+      "If you want a more structured care pattern, continue with personalized care content.",
     ],
   }),
 ];
