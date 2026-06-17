@@ -1,4 +1,8 @@
-import { COMMUNITY_CHIP_IDLE_CLASS, COMMUNITY_SOLID_CARD_CLASS } from "@/components/community/CommunityDetailSurface";
+import {
+  COMMUNITY_CHIP_IDLE_CLASS,
+  COMMUNITY_SOLID_CARD_CLASS,
+  COMMUNITY_SOLID_SURFACE_CLASS,
+} from "@/components/community/CommunityDetailSurface";
 import type { BreedGuide, PetAnimalType } from "@/lib/supabase/types";
 import { getAnimalLabel } from "@/lib/community/board-categories";
 import { Link } from "@/i18n/navigation";
