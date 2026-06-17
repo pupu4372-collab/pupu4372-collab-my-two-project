@@ -43,10 +43,12 @@ const RELATION_COPY: Record<
     ko: {
       title: (pet, owner) => `${pet} × ${owner} — 같은 오행, 같은 파장`,
       story: (pet, owner, pEl, oEl, sp) =>
-        `${pet}와 ${owner} 집사님은 ${pEl} 기운으로 맞춰진 팀이에요. ${sp} ${pet}의 리듬을 집사님이 intuitively 이해하고, 말 없이도 쿠션 자리를 맞춰요.`,
+        `${pet}와 ${owner} 집사님은 ${pEl} 기운으로 맞춰진 팀이에요. ${sp} ${pet}의 리듬을 집사님이 직관적으로 이해하고, 말 없이도 쿠션 자리와 휴식 타이밍을 맞춰요.`,
       tips: [
         "루틴을 함께 지키면 유대가 더 깊어져요",
         "같은 기운은 과열할 수 있으니 가끔은 새 산책로로 리프레시",
+        "둘 다 흥분하기 쉬운 날엔 조용한 공간에서 10분 휴식",
+        "좋아하는 간식·장난감을 고정해 주면 안정감이 커져요",
       ],
     },
     en: {
@@ -56,6 +58,8 @@ const RELATION_COPY: Record<
       tips: [
         "Shared routines deepen the bond",
         "Same energy can overheat—try a fresh walk route sometimes",
+        "On excited days, rest together in a quiet spot for 10 minutes",
+        "Fixed favorite treats and toys build a sense of safety",
       ],
     },
   },
@@ -67,6 +71,8 @@ const RELATION_COPY: Record<
       tips: [
         "규칙적인 케어가 궁합을 극대화해요",
         "칭찬과 간식 타이밍을 일정하게",
+        "밥·산책·수면 시간을 고정하면 신뢰가 빨리 쌓여요",
+        "집사님의 차분한 목소리가 반려동물에게 가장 큰 안심 신호예요",
       ],
     },
     en: {
@@ -76,6 +82,8 @@ const RELATION_COPY: Record<
       tips: [
         "Steady care maximizes compatibility",
         "Keep praise and treat timing consistent",
+        "Fixed meal, walk, and sleep times build trust quickly",
+        "A calm voice from the butler is the strongest safety signal",
       ],
     },
   },
@@ -87,6 +95,8 @@ const RELATION_COPY: Record<
       tips: [
         "함께 쉬는 시간을 의도적으로 만드세요",
         "눈 맞춤 + 천천히 쓰다듬기",
+        "퇴근 후 5분만 앉아 쉬며 인사하는 루틴을 만들어 보세요",
+        "반려동물 옆에 앉아 있는 것만으로도 집사님 마음이 회복돼요",
       ],
     },
     en: {
@@ -96,6 +106,8 @@ const RELATION_COPY: Record<
       tips: [
         "Schedule intentional rest together",
         "Eye contact + slow petting",
+        "Take 5 minutes to sit and greet each other after work",
+        "Simply sitting beside your pet can restore your mood",
       ],
     },
   },
@@ -106,7 +118,9 @@ const RELATION_COPY: Record<
         `집사님 ${oEl}와 ${pet} ${pEl}는 극(克) 관계. ${sp}는 자유롭고 집사님은 기준을 세우는 편—서로 맞추면 훈련·신뢰가 단단해져요.`,
       tips: [
         "짧은 훈련 세션 + 즉시 보상",
-        "NO 대신 redirection(다른 행동 유도)",
+        "NO 대신 다른 행동으로 유도하기",
+        "규칙은 2~3개만 고정하고 나머지는 유연하게",
+        "집사님이 먼저 침착한 톤으로 말하면 반려동물도 빠르게 따라와요",
       ],
     },
     en: {
@@ -116,6 +130,8 @@ const RELATION_COPY: Record<
       tips: [
         "Short training + instant reward",
         "Redirect instead of only saying no",
+        "Keep only 2–3 fixed rules and stay flexible on the rest",
+        "When the butler speaks calmly first, the pet follows faster",
       ],
     },
   },
@@ -127,6 +143,8 @@ const RELATION_COPY: Record<
       tips: [
         "일관된 규칙 2~3개만 유지",
         "간식은 칭찬 후에만",
+        "놀이 시간과 휴식 시간을 번갈아 정해 주세요",
+        "귀여움에 양보하기 전에 ‘지금은 쉬는 시간’을 한 번 알려 주세요",
       ],
     },
     en: {
@@ -136,6 +154,8 @@ const RELATION_COPY: Record<
       tips: [
         "Keep 2–3 consistent house rules",
         "Treats after praise, not before",
+        "Alternate planned play time and rest time",
+        "Say ‘rest time now’ once before giving in to cuteness",
       ],
     },
   },
@@ -147,6 +167,8 @@ const RELATION_COPY: Record<
       tips: [
         "서로의 템포를 관찰하는 첫 2주",
         "새 놀이를 함께 찾아보기",
+        "좋아하는 거리감(안아주기·옆에 두기)을 기록해 두세요",
+        "서로 다른 매력을 인정하면 오래 가는 조화형 궁합이 돼요",
       ],
     },
     en: {
@@ -156,6 +178,8 @@ const RELATION_COPY: Record<
       tips: [
         "Observe each other's tempo for two weeks",
         "Discover a new game together",
+        "Note preferred distance (holding vs. sitting nearby)",
+        "Respecting different charms makes this bond last",
       ],
     },
   },
@@ -223,6 +247,72 @@ function genderDetail(
   return `${petName} is a ${pet} ${species}, and ${ownerName} brings a ${owner} daily rhythm. Gender does not decide the score, but it helps tune names, touch intensity, and play tempo with more care.`;
 }
 
+const PET_ELEMENT_NOTES: Record<ElementKey, Record<Locale, (name: string) => string>> = {
+  wood: {
+    ko: (name) =>
+      `${name}의 목(木) 기운은 호기심과 활력이 중심이에요. 산책·놀이·새 자극에 잘 반응하므로 움직임을 챙겨 주면 마음이 안정돼요.`,
+    en: (name) =>
+      `${name}'s wood energy loves curiosity and motion. Walks, play, and new stimuli help them feel settled.`,
+  },
+  fire: {
+    ko: (name) =>
+      `${name}의 화(火) 기운은 표현과 애정이 풍부해요. 칭찬·눈맞춤·함께하는 시간이 많을수록 유대가 깊어져요.`,
+    en: (name) =>
+      `${name}'s fire energy is expressive and affectionate. Praise, eye contact, and shared time deepen the bond.`,
+  },
+  earth: {
+    ko: (name) =>
+      `${name}의 토(土) 기운은 안정과 습관을 좋아해요. 규칙적인 밥·휴식·산책 시간이 이 아이에게 가장 큰 안심이에요.`,
+    en: (name) =>
+      `${name}'s earth energy values stability and routine. Regular meals, rest, and walks are the biggest comfort.`,
+  },
+  metal: {
+    ko: (name) =>
+      `${name}의 금(金) 기운은 민감하고 기준이 분명한 편이에요. 예측 가능한 환경과 차분한 톤이 신뢰를 쌓아 줘요.`,
+    en: (name) =>
+      `${name}'s metal energy is sensitive and clear about boundaries. Predictable routines and a calm tone build trust.`,
+  },
+  water: {
+    ko: (name) =>
+      `${name}의 수(水) 기운은 관찰력과 적응력이 뛰어나요. 조용한 공간과 천천히 다가가는 스킨십이 잘 맞아요.`,
+    en: (name) =>
+      `${name}'s water energy is observant and adaptable. Quiet spaces and gentle, slow touch work best.`,
+  },
+};
+
+const OWNER_ELEMENT_NOTES: Record<ElementKey, Record<Locale, (name: string) => string>> = {
+  wood: {
+    ko: (name) =>
+      `${name} 집사님의 목(木) 기운은 성장과 계획을 중시해요. 반려동물의 도전을 격려하고 함께 움직이는 케어와 잘 맞아요.`,
+    en: (name) =>
+      `${name}'s wood energy values growth and planning. Encouraging the pet's efforts and moving together fits this style.`,
+  },
+  fire: {
+    ko: (name) =>
+      `${name} 집사님의 화(火) 기운은 따뜻한 표현과 적극적인 교감을 좋아해요. 칭찬과 놀이로 관계를 키우기 쉬운 타입이에요.`,
+    en: (name) =>
+      `${name}'s fire energy loves warm expression and active bonding. Praise and play come naturally.`,
+  },
+  earth: {
+    ko: (name) =>
+      `${name} 집사님의 토(土) 기운은 책임감과 꾸준함이 강해요. 루틴을 지키며 돌보는 방식이 반려동물에게 큰 안정감을 줘요.`,
+    en: (name) =>
+      `${name}'s earth energy is steady and responsible. Consistent care gives the pet a strong sense of safety.`,
+  },
+  metal: {
+    ko: (name) =>
+      `${name} 집사님의 금(金) 기운은 기준과 원칙을 세우는 편이에요. 짧고 명확한 규칙이 반려동물과의 신뢰를 단단하게 해요.`,
+    en: (name) =>
+      `${name}'s metal energy sets clear standards. Short, consistent rules build firm trust with the pet.`,
+  },
+  water: {
+    ko: (name) =>
+      `${name} 집사님의 수(水) 기운은 섬세한 관찰력이 돋보여요. 반려동물의 작은 신호를 읽고 맞춰 주는 케어에 강점이 있어요.`,
+    en: (name) =>
+      `${name}'s water energy reads small signals well. Tuning care to subtle cues is a real strength.`,
+  },
+};
+
 export function buildCompatibilityNarrative(
   relation: ElementRelation,
   score: number,
@@ -275,5 +365,8 @@ export function buildCompatibilityNarrative(
             },
           ],
     careTips: copy.tips,
+    relationDescription: relationDetail(relation, locale),
+    petElementNote: PET_ELEMENT_NOTES[petElement][locale](petName),
+    ownerElementNote: OWNER_ELEMENT_NOTES[ownerElement][locale](ownerName),
   };
 }

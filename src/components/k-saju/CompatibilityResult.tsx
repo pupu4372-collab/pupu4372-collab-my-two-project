@@ -35,6 +35,7 @@ const LABELS = {
     dayPillar: "일주(日柱)",
     details: "상세 궁합 해석",
     tips: "케어 팁",
+    tipsIntro: "오늘부터 바로 써볼 수 있는 실천 팁이에요.",
   },
   en: {
     eyebrow: "Pet-parent bond",
@@ -51,6 +52,7 @@ const LABELS = {
     dayPillar: "Day pillar",
     details: "Detailed bond reading",
     tips: "Care tips",
+    tipsIntro: "Practical tips you can try starting today.",
   },
 };
 
@@ -63,6 +65,7 @@ function ElementCard({
   genderLabel,
   genderValue,
   elementKey,
+  note,
 }: {
   title: string;
   name: string;
@@ -72,22 +75,24 @@ function ElementCard({
   genderLabel: string;
   genderValue: string;
   elementKey: CompatibilityResponse["petElement"];
+  note?: string;
 }) {
   const accent = ELEMENT_ACCENT[elementKey];
 
   return (
     <div className={`rounded-2xl border px-4 py-4 ${accent.pill}`}>
-      <p className="text-xs font-extrabold uppercase tracking-[0.12em] opacity-80">{title}</p>
+      <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-primary/70">{title}</p>
       <p className="mt-1 text-base font-bold text-primary">{name}</p>
-      <p className="mt-2 text-lg font-extrabold">
+      <p className="mt-2 text-lg font-extrabold text-ink">
         {elementLabel.hanja} {elementLabel.meaning} · {elementLabel.hangul}
       </p>
-      <p className="mt-2 text-xs text-plum/60">
+      <p className="mt-2 text-xs font-semibold text-plum/75">
         {genderLabel}: {genderValue}
       </p>
-      <p className="text-xs text-plum/60">
+      <p className="text-xs font-semibold text-plum/75">
         {dayPillarLabel}: {dayPillar}
       </p>
+      {note && <p className="mt-3 border-t border-primary/10 pt-3 text-xs leading-relaxed text-ink">{note}</p>}
     </div>
   );
 }
@@ -101,6 +106,9 @@ export function CompatibilityResult({
 }) {
   const t = LABELS[result.locale];
   const rel = RELATION_LABEL[result.relation][result.locale];
+  const details = result.details ?? [];
+  const relationBody =
+    result.relationDescription ?? details.find((d) => d.title)?.body ?? result.story;
 
   return (
     <div className="space-y-5">
@@ -151,6 +159,7 @@ export function CompatibilityResult({
           genderLabel={t.petGender}
           genderValue={result.petGender === "male" ? t.malePet : t.femalePet}
           elementKey={result.petElement}
+          note={result.petElementNote || undefined}
         />
         <ElementCard
           title={t.ownerEl}
@@ -161,22 +170,29 @@ export function CompatibilityResult({
           genderLabel={t.ownerGender}
           genderValue={result.ownerGender === "male" ? t.maleOwner : t.femaleOwner}
           elementKey={result.ownerElement}
+          note={result.ownerElementNote || undefined}
         />
       </div>
 
-      <GlassCard variant="solid" className="border-l-4 border-channel-saju/50 text-center">
-        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/55">{t.relation}</p>
-        <p className="mt-2 text-lg font-extrabold text-channel-saju">{rel}</p>
+      <GlassCard
+        variant="solid"
+        className="border border-channel-saju/25 bg-gradient-to-br from-sand/70 via-white to-lavender/30 text-center"
+      >
+        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary/80">{t.relation}</p>
+        <p className="mt-2 text-2xl font-extrabold text-primary">{rel}</p>
+        <p className="mx-auto mt-4 max-w-xl text-sm font-semibold leading-relaxed text-ink">{relationBody}</p>
       </GlassCard>
 
       <GlassCard variant="solid">
         <h3 className="font-extrabold text-primary">{t.tips}</h3>
+        <p className="mt-1 text-sm text-on-surface-variant">{t.tipsIntro}</p>
         <ul className="mt-4 space-y-3">
-          {result.careTips.map((tip) => (
+          {result.careTips.map((tip, index) => (
             <li
               key={tip}
-              className="rounded-xl border border-mint/35 bg-sand/45 px-4 py-3 text-sm leading-relaxed text-ink"
+              className="rounded-xl border border-mint/35 bg-white px-4 py-3 text-sm leading-relaxed text-ink"
             >
+              <span className="mr-2 font-extrabold text-channel-saju">{index + 1}.</span>
               {tip}
             </li>
           ))}

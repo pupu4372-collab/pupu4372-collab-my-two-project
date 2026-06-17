@@ -52,6 +52,9 @@ export interface CompatibilityResponse {
     body: string;
   }[];
   careTips: string[];
+  relationDescription: string;
+  petElementNote: string;
+  ownerElementNote: string;
 }
 
 export function computeCompatibility(input: CompatibilityRequest): CompatibilityResponse {
@@ -133,5 +136,8 @@ export function computeCompatibility(input: CompatibilityRequest): Compatibility
     story: narrative.story,
     details: narrative.details,
     careTips: narrative.careTips,
+    relationDescription: narrative.relationDescription,
+    petElementNote: narrative.petElementNote,
+    ownerElementNote: narrative.ownerElementNote,
   };
 }

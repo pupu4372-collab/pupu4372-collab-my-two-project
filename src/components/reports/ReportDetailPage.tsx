@@ -113,6 +113,8 @@ function compatibilityResult(report: ReportDetailRow): CompatibilityResponse {
   const payload = asObject(report.storytelling_payload);
   const elements = asObject(report.five_elements);
   const pillars = asObject(report.pillars);
+  const details = (payload.details as unknown as CompatibilityResponse["details"]) ?? [];
+  const firstDetailBody = details[0]?.body ?? "";
 
   return {
     petName: report.pet?.name ?? "반려동물",
@@ -136,8 +138,11 @@ function compatibilityResult(report: ReportDetailRow): CompatibilityResponse {
     ownerDayPillar: asString(pillars.ownerDay),
     headline: report.title ?? "",
     story: report.summary ?? "",
-    details: (payload.details as unknown as CompatibilityResponse["details"]) ?? [],
+    details,
     careTips: asStringArray(payload.careTips),
+    relationDescription: asString(payload.relationDescription, firstDetailBody),
+    petElementNote: asString(payload.petElementNote),
+    ownerElementNote: asString(payload.ownerElementNote),
   };
 }
 
