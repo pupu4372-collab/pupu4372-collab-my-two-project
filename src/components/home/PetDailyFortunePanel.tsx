@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { PetFortuneShareRow } from "@/components/home/PetFortuneShareRow";
 import {
   JigFortuneContentBox,
+  JigFortuneFoldButton,
   JigFortuneToggleButton,
   JigFortuneWatermark,
 } from "@/components/home/jig-fortune/JigFortuneDecor";
@@ -107,13 +108,7 @@ function CommonFortunePanel({
               </span>
               <span className="human-premium-label-caps text-sm tracking-widest">{fortune.cta}</span>
             </AuthRequiredLink>
-            <button
-              type="button"
-              onClick={() => setRevealed(false)}
-              className="mx-auto text-xs font-bold text-[var(--jig-muted)] transition hover:text-[var(--jig-seal)]"
-            >
-              {isKo ? "접기" : "Fold"}
-            </button>
+            <JigFortuneFoldButton isKo={isKo} onClick={() => setRevealed(false)} />
           </>
         ) : (
           <JigFortuneToggleButton expanded={false} isKo={isKo} onClick={() => setRevealed(true)} />
@@ -235,6 +230,8 @@ function PersonalizedFortunePanel({
   variant,
   isNight,
   onSelectPet,
+  initialRevealed = false,
+  hideFold = false,
 }: {
   pets: PetFortunePetMeta[];
   fortune: PetDailyFortune;
@@ -243,8 +240,10 @@ function PersonalizedFortunePanel({
   variant: PetFortuneVisualVariant;
   isNight: boolean;
   onSelectPet: (petId: string) => void;
+  initialRevealed?: boolean;
+  hideFold?: boolean;
 }) {
-  const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState(initialRevealed);
   const selectedPet = pets.find((pet) => pet.id === selectedPetId) ?? pets[0];
   const jig = isJigwanjae(variant);
 
@@ -419,13 +418,7 @@ function PersonalizedFortunePanel({
 
             <p className={`text-center text-xs font-semibold ${textMuted}`}>{fortune.disclaimer}</p>
 
-            <button
-              type="button"
-              onClick={() => setRevealed(false)}
-              className="mx-auto text-xs font-bold text-[var(--jig-muted)] transition hover:text-[var(--jig-seal)]"
-            >
-              {isKo ? "접기" : "Fold"}
-            </button>
+            {!hideFold && <JigFortuneFoldButton isKo={isKo} onClick={() => setRevealed(false)} />}
           </div>
         )}
       </div>
@@ -653,12 +646,16 @@ export function PetDailyFortunePanel({
   isNight = false,
   variant = "default",
   onSelectPet,
+  initialRevealed = false,
+  hideFold = false,
 }: {
   data: FortuneTodayState;
   isKo: boolean;
   isNight?: boolean;
   variant?: PetFortuneVisualVariant;
   onSelectPet?: (petId: string) => void;
+  initialRevealed?: boolean;
+  hideFold?: boolean;
 }) {
   if (data.mode === "common") {
     return (
@@ -681,6 +678,8 @@ export function PetDailyFortunePanel({
       variant={variant}
       isNight={isNight}
       onSelectPet={onSelectPet ?? (() => undefined)}
+      initialRevealed={initialRevealed}
+      hideFold={hideFold}
     />
   );
 }

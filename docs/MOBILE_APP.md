@@ -62,7 +62,38 @@ Add every URL users can open in the app:
 
 Also set **Site URL** to your production domain.
 
-For Google/Kakao setup details, see [SOCIAL_LOGIN.md](./SOCIAL_LOGIN.md).
+For Google/Kakao login setup details, see [SOCIAL_LOGIN.md](./SOCIAL_LOGIN.md).
+
+## Kakao share (native app vs web)
+
+The hybrid app uses **two paths**:
+
+| Environment | Mechanism | Key |
+|-------------|-----------|-----|
+| Browser (`ksajupet.com`) | Kakao **JavaScript SDK** | `NEXT_PUBLIC_KAKAO_JS_KEY` in `.env.local` / Vercel |
+| Capacitor Android/iOS shell | **Native Kakao SDK** via `capacitor-kakao-login-plugin` | **Native app key** in native config |
+
+Code: `src/lib/share/kakao-share.ts` — `Capacitor.isNativePlatform()` branches automatically.
+
+### Native app key setup
+
+1. [developers.kakao.com](https://developers.kakao.com) → your app → **앱 키** → copy **네이티브 앱 키**
+2. Replace `REPLACE_WITH_NATIVE_APP_KEY` in:
+   - `android/app/src/main/res/values/strings.xml` (`kakao_app_key`, `kakao_scheme`)
+   - `ios/App/App/Info.plist` (`KAKAO_APP_KEY`, URL scheme, `LSApplicationQueriesSchemes`)
+3. **Android** platform: package `com.ksajupet.app` + **키해시** (debug + release) register in Kakao console
+4. **iOS** platform: bundle ID `com.ksajupet.app` register in Kakao console
+5. Run `npm run cap:sync` and rebuild the native app
+
+Debug key hash (Windows):
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-21.0.11.10-hotspot"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+keytool -exportcert -alias androiddebugkey -keystore "$env:USERPROFILE\.android\debug.keystore" -storepass android -keypass android | openssl sha1 -binary | openssl base64
+```
+
+Web share still needs **Web** site domains (`https://ksajupet.com`, `http://localhost:3000`). Native share does **not** use JS SDK domain checks.
 
 ## PayPal / app URL
 

@@ -319,8 +319,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
           </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-          <div>
+        <section className="grid items-start gap-6 md:grid-cols-[1.05fr_0.95fr]">
+          <div className="min-w-0 space-y-6">
             {isNight ? (
               <div>
                 <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#22c55e] drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">
@@ -341,11 +341,11 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
               />
             )}
             {rankingSource === "mock" && (
-              <p className={`mt-2 text-xs font-semibold ${isNight ? "text-white/60" : "text-plum/45"}`}>
+              <p className={`text-xs font-semibold ${isNight ? "text-white/60" : "text-plum/45"}`}>
                 {isKo ? "데모 데이터 (DB 연결 또는 이번 주 게시물 없음)" : "Demo data (no DB or no posts this week)"}
               </p>
             )}
-            <div className="mt-5 flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3">
               <AuthRequiredLink
                 href="/community/pet-show/upload"
                 className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
@@ -377,32 +377,33 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                 {isKo ? "웃긴 실패 사진" : "Funny fails"}
               </AuthRequiredLink>
             </div>
+            <GlassCard className={`min-w-0 p-4 sm:p-5 ${nightGlassCard}`}>
+              <div className="grid gap-3">
+                <RankingPreviewList
+                  emoji="🐕"
+                  label={isKo ? "강아지 Top 5" : "Dog Top 5"}
+                  rows={rankingRows.dog}
+                  emptyText={isKo ? "이번 주 강아지 사진을 기다려요." : "Waiting for dog photos."}
+                  isNight={isNight}
+                />
+                <RankingPreviewList
+                  emoji="🐈"
+                  label={isKo ? "고양이 Top 5" : "Cat Top 5"}
+                  rows={rankingRows.cat}
+                  emptyText={isKo ? "이번 주 고양이 사진을 기다려요." : "Waiting for cat photos."}
+                  isNight={isNight}
+                />
+                <RankingPreviewList
+                  emoji="🐾"
+                  label={isKo ? "렙타일(다른동물) Top 5" : "Other Animals Top 5"}
+                  rows={rankingRows.other}
+                  emptyText={isKo ? "이번 주 렙타일(다른동물) 사진을 기다려요." : "Waiting for other animal photos."}
+                  isNight={isNight}
+                />
+              </div>
+            </GlassCard>
           </div>
-          <GlassCard className={`min-w-0 p-4 sm:p-5 ${nightGlassCard}`}>
-            <div className="grid gap-3">
-              <RankingPreviewList
-                emoji="🐕"
-                label={isKo ? "강아지 Top 5" : "Dog Top 5"}
-                rows={rankingRows.dog}
-                emptyText={isKo ? "이번 주 강아지 사진을 기다려요." : "Waiting for dog photos."}
-                isNight={isNight}
-              />
-              <RankingPreviewList
-                emoji="🐈"
-                label={isKo ? "고양이 Top 5" : "Cat Top 5"}
-                rows={rankingRows.cat}
-                emptyText={isKo ? "이번 주 고양이 사진을 기다려요." : "Waiting for cat photos."}
-                isNight={isNight}
-              />
-              <RankingPreviewList
-                emoji="🐾"
-                label={isKo ? "렙타일(다른동물) Top 5" : "Other Animals Top 5"}
-                rows={rankingRows.other}
-                emptyText={isKo ? "이번 주 렙타일(다른동물) 사진을 기다려요." : "Waiting for other animal photos."}
-                isNight={isNight}
-              />
-            </div>
-          </GlassCard>
+          <div className="hidden min-h-0 md:block" aria-hidden />
         </section>
 
         <AdSlot />

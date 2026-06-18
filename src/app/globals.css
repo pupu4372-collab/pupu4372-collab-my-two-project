@@ -599,6 +599,22 @@ html.native-app body {
   color: var(--jig-ink);
 }
 
+.pet-fortune-jigwanjae .jig-fortune-fold-bar {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  min-height: 1.65rem;
+  margin-top: 0.35rem;
+  padding-bottom: 0.1rem;
+}
+
+@media (min-width: 768px) {
+  .pet-fortune-jigwanjae .jig-fortune-fold-bar {
+    min-height: 2rem;
+  }
+}
+
 .pet-fortune-jigwanjae .jig-fortune-reveal-btn {
   position: relative;
   padding: 0.7rem 1.35rem;

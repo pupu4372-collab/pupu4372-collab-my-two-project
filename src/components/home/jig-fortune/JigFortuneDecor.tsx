@@ -39,6 +39,28 @@ export function JigFortuneWatermark() {
   );
 }
 
+export function JigFortuneFoldButton({
+  isKo,
+  onClick,
+  label,
+}: {
+  isKo: boolean;
+  onClick: () => void;
+  label?: string;
+}) {
+  return (
+    <div className="jig-fortune-fold-bar">
+      <button
+        type="button"
+        onClick={onClick}
+        className="text-xs font-bold text-[var(--jig-muted)] transition hover:text-[var(--jig-seal)]"
+      >
+        {label ?? (isKo ? "접기" : "Fold")}
+      </button>
+    </div>
+  );
+}
+
 export function JigFortuneToggleButton({
   expanded,
   isKo,

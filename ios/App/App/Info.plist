@@ -45,5 +45,23 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>KAKAO_APP_KEY</key>
+	<string>REPLACE_WITH_NATIVE_APP_KEY</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>kakaoREPLACE_WITH_NATIVE_APP_KEY</string>
+			</array>
+		</dict>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>kakaoREPLACE_WITH_NATIVE_APP_KEY</string>
+		<string>kakaokompassauth</string>
+		<string>kakaolink</string>
+		<string>kakaotalk</string>
+	</array>
 </dict>
 </plist>

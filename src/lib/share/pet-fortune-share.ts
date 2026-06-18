@@ -1,21 +1,11 @@
 import type { PetDailyFortune, PetFortunePetMeta } from "@/lib/saju/pet-daily-fortune";
 import type { Locale } from "@/lib/saju/types";
 import { getConfiguredAppBaseUrl } from "@/lib/app-url";
+import { loadKakaoSdk, shareKakaoFeed } from "@/lib/share/kakao-share";
 
-declare global {
-  interface Window {
-    Kakao?: {
-      isInitialized(): boolean;
-      init(key: string): void;
-      Share: {
-        sendDefault(options: Record<string, unknown>): void;
-      };
-    };
-  }
-}
+export { loadKakaoSdk } from "@/lib/share/kakao-share";
 
 const DEFAULT_SHARE_IMAGE_PATH = "/api/fortune/share-og";
-const KAKAO_SDK_URL = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js";
 const SHARE_FONT = '"SUIT Variable", "Noto Sans KR", sans-serif';
 const STORY_W = 1080;
 const STORY_H = 1920;
@@ -32,8 +22,6 @@ const JIG_STORY = {
   cardBorder: "rgba(34, 34, 34, 0.1)",
   obangWhite: "#e9e5d9",
 };
-
-let kakaoLoadPromise: Promise<NonNullable<typeof window.Kakao>> | null = null;
 
 function appShareBaseUrl() {
   return getConfiguredAppBaseUrl();
@@ -67,42 +55,6 @@ export function resolveShareImageUrl(profileImageUrl?: string | null) {
   return `${appBase}${DEFAULT_SHARE_IMAGE_PATH}`;
 }
 
-export async function loadKakaoSdk() {
-  const key = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
-  if (!key || typeof window === "undefined") {
-    throw new Error("KAKAO_SDK_UNAVAILABLE");
-  }
-
-  if (window.Kakao?.isInitialized()) return window.Kakao;
-
-  if (!kakaoLoadPromise) {
-    kakaoLoadPromise = new Promise((resolve, reject) => {
-      const existing = document.querySelector<HTMLScriptElement>('script[data-kakao-sdk="true"]');
-      if (existing) {
-        existing.addEventListener("load", () => resolve(window.Kakao!), { once: true });
-        existing.addEventListener("error", () => reject(new Error("KAKAO_SDK_LOAD_FAILED")), {
-          once: true,
-        });
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = KAKAO_SDK_URL;
-      script.async = true;
-      script.dataset.kakaoSdk = "true";
-      script.onload = () => resolve(window.Kakao!);
-      script.onerror = () => reject(new Error("KAKAO_SDK_LOAD_FAILED"));
-      document.head.appendChild(script);
-    });
-  }
-
-  const Kakao = await kakaoLoadPromise;
-  if (!Kakao.isInitialized()) {
-    Kakao.init(key);
-  }
-  return Kakao;
-}
-
 export async function sharePetFortuneToKakao(input: {
   petId: string;
   petName: string;
@@ -110,7 +62,6 @@ export async function sharePetFortuneToKakao(input: {
   imageUrl?: string | null;
   locale?: "ko" | "en";
 }) {
-  const Kakao = await loadKakaoSdk();
   const shareUrl = getPetFortuneShareUrl(input.petId);
   const fortuneText = buildFortuneShareDescription(
     input.fortune,
@@ -119,26 +70,12 @@ export async function sharePetFortuneToKakao(input: {
   );
   const imageUrl = resolveShareImageUrl(input.imageUrl);
 
-  Kakao.Share.sendDefault({
-    objectType: "feed",
-    content: {
-      title: `지관재 · ${input.petName}의 오늘 운세`.slice(0, 200),
-      description: fortuneText,
-      imageUrl,
-      link: {
-        mobileWebUrl: shareUrl,
-        webUrl: shareUrl,
-      },
-    },
-    buttons: [
-      {
-        title: "운세 보기",
-        link: {
-          mobileWebUrl: shareUrl,
-          webUrl: shareUrl,
-        },
-      },
-    ],
+  await shareKakaoFeed({
+    title: `지관재 · ${input.petName}의 오늘 운세`,
+    description: fortuneText,
+    shareUrl,
+    buttonTitle: "운세 보기",
+    imageUrl,
   });
 }
 
@@ -150,35 +87,18 @@ export async function shareHumanPremiumReportToKakao(input: {
   tagline: string;
   locale?: "ko" | "en";
 }) {
-  const Kakao = await loadKakaoSdk();
   const isKo = (input.locale ?? "ko") === "ko";
   const imageUrl = `${appShareBaseUrl()}${REPORT_SHARE_IMAGE_PATH}`;
-  const title = (
-    isKo
-      ? `지관재 · ${input.personName} 평생 사주 리포트`
-      : `Jigwanjae · ${input.personName} lifetime K-Saju report`
-  ).slice(0, 200);
+  const title = isKo
+    ? `지관재 · ${input.personName} 평생 사주 리포트`
+    : `Jigwanjae · ${input.personName} lifetime K-Saju report`;
 
-  Kakao.Share.sendDefault({
-    objectType: "feed",
-    content: {
-      title,
-      description: input.tagline.slice(0, 200),
-      imageUrl,
-      link: {
-        mobileWebUrl: input.shareUrl,
-        webUrl: input.shareUrl,
-      },
-    },
-    buttons: [
-      {
-        title: isKo ? "리포트 보기" : "View report",
-        link: {
-          mobileWebUrl: input.shareUrl,
-          webUrl: input.shareUrl,
-        },
-      },
-    ],
+  await shareKakaoFeed({
+    title,
+    description: input.tagline,
+    shareUrl: input.shareUrl,
+    buttonTitle: isKo ? "리포트 보기" : "View report",
+    imageUrl,
   });
 }
 
@@ -282,9 +202,9 @@ function drawStoryChrome(
   ctx: CanvasRenderingContext2D,
   slideIndex: number,
   totalSlides: number,
-  petName: string,
-  isKo: boolean
+  input: { pet: PetFortunePetMeta; fortune: PetDailyFortune; isKo: boolean }
 ) {
+  const { pet, fortune, isKo } = input;
   ctx.textAlign = "center";
   ctx.fillStyle = JIG_STORY.seal;
   ctx.font = `700 30px ${SHARE_FONT}`;
@@ -292,14 +212,19 @@ function drawStoryChrome(
 
   ctx.fillStyle = JIG_STORY.ink;
   ctx.font = `800 36px ${SHARE_FONT}`;
-  ctx.fillText("K-Saju Pet", STORY_W / 2, 108);
+  ctx.fillText(isKo ? "오늘의 운세" : "Today's fortune", STORY_W / 2, 108);
 
   ctx.fillStyle = JIG_STORY.muted;
   ctx.font = `600 22px ${SHARE_FONT}`;
+  ctx.fillText(fortune.dateLabel, STORY_W / 2, 144);
+
+  ctx.font = `600 20px ${SHARE_FONT}`;
   ctx.fillText(
-    isKo ? `${petName} · ${slideIndex + 1}/${totalSlides}` : `${petName} · ${slideIndex + 1}/${totalSlides}`,
+    isKo
+      ? `${pet.name} · ${slideIndex + 1}/${totalSlides}`
+      : `${pet.name} · ${slideIndex + 1}/${totalSlides}`,
     STORY_W / 2,
-    144
+    168
   );
 }
 
@@ -374,41 +299,30 @@ function drawHeroExpanded(
   input: { pet: PetFortunePetMeta; fortune: PetDailyFortune; isKo: boolean }
 ) {
   const { pet, fortune, isKo } = input;
-  const boxH = 320;
+  const heroIcon = fortune.overall >= 4 ? "🌟" : fortune.overall === 3 ? "☁️" : "🌙";
+  const boxH = 300;
   fillJigCard(ctx, PAD_X, y, CONTENT_W, boxH, 12);
 
   ctx.textAlign = "center";
-  ctx.fillStyle = JIG_STORY.seal;
-  ctx.font = `700 24px ${SHARE_FONT}`;
-  ctx.fillText(fortune.dateLabel, STORY_W / 2, y + 44);
-
   ctx.font = `56px ${SHARE_FONT}`;
-  ctx.fillText(pet.icon, STORY_W / 2, y + 108);
+  ctx.fillText(heroIcon, STORY_W / 2, y + 88);
 
   ctx.fillStyle = JIG_STORY.ink;
   ctx.font = `800 42px ${SHARE_FONT}`;
-  ctx.fillText(
-    isKo ? `${pet.name}의 오늘 운세` : `${pet.name}'s fortune`,
-    STORY_W / 2,
-    y + 162
-  );
-
-  ctx.fillStyle = JIG_STORY.ink;
-  ctx.font = `700 34px ${SHARE_FONT}`;
-  ctx.fillText(fortune.title, STORY_W / 2, y + 210);
+  ctx.fillText(fortune.title, STORY_W / 2, y + 148);
 
   ctx.fillStyle = JIG_STORY.muted;
   ctx.font = `700 26px ${SHARE_FONT}`;
   ctx.fillText(
-    `${pet.speciesLabel} · ${pet.dayBranchSign} ${starsString(fortune.overall)}`,
+    `${pet.name} · ${pet.speciesLabel} · ${pet.dayBranchSign} ${starsString(fortune.overall)}`,
     STORY_W / 2,
-    y + 248
+    y + 192
   );
 
   ctx.fillStyle = JIG_STORY.muted;
   ctx.font = `400 26px ${SHARE_FONT}`;
   ctx.textAlign = "left";
-  wrapCanvasText(ctx, fortune.subtitle, PAD_X + 40, y + 286, CONTENT_W - 80, 34, 2);
+  wrapCanvasText(ctx, fortune.subtitle, PAD_X + 40, y + 236, CONTENT_W - 80, 34, 2);
 
   return y + boxH + 24;
 }
@@ -504,7 +418,7 @@ function drawWeekExpanded(
   petIcon: string,
   isKo: boolean
 ) {
-  y = drawSectionTitle(ctx, y, isKo ? "이번 주 운세" : "This week", isKo);
+  y = drawSectionTitle(ctx, y, isKo ? "이번 주 운세 미리보기" : "This week's preview", isKo);
 
   const gap = 8;
   const cellW = (CONTENT_W - gap * 6) / 7;
@@ -533,25 +447,16 @@ function drawWeekExpanded(
     ctx.fillText(starsString(day.stars), x + cellW / 2, y + 102);
   });
 
-  return y + cellH + 20;
-}
+  ctx.fillStyle = JIG_STORY.muted;
+  ctx.font = `600 22px ${SHARE_FONT}`;
+  ctx.textAlign = "center";
+  ctx.fillText(
+    isKo ? "내일 이후는 내일 공개돼요" : "Future days unlock tomorrow",
+    STORY_W / 2,
+    y + cellH + 36
+  );
 
-function drawTipsExpanded(ctx: CanvasRenderingContext2D, y: number, fortune: PetDailyFortune, isKo: boolean) {
-  y = drawSectionTitle(ctx, y, isKo ? "오늘 이렇게 해주세요" : "Care tips", isKo);
-
-  const boxH = 28 + fortune.tips.length * 42;
-  fillJigCard(ctx, PAD_X, y, CONTENT_W, boxH, 10);
-
-  ctx.textAlign = "left";
-  ctx.fillStyle = JIG_STORY.ink;
-  ctx.font = `600 26px ${SHARE_FONT}`;
-  let lineY = y + 44;
-  for (const tip of fortune.tips) {
-    wrapCanvasText(ctx, `${tip.icon} ${tip.text}`, PAD_X + 24, lineY, CONTENT_W - 48, 34, 2);
-    lineY += 42;
-  }
-
-  return y + boxH;
+  return y + cellH + 56;
 }
 
 function renderStorySlide(
@@ -560,18 +465,16 @@ function renderStorySlide(
   input: { pet: PetFortunePetMeta; fortune: PetDailyFortune; isKo: boolean }
 ) {
   const { canvas, ctx } = createStorySlideCanvas();
-  drawStoryChrome(ctx, slideIndex, totalSlides, input.pet.name, input.isKo);
+  drawStoryChrome(ctx, slideIndex, totalSlides, input);
 
-  let y = 168;
+  let y = 196;
   if (slideIndex === 0) {
     y = drawHeroExpanded(ctx, y, input);
     drawCategoriesExpanded(ctx, y, input.fortune, input.isKo);
-  } else if (slideIndex === 1) {
-    y = drawMessagesExpanded(ctx, y, input.fortune, input.isKo);
-    drawLuckyExpanded(ctx, y, input.fortune, input.isKo);
   } else {
-    y = drawWeekExpanded(ctx, y, input.fortune, input.pet.icon, input.isKo);
-    drawTipsExpanded(ctx, y, input.fortune, input.isKo);
+    y = drawMessagesExpanded(ctx, y, input.fortune, input.isKo);
+    y = drawLuckyExpanded(ctx, y, input.fortune, input.isKo);
+    drawWeekExpanded(ctx, y, input.fortune, input.pet.icon, input.isKo);
     drawStoryFooter(ctx, input.fortune);
   }
 
@@ -584,7 +487,7 @@ export async function buildFortuneShareStorySlides(input: {
   isKo: boolean;
 }) {
   await ensureShareFonts();
-  const totalSlides = 3;
+  const totalSlides = 2;
   return Array.from({ length: totalSlides }, (_, index) =>
     renderStorySlide(index, totalSlides, input)
   );

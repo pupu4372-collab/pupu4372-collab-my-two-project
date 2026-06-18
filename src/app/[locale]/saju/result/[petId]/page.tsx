@@ -99,8 +99,9 @@ export default async function SharedPetFortunePage({ params }: SharedFortunePage
   return (
     <ChannelShell
       theme="saju"
-      title={isKo ? `${data.pet.name}의 오늘 운세` : `${data.pet.name}'s fortune today`}
+      title={isKo ? "오늘의 운세" : "Today's fortune"}
       subtitle={t("hubSubtitle")}
+      hideThemeLabel
     >
       <SharedPetFortuneLanding pet={data.pet} fortune={data.fortune} isKo={isKo} />
     </ChannelShell>

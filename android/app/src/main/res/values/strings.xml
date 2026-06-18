@@ -4,4 +4,7 @@
     <string name="title_activity_main">K-Saju Pet</string>
     <string name="package_name">com.ksajupet.app</string>
     <string name="custom_url_scheme">com.ksajupet.app</string>
+    <!-- Kakao Native app key (developers.kakao.com → 앱 키 → 네이티브 앱 키) -->
+    <string name="kakao_app_key" translatable="false">32c3bc5b7e1ada38c95a069eedcaccb0</string>
+    <string name="kakao_scheme" translatable="false">kakao32c3bc5b7e1ada38c95a069eedcaccb0</string>
 </resources>

@@ -4,10 +4,10 @@ import type { SajuBasicResponse } from "@/lib/saju/types";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
 import { getConfiguredAppBaseUrl } from "@/lib/app-url";
 import {
-  loadKakaoSdk,
   resolveShareImageUrl,
   saveFortuneStorySlidesToDevice,
 } from "@/lib/share/pet-fortune-share";
+import { shareKakaoFeed } from "@/lib/share/kakao-share";
 
 const SHARE_FONT = '"SUIT Variable", "Noto Sans KR", sans-serif';
 const STORY_W = 1080;
@@ -202,23 +202,12 @@ async function kakaoFeed(input: {
   buttonTitle: string;
   imageUrl?: string;
 }) {
-  const Kakao = await loadKakaoSdk();
-  const imageUrl = input.imageUrl ?? `${appBase()}${DEFAULT_SHARE_IMAGE_PATH}`;
-
-  Kakao.Share.sendDefault({
-    objectType: "feed",
-    content: {
-      title: input.title.slice(0, 200),
-      description: input.description.slice(0, 200),
-      imageUrl,
-      link: { mobileWebUrl: input.shareUrl, webUrl: input.shareUrl },
-    },
-    buttons: [
-      {
-        title: input.buttonTitle,
-        link: { mobileWebUrl: input.shareUrl, webUrl: input.shareUrl },
-      },
-    ],
+  await shareKakaoFeed({
+    title: input.title,
+    description: input.description.replace(/\s+/g, " ").trim(),
+    shareUrl: input.shareUrl,
+    buttonTitle: input.buttonTitle,
+    imageUrl: input.imageUrl ?? `${appBase()}${DEFAULT_SHARE_IMAGE_PATH}`,
   });
 }
 
