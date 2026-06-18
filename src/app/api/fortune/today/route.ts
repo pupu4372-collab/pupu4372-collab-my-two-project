@@ -6,6 +6,7 @@ import {
 } from "@/lib/saju/pet-daily-fortune";
 import type { Locale } from "@/lib/saju/types";
 import type { PetSpecies } from "@/lib/supabase/types";
+import { emptyCareReminders, fetchPetCareReminders } from "@/lib/pet-care/reminders";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -29,6 +30,7 @@ export async function GET(request: Request) {
       mode: "common" as const,
       hasRegisteredPets: false,
       fortune: buildCommonPetDailyFortune(locale),
+      careReminders: emptyCareReminders(),
     });
   }
 
@@ -38,6 +40,7 @@ export async function GET(request: Request) {
       mode: "common" as const,
       hasRegisteredPets: false,
       fortune: buildCommonPetDailyFortune(locale),
+      careReminders: emptyCareReminders(),
     });
   }
 
@@ -47,14 +50,14 @@ export async function GET(request: Request) {
       "id, name, species, birth_date, birth_time, birth_time_unknown, birth_timezone, profile_image_url"
     )
     .eq("owner_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(5);
+    .order("created_at", { ascending: false });
 
   if (petsError || !pets?.length) {
     return NextResponse.json({
       mode: "common" as const,
       hasRegisteredPets: false,
       fortune: buildCommonPetDailyFortune(locale),
+      careReminders: emptyCareReminders(),
     });
   }
 
@@ -77,6 +80,7 @@ export async function GET(request: Request) {
       mode: "common" as const,
       hasRegisteredPets: false,
       fortune: buildCommonPetDailyFortune(locale),
+      careReminders: emptyCareReminders(),
     });
   }
 
@@ -95,6 +99,14 @@ export async function GET(request: Request) {
   }));
 
   const selectedProfile = profiles.find((pet) => pet.id === selected.id)!;
+  const isKo = locale === "ko";
+  const careReminders = await fetchPetCareReminders(
+    supabase,
+    userId,
+    selected.id,
+    selected.name,
+    isKo
+  );
 
   return NextResponse.json({
     mode: "personalized" as const,
@@ -102,5 +114,6 @@ export async function GET(request: Request) {
     petId: selected.id,
     pets: profiles.map((pet) => buildPetFortunePetMeta(pet, locale)),
     fortune: buildPetDailyFortune(selectedProfile, locale),
+    careReminders,
   });
 }

@@ -7,6 +7,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { GlassCard, PageContainer, SectionHeader } from "@/components/layout/StitchLayout";
 import { OnboardingRoadmap } from "@/components/onboarding/OnboardingRoadmap";
 import { PetDailyFortunePanel, type FortuneTodayState } from "@/components/home/PetDailyFortunePanel";
+import { PetCareReminderBanner } from "@/components/home/PetCareReminderBanner";
 import { JigFortuneOrnateCorners } from "@/components/home/jig-fortune/JigFortuneDecor";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
@@ -298,6 +299,10 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                   {isKo ? "행운을 빌어요" : "wishing you luck"}
                 </p>
               </div>
+
+              {fortuneData?.careReminders && (
+                <PetCareReminderBanner careReminders={fortuneData.careReminders} isKo={isKo} />
+              )}
 
               {fortuneData ? (
                 <div className="relative z-[2]">

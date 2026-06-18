@@ -42,8 +42,7 @@ export async function GET(request: Request) {
     .from("pets")
     .select("id, name, species, breed, gender, birth_date, birth_time, birth_time_unknown, birth_timezone, profile_image_url, personality_tags, created_at")
     .eq("owner_id", ownerId)
-    .order("created_at", { ascending: false })
-    .limit(5);
+    .order("created_at", { ascending: false });
 
   if (petsError) {
     return NextResponse.json({ error: petsError.message }, { status: 500 });

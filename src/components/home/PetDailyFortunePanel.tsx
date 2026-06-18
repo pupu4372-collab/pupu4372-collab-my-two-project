@@ -7,6 +7,7 @@ import type {
   PetDailyFortune,
   PetFortunePetMeta,
 } from "@/lib/saju/pet-daily-fortune";
+import type { CareRemindersPayload } from "@/lib/pet-care/reminders";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PetFortuneShareRow } from "@/components/home/PetFortuneShareRow";
@@ -631,6 +632,7 @@ export type FortuneTodayState =
       mode: "common";
       hasRegisteredPets: boolean;
       fortune: CommonPetDailyFortune;
+      careReminders?: CareRemindersPayload;
     }
   | {
       mode: "personalized";
@@ -638,6 +640,7 @@ export type FortuneTodayState =
       petId: string;
       pets: PetFortunePetMeta[];
       fortune: PetDailyFortune;
+      careReminders?: CareRemindersPayload;
     };
 
 export function PetDailyFortunePanel({

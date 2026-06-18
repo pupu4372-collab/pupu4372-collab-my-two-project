@@ -62,8 +62,6 @@ const TYPE_LABELS = {
   },
 } as const;
 
-const MAX_PETS_PER_OWNER = 5;
-
 function speciesLabel(species: string, isKo: boolean) {
   if (species === "dog") return isKo ? "강아지" : "Dog";
   if (species === "cat") return isKo ? "고양이" : "Cat";
@@ -386,11 +384,11 @@ export function PetProfilesList({
         <div className={isCompactView ? "rounded-xl bg-channel-saju/10 px-2.5 py-1.5" : "rounded-2xl bg-channel-saju/10 px-4 py-3"}>
           <p className="text-plum/55">{isKo ? "저장된 펫" : "Saved pets"}</p>
           <p className={isCompactView ? "font-bold text-channel-saju" : "mt-1 text-2xl font-bold text-channel-saju"}>
-            {pets.length}/{MAX_PETS_PER_OWNER}
+            {pets.length}
           </p>
           {!isCompactView && (
             <p className="mt-1 text-[11px] text-plum/45">
-              {isKo ? "주인 1명당 최대 5마리" : "Up to 5 pets per owner"}
+              {isKo ? "등록된 반려동물" : "Registered pets"}
             </p>
           )}
         </div>

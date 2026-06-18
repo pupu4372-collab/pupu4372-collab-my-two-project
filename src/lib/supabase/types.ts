@@ -58,6 +58,39 @@ export type PetInsert = Pick<
   personality_tags?: string[];
 };
 
+export type PetCareCategory =
+  | "weight"
+  | "vaccine"
+  | "vet"
+  | "grooming"
+  | "medication"
+  | "nutrition"
+  | "exercise"
+  | "other";
+
+export interface PetCareEvent {
+  id: string;
+  pet_id: string;
+  owner_id: string;
+  event_date: string;
+  category: PetCareCategory;
+  title: string;
+  memo: string | null;
+  weight_kg: number | null;
+  is_done: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PetCareEventInsert = Pick<
+  PetCareEvent,
+  "pet_id" | "owner_id" | "event_date" | "category" | "title"
+> & {
+  memo?: string | null;
+  weight_kg?: number | null;
+  is_done?: boolean;
+};
+
 export type PetAnimalType = "dog" | "cat" | "other";
 
 export interface CommunityPost {
@@ -294,6 +327,7 @@ export interface Database {
     Tables: {
       profiles: TableDef<Profile, Partial<Profile>>;
       pets: TableDef<Pet, PetInsert>;
+      pet_care_events: TableDef<PetCareEvent, PetCareEventInsert>;
       saju_results: TableDef<SajuResultRow, SajuResultInsert>;
       community_posts: TableDef<CommunityPost, Partial<CommunityPost>>;
       post_likes: TableDef<
