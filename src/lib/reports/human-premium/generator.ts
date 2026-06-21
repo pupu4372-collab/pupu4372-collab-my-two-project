@@ -1,4 +1,7 @@
 import { computeBasicSaju } from "@/lib/saju/engine";
+import {
+  computeZiweiChartFromPremiumBirth,
+} from "@/lib/saju/ksaju-adapter";
 import { resolveHumanBirthBasis, resolveSolarBirthDate } from "./birth-basis";
 import {
   buildHumanSummary,
@@ -6,6 +9,7 @@ import {
   flattenChapterSections,
   sumChapterPages,
 } from "./content";
+import { buildZiweiChartSummary } from "./ziwei-narratives";
 import type {
   HumanPremiumReportInput,
   HumanPremiumReportPayload,
@@ -20,6 +24,7 @@ export function buildHumanPremiumReport(
   const saju = computeBasicSaju({
     petName: input.personName.trim(),
     species: "other",
+    petGender: input.gender ?? null,
     birthDate: solarBirthDate,
     birthTime: input.birthTime,
     birthTimeUnknown: input.birthTimeUnknown,
@@ -28,8 +33,18 @@ export function buildHumanPremiumReport(
     privacyConsent: input.privacyConsent,
   });
 
+  const ziweiChart = computeZiweiChartFromPremiumBirth({
+    birthDate: solarBirthDate,
+    birthTime: input.birthTime,
+    birthTimeUnknown: input.birthTimeUnknown,
+    gender: input.gender ?? birthBasis.gender ?? null,
+  });
+
   const summary = buildHumanSummary(input.personName, saju, input.locale);
-  const sajuChapters = buildSajuChapters(saju, input.locale);
+  const sajuChapters = buildSajuChapters(saju, input.locale, {
+    ziweiChart,
+    birthTimeUnknown: input.birthTimeUnknown,
+  });
 
   const sajuSectionCount = flattenChapterSections(sajuChapters).length;
   const sajuEstimatedPages = sumChapterPages(sajuChapters);
@@ -60,6 +75,7 @@ export function buildHumanPremiumReport(
       dominantElement: saju.dominantElement,
       pillars: saju.pillars as unknown as Record<string, unknown>,
       elements: saju.elements as unknown as Record<string, unknown>[],
+      ziwei: buildZiweiChartSummary(ziweiChart) as unknown as Record<string, unknown>,
       chapters: sajuChapters,
       sectionCount: sajuSectionCount,
       estimatedPages: sajuEstimatedPages,

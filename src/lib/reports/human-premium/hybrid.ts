@@ -1,52 +1,28 @@
 import { computeBasicSaju } from "@/lib/saju/engine";
+import {
+  applyHumanInterpretationToPremiumReport,
+  HUMAN_INTERPRET_SECTION_IDS,
+} from "@/lib/saju/llm/apply-human-to-premium";
+import { interpretSaju, isSajuInterpretLlmEnabled } from "@/lib/saju/llm/interpret";
+import { computeHumanSajuMappingFromPremiumBirth } from "@/lib/saju/ksaju-adapter";
 import { resolveSolarBirthDate } from "./birth-basis";
 import { buildHumanPremiumFacts } from "./facts";
 import { FORTUNE_MONTHS } from "./luck-narratives";
 import { buildHumanPremiumReport } from "./generator";
-import { generateHumanPremiumSectionBody, isHumanPremiumLlmEnabled } from "./llm";
+import {
+  generateHumanPremiumSectionBody,
+  isGeminiHumanPremiumEnabled,
+  isHumanPremiumLlmEnabled,
+} from "./llm";
 import { HUMAN_PREMIUM_LLM_SECTIONS } from "./prompts";
+import { findSectionBody, patchSectionBody } from "./section-patch";
 import type {
   HumanPremiumLlmMeta,
   HumanPremiumReportInput,
   HumanPremiumReportPayload,
 } from "./types";
 
-function findSectionBody(
-  payload: HumanPremiumReportPayload,
-  sectionId: string
-): string | null {
-  for (const chapter of payload.saju.chapters) {
-    const section = chapter.sections.find((s) => s.id === sectionId);
-    if (section) return section.body;
-  }
-  for (const chapter of payload.zodiac.chapters) {
-    const section = chapter.sections.find((s) => s.id === sectionId);
-    if (section) return section.body;
-  }
-  return null;
-}
-
-function patchSectionBody(
-  payload: HumanPremiumReportPayload,
-  sectionId: string,
-  body: string
-): boolean {
-  for (const chapter of payload.saju.chapters) {
-    const section = chapter.sections.find((s) => s.id === sectionId);
-    if (section) {
-      section.body = body;
-      return true;
-    }
-  }
-  for (const chapter of payload.zodiac.chapters) {
-    const section = chapter.sections.find((s) => s.id === sectionId);
-    if (section) {
-      section.body = body;
-      return true;
-    }
-  }
-  return false;
-}
+const INTERPRET_SECTION_SET = new Set<string>(HUMAN_INTERPRET_SECTION_IDS);
 
 export async function buildHumanPremiumReportHybrid(
   input: HumanPremiumReportInput
@@ -67,6 +43,7 @@ export async function buildHumanPremiumReportHybrid(
     timezone: input.timezone,
     locale: input.locale,
     privacyConsent: input.privacyConsent,
+    petGender: input.gender ?? null,
   });
 
   const facts = buildHumanPremiumFacts(
@@ -87,9 +64,56 @@ export async function buildHumanPremiumReportHybrid(
     sections: {},
   };
 
+  const filledSections = new Set<string>();
+
+  if (isSajuInterpretLlmEnabled()) {
+    try {
+      const mapping = computeHumanSajuMappingFromPremiumBirth({
+        birthDate: solarBirthDate,
+        birthTime: input.birthTime,
+        birthTimeUnknown: input.birthTimeUnknown,
+        gender: input.gender ?? payload.birthBasis.gender ?? null,
+        locale: input.locale,
+      });
+      const interpretation = await interpretSaju({
+        tier: "human",
+        mapping,
+        locale: input.locale,
+        subjectName: input.personName.trim(),
+      });
+      if (interpretation.tier === "human") {
+        const applied = applyHumanInterpretationToPremiumReport(
+          payload,
+          interpretation.data,
+          interpretation.provider
+        );
+        Object.assign(llmMeta.sections, applied);
+        for (const sectionId of Object.keys(applied)) {
+          filledSections.add(sectionId);
+        }
+      }
+    } catch (error) {
+      for (const sectionId of HUMAN_INTERPRET_SECTION_IDS) {
+        llmMeta.sections[sectionId] = {
+          source: "template",
+          error: error instanceof Error ? error.message : "interpret_saju_failed",
+        };
+      }
+    }
+  }
+
+  const geminiEnabled = isGeminiHumanPremiumEnabled();
+
   for (const config of HUMAN_PREMIUM_LLM_SECTIONS) {
+    if (filledSections.has(config.sectionId)) continue;
+
     const templateBody = findSectionBody(payload, config.sectionId);
     if (!templateBody) continue;
+
+    if (!geminiEnabled) {
+      llmMeta.sections[config.sectionId] = { source: "template" };
+      continue;
+    }
 
     try {
       const body = await generateHumanPremiumSectionBody({

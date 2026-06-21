@@ -42,10 +42,12 @@ function isCurrentReportTemplate(payload: HumanPremiumReportPayload): boolean {
   );
   const luckSectionIds = new Set(luckCycle?.sections.map((section) => section.id));
   const resultSectionIds = new Set(sajuResult?.sections.map((section) => section.id));
+  const hasZiwei = payload.saju.chapters.some((chapter) => chapter.id === "ziwei-chart");
   return (
     hasIntro &&
     Boolean(luckCycle) &&
     Boolean(sajuResult) &&
+    hasZiwei &&
     luckSectionIds.has("cycle-daewoon") &&
     luckSectionIds.has("cycle-shinsal") &&
     luckSectionIds.has("cycle-month-12") &&

@@ -322,6 +322,27 @@ type TableDef<Row, Insert, Update = Partial<Row>> = {
   Relationships: [];
 };
 
+export interface SajuLlmCacheRow {
+  cache_key: string;
+  cache_kind: "interpret_pet" | "interpret_human" | "human_premium_section";
+  locale: "ko" | "en";
+  provider: string;
+  model: string;
+  payload: Record<string, unknown>;
+  created_at: string;
+  expires_at: string | null;
+}
+
+export interface SajuLlmCacheInsert {
+  cache_key: string;
+  cache_kind: SajuLlmCacheRow["cache_kind"];
+  locale: "ko" | "en";
+  provider: string;
+  model: string;
+  payload: Record<string, unknown>;
+  expires_at?: string | null;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -418,6 +439,7 @@ export interface Database {
         { id: string; post_id: string; user_id: string; created_at: string },
         { post_id: string; user_id: string }
       >;
+      saju_llm_cache: TableDef<SajuLlmCacheRow, SajuLlmCacheInsert>;
     };
     Views: {
       pet_show_ranking_weekly: { Row: PetShowRankingRow; Relationships: [] };

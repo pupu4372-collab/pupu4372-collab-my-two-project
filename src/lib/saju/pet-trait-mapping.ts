@@ -12,6 +12,11 @@
  */
 import type { FiveElement, Stem } from "./ksaju-engine/core-tables";
 import { STEM_META } from "./ksaju-engine/core-tables";
+import {
+  DAYMASTER_TABLES_EN,
+  TRAIT_TABLES_EN,
+} from "./pet-trait-mapping-en";
+import type { Locale } from "./types";
 
 export type AnimalGroup = 'dog' | 'cat' | 'reptile';
 
@@ -255,11 +260,14 @@ export function mapToPetTraits(
   elements: FiveElement[],
   dayMaster: Stem,
   animalGroup: AnimalGroup,
+  locale: Locale = "ko"
 ): PetSajuMapping {
   const elementRatio = calcElementDistribution(elements);
   const { dominant, weak } = dominantAndWeak(elementRatio);
-  const table = TRAIT_TABLES[animalGroup];
-  const dayMasterTable = DAYMASTER_TABLES[animalGroup];
+  const traitTable =
+    locale === "ko" ? TRAIT_TABLES[animalGroup] : TRAIT_TABLES_EN[animalGroup];
+  const dayMasterTable =
+    locale === "ko" ? DAYMASTER_TABLES[animalGroup] : DAYMASTER_TABLES_EN[animalGroup];
   const dayMasterMeta = STEM_META[dayMaster];
 
   return {
@@ -267,8 +275,8 @@ export function mapToPetTraits(
     elementRatio,
     dominantElement: dominant,
     weakElement: weak,
-    dominantTraits: table[dominant],
-    weakTraits: table[weak],
+    dominantTraits: traitTable[dominant],
+    weakTraits: traitTable[weak],
     balanceScore: calcBalanceScore(elementRatio),
     dayMaster,
     dayMasterElement: dayMasterMeta.element,

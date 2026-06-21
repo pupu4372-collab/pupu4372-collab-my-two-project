@@ -125,7 +125,8 @@ export type HumanPremiumSectionKind =
   | "domain"
   | "cycle"
   | "summary"
-  | "zodiac";
+  | "zodiac"
+  | "ziwei";
 
 export interface HumanPremiumReportSection {
   id: string;
@@ -147,7 +148,11 @@ export interface HumanPremiumReportChapter {
   pageEstimate: number;
 }
 
-export type HumanPremiumLlmSectionSource = "gemini" | "template";
+export type HumanPremiumLlmSectionSource =
+  | "claude"
+  | "openai"
+  | "gemini"
+  | "template";
 
 export interface HumanPremiumLlmSectionMeta {
   source: HumanPremiumLlmSectionSource;
@@ -182,6 +187,7 @@ export interface HumanPremiumReportPayload {
     dominantElement: string;
     pillars: Record<string, unknown>;
     elements: Record<string, unknown>[];
+    ziwei?: Record<string, unknown>;
     chapters: HumanPremiumReportChapter[];
     sectionCount: number;
     estimatedPages: number;

@@ -1,0 +1,92 @@
+import { createHash } from "node:crypto";
+import type { HumanPremiumFactsBlock } from "@/lib/reports/human-premium/facts";
+import type { HumanPremiumLlmSectionKey } from "@/lib/reports/human-premium/prompts";
+import type { Locale } from "@/lib/saju/types";
+import type { InterpretSajuInput, LlmProviderName } from "./types";
+
+/** Bump when interpret prompts or mapping shape changes materially */
+export const LLM_CACHE_PROMPT_VERSION = 1;
+
+/** Bump when human premium section prompts change materially */
+export const HUMAN_PREMIUM_PROMPT_VERSION = 1;
+
+function stableStringify(value: unknown): string {
+  return JSON.stringify(value, (_key, current) => {
+    if (current && typeof current === "object" && !Array.isArray(current)) {
+      const sorted: Record<string, unknown> = {};
+      for (const key of Object.keys(current as Record<string, unknown>).sort()) {
+        sorted[key] = (current as Record<string, unknown>)[key];
+      }
+      return sorted;
+    }
+    return current;
+  });
+}
+
+function sha256Hex(input: string): string {
+  return createHash("sha256").update(input).digest("hex");
+}
+
+export function resolveProviderModel(provider: LlmProviderName): string {
+  if (provider === "claude") {
+    return process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-20250514";
+  }
+  return process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
+}
+
+export function resolveGeminiModel(): string {
+  return process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
+}
+
+export function buildInterpretCacheKey(
+  input: InterpretSajuInput,
+  provider: LlmProviderName,
+  model: string
+): string {
+  const context =
+    input.tier === "pet"
+      ? { petName: input.petName?.trim() ?? "" }
+      : { subjectName: input.subjectName?.trim() ?? "" };
+
+  return sha256Hex(
+    stableStringify({
+      v: LLM_CACHE_PROMPT_VERSION,
+      tier: input.tier,
+      locale: input.locale,
+      provider,
+      model,
+      mapping: input.mapping,
+      context,
+    })
+  );
+}
+
+export function buildHumanPremiumSectionCacheKey(options: {
+  sectionKey: HumanPremiumLlmSectionKey;
+  locale: Locale;
+  model: string;
+  facts: HumanPremiumFactsBlock;
+  month?: number;
+}): string {
+  return sha256Hex(
+    stableStringify({
+      v: HUMAN_PREMIUM_PROMPT_VERSION,
+      sectionKey: options.sectionKey,
+      locale: options.locale,
+      model: options.model,
+      month: options.month ?? null,
+      facts: {
+        analysisMode: options.facts.analysisMode,
+        ilganStem: options.facts.ilganStem,
+        dominantElement: options.facts.dominantElement,
+        elements: options.facts.elements,
+        pillars: options.facts.pillars,
+        sipseong: options.facts.sipseong,
+        daewoon: options.facts.daewoon,
+        shinsal: options.facts.shinsal,
+        seun: options.facts.seun,
+        monthlyLuck: options.facts.monthlyLuck,
+      },
+    })
+  );
+}

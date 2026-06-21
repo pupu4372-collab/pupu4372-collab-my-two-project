@@ -27,3 +27,16 @@ runCase(
 );
 runCase("테스트묘 나비", { year: 2022, month: 6, day: 15, hour: 14, minute: 0, gender: "F" }, "cat");
 runCase("테스트도마뱀 도도", { year: 2023, month: 3, day: 3, hour: 9, minute: 0, gender: "M" }, "reptile");
+
+console.log("\n========== EN sample (dog) ==========");
+const enBirth = { year: 2022, month: 6, day: 15, hour: 14, minute: 0, gender: "F" as const, isLunar: false };
+const enSaju = calculateSaju(enBirth);
+const enMapping = mapToPetTraits(
+  extractElementsFromSaju(enSaju),
+  extractDayMaster(enSaju),
+  "dog",
+  "en"
+);
+console.log("Day master:", `[${enMapping.dayMasterArchetype.keyword}]`, enMapping.dayMasterArchetype.description);
+console.log("Dominant:", enMapping.dominantTraits.personality.join(" / "));
+console.log("Compatibility:", enMapping.dominantTraits.compatibilityTag);

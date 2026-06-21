@@ -16,7 +16,7 @@ import {
   type AnimalGroup,
   type PetSajuMapping,
 } from "@/lib/saju/pet-trait-mapping";
-import type { Gender, SajuBasicRequest, Species } from "@/lib/saju/types";
+import type { Gender, Locale, SajuBasicRequest, Species } from "@/lib/saju/types";
 
 const DEFAULT_UNKNOWN_HOUR = 12;
 const DEFAULT_UNKNOWN_MINUTE = 0;
@@ -64,11 +64,12 @@ export function computeKsajuFromRequest(request: SajuBasicRequest): SajuResult {
 
 export function buildPetSajuMapping(
   saju: SajuResult,
-  species: Species
+  species: Species,
+  locale: Locale = "ko"
 ): PetSajuMapping {
   const elements = extractElementsFromSaju(saju);
   const dayMaster = extractDayMaster(saju);
-  return mapToPetTraits(elements, dayMaster, speciesToAnimalGroup(species));
+  return mapToPetTraits(elements, dayMaster, speciesToAnimalGroup(species), locale);
 }
 
 export function computePetSajuMappingFromRequest(request: SajuBasicRequest): {
@@ -76,11 +77,77 @@ export function computePetSajuMappingFromRequest(request: SajuBasicRequest): {
   mapping: PetSajuMapping;
 } {
   const saju = computeKsajuFromRequest(request);
-  return { saju, mapping: buildPetSajuMapping(saju, request.species) };
+  return { saju, mapping: buildPetSajuMapping(saju, request.species, request.locale) };
 }
 
-export function computeHumanSajuMappingFromBirthInput(input: BirthInput): HumanSajuMapping {
-  return mapToHumanInterpretation(calculateSaju(input));
+export function computeHumanSajuMappingFromBirthInput(
+  input: BirthInput,
+  locale: Locale = "ko"
+): HumanSajuMapping {
+  return mapToHumanInterpretation(calculateSaju(input), locale);
+}
+
+/** Human premium: solar/local birth fields → ksaju BirthInput */
+export function premiumBirthToBirthInput(input: {
+  birthDate: string;
+  birthTime: string | null;
+  birthTimeUnknown: boolean;
+  gender?: "male" | "female" | null;
+}): BirthInput {
+  const [year, month, day] = input.birthDate.split("-").map(Number);
+  const timeSource = input.birthTimeUnknown ? "12:00" : (input.birthTime ?? "12:00");
+  const [hour, minute] = timeSource.split(":").map(Number);
+
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(month) ||
+    !Number.isFinite(day) ||
+    !Number.isFinite(hour) ||
+    !Number.isFinite(minute)
+  ) {
+    throw new Error("Invalid birth date or time");
+  }
+
+  return {
+    year,
+    month,
+    day,
+    hour: input.birthTimeUnknown ? DEFAULT_UNKNOWN_HOUR : hour,
+    minute: input.birthTimeUnknown ? DEFAULT_UNKNOWN_MINUTE : minute,
+    gender: input.gender === "female" ? "F" : "M",
+    isLunar: false,
+  };
+}
+
+export function computeHumanSajuMappingFromPremiumBirth(input: {
+  birthDate: string;
+  birthTime: string | null;
+  birthTimeUnknown: boolean;
+  gender?: "male" | "female" | null;
+  locale?: Locale;
+}): HumanSajuMapping {
+  return computeHumanSajuMappingFromBirthInput(
+    premiumBirthToBirthInput(input),
+    input.locale ?? "ko"
+  );
+}
+
+export function computeZiweiChartFromPremiumBirth(input: {
+  birthDate: string;
+  birthTime: string | null;
+  birthTimeUnknown: boolean;
+  gender?: "male" | "female" | null;
+}): ZiweiChart {
+  const birth = premiumBirthToBirthInput(input);
+  return createZiweiChart({
+    year: birth.year,
+    month: birth.month,
+    day: birth.day,
+    hour: birth.hour,
+    minute: birth.minute,
+    gender: birth.gender,
+    isLunar: false,
+  });
 }
 
 export function computeZiweiChartFromRequest(request: SajuBasicRequest): ZiweiChart {

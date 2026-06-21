@@ -15,6 +15,7 @@ import {
   dominantAndWeak,
   type ElementRatio,
 } from "./pet-trait-mapping";
+import type { Locale } from "./types";
 
 export interface TenGodSummary {
   label: string;       // 년/월/일/시
@@ -44,26 +45,59 @@ export interface HumanSajuMapping {
   balanceScore: number;
 }
 
-const SAL_LABELS: Record<string, string> = {
-  yangin: '양인살', dohwa: '도화살', yeokma: '역마살', hwagae: '화개살',
-  cheoneul: '천을귀인', munchang: '문창귀인', baekho: '백호살', goegang: '괴강살',
+const SAL_LABELS: Record<Locale, Record<string, string>> = {
+  ko: {
+    yangin: "양인살",
+    dohwa: "도화살",
+    yeokma: "역마살",
+    hwagae: "화개살",
+    cheoneul: "천을귀인",
+    munchang: "문창귀인",
+    baekho: "백호살",
+    goegang: "괴강살",
+  },
+  en: {
+    yangin: "Yang-in Sal",
+    dohwa: "Dohwa Sal",
+    yeokma: "Yeokma Sal",
+    hwagae: "Hwagae Sal",
+    cheoneul: "Cheoneul Gwiin",
+    munchang: "Munchang Gwiin",
+    baekho: "Baek-ho Sal",
+    goegang: "Goegang Sal",
+  },
 };
 
-const PILLAR_LABEL_KR = ['년주', '월주', '일주', '시주'];
+const PILLAR_LABEL: Record<Locale, string[]> = {
+  ko: ["년주", "월주", "일주", "시주"],
+  en: ["Year pillar", "Month pillar", "Day pillar", "Hour pillar"],
+};
 
-function summarizeSpecialSal(saju: SajuResult): string[] {
+function summarizeSpecialSal(saju: SajuResult, locale: Locale): string[] {
   const sal = saju.specialSal;
   const summary: string[] = [];
+  const labels = SAL_LABELS[locale];
+  const pillars = PILLAR_LABEL[locale];
 
-  for (const key of ['yangin', 'dohwa', 'yeokma', 'hwagae', 'cheoneul', 'munchang'] as const) {
+  for (const key of ["yangin", "dohwa", "yeokma", "hwagae", "cheoneul", "munchang"] as const) {
     const indices = sal[key] as number[];
     if (indices.length > 0) {
-      const where = indices.map(i => PILLAR_LABEL_KR[i]).join(', ');
-      summary.push(`${where}에 ${SAL_LABELS[key]}`);
+      const where = indices.map((i) => pillars[i]).join(", ");
+      summary.push(
+        locale === "ko" ? `${where}에 ${labels[key]}` : `${labels[key]} on ${where}`
+      );
     }
   }
-  if (sal.baekho) summary.push('일주에 백호살');
-  if (sal.goegang) summary.push('일주에 괴강살');
+  if (sal.baekho) {
+    summary.push(
+      locale === "ko" ? "일주에 백호살" : `${labels.baekho} on day pillar`
+    );
+  }
+  if (sal.goegang) {
+    summary.push(
+      locale === "ko" ? "일주에 괴강살" : `${labels.goegang} on day pillar`
+    );
+  }
 
   return summary;
 }
@@ -72,7 +106,10 @@ function summarizeSpecialSal(saju: SajuResult): string[] {
  * SajuResult를 입력받아 사람(집사)용 해석 매핑 결과를 반환.
  * 순수 함수(결정론적), LLM 호출 없음.
  */
-export function mapToHumanInterpretation(saju: SajuResult): HumanSajuMapping {
+export function mapToHumanInterpretation(
+  saju: SajuResult,
+  locale: Locale = "ko"
+): HumanSajuMapping {
   const elements = extractElementsFromSaju(saju);
   const elementRatio = calcElementDistribution(elements);
   const { dominant, weak } = dominantAndWeak(elementRatio);
@@ -81,8 +118,13 @@ export function mapToHumanInterpretation(saju: SajuResult): HumanSajuMapping {
   const dayMasterMeta = STEM_META[dayMaster];
 
   // 일주를 제외한 년/월/시주의 천간 십신만 요약 (일간 자신은 기준점이라 제외)
+  const pillarLabels = PILLAR_LABEL[locale];
   const tenGods: TenGodSummary[] = saju.pillars
-    .map((p: PillarInfo, i: number) => ({ label: PILLAR_LABEL_KR[i], ganzi: p.ganzi, tenGod: p.stemTenGod }))
+    .map((p: PillarInfo, i: number) => ({
+      label: pillarLabels[i],
+      ganzi: p.ganzi,
+      tenGod: p.stemTenGod,
+    }))
     .filter((_, i) => i !== 2);
 
   const daewoonUpcoming = saju.daewoon.list.slice(0, 3).map(d => ({
@@ -103,7 +145,7 @@ export function mapToHumanInterpretation(saju: SajuResult): HumanSajuMapping {
     dominantElement: dominant,
     weakElement: weak,
     tenGods,
-    specialSalSummary: summarizeSpecialSal(saju),
+    specialSalSummary: summarizeSpecialSal(saju, locale),
     gongmangBranches: saju.gongmangBranches,
     daewoonUpcoming,
     balanceScore: calcBalanceScore(elementRatio),

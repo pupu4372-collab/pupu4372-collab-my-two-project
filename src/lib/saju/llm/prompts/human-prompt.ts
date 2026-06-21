@@ -1,4 +1,5 @@
 import type { HumanSajuMapping } from "@/lib/saju/human-trait-mapping";
+import { dominantElementLabel } from "@/lib/saju/pet-lucky-scores";
 import type { Locale } from "@/lib/saju/types";
 import type { LlmPromptPair } from "../types";
 
@@ -9,6 +10,8 @@ export function buildHumanInterpretationPrompts(options: {
 }): LlmPromptPair {
   const { mapping, locale, subjectName } = options;
   const isKo = locale === "ko";
+  const dominantEl = dominantElementLabel(mapping.dominantElement, locale);
+  const weakEl = dominantElementLabel(mapping.weakElement, locale);
 
   const system = isKo
     ? [
@@ -28,7 +31,11 @@ export function buildHumanInterpretationPrompts(options: {
     .map((tg) => `${tg.label} ${tg.ganzi}: ${tg.tenGod}`)
     .join("\n");
   const daewoonLines = mapping.daewoonUpcoming
-    .map((d) => `${d.ganzi} (${d.startAge}세~ / ${d.startYear}년~)`)
+    .map((d) =>
+      isKo
+        ? `${d.ganzi} (${d.startAge}세~ / ${d.startYear}년~)`
+        : `${d.ganzi} (from age ${d.startAge} / ${d.startYear}~)`
+    )
     .join("\n");
 
   const user = isKo
@@ -37,7 +44,7 @@ export function buildHumanInterpretationPrompts(options: {
         subjectName ? `- 대상: ${subjectName}` : null,
         `- 사주 4주: 년 ${mapping.pillars.year} / 월 ${mapping.pillars.month} / 일 ${mapping.pillars.day} / 시 ${mapping.pillars.hour}`,
         `- 일간: ${mapping.dayMaster} (${mapping.dayMasterElement}, ${mapping.dayMasterYinYang})`,
-        `- 주도/결핍 오행: ${mapping.dominantElement} / ${mapping.weakElement}`,
+        `- 주도/결핍 오행: ${dominantEl} / ${weakEl}`,
         `- 균형 점수: ${mapping.balanceScore}/100`,
         `- 십신:\n${tenGodLines}`,
         `- 신살: ${mapping.specialSalSummary.join(", ") || "특이 신살 없음"}`,
@@ -57,7 +64,7 @@ export function buildHumanInterpretationPrompts(options: {
         subjectName ? `- Subject: ${subjectName}` : null,
         `- Four pillars: ${mapping.pillars.year} / ${mapping.pillars.month} / ${mapping.pillars.day} / ${mapping.pillars.hour}`,
         `- Day master: ${mapping.dayMaster} (${mapping.dayMasterElement}, ${mapping.dayMasterYinYang})`,
-        `- Dominant/weak: ${mapping.dominantElement} / ${mapping.weakElement}`,
+        `- Dominant/weak: ${dominantEl} / ${weakEl}`,
         `- Balance: ${mapping.balanceScore}/100`,
         `- Ten gods:\n${tenGodLines}`,
         `- Special sal: ${mapping.specialSalSummary.join(", ") || "none"}`,

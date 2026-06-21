@@ -9,6 +9,17 @@ import {
   isOpenAiEnabled,
 } from "./providers/openai-provider";
 import {
+  buildInterpretCacheKey,
+  resolveProviderModel,
+} from "./cache-keys";
+import {
+  clearInterpretInFlight,
+  getCachedInterpretResult,
+  getInterpretInFlight,
+  setCachedInterpretResult,
+  setInterpretInFlight,
+} from "./cache";
+import {
   isHumanInterpretationJson,
   isPetInterpretationJson,
   SajuInterpretationError,
@@ -75,6 +86,34 @@ async function interpretWithProvider(
   );
 }
 
+async function interpretWithProviderCached(
+  provider: LlmProviderName,
+  input: InterpretSajuInput,
+  prompts: LlmPromptPair
+): Promise<InterpretSajuResult> {
+  const model = resolveProviderModel(provider);
+  const cacheKey = buildInterpretCacheKey(input, provider, model);
+  const cacheKind = input.tier === "pet" ? "interpret_pet" : "interpret_human";
+
+  const cached = await getCachedInterpretResult(cacheKey);
+  if (cached) return cached;
+
+  const inFlight = getInterpretInFlight(cacheKey);
+  if (inFlight) return inFlight;
+
+  const promise = interpretWithProvider(provider, input, prompts)
+    .then(async (result) => {
+      await setCachedInterpretResult(cacheKey, cacheKind, input.locale, provider, model, result);
+      return result;
+    })
+    .finally(() => {
+      clearInterpretInFlight(cacheKey);
+    });
+
+  setInterpretInFlight(cacheKey, promise);
+  return promise;
+}
+
 export async function interpretSaju(input: InterpretSajuInput): Promise<InterpretSajuResult> {
   if (!isSajuInterpretLlmEnabled()) {
     throw new SajuInterpretationError("No LLM API keys configured (ANTHROPIC_API_KEY or OPENAI_API_KEY).");
@@ -90,7 +129,7 @@ export async function interpretSaju(input: InterpretSajuInput): Promise<Interpre
 
   for (const provider of providers) {
     try {
-      return await interpretWithProvider(provider, input, prompts);
+      return await interpretWithProviderCached(provider, input, prompts);
     } catch (error) {
       lastError = error;
     }

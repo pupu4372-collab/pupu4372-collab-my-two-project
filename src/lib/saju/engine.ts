@@ -111,7 +111,7 @@ export function computePetSajuBundle(input: SajuBasicRequest): {
   return {
     result: buildBasicSajuResponse(input, saju),
     saju,
-    mapping: buildPetSajuMapping(saju, input.species),
+    mapping: buildPetSajuMapping(saju, input.species, input.locale),
   };
 }
 

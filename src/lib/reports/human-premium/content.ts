@@ -7,6 +7,7 @@ import {
   describeLuckPillar,
 } from "@/lib/saju/luck-pillars";
 import { computeRepresentativeShinsal } from "@/lib/saju/shinsal";
+import type { ZiweiChart } from "@/lib/saju/ksaju-engine";
 import type { ElementKey, Locale, PillarDisplay, SajuBasicResponse } from "@/lib/saju/types";
 import { getZodiacSignFromBirthDate } from "@/lib/saju/zodiac/signs";
 import type { ZodiacSignKey } from "@/lib/saju/zodiac/signs";
@@ -25,6 +26,7 @@ import {
   fortuneYearForReport,
   yearFortuneTitle,
 } from "./year-fortune-narratives";
+import { buildZiweiSections } from "./ziwei-narratives";
 
 const LIFE_DOMAINS: Array<{ id: string; ko: string; en: string }> = [
   { id: "career", ko: "커리어와 일", en: "Career & Work" },
@@ -665,7 +667,8 @@ export function buildHumanSummary(
 
 export function buildSajuChapters(
   saju: SajuBasicResponse,
-  locale: Locale
+  locale: Locale,
+  options?: { ziweiChart?: ZiweiChart; birthTimeUnknown?: boolean }
 ): HumanPremiumReportChapter[] {
   const name = saju.petName;
   const summary = humanElementStory(name, saju.dominantElement, locale);
@@ -740,6 +743,16 @@ This report is not a fixed verdict but a long journey of reading your chart and 
     }),
   ];
 
+  const ziweiSections =
+    options?.ziweiChart != null
+      ? buildZiweiSections(
+          options.ziweiChart,
+          name,
+          locale,
+          options.birthTimeUnknown ?? false
+        )
+      : [];
+
   return [
     chapter(
       "introduction",
@@ -758,6 +771,16 @@ This report is not a fixed verdict but a long journey of reading your chart and 
       manseSections,
       locale === "ko" ? "년·월·일·시 원국" : "Original chart"
     ),
+    ...(ziweiSections.length
+      ? [
+          chapter(
+            "ziwei-chart",
+            locale === "ko" ? "자미두수" : "Ziwei Astrology",
+            ziweiSections,
+            locale === "ko" ? "12궁·14주성 명반" : "Twelve palaces & major stars"
+          ),
+        ]
+      : []),
     chapter(
       "saju-result",
       locale === "ko" ? "사주결과" : "Saju Result",

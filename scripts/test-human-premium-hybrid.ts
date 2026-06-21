@@ -2,7 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { config } from "dotenv";
 import { buildHumanPremiumReportHybrid } from "../src/lib/reports/human-premium/hybrid";
-import { isHumanPremiumLlmEnabled } from "../src/lib/reports/human-premium/llm";
+import {
+  isGeminiHumanPremiumEnabled,
+  isHumanPremiumLlmEnabled,
+} from "../src/lib/reports/human-premium/llm";
+import { isSajuInterpretLlmEnabled } from "../src/lib/saju/llm/interpret";
+import { HUMAN_INTERPRET_SECTION_IDS } from "../src/lib/saju/llm/apply-human-to-premium";
 
 config({ path: ".env.local" });
 config({ path: ".env" });
@@ -21,6 +26,8 @@ async function main() {
   };
 
   console.log("LLM enabled:", isHumanPremiumLlmEnabled());
+  console.log("interpretSaju(human):", isSajuInterpretLlmEnabled());
+  console.log("Gemini sections:", isGeminiHumanPremiumEnabled());
   console.log("Generating hybrid report…");
 
   const report = await buildHumanPremiumReportHybrid(input);
@@ -47,6 +54,10 @@ async function main() {
   }
 
   console.log("\nLLM meta:", JSON.stringify(report.llm, null, 2));
+  for (const id of HUMAN_INTERPRET_SECTION_IDS) {
+    const source = report.llm?.sections[id]?.source;
+    console.log(`interpret section ${id}: ${source ?? "missing"}`);
+  }
 
   const outDir = path.join(process.cwd(), "tmp");
   const outFile = path.join(outDir, "human-premium-hybrid-sample.json");

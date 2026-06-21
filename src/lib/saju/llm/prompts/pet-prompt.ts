@@ -1,4 +1,5 @@
 import type { PetSajuMapping } from "@/lib/saju/pet-trait-mapping";
+import { dominantElementLabel } from "@/lib/saju/pet-lucky-scores";
 import type { Locale } from "@/lib/saju/types";
 import type { LlmPromptPair } from "../types";
 
@@ -16,6 +17,8 @@ export function buildPetInterpretationPrompts(options: {
   const { mapping, locale, petName } = options;
   const isKo = locale === "ko";
   const animal = ANIMAL_LABEL[mapping.animalGroup][locale === "ko" ? "ko" : "en"];
+  const dominantEl = dominantElementLabel(mapping.dominantElement, locale);
+  const weakEl = dominantElementLabel(mapping.weakElement, locale);
 
   const system = isKo
     ? [
@@ -37,8 +40,8 @@ export function buildPetInterpretationPrompts(options: {
         petName ? `- 이름: ${petName}` : null,
         `- 동물 종류: ${animal}`,
         `- 일간 캐릭터: [${mapping.dayMasterArchetype.keyword}] ${mapping.dayMasterArchetype.description}`,
-        `- 주도 오행: ${mapping.dominantElement} (${mapping.dominantTraits.personality.join(", ")})`,
-        `- 결핍 오행: ${mapping.weakElement} (보완: ${mapping.weakTraits.healthFocus.join(", ")})`,
+        `- 주도 오행: ${dominantEl} (${mapping.dominantTraits.personality.join(", ")})`,
+        `- 결핍 오행: ${weakEl} (보완: ${mapping.weakTraits.healthFocus.join(", ")})`,
         `- 오행 균형 점수: ${mapping.balanceScore}/100`,
         `- 보호자 궁합: ${mapping.dominantTraits.compatibilityTag}`,
         "",
@@ -57,8 +60,8 @@ export function buildPetInterpretationPrompts(options: {
         petName ? `- Name: ${petName}` : null,
         `- Species group: ${animal}`,
         `- Day master archetype: [${mapping.dayMasterArchetype.keyword}] ${mapping.dayMasterArchetype.description}`,
-        `- Dominant element: ${mapping.dominantElement} (${mapping.dominantTraits.personality.join(", ")})`,
-        `- Weak element: ${mapping.weakElement} (care: ${mapping.weakTraits.healthFocus.join(", ")})`,
+        `- Dominant element: ${dominantEl} (${mapping.dominantTraits.personality.join(", ")})`,
+        `- Weak element: ${weakEl} (care: ${mapping.weakTraits.healthFocus.join(", ")})`,
         `- Balance score: ${mapping.balanceScore}/100`,
         `- Guardian compatibility: ${mapping.dominantTraits.compatibilityTag}`,
         "",

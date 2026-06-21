@@ -1,4 +1,16 @@
 import type { Locale } from "@/lib/saju/types";
+import {
+  buildHumanPremiumSectionCacheKey,
+  resolveGeminiModel,
+} from "@/lib/saju/llm/cache-keys";
+import {
+  clearSectionInFlight,
+  getCachedHumanPremiumSectionBody,
+  getSectionInFlight,
+  setCachedHumanPremiumSectionBody,
+  setSectionInFlight,
+} from "@/lib/saju/llm/cache";
+import { isSajuInterpretLlmEnabled } from "@/lib/saju/llm/interpret";
 import type { HumanPremiumFactsBlock } from "./facts";
 import {
   buildHumanPremiumSectionUserPrompt,
@@ -21,9 +33,13 @@ interface LlmBodyPayload {
   body: string;
 }
 
-export function isHumanPremiumLlmEnabled(): boolean {
+export function isGeminiHumanPremiumEnabled(): boolean {
   if (process.env.HUMAN_PREMIUM_LLM === "0") return false;
   return Boolean(process.env.GEMINI_API_KEY?.trim());
+}
+
+export function isHumanPremiumLlmEnabled(): boolean {
+  return isGeminiHumanPremiumEnabled() || isSajuInterpretLlmEnabled();
 }
 
 function extractJson(text: string): string {
@@ -54,10 +70,48 @@ export async function generateHumanPremiumSectionBody(options: {
   minChars: number;
   month?: number;
 }): Promise<string | null> {
+  const model = resolveGeminiModel();
+  const cacheKey = buildHumanPremiumSectionCacheKey({
+    sectionKey: options.sectionKey,
+    locale: options.locale,
+    model,
+    facts: options.facts,
+    month: options.month,
+  });
+
+  const cached = await getCachedHumanPremiumSectionBody(cacheKey);
+  if (cached && cached.length >= options.minChars) return cached;
+
+  const inFlight = getSectionInFlight(cacheKey);
+  if (inFlight) return inFlight;
+
+  const promise = generateHumanPremiumSectionBodyUncached(options)
+    .then(async (body) => {
+      if (body && body.length >= options.minChars) {
+        await setCachedHumanPremiumSectionBody(cacheKey, options.locale, model, body);
+      }
+      return body;
+    })
+    .finally(() => {
+      clearSectionInFlight(cacheKey);
+    });
+
+  setSectionInFlight(cacheKey, promise);
+  return promise;
+}
+
+async function generateHumanPremiumSectionBodyUncached(options: {
+  sectionKey: HumanPremiumLlmSectionKey;
+  facts: HumanPremiumFactsBlock;
+  locale: Locale;
+  targetChars: number;
+  minChars: number;
+  month?: number;
+}): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) return null;
 
-  const model = process.env.GEMINI_MODEL ?? DEFAULT_MODEL;
+  const model = resolveGeminiModel();
   const systemPrompt = buildHumanPremiumSystemPrompt(options.locale);
   const userPrompt = buildHumanPremiumSectionUserPrompt(
     options.sectionKey,
