@@ -9,10 +9,13 @@ declare module "lunar-javascript" {
       second: number
     ): Solar;
     static fromYmd(year: number, month: number, day: number): Solar;
+    static fromDate(date: Date): Solar;
     getLunar(): Lunar;
     getYear(): number;
     getMonth(): number;
     getDay(): number;
+    toYmd(): string;
+    toYmdHms(): string;
   }
 
   export class Lunar {
@@ -22,6 +25,21 @@ declare module "lunar-javascript" {
     getMonth(): number;
     getDay(): number;
     getEightChar(): EightChar;
+    getNextJieQi(includeQi?: boolean): JieQi;
+    getPrevJieQi(includeQi?: boolean): JieQi;
+    getMonthInGanZhiExact(): string;
+    getYearInGanZhiByLiChun(): string;
+    getJieQiTable(): Record<string, Solar>;
+  }
+
+  export class LunarYear {
+    static fromYear(year: number): LunarYear;
+    getGanZhi(): string;
+  }
+
+  export interface JieQi {
+    getName(): string;
+    getSolar(): Solar;
   }
 
   export interface EightChar {

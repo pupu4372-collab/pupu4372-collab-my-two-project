@@ -62,15 +62,21 @@ export function computeKsajuFromRequest(request: SajuBasicRequest): SajuResult {
   return calculateSaju(sajuBasicRequestToBirthInput(request));
 }
 
+export function buildPetSajuMapping(
+  saju: SajuResult,
+  species: Species
+): PetSajuMapping {
+  const elements = extractElementsFromSaju(saju);
+  const dayMaster = extractDayMaster(saju);
+  return mapToPetTraits(elements, dayMaster, speciesToAnimalGroup(species));
+}
+
 export function computePetSajuMappingFromRequest(request: SajuBasicRequest): {
   saju: SajuResult;
   mapping: PetSajuMapping;
 } {
   const saju = computeKsajuFromRequest(request);
-  const elements = extractElementsFromSaju(saju);
-  const dayMaster = extractDayMaster(saju);
-  const mapping = mapToPetTraits(elements, dayMaster, speciesToAnimalGroup(request.species));
-  return { saju, mapping };
+  return { saju, mapping: buildPetSajuMapping(saju, request.species) };
 }
 
 export function computeHumanSajuMappingFromBirthInput(input: BirthInput): HumanSajuMapping {

@@ -1,4 +1,4 @@
-import lunisolar from "lunisolar";
+import { convertLunarYmdToSolar } from "@/lib/saju/ksaju-engine";
 import { localBirthToUtc } from "@/lib/saju/timezone";
 import type { HumanPremiumBirthBasis, HumanPremiumReportInput } from "./types";
 
@@ -16,14 +16,7 @@ export function resolveSolarBirthDate(input: HumanPremiumReportInput): string {
   }
 
   const { year, month, day } = parseYmd(input.birthDate);
-  const converted = lunisolar.fromLunar({
-    year,
-    month,
-    day,
-    isLeapMonth: false,
-  });
-
-  return converted.format("YYYY-MM-DD");
+  return convertLunarYmdToSolar(year, month, day, false);
 }
 
 export function resolveHumanBirthBasis(

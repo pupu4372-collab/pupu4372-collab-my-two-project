@@ -1,26 +1,17 @@
-import lunisolar from "lunisolar";
 import { formatStemBranchLabels } from "./elements";
+import {
+  findAdjacentSolarTermInstant,
+  getMonthGanZhiAtLocal,
+  getSeunYearGanZhi,
+  splitGanZhi,
+  branchRelationLabel,
+} from "./ksaju-engine";
 import { BRANCH_META, formatTenGodLabel, STEM_META } from "./sipseong";
-import { localBirthToUtc } from "./timezone";
 import type { Locale, PillarDisplay } from "./types";
 
 const STEM_ORDER = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
 const BRANCH_ORDER = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
 const YANG_STEMS = new Set(["甲", "丙", "戊", "庚", "壬"]);
-
-export function pillarFromSb(sb: lunisolar.SB): PillarDisplay {
-  const stem = sb.stem.toString();
-  const branch = sb.branch.toString();
-  const labels = formatStemBranchLabels(stem, branch);
-  return {
-    pillar: `${stem}${branch}`,
-    stem,
-    branch,
-    stemHanja: stem,
-    branchHanja: branch,
-    ...labels,
-  };
-}
 
 function pillarFromStemBranch(stem: string, branch: string): PillarDisplay {
   const labels = formatStemBranchLabels(stem, branch);
@@ -32,6 +23,11 @@ function pillarFromStemBranch(stem: string, branch: string): PillarDisplay {
     branchHanja: branch,
     ...labels,
   };
+}
+
+function pillarFromGanZhi(ganzi: string): PillarDisplay {
+  const { stem, branch } = splitGanZhi(ganzi);
+  return pillarFromStemBranch(stem, branch);
 }
 
 function sexagenaryIndex(pillar: PillarDisplay): number {
@@ -51,8 +47,7 @@ function shiftPillar(pillar: PillarDisplay, offset: number): PillarDisplay {
 }
 
 export function computeSeunPillar(year: number): PillarDisplay {
-  const sb = lunisolar.Char8.computeSBYear(year);
-  return pillarFromSb(sb);
+  return pillarFromGanZhi(getSeunYearGanZhi(year));
 }
 
 export type DaewoonDirection = "forward" | "reverse";
@@ -86,36 +81,13 @@ function resolveDaewoonDirection(
     : "reverse";
 }
 
-function solarTermDatesForYears(years: number[]): Date[] {
-  return years.flatMap((year) =>
-    Array.from({ length: 24 }, (_, term) => {
-      const [y, month, day] = lunisolar.SolarTerm.findDate(year, term);
-      return new Date(Date.UTC(y, month - 1, day, 12, 0, 0));
-    })
-  );
-}
-
-function findAdjacentSolarTerm(
-  birth: Date,
-  direction: DaewoonDirection
-): Date | null {
-  const year = birth.getUTCFullYear();
-  const terms = solarTermDatesForYears([year - 1, year, year + 1]).sort(
-    (a, b) => a.getTime() - b.getTime()
-  );
-  if (direction === "forward") {
-    return terms.find((term) => term.getTime() > birth.getTime()) ?? null;
-  }
-  return terms.reverse().find((term) => term.getTime() < birth.getTime()) ?? null;
-}
-
 function computeStartAge(
   birthUtc: string,
   direction: DaewoonDirection,
   locale: Locale
 ): { age: number; note: string } {
   const birth = new Date(birthUtc);
-  const term = findAdjacentSolarTerm(birth, direction);
+  const term = findAdjacentSolarTermInstant(birth, direction);
   if (!term) {
     return {
       age: 1,
@@ -188,12 +160,10 @@ export function computeDaewoonCandidates(options: {
 export function computeMonthLuckPillar(
   year: number,
   month: number,
-  timezone: string
+  _timezone: string
 ): PillarDisplay {
-  const dateStr = `${year}-${String(month).padStart(2, "0")}-15`;
-  const utc = localBirthToUtc(dateStr, "12:00", timezone);
-  const sb = lunisolar.Char8.computeSBMonth(new Date(utc));
-  return pillarFromSb(sb);
+  void _timezone;
+  return pillarFromGanZhi(getMonthGanZhiAtLocal(year, month));
 }
 
 export interface LuckPillarReading {
@@ -223,32 +193,6 @@ export interface SeunNatalInteraction {
   natalBranch: string;
   relation: string;
   label: string;
-}
-
-function branchRelationLabel(
-  from: string,
-  to: string,
-  locale: Locale
-): string | null {
-  const branch = lunisolar.Branch.create(from);
-  const ko = locale === "ko";
-
-  if (branch.conflict.toString() === to) {
-    return ko ? "충(冲)" : "Clash";
-  }
-  if (branch.group6.toString() === to) {
-    return ko ? "합(合)" : "Harmony";
-  }
-  if (branch.harming.toString() === to) {
-    return ko ? "해(害)" : "Harm";
-  }
-  if (branch.punishing.toString() === to || branch.punishBy.toString() === to) {
-    return ko ? "형(刑)" : "Punish";
-  }
-  if (branch.destroying.toString() === to) {
-    return ko ? "파(破)" : "Break";
-  }
-  return null;
 }
 
 const SLOT_LABEL: Record<SeunNatalInteraction["natalSlot"], { ko: string; en: string }> =

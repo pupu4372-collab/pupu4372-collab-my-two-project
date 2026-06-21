@@ -1,8 +1,7 @@
-import { computeBasicSaju } from "@/lib/saju/engine";
+import { computePetSajuBundle } from "@/lib/saju/engine";
 import { generateGeminiNarrative } from "@/lib/saju/gemini-narrative";
 import { applyPetInterpretationToBasicResponse } from "@/lib/saju/llm/apply-pet-to-basic";
 import { interpretSaju, isSajuInterpretLlmEnabled } from "@/lib/saju/llm/interpret";
-import { computePetSajuMappingFromRequest } from "@/lib/saju/ksaju-adapter";
 import { validatePetName } from "@/lib/saju/moderation";
 import { persistSajuResult } from "@/lib/saju/persist";
 import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
@@ -85,10 +84,8 @@ export async function POST(request: Request) {
   };
 
   try {
-    const result = computeBasicSaju(sajuRequest);
+    const { result, mapping } = computePetSajuBundle(sajuRequest);
     result.narrativeSource = "template";
-
-    const { mapping } = computePetSajuMappingFromRequest(sajuRequest);
     let llmApplied = false;
 
     if (isSajuInterpretLlmEnabled()) {

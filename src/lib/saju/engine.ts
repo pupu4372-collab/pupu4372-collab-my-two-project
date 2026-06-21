@@ -1,10 +1,15 @@
-import lunisolar from "lunisolar";
 import {
   buildElementBreakdown,
   countElements,
   formatStemBranchLabels,
 } from "./elements";
+import {
+  buildPetSajuMapping,
+  computeKsajuFromRequest,
+} from "./ksaju-adapter";
+import type { PillarInfo, SajuResult } from "./ksaju-engine";
 import { buildNarrative } from "./narratives";
+import type { PetSajuMapping } from "./pet-trait-mapping";
 import type {
   Locale,
   PillarDisplay,
@@ -15,26 +20,14 @@ import type {
 import { getKstJijiFromUtc } from "./jiji-hours";
 import { localBirthToUtc } from "./timezone";
 
-function pillarFromChar8(pillar: unknown): PillarDisplay {
-  const p = pillar as {
-    stem?: { toString(): string };
-    branch?: { toString(): string };
-    toString?: () => string;
-  };
-
-  const stemHanja = p?.stem?.toString?.() ?? "";
-  const branchHanja = p?.branch?.toString?.() ?? "";
-  const fallback = p?.toString?.() ?? "";
-  const stem = stemHanja || fallback.charAt(0);
-  const branch = branchHanja || fallback.charAt(1);
-  const labels = formatStemBranchLabels(stem, branch);
-
+function pillarFromKsaju(p: PillarInfo): PillarDisplay {
+  const labels = formatStemBranchLabels(p.stem, p.branch);
   return {
-    pillar: `${stem}${branch}`,
-    stem,
-    branch,
-    stemHanja: stem,
-    branchHanja: branch,
+    pillar: p.ganzi,
+    stem: p.stem,
+    branch: p.branch,
+    stemHanja: p.stem,
+    branchHanja: p.branch,
     ...labels,
   };
 }
@@ -57,22 +50,21 @@ function collectPillarChars(
   return list;
 }
 
-export function computeBasicSaju(input: SajuBasicRequest): SajuBasicResponse {
+export function buildBasicSajuResponse(
+  input: SajuBasicRequest,
+  saju: SajuResult
+): SajuBasicResponse {
   const birthUtc = localBirthToUtc(
     input.birthDate,
     input.birthTimeUnknown ? null : input.birthTime,
     input.timezone
   );
 
-  const birth = new Date(birthUtc);
-  const lsr = lunisolar(birth);
-  const char8 = lsr.char8;
-
   const pillars = {
-    year: pillarFromChar8(char8.year),
-    month: pillarFromChar8(char8.month),
-    day: pillarFromChar8(char8.day),
-    hour: input.birthTimeUnknown ? null : pillarFromChar8(char8.hour),
+    year: pillarFromKsaju(saju.pillars[0]),
+    month: pillarFromKsaju(saju.pillars[1]),
+    day: pillarFromKsaju(saju.pillars[2]),
+    hour: input.birthTimeUnknown ? null : pillarFromKsaju(saju.pillars[3]),
   };
 
   const chars = collectPillarChars(pillars, !input.birthTimeUnknown);
@@ -105,9 +97,35 @@ export function computeBasicSaju(input: SajuBasicRequest): SajuBasicResponse {
   };
 }
 
+export function computeBasicSaju(input: SajuBasicRequest): SajuBasicResponse {
+  return buildBasicSajuResponse(input, computeKsajuFromRequest(input));
+}
+
+/** Single ksaju pass: pillars for API/UI + trait mapping for LLM. */
+export function computePetSajuBundle(input: SajuBasicRequest): {
+  result: SajuBasicResponse;
+  saju: SajuResult;
+  mapping: PetSajuMapping;
+} {
+  const saju = computeKsajuFromRequest(input);
+  return {
+    result: buildBasicSajuResponse(input, saju),
+    saju,
+    mapping: buildPetSajuMapping(saju, input.species),
+  };
+}
+
 /** KST calendar date (YYYY-MM-DD) → that day's 日柱 pillar (noon KST). */
 export function computeKstDayPillar(dateKst: string): PillarDisplay {
-  const birthUtc = localBirthToUtc(dateKst, "12:00", "Asia/Seoul");
-  const lsr = lunisolar(new Date(birthUtc));
-  return pillarFromChar8(lsr.char8.day);
+  const saju = computeKsajuFromRequest({
+    petName: "",
+    species: "dog",
+    birthDate: dateKst,
+    birthTime: "12:00",
+    birthTimeUnknown: false,
+    timezone: "Asia/Seoul",
+    locale: "ko" as Locale,
+    privacyConsent: true,
+  });
+  return pillarFromKsaju(saju.pillars[2]);
 }
