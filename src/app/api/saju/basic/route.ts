@@ -1,5 +1,8 @@
 import { computeBasicSaju } from "@/lib/saju/engine";
 import { generateGeminiNarrative } from "@/lib/saju/gemini-narrative";
+import { applyPetInterpretationToBasicResponse } from "@/lib/saju/llm/apply-pet-to-basic";
+import { interpretSaju, isSajuInterpretLlmEnabled } from "@/lib/saju/llm/interpret";
+import { computePetSajuMappingFromRequest } from "@/lib/saju/ksaju-adapter";
 import { validatePetName } from "@/lib/saju/moderation";
 import { persistSajuResult } from "@/lib/saju/persist";
 import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
@@ -85,18 +88,46 @@ export async function POST(request: Request) {
     const result = computeBasicSaju(sajuRequest);
     result.narrativeSource = "template";
 
-    try {
-      const narrative = await generateGeminiNarrative(sajuRequest, result);
-      if (narrative) {
-        result.headline = narrative.headline;
-        result.story = narrative.story;
-        result.traits = narrative.traits;
-        result.narrativeSource = "gemini";
-        result.narrativeError = null;
+    const { mapping } = computePetSajuMappingFromRequest(sajuRequest);
+    let llmApplied = false;
+
+    if (isSajuInterpretLlmEnabled()) {
+      try {
+        const interpretation = await interpretSaju({
+          tier: "pet",
+          mapping,
+          locale: sajuRequest.locale,
+          petName: sajuRequest.petName,
+        });
+        if (interpretation.tier === "pet") {
+          applyPetInterpretationToBasicResponse(
+            result,
+            interpretation.data,
+            mapping,
+            interpretation.provider
+          );
+          llmApplied = true;
+        }
+      } catch (err) {
+        result.narrativeError =
+          err instanceof Error ? err.message : "LLM narrative generation failed.";
       }
-    } catch (err) {
-      result.narrativeError =
-        err instanceof Error ? err.message : "Gemini narrative generation failed.";
+    }
+
+    if (!llmApplied) {
+      try {
+        const narrative = await generateGeminiNarrative(sajuRequest, result);
+        if (narrative) {
+          result.headline = narrative.headline;
+          result.story = narrative.story;
+          result.traits = narrative.traits;
+          result.narrativeSource = "gemini";
+          result.narrativeError = null;
+        }
+      } catch (err) {
+        result.narrativeError =
+          err instanceof Error ? err.message : "Gemini narrative generation failed.";
+      }
     }
 
     let persisted = false;
