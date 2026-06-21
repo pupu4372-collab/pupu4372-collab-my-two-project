@@ -4,6 +4,7 @@ import { AdminModeration } from "@/components/admin/AdminModeration";
 import { AdminReportsInbox } from "@/components/admin/AdminReportsInbox";
 import { AdminSupportInquiries } from "@/components/admin/AdminSupportInquiries";
 import { GlassCard } from "@/components/layout/StitchLayout";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 
@@ -23,14 +24,33 @@ type Tab = "stats" | "inquiries" | "reports" | "moderation";
 const STAT_ICONS = ["👤", "📸", "💬", "🗨️", "✨", "💳"] as const;
 
 export function AdminDashboard() {
+  const { accessToken } = useSupabaseSession();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("stats");
 
   useEffect(() => {
-    fetch("/api/admin/stats")
-      .then((r) => r.json())
-      .then(setStats);
-  }, []);
+    if (!accessToken) {
+      setStats(null);
+      setStatsError("관리자 로그인이 필요합니다.");
+      return;
+    }
+
+    setStatsError(null);
+    fetch("/api/admin/stats", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error ?? "통계를 불러오지 못했습니다.");
+        return data as Stats;
+      })
+      .then(setStats)
+      .catch((err) => {
+        setStats(null);
+        setStatsError(err instanceof Error ? err.message : "통계를 불러오지 못했습니다.");
+      });
+  }, [accessToken]);
 
   const cards = stats
     ? [
@@ -106,7 +126,12 @@ export function AdminDashboard() {
 
       {tab === "stats" && (
         <div className="space-y-4">
-          {!stats && <p className="text-sm text-plum/60">통계 불러오는 중…</p>}
+          {!stats && !statsError && <p className="text-sm text-plum/60">통계 불러오는 중…</p>}
+          {statsError && (
+            <p className="rounded-full bg-surface-container-high px-4 py-2 text-sm text-plum/70">
+              {statsError}
+            </p>
+          )}
           {stats?.source === "mock" && (
             <p className="rounded-full bg-surface-container-high px-4 py-2 text-xs text-plum/55">
               데모 통계 (Supabase 미연동)

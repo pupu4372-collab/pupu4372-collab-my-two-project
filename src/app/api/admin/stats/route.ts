@@ -1,9 +1,14 @@
+import { requireAdmin } from "@/lib/admin/auth";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-export async function GET() {
-  const supabase = getSupabaseServerClient();
+export async function GET(request: Request) {
+  const adminId = await requireAdmin(request);
+  if (!adminId) {
+    return NextResponse.json({ error: "Admin access required." }, { status: 403 });
+  }
 
+  const supabase = getSupabaseServerClient();
   if (!supabase) {
     return NextResponse.json({
       source: "mock",
