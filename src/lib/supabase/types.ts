@@ -91,6 +91,45 @@ export type PetCareEventInsert = Pick<
   is_done?: boolean;
 };
 
+export type ChallengeChannel = "dog" | "cat" | "reptile" | "all";
+
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string | null;
+  channel: ChallengeChannel;
+  thumbnail_url: string | null;
+  is_active: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChallengePost {
+  id: string;
+  challenge_id: string;
+  user_id: string;
+  pet_id: string | null;
+  content: string | null;
+  image_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ChallengePostInsert = Pick<
+  ChallengePost,
+  "challenge_id" | "user_id"
+> & {
+  pet_id?: string | null;
+  content?: string | null;
+  image_url?: string | null;
+};
+
+export interface ChallengePostWithRelations extends ChallengePost {
+  profiles: Pick<Profile, "display_name" | "avatar_url"> | null;
+  pets: Pick<Pet, "name" | "species"> | null;
+}
+
 export type PetAnimalType = "dog" | "cat" | "other";
 
 export interface CommunityPost {
@@ -440,6 +479,8 @@ export interface Database {
         { post_id: string; user_id: string }
       >;
       saju_llm_cache: TableDef<SajuLlmCacheRow, SajuLlmCacheInsert>;
+      challenges: TableDef<Challenge, Partial<Challenge>>;
+      challenge_posts: TableDef<ChallengePost, ChallengePostInsert>;
     };
     Views: {
       pet_show_ranking_weekly: { Row: PetShowRankingRow; Relationships: [] };

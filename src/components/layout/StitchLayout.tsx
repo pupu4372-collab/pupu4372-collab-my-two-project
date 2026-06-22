@@ -51,3 +51,17 @@ export function SectionHeader({ eyebrow, title, subtitle, action, align = "left"
     </div>
   );
 }
+
+export function NightPageShell({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`min-h-screen overflow-x-hidden bg-[#0c134f] ${className}`}>
+      {children}
+    </div>
+  );
+}
