@@ -1,0 +1,13 @@
+android/
+ios/
+.next/
+.open-next/
+.wrangler/
+.vercel/
+node_modules/
+public/images/
+public/stitch/
+stitch-export/
+www/
+tsconfig.tsbuildinfo
+*.log

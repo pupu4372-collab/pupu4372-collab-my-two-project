@@ -8,17 +8,27 @@ import { signOut } from "@/lib/supabase/auth-client";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
-type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "community" | "support" | "profile";
+type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "challenge" | "community" | "support" | "profile";
 
 const NAV_LINKS: Array<{
   key: NavKey;
-  href: "/" | "/dog" | "/cat" | "/reptile" | "/saju" | "/community" | "/support" | "/profile";
+  href:
+    | "/"
+    | "/dog"
+    | "/cat"
+    | "/reptile"
+    | "/saju"
+    | "/community/challenge"
+    | "/community"
+    | "/support"
+    | "/profile";
 }> = [
   { key: "home", href: "/" },
   { key: "dog", href: "/dog" },
   { key: "cat", href: "/cat" },
   { key: "reptile", href: "/reptile" },
   { key: "saju", href: "/saju" },
+  { key: "challenge", href: "/community/challenge" },
   { key: "community", href: "/community" },
   { key: "support", href: "/support" },
 ];
@@ -81,7 +91,7 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
         </nav>
 
         <div className="flex items-center gap-2">
-          <ul className="hidden md:block">
+          <ul className="block">
             <LanguageSwitcher />
           </ul>
           {isSignedIn ? (

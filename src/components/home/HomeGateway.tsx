@@ -1,11 +1,9 @@
 "use client";
 
 import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
-import { AdSlot } from "@/components/ads/AdSlot";
 import { AppTopNav } from "@/components/layout/AppTopNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { GlassCard, PageContainer, SectionHeader } from "@/components/layout/StitchLayout";
-import { OnboardingRoadmap } from "@/components/onboarding/OnboardingRoadmap";
 import { PetDailyFortunePanel, type FortuneTodayState } from "@/components/home/PetDailyFortunePanel";
 import { PetCareReminderBanner } from "@/components/home/PetCareReminderBanner";
 import { JigFortuneOrnateCorners } from "@/components/home/jig-fortune/JigFortuneDecor";
@@ -14,54 +12,6 @@ import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import type { PetShowRankingRow } from "@/lib/supabase/types";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
-
-const featureCards = [
-  {
-    href: "/dog" as const,
-    emoji: "🐕",
-    koTitle: "강아지 채널",
-    enTitle: "Dog Channel",
-    koDesc: "행동, 산책, 사주 관리 팁을 모았어요.",
-    enDesc: "Guides for behavior, walks, saju, and daily care.",
-    className: "bg-channel-dog/18 text-channel-dog",
-  },
-  {
-    href: "/cat" as const,
-    emoji: "🐈",
-    koTitle: "고양이 채널",
-    enTitle: "Cat Channel",
-    koDesc: "냥이 성향과 생활 케어 콘텐츠를 둘러보세요.",
-    enDesc: "Explore cat personality and care content.",
-    className: "bg-channel-cat/18 text-channel-cat",
-  },
-  {
-    href: "/reptile" as const,
-    emoji: "🦎",
-    koTitle: "렙타일(다른동물)",
-    enTitle: "Reptile & Other",
-    koDesc: "파충류, 앵무새(조류), 소동물 케어 가이드를 모았어요.",
-    enDesc: "Guides for reptiles, birds, and small pets.",
-    className: "bg-channel-community/18 text-channel-community",
-  },
-  {
-    href: "/community" as const,
-    emoji: "🏆",
-    koTitle: "커뮤니티",
-    enTitle: "Community",
-    koDesc: "우리아이 자랑과 게시판을 둘러보세요.",
-    enDesc: "Explore Pet Show and community boards.",
-    className: "bg-channel-community/18 text-channel-community",
-  },
-  {
-    href: "/profile" as const,
-    emoji: "👤",
-    koTitle: "프로필",
-    enTitle: "Profile",
-    koDesc: "내 정보, 펫 정보, 활동 기록을 확인하세요.",
-    enDesc: "Check your profile, pets, and activity.",
-    className: "bg-channel-saju/15 text-channel-saju",
-  },
-];
 
 type WeeklyRankingRows = {
   dog: PetShowRankingRow[];
@@ -324,6 +274,46 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
           </div>
         </section>
 
+        <section>
+          {isNight ? (
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#22c55e] drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">
+                🏅
+              </p>
+              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white drop-shadow-[0_0_18px_rgba(245,217,255,0.2)] md:text-4xl">
+                {isKo ? "챌린지" : "Challenge"}
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/80 md:text-base">
+                {isKo
+                  ? "미션 인증하고 다른 집사들과 함께해요"
+                  : "Complete missions with other pet parents"}
+              </p>
+            </div>
+          ) : (
+            <SectionHeader
+              eyebrow="🏅"
+              title={isKo ? "챌린지" : "Challenge"}
+              subtitle={
+                isKo
+                  ? "미션 인증하고 다른 집사들과 함께해요"
+                  : "Complete missions with other pet parents"
+              }
+            />
+          )}
+          <div className="mt-4 flex flex-wrap gap-3">
+            <AuthRequiredLink
+              href="/community/challenge"
+              className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
+                isNight
+                  ? "bg-[#22c55e] shadow-[0_0_22px_rgba(34,197,94,0.25)]"
+                  : "bg-channel-community"
+              }`}
+            >
+              {isKo ? "챌린지 참여하기" : "Join Challenge"}
+            </AuthRequiredLink>
+          </div>
+        </section>
+
         <section className="grid items-start gap-6 md:grid-cols-[1.05fr_0.95fr]">
           <div className="min-w-0 space-y-6">
             {isNight ? (
@@ -409,63 +399,6 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             </GlassCard>
           </div>
           <div className="hidden min-h-0 md:block" aria-hidden />
-        </section>
-
-        <AdSlot />
-
-        <section>
-          {previewTheme === "night" ? (
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#ffd7ff]">Explore</p>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-4xl">
-                {isKo ? "어디부터 둘러볼까요?" : "Where should we go first?"}
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/80 md:text-base">
-                {isKo ? "K-Saju Pet의 핵심 기능을 빠르게 시작하세요." : "Start with the main K-Saju Pet spaces."}
-              </p>
-            </div>
-          ) : (
-            <SectionHeader
-              eyebrow={isKo ? "Explore" : "Explore"}
-              title={isKo ? "어디부터 둘러볼까요?" : "Where should we go first?"}
-              subtitle={isKo ? "K-Saju Pet의 핵심 기능을 빠르게 시작하세요." : "Start with the main K-Saju Pet spaces."}
-            />
-          )}
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            {featureCards.map((card) => (
-              <AuthRequiredLink
-                key={card.href}
-                href={card.href}
-                className={`p-5 shadow-sm transition hover:-translate-y-1 ${
-                  isNight
-                    ? "rounded-2xl border border-white/25 bg-white/80 shadow-[0_8px_24px_rgba(0,0,0,0.12)] backdrop-blur-sm hover:bg-white/90"
-                    : `pastel-card hover:bg-white/80 ${card.className}`
-                }`}
-              >
-                <span className="text-3xl" aria-hidden>
-                  {card.emoji}
-                </span>
-                <h2
-                  className={`mt-3 text-base font-extrabold ${
-                    isNight ? "text-primary" : ""
-                  }`}
-                >
-                  {isKo ? card.koTitle : card.enTitle}
-                </h2>
-                <p
-                  className={`mt-2 text-xs leading-5 ${
-                    isNight ? "text-plum/70" : "text-plum/62"
-                  }`}
-                >
-                  {isKo ? card.koDesc : card.enDesc}
-                </p>
-              </AuthRequiredLink>
-            ))}
-          </div>
-        </section>
-
-        <section>
-          <OnboardingRoadmap locale={locale} showActions={false} compact />
         </section>
       </PageContainer>
       <MobileBottomNav active="home" />

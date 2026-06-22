@@ -4,11 +4,19 @@ import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 
-type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "community" | "profile";
+type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "challenge" | "community" | "profile";
 
 const MOBILE_LINKS: Array<{
   key: NavKey;
-  href: "/" | "/dog" | "/cat" | "/reptile" | "/saju" | "/community" | "/profile";
+  href:
+    | "/"
+    | "/dog"
+    | "/cat"
+    | "/reptile"
+    | "/saju"
+    | "/community/challenge"
+    | "/community"
+    | "/profile";
   icon: string;
   requiresAuth?: boolean;
 }> = [
@@ -17,6 +25,7 @@ const MOBILE_LINKS: Array<{
   { key: "cat", href: "/cat", icon: "🐈", requiresAuth: true },
   { key: "reptile", href: "/reptile", icon: "🦎", requiresAuth: true },
   { key: "saju", href: "/saju", icon: "✨", requiresAuth: true },
+  { key: "challenge", href: "/community/challenge", icon: "🏅", requiresAuth: true },
   { key: "community", href: "/community", icon: "💬", requiresAuth: true },
 ];
 

@@ -19,6 +19,7 @@
     "test:pillar-regression": "tsx scripts/test-pillar-regression.ts",
     "test:luck-pillars": "tsx scripts/test-luck-pillars.ts",
     "test:llm-cache-keys": "tsx scripts/test-llm-cache-keys.ts",
+    "test:llm-cache-db": "tsx scripts/test-llm-cache-db.ts",
     "db:apply-community": "node scripts/apply-community-migrations.mjs",
     "db:apply-breed-guides": "node scripts/apply-breed-guide-migrations.mjs",
     "stitch:localize": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/localize-stitch-images.ps1",
