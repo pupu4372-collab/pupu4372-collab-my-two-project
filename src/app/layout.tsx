@@ -14,6 +14,10 @@ const noto = Noto_Sans_KR({
 export const metadata: Metadata = {
   title: "K-Saju Pet",
   description: "반려동물 K-사주와 커뮤니티",
+  icons: {
+    icon: "/stitch/asset-09.jpg",
+    apple: "/stitch/asset-09.jpg",
+  },
 };
 
 export const viewport: Viewport = {

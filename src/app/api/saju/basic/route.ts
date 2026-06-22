@@ -11,7 +11,15 @@ import {
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, "1 h"),
+  analytics: true,
+});
 
 function isValidDate(s: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s));
@@ -23,6 +31,23 @@ function isValidTime(s: string | null): boolean {
 }
 
 export async function POST(request: Request) {
+  const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
+  const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+
+  if (!success) {
+    return NextResponse.json(
+      { error: "요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요." },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": limit.toString(),
+          "X-RateLimit-Remaining": remaining.toString(),
+          "X-RateLimit-Reset": reset.toString(),
+        },
+      }
+    );
+  }
+
   let body: Partial<SajuBasicRequest>;
   try {
     body = await request.json();
