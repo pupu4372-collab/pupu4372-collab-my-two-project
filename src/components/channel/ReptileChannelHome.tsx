@@ -228,19 +228,81 @@ export function ReptileChannelHome({
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-white/30 bg-cream p-6 text-center shadow-lg md:p-8">
-        <h2 className="text-2xl font-extrabold text-ink md:text-3xl">{isKo ? "우리 아이 사주도 같이 볼까요?" : "Want to read your pet's K-Saju too?"}</h2>
-        <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-plum/80">
-          {isKo
-            ? "강아지, 고양이, 다른 동물까지 생일 정보로 오행 밸런스와 성향을 확인할 수 있어요."
-            : "Use birth data to check elemental balance and care cues for dogs, cats, and other pets."}
-        </p>
-        <AuthRequiredLink
-          href="/saju"
-          className="mt-5 inline-flex rounded-full bg-channel-community px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
-        >
-          {isKo ? "우리 아이 사주 보기" : "Read K-Saju"}
-        </AuthRequiredLink>
+      <section id="adoption-partners" className="rounded-[2rem] border border-white/30 bg-cream p-6 shadow-lg md:p-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-extrabold text-ink md:text-3xl">{isKo ? "우리 아이 사주도 같이 볼까요?" : "Want to read your pet's K-Saju too?"}</h2>
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-plum/80">
+            {isKo
+              ? "강아지, 고양이, 다른 동물까지 생일 정보로 오행 밸런스와 성향을 확인할 수 있어요."
+              : "Use birth data to check elemental balance and care cues for dogs, cats, and other pets."}
+          </p>
+          <AuthRequiredLink
+            href="/saju"
+            className="mt-5 inline-flex rounded-full bg-channel-community px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
+          >
+            {isKo ? "우리 아이 사주 보기" : "Read K-Saju"}
+          </AuthRequiredLink>
+        </div>
+
+        <div className="my-8 border-t border-channel-community/15" />
+
+        <div className="pb-24 md:pb-0">
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community">
+            {isKo ? "분양 정보" : "Adoption & Breeding"}
+          </p>
+          <h3 className="mt-2 text-xl font-extrabold text-ink md:text-2xl">
+            {isKo ? "렙타일 분양 알아보기" : "Find Reptile Adoption Info"}
+          </h3>
+          <p className="mt-2 text-sm text-plum/80">
+            {isKo
+              ? "신뢰할 수 있는 분양 커뮤니티에서 정보를 확인하세요."
+              : "Check trusted communities for reptile adoption info."}
+          </p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+            {[
+              {
+                name: "도마뱀조아",
+                desc: isKo ? "파충류 전문 분양/커뮤니티" : "Reptile community & adoption",
+                url: "https://www.domazoa.com",
+                emoji: "🦎",
+              },
+              {
+                name: "파충류114",
+                desc: isKo ? "파충류 분양 정보 모음" : "Reptile adoption listings",
+                url: "https://www.reptile114.com",
+                emoji: "🐍",
+              },
+              {
+                name: "네이버 카페 — 렙타일클럽",
+                desc: isKo ? "렙타일 최대 커뮤니티" : "Korea's largest reptile cafe",
+                url: "https://cafe.naver.com/reptileclub",
+                emoji: "🐢",
+              },
+            ].map((partner) => (
+              <a
+                key={partner.name}
+                href={partner.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-3 rounded-2xl border border-channel-community/20 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <span className="text-2xl">{partner.emoji}</span>
+                <div>
+                  <p className="text-sm font-extrabold text-primary">{partner.name}</p>
+                  <p className="mt-0.5 text-xs text-plum/65">{partner.desc}</p>
+                </div>
+                <span className="ml-auto text-xs text-plum/50">→</span>
+              </a>
+            ))}
+          </div>
+
+          <p className="mt-4 text-xs text-plum/55">
+            {isKo
+              ? "* K-Saju Pet은 외부 분양 사이트와 무관하며, 거래에 대한 책임을 지지 않습니다."
+              : "* K-Saju Pet is not affiliated with external sites and is not responsible for transactions."}
+          </p>
+        </div>
       </section>
     </div>
   );
