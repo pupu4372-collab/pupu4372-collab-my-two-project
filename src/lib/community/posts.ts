@@ -46,6 +46,7 @@ export interface CreatePetShowPostInput {
   petId?: string | null;
   petShowSpecies: PetShowSpecies;
   language?: string;
+  tags?: string[];
 }
 
 async function getVisibleCountryCode(supabase: Db, userId: string): Promise<string | null> {
@@ -74,7 +75,11 @@ export async function createPetShowPost(
       title: input.title.trim(),
       content: input.content?.trim() || null,
       image_urls: [input.imageUrl],
-      tags: ["pet-show", `pet-show:${input.petShowSpecies}`],
+      tags: [
+        "pet-show",
+        `pet-show:${input.petShowSpecies}`,
+        ...(Array.isArray(input.tags) ? input.tags : []),
+      ],
       language: input.language ?? "ko",
       country_code: countryCode,
     } as never)

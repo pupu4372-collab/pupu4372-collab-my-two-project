@@ -90,7 +90,7 @@ export default async function PetShowFailsPage({ params }: PageProps) {
           ))}
         </section>
 
-        <PetShowFeed />
+        <PetShowFeed tags={["fails"]} />
       </div>
     </PetShowShell>
   );

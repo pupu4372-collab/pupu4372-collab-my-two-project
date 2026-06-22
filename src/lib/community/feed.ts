@@ -10,8 +10,10 @@ export interface PetShowFeedPage {
   source: "supabase" | "mock";
 }
 
-function mockFeed(cursor: string | null): PetShowFeedPage {
-  const all = getMockPosts();
+function mockFeed(cursor: string | null, tags?: string[]): PetShowFeedPage {
+  const all = getMockPosts().filter((post) =>
+    tags?.length ? tags.every((tag) => post.tags.includes(tag)) : true
+  );
   const start = cursor ? all.findIndex((p) => p.id === cursor) + 1 : 0;
   const slice = all.slice(start, start + PAGE_SIZE);
   const last = slice[slice.length - 1];
@@ -22,9 +24,12 @@ function mockFeed(cursor: string | null): PetShowFeedPage {
   };
 }
 
-export async function fetchPetShowFeed(cursor?: string | null): Promise<PetShowFeedPage> {
+export async function fetchPetShowFeed(
+  cursor?: string | null,
+  tags?: string[]
+): Promise<PetShowFeedPage> {
   const supabase = getSupabaseServerClient();
-  if (!supabase) return mockFeed(cursor ?? null);
+  if (!supabase) return mockFeed(cursor ?? null, tags);
 
   let query = supabase
     .from("community_posts")
@@ -33,6 +38,10 @@ export async function fetchPetShowFeed(cursor?: string | null): Promise<PetShowF
     .eq("is_hidden", false)
     .order("created_at", { ascending: false })
     .limit(PAGE_SIZE);
+
+  if (tags?.length) {
+    query = query.contains("tags", tags);
+  }
 
   if (cursor) {
     const { data: cursorRow } = await supabase
@@ -49,7 +58,7 @@ export async function fetchPetShowFeed(cursor?: string | null): Promise<PetShowF
 
   const { data, error } = await query;
   if (error || !data?.length) {
-    return mockFeed(cursor ?? null);
+    return mockFeed(cursor ?? null, tags);
   }
 
   const posts = data as CommunityPost[];

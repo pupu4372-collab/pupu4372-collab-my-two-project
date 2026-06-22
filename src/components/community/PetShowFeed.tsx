@@ -17,9 +17,10 @@ interface FeedResponse {
 
 interface PetShowFeedProps {
   refreshKey?: number;
+  tags?: string[];
 }
 
-export function PetShowFeed({ refreshKey = 0 }: PetShowFeedProps) {
+export function PetShowFeed({ refreshKey = 0, tags }: PetShowFeedProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const [posts, setPosts] = useState<CommunityPost[]>([]);
@@ -34,7 +35,10 @@ export function PetShowFeed({ refreshKey = 0 }: PetShowFeedProps) {
     if (append) loadingMoreRef.current = true;
     setLoading(true);
     try {
-      const qs = pageCursor ? `?cursor=${encodeURIComponent(pageCursor)}` : "";
+      const params = new URLSearchParams();
+      if (pageCursor) params.set("cursor", pageCursor);
+      tags?.forEach((tag) => params.append("tag", tag));
+      const qs = params.toString() ? `?${params.toString()}` : "";
       const res = await fetch(`/api/community/pet-show/feed${qs}`);
       const data: FeedResponse = await res.json();
       setPosts((prev) => (append ? [...prev, ...data.posts] : data.posts));
@@ -44,7 +48,7 @@ export function PetShowFeed({ refreshKey = 0 }: PetShowFeedProps) {
       setLoading(false);
       loadingMoreRef.current = false;
     }
-  }, []);
+  }, [tags]);
 
   useEffect(() => {
     void load(false, null);

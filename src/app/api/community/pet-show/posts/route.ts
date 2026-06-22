@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     petId?: string | null;
     petSpecies?: string;
     language?: string;
+    tags?: string[];
   };
 
   try {
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
       petId: null,
       petShowSpecies: body.petSpecies,
       language: body.language,
+      tags: Array.isArray(body.tags) ? body.tags : [],
     });
     return NextResponse.json({ post }, { status: 201 });
   } catch (err) {

@@ -20,6 +20,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const fileRef = useRef<HTMLInputElement>(null);
   const [petSpecies, setPetSpecies] = useState<PetShowSpecies | "">("");
+  const [isFails, setIsFails] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
@@ -126,6 +127,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
           content: content.trim() || undefined,
           imageUrl: uploadData.imageUrl,
           petSpecies,
+          tags: isFails ? ["fails"] : [],
         }),
       });
       const postData = await postRes.json();
@@ -138,6 +140,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
       setContent("");
       setFile(null);
       setPetSpecies("");
+      setIsFails(false);
       setPreview(null);
       if (fileRef.current) fileRef.current.value = "";
       setSuccess(true);
@@ -270,6 +273,17 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
               </button>
             ))}
           </div>
+          <label className="mt-4 flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={isFails}
+              onChange={(e) => setIsFails(e.target.checked)}
+              className="h-4 w-4 accent-primary"
+            />
+            <span className="text-sm font-bold text-plum">
+              {isKo ? "😂 웃긴 실패 사진으로 올리기" : "😂 Post as Funny Fail"}
+            </span>
+          </label>
         </section>
 
         <section className="space-y-5">
