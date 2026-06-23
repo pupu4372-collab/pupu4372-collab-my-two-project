@@ -5,10 +5,12 @@ import {
   markHumanPremiumReportReady,
   updateHumanPremiumReport,
 } from "./storage";
-import type {
-  HumanPremiumReportInput,
-  HumanPremiumReportPayload,
-  HumanPremiumReportRow,
+import {
+  HUMAN_PREMIUM_SECTION_IDS,
+  parseReportType,
+  type HumanPremiumReportInput,
+  type HumanPremiumReportPayload,
+  type HumanPremiumReportRow,
 } from "./types";
 
 function rowToInput(row: HumanPremiumReportRow): HumanPremiumReportInput {
@@ -24,6 +26,7 @@ function rowToInput(row: HumanPremiumReportRow): HumanPremiumReportInput {
     privacyConsent: row.privacy_consent,
     gender: row.birth_basis?.gender ?? null,
     userId: row.user_id,
+    reportType: parseReportType(row.report_type),
   };
 }
 
@@ -33,30 +36,15 @@ function isAccessExpired(row: HumanPremiumReportRow): boolean {
 }
 
 function isCurrentReportTemplate(payload: HumanPremiumReportPayload): boolean {
-  const hasIntro = payload.saju.chapters[0]?.id === "introduction";
-  const luckCycle = payload.saju.chapters.find(
-    (chapter) => chapter.id === "luck-cycles"
+  const sectionIds = new Set(
+    payload.saju.chapters.flatMap((chapter) =>
+      chapter.sections.map((section) => section.id)
+    )
   );
-  const sajuResult = payload.saju.chapters.find(
-    (chapter) => chapter.id === "saju-result"
-  );
-  const luckSectionIds = new Set(luckCycle?.sections.map((section) => section.id));
-  const resultSectionIds = new Set(sajuResult?.sections.map((section) => section.id));
-  const hasZiwei = payload.saju.chapters.some((chapter) => chapter.id === "ziwei-chart");
+
   return (
-    hasIntro &&
-    Boolean(luckCycle) &&
-    Boolean(sajuResult) &&
-    hasZiwei &&
-    luckSectionIds.has("cycle-daewoon") &&
-    luckSectionIds.has("cycle-shinsal") &&
-    luckSectionIds.has("cycle-month-12") &&
-    !luckSectionIds.has("result-lifetime") &&
-    resultSectionIds.has("result-year-fortune") &&
-    resultSectionIds.has("result-temperament") &&
-    resultSectionIds.has("result-final-advice") &&
-    !resultSectionIds.has("result-year") &&
-    !resultSectionIds.has("result-year-summary")
+    Boolean(payload.structured?.scores?.length) &&
+    HUMAN_PREMIUM_SECTION_IDS.every((id) => sectionIds.has(id))
   );
 }
 

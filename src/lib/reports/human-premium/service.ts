@@ -5,12 +5,13 @@ import {
   markHumanPremiumReportPaid,
   markHumanPremiumReportReady,
 } from "./storage";
-import type {
-  HumanPremiumBirthBasis,
-  HumanPremiumPaymentProvider,
-  HumanPremiumReportInput,
-  HumanPremiumReportPayload,
-  HumanPremiumReportRow,
+import {
+  parseReportType,
+  type HumanPremiumBirthBasis,
+  type HumanPremiumPaymentProvider,
+  type HumanPremiumReportInput,
+  type HumanPremiumReportPayload,
+  type HumanPremiumReportRow,
 } from "./types";
 
 function isValidEmail(email: string): boolean {
@@ -54,6 +55,7 @@ export function parseHumanPremiumReportInput(
     privacyConsent: true,
     gender: parseGender(body),
     userId: userId ?? null,
+    reportType: parseReportType(body.reportType),
   };
 }
 
@@ -73,6 +75,7 @@ export function humanPremiumRowToInput(
     privacyConsent: row.privacy_consent,
     gender: basis?.gender ?? null,
     userId: row.user_id,
+    reportType: parseReportType(row.report_type),
   };
 }
 

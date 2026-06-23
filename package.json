@@ -49,6 +49,7 @@
     "@upstash/redis": "^1.38.0",
     "browser-image-compression": "^2.0.2",
     "capacitor-kakao-login-plugin": "^3.0.0",
+    "html2canvas": "^1.4.1",
     "lunar-javascript": "^1.7.7",
     "next": "^15.3.2",
     "next-intl": "^4.12.0",

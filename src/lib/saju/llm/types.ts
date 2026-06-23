@@ -1,3 +1,13 @@
+import type {
+  ReportCohortInsight,
+  ReportDecisionMoment,
+  ReportOpportunity,
+  ReportProphecy,
+  ReportRisk,
+  ReportRoadmapItem,
+  ReportScore,
+  ReportType,
+} from "@/lib/reports/human-premium/types";
 import type { HumanSajuMapping } from "@/lib/saju/human-trait-mapping";
 import type { PetSajuMapping } from "@/lib/saju/pet-trait-mapping";
 import type { Locale } from "@/lib/saju/types";
@@ -12,10 +22,23 @@ export interface PetInterpretationJson {
   compatibility: string;
 }
 
-export interface HumanInterpretationJson {
+/** Legacy fields for interpretSaju(human) single-call API */
+export interface LegacyHumanInterpretationJson {
   personality: string;
   tenGodAnalysis: string;
   daewoonOutlook: string;
+}
+
+export interface HumanInterpretationJson {
+  sajuStructure: string;
+  scores: ReportScore[];
+  deepAnalysis: string;
+  opportunities: ReportOpportunity[];
+  risks: ReportRisk[];
+  roadmap: ReportRoadmapItem[];
+  decisionMoments: ReportDecisionMoment[];
+  prophecy: ReportProphecy;
+  cohortInsight: ReportCohortInsight;
 }
 
 export type InterpretSajuInput =
@@ -30,11 +53,12 @@ export type InterpretSajuInput =
       mapping: HumanSajuMapping;
       locale: Locale;
       subjectName?: string;
+      analysisMode?: "three_pillars" | "four_pillars";
     };
 
 export type InterpretSajuResult =
   | { tier: "pet"; provider: LlmProviderName; data: PetInterpretationJson }
-  | { tier: "human"; provider: LlmProviderName; data: HumanInterpretationJson };
+  | { tier: "human"; provider: LlmProviderName; data: LegacyHumanInterpretationJson };
 
 export interface LlmPromptPair {
   system: string;
@@ -66,9 +90,11 @@ export function isPetInterpretationJson(value: unknown): value is PetInterpretat
   );
 }
 
-export function isHumanInterpretationJson(value: unknown): value is HumanInterpretationJson {
+export function isLegacyHumanInterpretationJson(
+  value: unknown
+): value is LegacyHumanInterpretationJson {
   if (!value || typeof value !== "object") return false;
-  const v = value as Partial<HumanInterpretationJson>;
+  const v = value as Partial<LegacyHumanInterpretationJson>;
   return (
     typeof v.personality === "string" &&
     v.personality.trim().length > 0 &&
@@ -78,3 +104,8 @@ export function isHumanInterpretationJson(value: unknown): value is HumanInterpr
     v.daewoonOutlook.trim().length > 0
   );
 }
+
+export {
+  isHumanInterpretationJson,
+  parseHumanInterpretationJson,
+} from "./human-interpretation-parse";

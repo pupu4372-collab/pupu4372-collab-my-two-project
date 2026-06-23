@@ -10,6 +10,10 @@ export type LlmCacheKind =
 
 const interpretInFlight = new Map<string, Promise<InterpretSajuResult>>();
 const sectionInFlight = new Map<string, Promise<string | null>>();
+const premiumCallInFlight = new Map<
+  string,
+  Promise<{ data: unknown; provider: string } | null>
+>();
 
 export function isLlmCacheEnabled(): boolean {
   if (process.env.LLM_CACHE === "0") return false;
@@ -181,4 +185,78 @@ export function setSectionInFlight(
 
 export function clearSectionInFlight(cacheKey: string): void {
   sectionInFlight.delete(cacheKey);
+}
+
+export async function getCachedPremiumCallResult(
+  cacheKey: string
+): Promise<{ data: unknown; provider: string } | null> {
+  if (!isLlmCacheEnabled()) return null;
+
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("saju_llm_cache")
+    .select("payload, expires_at")
+    .eq("cache_key", cacheKey)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  const row = data as Pick<SajuLlmCacheRow, "payload" | "expires_at">;
+  if (isExpired(row.expires_at)) return null;
+
+  const payload = row.payload as { data?: unknown; provider?: unknown } | null;
+  if (!payload || typeof payload.provider !== "string" || payload.data === undefined) {
+    return null;
+  }
+  return { data: payload.data, provider: payload.provider };
+}
+
+export async function setCachedPremiumCallResult(
+  cacheKey: string,
+  locale: Locale,
+  provider: string,
+  model: string,
+  result: { data: unknown; provider: string }
+): Promise<void> {
+  if (!isLlmCacheEnabled()) return;
+
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return;
+
+  const row: SajuLlmCacheInsert = {
+    cache_key: cacheKey,
+    cache_kind: "human_premium_section",
+    locale,
+    provider,
+    model,
+    payload: result as unknown as Record<string, unknown>,
+    expires_at: expiresAtIso(),
+  };
+
+  const { error } = await supabase.from("saju_llm_cache").upsert(row as never, {
+    onConflict: "cache_key",
+  });
+
+  if (error) {
+    console.error("saju_llm_cache upsert failed (premium call)", error.message);
+  }
+}
+
+export function getPremiumCallInFlight(
+  cacheKey: string
+): Promise<{ data: unknown; provider: string } | null> | undefined {
+  return premiumCallInFlight.get(cacheKey);
+}
+
+export function setPremiumCallInFlight(
+  cacheKey: string,
+  promise: Promise<{ data: unknown; provider: string } | null>
+): void {
+  premiumCallInFlight.set(cacheKey, promise);
+}
+
+export function clearPremiumCallInFlight(cacheKey: string): void {
+  premiumCallInFlight.delete(cacheKey);
 }

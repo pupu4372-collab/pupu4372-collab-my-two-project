@@ -20,7 +20,7 @@ import {
   setInterpretInFlight,
 } from "./cache";
 import {
-  isHumanInterpretationJson,
+  isLegacyHumanInterpretationJson,
   isPetInterpretationJson,
   SajuInterpretationError,
   type InterpretSajuInput,
@@ -66,15 +66,15 @@ async function interpretWithProvider(
     try {
       const parsed = await callProvider(provider, prompts);
       if (input.tier === "pet") {
-        if (!isPetInterpretationJson(parsed)) {
-          throw new SajuInterpretationError(`Pet JSON schema validation failed (attempt ${attempt}).`);
-        }
-        return { tier: "pet", provider, data: parsed };
+      if (!isPetInterpretationJson(parsed)) {
+        throw new SajuInterpretationError(`Pet JSON schema validation failed (attempt ${attempt}).`);
       }
-      if (!isHumanInterpretationJson(parsed)) {
-        throw new SajuInterpretationError(`Human JSON schema validation failed (attempt ${attempt}).`);
-      }
-      return { tier: "human", provider, data: parsed };
+      return { tier: "pet", provider, data: parsed };
+    }
+    if (!isLegacyHumanInterpretationJson(parsed)) {
+      throw new SajuInterpretationError(`Human JSON schema validation failed (attempt ${attempt}).`);
+    }
+    return { tier: "human", provider, data: parsed };
     } catch (error) {
       lastError = error;
     }

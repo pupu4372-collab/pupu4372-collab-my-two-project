@@ -8,7 +8,10 @@ export function isClaudeEnabled(): boolean {
   return Boolean(process.env.ANTHROPIC_API_KEY?.trim());
 }
 
-export async function callClaudeJson(prompts: LlmPromptPair): Promise<string> {
+export async function callClaudeJson(
+  prompts: LlmPromptPair,
+  maxTokens = 1800
+): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) {
     throw new Error("ANTHROPIC_API_KEY is not configured.");
@@ -19,7 +22,7 @@ export async function callClaudeJson(prompts: LlmPromptPair): Promise<string> {
 
   const message = await client.messages.create({
     model,
-    max_tokens: 1800,
+    max_tokens: maxTokens,
     temperature: 0.7,
     system: prompts.system,
     messages: [{ role: "user", content: prompts.user }],
@@ -38,8 +41,11 @@ export async function callClaudeJson(prompts: LlmPromptPair): Promise<string> {
   return text;
 }
 
-export async function callClaudeJsonParsed(prompts: LlmPromptPair): Promise<unknown> {
-  const text = await callClaudeJson(prompts);
+export async function callClaudeJsonParsed(
+  prompts: LlmPromptPair,
+  maxTokens = 1800
+): Promise<unknown> {
+  const text = await callClaudeJson(prompts, maxTokens);
   try {
     return parseJsonObject(text);
   } catch (error) {

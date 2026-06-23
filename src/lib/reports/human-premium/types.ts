@@ -1,5 +1,122 @@
 import type { Locale } from "@/lib/saju/types";
 
+export type ReportType =
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "yearly"
+  | "mental"
+  | "love"
+  | "career"
+  | "business"
+  | "lifetime";
+
+export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
+  daily: "일간 운세",
+  weekly: "주간 운세",
+  monthly: "월간 운세",
+  yearly: "연간 운세",
+  mental: "건강·힐링·에너지",
+  love: "사랑과 결혼",
+  career: "직장 및 성장",
+  business: "비즈니스 파트너",
+  lifetime: "인생 설계",
+};
+
+export const REPORT_TYPE_LABELS_EN: Record<ReportType, string> = {
+  daily: "Daily fortune",
+  weekly: "Weekly fortune",
+  monthly: "Monthly fortune",
+  yearly: "Yearly fortune",
+  mental: "Health, healing & energy",
+  love: "Love & marriage",
+  career: "Career & growth",
+  business: "Business & partners",
+  lifetime: "Lifetime design",
+};
+
+export const DEFAULT_REPORT_TYPE: ReportType = "lifetime";
+
+const REPORT_TYPE_SET = new Set<ReportType>([
+  "daily",
+  "weekly",
+  "monthly",
+  "yearly",
+  "mental",
+  "love",
+  "career",
+  "business",
+  "lifetime",
+]);
+
+export function parseReportType(value: unknown): ReportType {
+  if (typeof value === "string" && REPORT_TYPE_SET.has(value as ReportType)) {
+    return value as ReportType;
+  }
+  return DEFAULT_REPORT_TYPE;
+}
+
+export const HUMAN_PREMIUM_SECTION_IDS = [
+  "section-cover",
+  "section-structure",
+  "section-metrics",
+  "section-depth",
+  "section-opportunity",
+  "section-risk",
+  "section-roadmap",
+  "section-prophecy",
+] as const;
+
+export type HumanPremiumSectionId = (typeof HUMAN_PREMIUM_SECTION_IDS)[number];
+
+export interface ReportScore {
+  label: string;
+  score: number;
+  description: string;
+}
+
+export interface ReportOpportunity {
+  title: string;
+  body: string;
+  tip: string;
+}
+
+export interface ReportRisk {
+  title: string;
+  body: string;
+  countermeasure: string;
+}
+
+export interface ReportRoadmapItem {
+  period: string;
+  label: string;
+  body: string;
+}
+
+export interface ReportDecisionMoment {
+  situation: string;
+  script: string;
+}
+
+export interface ReportProphecy {
+  short: string;
+  full?: string;
+}
+
+export interface ReportCohortInsight {
+  body: string;
+}
+
+export interface HumanPremiumReportStructured {
+  scores: ReportScore[];
+  opportunities: ReportOpportunity[];
+  risks: ReportRisk[];
+  roadmap: ReportRoadmapItem[];
+  decisionMoments: ReportDecisionMoment[];
+  prophecy: ReportProphecy;
+  cohortInsight: ReportCohortInsight;
+}
+
 export type HumanPremiumReportStatus =
   | "draft"
   | "payment_pending"
@@ -46,6 +163,8 @@ export interface HumanPremiumReportInput {
   privacyConsent: boolean;
   gender?: "male" | "female" | null;
   userId?: string | null;
+  /** Defaults to {@link DEFAULT_REPORT_TYPE} when omitted */
+  reportType?: ReportType;
 }
 
 export interface HumanPremiumReportRow {
@@ -85,6 +204,8 @@ export interface HumanPremiumReportRow {
   email_sent_at: string | null;
   email_error: string | null;
   resend_message_id: string | null;
+  /** Present after migration 031; defaults to lifetime in DB */
+  report_type?: ReportType;
   created_at: string;
   updated_at: string;
 }
@@ -119,6 +240,13 @@ export const HUMAN_PREMIUM_PDF_BUCKET = "human-premium-reports";
 
 export type HumanPremiumSectionKind =
   | "cover"
+  | "structure"
+  | "metrics"
+  | "depth"
+  | "opportunity"
+  | "risk"
+  | "roadmap"
+  | "prophecy"
   | "intro"
   | "pillar"
   | "element"
@@ -169,9 +297,11 @@ export interface HumanPremiumReportPayload {
   generatedAt: string;
   personName: string;
   locale: Locale;
+  reportType: ReportType;
   calendarType: HumanPremiumCalendarType;
   birthBasis: HumanPremiumBirthBasis;
   analysisMode: "three_pillars" | "four_pillars";
+  structured: HumanPremiumReportStructured;
   llm?: HumanPremiumLlmMeta;
   cover: {
     title: string;

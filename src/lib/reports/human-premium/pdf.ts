@@ -5,6 +5,11 @@ import type {
   HumanPremiumReportPayload,
   HumanPremiumReportSection,
 } from "./types";
+import {
+  DEFAULT_REPORT_TYPE,
+  REPORT_TYPE_LABELS,
+  REPORT_TYPE_LABELS_EN,
+} from "./types";
 
 const JIG_HANJI = "#F4F1EA";
 const JIG_INK = "#222222";
@@ -164,7 +169,10 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
     : "[He who knows his destiny is without obstacles.]";
   const recipientLabel = isKo ? "수신" : "RECIPIENT";
   const issuedLabel = isKo ? "발행일" : "ISSUED DATE";
-  const reportType = isKo ? "평생 사주 리포트" : "Lifetime Saju Report";
+  const reportTypeKey = report.reportType ?? DEFAULT_REPORT_TYPE;
+  const reportType = isKo
+    ? REPORT_TYPE_LABELS[reportTypeKey]
+    : REPORT_TYPE_LABELS_EN[reportTypeKey];
 
   const content: Content[] = [
     { text: brandLine, style: "coverBrand", alignment: "center" },

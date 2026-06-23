@@ -1,6 +1,11 @@
 import { createHash } from "node:crypto";
 import type { HumanPremiumFactsBlock } from "@/lib/reports/human-premium/facts";
 import type { HumanPremiumLlmSectionKey } from "@/lib/reports/human-premium/prompts";
+import {
+  DEFAULT_REPORT_TYPE,
+  type ReportType,
+} from "@/lib/reports/human-premium/types";
+import type { HumanSajuMapping } from "@/lib/saju/human-trait-mapping";
 import type { Locale } from "@/lib/saju/types";
 import type { InterpretSajuInput, LlmProviderName } from "./types";
 
@@ -8,7 +13,7 @@ import type { InterpretSajuInput, LlmProviderName } from "./types";
 export const LLM_CACHE_PROMPT_VERSION = 1;
 
 /** Bump when human premium section prompts change materially */
-export const HUMAN_PREMIUM_PROMPT_VERSION = 1;
+export const HUMAN_PREMIUM_PROMPT_VERSION = 3;
 
 function stableStringify(value: unknown): string {
   return JSON.stringify(value, (_key, current) => {
@@ -61,16 +66,50 @@ export function buildInterpretCacheKey(
   );
 }
 
+export function buildHumanPremiumCallCacheKey(options: {
+  callKind: string;
+  reportType: ReportType;
+  locale: Locale;
+  analysisMode: "three_pillars" | "four_pillars";
+  mapping: HumanSajuMapping;
+  model: string;
+  provider: string;
+  narrative?: string;
+}): string {
+  return sha256Hex(
+    stableStringify({
+      v: HUMAN_PREMIUM_PROMPT_VERSION,
+      callKind: options.callKind,
+      reportType: options.reportType,
+      locale: options.locale,
+      analysisMode: options.analysisMode,
+      provider: options.provider,
+      model: options.model,
+      narrativeHash: options.narrative
+        ? sha256Hex(options.narrative.slice(0, 500))
+        : null,
+      mapping: {
+        pillars: options.mapping.pillars,
+        dayMaster: options.mapping.dayMaster,
+        balanceScore: options.mapping.balanceScore,
+        daewoonUpcoming: options.mapping.daewoonUpcoming,
+      },
+    })
+  );
+}
+
 export function buildHumanPremiumSectionCacheKey(options: {
   sectionKey: HumanPremiumLlmSectionKey;
   locale: Locale;
   model: string;
   facts: HumanPremiumFactsBlock;
   month?: number;
+  reportType?: ReportType;
 }): string {
   return sha256Hex(
     stableStringify({
       v: HUMAN_PREMIUM_PROMPT_VERSION,
+      reportType: options.reportType ?? DEFAULT_REPORT_TYPE,
       sectionKey: options.sectionKey,
       locale: options.locale,
       model: options.model,

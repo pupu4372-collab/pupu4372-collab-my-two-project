@@ -5,8 +5,10 @@ import {
 import { resolveHumanBirthBasis, resolveSolarBirthDate } from "./birth-basis";
 import {
   buildHumanSummary,
+  buildHumanPremiumStructured,
   buildSajuChapters,
   flattenChapterSections,
+  resolveReportType,
   sumChapterPages,
 } from "./content";
 import { buildZiweiChartSummary } from "./ziwei-narratives";
@@ -41,9 +43,12 @@ export function buildHumanPremiumReport(
   });
 
   const summary = buildHumanSummary(input.personName, saju, input.locale);
+  const reportType = resolveReportType(input.reportType);
+  const structured = buildHumanPremiumStructured(saju, input.locale, reportType);
   const sajuChapters = buildSajuChapters(saju, input.locale, {
     ziweiChart,
     birthTimeUnknown: input.birthTimeUnknown,
+    reportType,
   });
 
   const sajuSectionCount = flattenChapterSections(sajuChapters).length;
@@ -56,9 +61,11 @@ export function buildHumanPremiumReport(
     generatedAt: new Date().toISOString(),
     personName: input.personName.trim(),
     locale: input.locale,
+    reportType,
     calendarType: input.calendarType,
     birthBasis,
     analysisMode: input.birthTimeUnknown ? "three_pillars" : "four_pillars",
+    structured,
     cover: {
       title: isKo
         ? "지운자무애(知運者無礙) - 운명을 아는 자는 거침이 없나니."

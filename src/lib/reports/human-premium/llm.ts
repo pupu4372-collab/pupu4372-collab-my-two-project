@@ -1,3 +1,4 @@
+import type { ReportType } from "./types";
 import type { Locale } from "@/lib/saju/types";
 import {
   buildHumanPremiumSectionCacheKey,
@@ -69,6 +70,7 @@ export async function generateHumanPremiumSectionBody(options: {
   targetChars: number;
   minChars: number;
   month?: number;
+  reportType?: ReportType;
 }): Promise<string | null> {
   const model = resolveGeminiModel();
   const cacheKey = buildHumanPremiumSectionCacheKey({
@@ -77,6 +79,7 @@ export async function generateHumanPremiumSectionBody(options: {
     model,
     facts: options.facts,
     month: options.month,
+    reportType: options.reportType,
   });
 
   const cached = await getCachedHumanPremiumSectionBody(cacheKey);

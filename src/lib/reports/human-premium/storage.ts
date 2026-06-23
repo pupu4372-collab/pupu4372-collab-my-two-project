@@ -55,9 +55,14 @@ export async function createHumanPremiumReportDraft(
     paymentOrderId?: string | null;
     checkoutSessionId?: string | null;
     amountPaid?: number;
+    amountOriginal?: number;
+    currency?: string;
+    pgProvider?: string | null;
   }
 ): Promise<HumanPremiumReportRow> {
   const supabase = requireDb();
+  const amountOriginal = options?.amountOriginal ?? HUMAN_PREMIUM_AMOUNT_ORIGINAL_USD;
+  const currency = options?.currency ?? "USD";
 
   const { data, error } = await supabase
     .from("human_premium_reports")
@@ -73,13 +78,15 @@ export async function createHumanPremiumReportDraft(
       locale: input.locale,
       privacy_consent: input.privacyConsent,
       birth_basis: toBirthBasis(input),
+      report_type: input.reportType ?? "lifetime",
       status: options?.status ?? "draft",
       payment_provider: options?.paymentProvider ?? null,
+      pg_provider: options?.pgProvider ?? null,
       payment_order_id: options?.paymentOrderId ?? null,
       checkout_session_id: options?.checkoutSessionId ?? null,
-      amount_original: HUMAN_PREMIUM_AMOUNT_ORIGINAL_USD,
+      amount_original: amountOriginal,
       amount_paid: options?.amountPaid ?? 0,
-      currency: "USD",
+      currency,
     } as never)
     .select("*")
     .single();
