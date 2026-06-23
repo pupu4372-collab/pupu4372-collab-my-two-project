@@ -1,3 +1,4 @@
+import { AppFooter } from "@/components/layout/AppFooter";
 import { routing } from "@/i18n/routing";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
@@ -37,6 +38,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+    <NextIntlClientProvider messages={messages}>
+      {children}
+      <AppFooter />
+    </NextIntlClientProvider>
   );
 }
