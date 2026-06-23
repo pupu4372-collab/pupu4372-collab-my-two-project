@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AppFooter } from "@/components/layout/AppFooter";
 
 const stars = [
   ["7%", "13%", "1px", "0s"],
@@ -76,7 +77,10 @@ export function NightSkyBackground({ children }: { children: ReactNode }) {
         ))}
       </div>
       <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_15%_20%,rgba(255,215,255,0.16),transparent_24%),radial-gradient(circle_at_82%_18%,rgba(115,145,255,0.18),transparent_26%)]" />
-      <div className="relative z-10 min-h-screen">{children}</div>
+      <div className="relative z-10 min-h-screen">
+        {children}
+        <AppFooter />
+      </div>
     </div>
   );
 }
