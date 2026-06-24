@@ -26,7 +26,6 @@ import {
   REPORT_TYPE_SUBTITLES_EN,
   REPORT_TYPE_SUBTITLES_KO,
   sumCartAmount,
-  type HumanPremiumBundleKind,
 } from "@/lib/reports/human-premium/pricing";
 import {
   REPORT_TYPE_LABELS,
@@ -36,16 +35,9 @@ import {
 import { useLocale } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const BUNDLE_TYPES: Record<HumanPremiumBundleKind, ReportType[]> = {
-  all: REPORT_TYPE_ORDER,
-  timepack: ["daily", "weekly", "monthly", "yearly"],
-  themepack: ["mental", "love", "career", "business"],
-};
-
 export function HumanPremiumShop() {
   const routeLocale = useLocale();
   const isKo = routeLocale === "ko";
-  const gridRef = useRef<HTMLDivElement>(null);
   const cartRef = useRef<HTMLDivElement>(null);
 
   const [profile, setProfile] = useState<HumanPremiumProfile>(() => loadHumanPremiumProfile());
@@ -116,8 +108,8 @@ export function HumanPremiumShop() {
     window.setTimeout(() => setCartFlash(false), 600);
   }
 
-  function handleAddBundle(bundle: HumanPremiumBundleKind) {
-    setCart(addManyToHumanPremiumCart(BUNDLE_TYPES[bundle], profile));
+  function handleAddBundle() {
+    setCart(addManyToHumanPremiumCart(REPORT_TYPE_ORDER, profile));
     setCartFlash(true);
     window.setTimeout(() => setCartFlash(false), 600);
     cartRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -131,7 +123,7 @@ export function HumanPremiumShop() {
     <div className="space-y-10">
       <DayPillarPreview profile={profile} onProfileChange={handleProfileChange} />
 
-      <div ref={gridRef} className="space-y-6">
+      <div className="space-y-6">
         <header className="text-center">
           <h2 className="text-2xl font-bold text-white">
             {isKo ? "리포트 선택" : "Choose your report"}
@@ -283,7 +275,7 @@ export function HumanPremiumShop() {
         <button
           type="button"
           disabled={bundleAddableCount === 0}
-          onClick={() => handleAddBundle("all")}
+          onClick={() => handleAddBundle()}
           className="mt-6 rounded-full bg-white px-8 py-3 font-bold text-channel-saju shadow-lg disabled:opacity-50"
         >
           {bundleAddableCount === 0
