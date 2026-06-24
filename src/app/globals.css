@@ -135,6 +135,16 @@ html.native-app body {
   background-color: transparent !important;
 }
 
+/* Navy-sky pages: solid white inside bordered boxes (no gray glass) */
+.bg-dream-sky .pastel-card {
+  background: #ffffff;
+  backdrop-filter: none;
+}
+
+.bg-dream-sky .pastel-input {
+  background: #ffffff;
+}
+
 .auth-dream-sky {
   background: transparent !important;
 }
@@ -157,6 +167,45 @@ html.native-app body {
 
 /* Human premium report — Jigwanjae oriental-modern (DESIGN.md) */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&display=swap");
+
+.human-premium-stage {
+  --jig-hanji: #f4f1ea;
+  --jig-ink: #222222;
+  --jig-seal: #b22222;
+  --jig-obang-blue: #3e5c76;
+  --jig-obang-red: #9a3b3b;
+  --jig-obang-yellow: #d4a373;
+  --jig-obang-white: #e9e5d9;
+  --jig-obang-black: #3d3d3d;
+  --jig-muted: #444748;
+  background: #121a3a;
+  color: var(--jig-ink);
+}
+
+.human-premium-paper-sheet {
+  background-color: var(--jig-hanji);
+  background-image:
+    radial-gradient(at 20% 30%, rgba(255, 255, 255, 0.35) 0%, transparent 50%),
+    radial-gradient(at 80% 70%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
+  background-blend-mode: normal, normal;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 28px 70px rgba(0, 0, 0, 0.42);
+}
+
+/* Report result: no decorative square frames anywhere on the sheet */
+.human-premium-stage .human-premium-lattice,
+.human-premium-stage .human-premium-frame,
+.human-premium-stage .human-premium-inner-frame {
+  border: none !important;
+}
+
+.human-premium-stage .human-premium-lattice::before,
+.human-premium-stage .human-premium-frame::after,
+.human-premium-stage .human-premium-inner-frame::after {
+  content: none !important;
+  display: none !important;
+}
 
 .human-premium-report {
   --jig-hanji: #f4f1ea;
@@ -182,13 +231,13 @@ html.native-app body {
 }
 
 .human-premium-paper {
-  background-color: rgba(255, 255, 255, 0.92);
+  background-color: #ffffff;
   border: 1px solid rgba(34, 34, 34, 0.1);
   color: var(--jig-ink);
 }
 
 .human-premium-paper-warm {
-  background-color: rgba(252, 249, 242, 0.95);
+  background-color: #ffffff;
   border: 1px solid rgba(34, 34, 34, 0.08);
   color: var(--jig-ink);
 }
@@ -278,6 +327,7 @@ html.native-app body {
   transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.human-premium-stage .human-premium-share-panel,
 .human-premium-report .human-premium-share-panel {
   padding: 1.25rem 1rem 1rem;
   border-radius: 0.75rem;
@@ -290,6 +340,7 @@ html.native-app body {
     0 4px 20px rgba(34, 34, 34, 0.06);
 }
 
+.human-premium-stage .human-premium-share-btn,
 .human-premium-report .human-premium-share-btn {
   display: flex;
   width: 100%;
@@ -309,11 +360,13 @@ html.native-app body {
     box-shadow 0.2s ease;
 }
 
+.human-premium-stage .human-premium-share-btn:hover:not(:disabled),
 .human-premium-report .human-premium-share-btn:hover:not(:disabled) {
   opacity: 0.94;
   box-shadow: 0 2px 12px rgba(34, 34, 34, 0.08);
 }
 
+.human-premium-stage .human-premium-share-btn:active:not(:disabled),
 .human-premium-report .human-premium-share-btn:active:not(:disabled) {
   transform: scale(0.98);
 }
@@ -662,7 +715,17 @@ html.native-app body {
     background: #ffffff !important;
   }
 
-  .human-premium-report {
+  .human-premium-stage {
+    background: #ffffff !important;
+  }
+
+  .human-premium-paper-sheet {
+    box-shadow: none !important;
+    max-width: none !important;
+  }
+
+  .human-premium-report,
+  .human-premium-stage .human-premium-paper-sheet {
     background: #ffffff !important;
     color: var(--jig-ink) !important;
   }

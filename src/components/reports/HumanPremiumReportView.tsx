@@ -10,10 +10,11 @@ import { RoadmapSection } from "@/components/human-premium/RoadmapSection";
 import { SajuStructureSection } from "@/components/human-premium/SajuStructureSection";
 import { AppTopNav } from "@/components/layout/AppTopNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { Link } from "@/i18n/navigation";
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import { HUMAN_PREMIUM_SECTION_IDS } from "@/lib/reports/human-premium/types";
-import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { markSessionAlive } from "@/lib/supabase/auth-session-policy";
 
 const UI = {
   ko: {
@@ -33,6 +34,8 @@ const UI = {
     emailFailed: "이메일 발송에 실패했습니다",
     disclaimer:
       "사주란 2,000년전부터 내려오는 통계학에 가까운 학문입니다.\n맹신하기보단 삶의 지침서나 이정표 정도로 삼으시길 바랍니다.",
+    backToVault: "리포트 보관함으로",
+    vaultButton: "리포트 보관함",
     copyright: "본 리포트는 지관재(知觀齋)의 고유 자산이며 무단 복제를 금합니다.",
     brand: "知觀齋",
     sectionTitles: {
@@ -62,6 +65,8 @@ const UI = {
     emailSent: "Email sent",
     emailFailed: "Email failed",
     disclaimer: "Enjoy fortunes lightly — for fun only.",
+    backToVault: "Back to report vault",
+    vaultButton: "Report vault",
     copyright: "This report is proprietary to Jigwanjae (知觀齋).",
     brand: "Jigwanjae",
     sectionTitles: {
@@ -84,6 +89,7 @@ interface HumanPremiumReportViewProps {
   shareUrl: string;
   emailUrl: string;
   pdfUrl: string;
+  backHref?: string;
 }
 
 interface FileSystemWritableFileStreamLike {
@@ -118,11 +124,11 @@ function TocTextRows({
   const rows = [items.slice(0, 4), items.slice(4, 8)];
 
   return (
-    <div className="mt-3 space-y-2.5">
+    <div className="mt-4 space-y-4">
       {rows.map((row, rowIndex) => (
         <div
           key={rowIndex}
-          className="grid grid-cols-4 gap-x-1 text-center text-[11px] leading-snug sm:gap-x-2 sm:text-sm"
+          className="grid grid-cols-4 gap-1 sm:gap-3"
         >
           {row.map((item, index) => {
             const num = rowIndex * 4 + index + 1;
@@ -130,9 +136,12 @@ function TocTextRows({
               <a
                 key={item.id}
                 href={`#${item.id}`}
-                className="human-premium-serif break-keep text-[var(--jig-ink)] transition hover:text-[var(--jig-seal)]"
+                className="human-premium-serif group flex min-w-0 flex-col items-center px-0.5 text-center transition"
               >
-                {num}.{item.title}
+                <span className="text-base font-bold text-[var(--jig-seal)] sm:text-lg">{num}</span>
+                <span className="mt-1 break-keep text-[9px] leading-snug text-[var(--jig-ink)] group-hover:text-[var(--jig-seal)] sm:text-[11px]">
+                  {item.title}
+                </span>
               </a>
             );
           })}
@@ -145,33 +154,13 @@ function TocTextRows({
 function ReportToc({
   items,
   t,
-  compact = false,
 }: {
   items: Array<{ id: string; title: string; group: string }>;
   t: UiStrings;
-  compact?: boolean;
 }) {
-  if (compact) {
-    return (
-      <nav className="no-print human-premium-lattice human-premium-paper-warm rounded-sm p-4 lg:hidden">
-        <p className="human-premium-label-caps text-[var(--jig-seal)]">{t.toc}</p>
-        <TocTextRows items={items} />
-      </nav>
-    );
-  }
-
   return (
-    <nav className="human-premium-lattice human-premium-paper-warm rounded-sm p-4">
-      <div className="mb-3 flex items-center gap-2 border-b border-[var(--jig-seal)]/15 pb-3">
-        <Image
-          src="/stitch/jigwanjae/jigwanjae-small-logo.png"
-          alt={t.brand}
-          width={80}
-          height={32}
-          className="h-8 w-auto object-contain"
-        />
-      </div>
-      <p className="human-premium-label-caps text-[var(--jig-seal)]">{t.toc}</p>
+    <nav className="no-print mb-8 border-b border-[var(--jig-seal)]/15 pb-6">
+      <p className="human-premium-label-caps text-center text-[var(--jig-seal)]">{t.toc}</p>
       <TocTextRows items={items} />
     </nav>
   );
@@ -182,6 +171,7 @@ export function HumanPremiumReportView({
   shareUrl,
   emailUrl,
   pdfUrl,
+  backHref,
 }: HumanPremiumReportViewProps) {
   const isKo = report.locale === "ko";
   const t = UI[report.locale];
@@ -191,6 +181,10 @@ export function HumanPremiumReportView({
   );
   const [pdfState, setPdfState] = useState<"idle" | "downloading" | "failed">("idle");
   const [pdfError, setPdfError] = useState<string | null>(null);
+
+  useEffect(() => {
+    markSessionAlive();
+  }, []);
 
   const toc = useMemo(
     () =>
@@ -281,16 +275,30 @@ export function HumanPremiumReportView({
   }
 
   return (
-    <div className="human-premium-report safe-area-shell flex min-h-dvh flex-col">
+    <div className="human-premium-stage safe-area-shell flex min-h-dvh flex-col">
       <AppTopNav active="saju" />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-32 pt-4 sm:px-6 sm:pt-6">
-        <div className="grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)] lg:gap-10">
-          <aside className="no-print hidden lg:sticky lg:top-24 lg:block lg:self-start">
-            <ReportToc items={toc} t={t} />
-          </aside>
+      <main className="flex-1 px-3 py-4 pb-32 sm:px-4 sm:py-6">
+        <div className="human-premium-paper-sheet mx-auto w-full max-w-3xl px-4 py-6 sm:px-8 sm:py-10">
+          {backHref ? (
+            <div className="no-print mb-6">
+              <Link
+                href={backHref}
+                title={t.backToVault}
+                className="inline-flex h-[4.5rem] w-[4.5rem] flex-col items-center justify-center gap-1 rounded-xl border-2 border-[var(--jig-seal)]/25 bg-white/90 text-center shadow-[0_4px_18px_rgba(34,34,34,0.12)] transition hover:border-[var(--jig-seal)]/45 hover:bg-white"
+              >
+                <span className="text-lg leading-none" aria-hidden>
+                  📁
+                </span>
+                <span className="human-premium-serif px-1 text-[9px] font-bold leading-tight text-[var(--jig-ink)]">
+                  {t.vaultButton}
+                </span>
+              </Link>
+            </div>
+          ) : null}
+
+          <ReportToc items={toc} t={t} />
 
           <div className="print-report-main min-w-0 space-y-10 sm:space-y-16">
-            <ReportToc items={toc} t={t} compact />
             <CoverSection report={report} isKo={isKo} />
             <SajuStructureSection report={report} isKo={isKo} />
             <KeyIndicatorsSection report={report} isKo={isKo} />

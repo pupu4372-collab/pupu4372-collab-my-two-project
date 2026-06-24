@@ -4,6 +4,8 @@ import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { Link } from "@/i18n/navigation";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
+import type { HumanPremiumProfile } from "@/lib/reports/human-premium/cart-session";
+import { saveHumanPremiumProfile } from "@/lib/reports/human-premium/cart-session";
 import type { DayPillarFreeFullView } from "@/lib/reports/human-premium/content";
 import {
   BIRTH_TIME_OPTIONS,
@@ -26,25 +28,31 @@ interface DayPillarPreviewData {
   fullView: DayPillarFreeFullView;
 }
 
-export function DayPillarPreview() {
+export function DayPillarPreview({
+  profile,
+  onProfileChange,
+}: {
+  profile: HumanPremiumProfile;
+  onProfileChange: (next: HumanPremiumProfile) => void;
+}) {
   const routeLocale = useLocale();
   const isKo = routeLocale === "ko";
-  const [personName, setPersonName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [birthTimeSelect, setBirthTimeSelect] = useState("unknown");
-  const [timezone, setTimezone] = useState("Asia/Seoul");
-  const [calendarType, setCalendarType] = useState<"solar" | "lunar">("solar");
-  const [privacyConsent, setPrivacyConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<DayPillarPreviewData | null>(null);
   const [showFullResult, setShowFullResult] = useState(false);
 
-  const birthTimeUnknown = birthTimeSelect === "unknown";
+  function patchProfile(partial: Partial<HumanPremiumProfile>) {
+    const next = { ...profile, ...partial };
+    onProfileChange(next);
+    saveHumanPremiumProfile(next);
+  }
+
+  const birthTimeUnknown = profile.birthTimeSelect === "unknown";
   const birthTime = useMemo(() => {
     if (birthTimeUnknown) return null;
-    return parseBirthTimeSelect(birthTimeSelect).birthTime;
-  }, [birthTimeSelect, birthTimeUnknown]);
+    return parseBirthTimeSelect(profile.birthTimeSelect).birthTime;
+  }, [profile.birthTimeSelect, birthTimeUnknown]);
 
   async function handlePreview() {
     setError(null);
@@ -55,15 +63,15 @@ export function DayPillarPreview() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          personName: personName.trim() || (isKo ? "게스트" : "Guest"),
-          email: "preview@ksajupet.local",
-          birthDate,
+          personName: profile.personName.trim() || (isKo ? "게스트" : "Guest"),
+          email: profile.email.trim(),
+          birthDate: profile.birthDate,
           birthTime,
           birthTimeUnknown,
-          timezone,
-          calendarType,
+          timezone: profile.timezone,
+          calendarType: profile.calendarType,
           locale: routeLocale,
-          privacyConsent,
+          privacyConsent: profile.privacyConsent,
         }),
       });
       const data = await res.json();
@@ -84,35 +92,42 @@ export function DayPillarPreview() {
   }
 
   return (
-    <section className="pastel-card space-y-6 p-6 sm:p-8">
+    <section className="pastel-card mx-auto w-full max-w-sm space-y-6 p-6 sm:max-w-md sm:p-8">
       <div className="text-center">
-        <p className="text-sm font-semibold text-channel-saju">
-          {isKo ? "무료 맛보기" : "Free preview"}
-        </p>
-        <h2 className="mt-2 text-2xl font-bold text-ink">
-          {isKo ? "일주 분석 무료로 보기" : "Free day-pillar reading"}
+        <h2 className="text-2xl font-bold text-ink">
+          {isKo ? "사주 정보 입력" : "Birth details"}
         </h2>
-        <p className="mt-2 text-sm text-plum/80">
-          {isKo
-            ? "생년월일만 입력하면 일주(日柱)와 오행 기질을 먼저 확인할 수 있어요."
-            : "Enter your birth date to preview your day pillar and element tone."}
-        </p>
       </div>
 
       {!preview ? (
-        <div className="mx-auto max-w-lg space-y-4">
+        <div className="space-y-4">
           <label className="block text-sm font-medium text-ink">
             {isKo ? "이름" : "Name"}
             <input
               className="pastel-input mt-1 w-full"
-              value={personName}
-              onChange={(e) => setPersonName(e.target.value)}
+              value={profile.personName}
+              onChange={(e) => patchProfile({ personName: e.target.value })}
               placeholder={isKo ? "홍길동" : "Alex"}
             />
           </label>
+          <label className="block text-sm font-medium text-ink">
+            {isKo ? "이메일 (선택)" : "Email (optional)"}
+            <input
+              type="email"
+              className="pastel-input mt-1 w-full"
+              value={profile.email}
+              onChange={(e) => patchProfile({ email: e.target.value })}
+              placeholder="you@email.com"
+            />
+            <span className="mt-1 block text-xs text-plum/50">
+              {isKo
+                ? "원하시면 이메일을 적어주세요. 입력 시 리포트 링크를 보내드려요."
+                : "Optional — we'll email your report link if provided."}
+            </span>
+          </label>
           <BirthDateSelect
-            value={birthDate}
-            onChange={setBirthDate}
+            value={profile.birthDate}
+            onChange={(birthDate) => patchProfile({ birthDate })}
             label={isKo ? "생년월일" : "Birth date"}
             locale={routeLocale as "ko" | "en"}
           />
@@ -120,8 +135,8 @@ export function DayPillarPreview() {
             {isKo ? "출생 시간" : "Birth time"}
             <select
               className="pastel-input mt-1 w-full"
-              value={birthTimeSelect}
-              onChange={(e) => setBirthTimeSelect(e.target.value)}
+              value={profile.birthTimeSelect}
+              onChange={(e) => patchProfile({ birthTimeSelect: e.target.value })}
             >
               {BIRTH_TIME_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -130,26 +145,12 @@ export function DayPillarPreview() {
               ))}
             </select>
           </label>
-          <label className="block text-sm font-medium text-ink">
-            {isKo ? "타임존" : "Timezone"}
-            <select
-              className="pastel-input mt-1 w-full"
-              value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
-            >
-              {COMMON_TIMEZONES.map((tz) => (
-                <option key={tz} value={tz}>
-                  {tz}
-                </option>
-              ))}
-            </select>
-          </label>
           <div className="flex gap-3 text-sm">
             <button
               type="button"
-              onClick={() => setCalendarType("solar")}
+              onClick={() => patchProfile({ calendarType: "solar" })}
               className={`rounded-full px-4 py-2 font-semibold ${
-                calendarType === "solar"
+                profile.calendarType === "solar"
                   ? "bg-channel-saju text-white"
                   : "bg-cream text-plum"
               }`}
@@ -158,9 +159,9 @@ export function DayPillarPreview() {
             </button>
             <button
               type="button"
-              onClick={() => setCalendarType("lunar")}
+              onClick={() => patchProfile({ calendarType: "lunar" })}
               className={`rounded-full px-4 py-2 font-semibold ${
-                calendarType === "lunar"
+                profile.calendarType === "lunar"
                   ? "bg-channel-saju text-white"
                   : "bg-cream text-plum"
               }`}
@@ -168,9 +169,23 @@ export function DayPillarPreview() {
               {isKo ? "음력" : "Lunar"}
             </button>
           </div>
+          <label className="block text-sm font-medium text-ink">
+            {isKo ? "타임존" : "Timezone"}
+            <select
+              className="pastel-input mt-1 w-full"
+              value={profile.timezone}
+              onChange={(e) => patchProfile({ timezone: e.target.value })}
+            >
+              {COMMON_TIMEZONES.map((tz) => (
+                <option key={tz} value={tz}>
+                  {tz}
+                </option>
+              ))}
+            </select>
+          </label>
           <PrivacyConsent
-            checked={privacyConsent}
-            onChange={setPrivacyConsent}
+            checked={profile.privacyConsent}
+            onChange={(privacyConsent) => patchProfile({ privacyConsent })}
             locale={routeLocale as "ko" | "en"}
             variant="pastel"
             audience="human"
@@ -185,7 +200,7 @@ export function DayPillarPreview() {
           ) : null}
           <button
             type="button"
-            disabled={!birthDate || !privacyConsent || loading}
+            disabled={!profile.birthDate || !profile.privacyConsent || loading}
             onClick={handlePreview}
             className="w-full rounded-full bg-channel-saju py-3 font-bold text-white disabled:opacity-50"
           >
@@ -194,8 +209,8 @@ export function DayPillarPreview() {
                 ? "분석 중…"
                 : "Analyzing…"
               : isKo
-                ? "일주 분석 무료로 보기 →"
-                : "See free day-pillar reading →"}
+                ? "일주 미리보기 →"
+                : "Preview day pillar →"}
           </button>
         </div>
       ) : (
@@ -215,7 +230,7 @@ export function DayPillarPreview() {
                 {preview.traits.map((trait) => (
                   <li
                     key={trait}
-                    className="rounded-full bg-white/70 px-3 py-1 text-xs font-medium text-plum"
+                    className="rounded-full bg-white px-3 py-1 text-xs font-medium text-plum"
                   >
                     {trait}
                   </li>
@@ -252,7 +267,7 @@ export function DayPillarPreview() {
                 {preview.fullView.pillars.map((row) => (
                   <article
                     key={row.slot}
-                    className="rounded-2xl border border-plum/10 bg-white/70 p-4"
+                    className="rounded-2xl border border-plum/10 bg-white p-4"
                   >
                     <p className="text-xs font-semibold text-channel-saju">{row.label}</p>
                     <p className="mt-1 text-2xl font-bold text-ink">{row.pillar}</p>
@@ -261,7 +276,7 @@ export function DayPillarPreview() {
                 ))}
               </div>
 
-              <section className="rounded-2xl border border-plum/10 bg-cream/60 p-4">
+              <section className="rounded-2xl border border-plum/10 bg-white p-4">
                 <h4 className="font-semibold text-ink">
                   {isKo ? "오행 분포" : "Element balance"}
                 </h4>
@@ -283,7 +298,7 @@ export function DayPillarPreview() {
                 </ul>
               </section>
 
-              <section className="rounded-2xl border border-plum/10 bg-white/70 p-5">
+              <section className="rounded-2xl border border-plum/10 bg-white p-5">
                 <h4 className="font-semibold text-ink">
                   {isKo ? "일주 · 사주 구조 해석" : "Day pillar · chart structure"}
                 </h4>

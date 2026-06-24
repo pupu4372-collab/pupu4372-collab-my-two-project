@@ -73,6 +73,10 @@ interface ChannelShellProps {
   }>;
   heroMedia?: ReactNode;
   hideThemeLabel?: boolean;
+  /** Match human-premium preview card width (max-w-sm / sm:max-w-md) */
+  narrowHero?: boolean;
+  /** Skip the hero GlassCard (content only) */
+  hideHero?: boolean;
 }
 
 export function ChannelShell({
@@ -88,6 +92,8 @@ export function ChannelShell({
   rightLinks,
   heroMedia,
   hideThemeLabel = false,
+  narrowHero = false,
+  hideHero = false,
 }: ChannelShellProps) {
   const t = THEME[theme];
   const tc = useTranslations("common");
@@ -153,7 +159,7 @@ export function ChannelShell({
         </div>
         <GlassCard
           variant={heroSolid ? "solid" : "glass"}
-          className={`relative overflow-hidden ${heroSolid ? "" : `border-2 ${t.border}`} px-6 py-8 md:px-10`}
+          className={`relative overflow-hidden ${heroSolid ? "" : `border-2 ${t.border}`} px-6 py-8 md:px-10 ${narrowHero ? "mx-auto w-full max-w-sm sm:max-w-md" : ""} ${hideHero ? "hidden" : ""}`}
         >
           <div className={`absolute -right-10 -top-14 h-44 w-44 rounded-full ${t.bg} blur-3xl`} />
           <div className={heroMedia ? "relative grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(260px,42%)] sm:items-center" : "relative"}>

@@ -14,9 +14,10 @@ import {
   type HumanPremiumReportRow,
 } from "./types";
 
-function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
+import {
+  isDeliverableHumanPremiumEmail,
+  resolveHumanPremiumEmail,
+} from "./email-policy";
 
 function parseGender(body: Record<string, unknown>): "male" | "female" | null {
   if (body.gender === "male") return "male";
@@ -29,7 +30,7 @@ export function parseHumanPremiumReportInput(
   userId?: string | null
 ): HumanPremiumReportInput {
   const personName = String(body.personName ?? "").trim();
-  const email = String(body.email ?? "").trim().toLowerCase();
+  const { email } = resolveHumanPremiumEmail(body.email);
   const birthDate = String(body.birthDate ?? "").trim();
   const timezone = String(body.timezone ?? "Asia/Seoul").trim();
   const calendarType = body.calendarType === "lunar" ? "lunar" : "solar";
@@ -38,7 +39,6 @@ export function parseHumanPremiumReportInput(
   const birthTime = birthTimeUnknown ? null : String(body.birthTime ?? "").trim() || null;
 
   if (!personName) throw new Error("personName required.");
-  if (!email || !isValidEmail(email)) throw new Error("Valid email required.");
   if (!birthDate) throw new Error("birthDate required.");
   if (!timezone) throw new Error("timezone required.");
   if (!body.privacyConsent) throw new Error("privacyConsent required.");
@@ -95,7 +95,11 @@ export async function completeHumanPremiumPayment(
 }> {
   if (row.report_payload) {
     let saved = row;
-    if (options?.sendEmail !== false && row.email_status !== "sent") {
+    if (
+      options?.sendEmail !== false &&
+      isDeliverableHumanPremiumEmail(row.email) &&
+      row.email_status !== "sent"
+    ) {
       saved = await sendHumanPremiumReportEmail(row, options?.request);
     }
 
@@ -115,7 +119,7 @@ export async function completeHumanPremiumPayment(
     payload.birthBasis
   );
 
-  if (options?.sendEmail !== false) {
+  if (options?.sendEmail !== false && isDeliverableHumanPremiumEmail(ready.email)) {
     ready = await sendHumanPremiumReportEmail(ready, options?.request);
   }
 

@@ -97,7 +97,7 @@ export function ManseTable({
   ];
 
   return (
-    <div className="human-premium-lattice overflow-x-auto bg-gradient-to-b from-[var(--jig-hanji)] to-white/60 p-4 shadow-inner sm:p-6">
+    <div className="overflow-x-auto p-4 sm:p-6">
       <div className="min-w-[620px]">
         <div
           className="grid gap-0 pl-12 text-center text-sm font-semibold text-[var(--jig-ink)]"
@@ -121,7 +121,7 @@ export function ManseTable({
           </div>
 
           <div
-            className="grid overflow-hidden rounded-lg border border-[var(--jig-ink)]/15 bg-white/70 text-center shadow-sm"
+            className="grid overflow-hidden rounded-lg border border-[var(--jig-ink)]/15 bg-white text-center shadow-sm"
             style={{ gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}
           >
             {cols.map((col, colIndex) => {

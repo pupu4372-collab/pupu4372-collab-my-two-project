@@ -167,7 +167,7 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
 
   return (
     <NightPageShell>
-      <AppTopNav active="community" />
+      <AppTopNav active="challenge" />
       <PageContainer className="space-y-8 py-8">
         <Link
           href="/community/challenge"
@@ -316,7 +316,7 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
           </>
         )}
       </PageContainer>
-      <MobileBottomNav active="community" />
+      <MobileBottomNav active="challenge" />
     </NightPageShell>
   );
 }

@@ -20,7 +20,7 @@ export function SajuStructureSection({
         title={isKo ? "사주 구조 해석" : "Chart structure"}
         subtitle={isKo ? "오행 · 십신 · 명리 진단" : "Elements · Ten Gods · frame"}
       />
-      <article className="human-premium-inner-frame human-premium-paper rounded-lg p-6 sm:p-8">
+      <article className="human-premium-paper rounded-lg p-6 sm:p-8">
         <BodyText body={body} className="human-premium-serif text-lg leading-[1.95]" />
       </article>
     </section>

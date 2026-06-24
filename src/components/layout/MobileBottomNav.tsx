@@ -27,6 +27,7 @@ const MOBILE_LINKS: Array<{
   { key: "saju", href: "/saju", icon: "✨", requiresAuth: true },
   { key: "challenge", href: "/community/challenge", icon: "🏅", requiresAuth: true },
   { key: "community", href: "/community", icon: "💬", requiresAuth: true },
+  { key: "profile", href: "/profile", icon: "👤", requiresAuth: true },
 ];
 
 interface MobileBottomNavProps {

@@ -41,7 +41,7 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
 
   return (
     <section id="section-cover" className="scroll-mt-24 space-y-8">
-      <div className="human-premium-frame relative py-8 text-center sm:py-12">
+      <div className="relative py-8 text-center sm:py-12">
         <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center px-4">
           <Image
             src="/stitch/jigwanjae/jigwanjae-cover-logo.png"
@@ -97,7 +97,7 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
         </div>
       </div>
 
-      <div className="human-premium-lattice bg-white/40 p-6 sm:p-8">
+      <div className="p-6 sm:p-8">
         <p className="human-premium-label-caps mb-2 text-[var(--jig-seal)]">
           {isKo ? "일주 오행" : "Day pillar element"}
         </p>
@@ -116,7 +116,7 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
         <ManseTable pillars={pillars} hasHour={hasHour} isKo={isKo} />
       </div>
 
-      <div className="human-premium-lattice bg-white/40 p-6 sm:p-10">
+      <div className="p-6 sm:p-10">
         <header className="mb-6 border-b border-[var(--jig-ink)]/5 pb-4">
           <h3 className="human-premium-serif text-xl font-bold sm:text-2xl">
             {isKo ? "오행 에너지 균형" : "Element balance"}

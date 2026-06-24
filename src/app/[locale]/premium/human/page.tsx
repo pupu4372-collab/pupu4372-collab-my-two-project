@@ -15,6 +15,7 @@ export default async function HumanPremiumPage() {
         title="Human Premium"
         subtitle="K-Saju Pet · 사람 사주 프리미엄"
         hideThemeLabel
+        narrowHero
       >
         <HumanPremiumShop />
         <p className="mt-8 text-center text-sm">

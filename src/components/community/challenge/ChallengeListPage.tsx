@@ -59,7 +59,7 @@ export function ChallengeListPage() {
 
   return (
     <NightPageShell>
-      <AppTopNav active="community" />
+      <AppTopNav active="challenge" />
       <PageContainer className="space-y-8 py-8">
         <SectionHeader
           onDark
@@ -144,7 +144,7 @@ export function ChallengeListPage() {
           </ul>
         )}
       </PageContainer>
-      <MobileBottomNav active="community" />
+      <MobileBottomNav active="challenge" />
     </NightPageShell>
   );
 }

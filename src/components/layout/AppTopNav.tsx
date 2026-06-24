@@ -31,6 +31,7 @@ const NAV_LINKS: Array<{
   { key: "challenge", href: "/community/challenge" },
   { key: "community", href: "/community" },
   { key: "support", href: "/support" },
+  { key: "profile", href: "/profile" },
 ];
 
 interface AppTopNavProps {

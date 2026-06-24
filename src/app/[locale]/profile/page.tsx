@@ -11,9 +11,9 @@ export default async function ProfileRoutePage({ params }: ProfileRoutePageProps
   await params;
 
   return (
-    <div className="min-h-screen bg-dream-sky">
+    <div className="min-h-screen bg-transparent">
       <AppTopNav active="profile" />
-      <PageContainer className="max-w-3xl pb-32">
+      <PageContainer className="max-w-6xl pb-32">
         <ProfilePage />
       </PageContainer>
       <MobileBottomNav active="profile" />

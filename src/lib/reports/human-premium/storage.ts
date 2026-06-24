@@ -14,6 +14,7 @@ import {
   type HumanPremiumReportRow,
   type HumanPremiumReportStatus,
 } from "./types";
+import { humanPremiumWebExpiresAt } from "./retention";
 
 type Db = SupabaseClient<Database>;
 
@@ -126,6 +127,22 @@ export async function getHumanPremiumReportByPaymentOrderId(
   return data ? rowFromDb(data) : null;
 }
 
+export async function getHumanPremiumReportByCheckoutSession(
+  checkoutSessionId: string
+): Promise<HumanPremiumReportRow | null> {
+  const supabase = requireDb();
+  const { data, error } = await supabase
+    .from("human_premium_reports")
+    .select("*")
+    .eq("checkout_session_id", checkoutSessionId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  return data ? rowFromDb(data) : null;
+}
+
 export async function getHumanPremiumReportByWebToken(
   token: string
 ): Promise<HumanPremiumReportRow | null> {
@@ -228,9 +245,67 @@ export async function markHumanPremiumReportReady(
     pdf_generated_at: null,
     download_token: null,
     download_expires_at: null,
+    web_access_expires_at: humanPremiumWebExpiresAt(),
     failure_stage: null,
     failure_message: null,
     ...(birthBasis ? { birth_basis: birthBasis } : {}),
+  });
+}
+
+export async function listHumanPremiumCartOrderRows(options: {
+  userId?: string | null;
+  email?: string | null;
+  orderIds?: string[];
+  limit?: number;
+}): Promise<HumanPremiumReportRow[]> {
+  const supabase = requireDb();
+  const limit = options.limit ?? 20;
+  const rows: HumanPremiumReportRow[] = [];
+
+  if (options.orderIds?.length) {
+    const { data, error } = await supabase
+      .from("human_premium_reports")
+      .select("*")
+      .in("payment_order_id", options.orderIds)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    rows.push(...(data ?? []).map(rowFromDb));
+  }
+
+  if (options.userId) {
+    const { data, error } = await supabase
+      .from("human_premium_reports")
+      .select("*")
+      .eq("user_id", options.userId)
+      .like("payment_order_id", "hp_cart_%")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) throw new Error(error.message);
+    rows.push(...(data ?? []).map(rowFromDb));
+  }
+
+  const normalizedEmail =
+    typeof options.email === "string" ? options.email.trim().toLowerCase() : "";
+  if (normalizedEmail && !normalizedEmail.endsWith("@ksajupet.local")) {
+    const { data, error } = await supabase
+      .from("human_premium_reports")
+      .select("*")
+      .eq("email", normalizedEmail)
+      .like("payment_order_id", "hp_cart_%")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) throw new Error(error.message);
+    rows.push(...(data ?? []).map(rowFromDb));
+  }
+
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    if (seen.has(row.id)) return false;
+    seen.add(row.id);
+    return Boolean(row.birth_basis?.cart?.cartOrder);
   });
 }
 

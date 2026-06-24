@@ -352,7 +352,7 @@ export function PetProfilesList({
   }
 
   if (error && pets.length === 0) {
-    return <p className="text-sm text-red-700/80">{error}</p>;
+    return <p className="rounded-2xl bg-red-50/95 px-4 py-3 text-sm text-red-800">{error}</p>;
   }
 
   if (pets.length === 0) {
@@ -367,7 +367,7 @@ export function PetProfilesList({
   return (
     <div className={isCompactView ? "space-y-2" : "space-y-4"}>
       {(message || error) && (
-        <div className={`rounded-2xl bg-white/55 text-sm ${isCompactView ? "px-3 py-2 text-xs" : "px-4 py-3"}`}>
+        <div className={`rounded-2xl bg-white/90 text-sm shadow-sm ${isCompactView ? "px-3 py-2 text-xs" : "px-4 py-3"}`}>
           {message && <p className="font-medium text-channel-community">{message}</p>}
           {error && <p className="text-red-700/80">{error}</p>}
         </div>
@@ -381,32 +381,32 @@ export function PetProfilesList({
             : "grid gap-3 sm:grid-cols-3"
         }
       >
-        <div className={isCompactView ? "rounded-xl bg-channel-saju/10 px-2.5 py-1.5" : "rounded-2xl bg-channel-saju/10 px-4 py-3"}>
-          <p className="text-plum/55">{isKo ? "저장된 펫" : "Saved pets"}</p>
-          <p className={isCompactView ? "font-bold text-channel-saju" : "mt-1 text-2xl font-bold text-channel-saju"}>
+        <div className={isCompactView ? "rounded-xl border border-white/20 bg-white/90 px-2.5 py-1.5 shadow-sm" : "glass-card rounded-2xl px-4 py-3"}>
+          <p className="text-xs font-semibold text-plum/60">{isKo ? "저장된 펫" : "Saved pets"}</p>
+          <p className={isCompactView ? "font-bold text-primary" : "mt-1 text-2xl font-bold text-primary"}>
             {pets.length}
           </p>
           {!isCompactView && (
-            <p className="mt-1 text-[11px] text-plum/45">
+            <p className="mt-1 text-[11px] text-plum/50">
               {isKo ? "등록된 반려동물" : "Registered pets"}
             </p>
           )}
         </div>
-        <div className={isCompactView ? "rounded-xl bg-petal/35 px-2.5 py-1.5" : "rounded-2xl bg-petal/35 px-4 py-3"}>
-          <p className="text-plum/55">{isKo ? "사주 결과" : "Saju results"}</p>
-          <p className={isCompactView ? "font-bold text-plum" : "mt-1 text-2xl font-bold text-plum"}>{totalReadings}</p>
+        <div className={isCompactView ? "rounded-xl border border-white/20 bg-white/90 px-2.5 py-1.5 shadow-sm" : "glass-card rounded-2xl px-4 py-3"}>
+          <p className="text-xs font-semibold text-plum/60">{isKo ? "사주 결과" : "Saju results"}</p>
+          <p className={isCompactView ? "font-bold text-primary" : "mt-1 text-2xl font-bold text-primary"}>{totalReadings}</p>
         </div>
         <Link
           href="/saju"
           className={
             isCompactView
-              ? "rounded-xl bg-mint/45 px-2.5 py-1.5 font-bold text-ink transition hover:brightness-105"
-              : "rounded-2xl bg-mint/45 px-4 py-3 text-sm font-bold text-ink transition hover:brightness-105"
+              ? "rounded-xl border border-white/20 bg-white/90 px-2.5 py-1.5 font-bold text-primary shadow-sm transition hover:bg-white"
+              : "glass-card rounded-2xl px-4 py-3 text-sm font-bold text-primary transition hover:bg-white/80"
           }
         >
           {isKo ? "새 펫 사주" : "New pet saju"}
           {!isCompactView && (
-            <span className="mt-1 block text-xs font-medium text-ink/60">
+            <span className="mt-1 block text-xs font-medium text-plum/60">
               {isKo ? "사주 입력 후 자동 저장" : "Saved after saju reading"}
             </span>
           )}
@@ -445,8 +445,8 @@ export function PetProfilesList({
                 useGlassCards
                   ? "glass-card rounded-[2rem] p-5 text-primary transition active:scale-[0.99]"
                   : isCompactView
-                    ? "rounded-xl border border-plum/15 bg-white/55 px-2 py-2"
-                    : "rounded-2xl border border-plum/15 bg-white/55 px-3 py-3"
+                    ? "rounded-xl border border-white/20 bg-white/90 px-2 py-2 shadow-sm"
+                    : "glass-card rounded-[2rem] p-5 text-primary"
               }
             >
               <div className={`flex items-center ${useGlassCards ? "w-full gap-4" : `items-start ${isCompactView ? "gap-2" : "gap-2.5"}`}`}>
@@ -558,7 +558,7 @@ export function PetProfilesList({
               )}
 
               {editable && drafts[pet.id] && (
-                <div className="mt-4 grid gap-3 rounded-2xl bg-white/45 p-4 sm:grid-cols-2">
+                <div className="mt-4 grid gap-3 rounded-2xl border border-plum/10 bg-white/85 p-4 sm:grid-cols-2">
                   <label className="block text-xs font-medium text-plum/80 sm:col-span-2">
                     {isKo ? "펫 이름" : "Pet name"}
                     <input

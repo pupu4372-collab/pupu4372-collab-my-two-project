@@ -1,5 +1,6 @@
 import { HumanPremiumReportView } from "@/components/reports/HumanPremiumReportView";
 import { Link } from "@/i18n/navigation";
+import { parseCartParentOrderId } from "@/lib/reports/human-premium/cart";
 import { scheduleHumanPremiumPdfPrewarm } from "@/lib/reports/human-premium/pdf-cache";
 import { resolveHumanPremiumReportByToken } from "@/lib/reports/human-premium/resolve";
 import { resolveAppBaseUrlFromHeaders } from "@/lib/app-url";
@@ -47,6 +48,10 @@ export default async function HumanPremiumReportRoute({
   const shareUrl = `${baseUrl}/${locale}/reports/human/${token}`;
   const emailUrl = `${baseUrl}/api/premium/human/email`;
   const pdfUrl = `${baseUrl}/api/premium/human/pdf`;
+  const parentOrderId = parseCartParentOrderId(resolved.row.payment_order_id);
+  const backHref = parentOrderId
+    ? `/premium/human/vault`
+    : `/premium/human`;
 
   return (
     <HumanPremiumReportView
@@ -54,6 +59,7 @@ export default async function HumanPremiumReportRoute({
       shareUrl={shareUrl}
       emailUrl={emailUrl}
       pdfUrl={pdfUrl}
+      backHref={backHref}
     />
   );
 }

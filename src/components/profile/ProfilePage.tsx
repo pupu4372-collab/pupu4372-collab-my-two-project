@@ -100,6 +100,18 @@ export function ProfilePage() {
             ›
           </span>
         </Link>
+        <Link
+          href="/premium/human/vault"
+          className="flex items-center justify-between px-5 py-4 transition hover:bg-white/40"
+        >
+          <span className="flex items-center gap-3 text-sm font-medium text-on-surface">
+            <span aria-hidden>✨</span>
+            {isKo ? "프리미엄 리포트 보관함" : "Premium report vault"}
+          </span>
+          <span className="text-plum/40" aria-hidden>
+            ›
+          </span>
+        </Link>
       </GlassCard>
     </div>
   );

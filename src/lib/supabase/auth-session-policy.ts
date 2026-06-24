@@ -66,11 +66,6 @@ export function shouldInvalidateSession(): boolean {
     return true;
   }
 
-  const rememberMe = localStorage.getItem(REMEMBER_KEY) === "1";
-  if (!rememberMe && sessionStorage.getItem(SESSION_ALIVE_KEY) !== "1") {
-    return true;
-  }
-
   return false;
 }
 

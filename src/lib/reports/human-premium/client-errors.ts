@@ -9,6 +9,7 @@ const KO_MESSAGES: Record<string, string> = {
   "Supabase is not configured.": "Supabase 설정이 필요합니다. .env.local에 NEXT_PUBLIC_SUPABASE_URL 과 SUPABASE_SERVICE_ROLE_KEY 를 넣고 서버를 재시작하세요.",
   "Demo checkout failed.": "데모 결제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
   "Failed to create human premium report.": "리포트 저장에 실패했습니다. DB 마이그레이션을 확인해 주세요.",
+  cart_items_already_purchased: "이미 구매한 리포트는 장바구니에 담을 수 없어요. 보관함에서 확인해 주세요.",
 };
 
 export function formatHumanPremiumError(message: string, locale: "ko" | "en"): string {

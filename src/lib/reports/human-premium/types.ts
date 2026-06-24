@@ -12,27 +12,27 @@ export type ReportType =
   | "lifetime";
 
 export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
-  daily: "일간 운세",
-  weekly: "주간 운세",
-  monthly: "월간 운세",
-  yearly: "연간 운세",
-  mental: "건강·힐링·에너지",
-  love: "사랑과 결혼",
-  career: "직장 및 성장",
+  daily: "데일리루틴",
+  weekly: "주간플랜",
+  monthly: "월간 로드맵",
+  yearly: "올해의 대운 플랜",
+  mental: "멘탈디톡스",
+  love: "로맨스시그널",
+  career: "커리어 빌드업",
   business: "비즈니스 파트너",
-  lifetime: "인생 설계",
+  lifetime: "인생의 마스터플랜",
 };
 
 export const REPORT_TYPE_LABELS_EN: Record<ReportType, string> = {
-  daily: "Daily fortune",
-  weekly: "Weekly fortune",
-  monthly: "Monthly fortune",
-  yearly: "Yearly fortune",
-  mental: "Health, healing & energy",
-  love: "Love & marriage",
-  career: "Career & growth",
-  business: "Business & partners",
-  lifetime: "Lifetime design",
+  daily: "Daily Routine",
+  weekly: "Weekly Plan",
+  monthly: "Monthly Roadmap",
+  yearly: "This Year's Major-Luck Plan",
+  mental: "Mental Detox",
+  love: "Romance Signal",
+  career: "Career Build-up",
+  business: "Business Partner",
+  lifetime: "Life Master Plan",
 };
 
 export const DEFAULT_REPORT_TYPE: ReportType = "lifetime";
@@ -149,6 +149,19 @@ export interface HumanPremiumBirthBasis {
   birthUtc?: string;
   convertedSolarDate?: string;
   gender?: "male" | "female" | null;
+  cart?: HumanPremiumCartMeta;
+}
+
+export interface HumanPremiumCartGeneratedItem {
+  reportId: string;
+  webToken: string;
+}
+
+export interface HumanPremiumCartMeta {
+  cartOrder: true;
+  items: ReportType[];
+  generated: Partial<Record<ReportType, HumanPremiumCartGeneratedItem>>;
+  deliverEmail: boolean;
 }
 
 export interface HumanPremiumReportInput {

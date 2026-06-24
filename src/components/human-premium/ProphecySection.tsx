@@ -48,7 +48,7 @@ export function ProphecySection({
       </article>
 
       {cohort?.body ? (
-        <article className="human-premium-lattice human-premium-paper rounded-lg p-6">
+        <article className="human-premium-paper rounded-lg p-6">
           <p className="human-premium-label-caps text-[var(--jig-seal)]">COHORT INSIGHT</p>
           <BodyText body={cohort.body} className="mt-3" />
         </article>
