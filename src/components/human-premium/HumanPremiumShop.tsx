@@ -26,11 +26,27 @@ import {
 } from "@/lib/saju/birth-time-options";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import { useLocale } from "next-intl";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type CheckoutTarget =
   | { kind: "single"; reportType: ReportType }
   | { kind: "bundle"; bundle: HumanPremiumBundleKind };
+
+type PaymentMethod = "portone" | "paypal_link";
+
+type PaymentConfig = {
+  portone: boolean;
+  paypalLink: boolean;
+  demoAllowed: boolean;
+};
+
+type CheckoutResult = {
+  reportId: string;
+  webUrl: string;
+  emailStatus: string | null;
+};
+
+const PENDING_KEY = "human_premium_pending";
 
 export function HumanPremiumShop() {
   const routeLocale = useLocale();
@@ -39,6 +55,8 @@ export function HumanPremiumShop() {
   const { accessToken } = useSupabaseSession();
 
   const [checkout, setCheckout] = useState<CheckoutTarget | null>(null);
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("portone");
   const [personName, setPersonName] = useState("");
   const [email, setEmail] = useState("");
   const [birthDate, setBirthDate] = useState("");
@@ -49,7 +67,12 @@ export function HumanPremiumShop() {
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [portOneReady, setPortOneReady] = useState<boolean | null>(null);
+  const [paypalPending, setPaypalPending] = useState<{
+    reportId: string;
+    paymentReference: string;
+    link: string;
+  } | null>(null);
+  const [result, setResult] = useState<CheckoutResult | null>(null);
 
   const birthTimeUnknown = birthTimeSelect === "unknown";
   const birthTime = useMemo(
@@ -61,6 +84,19 @@ export function HumanPremiumShop() {
   const subtitles = isKo ? REPORT_TYPE_SUBTITLES_KO : REPORT_TYPE_SUBTITLES_EN;
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
 
+  useEffect(() => {
+    void fetch("/api/payments/human-premium/config")
+      .then((res) => res.json())
+      .then((data: PaymentConfig) => {
+        setPaymentConfig(data);
+        if (data.portone) setPaymentMethod("portone");
+        else if (data.paypalLink) setPaymentMethod("paypal_link");
+      })
+      .catch(() => {
+        setPaymentConfig({ portone: false, paypalLink: false, demoAllowed: true });
+      });
+  }, []);
+
   function scrollToGrid() {
     gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -68,6 +104,8 @@ export function HumanPremiumShop() {
   function openCheckout(target: CheckoutTarget) {
     setCheckout(target);
     setError(null);
+    setPaypalPending(null);
+    setResult(null);
     scrollToGrid();
   }
 
@@ -83,51 +121,73 @@ export function HumanPremiumShop() {
     return "lifetime";
   }
 
-  async function handlePay() {
-    if (!checkout || !privacyConsent) return;
-    setLoading(true);
-    setError(null);
+  function checkoutPayload() {
+    if (!checkout) return null;
+    return {
+      personName,
+      email,
+      birthDate,
+      birthTime,
+      birthTimeUnknown,
+      timezone,
+      calendarType,
+      locale: routeLocale,
+      privacyConsent,
+      gender: gender || undefined,
+      reportType: checkoutReportType(checkout),
+      isBundle: checkout.kind === "bundle" && checkout.bundle === "all",
+      bundle: checkout.kind === "bundle" ? checkout.bundle : undefined,
+    };
+  }
 
+  function authHeaders(): Record<string, string> {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+    return headers;
+  }
+
+  const formReady = Boolean(privacyConsent && personName && email && birthDate);
+
+  async function prepareCheckout(method: PaymentMethod) {
+    const payload = checkoutPayload();
+    if (!payload) return null;
+
+    const res = await fetch("/api/payments/human-premium/checkout", {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ ...payload, paymentMethod: method }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Checkout failed");
+    return data as {
+      configured: boolean;
+      reportId: string;
+      paymentId: string;
+      storeId: string;
+      amount: number;
+      orderName: string;
+      webAccessToken?: string;
+      paypal?: { link: string | null; paymentReference: string };
+    };
+  }
+
+  async function handlePortOnePay() {
+    if (!checkout || !formReady) return;
+    setLoading(true);
+    setError(null);
+    setPaypalPending(null);
+    setResult(null);
 
     try {
-      const res = await fetch("/api/payments/human-premium/checkout", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          personName,
-          email,
-          birthDate,
-          birthTime,
-          birthTimeUnknown,
-          timezone,
-          calendarType,
-          locale: routeLocale,
-          privacyConsent,
-          gender: gender || undefined,
-          reportType: checkoutReportType(checkout),
-          isBundle: checkout.kind === "bundle" && checkout.bundle === "all",
-          bundle: checkout.kind === "bundle" ? checkout.bundle : undefined,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Checkout failed");
-
-      setPortOneReady(data.configured ?? false);
+      const data = await prepareCheckout("portone");
+      if (!data) return;
 
       if (!data.configured) {
         setError(
           isKo
-            ? "결제 연동 준비 중입니다. PortOne 키 설정 후 이용 가능합니다."
-            : "Payment integration pending. Configure PortOne keys to checkout."
+            ? "PortOne 키가 설정되지 않았습니다. 데모 결제로 테스트하거나 PayPal 링크를 설정하세요."
+            : "PortOne is not configured. Use demo checkout or set PayPal links."
         );
-        return;
-      }
-
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl as string;
         return;
       }
 
@@ -142,6 +202,12 @@ export function HumanPremiumShop() {
         }
       ).requestPayment;
 
+      const token = data.webAccessToken ?? "";
+      sessionStorage.setItem(
+        PENDING_KEY,
+        JSON.stringify({ reportId: data.reportId, token })
+      );
+
       await requestPayment({
         storeId: data.storeId,
         paymentId: data.paymentId,
@@ -149,7 +215,7 @@ export function HumanPremiumShop() {
         totalAmount: data.amount,
         currency: "KRW",
         customData: { reportId: data.reportId },
-        redirectUrl: `${window.location.origin}/${routeLocale}/premium/human/success?reportId=${data.reportId}`,
+        redirectUrl: `${window.location.origin}/${routeLocale}/premium/human/success?reportId=${data.reportId}${token ? `&token=${token}` : ""}`,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Checkout failed");
@@ -158,9 +224,122 @@ export function HumanPremiumShop() {
     }
   }
 
+  async function handlePayPalLinkPay() {
+    if (!checkout || !formReady) return;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      const data = await prepareCheckout("paypal_link");
+      if (!data) return;
+
+      const link = data.paypal?.link;
+      if (!link) {
+        setError(
+          isKo
+            ? "PayPal 결제 링크가 설정되지 않았습니다. .env에 PAYPAL_LINK_* 를 추가하세요."
+            : "PayPal payment link is not configured. Set PAYPAL_LINK_* in .env."
+        );
+        return;
+      }
+
+      const token = data.webAccessToken ?? "";
+      const paymentReference = data.paypal?.paymentReference ?? data.paymentId;
+
+      sessionStorage.setItem(
+        PENDING_KEY,
+        JSON.stringify({
+          reportId: data.reportId,
+          token,
+          paymentReference,
+        })
+      );
+
+      setPaypalPending({
+        reportId: data.reportId,
+        paymentReference,
+        link,
+      });
+
+      window.open(link, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Checkout failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDemoPay() {
+    if (!checkout || !formReady) return;
+    setLoading(true);
+    setError(null);
+    setPaypalPending(null);
+    setResult(null);
+
+    try {
+      const payload = checkoutPayload();
+      if (!payload) return;
+
+      const res = await fetch("/api/payments/human-premium/demo-complete", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Demo checkout failed");
+
+      setResult({
+        reportId: data.report.id,
+        webUrl: data.webUrl,
+        emailStatus: data.report.email_status ?? null,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Demo checkout failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const showPortone = paymentConfig?.portone ?? false;
+  const showPaypal = paymentConfig?.paypalLink ?? false;
+  const showDemo = paymentConfig?.demoAllowed ?? true;
+
   return (
     <div className="space-y-10">
+      {showDemo ? (
+        <p className="rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-center text-sm text-amber-900">
+          {isKo
+            ? "테스트: 아래 결제 폼에서 「데모 결제」로 리포트 생성까지 확인할 수 있습니다."
+            : "Test mode: use “Demo checkout” in the form to generate a report without payment."}
+        </p>
+      ) : null}
+
       <DayPillarPreview onViewFull={(type) => openCheckout({ kind: "single", reportType: type })} />
+
+      {result ? (
+        <section className="pastel-card space-y-4 p-6 text-center">
+          <h3 className="text-xl font-extrabold text-plum">
+            {isKo ? "리포트가 준비되었습니다" : "Your report is ready"}
+          </h3>
+          <p className="text-sm text-plum/70">
+            {result.emailStatus === "sent"
+              ? isKo
+                ? "이메일로도 링크를 보냈습니다."
+                : "We also emailed you the link."
+              : isKo
+                ? "아래에서 바로 열어보세요."
+                : "Open it below."}
+          </p>
+          <a
+            href={result.webUrl}
+            className="inline-flex rounded-full bg-channel-saju px-5 py-3 text-sm font-semibold text-white"
+          >
+            {isKo ? "리포트 열기" : "Open report"}
+          </a>
+          <p className="break-all text-xs text-plum/50">ID: {result.reportId}</p>
+        </section>
+      ) : null}
 
       <div ref={gridRef} className="space-y-6">
         <header className="text-center">
@@ -205,6 +384,34 @@ export function HumanPremiumShop() {
               {formatKrw(checkoutAmount(checkout))}
             </span>
           </h3>
+
+          {showPortone && showPaypal ? (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("portone")}
+                className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                  paymentMethod === "portone"
+                    ? "bg-channel-saju text-white"
+                    : "border border-plum/20 text-plum"
+                }`}
+              >
+                {isKo ? "국내 카드 (PortOne)" : "KRW card (PortOne)"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("paypal_link")}
+                className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                  paymentMethod === "paypal_link"
+                    ? "bg-[#222222] text-white"
+                    : "border border-plum/20 text-plum"
+                }`}
+              >
+                PayPal
+              </button>
+            </div>
+          ) : null}
+
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-medium text-ink">
               {isKo ? "이름" : "Name"}
@@ -277,26 +484,83 @@ export function HumanPremiumShop() {
             variant="pastel"
             audience="human"
           />
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
-          {portOneReady === false ? (
-            <p className="text-sm text-plum/80">
-              {isKo
-                ? "PortOne 환경변수 설정 후 실제 결제가 가능합니다."
-                : "Set PortOne env vars to enable live checkout."}
-            </p>
+
+          {paypalPending ? (
+            <div className="rounded-2xl border border-[#222222]/15 bg-[#fcf9f2] p-4 text-sm text-plum/90">
+              <p className="font-semibold text-ink">
+                {isKo ? "PayPal 결제 페이지가 열렸습니다." : "PayPal checkout opened."}
+              </p>
+              <p className="mt-2">
+                {isKo
+                  ? "결제 시 아래 주문번호를 메모에 적어주시면 빠르게 확인됩니다."
+                  : "Add this order reference in the PayPal note field if available."}
+              </p>
+              <p className="mt-2 break-all font-mono text-xs">{paypalPending.paymentReference}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <a
+                  href={paypalPending.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full bg-[#222222] px-4 py-2 text-sm font-semibold text-white"
+                >
+                  {isKo ? "PayPal 다시 열기" : "Reopen PayPal"}
+                </a>
+                <a
+                  href={`/${routeLocale}/premium/human/success?reportId=${paypalPending.reportId}`}
+                  className="rounded-full border border-plum/20 px-4 py-2 text-sm font-semibold text-plum"
+                >
+                  {isKo ? "결제 완료 후 이동" : "After payment"}
+                </a>
+              </div>
+            </div>
           ) : null}
+
+          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
           <div className="flex flex-wrap gap-3">
+            {paymentMethod === "portone" && showPortone ? (
+              <button
+                type="button"
+                disabled={loading || !formReady}
+                onClick={() => void handlePortOnePay()}
+                className="rounded-full bg-channel-saju px-6 py-3 font-bold text-white disabled:opacity-50"
+              >
+                {loading ? (isKo ? "처리 중…" : "Processing…") : isKo ? "카드 결제" : "Pay with card"}
+              </button>
+            ) : null}
+            {paymentMethod === "paypal_link" && showPaypal ? (
+              <button
+                type="button"
+                disabled={loading || !formReady}
+                onClick={() => void handlePayPalLinkPay()}
+                className="rounded-full bg-[#222222] px-6 py-3 font-bold text-white disabled:opacity-50"
+              >
+                {loading ? (isKo ? "처리 중…" : "Processing…") : "PayPal"}
+              </button>
+            ) : null}
+            {!showPortone && !showPaypal && showDemo ? (
+              <p className="text-sm text-plum/80">
+                {isKo
+                  ? "실결제 키가 없습니다. 데모 결제로 테스트하세요."
+                  : "No live payment keys. Use demo checkout to test."}
+              </p>
+            ) : null}
+            {showDemo ? (
+              <button
+                type="button"
+                disabled={loading || !formReady}
+                onClick={() => void handleDemoPay()}
+                className="rounded-full border border-[#222222]/14 bg-[#fcf9f2] px-6 py-3 text-sm font-semibold text-[#222222] disabled:opacity-50"
+              >
+                {loading ? (isKo ? "생성 중…" : "Generating…") : isKo ? "데모 결제 (테스트)" : "Demo checkout"}
+              </button>
+            ) : null}
             <button
               type="button"
-              disabled={loading || !privacyConsent || !personName || !email || !birthDate}
-              onClick={handlePay}
-              className="rounded-full bg-channel-saju px-6 py-3 font-bold text-white disabled:opacity-50"
-            >
-              {loading ? (isKo ? "처리 중…" : "Processing…") : isKo ? "결제하기" : "Pay now"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setCheckout(null)}
+              onClick={() => {
+                setCheckout(null);
+                setPaypalPending(null);
+              }}
               className="rounded-full border border-plum/20 px-6 py-3 text-sm font-semibold text-plum"
             >
               {isKo ? "취소" : "Cancel"}

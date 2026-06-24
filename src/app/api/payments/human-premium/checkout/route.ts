@@ -1,12 +1,15 @@
 import { randomBytes } from "node:crypto";
+import { isHumanPremiumDemoCheckoutEnabled } from "@/lib/payments/human-premium-demo";
+import {
+  isPayPalLinkConfigured,
+  resolvePayPalPaymentLink,
+} from "@/lib/payments/paypal-links";
 import { getPortOneShopId, isPortOneConfigured } from "@/lib/payments/portone/config";
 import {
   REPORT_TYPE_LABELS,
   REPORT_TYPE_LABELS_EN,
 } from "@/lib/reports/human-premium/types";
-import {
-  parseHumanPremiumReportInput,
-} from "@/lib/reports/human-premium/service";
+import { parseHumanPremiumReportInput } from "@/lib/reports/human-premium/service";
 import { createHumanPremiumReportDraft } from "@/lib/reports/human-premium/storage";
 import {
   resolveCheckoutAmount,
@@ -18,6 +21,12 @@ import { NextResponse } from "next/server";
 function parseBundle(value: unknown): HumanPremiumBundleKind | null {
   if (value === "all" || value === "themepack" || value === "timepack") return value;
   return null;
+}
+
+function parsePaymentMethod(
+  value: unknown
+): "portone" | "paypal_link" {
+  return value === "paypal_link" ? "paypal_link" : "portone";
 }
 
 export async function POST(request: Request) {
@@ -34,6 +43,7 @@ export async function POST(request: Request) {
     const input = parseHumanPremiumReportInput(body, userId);
     const bundle = parseBundle(body.bundle);
     const isBundle = Boolean(body.isBundle ?? body.isBunde);
+    const paymentMethod = parsePaymentMethod(body.paymentMethod);
     const amount = resolveCheckoutAmount({
       reportType: input.reportType,
       bundle,
@@ -42,11 +52,20 @@ export async function POST(request: Request) {
 
     const paymentId = `hp_${randomBytes(12).toString("hex")}`;
     const bundleMeta = bundle ?? (isBundle ? "all" : null);
+    const portoneConfigured = isPortOneConfigured();
+    const paypalLinkConfigured = isPayPalLinkConfigured();
+
+    const paymentProvider =
+      paymentMethod === "paypal_link"
+        ? "paypal"
+        : portoneConfigured
+          ? "card_pg"
+          : null;
 
     const report = await createHumanPremiumReportDraft(input, {
       status: "payment_pending",
-      paymentProvider: isPortOneConfigured() ? "card_pg" : null,
-      pgProvider: isPortOneConfigured() ? "portone" : null,
+      paymentProvider,
+      pgProvider: paymentMethod === "portone" && portoneConfigured ? "portone" : null,
       paymentOrderId: paymentId,
       checkoutSessionId: bundleMeta ? `bundle:${bundleMeta}` : null,
       amountPaid: amount,
@@ -54,15 +73,25 @@ export async function POST(request: Request) {
       currency: "KRW",
     });
 
-    const configured = isPortOneConfigured();
     const storeId = getPortOneShopId();
     const orderName =
       input.locale === "ko"
         ? REPORT_TYPE_LABELS[input.reportType ?? "lifetime"]
         : REPORT_TYPE_LABELS_EN[input.reportType ?? "lifetime"];
 
+    const paypalLink = resolvePayPalPaymentLink({
+      reportType: input.reportType,
+      bundle,
+      reportId: report.id,
+      paymentId,
+    });
+
+    const configured =
+      paymentMethod === "paypal_link" ? Boolean(paypalLink) : portoneConfigured;
+
     return NextResponse.json({
       configured,
+      paymentMethod,
       reportId: report.id,
       paymentId,
       storeId,
@@ -70,10 +99,20 @@ export async function POST(request: Request) {
       currency: "KRW",
       orderName: bundleMeta
         ? input.locale === "ko"
-          ? `K-Saju 올인원 번들`
+          ? "K-Saju 올인원 번들"
           : "K-Saju all-in-one bundle"
         : `K-Saju ${orderName}`,
       webAccessToken: report.web_access_token,
+      portone: {
+        configured: portoneConfigured,
+        storeId,
+      },
+      paypal: {
+        configured: paypalLinkConfigured,
+        link: paypalLink,
+        paymentReference: paymentId,
+      },
+      demoAllowed: isHumanPremiumDemoCheckoutEnabled(),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Checkout failed.";
