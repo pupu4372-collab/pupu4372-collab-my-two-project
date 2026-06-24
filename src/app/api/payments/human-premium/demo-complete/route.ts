@@ -1,4 +1,6 @@
-import { isHumanPremiumDemoCheckoutEnabled } from "@/lib/payments/human-premium-demo";
+import { isHumanPremiumDemoBackendReady, isHumanPremiumDemoCheckoutEnabled } from "@/lib/payments/human-premium-demo";
+import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
+import { buildHumanPremiumReportUrl } from "@/lib/reports/human-premium/email";
 import {
   completeHumanPremiumPayment,
   parseHumanPremiumReportInput,
@@ -22,7 +24,20 @@ function parseBundle(value: unknown): HumanPremiumBundleKind | null {
 
 export async function POST(request: Request) {
   if (!isHumanPremiumDemoCheckoutEnabled()) {
-    return NextResponse.json({ error: "Demo checkout is disabled." }, { status: 403 });
+    return NextResponse.json(
+      { error: formatHumanPremiumError("Demo checkout is disabled.", "ko") },
+      { status: 403 }
+    );
+  }
+
+  if (!isHumanPremiumDemoBackendReady()) {
+    return NextResponse.json(
+      {
+        error: formatHumanPremiumError("Supabase is not configured.", "ko"),
+        code: "supabase_missing",
+      },
+      { status: 503 }
+    );
   }
 
   const userId = await getUserIdFromRequest(request);
@@ -33,6 +48,8 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
+
+  const resolvedLocale = body.locale === "en" ? "en" : "ko";
 
   try {
     const reportId = String(body.reportId ?? "").trim();
@@ -66,11 +83,16 @@ export async function POST(request: Request) {
         return NextResponse.json({
           report,
           duplicate: true,
-          webUrl: null,
+          webUrl: buildHumanPremiumReportUrl(report, request),
         });
       }
       return NextResponse.json(
-        { error: `Report status is ${report.status}, cannot demo-complete.` },
+        {
+          error: formatHumanPremiumError(
+            `Report status is ${report.status}, cannot demo-complete.`,
+            resolvedLocale
+          ),
+        },
         { status: 400 }
       );
     }
@@ -94,7 +116,10 @@ export async function POST(request: Request) {
       demo: true,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Demo checkout failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const raw = err instanceof Error ? err.message : "Demo checkout failed.";
+    return NextResponse.json(
+      { error: formatHumanPremiumError(raw, resolvedLocale) },
+      { status: 500 }
+    );
   }
 }

@@ -1,5 +1,6 @@
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import type { PillarDisplay } from "@/lib/saju/types";
+import { charToElement } from "@/lib/saju/elements";
 
 export const OBANG_COLORS: Record<string, string> = {
   wood: "#3E5C76",
@@ -8,6 +9,18 @@ export const OBANG_COLORS: Record<string, string> = {
   metal: "#BDBDBD",
   water: "#3D3D3D",
 };
+
+/** Pale fill for 오행 cards and 만세력 cells */
+export function obangPaleBg(key: string, mixPct = 14): string {
+  const color = OBANG_COLORS[key] ?? "#888888";
+  return `color-mix(in srgb, ${color} ${mixPct}%, var(--jig-hanji))`;
+}
+
+export function hanjaPaleBg(hanja: string, mixPct = 12): string | undefined {
+  const element = charToElement(hanja);
+  if (!element) return undefined;
+  return obangPaleBg(element, mixPct);
+}
 
 export interface ElementBreakdown {
   key: string;

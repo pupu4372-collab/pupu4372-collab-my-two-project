@@ -13,6 +13,7 @@ import {
   asElements,
   asPillars,
   formatIssuedDate,
+  obangPaleBg,
 } from "./report-helpers";
 import { BodyText } from "./report-ui";
 
@@ -132,8 +133,11 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
             return (
               <div
                 key={item.key}
-                className={`human-premium-paper p-5 ${isDominant ? "border-2" : ""}`}
-                style={isDominant ? { borderColor: `${color}40` } : undefined}
+                className={`rounded-lg border p-5 ${isDominant ? "border-2 shadow-sm" : "border-black/[0.06]"}`}
+                style={{
+                  backgroundColor: obangPaleBg(item.key, isDominant ? 18 : 14),
+                  borderColor: isDominant ? `${color}55` : `${color}28`,
+                }}
               >
                 <div className="mb-3 flex items-start justify-between">
                   <span className="human-premium-label-caps" style={{ color }}>

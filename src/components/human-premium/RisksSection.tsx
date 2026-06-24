@@ -23,15 +23,31 @@ export function RisksSection({
         {items.map((item, index) => (
           <article
             key={item.title}
-            className="human-premium-paper rounded-lg border border-[var(--jig-obang-red)]/30 bg-[color-mix(in_srgb,var(--jig-obang-red)_10%,var(--jig-hanji))] p-6"
+            className="rounded-lg border p-6"
+            style={{
+              backgroundColor: "color-mix(in srgb, #fdf2f8 65%, var(--jig-hanji))",
+              borderColor: "color-mix(in srgb, var(--jig-obang-red) 42%, transparent)",
+            }}
           >
-            <p className="human-premium-label-caps text-[var(--jig-obang-red)]">
+            <p
+              className="human-premium-label-caps"
+              style={{ color: "color-mix(in srgb, var(--jig-obang-red) 65%, var(--jig-muted))" }}
+            >
               {isKo ? "주의" : "Caution"} {index + 1}
             </p>
             <h3 className="human-premium-serif mt-2 text-lg font-semibold">{item.title}</h3>
             <BodyText body={item.body} className="mt-3 text-sm" />
-            <p className="mt-4 rounded-lg border border-[var(--jig-obang-red)]/20 bg-white/50 px-4 py-3 text-sm">
-              <span className="font-semibold text-[var(--jig-obang-red)]">
+            <p
+              className="mt-4 rounded-lg border px-4 py-3 text-sm"
+              style={{
+                backgroundColor: "color-mix(in srgb, #fff1f2 75%, white)",
+                borderColor: "color-mix(in srgb, var(--jig-obang-red) 33%, transparent)",
+              }}
+            >
+              <span
+                className="font-semibold"
+                style={{ color: "color-mix(in srgb, var(--jig-obang-red) 80%, var(--jig-seal))" }}
+              >
                 {isKo ? "대비책" : "Countermeasure"}
               </span>
               {" · "}

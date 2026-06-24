@@ -2,7 +2,6 @@
 
 import { CoverSection } from "@/components/human-premium/CoverSection";
 import { DeepAnalysisSection } from "@/components/human-premium/DeepAnalysisSection";
-import { InstaCard } from "@/components/human-premium/InstaCard";
 import { KeyIndicatorsSection } from "@/components/human-premium/KeyIndicatorsSection";
 import { OpportunitiesSection } from "@/components/human-premium/OpportunitiesSection";
 import { ProphecySection } from "@/components/human-premium/ProphecySection";
@@ -13,7 +12,6 @@ import { AppTopNav } from "@/components/layout/AppTopNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import { HUMAN_PREMIUM_SECTION_IDS } from "@/lib/reports/human-premium/types";
-import { shareHumanPremiumReportToKakao } from "@/lib/share/pet-fortune-share";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
@@ -21,11 +19,8 @@ const UI = {
   ko: {
     toc: "목차",
     saju: "사주 리포트",
-    share: "카카오 공유",
-    shareSectionLabel: "지관재 · 나눔",
-    shareSectionHint: "소중한 리포트를 카카오로 전해 보세요",
-    shareFailed:
-      "카카오 공유 검증 실패예요. developers.kakao.com 에서 Web 도메인(ksajupet.com, localhost) 등록을 확인해 주세요.",
+    shareSectionLabel: "저장 · 공유",
+    shareSectionHint: "링크 복사, PDF 저장, 이메일 발송",
     copyLink: "링크 복사",
     shared: "링크를 복사했어요",
     pdfReady: "한글 폰트가 포함된 PDF를 바로 저장합니다",
@@ -54,11 +49,8 @@ const UI = {
   en: {
     toc: "Contents",
     saju: "K-Saju report",
-    share: "Kakao",
-    shareSectionLabel: "Jigwanjae · Share",
-    shareSectionHint: "Send your report to friends on Kakao",
-    shareFailed:
-      "Kakao share verification failed. Register ksajupet.com in Kakao Developers.",
+    shareSectionLabel: "Save · Share",
+    shareSectionHint: "Copy link, save PDF, or send email",
     copyLink: "Copy link",
     shared: "Link copied",
     pdfReady: "Download a PDF with embedded Korean fonts",
@@ -86,59 +78,6 @@ const UI = {
 } as const;
 
 type UiStrings = (typeof UI)["ko"] | (typeof UI)["en"];
-
-const TOC_CHIP_STYLES: Record<string, { bg: string; border: string; text: string }> = {
-  "section-cover": {
-    bg: "color-mix(in srgb, var(--jig-obang-yellow) 22%, var(--jig-hanji))",
-    border: "var(--jig-obang-yellow)",
-    text: "#6f4f2c",
-  },
-  "section-structure": {
-    bg: "color-mix(in srgb, var(--jig-obang-blue) 16%, var(--jig-hanji))",
-    border: "var(--jig-obang-blue)",
-    text: "var(--jig-obang-blue)",
-  },
-  "section-metrics": {
-    bg: "color-mix(in srgb, var(--jig-seal) 12%, var(--jig-hanji))",
-    border: "var(--jig-seal)",
-    text: "var(--jig-seal)",
-  },
-  "section-depth": {
-    bg: "color-mix(in srgb, white 55%, var(--jig-hanji))",
-    border: "rgba(34, 34, 34, 0.16)",
-    text: "var(--jig-ink)",
-  },
-  "section-opportunity": {
-    bg: "color-mix(in srgb, var(--jig-obang-blue) 10%, var(--jig-hanji))",
-    border: "var(--jig-obang-blue)",
-    text: "var(--jig-obang-blue)",
-  },
-  "section-risk": {
-    bg: "color-mix(in srgb, var(--jig-obang-red) 14%, var(--jig-hanji))",
-    border: "var(--jig-obang-red)",
-    text: "var(--jig-obang-red)",
-  },
-  "section-roadmap": {
-    bg: "color-mix(in srgb, var(--jig-obang-black) 10%, var(--jig-hanji))",
-    border: "var(--jig-obang-black)",
-    text: "var(--jig-obang-black)",
-  },
-  "section-prophecy": {
-    bg: "color-mix(in srgb, #2a2433 12%, var(--jig-hanji))",
-    border: "#2a2433",
-    text: "#2a2433",
-  },
-};
-
-const TOC_CHIP_DEFAULT = {
-  bg: "color-mix(in srgb, white 55%, var(--jig-hanji))",
-  border: "rgba(34, 34, 34, 0.12)",
-  text: "var(--jig-ink)",
-};
-
-function tocChipStyle(id: string) {
-  return TOC_CHIP_STYLES[id] ?? TOC_CHIP_DEFAULT;
-}
 
 interface HumanPremiumReportViewProps {
   report: HumanPremiumReportPayload;
@@ -171,6 +110,38 @@ function safePdfFilename(name: string): string {
   return `jigwanjae-${safe || "report"}.pdf`;
 }
 
+function TocTextRows({
+  items,
+}: {
+  items: Array<{ id: string; title: string }>;
+}) {
+  const rows = [items.slice(0, 4), items.slice(4, 8)];
+
+  return (
+    <div className="mt-3 space-y-2.5">
+      {rows.map((row, rowIndex) => (
+        <div
+          key={rowIndex}
+          className="grid grid-cols-4 gap-x-1 text-center text-[11px] leading-snug sm:gap-x-2 sm:text-sm"
+        >
+          {row.map((item, index) => {
+            const num = rowIndex * 4 + index + 1;
+            return (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className="human-premium-serif break-keep text-[var(--jig-ink)] transition hover:text-[var(--jig-seal)]"
+              >
+                {num}.{item.title}
+              </a>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ReportToc({
   items,
   t,
@@ -183,31 +154,8 @@ function ReportToc({
   if (compact) {
     return (
       <nav className="no-print human-premium-lattice human-premium-paper-warm rounded-sm p-4 lg:hidden">
-        <p className="human-premium-label-caps mb-3 text-[var(--jig-seal)]">{t.toc}</p>
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-          {items.map((item, index) => {
-            const chip = tocChipStyle(item.id);
-            return (
-              <a
-                key={item.id}
-                href={`#${item.id}`}
-                className="group min-w-0 rounded-sm border px-2.5 py-2.5 text-center transition hover:shadow-sm"
-                style={{
-                  backgroundColor: chip.bg,
-                  borderColor: chip.border,
-                  color: chip.text,
-                }}
-              >
-                <span className="human-premium-label-caps mb-1 block text-[9px] opacity-75">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <span className="human-premium-serif block text-xs font-semibold leading-snug break-keep">
-                  {item.title}
-                </span>
-              </a>
-            );
-          })}
-        </div>
+        <p className="human-premium-label-caps text-[var(--jig-seal)]">{t.toc}</p>
+        <TocTextRows items={items} />
       </nav>
     );
   }
@@ -224,32 +172,7 @@ function ReportToc({
         />
       </div>
       <p className="human-premium-label-caps text-[var(--jig-seal)]">{t.toc}</p>
-      <ul className="mt-3 max-h-[60vh] space-y-1.5 overflow-y-auto text-sm">
-        {items.map((item, index) => {
-          const chip = tocChipStyle(item.id);
-          return (
-            <li key={item.id}>
-              <a
-                href={`#${item.id}`}
-                className="block rounded-sm border px-2.5 py-2 transition hover:shadow-sm"
-                style={{
-                  backgroundColor: chip.bg,
-                  borderColor: chip.border,
-                  color: chip.text,
-                  borderLeftWidth: 3,
-                }}
-              >
-                <span className="human-premium-label-caps block text-[9px] opacity-75">
-                  {String(index + 1).padStart(2, "0")} · {item.group}
-                </span>
-                <span className="human-premium-serif mt-0.5 block font-semibold leading-snug">
-                  {item.title}
-                </span>
-              </a>
-            </li>
-          );
-        })}
-      </ul>
+      <TocTextRows items={items} />
     </nav>
   );
 }
@@ -268,8 +191,6 @@ export function HumanPremiumReportView({
   );
   const [pdfState, setPdfState] = useState<"idle" | "downloading" | "failed">("idle");
   const [pdfError, setPdfError] = useState<string | null>(null);
-  const [shareBusy, setShareBusy] = useState(false);
-  const [shareError, setShareError] = useState<string | null>(null);
 
   const toc = useMemo(
     () =>
@@ -288,23 +209,6 @@ export function HumanPremiumReportView({
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
-    }
-  }
-
-  async function shareReportToKakao() {
-    setShareBusy(true);
-    setShareError(null);
-    try {
-      await shareHumanPremiumReportToKakao({
-        shareUrl,
-        personName: report.personName,
-        tagline: report.cover.tagline,
-        locale: report.locale,
-      });
-    } catch {
-      setShareError(t.shareFailed);
-    } finally {
-      setShareBusy(false);
     }
   }
 
@@ -395,7 +299,6 @@ export function HumanPremiumReportView({
             <RisksSection report={report} isKo={isKo} />
             <RoadmapSection report={report} isKo={isKo} />
             <ProphecySection report={report} isKo={isKo} />
-            <InstaCard report={report} isKo={isKo} />
 
             <section className="no-print human-premium-share-panel space-y-3">
               <p className="human-premium-label-caps text-center text-[var(--jig-seal)]">
@@ -404,17 +307,6 @@ export function HumanPremiumReportView({
               <p className="human-premium-serif text-center text-sm font-semibold text-[var(--jig-ink)]">
                 {t.shareSectionHint}
               </p>
-              <button
-                type="button"
-                disabled={shareBusy}
-                onClick={() => void shareReportToKakao()}
-                className="human-premium-share-btn human-premium-share-btn--kakao disabled:opacity-60"
-              >
-                {shareBusy ? "…" : t.share}
-              </button>
-              {shareError ? (
-                <p className="text-center text-xs text-[var(--jig-seal)]">{shareError}</p>
-              ) : null}
               <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                 <button
                   type="button"

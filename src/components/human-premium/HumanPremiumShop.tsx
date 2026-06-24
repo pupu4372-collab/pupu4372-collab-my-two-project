@@ -39,6 +39,7 @@ type PaymentConfig = {
   portone: boolean;
   paypalLink: boolean;
   demoAllowed: boolean;
+  demoReady: boolean;
 };
 
 type CheckoutResult = {
@@ -95,7 +96,12 @@ export function HumanPremiumShop() {
         else if (data.paypalLink) setPaymentMethod("paypal_link");
       })
       .catch(() => {
-        setPaymentConfig({ portone: false, paypalLink: false, demoAllowed: true });
+        setPaymentConfig({
+          portone: false,
+          paypalLink: false,
+          demoAllowed: true,
+          demoReady: false,
+        });
       });
   }, []);
 
@@ -278,7 +284,7 @@ export function HumanPremiumShop() {
   }
 
   async function handleDemoPay() {
-    if (!checkout || !formReady) return;
+    if (!checkout || !formReady || !demoReady) return;
     setLoading(true);
     setError(null);
     setPaypalPending(null);
@@ -294,8 +300,15 @@ export function HumanPremiumShop() {
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Demo checkout failed");
+      if (!res.ok) {
+        const err = new Error(data.error ?? "Demo checkout failed");
+        if (data.code === "supabase_missing") {
+          (err as Error & { code?: string }).code = "supabase_missing";
+        }
+        throw err;
+      }
 
+      setCheckout(null);
       setResult({
         reportId: data.report.id,
         webUrl: data.webUrl,
@@ -312,15 +325,46 @@ export function HumanPremiumShop() {
   const showPortone = paymentConfig?.portone ?? false;
   const showPaypal = paymentConfig?.paypalLink ?? false;
   const showDemo = paymentConfig?.demoAllowed ?? true;
+  const demoReady = paymentConfig?.demoReady ?? false;
+  const demoOnly = showDemo && demoReady && !showPortone && !showPaypal;
 
   return (
     <div className="space-y-10">
       {showDemo ? (
-        <p className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-center text-sm text-white/90 backdrop-blur-sm">
-          {isKo
-            ? "테스트: 아래 결제 폼에서 「데모 결제」로 리포트 생성까지 확인할 수 있습니다."
-            : "Test mode: use “Demo checkout” in the form to generate a report without payment."}
-        </p>
+        <div
+          className={`rounded-2xl border px-4 py-3 text-center text-sm ${
+            demoReady
+              ? "border-white/20 bg-white/10 text-white/90"
+              : "border-amber-300/50 bg-amber-50/95 text-amber-950"
+          }`}
+        >
+          {demoReady ? (
+            isKo ? (
+              <>
+                <strong>데모 테스트</strong> — 리포트 선택 → 정보 입력 →{" "}
+                <strong>데모 결제</strong> (실제 결제 없음, 1~2분 소요)
+              </>
+            ) : (
+              <>
+                <strong>Demo</strong> — select a report → fill the form →{" "}
+                <strong>Demo checkout</strong> (no charge, ~1–2 min)
+              </>
+            )
+          ) : isKo ? (
+            <>
+              데모 결제를 쓰려면 <code className="text-xs">.env.local</code>에{" "}
+              <strong>NEXT_PUBLIC_SUPABASE_URL</strong>,{" "}
+              <strong>SUPABASE_SERVICE_ROLE_KEY</strong>를 넣고{" "}
+              <strong>npm run dev</strong>를 다시 실행하세요.
+            </>
+          ) : (
+            <>
+              Set <strong>NEXT_PUBLIC_SUPABASE_URL</strong> and{" "}
+              <strong>SUPABASE_SERVICE_ROLE_KEY</strong> in <code>.env.local</code>, then
+              restart <strong>npm run dev</strong>.
+            </>
+          )}
+        </div>
       ) : null}
 
       <DayPillarPreview />
@@ -355,7 +399,13 @@ export function HumanPremiumShop() {
             {isKo ? "리포트 선택" : "Choose your report"}
           </h2>
           <p className="mt-2 text-sm text-white/75">
-            {isKo ? "원하는 분석 유형을 골라 구매하세요." : "Pick a report type and checkout."}
+            {demoOnly
+              ? isKo
+                ? "원하는 리포트를 선택한 뒤 데모 결제로 테스트하세요."
+                : "Select a report, then use demo checkout to test."
+              : isKo
+                ? "원하는 분석 유형을 골라 구매하세요."
+                : "Pick a report type and checkout."}
           </p>
         </header>
 
@@ -377,7 +427,7 @@ export function HumanPremiumShop() {
                 onClick={() => openCheckout({ kind: "single", reportType })}
                 className="mt-auto pt-4 text-sm font-bold text-channel-saju underline underline-offset-4"
               >
-                {isKo ? "구매하기" : "Buy"}
+                {isKo ? "선택" : "Select"}
               </button>
             </article>
           ))}
@@ -388,11 +438,25 @@ export function HumanPremiumShop() {
       {checkout ? (
         <section className="pastel-card space-y-4 border-2 border-channel-saju/30 p-6">
           <h3 className="text-lg font-bold text-ink">
-            {isKo ? "결제 정보" : "Checkout"}
+            {demoOnly
+              ? isKo
+                ? "데모 결제"
+                : "Demo checkout"
+              : isKo
+                ? "결제 정보"
+                : "Checkout"}
             <span className="ml-2 text-channel-saju">
               {formatKrw(checkoutAmount(checkout))}
             </span>
           </h3>
+
+          {demoOnly ? (
+            <p className="text-sm text-plum/80">
+              {isKo
+                ? "이름·이메일·생년월일을 입력한 뒤 아래 「데모 결제」를 누르세요."
+                : "Fill in your details, then tap Demo checkout below."}
+            </p>
+          ) : null}
 
           {showPortone && showPaypal ? (
             <div className="flex flex-wrap gap-2">
@@ -534,7 +598,23 @@ export function HumanPremiumShop() {
           ) : null}
 
           <div className="flex flex-wrap gap-3">
-            {paymentMethod === "portone" && showPortone ? (
+            {showDemo && (demoOnly || (!showPortone && !showPaypal)) ? (
+              <button
+                type="button"
+                disabled={loading || !formReady || !demoReady}
+                onClick={() => void handleDemoPay()}
+                className="rounded-full bg-channel-saju px-6 py-3 font-bold text-white disabled:opacity-50"
+              >
+                {loading
+                  ? isKo
+                    ? "리포트 생성 중… (1~2분)"
+                    : "Generating… (1–2 min)"
+                  : isKo
+                    ? "데모 결제 (테스트)"
+                    : "Demo checkout"}
+              </button>
+            ) : null}
+            {!demoOnly && paymentMethod === "portone" && showPortone ? (
               <button
                 type="button"
                 disabled={loading || !formReady}
@@ -544,7 +624,7 @@ export function HumanPremiumShop() {
                 {loading ? (isKo ? "처리 중…" : "Processing…") : isKo ? "카드 결제" : "Pay with card"}
               </button>
             ) : null}
-            {paymentMethod === "paypal_link" && showPaypal ? (
+            {!demoOnly && paymentMethod === "paypal_link" && showPaypal ? (
               <button
                 type="button"
                 disabled={loading || !formReady}
@@ -554,21 +634,21 @@ export function HumanPremiumShop() {
                 {loading ? (isKo ? "처리 중…" : "Processing…") : "PayPal"}
               </button>
             ) : null}
-            {!showPortone && !showPaypal && showDemo ? (
+            {!demoOnly && !showPortone && !showPaypal && showDemo && !demoReady ? (
               <p className="text-sm text-plum/80">
                 {isKo
-                  ? "실결제 키가 없습니다. 데모 결제로 테스트하세요."
-                  : "No live payment keys. Use demo checkout to test."}
+                  ? "Supabase 설정 후 데모 결제를 사용할 수 있습니다."
+                  : "Configure Supabase to enable demo checkout."}
               </p>
             ) : null}
-            {showDemo ? (
+            {!demoOnly && showDemo && (showPortone || showPaypal) ? (
               <button
                 type="button"
-                disabled={loading || !formReady}
+                disabled={loading || !formReady || !demoReady}
                 onClick={() => void handleDemoPay()}
                 className="rounded-full border border-[#222222]/14 bg-[#fcf9f2] px-6 py-3 text-sm font-semibold text-[#222222] disabled:opacity-50"
               >
-                {loading ? (isKo ? "생성 중…" : "Generating…") : isKo ? "데모 결제 (테스트)" : "Demo checkout"}
+                {loading ? (isKo ? "생성 중…" : "Generating…") : isKo ? "데모 결제" : "Demo"}
               </button>
             ) : null}
             <button
@@ -607,7 +687,7 @@ export function HumanPremiumShop() {
           onClick={() => openCheckout({ kind: "bundle", bundle: "all" })}
           className="mt-6 rounded-full bg-white px-8 py-3 font-bold text-channel-saju shadow-lg"
         >
-          {isKo ? "번들 구매하기" : "Buy bundle"}
+          {isKo ? "번들 선택" : "Select bundle"}
         </button>
       </section>
     </div>

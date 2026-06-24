@@ -6,9 +6,22 @@ import {
   STEM_META,
 } from "@/lib/saju/sipseong";
 import type { SajuPillars } from "./report-helpers";
+import { hanjaPaleBg } from "./report-helpers";
 
 const STEM_ORDER = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
 const BRANCH_ORDER = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+
+function pillarCellBg(hanja: string, options?: { emphasis?: boolean }): string | undefined {
+  const elementBg = hanjaPaleBg(hanja, options?.emphasis ? 16 : 12);
+  if (!elementBg) {
+    if (options?.emphasis) return "color-mix(in srgb, var(--jig-seal) 6%, var(--jig-hanji))";
+    return undefined;
+  }
+  if (options?.emphasis) {
+    return `color-mix(in srgb, var(--jig-seal) 7%, ${elementBg})`;
+  }
+  return elementBg;
+}
 
 function emptyBranchesForDay(dayPillar: SajuPillars["day"]): string[] {
   const stem = dayPillar.stemHanja || dayPillar.stem || dayPillar.pillar.charAt(0);
@@ -84,7 +97,7 @@ export function ManseTable({
   ];
 
   return (
-    <div className="human-premium-lattice overflow-x-auto bg-white/50 p-4 sm:p-6">
+    <div className="human-premium-lattice overflow-x-auto bg-gradient-to-b from-[var(--jig-hanji)] to-white/60 p-4 shadow-inner sm:p-6">
       <div className="min-w-[620px]">
         <div
           className="grid gap-0 pl-12 text-center text-sm font-semibold text-[var(--jig-ink)]"
@@ -108,16 +121,23 @@ export function ManseTable({
           </div>
 
           <div
-            className="human-premium-paper grid overflow-hidden rounded-lg border border-[var(--jig-ink)]/15 text-center"
+            className="grid overflow-hidden rounded-lg border border-[var(--jig-ink)]/15 bg-white/70 text-center shadow-sm"
             style={{ gridTemplateColumns: `repeat(${cols.length}, minmax(0, 1fr))` }}
           >
-            {cols.map((col) => {
+            {cols.map((col, colIndex) => {
               const pillar = pillars[col.key];
               if (!pillar) return null;
               return (
                 <div
                   key={`${col.key}-fortune`}
                   className="border-b border-r border-[var(--jig-ink)]/10 p-3 last:border-r-0"
+                  style={{
+                    backgroundColor: col.emphasis
+                      ? "color-mix(in srgb, var(--jig-seal) 8%, var(--jig-hanji))"
+                      : colIndex % 2 === 0
+                        ? "color-mix(in srgb, var(--jig-ink) 4%, var(--jig-hanji))"
+                        : "color-mix(in srgb, var(--jig-ink) 2%, white)",
+                  }}
                 >
                   <p className="human-premium-serif text-lg font-semibold">{col.fortune}</p>
                   <p className="mt-1 text-xs text-[var(--jig-muted)]">{col.hint}</p>
@@ -128,12 +148,14 @@ export function ManseTable({
             {cols.map((col) => {
               const pillar = pillars[col.key];
               if (!pillar) return null;
+              const stemHanja = pillar.stemHanja || pillar.stem || pillar.pillar.charAt(0);
               return (
                 <div
                   key={`${col.key}-stem`}
-                  className={`relative border-b border-r border-[var(--jig-ink)]/10 p-3 last:border-r-0 ${
-                    col.emphasis ? "bg-[var(--jig-seal)]/5" : ""
-                  }`}
+                  className="relative border-b border-r border-[var(--jig-ink)]/10 p-3 last:border-r-0"
+                  style={{
+                    backgroundColor: pillarCellBg(stemHanja, { emphasis: col.emphasis }),
+                  }}
                 >
                   <div className="flex items-end justify-center gap-2">
                     <span
@@ -152,15 +174,20 @@ export function ManseTable({
               );
             })}
 
-            {cols.map((col) => {
+            {cols.map((col, colIndex) => {
               const pillar = pillars[col.key];
               if (!pillar) return null;
               return (
                 <div
                   key={`${col.key}-stem-ten-god`}
-                  className={`border-b border-r border-[var(--jig-ink)]/10 px-3 py-2 text-sm font-medium last:border-r-0 ${
-                    col.emphasis ? "bg-[var(--jig-seal)]/5" : ""
-                  }`}
+                  className="border-b border-r border-[var(--jig-ink)]/10 px-3 py-2 text-sm font-medium last:border-r-0"
+                  style={{
+                    backgroundColor: col.emphasis
+                      ? "color-mix(in srgb, var(--jig-seal) 6%, var(--jig-hanji))"
+                      : colIndex % 2 === 0
+                        ? "color-mix(in srgb, var(--jig-ink) 3%, white)"
+                        : "color-mix(in srgb, var(--jig-ink) 2%, var(--jig-hanji))",
+                  }}
                 >
                   {formatTenGodLabel(
                     pillars.day.stemHanja,
@@ -174,12 +201,14 @@ export function ManseTable({
             {cols.map((col) => {
               const pillar = pillars[col.key];
               if (!pillar) return null;
+              const branchHanja = pillar.branchHanja || pillar.branch || pillar.pillar.charAt(1);
               return (
                 <div
                   key={`${col.key}-branch`}
-                  className={`relative border-b border-r border-[var(--jig-ink)]/10 p-3 last:border-r-0 ${
-                    col.emphasis ? "bg-[var(--jig-seal)]/5" : ""
-                  }`}
+                  className="relative border-b border-r border-[var(--jig-ink)]/10 p-3 last:border-r-0"
+                  style={{
+                    backgroundColor: pillarCellBg(branchHanja, { emphasis: col.emphasis }),
+                  }}
                 >
                   <div className="flex items-end justify-center gap-2">
                     <span className="human-premium-serif text-3xl font-bold sm:text-4xl">
@@ -194,15 +223,20 @@ export function ManseTable({
               );
             })}
 
-            {cols.map((col) => {
+            {cols.map((col, colIndex) => {
               const pillar = pillars[col.key];
               if (!pillar) return null;
               return (
                 <div
                   key={`${col.key}-branch-ten-god`}
-                  className={`border-b border-r border-[var(--jig-ink)]/10 px-3 py-2 text-sm font-medium last:border-r-0 ${
-                    col.emphasis ? "bg-[var(--jig-seal)]/5" : ""
-                  }`}
+                  className="border-b border-r border-[var(--jig-ink)]/10 px-3 py-2 text-sm font-medium last:border-r-0"
+                  style={{
+                    backgroundColor: col.emphasis
+                      ? "color-mix(in srgb, var(--jig-seal) 6%, var(--jig-hanji))"
+                      : colIndex % 2 === 0
+                        ? "color-mix(in srgb, var(--jig-ink) 3%, white)"
+                        : "color-mix(in srgb, var(--jig-ink) 2%, var(--jig-hanji))",
+                  }}
                 >
                   {formatTenGodLabel(
                     pillars.day.stemHanja,
@@ -222,8 +256,13 @@ export function ManseTable({
                 <div
                   key={`${col.key}-void`}
                   className={`border-r border-[var(--jig-ink)]/10 px-3 py-2 text-sm font-medium last:border-r-0 ${
-                    isVoid ? "bg-[var(--jig-ink)] text-[var(--jig-hanji)]" : "text-[var(--jig-muted)]"
+                    isVoid ? "text-[var(--jig-hanji)]" : "text-[var(--jig-muted)]"
                   }`}
+                  style={{
+                    backgroundColor: isVoid
+                      ? "var(--jig-ink)"
+                      : "color-mix(in srgb, var(--jig-ink) 3%, var(--jig-hanji))",
+                  }}
                 >
                   {isVoid ? (isKo ? "공망 해당" : "Void hit") : emptyBranchText}
                 </div>

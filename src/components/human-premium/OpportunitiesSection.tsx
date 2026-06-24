@@ -23,15 +23,27 @@ export function OpportunitiesSection({
         {items.map((item, index) => (
           <article
             key={item.title}
-            className="human-premium-paper rounded-lg border border-[var(--jig-obang-blue)]/25 bg-[color-mix(in_srgb,var(--jig-obang-blue)_8%,var(--jig-hanji))] p-6"
+            className="rounded-lg border p-6"
+            style={{
+              backgroundColor: "color-mix(in srgb, #dcfce7 55%, var(--jig-hanji))",
+              borderColor: "color-mix(in srgb, #86efac 35%, transparent)",
+            }}
           >
-            <p className="human-premium-label-caps text-[var(--jig-obang-blue)]">
+            <p
+              className="human-premium-label-caps"
+              style={{ color: "color-mix(in srgb, #4ade80 55%, var(--jig-muted))" }}
+            >
               {String(index + 1).padStart(2, "0")}
             </p>
             <h3 className="human-premium-serif mt-2 text-xl font-semibold">{item.title}</h3>
             <BodyText body={item.body} className="mt-3 text-sm" />
-            <p className="mt-4 rounded-lg bg-white/60 px-4 py-3 text-sm font-medium text-[var(--jig-ink)]">
-              <span className="text-[var(--jig-seal)]">
+            <p
+              className="mt-4 rounded-lg px-4 py-3 text-sm font-medium text-[var(--jig-ink)]"
+              style={{
+                backgroundColor: "color-mix(in srgb, #ecfdf5 70%, white)",
+              }}
+            >
+              <span style={{ color: "color-mix(in srgb, #22c55e 50%, var(--jig-seal))" }}>
                 {isKo ? "잡는 법" : "How to catch"}
               </span>
               {" · "}
