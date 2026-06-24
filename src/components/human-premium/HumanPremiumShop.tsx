@@ -4,6 +4,7 @@ import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { DayPillarPreview } from "@/components/human-premium/DayPillarPreview";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import {
   BUNDLE_PRICING,
   formatKrw,
@@ -75,10 +76,10 @@ export function HumanPremiumShop() {
   const [result, setResult] = useState<CheckoutResult | null>(null);
 
   const birthTimeUnknown = birthTimeSelect === "unknown";
-  const birthTime = useMemo(
-    () => (birthTimeUnknown ? null : parseBirthTimeSelect(birthTimeSelect)),
-    [birthTimeSelect, birthTimeUnknown]
-  );
+  const birthTime = useMemo(() => {
+    if (birthTimeUnknown) return null;
+    return parseBirthTimeSelect(birthTimeSelect).birthTime;
+  }, [birthTimeSelect, birthTimeUnknown]);
 
   const savings = getBundleSavings();
   const subtitles = isKo ? REPORT_TYPE_SUBTITLES_KO : REPORT_TYPE_SUBTITLES_EN;
@@ -218,7 +219,8 @@ export function HumanPremiumShop() {
         redirectUrl: `${window.location.origin}/${routeLocale}/premium/human/success?reportId=${data.reportId}${token ? `&token=${token}` : ""}`,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Checkout failed");
+      const raw = err instanceof Error ? err.message : "Checkout failed";
+      setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
     } finally {
       setLoading(false);
     }
@@ -264,7 +266,8 @@ export function HumanPremiumShop() {
 
       window.open(link, "_blank", "noopener,noreferrer");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Checkout failed");
+      const raw = err instanceof Error ? err.message : "Checkout failed";
+      setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
     } finally {
       setLoading(false);
     }
@@ -295,7 +298,8 @@ export function HumanPremiumShop() {
         emailStatus: data.report.email_status ?? null,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Demo checkout failed");
+      const raw = err instanceof Error ? err.message : "Demo checkout failed";
+      setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
     } finally {
       setLoading(false);
     }
@@ -308,7 +312,7 @@ export function HumanPremiumShop() {
   return (
     <div className="space-y-10">
       {showDemo ? (
-        <p className="rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-center text-sm text-amber-900">
+        <p className="rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-center text-sm text-white/90 backdrop-blur-sm">
           {isKo
             ? "테스트: 아래 결제 폼에서 「데모 결제」로 리포트 생성까지 확인할 수 있습니다."
             : "Test mode: use “Demo checkout” in the form to generate a report without payment."}
@@ -343,10 +347,10 @@ export function HumanPremiumShop() {
 
       <div ref={gridRef} className="space-y-6">
         <header className="text-center">
-          <h2 className="text-2xl font-bold text-ink">
+          <h2 className="text-2xl font-bold text-white">
             {isKo ? "리포트 선택" : "Choose your report"}
           </h2>
-          <p className="mt-2 text-sm text-plum/80">
+          <p className="mt-2 text-sm text-white/75">
             {isKo ? "원하는 분석 유형을 골라 구매하세요." : "Pick a report type and checkout."}
           </p>
         </header>
@@ -515,7 +519,14 @@ export function HumanPremiumShop() {
             </div>
           ) : null}
 
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          {error ? (
+            <p
+              role="alert"
+              className="rounded-2xl border border-red-300/80 bg-red-50 px-4 py-3 text-sm font-medium text-red-900"
+            >
+              {error}
+            </p>
+          ) : null}
 
           <div className="flex flex-wrap gap-3">
             {paymentMethod === "portone" && showPortone ? (

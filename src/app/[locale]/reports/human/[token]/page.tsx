@@ -30,7 +30,7 @@ export default async function HumanPremiumReportRoute({
             ? "Please try again later or contact support."
             : "잠시 후 다시 시도하거나 고객 지원에 문의해 주세요."}
         </p>
-        <Link href="/saju/premium" className="mt-6 inline-block text-channel-saju underline">
+        <Link href="/premium/human" className="mt-6 inline-block text-channel-saju underline">
           {locale === "en" ? "Back to Premium" : "Premium으로 돌아가기"}
         </Link>
       </main>

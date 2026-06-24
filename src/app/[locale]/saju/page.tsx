@@ -21,7 +21,7 @@ export default async function SajuHubPage() {
               </p>
             </div>
             <Link
-              href="/saju/premium"
+              href="/premium/human"
               className="inline-flex w-fit shrink-0 items-center justify-center self-start rounded-full bg-cream px-6 py-3 text-sm font-bold text-primary transition hover:bg-white md:self-center"
             >
               {t("premium")}

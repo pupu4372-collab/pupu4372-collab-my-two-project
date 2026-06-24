@@ -9,6 +9,7 @@ import {
   parseBirthTimeSelect,
 } from "@/lib/saju/birth-time-options";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
+import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import type { ReportType } from "@/lib/reports/human-premium/types";
 import { useLocale } from "next-intl";
 import { useMemo, useState } from "react";
@@ -54,10 +55,10 @@ export function DayPillarPreview({ onViewFull }: DayPillarPreviewProps) {
   const [preview, setPreview] = useState<DayPillarPreviewData | null>(null);
 
   const birthTimeUnknown = birthTimeSelect === "unknown";
-  const birthTime = useMemo(
-    () => (birthTimeUnknown ? null : parseBirthTimeSelect(birthTimeSelect)),
-    [birthTimeSelect, birthTimeUnknown]
-  );
+  const birthTime = useMemo(() => {
+    if (birthTimeUnknown) return null;
+    return parseBirthTimeSelect(birthTimeSelect).birthTime;
+  }, [birthTimeSelect, birthTimeUnknown]);
 
   async function handlePreview() {
     setError(null);
@@ -82,7 +83,8 @@ export function DayPillarPreview({ onViewFull }: DayPillarPreviewProps) {
       if (!res.ok) throw new Error(data.error ?? "Preview failed");
       setPreview(data as DayPillarPreviewData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Preview failed");
+      const raw = err instanceof Error ? err.message : "Preview failed";
+      setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
     } finally {
       setLoading(false);
     }
@@ -182,7 +184,14 @@ export function DayPillarPreview({ onViewFull }: DayPillarPreviewProps) {
             variant="pastel"
             audience="human"
           />
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          {error ? (
+            <p
+              role="alert"
+              className="rounded-2xl border border-red-300/80 bg-red-50 px-4 py-3 text-sm font-medium text-red-900"
+            >
+              {error}
+            </p>
+          ) : null}
           <button
             type="button"
             disabled={!birthDate || !privacyConsent || loading}

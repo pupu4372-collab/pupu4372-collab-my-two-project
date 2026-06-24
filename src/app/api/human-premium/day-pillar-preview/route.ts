@@ -1,3 +1,4 @@
+import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { computeBasicSaju } from "@/lib/saju/engine";
 import { buildHumanSummary } from "@/lib/reports/human-premium/content";
 import { resolveSolarBirthDate } from "@/lib/reports/human-premium/birth-basis";
@@ -48,7 +49,11 @@ export async function POST(request: Request) {
         input.birthTimeUnknown || !saju.pillars.hour ? "three_pillars" : "four_pillars",
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Preview failed.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    const raw = err instanceof Error ? err.message : "Preview failed.";
+    const locale = body?.locale === "en" ? "en" : "ko";
+    return NextResponse.json(
+      { error: formatHumanPremiumError(raw, locale) },
+      { status: 400 }
+    );
   }
 }
