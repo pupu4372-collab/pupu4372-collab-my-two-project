@@ -53,6 +53,7 @@ export function HumanPremiumShop() {
   const routeLocale = useLocale();
   const isKo = routeLocale === "ko";
   const gridRef = useRef<HTMLDivElement>(null);
+  const checkoutRef = useRef<HTMLDivElement>(null);
   const { accessToken } = useSupabaseSession();
 
   const [checkout, setCheckout] = useState<CheckoutTarget | null>(null);
@@ -98,16 +99,19 @@ export function HumanPremiumShop() {
       });
   }, []);
 
-  function scrollToGrid() {
-    gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  useEffect(() => {
+    if (!checkout) return;
+    const frame = window.requestAnimationFrame(() => {
+      checkoutRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [checkout]);
 
   function openCheckout(target: CheckoutTarget) {
     setCheckout(target);
     setError(null);
     setPaypalPending(null);
     setResult(null);
-    scrollToGrid();
   }
 
   function checkoutAmount(target: CheckoutTarget): number {
@@ -319,7 +323,7 @@ export function HumanPremiumShop() {
         </p>
       ) : null}
 
-      <DayPillarPreview onViewFull={(type) => openCheckout({ kind: "single", reportType: type })} />
+      <DayPillarPreview />
 
       {result ? (
         <section className="pastel-card space-y-4 p-6 text-center">
@@ -380,6 +384,7 @@ export function HumanPremiumShop() {
         </div>
       </div>
 
+      <div ref={checkoutRef}>
       {checkout ? (
         <section className="pastel-card space-y-4 border-2 border-channel-saju/30 p-6">
           <h3 className="text-lg font-bold text-ink">
@@ -579,6 +584,7 @@ export function HumanPremiumShop() {
           </div>
         </section>
       ) : null}
+      </div>
 
       <section className="rounded-[2rem] bg-gradient-to-br from-channel-saju/90 to-plum p-6 text-white sm:p-8">
         <p className="text-sm font-semibold text-white/80">

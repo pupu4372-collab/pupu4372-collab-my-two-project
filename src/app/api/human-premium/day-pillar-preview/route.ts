@@ -1,6 +1,6 @@
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { computeBasicSaju } from "@/lib/saju/engine";
-import { buildHumanSummary } from "@/lib/reports/human-premium/content";
+import { buildDayPillarFreeFullView, buildHumanSummary } from "@/lib/reports/human-premium/content";
 import { resolveSolarBirthDate } from "@/lib/reports/human-premium/birth-basis";
 import { parseHumanPremiumReportInput } from "@/lib/reports/human-premium/service";
 import { ELEMENT_META } from "@/lib/saju/elements";
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     });
 
     const summary = buildHumanSummary(input.personName, saju, input.locale);
+    const fullView = buildDayPillarFreeFullView(input.personName.trim(), saju, input.locale);
     const day = saju.pillars.day;
     const dominant = ELEMENT_META[saju.dominantElement as ElementKey];
     const isKo = input.locale === "ko";
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
         : dominant.romanized,
       story: summary.story,
       traits: summary.traits,
+      fullView,
       analysisMode:
         input.birthTimeUnknown || !saju.pillars.hour ? "three_pillars" : "four_pillars",
     });

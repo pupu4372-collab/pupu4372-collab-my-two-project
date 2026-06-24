@@ -3,14 +3,14 @@
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { Link } from "@/i18n/navigation";
+import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
+import type { DayPillarFreeFullView } from "@/lib/reports/human-premium/content";
 import {
   BIRTH_TIME_OPTIONS,
   getBirthTimeOptionLabel,
   parseBirthTimeSelect,
 } from "@/lib/saju/birth-time-options";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
-import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
-import type { ReportType } from "@/lib/reports/human-premium/types";
 import { useLocale } from "next-intl";
 import { useMemo, useState } from "react";
 
@@ -23,25 +23,10 @@ interface DayPillarPreviewData {
   story: string;
   traits: string[];
   analysisMode: "three_pillars" | "four_pillars";
+  fullView: DayPillarFreeFullView;
 }
 
-interface DayPillarPreviewProps {
-  onViewFull: (reportType: ReportType) => void;
-}
-
-const BLUR_SECTIONS_KO = [
-  { title: "핵심 운세 지표", hint: "6개 영역 점수" },
-  { title: "심층 분석", hint: "마스터 내러티브" },
-  { title: "포착할 기회", hint: "5가지 기회" },
-];
-
-const BLUR_SECTIONS_EN = [
-  { title: "Key indicators", hint: "Six domain scores" },
-  { title: "Deep analysis", hint: "Master narrative" },
-  { title: "Opportunities", hint: "Five openings" },
-];
-
-export function DayPillarPreview({ onViewFull }: DayPillarPreviewProps) {
+export function DayPillarPreview() {
   const routeLocale = useLocale();
   const isKo = routeLocale === "ko";
   const [personName, setPersonName] = useState("");
@@ -53,6 +38,7 @@ export function DayPillarPreview({ onViewFull }: DayPillarPreviewProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<DayPillarPreviewData | null>(null);
+  const [showFullResult, setShowFullResult] = useState(false);
 
   const birthTimeUnknown = birthTimeSelect === "unknown";
   const birthTime = useMemo(() => {
@@ -62,6 +48,7 @@ export function DayPillarPreview({ onViewFull }: DayPillarPreviewProps) {
 
   async function handlePreview() {
     setError(null);
+    setShowFullResult(false);
     setLoading(true);
     try {
       const res = await fetch("/api/human-premium/day-pillar-preview", {
@@ -90,7 +77,11 @@ export function DayPillarPreview({ onViewFull }: DayPillarPreviewProps) {
     }
   }
 
-  const blurSections = isKo ? BLUR_SECTIONS_KO : BLUR_SECTIONS_EN;
+  function resetPreview() {
+    setPreview(null);
+    setShowFullResult(false);
+    setError(null);
+  }
 
   return (
     <section className="pastel-card space-y-6 p-6 sm:p-8">
@@ -233,34 +224,87 @@ export function DayPillarPreview({ onViewFull }: DayPillarPreviewProps) {
             ) : null}
           </article>
 
-          <div className="relative space-y-3">
-            {blurSections.map((section) => (
-              <div
-                key={section.title}
-                className="select-none rounded-2xl border border-plum/10 bg-cream/60 p-4 blur-[3px]"
-                aria-hidden
-              >
-                <p className="font-semibold text-ink">{section.title}</p>
-                <p className="text-sm text-plum/70">{section.hint}</p>
-                <div className="mt-2 h-10 rounded-lg bg-plum/5" />
-              </div>
-            ))}
-            <div className="absolute inset-0 flex items-center justify-center">
+          {!showFullResult ? (
+            <div className="text-center">
               <button
                 type="button"
-                onClick={() => onViewFull("lifetime")}
-                className="rounded-full bg-channel-saju px-6 py-3 font-bold text-white shadow-lg"
+                onClick={() => setShowFullResult(true)}
+                className="rounded-full bg-channel-saju px-6 py-3 font-bold text-white shadow-lg transition hover:brightness-110"
               >
-                {isKo ? "전체 분석 보기" : "View full analysis"}
+                {isKo ? "일주분석 보기" : "View day-pillar analysis"}
               </button>
+              <p className="mt-3 text-xs text-plum/70">
+                {isKo
+                  ? "만세력·오행·일주 해석을 무료로 펼쳐봅니다."
+                  : "Open your free pillars, elements, and day-master reading."}
+              </p>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-5">
+              <header className="text-center">
+                <p className="text-xs font-semibold uppercase tracking-wide text-channel-saju">
+                  {preview.fullView.analysisModeLabel}
+                </p>
+                <h3 className="mt-2 text-lg font-bold text-ink">{preview.fullView.headline}</h3>
+              </header>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {preview.fullView.pillars.map((row) => (
+                  <article
+                    key={row.slot}
+                    className="rounded-2xl border border-plum/10 bg-white/70 p-4"
+                  >
+                    <p className="text-xs font-semibold text-channel-saju">{row.label}</p>
+                    <p className="mt-1 text-2xl font-bold text-ink">{row.pillar}</p>
+                    <p className="mt-1 text-sm text-plum/80">{row.detail}</p>
+                  </article>
+                ))}
+              </div>
+
+              <section className="rounded-2xl border border-plum/10 bg-cream/60 p-4">
+                <h4 className="font-semibold text-ink">
+                  {isKo ? "오행 분포" : "Element balance"}
+                </h4>
+                <ul className="mt-3 space-y-2">
+                  {preview.fullView.elements.map((item) => (
+                    <li key={item.label}>
+                      <div className="mb-1 flex justify-between text-xs text-plum/80">
+                        <span>{item.label}</span>
+                        <span>{item.percent}%</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-white/80">
+                        <div
+                          className="h-full rounded-full bg-channel-saju/80"
+                          style={{ width: `${Math.max(item.percent, 4)}%` }}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="rounded-2xl border border-plum/10 bg-white/70 p-5">
+                <h4 className="font-semibold text-ink">
+                  {isKo ? "일주 · 사주 구조 해석" : "Day pillar · chart structure"}
+                </h4>
+                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/90">
+                  {preview.fullView.structureBody}
+                </p>
+              </section>
+
+              <p className="text-center text-xs text-plum/65">
+                {isKo
+                  ? "점수·기회·리스크·로드맵 등 심층 리포트는 아래 프리미엄 상품에서 확인할 수 있어요."
+                  : "Scores, opportunities, risks, and roadmap live in the premium reports below."}
+              </p>
+            </div>
+          )}
 
           <p className="text-center text-sm">
             <button
               type="button"
               className="font-semibold text-channel-saju underline"
-              onClick={() => setPreview(null)}
+              onClick={resetPreview}
             >
               {isKo ? "다시 입력" : "Enter again"}
             </button>

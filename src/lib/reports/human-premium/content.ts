@@ -878,3 +878,64 @@ export function flattenChapterSections(
 export function sumChapterPages(chapters: HumanPremiumReportChapter[]): number {
   return chapters.reduce((sum, chapter) => sum + chapter.pageEstimate, 0);
 }
+
+export interface DayPillarFreePillarRow {
+  slot: string;
+  label: string;
+  pillar: string;
+  detail: string;
+}
+
+export interface DayPillarFreeFullView {
+  headline: string;
+  pillars: DayPillarFreePillarRow[];
+  elements: Array<{ label: string; count: number; percent: number }>;
+  dayInsight: string;
+  structureBody: string;
+  analysisModeLabel: string;
+}
+
+export function buildDayPillarFreeFullView(
+  name: string,
+  saju: SajuBasicResponse,
+  locale: Locale
+): DayPillarFreeFullView {
+  const summary = humanElementStory(name, saju.dominantElement, locale);
+  const includeHour = !saju.birthTimeUnknown && Boolean(saju.pillars.hour);
+  const slotLabelsKo = { year: "년주", month: "월주", day: "일주", hour: "시주" };
+  const slotLabelsEn = { year: "Year", month: "Month", day: "Day", hour: "Hour" };
+
+  const pillars = (["year", "month", "day", "hour"] as const)
+    .filter((slot) => slot !== "hour" || includeHour)
+    .map((slot) => {
+      const pillar = saju.pillars[slot]!;
+      return {
+        slot,
+        label: locale === "ko" ? slotLabelsKo[slot] : slotLabelsEn[slot],
+        pillar: pillar.pillar,
+        detail: `${pillar.stemLabel} · ${pillar.branchLabel}`,
+      };
+    });
+
+  const total = saju.elements.reduce((sum, item) => sum + item.count, 0) || 1;
+
+  return {
+    headline: summary.headline,
+    pillars,
+    elements: saju.elements.map((item) => ({
+      label: elLabel(item.key, locale),
+      count: item.count,
+      percent: Math.round((item.count / total) * 100),
+    })),
+    dayInsight: summary.story,
+    structureBody: buildStructureBody(saju, locale, "lifetime"),
+    analysisModeLabel:
+      locale === "ko"
+        ? includeHour
+          ? "사주(四柱) · 시주 포함"
+          : "삼주(三柱) · 시주 미상"
+        : includeHour
+          ? "Four pillars · hour included"
+          : "Three pillars · hour unknown",
+  };
+}
