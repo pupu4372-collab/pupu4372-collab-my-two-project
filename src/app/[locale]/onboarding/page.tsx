@@ -11,7 +11,7 @@ export default async function OnboardingPage({ params }: OnboardingPageProps) {
   const { locale } = await params;
 
   return (
-    <div className="min-h-screen bg-dream-sky">
+    <div className="min-h-screen night-sky-page">
       <AppTopNav active="home" />
       <PageContainer>
         <OnboardingRoadmap locale={locale} />

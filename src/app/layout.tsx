@@ -1,3 +1,4 @@
+import { NIGHT_SKY_BASE } from "@/lib/theme/night-sky";
 import { CapacitorShell } from "@/components/mobile/CapacitorShell";
 import { NightSkyBackground } from "@/components/layout/NightSkyBackground";
 import type { Metadata, Viewport } from "next";
@@ -24,7 +25,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#f8e8ff",
+  themeColor: NIGHT_SKY_BASE,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -174,6 +174,9 @@ export function savePaidHumanPremiumOrder(order: SavedHumanPremiumOrder) {
   const existing = loadPaidHumanPremiumOrders();
   if (existing.some((entry) => entry.orderId === order.orderId)) return;
   writeLocalJson(PAID_ORDERS_KEY, [order, ...existing].slice(0, 30));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("human-premium-paid"));
+  }
 }
 
 function orderMatchesProfile(order: SavedHumanPremiumOrder, profile: HumanPremiumProfile): boolean {

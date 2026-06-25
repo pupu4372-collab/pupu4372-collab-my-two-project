@@ -1,0 +1,56 @@
+"use client";
+
+import { Link } from "@/i18n/navigation";
+import { getPaidHumanPremiumOrderIds } from "@/lib/reports/human-premium/cart-session";
+import { useEffect, useState } from "react";
+
+type FooterNavLinksProps = {
+  termsLabel: string;
+  privacyLabel: string;
+  supportLabel: string;
+  paymentsLabel: string;
+  hasServerPayments: boolean;
+};
+
+export function FooterNavLinks({
+  termsLabel,
+  privacyLabel,
+  supportLabel,
+  paymentsLabel,
+  hasServerPayments,
+}: FooterNavLinksProps) {
+  const [showPayments, setShowPayments] = useState(hasServerPayments);
+
+  useEffect(() => {
+    const sync = () => {
+      setShowPayments(hasServerPayments || getPaidHumanPremiumOrderIds().length > 0);
+    };
+    sync();
+    window.addEventListener("human-premium-paid", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("human-premium-paid", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, [hasServerPayments]);
+
+  const links = [
+    { href: "/terms" as const, label: termsLabel },
+    { href: "/privacy" as const, label: privacyLabel },
+    { href: "/support" as const, label: supportLabel },
+    ...(showPayments ? [{ href: "/payments" as const, label: paymentsLabel }] : []),
+  ];
+
+  return (
+    <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-white/75">
+      {links.map((item, index) => (
+        <span key={item.href} className="inline-flex items-center gap-3">
+          {index > 0 ? <span className="text-white/25" aria-hidden>|</span> : null}
+          <Link href={item.href} className="transition-colors hover:text-[#ffd7ff] hover:underline">
+            {item.label}
+          </Link>
+        </span>
+      ))}
+    </nav>
+  );
+}

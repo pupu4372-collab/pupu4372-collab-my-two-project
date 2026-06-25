@@ -4,7 +4,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 export default function LocaleNotFoundPage() {
   return (
-    <div className="min-h-screen bg-dream-sky">
+    <div className="min-h-screen night-sky-page">
       <AppTopNav />
       <NotFoundView />
       <MobileBottomNav />

@@ -13,7 +13,7 @@ export default async function ProfilePostsPage({ params }: ProfilePostsPageProps
   const isKo = locale === "ko";
 
   return (
-    <div className="min-h-screen bg-dream-sky">
+    <div className="min-h-screen night-sky-page">
       <AppTopNav active="profile" />
       <PageContainer className="max-w-3xl pb-32">
         <Link href="/profile" className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:opacity-80">

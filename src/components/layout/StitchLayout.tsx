@@ -60,7 +60,7 @@ export function NightPageShell({
   className?: string;
 }) {
   return (
-    <div className={`min-h-screen overflow-x-hidden bg-[#0c134f] ${className}`}>
+    <div className={`min-h-screen overflow-x-hidden bg-transparent ${className}`}>
       {children}
     </div>
   );

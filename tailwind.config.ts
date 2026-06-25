@@ -44,6 +44,7 @@ const config: Config = {
         "element-earth": "#F7F0E4",
         "element-metal": "#F2F0ED",
         "element-water": "#E6EFF6",
+        "night-sky": "var(--night-sky-base)",
       },
       fontFamily: {
         sans: ["SUIT Variable", "SUIT", "var(--font-noto)", "Pretendard", "system-ui", "sans-serif"],

@@ -22,7 +22,7 @@ export default async function PrivacyPage({ params }: PrivacyPageProps) {
   const content = getPrivacyPolicyContent(locale);
 
   return (
-    <div className="min-h-screen bg-dream-sky px-4 py-10">
+    <div className="min-h-screen night-sky-page px-4 py-10">
       <LegalPolicyDocument content={content} locale={locale} />
     </div>
   );

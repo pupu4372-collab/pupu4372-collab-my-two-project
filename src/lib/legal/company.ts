@@ -8,6 +8,7 @@ export const LEGAL_ENTITY = {
   addressKo: "대전광역시 동구 동서대로 1688, 8층 806-32호",
   addressEn: "806-32, 8F, 1688 Dongseo-daero, Dong-gu, Daejeon, Republic of Korea",
   phone: "042-300-5388",
+  email: "jungho@ksajupet.com",
   website: "https://ksajupet.com",
   effectiveDateKo: "2026년 6월 23일",
   effectiveDateEn: "June 23, 2026",

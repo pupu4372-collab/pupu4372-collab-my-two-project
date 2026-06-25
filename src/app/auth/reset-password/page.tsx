@@ -111,7 +111,7 @@ function ResetPasswordContent() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-dream-sky px-4">
+    <main className="flex min-h-screen items-center justify-center night-sky-page px-4">
       <div className="w-full max-w-sm rounded-[2rem] bg-white/95 px-6 py-8 shadow-[0_24px_60px_rgba(92,61,110,0.12)]">
         <div className="text-center">
           <h1 className="text-2xl font-extrabold text-ink">{copy.title}</h1>

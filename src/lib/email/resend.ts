@@ -12,7 +12,7 @@ export interface ResendEmailResult {
 }
 
 function getReportEmailFrom(): string {
-  return process.env.REPORT_EMAIL_FROM ?? "K-Saju Pet <noreply@ksajupet.com>";
+  return process.env.REPORT_EMAIL_FROM ?? "K-Saju Pet <jungho@ksajupet.com>";
 }
 
 export function isResendConfigured(): boolean {

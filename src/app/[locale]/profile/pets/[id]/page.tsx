@@ -11,7 +11,7 @@ export default async function PetDetailRoutePage({ params }: PetDetailRoutePageP
   const { id } = await params;
 
   return (
-    <div className="min-h-screen bg-dream-sky">
+    <div className="min-h-screen night-sky-page">
       <AppTopNav active="profile" />
       <PageContainer className="max-w-6xl">
         <PetDetailPage petId={id} />

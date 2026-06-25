@@ -10,6 +10,45 @@ import { useState } from "react";
 
 type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "challenge" | "community" | "support" | "profile";
 
+function splitNavLabel(label: string): string[] {
+  if (label.length < 4) return [label];
+
+  const paren = label.indexOf("(");
+  if (paren > 0 && paren < label.length - 1) {
+    return [label.slice(0, paren), label.slice(paren)];
+  }
+
+  const space = label.indexOf(" ");
+  if (space > 0 && space < label.length - 1) {
+    return [label.slice(0, space), label.slice(space + 1)];
+  }
+
+  const chars = [...label];
+  const mid = Math.ceil(chars.length / 2);
+  return [chars.slice(0, mid).join(""), chars.slice(mid).join("")];
+}
+
+function NavLabel({ label }: { label: string }) {
+  const lines = splitNavLabel(label);
+
+  if (lines.length === 1) {
+    return <span className="whitespace-nowrap">{lines[0]}</span>;
+  }
+
+  return (
+    <span className="inline-flex min-w-[2.5rem] flex-col items-center justify-center text-center leading-[1.12]">
+      {lines.map((line) => (
+        <span key={line} className="block whitespace-nowrap">
+          {line}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+const NAV_LINK_CLASS =
+  "inline-flex min-h-[2.25rem] min-w-[2.5rem] items-center justify-center rounded-full px-2 py-1 text-center text-[11px] font-bold leading-none sm:px-2.5 sm:text-xs lg:px-3 lg:text-sm";
+
 const NAV_LINKS: Array<{
   key: NavKey;
   href:
@@ -60,7 +99,7 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/45 bg-cream/80 shadow-sm backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-5 md:px-10">
+      <div className="mx-auto flex min-h-16 w-full max-w-7xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 md:px-8 lg:px-10">
         <Link href="/" className="flex items-center gap-2.5">
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/75 text-xl shadow-sm" aria-hidden>
             🐾
@@ -68,24 +107,27 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
           <span className="text-xl font-extrabold tracking-tight text-primary md:text-2xl">{nav("brand")}</span>
         </Link>
 
-        <nav className="hidden items-center gap-2 md:flex" aria-label={isKo ? "주요 메뉴" : "Main navigation"}>
+        <nav
+          className="hidden flex-1 flex-wrap items-center justify-center gap-1 md:flex lg:gap-1.5"
+          aria-label={isKo ? "주요 메뉴" : "Main navigation"}
+        >
           {NAV_LINKS.map((item) => {
             const className =
               active === item.key
-                ? "rounded-full bg-primary px-4 py-2 text-sm font-extrabold text-white shadow-sm"
-                : "rounded-full px-4 py-2 text-sm font-bold text-plum/65 transition hover:bg-white/65 hover:text-primary";
+                ? `${NAV_LINK_CLASS} bg-primary font-extrabold text-white shadow-sm`
+                : `${NAV_LINK_CLASS} text-plum/65 transition hover:bg-white/65 hover:text-primary`;
 
             if (item.key === "home") {
               return (
                 <Link key={item.key} href={item.href} className={className}>
-                  {nav(item.key)}
+                  <NavLabel label={nav(item.key)} />
                 </Link>
               );
             }
 
             return (
               <AuthRequiredLink key={item.key} href={item.href} className={className}>
-                {nav(item.key)}
+                <NavLabel label={nav(item.key)} />
               </AuthRequiredLink>
             );
           })}

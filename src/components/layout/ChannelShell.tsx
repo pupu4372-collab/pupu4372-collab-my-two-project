@@ -126,7 +126,7 @@ export function ChannelShell({
     ] satisfies ChannelShellProps["rightLinks"]);
 
   return (
-    <div className="min-h-screen bg-dream-sky">
+    <div className="min-h-screen night-sky-page">
       <AppTopNav active={topNavActive} />
       <PageContainer>
         {topBar && <div className="mb-5">{topBar}</div>}

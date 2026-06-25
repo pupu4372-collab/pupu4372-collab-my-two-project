@@ -59,12 +59,12 @@ const stars = [
 
 export function NightSkyBackground({ children }: { children: ReactNode }) {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#121a5c]">
+    <div className="relative min-h-screen overflow-x-hidden bg-night-sky">
       <div className="pointer-events-none fixed inset-0 z-0">
         {stars.map(([left, top, size, delay]) => (
           <span
             key={`${left}-${top}`}
-            className="star-twinkle absolute rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,1)]"
+            className="star-twinkle absolute rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.85)]"
             style={{
               left,
               top,
@@ -75,7 +75,7 @@ export function NightSkyBackground({ children }: { children: ReactNode }) {
           />
         ))}
       </div>
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_15%_20%,rgba(255,215,255,0.16),transparent_24%),radial-gradient(circle_at_82%_18%,rgba(115,145,255,0.18),transparent_26%)]" />
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_15%_20%,rgba(96,120,204,0.11),transparent_30%),radial-gradient(circle_at_82%_18%,rgba(56,88,176,0.13),transparent_32%),linear-gradient(180deg,rgba(16,28,76,0.36)_0%,rgba(9,15,50,0.16)_55%,transparent_100%)]" />
       <div className="relative z-10 min-h-screen">{children}</div>
     </div>
   );

@@ -1,50 +1,63 @@
+import { FooterNavLinks } from "@/components/layout/FooterNavLinks";
 import { Link } from "@/i18n/navigation";
-import { getTranslations } from "next-intl/server";
+import { LEGAL_ENTITY } from "@/lib/legal/company";
+import { getServerPaymentHistoryFlag } from "@/lib/reports/human-premium/payment-history";
+import { getLocale, getTranslations } from "next-intl/server";
+import Image from "next/image";
 
 export async function AppFooter() {
+  const locale = await getLocale();
+  const isKo = locale === "ko";
   const nav = await getTranslations("nav");
   const auth = await getTranslations("auth");
+  const year = new Date().getFullYear();
+  const hasServerPayments = await getServerPaymentHistoryFlag();
 
   return (
-    <footer className="relative z-10 w-full border-t border-white/10 bg-[#0a1038] py-14">
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center justify-between gap-8 px-5 md:flex-row md:px-10">
-        <div className="flex flex-col items-center md:items-start">
-          <div className="mb-2 text-sm font-bold text-white">K-Saju Pet</div>
-          <p className="text-sm text-white/60">© {new Date().getFullYear()} K-Saju Pet</p>
-        </div>
-        <div className="flex flex-wrap justify-center gap-8">
-          <Link
-            href="/privacy"
-            className="text-sm text-white/75 transition-all hover:text-[#ffd7ff] hover:underline"
-          >
-            {auth("privacy")}
-          </Link>
-          <Link
-            href="/terms"
-            className="text-sm text-white/75 transition-all hover:text-[#ffd7ff] hover:underline"
-          >
-            {auth("terms")}
-          </Link>
-          <Link
-            href="/support"
-            className="text-sm text-white/75 transition-all hover:text-[#ffd7ff] hover:underline"
-          >
-            {nav("support")}
-          </Link>
-          <Link
-            href="/saju"
-            className="text-sm text-white/75 transition-all hover:text-[#ffd7ff] hover:underline"
-          >
-            {nav("saju")}
-          </Link>
+    <footer className="relative z-10 w-full border-t border-white/10 bg-night-sky py-12 md:py-14">
+      <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-5 px-5 text-center md:px-10">
+        <Link href="/" className="group flex items-center gap-3">
+          <div className="relative h-11 w-11 overflow-hidden rounded-full border border-white/25 bg-white/10 shadow-[0_0_24px_rgba(245,217,255,0.15)]">
+            <Image
+              src="/stitch/asset-09.jpg"
+              alt="K-Saju Pet"
+              fill
+              className="object-contain"
+              sizes="44px"
+            />
+          </div>
+          <span className="text-base font-bold text-white transition-colors group-hover:text-[#ffd7ff]">
+            K-Saju Pet
+          </span>
+        </Link>
+
+        <p className="text-xs text-white/50">© {year} K-Saju Pet. All rights reserved.</p>
+
+        <FooterNavLinks
+          termsLabel={auth("terms")}
+          privacyLabel={auth("privacy")}
+          supportLabel={nav("support")}
+          paymentsLabel={nav("paymentHistory")}
+          hasServerPayments={hasServerPayments}
+        />
+
+        <div className="mt-2 max-w-3xl space-y-1.5 text-[11px] leading-relaxed text-white/40 md:text-xs">
+          <p>
+            {isKo ? "상호명" : "Business"}: 펫스토롤로지(petstrology) | {isKo ? "대표" : "CEO"}: 이경미
+            | {isKo ? "사업자등록번호" : "BRN"}: {LEGAL_ENTITY.businessNumber}
+          </p>
+          <p>
+            {isKo ? "주소" : "Address"}: {LEGAL_ENTITY.addressKo} | {isKo ? "전화" : "Tel"}:{" "}
+            {LEGAL_ENTITY.phone} | {isKo ? "이메일" : "Email"}:{" "}
+            <a
+              href={`mailto:${LEGAL_ENTITY.email}`}
+              className="text-white/55 underline decoration-white/20 hover:text-[#ffd7ff]"
+            >
+              {LEGAL_ENTITY.email}
+            </a>
+          </p>
         </div>
       </div>
-      <p className="mx-auto mt-8 max-w-[1200px] px-5 text-center text-xs leading-relaxed text-white/45 md:px-10">
-        펫스토롤로지(petstrology) | 대표 이경미 |
-        <br className="sm:hidden" />
-        <span className="hidden sm:inline"> </span>
-        사업자등록번호 536-17-02581 | 대전광역시 동구 동서대로 1688, 8층 806-32호 | 042-300-5388
-      </p>
     </footer>
   );
 }

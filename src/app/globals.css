@@ -12,12 +12,13 @@
   --petal: #fce1f1;
   --lavender: #e6e1f9;
   --cream: #fdfbf7;
+  --night-sky-base: #090f32;
 }
 
 body {
   color: var(--ink);
   min-height: 100vh;
-  background: #0c134f;
+  background: var(--night-sky-base);
 }
 
 .safe-area-shell {
@@ -130,18 +131,21 @@ html.native-app body {
   }
 }
 
-.bg-dream-sky {
+.bg-dream-sky,
+.night-sky-page {
   background-image: none !important;
   background-color: transparent !important;
 }
 
 /* Navy-sky pages: solid white inside bordered boxes (no gray glass) */
-.bg-dream-sky .pastel-card {
+.bg-dream-sky .pastel-card,
+.night-sky-page .pastel-card {
   background: #ffffff;
   backdrop-filter: none;
 }
 
-.bg-dream-sky .pastel-input {
+.bg-dream-sky .pastel-input,
+.night-sky-page .pastel-input {
   background: #ffffff;
 }
 
@@ -178,7 +182,7 @@ html.native-app body {
   --jig-obang-white: #e9e5d9;
   --jig-obang-black: #3d3d3d;
   --jig-muted: #444748;
-  background: #121a3a;
+  background: var(--night-sky-base);
   color: var(--jig-ink);
 }
 

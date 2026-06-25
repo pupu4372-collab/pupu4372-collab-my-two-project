@@ -4,7 +4,7 @@ import { PageContainer } from "@/components/layout/StitchLayout";
 
 export default function HumanPremiumAdminTestPage() {
   return (
-    <div className="min-h-screen bg-dream-sky">
+    <div className="min-h-screen night-sky-page">
       <AppTopNav active="profile" />
       <PageContainer className="max-w-4xl">
         <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-channel-saju">

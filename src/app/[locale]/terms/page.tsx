@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-dream-sky px-4 py-10">
+    <div className="min-h-screen night-sky-page px-4 py-10">
       <article className="pastel-card mx-auto max-w-2xl space-y-4 p-6 text-sm leading-relaxed text-plum/80">
         <Link href="/" className="text-sm text-plum/60 underline hover:text-plum">
           ← 홈

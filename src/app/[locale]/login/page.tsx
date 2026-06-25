@@ -15,7 +15,7 @@ export default async function LoginPage({
   const homeHref = `/${locale}`;
 
   return (
-    <div className="auth-dream-sky flex min-h-screen items-center justify-center px-4 py-10">
+    <div className="auth-dream-sky night-sky-page flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
         {error && (
           <p
