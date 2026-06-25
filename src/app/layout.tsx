@@ -16,9 +16,15 @@ export const metadata: Metadata = {
   title: "K-Saju Pet",
   description: "반려동물 K-사주와 커뮤니티",
   icons: {
-    icon: "/stitch/asset-09.jpg",
-    apple: "/stitch/asset-09.jpg",
+    icon: [
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  manifest: "/site.webmanifest",
 };
 
 export const viewport: Viewport = {

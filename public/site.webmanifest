@@ -1,0 +1,21 @@
+{
+  "name": "K-Saju Pet",
+  "short_name": "K-Saju Pet",
+  "description": "반려동물 K-사주와 커뮤니티",
+  "start_url": "/ko",
+  "display": "standalone",
+  "background_color": "#090f32",
+  "theme_color": "#090f32",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

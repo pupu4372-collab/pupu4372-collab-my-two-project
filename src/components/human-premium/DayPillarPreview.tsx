@@ -13,7 +13,7 @@ import {
   parseBirthTimeSelect,
 } from "@/lib/saju/birth-time-options";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 interface DayPillarPreviewData {
@@ -36,6 +36,7 @@ export function DayPillarPreview({
   onProfileChange: (next: HumanPremiumProfile) => void;
 }) {
   const routeLocale = useLocale();
+  const tNav = useTranslations("nav");
   const isKo = routeLocale === "ko";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,34 +93,42 @@ export function DayPillarPreview({
   }
 
   return (
-    <section className="pastel-card mx-auto w-full max-w-sm space-y-6 p-6 sm:max-w-md sm:p-8">
+    <section className="human-premium-birth-card mx-auto w-full max-w-sm space-y-6 p-6 sm:max-w-md sm:p-8">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-ink">
+        <p className="human-premium-birth-eyebrow">
+          {isKo ? "집사님의 사주" : "Butler birth chart"}
+        </p>
+        <h2 className="mt-2 text-2xl font-bold">
           {isKo ? "사주 정보 입력" : "Birth details"}
         </h2>
       </div>
 
       {!preview ? (
-        <div className="space-y-4">
-          <label className="block text-sm font-medium text-ink">
-            {isKo ? "이름" : "Name"}
+        <div className="human-premium-birth-form-inner space-y-4">
+          <label className="human-premium-birth-field">
+            {isKo ? "닉네임" : "Nickname"}
             <input
-              className="pastel-input mt-1 w-full"
+              className="human-premium-birth-input"
               value={profile.personName}
               onChange={(e) => patchProfile({ personName: e.target.value })}
-              placeholder={isKo ? "홍길동" : "Alex"}
+              placeholder={isKo ? "닉네임 입력" : "Your nickname"}
             />
+            <span className="human-premium-birth-hint">
+              {isKo
+                ? "보안을 위해 닉네임으로 넣어주세요."
+                : "For your privacy, please use a nickname."}
+            </span>
           </label>
-          <label className="block text-sm font-medium text-ink">
+          <label className="human-premium-birth-field">
             {isKo ? "이메일 (선택)" : "Email (optional)"}
             <input
               type="email"
-              className="pastel-input mt-1 w-full"
+              className="human-premium-birth-input"
               value={profile.email}
               onChange={(e) => patchProfile({ email: e.target.value })}
               placeholder="you@email.com"
             />
-            <span className="mt-1 block text-xs text-plum/50">
+            <span className="human-premium-birth-hint">
               {isKo
                 ? "원하시면 이메일을 적어주세요. 입력 시 리포트 링크를 보내드려요."
                 : "Optional — we'll email your report link if provided."}
@@ -130,11 +139,13 @@ export function DayPillarPreview({
             onChange={(birthDate) => patchProfile({ birthDate })}
             label={isKo ? "생년월일" : "Birth date"}
             locale={routeLocale as "ko" | "en"}
+            className="human-premium-birth-field"
+            selectClassName="human-premium-birth-input"
           />
-          <label className="block text-sm font-medium text-ink">
+          <label className="human-premium-birth-field">
             {isKo ? "출생 시간" : "Birth time"}
             <select
-              className="pastel-input mt-1 w-full"
+              className="human-premium-birth-input"
               value={profile.birthTimeSelect}
               onChange={(e) => patchProfile({ birthTimeSelect: e.target.value })}
             >
@@ -149,10 +160,10 @@ export function DayPillarPreview({
             <button
               type="button"
               onClick={() => patchProfile({ calendarType: "solar" })}
-              className={`rounded-full px-4 py-2 font-semibold ${
+              className={`human-premium-birth-pill ${
                 profile.calendarType === "solar"
-                  ? "bg-channel-saju text-white"
-                  : "bg-cream text-plum"
+                  ? "human-premium-birth-pill--active"
+                  : "human-premium-birth-pill--idle"
               }`}
             >
               {isKo ? "양력" : "Solar"}
@@ -160,19 +171,19 @@ export function DayPillarPreview({
             <button
               type="button"
               onClick={() => patchProfile({ calendarType: "lunar" })}
-              className={`rounded-full px-4 py-2 font-semibold ${
+              className={`human-premium-birth-pill ${
                 profile.calendarType === "lunar"
-                  ? "bg-channel-saju text-white"
-                  : "bg-cream text-plum"
+                  ? "human-premium-birth-pill--active"
+                  : "human-premium-birth-pill--idle"
               }`}
             >
               {isKo ? "음력" : "Lunar"}
             </button>
           </div>
-          <label className="block text-sm font-medium text-ink">
+          <label className="human-premium-birth-field">
             {isKo ? "타임존" : "Timezone"}
             <select
-              className="pastel-input mt-1 w-full"
+              className="human-premium-birth-input"
               value={profile.timezone}
               onChange={(e) => patchProfile({ timezone: e.target.value })}
             >
@@ -183,13 +194,15 @@ export function DayPillarPreview({
               ))}
             </select>
           </label>
-          <PrivacyConsent
-            checked={profile.privacyConsent}
-            onChange={(privacyConsent) => patchProfile({ privacyConsent })}
-            locale={routeLocale as "ko" | "en"}
-            variant="pastel"
-            audience="human"
-          />
+          <div className="human-premium-birth-consent">
+            <PrivacyConsent
+              checked={profile.privacyConsent}
+              onChange={(privacyConsent) => patchProfile({ privacyConsent })}
+              locale={routeLocale as "ko" | "en"}
+              variant="card"
+              audience="human"
+            />
+          </div>
           {error ? (
             <p
               role="alert"
@@ -202,15 +215,15 @@ export function DayPillarPreview({
             type="button"
             disabled={!profile.birthDate || !profile.privacyConsent || loading}
             onClick={handlePreview}
-            className="w-full rounded-full bg-channel-saju py-3 font-bold text-white disabled:opacity-50"
+            className="human-premium-birth-submit"
           >
             {loading
               ? isKo
                 ? "분석 중…"
                 : "Analyzing…"
               : isKo
-                ? "일주 미리보기 →"
-                : "Preview day pillar →"}
+                ? "오늘 운세 무료보기"
+                : "Today's fortune — free"}
           </button>
         </div>
       ) : (
@@ -328,9 +341,8 @@ export function DayPillarPreview({
       )}
 
       <p className="text-center text-xs text-plum/60">
-        {isKo ? "운세는 재미로만 보세요~" : "For entertainment only."}{" "}
         <Link href="/saju" className="underline">
-          {isKo ? "댕냥사주 홈" : "K-Saju home"}
+          {tNav("saju")}
         </Link>
       </p>
     </section>

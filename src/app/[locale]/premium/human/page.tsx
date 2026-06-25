@@ -9,8 +9,8 @@ export default async function HumanPremiumPage() {
   return (
     <ChannelShell
       theme="saju"
-      title="Human Premium"
-      subtitle="K-Saju Pet · 사람 사주 프리미엄"
+      title={t("premiumTitle")}
+      subtitle={t("premiumSubtitle")}
       hideThemeLabel
       narrowHero
     >
