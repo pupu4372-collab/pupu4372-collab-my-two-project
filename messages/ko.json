@@ -124,5 +124,15 @@
     "loading": "불러오는 중…",
     "localeKo": "한국어",
     "localeEn": "English"
+  },
+  "home": {
+    "heroEyebrow": "Pet Saju · Community · Care",
+    "heroTitleLine1": "우리 아이의 특별한",
+    "heroTitleLine2": "운명과 하루",
+    "heroSubtitle": "반려동물 생년월일 기반 맞춤 사주 리딩, 일일 운세, 커뮤니티를 제공하는 펫 라이프 서비스",
+    "heroFeature1": "반려동물 프로필 등록으로 맞춤 사주 생성",
+    "heroFeature2": "오늘의 운세와 성향 기반 해석 제공",
+    "heroFeature3": "강아지·고양이·파충류 케어 콘텐츠와 커뮤니티 연결",
+    "heroCta": "반려동물 등록하고 맞춤 사주 보기"
   }
 }

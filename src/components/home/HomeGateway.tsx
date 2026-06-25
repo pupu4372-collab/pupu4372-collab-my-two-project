@@ -10,7 +10,7 @@ import { JigFortuneOrnateCorners } from "@/components/home/jig-fortune/JigFortun
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import type { PetShowRankingRow } from "@/lib/supabase/types";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 type WeeklyRankingRows = {
@@ -102,6 +102,7 @@ interface HomeGatewayProps {
 
 export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   const locale = useLocale();
+  const t = useTranslations("home");
   const isKo = locale === "ko";
   const { ready, configured, isAnonymous, accessToken } = useSupabaseSession();
   const [rankingRows, setRankingRows] = useState<WeeklyRankingRows>(emptyRankingRows);
@@ -212,24 +213,50 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                   : "bg-white/70 text-channel-community"
               }`}
             >
-              {isKo ? "Pet Saju · Community · Care" : "Pet saju · Community · Care"}
+              {t("heroEyebrow")}
             </p>
             <h1 className={`mt-6 text-4xl font-extrabold leading-tight tracking-tight md:text-6xl ${isNight ? "text-white drop-shadow-[0_0_20px_rgba(245,217,255,0.28)]" : "text-primary"}`}>
-              {isKo ? "우리 아이의 특별한" : "Discover your pet's"}
+              {t("heroTitleLine1")}
               <span className={isNight ? "block text-[#ffd7ff]" : "block text-gradient-hero"}>
-                {isKo ? "운명과 하루" : "cosmic daily story"}
+                {t("heroTitleLine2")}
               </span>
             </h1>
-            {isKo && (
-              <p className={`mt-4 text-lg font-extrabold ${isNight ? "text-[#ffd7ff]" : "text-channel-saju"}`}>
-                2026 병오년, 우리 아이는 어떤 한 해를 보낼까?
-              </p>
-            )}
             <p className={`mt-5 max-w-xl text-base leading-8 ${isNight ? "font-semibold text-white/85 drop-shadow-[0_1px_12px_rgba(0,0,0,0.2)]" : "text-plum/70"}`}>
-              {isKo
-                ? "펫 사주로 성향을 읽고, 우리아이 자랑에서 사진을 나누고, 강아지·고양이·렙타일(다른동물) 채널에서 케어 팁을 찾아보세요."
-                : "Read your pet's saju, share photos in Pet Show, and browse dog, cat, and reptile care guides."}
+              {t("heroSubtitle")}
             </p>
+            <ul
+              className={`mt-6 space-y-2.5 text-sm leading-relaxed md:text-[15px] ${
+                isNight ? "font-semibold text-white/88" : "font-medium text-plum/80"
+              }`}
+            >
+              {[t("heroFeature1"), t("heroFeature2"), t("heroFeature3")].map((line) => (
+                <li key={line} className="flex gap-2.5">
+                  <span
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+                      isNight
+                        ? "bg-[#ffd7ff]/20 text-[#ffd7ff]"
+                        : "bg-channel-saju/12 text-channel-saju"
+                    }`}
+                    aria-hidden
+                  >
+                    ✓
+                  </span>
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8">
+              <AuthRequiredLink
+                href="/profile"
+                className={`inline-flex rounded-full px-6 py-3.5 text-sm font-extrabold text-white shadow-sm transition hover:scale-[1.02] hover:brightness-105 ${
+                  isNight
+                    ? "bg-channel-saju shadow-[0_0_24px_rgba(139,92,246,0.35)]"
+                    : "bg-channel-saju"
+                }`}
+              >
+                {t("heroCta")}
+              </AuthRequiredLink>
+            </div>
           </div>
 
           <div className="pet-fortune-jigwanjae relative overflow-visible p-4 shadow-lg md:p-5">

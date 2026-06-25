@@ -124,5 +124,15 @@
     "loading": "Loading…",
     "localeKo": "한국어",
     "localeEn": "English"
+  },
+  "home": {
+    "heroEyebrow": "Pet Saju · Community · Care",
+    "heroTitleLine1": "Discover your pet's",
+    "heroTitleLine2": "cosmic daily story",
+    "heroSubtitle": "A pet lifestyle platform offering personalized saju readings, daily fortunes, and care content for dogs, cats, and reptiles",
+    "heroFeature1": "Register your pet to get a personalized reading",
+    "heroFeature2": "View daily fortunes and personality-based insights",
+    "heroFeature3": "Explore care guides and community features",
+    "heroCta": "Register your pet and get a personalized saju reading"
   }
 }
