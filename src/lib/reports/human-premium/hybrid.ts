@@ -10,6 +10,7 @@ import {
 } from "@/lib/saju/llm/human-premium-orchestrator";
 import { computeHumanSajuMappingFromPremiumBirth } from "@/lib/saju/ksaju-adapter";
 import { resolveSolarBirthDate } from "./birth-basis";
+import { FREE_DAILY_PREVIEW_PROMPT_PRODUCT } from "./report-prompts";
 import { buildHumanPremiumFacts } from "./facts";
 import { FORTUNE_MONTHS } from "./luck-narratives";
 import { buildHumanPremiumReport } from "./generator";
@@ -76,8 +77,17 @@ export async function buildHumanPremiumReportHybrid(
     facts,
     locale: input.locale,
     reportType: payload.reportType,
+    promptProduct:
+      input.deliveryMode === "free-preview"
+        ? FREE_DAILY_PREVIEW_PROMPT_PRODUCT
+        : payload.reportType,
+    deliveryMode: input.deliveryMode,
     analysisMode: payload.analysisMode,
     dayPillarLabel: dayPillarLabel(saju, input.locale),
+    solarBirthDate,
+    birthTime: input.birthTime,
+    birthTimeUnknown: input.birthTimeUnknown,
+    gender: input.gender ?? payload.birthBasis.gender ?? null,
   };
 
   const llmMeta: HumanPremiumLlmMeta = {

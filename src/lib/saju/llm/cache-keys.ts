@@ -13,7 +13,7 @@ import type { InterpretSajuInput, LlmProviderName } from "./types";
 export const LLM_CACHE_PROMPT_VERSION = 1;
 
 /** Bump when human premium section prompts change materially */
-export const HUMAN_PREMIUM_PROMPT_VERSION = 3;
+export const HUMAN_PREMIUM_PROMPT_VERSION = 6;
 
 function stableStringify(value: unknown): string {
   return JSON.stringify(value, (_key, current) => {
@@ -69,18 +69,21 @@ export function buildInterpretCacheKey(
 export function buildHumanPremiumCallCacheKey(options: {
   callKind: string;
   reportType: ReportType;
+  promptProduct?: string;
   locale: Locale;
   analysisMode: "three_pillars" | "four_pillars";
   mapping: HumanSajuMapping;
   model: string;
   provider: string;
   narrative?: string;
+  reportInputFacet?: string | null;
 }): string {
   return sha256Hex(
     stableStringify({
       v: HUMAN_PREMIUM_PROMPT_VERSION,
       callKind: options.callKind,
       reportType: options.reportType,
+      promptProduct: options.promptProduct ?? options.reportType,
       locale: options.locale,
       analysisMode: options.analysisMode,
       provider: options.provider,
@@ -88,6 +91,7 @@ export function buildHumanPremiumCallCacheKey(options: {
       narrativeHash: options.narrative
         ? sha256Hex(options.narrative.slice(0, 500))
         : null,
+      reportInputFacet: options.reportInputFacet ?? null,
       mapping: {
         pillars: options.mapping.pillars,
         dayMaster: options.mapping.dayMaster,

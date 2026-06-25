@@ -25,8 +25,23 @@ export function parseSajuStructure(value: unknown): string | null {
 export function parseDeepAnalysis(value: unknown): string | null {
   if (typeof value === "string") return nonEmptyString(value);
   if (!value || typeof value !== "object") return null;
-  const v = value as { deepAnalysis?: unknown; narrative?: unknown };
-  return nonEmptyString(v.deepAnalysis) ?? nonEmptyString(v.narrative);
+  return nonEmptyString((value as { deepAnalysis?: unknown }).deepAnalysis);
+}
+
+export function parseMasterNarrative(value: unknown): string | null {
+  if (typeof value === "string") return nonEmptyString(value);
+  if (!value || typeof value !== "object") return null;
+  const v = value as {
+    narrative?: unknown;
+    masterNarrative?: unknown;
+    /** @deprecated legacy packs that used deepAnalysis for master-narrative */
+    deepAnalysis?: unknown;
+  };
+  return (
+    nonEmptyString(v.narrative) ??
+    nonEmptyString(v.masterNarrative) ??
+    nonEmptyString(v.deepAnalysis)
+  );
 }
 
 export function parseOpportunities(value: unknown): ReportOpportunity[] | null {

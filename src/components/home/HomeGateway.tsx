@@ -221,27 +221,19 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                 {t("heroTitleLine2")}
               </span>
             </h1>
-            <p className={`mt-5 max-w-xl text-base leading-8 ${isNight ? "font-semibold text-white/85 drop-shadow-[0_1px_12px_rgba(0,0,0,0.2)]" : "text-plum/70"}`}>
+            <p className="mt-5 max-w-xl text-base font-semibold leading-8 text-white/92 drop-shadow-[0_1px_12px_rgba(0,0,0,0.25)]">
               {t("heroSubtitle")}
             </p>
-            <ul
-              className={`mt-6 space-y-2.5 text-sm leading-relaxed md:text-[15px] ${
-                isNight ? "font-semibold text-white/88" : "font-medium text-plum/80"
-              }`}
-            >
+            <ul className="mt-6 space-y-2.5 text-sm font-semibold leading-relaxed text-[#f5f0ff] md:text-[15px]">
               {[t("heroFeature1"), t("heroFeature2"), t("heroFeature3")].map((line) => (
                 <li key={line} className="flex gap-2.5">
                   <span
-                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
-                      isNight
-                        ? "bg-[#ffd7ff]/20 text-[#ffd7ff]"
-                        : "bg-channel-saju/12 text-channel-saju"
-                    }`}
+                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#ffd7ff]/25 text-[11px] font-bold text-[#ffd7ff]"
                     aria-hidden
                   >
                     ✓
                   </span>
-                  <span>{line}</span>
+                  <span className="text-[#faf5ff] drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]">{line}</span>
                 </li>
               ))}
             </ul>

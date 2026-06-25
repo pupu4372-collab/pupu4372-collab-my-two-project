@@ -4,6 +4,7 @@ export {
   convertLunarYmdToSolar,
   findAdjacentSolarTermInstant,
   formatSolarYmd,
+  getDayGanZhiAtLocal,
   getMonthGanZhiAtLocal,
   getSeunYearGanZhi,
   splitGanZhi,

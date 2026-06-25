@@ -141,7 +141,6 @@ export function calculateSaju(input: BirthInput): SajuResult {
   const daYunList = yun.getDaYun();
   const daewoon: DaewoonItem[] = daYunList
     .filter((dy) => dy.getGanZhi())
-    .slice(0, 10)
     .map((dy) => ({
       index: dy.getIndex(),
       ganzi: dy.getGanZhi(),

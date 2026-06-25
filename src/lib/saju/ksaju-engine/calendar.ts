@@ -34,6 +34,20 @@ export function getSeunYearGanZhi(year: number): string {
   return LunarYear.fromYear(year).getGanZhi();
 }
 
+/** Local civil datetime → 日柱 */
+export function getDayGanZhiAtLocal(
+  year: number,
+  month: number,
+  day: number,
+  hour = 12,
+  minute = 0
+): string {
+  const ec = Solar.fromYmdHms(year, month, day, hour, minute, 0)
+    .getLunar()
+    .getEightChar();
+  return `${ec.getDayGan()}${ec.getDayZhi()}`;
+}
+
 /** Local civil datetime → 月柱 (절기 기준) */
 export function getMonthGanZhiAtLocal(
   year: number,

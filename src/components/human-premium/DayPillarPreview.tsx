@@ -215,15 +215,27 @@ export function DayPillarPreview({
             type="button"
             disabled={!profile.birthDate || !profile.privacyConsent || loading}
             onClick={handlePreview}
-            className="human-premium-birth-submit"
+            className="human-premium-birth-submit human-premium-birth-submit--plan"
           >
-            {loading
-              ? isKo
-                ? "분석 중…"
-                : "Analyzing…"
-              : isKo
-                ? "오늘 운세 무료보기"
-                : "Today's fortune — free"}
+            {!loading ? (
+              <span className="human-premium-birth-submit-index" aria-hidden>
+                1
+              </span>
+            ) : null}
+            <span className="human-premium-birth-submit-body">
+              {loading ? (
+                isKo ? "분석 중…" : "Analyzing…"
+              ) : (
+                <>
+                  <span className="human-premium-birth-submit-title">
+                    {isKo ? "일별 인생 플랜 보기" : "View daily life plan"}
+                  </span>
+                  <span className="human-premium-birth-submit-sub">
+                    {isKo ? "시간대 활용법" : "Time-slot guide"}
+                  </span>
+                </>
+              )}
+            </span>
           </button>
         </div>
       ) : (

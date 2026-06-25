@@ -93,8 +93,8 @@ function CommonFortunePanel({
         {revealed && showRegisterCta && (
           <p className="jig-fortune-notice text-center text-[11px] font-semibold leading-5 text-[var(--jig-muted)]">
             {isKo
-              ? "K-사주를 저장하면 내 아이 맞춤 운세가 열려요."
-              : "Save a K-Saju reading to unlock your pet's personalized fortune."}
+              ? "반려동물 생일을 입력하면 내 아이 맞춤 운세가 열려요."
+              : "Enter your pet's birthday to unlock your pet's personalized fortune."}
           </p>
         )}
 
@@ -139,7 +139,7 @@ function CommonFortunePanel({
       <p className={`mt-3 text-sm font-semibold leading-7 ${isNight ? "text-[#f3e8ff]/90" : "text-plum/75"}`}>{fortune.body}</p>
       {showRegisterCta && (
         <p className="mt-4 rounded-2xl bg-white/65 px-4 py-3 text-xs font-extrabold leading-5 text-primary shadow-sm">
-          {isKo ? "K-사주를 저장하면 내 아이 맞춤 운세가 열려요." : "Save a K-Saju reading to unlock your pet's personalized fortune."}
+          {isKo ? "반려동물 생일을 입력하면 내 아이 맞춤 운세가 열려요." : "Enter your pet's birthday to unlock your pet's personalized fortune."}
         </p>
       )}
       <AuthRequiredLink

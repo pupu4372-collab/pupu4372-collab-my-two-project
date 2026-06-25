@@ -32,6 +32,7 @@ export interface LegacyHumanInterpretationJson {
 export interface HumanInterpretationJson {
   sajuStructure: string;
   scores: ReportScore[];
+  masterNarrative?: string;
   deepAnalysis: string;
   opportunities: ReportOpportunity[];
   risks: ReportRisk[];

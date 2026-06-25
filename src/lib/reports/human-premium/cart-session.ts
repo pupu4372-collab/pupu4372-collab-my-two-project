@@ -1,4 +1,5 @@
 import type { ReportType } from "@/lib/reports/human-premium/types";
+import { normalizeReportTypeKey } from "@/lib/reports/human-premium/types";
 
 export type HumanPremiumProfile = {
   personName: string;
@@ -87,8 +88,20 @@ export function saveHumanPremiumProfile(profile: HumanPremiumProfile) {
   writeJson(PROFILE_KEY, profile);
 }
 
+function normalizeCartItems(items: ReportType[]): ReportType[] {
+  const next: ReportType[] = [];
+  for (const item of items) {
+    const type = normalizeReportTypeKey(String(item));
+    if (!type || next.includes(type)) continue;
+    next.push(type);
+  }
+  return next;
+}
+
 export function loadHumanPremiumCart(): HumanPremiumCartState {
-  return readJson(CART_KEY, DEFAULT_CART);
+  const cart = readJson(CART_KEY, DEFAULT_CART);
+  cart.items = normalizeCartItems(cart.items);
+  return cart;
 }
 
 export function saveHumanPremiumCart(cart: HumanPremiumCartState) {
@@ -194,7 +207,7 @@ export function getPurchasedReportTypes(
   const types = new Set<ReportType>();
   for (const order of loadPaidHumanPremiumOrders()) {
     if (!orderMatchesProfile(order, profile)) continue;
-    for (const item of order.items) types.add(item);
+    for (const item of normalizeCartItems(order.items)) types.add(item);
   }
   return [...types];
 }
@@ -221,7 +234,7 @@ export function syncPaidOrdersFromVault(
     savePaidHumanPremiumOrder({
       orderId: order.orderId,
       paidAt: order.createdAt ?? new Date().toISOString(),
-      items: order.items,
+      items: normalizeCartItems(order.items),
       personName: order.personName,
       birthDate: order.birthDate,
       birthTimeSelect: order.birthTimeUnknown ? "unknown" : order.birthTime ?? "unknown",

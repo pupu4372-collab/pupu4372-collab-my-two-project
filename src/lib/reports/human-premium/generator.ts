@@ -62,6 +62,7 @@ export function buildHumanPremiumReport(
     personName: input.personName.trim(),
     locale: input.locale,
     reportType,
+    deliveryMode: input.deliveryMode,
     calendarType: input.calendarType,
     birthBasis,
     analysisMode: input.birthTimeUnknown ? "three_pillars" : "four_pillars",

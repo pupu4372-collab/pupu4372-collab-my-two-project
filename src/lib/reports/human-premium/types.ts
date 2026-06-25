@@ -2,36 +2,46 @@ import type { Locale } from "@/lib/saju/types";
 
 export type ReportType =
   | "daily"
-  | "weekly"
+  | "decade"
   | "monthly"
   | "yearly"
   | "mental"
   | "love"
   | "career"
   | "business"
+  | "wealth"
   | "lifetime";
 
+/** @deprecated DB/API legacy alias — maps to `decade` */
+export const LEGACY_REPORT_TYPE_WEEKLY = "weekly" as const;
+
+const LEGACY_REPORT_TYPE_ALIASES: Record<string, ReportType> = {
+  weekly: "decade",
+};
+
 export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
-  daily: "데일리루틴",
-  weekly: "주간플랜",
+  daily: "데일리 럭키 루틴",
+  decade: "10년 인생 청사진",
   monthly: "월간 로드맵",
-  yearly: "올해의 대운 플랜",
+  yearly: "올해의 인생 청사진",
   mental: "멘탈디톡스",
   love: "로맨스시그널",
   career: "커리어 빌드업",
-  business: "비즈니스 파트너",
+  business: "비즈니스 파트너 플랜",
+  wealth: "자산과 재테크",
   lifetime: "인생의 마스터플랜",
 };
 
 export const REPORT_TYPE_LABELS_EN: Record<ReportType, string> = {
   daily: "Daily Routine",
-  weekly: "Weekly Plan",
+  decade: "10-Year Life Blueprint",
   monthly: "Monthly Roadmap",
   yearly: "This Year's Major-Luck Plan",
   mental: "Mental Detox",
   love: "Romance Signal",
   career: "Career Build-up",
   business: "Business Partner",
+  wealth: "Assets & Wealth",
   lifetime: "Life Master Plan",
 };
 
@@ -39,19 +49,27 @@ export const DEFAULT_REPORT_TYPE: ReportType = "lifetime";
 
 const REPORT_TYPE_SET = new Set<ReportType>([
   "daily",
-  "weekly",
+  "decade",
   "monthly",
   "yearly",
   "mental",
   "love",
   "career",
   "business",
+  "wealth",
   "lifetime",
 ]);
 
+export function normalizeReportTypeKey(value: string): ReportType | null {
+  const key = LEGACY_REPORT_TYPE_ALIASES[value] ?? value;
+  if (REPORT_TYPE_SET.has(key as ReportType)) return key as ReportType;
+  return null;
+}
+
 export function parseReportType(value: unknown): ReportType {
-  if (typeof value === "string" && REPORT_TYPE_SET.has(value as ReportType)) {
-    return value as ReportType;
+  if (typeof value === "string") {
+    const parsed = normalizeReportTypeKey(value);
+    if (parsed) return parsed;
   }
   return DEFAULT_REPORT_TYPE;
 }
@@ -164,6 +182,8 @@ export interface HumanPremiumCartMeta {
   deliverEmail: boolean;
 }
 
+export type HumanPremiumDeliveryMode = "free-preview" | "paid";
+
 export interface HumanPremiumReportInput {
   personName: string;
   email: string;
@@ -178,6 +198,8 @@ export interface HumanPremiumReportInput {
   userId?: string | null;
   /** Defaults to {@link DEFAULT_REPORT_TYPE} when omitted */
   reportType?: ReportType;
+  /** free-preview = 오늘 운세 무료보기 (daily report, premium UI) */
+  deliveryMode?: HumanPremiumDeliveryMode;
 }
 
 export interface HumanPremiumReportRow {
@@ -311,6 +333,7 @@ export interface HumanPremiumReportPayload {
   personName: string;
   locale: Locale;
   reportType: ReportType;
+  deliveryMode?: HumanPremiumDeliveryMode;
   calendarType: HumanPremiumCalendarType;
   birthBasis: HumanPremiumBirthBasis;
   analysisMode: "three_pillars" | "four_pillars";

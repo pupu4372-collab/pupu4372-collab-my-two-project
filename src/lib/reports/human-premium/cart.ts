@@ -17,28 +17,44 @@ import {
 } from "./storage";
 import type {
   HumanPremiumBirthBasis,
+  HumanPremiumCartGeneratedItem,
   HumanPremiumCartMeta,
   HumanPremiumReportInput,
   HumanPremiumReportRow,
   ReportType,
 } from "./types";
+import { normalizeReportTypeKey } from "./types";
 
 export function parseCartReportTypes(value: unknown): ReportType[] {
   if (!Array.isArray(value)) return [];
   const items: ReportType[] = [];
-  const allowed = new Set<ReportType>(REPORT_TYPE_ORDER);
   for (const entry of value) {
-    if (typeof entry !== "string" || !allowed.has(entry as ReportType)) continue;
-    const type = entry as ReportType;
-    if (!items.includes(type)) items.push(type);
+    if (typeof entry !== "string") continue;
+    const type = normalizeReportTypeKey(entry);
+    if (!type || items.includes(type)) continue;
+    items.push(type);
   }
   return items;
+}
+
+function normalizeCartMeta(cart: HumanPremiumCartMeta): HumanPremiumCartMeta {
+  const items = parseCartReportTypes(cart.items);
+  const generated: Partial<Record<ReportType, HumanPremiumCartGeneratedItem>> = {
+    ...cart.generated,
+  };
+  const legacyWeekly = (cart.generated as Record<string, HumanPremiumCartGeneratedItem | undefined>)
+    .weekly;
+  if (legacyWeekly && !generated.decade) {
+    generated.decade = legacyWeekly;
+  }
+  delete (generated as Record<string, unknown>).weekly;
+  return { ...cart, items, generated };
 }
 
 function getCartMeta(row: HumanPremiumReportRow): HumanPremiumCartMeta | null {
   const cart = row.birth_basis?.cart;
   if (!cart?.cartOrder || !Array.isArray(cart.items)) return null;
-  return cart;
+  return normalizeCartMeta(cart);
 }
 
 function rowMatchesBirthProfile(

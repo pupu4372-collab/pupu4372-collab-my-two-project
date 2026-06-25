@@ -3,13 +3,14 @@ import type { ReportType } from "@/lib/reports/human-premium/types";
 
 const REPORT_TYPE_ENV_KEYS: Record<ReportType, string> = {
   daily: "PAYPAL_LINK_DAILY",
-  weekly: "PAYPAL_LINK_WEEKLY",
+  decade: "PAYPAL_LINK_DECADE",
   monthly: "PAYPAL_LINK_MONTHLY",
   yearly: "PAYPAL_LINK_YEARLY",
   mental: "PAYPAL_LINK_MENTAL",
   love: "PAYPAL_LINK_LOVE",
   career: "PAYPAL_LINK_CAREER",
   business: "PAYPAL_LINK_BUSINESS",
+  wealth: "PAYPAL_LINK_WEALTH",
   lifetime: "PAYPAL_LINK_LIFETIME",
 };
 
@@ -42,7 +43,9 @@ export function resolvePayPalPaymentLink(options: {
   if (options.bundle) {
     base = readPayPalLink(BUNDLE_ENV_KEYS[options.bundle]);
   } else if (options.reportType) {
-    base = readPayPalLink(REPORT_TYPE_ENV_KEYS[options.reportType]);
+    base =
+      readPayPalLink(REPORT_TYPE_ENV_KEYS[options.reportType]) ??
+      (options.reportType === "decade" ? readPayPalLink("PAYPAL_LINK_WEEKLY") : null);
   }
 
   base ??= readPayPalLink("PAYPAL_LINK_DEFAULT");

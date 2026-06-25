@@ -52,25 +52,27 @@ const MAX_SCORE = 95;
 
 const REPORT_FOCUS_KO: Record<ReportType, string> = {
   daily: "오늘 하루의 행동과 타이밍",
-  weekly: "이번 주의 흐름과 우선순위",
+  decade: "10년 대운 전략과 인생 로드맵",
   monthly: "이달의 전략과 에너지 배분",
   yearly: "올해의 로드맵과 핵심 테마",
   mental: "심리·건강·회복력과 에너지 관리",
   love: "연애·결혼·관계의 온도",
   career: "직장·성장·성과의 방향",
   business: "협업·네트워크·파트너십",
-  lifetime: "대운 전체와 인생 설계",
+  wealth: "자산 흐름과 재테크 설계",
+  lifetime: "평생 대운과 인생 설계",
 };
 
 const REPORT_FOCUS_EN: Record<ReportType, string> = {
   daily: "today's actions and timing",
-  weekly: "this week's rhythm and priorities",
+  decade: "10-year major-luck strategy and life roadmap",
   monthly: "this month's strategy and energy",
   yearly: "this year's roadmap and themes",
   mental: "mental health, recovery, and energy",
   love: "romance, partnership, and bonds",
   career: "work, growth, and recognition",
   business: "collaboration, network, and partners",
+  wealth: "asset flow and wealth design",
   lifetime: "major luck cycles and life design",
 };
 
@@ -794,7 +796,7 @@ Dominant element: ${elLabel(saju.dominantElement, locale)}. Read the chart as a 
       kind: "depth",
       title: locale === "ko" ? "심층 분석" : "Deep analysis",
       subtitle: locale === "ko" ? "마스터 내러티브 · 대운 스토리" : "Master narrative · major cycles",
-      body: buildDepthBody(saju, name, locale, reportType, summary.story),
+      body: reportType === "daily" ? "" : buildDepthBody(saju, name, locale, reportType, summary.story),
       pageEstimate: 4,
     },
     {

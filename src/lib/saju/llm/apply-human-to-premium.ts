@@ -1,5 +1,6 @@
 import { formatStructuredSectionBodies } from "@/lib/reports/human-premium/content";
 import { patchSectionBody } from "@/lib/reports/human-premium/section-patch";
+import type { HumanPremiumPromptSlotKey } from "@/lib/reports/human-premium/report-prompts/types";
 import type {
   HumanPremiumLlmSectionMeta,
   HumanPremiumLlmSectionSource,
@@ -20,6 +21,18 @@ export const HUMAN_INTERPRET_SECTION_IDS = [
 ] as const;
 
 export type HumanInterpretSectionId = (typeof HUMAN_INTERPRET_SECTION_IDS)[number];
+
+/** Prompt slot → report section (master-narrative feeds later slots only). */
+export const HUMAN_PREMIUM_PROMPT_SLOT_SECTIONS: Partial<
+  Record<HumanPremiumPromptSlotKey, HumanInterpretSectionId>
+> = {
+  "saju-structure": "section-structure",
+  "deep-analysis": "section-depth",
+  opportunities: "section-opportunity",
+  risks: "section-risk",
+  roadmap: "section-roadmap",
+  prophecy: "section-prophecy",
+};
 
 const SKIP_LLM_SECTIONS = new Set<string>(["section-cover"]);
 

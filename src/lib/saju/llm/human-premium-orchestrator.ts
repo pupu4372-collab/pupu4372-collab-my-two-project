@@ -22,13 +22,15 @@ import {
 } from "./cache";
 import {
   buildMasterNarrativePrompts,
+  buildDeepAnalysisPrompts,
   buildOpportunitiesPrompts,
   buildProphecyPrompts,
   buildRisksPrompts,
   buildRoadmapPrompts,
   buildSajuStructurePrompts,
-  type PremiumPromptContext,
 } from "./prompts/human-prompt";
+import type { PremiumPromptContext } from "./prompts/premium-context";
+import { resolvePromptProduct, reportSpecificInputCacheFacet } from "@/lib/reports/human-premium/report-prompts";
 import {
   callClaudeJsonParsed,
   isClaudeEnabled,
@@ -41,6 +43,7 @@ import {
   parseCohortInsight,
   parseDeepAnalysis,
   parseDecisionMoments,
+  parseMasterNarrative,
   parseOpportunities,
   parseProphecy,
   parseRisks,
@@ -120,6 +123,11 @@ async function callProviderJson(
 }
 
 function providerOrder(): PremiumLlmProvider[] {
+  const forced = process.env.HUMAN_PREMIUM_LLM_PROVIDER?.trim().toLowerCase();
+  if (forced === "claude" && isClaudeEnabled()) return ["claude"];
+  if (forced === "openai" && isOpenAiEnabled()) return ["openai"];
+  if (forced === "gemini" && isGeminiEnabled()) return ["gemini"];
+
   const order: PremiumLlmProvider[] = [];
   if (isClaudeEnabled()) order.push("claude");
   if (isOpenAiEnabled()) order.push("openai");
@@ -143,6 +151,8 @@ async function callPremiumJsonCached(options: {
     const cacheKey = buildHumanPremiumCallCacheKey({
       callKind: options.callKind,
       reportType: options.ctx.reportType,
+      promptProduct: resolvePromptProduct(options.ctx),
+      reportInputFacet: reportSpecificInputCacheFacet(options.ctx),
       locale: options.ctx.locale,
       analysisMode: options.ctx.analysisMode,
       mapping: options.ctx.mapping,
@@ -211,6 +221,18 @@ async function generateMasterNarrative(ctx: PremiumLlmContext) {
     maxTokens: 2000,
   });
   if (!result) return { value: null, provider: null };
+  return { value: parseMasterNarrative(result.data), provider: result.provider };
+}
+
+async function generateDeepAnalysis(ctx: PremiumLlmContext, narrative: string) {
+  const result = await callPremiumJsonCached({
+    callKind: "deep-analysis",
+    ctx,
+    prompts: buildDeepAnalysisPrompts(ctx, narrative),
+    maxTokens: 2000,
+    narrative,
+  });
+  if (!result) return { value: null, provider: null };
   return { value: parseDeepAnalysis(result.data), provider: result.provider };
 }
 
@@ -270,20 +292,6 @@ async function generateProphecyBundle(ctx: PremiumLlmContext, narrative: string)
   };
 }
 
-async function runParallelOrSequential<T extends unknown[]>(
-  tasks: { [K in keyof T]: () => Promise<T[K]> }
-): Promise<T> {
-  try {
-    const results = await Promise.all(tasks.map((task) => task()));
-    return results as T;
-  } catch {
-    const results: unknown[] = [];
-    for (const task of tasks) {
-      results.push(await task());
-    }
-    return results as T;
-  }
-}
 
 function generateScores(saju: SajuBasicResponse, locale: Locale): ReportScore[] {
   return buildHumanPremiumStructured(saju, locale, "lifetime").scores;
@@ -342,19 +350,29 @@ export async function buildHumanPremiumStructuredWithLlm(
     mark("section-structure", null, false, "llm_failed");
   }
 
+  const skipDeepLlm = ctx.reportType === "daily";
   const narrativeResult = await generateMasterNarrative(ctx);
   const narrative = narrativeResult.value ?? "";
   if (narrativeResult.value) {
-    interpretation.deepAnalysis = narrativeResult.value;
-    mark("section-depth", narrativeResult.provider, true);
-  } else {
-    mark("section-depth", null, false, "llm_failed");
+    interpretation.masterNarrative = narrativeResult.value;
   }
 
-  const [oppResult, riskResult, roadmapResult] = await runParallelOrSequential([
-    () => generateOpportunities(ctx, narrative),
-    () => generateRisks(ctx, narrative),
-    () => generateRoadmap(ctx, narrative),
+  if (skipDeepLlm) {
+    mark("section-depth", null, true);
+  } else {
+    const deepAnalysisResult = await generateDeepAnalysis(ctx, narrative);
+    if (deepAnalysisResult.value) {
+      interpretation.deepAnalysis = deepAnalysisResult.value;
+      mark("section-depth", deepAnalysisResult.provider, true);
+    } else {
+      mark("section-depth", null, false, "llm_failed");
+    }
+  }
+
+  const [oppResult, riskResult, roadmapResult] = await Promise.all([
+    generateOpportunities(ctx, narrative),
+    generateRisks(ctx, narrative),
+    generateRoadmap(ctx, narrative),
   ]);
 
   if (oppResult.value?.length) {
