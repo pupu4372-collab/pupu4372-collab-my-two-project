@@ -530,6 +530,15 @@ html.native-app body {
   text-transform: uppercase;
 }
 
+/* Cover recipient block — report type title (e.g. 10년 인생 청사진), matches day-pillar headline */
+.human-premium-report-type-title {
+  font-family: "Noto Serif KR", ui-serif, Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--jig-ink);
+}
+
 .human-premium-accent-bar {
   width: 0.5rem;
   height: 2rem;

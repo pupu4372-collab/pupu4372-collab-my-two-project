@@ -47,6 +47,16 @@ export function BodyText({
   );
 }
 
+export function ReportTypeTitle({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return <p className={`human-premium-report-type-title ${className}`.trim()}>{children}</p>;
+}
+
 export function SectionHeading({
   id,
   title,

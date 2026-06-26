@@ -15,7 +15,7 @@ import {
   formatIssuedDate,
   obangPaleBg,
 } from "./report-helpers";
-import { BodyText } from "./report-ui";
+import { BodyText, ReportTypeTitle } from "./report-ui";
 
 interface CoverSectionProps {
   report: HumanPremiumReportPayload;
@@ -72,7 +72,7 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
                 {report.personName}
                 {isKo ? "님" : ""}
               </p>
-              <p className="mt-1 text-sm text-[var(--jig-muted)]">{typeLabel}</p>
+              <ReportTypeTitle className="mt-1">{typeLabel}</ReportTypeTitle>
             </div>
             <div className="border-l border-[var(--jig-ink)]/10 pl-6 text-left">
               <p className="human-premium-label-caps mb-1 text-[var(--jig-muted)]">

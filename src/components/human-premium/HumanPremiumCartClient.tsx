@@ -296,8 +296,8 @@ export function HumanPremiumCartClient() {
                               ? "사주 보기"
                               : "View report"
                             : isKo
-                              ? "지금 생성"
-                              : "Generate"}
+                              ? "준비중"
+                              : "Coming soon"}
                       </button>
                     ) : (
                       <button

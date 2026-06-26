@@ -195,7 +195,7 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
               style: "personName",
               margin: [0, 4, 0, 0],
             },
-            { text: reportType, style: "bodyMuted", margin: [0, 2, 0, 0] },
+            { text: reportType, style: "reportTypeTitle", margin: [0, 4, 0, 0] },
           ],
         },
         {
@@ -276,6 +276,7 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
     styles: {
       coverBrand: { fontSize: 22, bold: true, color: JIG_INK },
       coverSubtitle: { fontSize: 14, color: JIG_SEAL },
+      reportTypeTitle: { fontSize: 24, bold: true, color: JIG_INK },
       coverMotto: { fontSize: 11, color: JIG_INK, lineHeight: 1.5 },
       coverMaxim: { fontSize: 9, color: JIG_MUTED },
       labelCaps: { fontSize: 8, bold: true, color: JIG_MUTED },

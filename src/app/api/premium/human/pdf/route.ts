@@ -3,6 +3,9 @@ import { resolveHumanPremiumReportByToken } from "@/lib/reports/human-premium/re
 import { markHumanPremiumReportFailed } from "@/lib/reports/human-premium/storage";
 import { NextResponse } from "next/server";
 
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
 /** HTTP header filenames must be ASCII (ByteString). Korean name goes via client save picker. */
 function pdfHeaderFilename(personName: string): string {
   const ascii = personName.replace(/[^\x20-\x7E]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");

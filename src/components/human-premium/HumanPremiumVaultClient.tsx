@@ -198,8 +198,8 @@ export function HumanPremiumVaultClient() {
                           ? "생성 중…"
                           : "Generating…"
                         : isKo
-                          ? "지금 생성"
-                          : "Generate"}
+                          ? "준비중"
+                          : "Coming soon"}
                     </button>
                   )}
                 </article>

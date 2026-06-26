@@ -82,8 +82,7 @@ function PaymentContent() {
   async function handlePay() {
     setStatus("processing");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const PortOne = (window as any).PortOne;
+    const PortOne = (window as unknown as { PortOne: { requestPayment: (args: unknown) => Promise<{ code?: string }> } }).PortOne;
     if (!PortOne || !sdkReady) {
       setStatus("sdk_error");
       return;

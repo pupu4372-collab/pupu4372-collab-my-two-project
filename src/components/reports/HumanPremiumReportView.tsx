@@ -13,6 +13,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Link } from "@/i18n/navigation";
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import { HUMAN_PREMIUM_SECTION_IDS } from "@/lib/reports/human-premium/types";
+import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { useEffect, useMemo, useState } from "react";
 import { markSessionAlive } from "@/lib/supabase/auth-session-policy";
 
@@ -32,6 +33,7 @@ const UI = {
     emailSending: "이메일 발송 중…",
     emailSent: "이메일을 발송했어요",
     emailFailed: "이메일 발송에 실패했습니다",
+    emailUnavailable: "결제 시 이메일을 입력하면 여기서 다시 발송할 수 있어요",
     disclaimer:
       "사주란 2,000년전부터 내려오는 통계학에 가까운 학문입니다.\n맹신하기보단 삶의 지침서나 이정표 정도로 삼으시길 바랍니다.",
     backToVault: "리포트 보관함으로",
@@ -64,6 +66,7 @@ const UI = {
     emailSending: "Sending email…",
     emailSent: "Email sent",
     emailFailed: "Email failed",
+    emailUnavailable: "Add your email at checkout to resend from here",
     disclaimer: "Enjoy fortunes lightly — for fun only.",
     backToVault: "Back to report vault",
     vaultButton: "Report vault",
@@ -87,8 +90,8 @@ type UiStrings = (typeof UI)["ko"] | (typeof UI)["en"];
 interface HumanPremiumReportViewProps {
   report: HumanPremiumReportPayload;
   shareUrl: string;
-  emailUrl: string;
-  pdfUrl: string;
+  webToken: string;
+  canSendEmail: boolean;
   backHref?: string;
 }
 
@@ -169,8 +172,8 @@ function ReportToc({
 export function HumanPremiumReportView({
   report,
   shareUrl,
-  emailUrl,
-  pdfUrl,
+  webToken,
+  canSendEmail,
   backHref,
 }: HumanPremiumReportViewProps) {
   const isKo = report.locale === "ko";
@@ -179,6 +182,7 @@ export function HumanPremiumReportView({
   const [emailState, setEmailState] = useState<"idle" | "sending" | "sent" | "failed">(
     "idle"
   );
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [pdfState, setPdfState] = useState<"idle" | "downloading" | "failed">("idle");
   const [pdfError, setPdfError] = useState<string | null>(null);
 
@@ -207,17 +211,26 @@ export function HumanPremiumReportView({
   }
 
   async function sendEmail() {
+    if (!canSendEmail) return;
     setEmailState("sending");
+    setEmailError(null);
     try {
-      const token = shareUrl.split("/").filter(Boolean).pop();
-      const res = await fetch(emailUrl, {
+      const res = await fetch("/api/premium/human/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ token: webToken }),
       });
-      if (!res.ok) throw new Error("Email failed");
+      const data = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!res.ok) {
+        throw new Error(data?.error ?? "Email failed");
+      }
       setEmailState("sent");
-    } catch {
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? formatHumanPremiumError(error.message, report.locale)
+          : t.emailFailed;
+      setEmailError(message);
       setEmailState("failed");
     }
   }
@@ -226,8 +239,9 @@ export function HumanPremiumReportView({
     setPdfState("downloading");
     setPdfError(null);
     try {
-      const token = shareUrl.split("/").filter(Boolean).pop();
-      const res = await fetch(`${pdfUrl}?token=${encodeURIComponent(token ?? "")}`);
+      const res = await fetch(
+        `/api/premium/human/pdf?token=${encodeURIComponent(webToken)}`
+      );
       if (!res.ok) {
         const errorText = await res.text();
         throw new Error(errorText || "PDF failed");
@@ -335,8 +349,9 @@ export function HumanPremiumReportView({
                 <button
                   type="button"
                   onClick={() => void sendEmail()}
-                  disabled={emailState === "sending"}
-                  className="human-premium-share-btn human-premium-share-btn--email disabled:opacity-60"
+                  disabled={!canSendEmail || emailState === "sending"}
+                  title={canSendEmail ? undefined : t.emailUnavailable}
+                  className="human-premium-share-btn human-premium-share-btn--email disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {emailState === "sending"
                     ? t.emailSending
@@ -346,8 +361,13 @@ export function HumanPremiumReportView({
                 </button>
               </div>
               {emailState === "failed" && (
-                <p className="text-center text-xs text-[var(--jig-seal)]">{t.emailFailed}</p>
+                <p className="text-center text-xs text-[var(--jig-seal)]">
+                  {emailError ?? t.emailFailed}
+                </p>
               )}
+              {!canSendEmail ? (
+                <p className="text-center text-xs text-[var(--jig-muted)]">{t.emailUnavailable}</p>
+              ) : null}
               {pdfState === "failed" && (
                 <p className="text-center text-xs text-[var(--jig-seal)]">
                   {t.pdfFailed}

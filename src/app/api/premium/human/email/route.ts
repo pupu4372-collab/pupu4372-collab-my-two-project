@@ -1,5 +1,7 @@
 import { sendHumanPremiumReportEmail } from "@/lib/reports/human-premium/email";
+import { isDeliverableHumanPremiumEmail } from "@/lib/reports/human-premium/email-policy";
 import { getHumanPremiumReportByWebToken } from "@/lib/reports/human-premium/storage";
+import { isResendConfigured } from "@/lib/email/resend";
 import { NextResponse } from "next/server";
 
 function isAccessExpired(expiresAt: string | null): boolean {
@@ -23,6 +25,14 @@ export async function POST(request: Request) {
   const report = await getHumanPremiumReportByWebToken(token);
   if (!report || isAccessExpired(report.web_access_expires_at)) {
     return NextResponse.json({ error: "Report not found." }, { status: 404 });
+  }
+
+  if (!isResendConfigured()) {
+    return NextResponse.json({ error: "RESEND_NOT_CONFIGURED" }, { status: 503 });
+  }
+
+  if (!isDeliverableHumanPremiumEmail(report.email)) {
+    return NextResponse.json({ error: "EMAIL_NOT_ON_FILE" }, { status: 400 });
   }
 
   const updated = await sendHumanPremiumReportEmail(report, request);

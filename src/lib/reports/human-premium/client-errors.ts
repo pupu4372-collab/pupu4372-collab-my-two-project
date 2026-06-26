@@ -10,6 +10,9 @@ const KO_MESSAGES: Record<string, string> = {
   "Demo checkout failed.": "데모 결제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
   "Failed to create human premium report.": "리포트 저장에 실패했습니다. DB 마이그레이션을 확인해 주세요.",
   cart_items_already_purchased: "이미 구매한 리포트는 장바구니에 담을 수 없어요. 보관함에서 확인해 주세요.",
+  RESEND_NOT_CONFIGURED: "이메일 발송 설정이 아직 준비되지 않았어요.",
+  EMAIL_NOT_ON_FILE: "결제 시 입력한 이메일이 없어 발송할 수 없어요.",
+  "RESEND_API_KEY is not configured.": "이메일 발송 설정이 아직 준비되지 않았어요.",
 };
 
 export function formatHumanPremiumError(message: string, locale: "ko" | "en"): string {
