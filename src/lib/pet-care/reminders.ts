@@ -98,9 +98,8 @@ export async function fetchPetCareReminders(
   const { data, error } = await supabase
     .from("pet_care_events")
     .select("id, pet_id, event_date, category, title")
-    .eq("owner_id", ownerId)
+    .eq("user_id", ownerId)
     .eq("pet_id", petId)
-    .eq("is_done", false)
     .gte("event_date", overdueFrom)
     .lte("event_date", upcomingTo)
     .order("event_date", { ascending: true })

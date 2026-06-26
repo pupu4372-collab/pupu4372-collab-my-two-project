@@ -59,37 +59,44 @@ export type PetInsert = Pick<
 };
 
 export type PetCareCategory =
-  | "weight"
-  | "vaccine"
-  | "vet"
+  | "feeding"
   | "grooming"
-  | "medication"
-  | "nutrition"
+  | "vet_visit"
+  | "vaccination"
   | "exercise"
+  | "medication"
   | "other";
 
 export interface PetCareEvent {
   id: string;
-  pet_id: string;
-  owner_id: string;
+  user_id: string;
+  pet_id: string | null;
   event_date: string;
+  event_time: string | null;
   category: PetCareCategory;
   title: string;
-  memo: string | null;
-  weight_kg: number | null;
-  is_done: boolean;
+  description: string | null;
+  is_recurring: boolean;
+  recurrence_rule: string | null;
+  reminder_at: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export type PetCareEventInsert = Pick<
   PetCareEvent,
-  "pet_id" | "owner_id" | "event_date" | "category" | "title"
+  "user_id" | "category" | "title" | "event_date"
 > & {
-  memo?: string | null;
-  weight_kg?: number | null;
-  is_done?: boolean;
+  pet_id?: string | null;
+  event_time?: string | null;
+  description?: string | null;
+  is_recurring?: boolean;
+  recurrence_rule?: string | null;
+  reminder_at?: string | null;
 };
+
+export const PET_CARE_EVENT_COLUMNS =
+  "id, user_id, pet_id, event_date, event_time, category, title, description, is_recurring, recurrence_rule, reminder_at, created_at, updated_at";
 
 export type ChallengeChannel = "dog" | "cat" | "reptile" | "all";
 

@@ -3,8 +3,8 @@ import {
   getBearerToken,
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
-import { isPetCareCategory } from "@/lib/pet-care/categories";
-import type { PetCareEvent } from "@/lib/supabase/types";
+import { isPetCareCategory, normalizeEventTime } from "@/lib/pet-care/categories";
+import { PET_CARE_EVENT_COLUMNS, type PetCareEvent } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
 function isDate(value: unknown): value is string {
@@ -13,14 +13,14 @@ function isDate(value: unknown): value is string {
 
 async function loadOwnedPet(
   supabase: NonNullable<ReturnType<typeof createUserSupabaseClient>>,
-  ownerId: string,
+  userId: string,
   petId: string
 ) {
   const { data, error } = await supabase
     .from("pets")
     .select("id")
     .eq("id", petId)
-    .eq("owner_id", ownerId)
+    .eq("owner_id", userId)
     .maybeSingle();
 
   if (error) throw new Error(error.message);
@@ -32,9 +32,9 @@ interface CareRouteContext {
 }
 
 export async function GET(request: Request, context: CareRouteContext) {
-  const ownerId = await getUserIdFromRequest(request);
+  const userId = await getUserIdFromRequest(request);
   const token = getBearerToken(request);
-  if (!ownerId || !token) {
+  if (!userId || !token) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
@@ -53,20 +53,20 @@ export async function GET(request: Request, context: CareRouteContext) {
   }
 
   try {
-    const pet = await loadOwnedPet(supabase, ownerId, petId);
+    const pet = await loadOwnedPet(supabase, userId, petId);
     if (!pet) {
       return NextResponse.json({ error: "Pet not found." }, { status: 404 });
     }
 
     const { data, error } = await supabase
       .from("pet_care_events")
-      .select(
-        "id, pet_id, owner_id, event_date, category, title, memo, weight_kg, is_done, created_at, updated_at"
-      )
+      .select(PET_CARE_EVENT_COLUMNS)
+      .eq("user_id", userId)
       .eq("pet_id", petId)
       .gte("event_date", from)
       .lte("event_date", to)
       .order("event_date", { ascending: true })
+      .order("event_time", { ascending: true, nullsFirst: true })
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -83,9 +83,9 @@ export async function GET(request: Request, context: CareRouteContext) {
 }
 
 export async function POST(request: Request, context: CareRouteContext) {
-  const ownerId = await getUserIdFromRequest(request);
+  const userId = await getUserIdFromRequest(request);
   const token = getBearerToken(request);
-  if (!ownerId || !token) {
+  if (!userId || !token) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
@@ -93,11 +93,13 @@ export async function POST(request: Request, context: CareRouteContext) {
 
   let body: {
     eventDate?: string;
+    eventTime?: string | null;
     category?: string;
     title?: string;
-    memo?: string;
-    weightKg?: number | string | null;
-    isDone?: boolean;
+    description?: string;
+    isRecurring?: boolean;
+    recurrenceRule?: string | null;
+    reminderAt?: string | null;
   };
 
   try {
@@ -115,13 +117,9 @@ export async function POST(request: Request, context: CareRouteContext) {
     return NextResponse.json({ error: "Invalid category." }, { status: 400 });
   }
 
-  let weightKg: number | null = null;
-  if (body.weightKg != null && body.weightKg !== "") {
-    const parsed = typeof body.weightKg === "number" ? body.weightKg : Number(body.weightKg);
-    if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 999) {
-      return NextResponse.json({ error: "Invalid weight." }, { status: 400 });
-    }
-    weightKg = Math.round(parsed * 100) / 100;
+  const eventTime = body.eventTime !== undefined ? normalizeEventTime(body.eventTime) : null;
+  if (body.eventTime && eventTime === null) {
+    return NextResponse.json({ error: "Invalid eventTime." }, { status: 400 });
   }
 
   const supabase = createUserSupabaseClient(token);
@@ -130,7 +128,7 @@ export async function POST(request: Request, context: CareRouteContext) {
   }
 
   try {
-    const pet = await loadOwnedPet(supabase, ownerId, petId);
+    const pet = await loadOwnedPet(supabase, userId, petId);
     if (!pet) {
       return NextResponse.json({ error: "Pet not found." }, { status: 404 });
     }
@@ -138,18 +136,18 @@ export async function POST(request: Request, context: CareRouteContext) {
     const { data, error } = await supabase
       .from("pet_care_events")
       .insert({
+        user_id: userId,
         pet_id: petId,
-        owner_id: ownerId,
         event_date: eventDate,
+        event_time: eventTime,
         category: body.category,
         title,
-        memo: body.memo?.trim() || null,
-        weight_kg: weightKg,
-        is_done: body.isDone === true,
+        description: body.description?.trim() || null,
+        is_recurring: body.isRecurring === true,
+        recurrence_rule: body.recurrenceRule?.trim() || null,
+        reminder_at: body.reminderAt?.trim() || null,
       } as never)
-      .select(
-        "id, pet_id, owner_id, event_date, category, title, memo, weight_kg, is_done, created_at, updated_at"
-      )
+      .select(PET_CARE_EVENT_COLUMNS)
       .single();
 
     if (error) {

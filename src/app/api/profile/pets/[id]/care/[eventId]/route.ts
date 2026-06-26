@@ -3,8 +3,8 @@ import {
   getBearerToken,
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
-import { isPetCareCategory } from "@/lib/pet-care/categories";
-import type { PetCareEvent } from "@/lib/supabase/types";
+import { isPetCareCategory, normalizeEventTime } from "@/lib/pet-care/categories";
+import { PET_CARE_EVENT_COLUMNS, type PetCareEvent } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
 function isDate(value: unknown): value is string {
@@ -16,9 +16,9 @@ interface EventRouteContext {
 }
 
 export async function PATCH(request: Request, context: EventRouteContext) {
-  const ownerId = await getUserIdFromRequest(request);
+  const userId = await getUserIdFromRequest(request);
   const token = getBearerToken(request);
-  if (!ownerId || !token) {
+  if (!userId || !token) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
@@ -26,11 +26,13 @@ export async function PATCH(request: Request, context: EventRouteContext) {
 
   let body: {
     eventDate?: string;
+    eventTime?: string | null;
     category?: string;
     title?: string;
-    memo?: string | null;
-    weightKg?: number | string | null;
-    isDone?: boolean;
+    description?: string | null;
+    isRecurring?: boolean;
+    recurrenceRule?: string | null;
+    reminderAt?: string | null;
   };
 
   try {
@@ -46,6 +48,17 @@ export async function PATCH(request: Request, context: EventRouteContext) {
     }
     patch.event_date = body.eventDate;
   }
+  if (body.eventTime !== undefined) {
+    if (body.eventTime == null || body.eventTime === "") {
+      patch.event_time = null;
+    } else {
+      const eventTime = normalizeEventTime(body.eventTime);
+      if (!eventTime) {
+        return NextResponse.json({ error: "Invalid eventTime." }, { status: 400 });
+      }
+      patch.event_time = eventTime;
+    }
+  }
   if (body.category !== undefined) {
     if (!isPetCareCategory(body.category)) {
       return NextResponse.json({ error: "Invalid category." }, { status: 400 });
@@ -59,22 +72,17 @@ export async function PATCH(request: Request, context: EventRouteContext) {
     }
     patch.title = title;
   }
-  if (body.memo !== undefined) {
-    patch.memo = body.memo?.trim() || null;
+  if (body.description !== undefined) {
+    patch.description = body.description?.trim() || null;
   }
-  if (body.weightKg !== undefined) {
-    if (body.weightKg == null || body.weightKg === "") {
-      patch.weight_kg = null;
-    } else {
-      const parsed = typeof body.weightKg === "number" ? body.weightKg : Number(body.weightKg);
-      if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 999) {
-        return NextResponse.json({ error: "Invalid weight." }, { status: 400 });
-      }
-      patch.weight_kg = Math.round(parsed * 100) / 100;
-    }
+  if (body.isRecurring !== undefined) {
+    patch.is_recurring = body.isRecurring === true;
   }
-  if (body.isDone !== undefined) {
-    patch.is_done = body.isDone === true;
+  if (body.recurrenceRule !== undefined) {
+    patch.recurrence_rule = body.recurrenceRule?.trim() || null;
+  }
+  if (body.reminderAt !== undefined) {
+    patch.reminder_at = body.reminderAt?.trim() || null;
   }
 
   if (Object.keys(patch).length === 0) {
@@ -91,10 +99,8 @@ export async function PATCH(request: Request, context: EventRouteContext) {
     .update(patch as never)
     .eq("id", eventId)
     .eq("pet_id", petId)
-    .eq("owner_id", ownerId)
-    .select(
-      "id, pet_id, owner_id, event_date, category, title, memo, weight_kg, is_done, created_at, updated_at"
-    )
+    .eq("user_id", userId)
+    .select(PET_CARE_EVENT_COLUMNS)
     .maybeSingle();
 
   if (error) {
@@ -108,9 +114,9 @@ export async function PATCH(request: Request, context: EventRouteContext) {
 }
 
 export async function DELETE(_request: Request, context: EventRouteContext) {
-  const ownerId = await getUserIdFromRequest(_request);
+  const userId = await getUserIdFromRequest(_request);
   const token = getBearerToken(_request);
-  if (!ownerId || !token) {
+  if (!userId || !token) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
@@ -125,7 +131,7 @@ export async function DELETE(_request: Request, context: EventRouteContext) {
     .delete()
     .eq("id", eventId)
     .eq("pet_id", petId)
-    .eq("owner_id", ownerId);
+    .eq("user_id", userId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

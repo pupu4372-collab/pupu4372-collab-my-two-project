@@ -27,6 +27,17 @@ function buildCalendarCells(year: number, month: number) {
   return cells;
 }
 
+function formatEventTime(value: string | null, isKo: boolean) {
+  if (!value) return null;
+  const [hour, minute] = value.split(":");
+  if (!hour || !minute) return value;
+  if (isKo) return `${hour}:${minute}`;
+  const h = Number(hour);
+  const suffix = h >= 12 ? "PM" : "AM";
+  const hour12 = h % 12 || 12;
+  return `${hour12}:${minute} ${suffix}`;
+}
+
 export function PetCareCalendar({
   petId,
   petName,
@@ -39,6 +50,7 @@ export function PetCareCalendar({
   accessToken: string | null;
 }) {
   const today = useMemo(() => new Date(), []);
+  const [expanded, setExpanded] = useState(false);
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth() + 1);
   const [selectedDate, setSelectedDate] = useState(toDateISO(today));
@@ -49,8 +61,8 @@ export function PetCareCalendar({
 
   const [category, setCategory] = useState<PetCareCategory>("other");
   const [title, setTitle] = useState("");
-  const [memo, setMemo] = useState("");
-  const [weightKg, setWeightKg] = useState("");
+  const [description, setDescription] = useState("");
+  const [eventTime, setEventTime] = useState("");
 
   const monthLabel = isKo
     ? `${viewYear}년 ${viewMonth}월`
@@ -69,6 +81,8 @@ export function PetCareCalendar({
   const selectedEvents = eventsByDate.get(selectedDate) ?? [];
   const cells = buildCalendarCells(viewYear, viewMonth);
   const weekdays = isKo ? WEEKDAYS_KO : WEEKDAYS_EN;
+  const monthEventCount = events.length;
+  const todayEventCount = eventsByDate.get(toDateISO(today))?.length ?? 0;
 
   const loadMonth = useCallback(async () => {
     if (!accessToken) return;
@@ -102,6 +116,11 @@ export function PetCareCalendar({
     setViewMonth(d.getMonth() + 1);
   }
 
+  function selectDate(date: string, openExpanded = false) {
+    setSelectedDate(date);
+    if (openExpanded) setExpanded(true);
+  }
+
   async function addEvent(e: React.FormEvent) {
     e.preventDefault();
     if (!accessToken || !title.trim()) return;
@@ -116,10 +135,10 @@ export function PetCareCalendar({
         },
         body: JSON.stringify({
           eventDate: selectedDate,
+          eventTime: eventTime.trim() || undefined,
           category,
           title: title.trim(),
-          memo: memo.trim() || undefined,
-          weightKg: category === "weight" && weightKg ? weightKg : undefined,
+          description: description.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -128,29 +147,11 @@ export function PetCareCalendar({
         return;
       }
       setTitle("");
-      setMemo("");
-      setWeightKg("");
+      setDescription("");
+      setEventTime("");
       await loadMonth();
     } catch {
       setError(isKo ? "네트워크 오류" : "Network error");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function toggleDone(event: PetCareEvent) {
-    if (!accessToken) return;
-    setBusy(true);
-    try {
-      const res = await fetch(`/api/profile/pets/${petId}/care/${event.id}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ isDone: !event.is_done }),
-      });
-      if (res.ok) await loadMonth();
     } finally {
       setBusy(false);
     }
@@ -171,36 +172,186 @@ export function PetCareCalendar({
     }
   }
 
+  function renderMonthNav(compact: boolean) {
+    const btnClass = compact
+      ? "rounded-full border border-plum/15 bg-white px-2 py-1 text-xs font-bold text-primary transition hover:bg-[#f5f3ef]"
+      : "rounded-full border border-plum/15 bg-white px-3 py-1.5 text-sm font-bold text-primary transition hover:bg-[#f5f3ef]";
+
+    return (
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            shiftMonth(-1);
+          }}
+          className={btnClass}
+          aria-label={isKo ? "이전 달" : "Previous month"}
+        >
+          ‹
+        </button>
+        <span
+          className={
+            compact
+              ? "min-w-[5.5rem] text-center text-xs font-bold text-primary"
+              : "min-w-[8.5rem] text-center text-sm font-bold text-primary"
+          }
+        >
+          {monthLabel}
+        </span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            shiftMonth(1);
+          }}
+          className={btnClass}
+          aria-label={isKo ? "다음 달" : "Next month"}
+        >
+          ›
+        </button>
+      </div>
+    );
+  }
+
+  function renderCalendarGrid(compact: boolean) {
+    const weekdayClass = compact
+      ? "text-center text-[9px] font-bold text-plum/60"
+      : "py-1 text-center text-[11px] font-bold text-plum/65";
+    const cellClass = compact ? "text-[10px]" : "text-sm";
+    const dotClass = compact ? "h-1 w-1" : "h-1.5 w-1.5";
+    const gapClass = compact ? "gap-0.5" : "gap-1";
+    const radiusClass = compact ? "rounded-md" : "rounded-xl";
+
+    return (
+      <>
+        <div className={`grid grid-cols-7 ${gapClass}`}>
+          {weekdays.map((label) => (
+            <div key={label} className={weekdayClass}>
+              {compact ? label.charAt(0) : label}
+            </div>
+          ))}
+        </div>
+        <div className={`grid grid-cols-7 ${gapClass}`}>
+          {cells.map((cell, index) => {
+            if (!cell.date) {
+              return (
+                <div
+                  key={`empty-${index}`}
+                  className={compact ? "aspect-square max-h-7" : "aspect-square"}
+                  aria-hidden
+                />
+              );
+            }
+            const dayEvents = eventsByDate.get(cell.date) ?? [];
+            const isSelected = cell.date === selectedDate;
+            const isToday = cell.date === toDateISO(today);
+            return (
+              <button
+                key={cell.date}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  selectDate(cell.date!, !compact);
+                }}
+                className={`relative flex ${compact ? "aspect-square max-h-7" : "aspect-square"} flex-col items-center justify-center border ${radiusClass} ${cellClass} transition ${
+                  isSelected
+                    ? "border-channel-saju bg-channel-saju/12 font-bold text-channel-saju"
+                    : isToday
+                      ? "border-[#b22222]/35 bg-[#fcf9f2] font-semibold text-primary"
+                      : "border-transparent bg-white/70 text-plum/80 hover:border-plum/10 hover:bg-white"
+                }`}
+              >
+                {cell.day}
+                {dayEvents.length > 0 && (
+                  <span className={`absolute ${compact ? "bottom-0" : "bottom-1"} flex gap-0.5`}>
+                    {dayEvents.slice(0, compact ? 2 : 3).map((ev) => (
+                      <span
+                        key={ev.id}
+                        className={`${dotClass} rounded-full`}
+                        style={{ backgroundColor: PET_CARE_CATEGORY_META[ev.category].color }}
+                      />
+                    ))}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </>
+    );
+  }
+
+  if (!expanded) {
+    return (
+      <button
+        type="button"
+        onClick={() => setExpanded(true)}
+        className="w-full rounded-2xl border border-plum/10 bg-[#f5f3ef]/60 p-4 text-left transition hover:border-channel-saju/25 hover:bg-[#f5f3ef]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-channel-saju/40"
+        aria-expanded={false}
+        aria-label={isKo ? "케어 캘린더 펼치기" : "Expand care calendar"}
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-bold text-primary">
+                {isKo ? "생육·케어 캘린더" : "Care calendar"}
+              </h2>
+              {renderMonthNav(true)}
+            </div>
+            <p className="mt-1 text-xs text-plum/75">
+              {isKo
+                ? `${petName} · 이번 달 ${monthEventCount}건 · 오늘 ${todayEventCount}건`
+                : `${petName} · ${monthEventCount} this month · ${todayEventCount} today`}
+            </p>
+            <p className="mt-2 text-xs font-semibold text-channel-saju">
+              {isKo ? "탭하면 일정 보기·기록 추가" : "Tap to view entries and add care logs"}
+            </p>
+          </div>
+
+          <div
+            className="w-full shrink-0 sm:max-w-[11.5rem]"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            role="presentation"
+          >
+            {renderCalendarGrid(true)}
+          </div>
+        </div>
+
+        {error && (
+          <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700/85" role="alert">
+            {error}
+          </p>
+        )}
+        {loading && (
+          <p className="mt-2 text-center text-[10px] text-plum/55">{isKo ? "불러오는 중…" : "Loading…"}</p>
+        )}
+      </button>
+    );
+  }
+
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold text-primary">
             {isKo ? "생육·케어 캘린더" : "Care calendar"}
           </h2>
           <p className="mt-1 text-sm text-plum/80">
             {isKo
-              ? `${petName}의 체중·접종·병원·루틴을 날짜별로 기록해요.`
-              : `Track ${petName}'s weight, vet visits, and daily care by date.`}
+              ? `${petName}의 급여·접종·병원·루틴을 날짜별로 기록해요.`
+              : `Track ${petName}'s feeding, vet visits, and daily care by date.`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {renderMonthNav(false)}
           <button
             type="button"
-            onClick={() => shiftMonth(-1)}
-            className="rounded-full border border-plum/15 bg-white px-3 py-1.5 text-sm font-bold text-primary transition hover:bg-[#f5f3ef]"
-            aria-label={isKo ? "이전 달" : "Previous month"}
+            onClick={() => setExpanded(false)}
+            className="rounded-full border border-plum/15 bg-white px-3 py-1.5 text-sm font-bold text-plum/80 transition hover:bg-[#f5f3ef]"
           >
-            ‹
-          </button>
-          <span className="min-w-[8.5rem] text-center text-sm font-bold text-primary">{monthLabel}</span>
-          <button
-            type="button"
-            onClick={() => shiftMonth(1)}
-            className="rounded-full border border-plum/15 bg-white px-3 py-1.5 text-sm font-bold text-primary transition hover:bg-[#f5f3ef]"
-            aria-label={isKo ? "다음 달" : "Next month"}
-          >
-            ›
+            {isKo ? "접기" : "Collapse"}
           </button>
         </div>
       </div>
@@ -211,51 +362,7 @@ export function PetCareCalendar({
         </p>
       )}
 
-      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-plum/65">
-        {weekdays.map((label) => (
-          <div key={label} className="py-1">
-            {label}
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-7 gap-1">
-        {cells.map((cell, index) => {
-          if (!cell.date) {
-            return <div key={`empty-${index}`} className="aspect-square" aria-hidden />;
-          }
-          const dayEvents = eventsByDate.get(cell.date) ?? [];
-          const isSelected = cell.date === selectedDate;
-          const isToday = cell.date === toDateISO(today);
-          return (
-            <button
-              key={cell.date}
-              type="button"
-              onClick={() => setSelectedDate(cell.date!)}
-              className={`relative flex aspect-square flex-col items-center justify-center rounded-xl border text-sm transition ${
-                isSelected
-                  ? "border-channel-saju bg-channel-saju/12 font-bold text-channel-saju"
-                  : isToday
-                    ? "border-[#b22222]/35 bg-[#fcf9f2] font-semibold text-primary"
-                    : "border-transparent bg-white/70 text-plum/80 hover:border-plum/10 hover:bg-white"
-              }`}
-            >
-              {cell.day}
-              {dayEvents.length > 0 && (
-                <span className="absolute bottom-1 flex gap-0.5">
-                  {dayEvents.slice(0, 3).map((ev) => (
-                    <span
-                      key={ev.id}
-                      className="h-1.5 w-1.5 rounded-full"
-                      style={{ backgroundColor: PET_CARE_CATEGORY_META[ev.category].color }}
-                    />
-                  ))}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {renderCalendarGrid(false)}
 
       {loading && (
         <p className="text-center text-xs text-plum/60">{isKo ? "불러오는 중…" : "Loading…"}</p>
@@ -279,12 +386,11 @@ export function PetCareCalendar({
           <ul className="mt-3 space-y-2">
             {selectedEvents.map((event) => {
               const meta = PET_CARE_CATEGORY_META[event.category];
+              const timeLabel = formatEventTime(event.event_time, isKo);
               return (
                 <li
                   key={event.id}
-                  className={`flex items-start gap-3 rounded-xl border border-white bg-white/90 p-3 ${
-                    event.is_done ? "opacity-70" : ""
-                  }`}
+                  className="flex items-start gap-3 rounded-xl border border-white bg-white/90 p-3"
                 >
                   <span className="text-xl" aria-hidden>
                     {meta.emoji}
@@ -295,20 +401,14 @@ export function PetCareCalendar({
                       <span className="rounded-full bg-[#f5f3ef] px-2 py-0.5 text-[10px] font-bold text-plum/70">
                         {categoryLabel(event.category, isKo)}
                       </span>
-                      {event.weight_kg != null && (
-                        <span className="text-xs font-semibold text-[#b22222]">{event.weight_kg}kg</span>
+                      {timeLabel && (
+                        <span className="text-xs font-semibold text-plum/70">{timeLabel}</span>
                       )}
                     </div>
-                    {event.memo && <p className="mt-1 text-xs leading-5 text-plum/80">{event.memo}</p>}
+                    {event.description && (
+                      <p className="mt-1 text-xs leading-5 text-plum/80">{event.description}</p>
+                    )}
                     <div className="mt-2 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => void toggleDone(event)}
-                        className="rounded-full border border-plum/15 px-2.5 py-1 text-[11px] font-bold text-primary transition hover:bg-[#f5f3ef] disabled:opacity-50"
-                      >
-                        {event.is_done ? (isKo ? "완료 취소" : "Undo") : isKo ? "완료" : "Done"}
-                      </button>
                       <button
                         type="button"
                         disabled={busy}
@@ -355,24 +455,20 @@ export function PetCareCalendar({
               />
             </label>
           </div>
-          {category === "weight" && (
-            <label className="block text-xs font-semibold text-plum/75">
-              {isKo ? "체중 (kg)" : "Weight (kg)"}
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={weightKg}
-                onChange={(e) => setWeightKg(e.target.value)}
-                className="pastel-input mt-1 w-full rounded-xl px-3 py-2 text-sm text-primary"
-              />
-            </label>
-          )}
           <label className="block text-xs font-semibold text-plum/75">
-            {isKo ? "메모 (선택)" : "Memo (optional)"}
+            {isKo ? "시간 (선택)" : "Time (optional)"}
+            <input
+              type="time"
+              value={eventTime}
+              onChange={(e) => setEventTime(e.target.value)}
+              className="pastel-input mt-1 w-full rounded-xl px-3 py-2 text-sm text-primary"
+            />
+          </label>
+          <label className="block text-xs font-semibold text-plum/75">
+            {isKo ? "메모 (선택)" : "Notes (optional)"}
             <textarea
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               rows={2}
               className="pastel-input mt-1 w-full rounded-xl px-3 py-2 text-sm text-primary"
             />
