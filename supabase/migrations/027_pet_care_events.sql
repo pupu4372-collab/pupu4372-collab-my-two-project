@@ -1,46 +1,78 @@
--- Pet profile care calendar (growth / health / routine logs)
+-- Pet care calendar: categories, events, RLS (growth / health / routine logs)
 
-create type public.pet_care_category as enum (
-  'weight',
-  'vaccine',
-  'vet',
-  'grooming',
-  'medication',
-  'nutrition',
-  'exercise',
-  'other'
-);
+-- 1. pet_care_category ENUM (idempotent)
+do $enum$
+begin
+  if not exists (
+    select 1
+    from pg_type t
+    join pg_namespace n on n.oid = t.typnamespace
+    where t.typname = 'pet_care_category'
+      and n.nspname = 'public'
+  ) then
+    create type public.pet_care_category as enum (
+      'feeding',
+      'grooming',
+      'vet_visit',
+      'vaccination',
+      'exercise',
+      'medication',
+      'other'
+    );
+  end if;
+end
+$enum$;
 
-create table public.pet_care_events (
+-- 2. pet_care_events table (idempotent)
+create table if not exists public.pet_care_events (
   id uuid primary key default gen_random_uuid(),
-  pet_id uuid not null references public.pets (id) on delete cascade,
-  owner_id uuid not null references public.profiles (id) on delete cascade,
-  event_date date not null,
-  category public.pet_care_category not null default 'other',
+  user_id uuid not null references auth.users (id) on delete cascade,
+  pet_id uuid references public.pets (id) on delete cascade,
+  category public.pet_care_category not null,
   title text not null,
-  memo text,
-  weight_kg numeric(5, 2),
-  is_done boolean not null default false,
+  description text,
+  event_date date not null,
+  event_time time,
+  is_recurring boolean not null default false,
+  recurrence_rule text,
+  reminder_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
-create index idx_pet_care_events_pet_date on public.pet_care_events (pet_id, event_date desc);
+-- 5. indexes (idempotent)
+create index if not exists idx_pet_care_events_user_id
+  on public.pet_care_events (user_id);
+
+create index if not exists idx_pet_care_events_pet_id
+  on public.pet_care_events (pet_id);
+
+create index if not exists idx_pet_care_events_event_date
+  on public.pet_care_events (event_date);
+
+-- 4. updated_at trigger (uses set_updated_at from 001_initial_schema)
+drop trigger if exists pet_care_events_updated_at on public.pet_care_events;
 
 create trigger pet_care_events_updated_at
 before update on public.pet_care_events
 for each row execute function public.set_updated_at();
 
+-- 3. RLS policies (idempotent)
 alter table public.pet_care_events enable row level security;
 
-create policy "pet_care_select_own" on public.pet_care_events
-  for select using (auth.uid() = owner_id);
+drop policy if exists pet_care_events_select_own on public.pet_care_events;
+create policy pet_care_events_select_own on public.pet_care_events
+  for select using (auth.uid() = user_id);
 
-create policy "pet_care_insert_own" on public.pet_care_events
-  for insert with check (auth.uid() = owner_id);
+drop policy if exists pet_care_events_insert_own on public.pet_care_events;
+create policy pet_care_events_insert_own on public.pet_care_events
+  for insert with check (auth.uid() = user_id);
 
-create policy "pet_care_update_own" on public.pet_care_events
-  for update using (auth.uid() = owner_id);
+drop policy if exists pet_care_events_update_own on public.pet_care_events;
+create policy pet_care_events_update_own on public.pet_care_events
+  for update using (auth.uid() = user_id);
 
-create policy "pet_care_delete_own" on public.pet_care_events
-  for delete using (auth.uid() = owner_id);
+drop policy if exists pet_care_delete_own on public.pet_care_events;
+drop policy if exists pet_care_events_delete_own on public.pet_care_events;
+create policy pet_care_events_delete_own on public.pet_care_events
+  for delete using (auth.uid() = user_id);
