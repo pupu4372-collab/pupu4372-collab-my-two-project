@@ -42,6 +42,8 @@ const UI = {
     localeLabel: "언어",
     ownerBirthNotice:
       "생년월일 저장에 동의하시면 로그인할때마다 오늘의 운세를 점쳐드립니다",
+    premiumRequired: "이 기능은 프리미엄 전용이에요. 결제 후 이용할 수 있어요.",
+    goToPay: "결제하러 가기 →",
   },
   en: {
     petSection: "Pet",
@@ -67,6 +69,8 @@ const UI = {
     localeLabel: "Language",
     ownerBirthNotice:
       "If you agree to save your birth date, we will show a small daily fortune whenever you log in.",
+    premiumRequired: "This feature requires premium. Please complete payment to continue.",
+    goToPay: "Go to payment →",
   },
 };
 
@@ -116,6 +120,7 @@ export function CompatibilityForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CompatibilityResponse | null>(null);
+  const [petId, setPetId] = useState<string | null>(null);
 
   const t = UI[locale];
   const timezoneOptions = useMemo(() => {
@@ -140,6 +145,9 @@ export function CompatibilityForm() {
     if (nextBirthDate) setPetBirthDate(nextBirthDate);
     if (isBirthTimeOption(nextBirthTime)) setPetBirthTime(nextBirthTime);
     if (nextTimezone) setTimezone(nextTimezone);
+
+    const nextPetId = params.get("petId");
+    if (nextPetId) setPetId(nextPetId);
   }, []);
 
   if (configured && ready && isAnonymous) {
@@ -194,11 +202,16 @@ export function CompatibilityForm() {
           timezone,
           locale,
           privacyConsent: consent,
+          petId: petId ?? null,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Error");
+        if (data.error === "premium_required") {
+          setError("premium_required");
+        } else {
+          setError(data.error ?? "Error");
+        }
         return;
       }
       setResult(data as CompatibilityResponse);
@@ -378,9 +391,21 @@ export function CompatibilityForm() {
         </div>
 
         {error && (
-          <p className="rounded-2xl bg-petal/40 px-4 py-2 text-sm text-plum" role="alert">
-            {error}
-          </p>
+          error === "premium_required" ? (
+            <div className="rounded-2xl bg-petal/40 px-4 py-3 text-sm text-plum space-y-2">
+              <p>{t.premiumRequired}</p>
+              <Link
+                href={`/payment?product=pet_premium_v1&type=compatibility&petName=${encodeURIComponent(petName)}&species=${species}&birthDate=${petBirthDate}&locale=${locale}${petId ? `&petId=${petId}` : ""}`}
+                className="inline-block font-bold text-primary underline"
+              >
+                {t.goToPay}
+              </Link>
+            </div>
+          ) : (
+            <p className="rounded-2xl bg-petal/40 px-4 py-2 text-sm text-plum" role="alert">
+              {error}
+            </p>
+          )
         )}
 
         <button

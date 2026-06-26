@@ -1,6 +1,7 @@
 import { persistZodiacFortune } from "@/lib/saju/persist-zodiac";
 import { computeZodiacFortune } from "@/lib/saju/zodiac/engine";
 import { validatePetName } from "@/lib/saju/moderation";
+import { hasPetPremiumUnlock } from "@/lib/payments/portone/entitlement";
 import type { Locale, Species } from "@/lib/saju/types";
 import {
   createUserSupabaseClient,
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
     species?: string;
     birthDate?: string;
     locale?: string;
+    petId?: string | null;
   };
 
   try {
@@ -40,6 +42,29 @@ export async function POST(request: Request) {
   if (!body.birthDate || !isValidDate(body.birthDate)) {
     return NextResponse.json({ error: "Invalid birth date." }, { status: 400 });
   }
+
+  // ── 유료 게이트 ──────────────────────────────────────────
+  if (isSupabaseConfigured()) {
+    const userId = await getUserIdFromRequest(request);
+    const token = getBearerToken(request);
+    const userClient = token ? createUserSupabaseClient(token) : null;
+
+    if (!userId || !userClient) {
+      return NextResponse.json({ error: "login_required" }, { status: 401 });
+    }
+
+    const unlocked = await hasPetPremiumUnlock(
+      userClient,
+      userId,
+      "pet_premium_v1",
+      body.petId
+    );
+
+    if (!unlocked) {
+      return NextResponse.json({ error: "premium_required" }, { status: 403 });
+    }
+  }
+  // ─────────────────────────────────────────────────────────
 
   const locale: Locale = body.locale === "en" ? "en" : "ko";
 

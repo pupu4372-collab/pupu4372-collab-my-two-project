@@ -20,6 +20,8 @@ const UI = {
     submit: "Read today's stars",
     loading: "Reading the cosmos…",
     localeLabel: "Language",
+    premiumRequired: "This feature requires premium. Please complete payment to continue.",
+    goToPay: "Go to payment →",
   },
   ko: {
     petName: "이름",
@@ -31,6 +33,8 @@ const UI = {
     submit: "오늘의 별자리 운세 보기",
     loading: "별자리 읽는 중…",
     localeLabel: "언어",
+    premiumRequired: "이 기능은 프리미엄 전용이에요. 결제 후 이용할 수 있어요.",
+    goToPay: "결제하러 가기 →",
   },
 };
 
@@ -57,6 +61,7 @@ export function ZodiacForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ZodiacFortuneResponse | null>(null);
+  const [petId, setPetId] = useState<string | null>(null);
 
   const t = UI[locale];
 
@@ -71,6 +76,9 @@ export function ZodiacForm() {
     if (isSpecies(nextSpecies)) setSpecies(nextSpecies);
     if (nextName) setPetName(nextName);
     if (nextBirthDate) setBirthDate(nextBirthDate);
+
+    const nextPetId = params.get("petId");
+    if (nextPetId) setPetId(nextPetId);
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -91,11 +99,16 @@ export function ZodiacForm() {
           species,
           birthDate,
           locale,
+          petId: petId ?? null,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong.");
+        if (data.error === "premium_required") {
+          setError("premium_required");
+        } else {
+          setError(data.error ?? "Something went wrong.");
+        }
         return;
       }
       setResult(data as ZodiacFortuneResponse);
@@ -196,9 +209,21 @@ export function ZodiacForm() {
         />
 
         {error && (
-          <p className="rounded-2xl bg-petal/40 px-4 py-2 text-sm text-plum" role="alert">
-            {error}
-          </p>
+          error === "premium_required" ? (
+            <div className="rounded-2xl bg-petal/40 px-4 py-3 text-sm text-plum space-y-2">
+              <p>{t.premiumRequired}</p>
+              <Link
+                href={`/payment?product=pet_premium_v1&type=zodiac&petName=${encodeURIComponent(petName)}&species=${species}&birthDate=${birthDate}&locale=${locale}${petId ? `&petId=${petId}` : ""}`}
+                className="inline-block font-bold text-primary underline"
+              >
+                {t.goToPay}
+              </Link>
+            </div>
+          ) : (
+            <p className="rounded-2xl bg-petal/40 px-4 py-2 text-sm text-plum" role="alert">
+              {error}
+            </p>
+          )
         )}
 
         <button

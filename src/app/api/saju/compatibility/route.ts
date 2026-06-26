@@ -1,6 +1,7 @@
 import { computeCompatibility } from "@/lib/saju/compatibility/engine";
 import { persistCompatibilityResult } from "@/lib/saju/persist-compatibility";
 import { validatePetName } from "@/lib/saju/moderation";
+import { hasPetPremiumUnlock } from "@/lib/payments/portone/entitlement";
 import type { Gender, Locale, Species } from "@/lib/saju/types";
 import {
   createUserSupabaseClient,
@@ -93,6 +94,29 @@ export async function POST(request: Request) {
     timezone: body.timezone as string,
     locale,
   };
+
+  // ── 유료 게이트 ──────────────────────────────────────────
+  if (isSupabaseConfigured()) {
+    const userId = await getUserIdFromRequest(request);
+    const token = getBearerToken(request);
+    const userClient = token ? createUserSupabaseClient(token) : null;
+
+    if (!userId || !userClient) {
+      return NextResponse.json({ error: "login_required" }, { status: 401 });
+    }
+
+    const unlocked = await hasPetPremiumUnlock(
+      userClient,
+      userId,
+      "pet_premium_v1",
+      String(body.petId ?? "") || null
+    );
+
+    if (!unlocked) {
+      return NextResponse.json({ error: "premium_required" }, { status: 403 });
+    }
+  }
+  // ─────────────────────────────────────────────────────────
 
   try {
     const result = computeCompatibility(requestPayload);

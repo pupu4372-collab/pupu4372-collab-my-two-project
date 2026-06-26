@@ -1,6 +1,10 @@
 /** PortOne V2 — shop ID from console (used as `storeId` in browser SDK). */
 export function getPortOneShopId(): string | null {
-  return process.env.PORTONE_SHOP_ID?.trim() || null;
+  return (
+    process.env.PORTONE_SHOP_ID?.trim() ||
+    process.env.NEXT_PUBLIC_PORTONE_SHOP_ID?.trim() ||
+    null
+  );
 }
 
 export function getPortOneApiSecret(): string | null {

@@ -41,8 +41,10 @@ const LABELS = {
     kstAt: "Birth time in KST",
     kstWindow: "KST window",
     zodiacCta: "Zodiac fortune",
+    zodiacCtaBadge: "Premium ₩4,500",
     zodiacBody: "See how western zodiac meets your pet's elemental vibe.",
     bondCta: "Pet-parent bond",
+    bondCtaBadge: "Premium ₩4,500",
     bondBody: "Compare elemental harmony with your birth chart.",
     luckyColorTitle: "Today's lucky color",
     luckyColorBody: (name: string, color: string) =>
@@ -73,8 +75,10 @@ const LABELS = {
     kstAt: "한국 표준시 기준",
     kstWindow: "KST 구간",
     zodiacCta: "별자리 운세",
+    zodiacCtaBadge: "프리미엄 ₩4,500",
     zodiacBody: "서양 별자리와 오행이 만나는 오늘의 운세를 이어서 볼 수 있어요.",
     bondCta: "집사 궁합",
+    bondCtaBadge: "프리미엄 ₩4,500",
     bondBody: "집사와 펫의 오행 상생·상극으로 인연 지수를 확인해 보세요.",
     luckyColorTitle: "오늘의 행운 컬러",
     luckyColorBody: (name: string, color: string) =>
@@ -169,7 +173,10 @@ export function SajuResult({ result }: SajuResultProps) {
     species: result.species,
     birthDate: result.birthUtc.slice(0, 10),
     locale: result.locale,
+    ...(result.petId ? { petId: result.petId } : {}),
   }).toString();
+  const zodiacPaymentHref = `/payment?product=pet_premium_v1&type=zodiac&${continuationQuery}`;
+  const compatibilityPaymentHref = `/payment?product=pet_premium_v1&type=compatibility&${continuationQuery}`;
 
   const detailTraits = traitCards(result.traits, result.locale);
 
@@ -407,25 +414,31 @@ export function SajuResult({ result }: SajuResultProps) {
         <aside className="space-y-6 lg:col-span-4">
           <GlassCard className="relative overflow-hidden p-6 text-center">
             <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl" />
+            <span className="relative mb-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+              {t.zodiacCtaBadge}
+            </span>
             <h3 className="relative text-base font-bold text-primary">{t.zodiacCta}</h3>
             <p className="relative mt-3 text-sm leading-relaxed text-on-surface-variant">{t.zodiacBody}</p>
             <Link
-              href={`/saju/zodiac?${continuationQuery}`}
+              href={zodiacPaymentHref}
               className="relative mt-5 inline-flex w-full justify-center rounded-full bg-primary/10 px-4 py-3 text-sm font-bold text-primary transition hover:bg-primary/20"
             >
-              {t.zodiacCta}
+              {t.zodiacCta} →
             </Link>
           </GlassCard>
 
           <GlassCard className="relative overflow-hidden p-6 text-center">
             <div className="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl" />
+            <span className="relative mb-2 inline-block rounded-full bg-petal/40 px-2 py-0.5 text-[10px] font-bold text-plum">
+              {t.bondCtaBadge}
+            </span>
             <h3 className="relative text-base font-bold text-primary">{t.bondCta}</h3>
             <p className="relative mt-3 text-sm leading-relaxed text-on-surface-variant">{t.bondBody}</p>
             <Link
-              href={`/saju/compatibility?${continuationQuery}`}
+              href={compatibilityPaymentHref}
               className="relative mt-5 inline-flex w-full justify-center rounded-full bg-primary/10 px-4 py-3 text-sm font-bold text-primary transition hover:bg-primary/20"
             >
-              {t.bondCta}
+              {t.bondCta} →
             </Link>
           </GlassCard>
 
