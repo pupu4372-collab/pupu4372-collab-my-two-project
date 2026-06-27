@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
           payment_id,
           price_krw: expectedAmount,
           ...(pet_id ? { pet_id } : {}),
-        },
+        } as Record<string, unknown>,
         {
           onConflict: "payment_id",
         }
