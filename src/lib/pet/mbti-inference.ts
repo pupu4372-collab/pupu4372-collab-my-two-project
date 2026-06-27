@@ -356,6 +356,16 @@ export function buildPetMbtiResult(scores: PetMbtiScores): PetMbtiResult {
   return { type, scores, ...copy };
 }
 
+export function buildPetMbtiResultFromType(type: string): PetMbtiResult | null {
+  if (!(type in TYPE_COPY)) return null;
+  const petType = type as PetMbtiType;
+  return {
+    type: petType,
+    scores: createEmptyPetMbtiScores(),
+    ...TYPE_COPY[petType],
+  };
+}
+
 export interface PetMbtiPremiumInsight {
   sajuComboKo: string;
   sajuComboEn: string;

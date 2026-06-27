@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { userHasPetPremiumPayments } from "@/lib/payments/pet-premium-history";
 import { listHumanPremiumVaultOrders } from "./cart";
 
 export async function userHasHumanPremiumPayments(userId: string): Promise<boolean> {
@@ -24,7 +25,11 @@ export async function getServerPaymentHistoryFlag(): Promise<boolean> {
   } = await supabase.auth.getUser();
   if (!user) return false;
 
-  return userHasHumanPremiumPayments(user.id);
+  const [human, pet] = await Promise.all([
+    userHasHumanPremiumPayments(user.id),
+    userHasPetPremiumPayments(user.id),
+  ]);
+  return human || pet;
 }
 
 export async function listHumanPremiumPaymentHistory(options: {

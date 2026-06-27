@@ -7,9 +7,9 @@ import { Suspense, useEffect, useState } from "react";
 const UI = {
   ko: {
     title: "프리미엄 잠금 해제",
-    subtitle: "별자리 운세 + 펫·집사 궁합을 한 번에 열어보세요.",
+    subtitle: "상세 MBTI · 별자리 운세 · 펫·집사 궁합을 한 번에 열어보세요.",
     product: "펫 프리미엄 패키지",
-    includes: ["🔭 별자리 운세", "💞 펫·집사 궁합"],
+    includes: ["🧠 상세 MBTI", "🔭 별자리 운세", "💞 펫·집사 궁합"],
     price: "₩4,500",
     priceNote: "1회 결제 · 해당 펫 영구 잠금 해제",
     cta: "₩4,500 결제하기",
@@ -21,9 +21,9 @@ const UI = {
   },
   en: {
     title: "Unlock Premium",
-    subtitle: "Get zodiac fortune + pet-parent bond reading in one go.",
+    subtitle: "Unlock detailed MBTI, zodiac fortune, and pet–butler bond in one go.",
     product: "Pet Premium Package",
-    includes: ["🔭 Zodiac fortune", "💞 Pet & butler bond"],
+    includes: ["🧠 Detailed MBTI", "🔭 Zodiac fortune", "💞 Pet & butler bond"],
     price: "₩4,500",
     priceNote: "One-time payment · Permanent unlock for this pet",
     cta: "Pay ₩4,500",
@@ -40,7 +40,6 @@ function PaymentContent() {
   const params = useSearchParams();
   const { accessToken } = useSupabaseSession();
 
-  const type = params.get("type") ?? "zodiac";
   const locale = (params.get("locale") ?? "ko") as "ko" | "en";
   const t = UI[locale];
 
@@ -57,10 +56,7 @@ function PaymentContent() {
     ...(petIdParam ? { petId: petIdParam } : {}),
   }).toString();
 
-  const successHref =
-    type === "compatibility"
-      ? `/saju/compatibility?${continuationQuery}`
-      : `/saju/zodiac?${continuationQuery}`;
+  const successHref = `/saju/premium?${continuationQuery}`;
 
   const [status, setStatus] = useState<"idle" | "processing" | "success" | "error" | "sdk_error">("idle");
   const [sdkReady, setSdkReady] = useState(false);
@@ -100,7 +96,7 @@ function PaymentContent() {
       const response = await PortOne.requestPayment({
         storeId: process.env.NEXT_PUBLIC_PORTONE_SHOP_ID ?? "",
         paymentId,
-        orderName: "펫 프리미엄 패키지 (별자리 + 궁합)",
+        orderName: "펫 프리미엄 패키지 (MBTI + 별자리 + 궁합)",
         totalAmount: 4500,
         currency: "KRW",
         channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",

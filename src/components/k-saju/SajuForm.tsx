@@ -1,7 +1,7 @@
 "use client";
 
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
-import { PetMbtiStep } from "@/components/k-saju/PetMbtiStep";
+import { PetMbtiAccordion } from "@/components/k-saju/PetMbtiAccordion";
 import { SajuResult } from "@/components/k-saju/SajuResult";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
@@ -13,13 +13,13 @@ import { Link } from "@/i18n/navigation";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import type { Gender, Locale, SajuBasicResponse, Species } from "@/lib/saju/types";
 import type { MbtiAnswerMap } from "@/lib/pet/calc-mbti";
-import { calcMbti } from "@/lib/pet/calc-mbti";
+import { calcMbti, isMbtiComplete } from "@/lib/pet/calc-mbti";
 import { getQuestionsBySpecies } from "@/lib/pet/mbti-questions";
 import { getMbtiTypeData } from "@/lib/pet/mbti-types";
 import { useLocale } from "next-intl";
 import { useMemo, useState } from "react";
 
-type Step = "form" | "mbti" | "result";
+type Step = "form" | "result";
 
 const UI = {
   en: {
@@ -36,7 +36,7 @@ const UI = {
     birthDate: "Birth date",
     birthTime: "Birth time",
     timezone: "Birth timezone",
-    submit: "Next: Personality quiz →",
+    submit: "Read K-Saju",
     loading: "Reading your pet's energy...",
     errorConsent: "Please agree to the privacy notice.",
     localeLabel: "Language",
@@ -65,7 +65,7 @@ const UI = {
     birthDate: "생년월일",
     birthTime: "출생 시간",
     timezone: "출생 지역 시간대",
-    submit: "다음: 성격 테스트 →",
+    submit: "사주 보기",
     loading: "우리 아이 기운을 읽고 있어요...",
     errorConsent: "개인정보 동의가 필요합니다.",
     localeLabel: "언어",
@@ -84,6 +84,8 @@ const UI = {
 };
 
 const FIELD_LABEL_CLASS = "block text-sm font-bold text-primary";
+const FORM_ERROR_CLASS =
+  "rounded-2xl border border-red-300/70 bg-white/95 px-4 py-2.5 text-sm font-semibold text-red-800 shadow-sm";
 const STITCH_INPUT_CLASS =
   "pastel-input mt-2 w-full rounded-[2rem] border-transparent bg-sand/50 px-4 py-3.5 text-sm text-on-surface focus:ring-primary/20";
 
@@ -158,6 +160,11 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
 
   const petId = result?.petId ?? null;
 
+  const mbtiCompleteForLink = isMbtiComplete(mbtiAnswers, mbtiQuestions);
+  const mbtiTypeForLink = mbtiCompleteForLink
+    ? calcMbti(mbtiAnswers, mbtiQuestions).type
+    : null;
+
   const continuationQuery = new URLSearchParams({
     petName,
     species,
@@ -167,9 +174,9 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     timezone,
     locale,
     ...(petId ? { petId } : {}),
+    ...(mbtiTypeForLink ? { mbtiType: mbtiTypeForLink } : {}),
   }).toString();
-  const zodiacPaymentHref = `/payment?product=pet_premium_v1&type=zodiac&${continuationQuery}`;
-  const compatibilityPaymentHref = `/payment?product=pet_premium_v1&type=compatibility&${continuationQuery}`;
+  const premiumPaymentHref = `/payment?product=pet_premium_v1&${continuationQuery}`;
 
   function handleMbtiAnswer(questionId: string, value: 0 | 1) {
     setMbtiAnswers((prev) => ({ ...prev, [questionId]: value }));
@@ -188,13 +195,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
       return;
     }
 
-    if (embedded) {
-      void handleApiSubmit();
-      return;
-    }
-
-    setStep("mbti");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    void handleApiSubmit();
   }
 
   async function handleApiSubmit() {
@@ -202,6 +203,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     setLoading(true);
 
     const mbtiResult = calcMbti(mbtiAnswers, mbtiQuestions);
+    const mbtiComplete = isMbtiComplete(mbtiAnswers, mbtiQuestions);
 
     try {
       const headers: Record<string, string> = {
@@ -222,14 +224,24 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
           timezone,
           locale,
           privacyConsent: consent,
-          mbtiType: mbtiResult.type,
-          mbtiScores: mbtiResult.scores,
+          ...(mbtiComplete
+            ? { mbtiType: mbtiResult.type, mbtiScores: mbtiResult.scores }
+            : {}),
         }),
       });
 
-      const data = await res.json();
+      const raw = await res.text();
+      let data: { error?: string } = {};
+      if (raw) {
+        try {
+          data = JSON.parse(raw) as { error?: string };
+        } catch {
+          setError(res.ok ? t.networkError : t.networkError);
+          return;
+        }
+      }
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong.");
+        setError(data.error ?? t.networkError);
         return;
       }
       setResult(data as SajuBasicResponse);
@@ -248,28 +260,10 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   );
   const mbtiTypeData = getMbtiTypeData(mbtiResult.type);
 
-  if (step === "mbti") {
-    return (
-      <PetMbtiStep
-        petName={petName}
-        questions={mbtiQuestions}
-        answers={mbtiAnswers}
-        onAnswer={handleMbtiAnswer}
-        onBack={() => {
-          setStep("form");
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}
-        onSubmit={handleApiSubmit}
-        loading={loading}
-        locale={locale}
-      />
-    );
-  }
-
   if (step === "result" && result) {
     return (
-      <div className="space-y-8 pb-28 md:pb-10">
-        {mbtiTypeData && (
+      <div className="space-y-8 pb-40 md:pb-20">
+        {mbtiTypeData && isMbtiComplete(mbtiAnswers, mbtiQuestions) && (
           <section className="rounded-[2rem] bg-white p-6 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-outline">
               {t.mbtiResultDesc}
@@ -288,39 +282,31 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
 
         <SajuResult result={result} variant={embedded ? "pastel" : "default"} />
 
-        <section
-          className={
-            embedded ? "pastel-card space-y-3 p-5" : "oriental-card space-y-3 p-5"
-          }
-        >
+        <section className="space-y-4 rounded-[2rem] border-2 border-white/50 bg-gradient-to-br from-white via-lavender/30 to-petal/20 p-6 shadow-lg">
           <div>
-            <h3 className="font-semibold text-plum">{t.continueTitle}</h3>
-            <p className="mt-1 text-sm leading-relaxed text-plum/65">
+            <h3 className="font-bold text-primary">{t.continueTitle}</h3>
+            <p className="mt-1 text-sm leading-relaxed text-plum/80">
               {t.continueSubtitle}
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Link
-              href={zodiacPaymentHref}
-              className="group relative flex flex-col items-center rounded-2xl bg-channel-saju/15 px-4 py-3 text-center transition hover:bg-channel-saju/25"
+              href={premiumPaymentHref}
+              className="group flex flex-col items-center rounded-2xl border-2 border-channel-saju/45 bg-gradient-to-b from-lavender to-white px-4 py-4 text-center shadow-md transition hover:border-channel-saju hover:shadow-lg"
             >
-              <span className="mb-1 rounded-full bg-channel-saju/20 px-2 py-0.5 text-[10px] font-bold text-channel-saju">
+              <span className="mb-2 rounded-full bg-channel-saju px-2.5 py-1 text-[10px] font-bold text-white">
                 {t.premiumBadge}
               </span>
-              <span className="text-sm font-semibold text-channel-saju">
-                {t.zodiacCta}
-              </span>
+              <span className="text-sm font-bold text-channel-saju">{t.zodiacCta}</span>
             </Link>
             <Link
-              href={compatibilityPaymentHref}
-              className="group relative flex flex-col items-center rounded-2xl bg-petal/40 px-4 py-3 text-center transition hover:bg-petal/60"
+              href={premiumPaymentHref}
+              className="group flex flex-col items-center rounded-2xl border-2 border-hwa-red/40 bg-gradient-to-b from-petal to-white px-4 py-4 text-center shadow-md transition hover:border-hwa-red hover:shadow-lg"
             >
-              <span className="mb-1 rounded-full bg-plum/10 px-2 py-0.5 text-[10px] font-bold text-plum">
+              <span className="mb-2 rounded-full bg-hwa-red px-2.5 py-1 text-[10px] font-bold text-white">
                 {t.premiumBadge}
               </span>
-              <span className="text-sm font-semibold text-plum">
-                {t.compatibilityCta}
-              </span>
+              <span className="text-sm font-bold text-[#8b3a3a]">{t.compatibilityCta}</span>
             </Link>
           </div>
         </section>
@@ -596,11 +582,16 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
           />
         </div>
 
+        <PetMbtiAccordion
+          species={species}
+          questions={mbtiQuestions}
+          answers={mbtiAnswers}
+          onAnswer={handleMbtiAnswer}
+          locale={locale}
+        />
+
         {error && (
-          <p
-            className="rounded-2xl bg-petal/40 px-4 py-2.5 text-sm text-plum"
-            role="alert"
-          >
+          <p className={FORM_ERROR_CLASS} role="alert">
             {error}
           </p>
         )}

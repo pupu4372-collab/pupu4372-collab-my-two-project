@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
           product_code,
           payment_id,
           price_krw: expectedAmount,
+          paid_at: new Date().toISOString(),
           ...(pet_id ? { pet_id } : {}),
         } as any,
         {

@@ -175,8 +175,7 @@ export function SajuResult({ result }: SajuResultProps) {
     locale: result.locale,
     ...(result.petId ? { petId: result.petId } : {}),
   }).toString();
-  const zodiacPaymentHref = `/payment?product=pet_premium_v1&type=zodiac&${continuationQuery}`;
-  const compatibilityPaymentHref = `/payment?product=pet_premium_v1&type=compatibility&${continuationQuery}`;
+  const premiumPaymentHref = `/payment?product=pet_premium_v1&${continuationQuery}`;
 
   const detailTraits = traitCards(result.traits, result.locale);
 
@@ -186,7 +185,7 @@ export function SajuResult({ result }: SajuResultProps) {
   }, [result.petName, result.birthUtc]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8 max-lg:pb-4">
       <SaveStatusBanner locale={result.locale} persisted={result.persisted} persistError={result.persistError} />
 
       <section className="pastel-card flex flex-col items-center gap-6 p-6 md:flex-row md:items-center md:p-8">
@@ -393,58 +392,58 @@ export function SajuResult({ result }: SajuResultProps) {
               </p>
             )}
             {result.kstJiji && (
-              <div className="mt-6 rounded-2xl border border-mint/40 bg-mint/20 px-4 py-4 text-sm">
-                <p className="text-xs font-medium text-plum/55">{t.kstHour}</p>
-                <p className="mt-1 font-medium text-plum">{formatJijiDisplay(result.kstJiji, result.locale)}</p>
-                <p className="mt-1 text-xs text-plum/55">
+              <div className="mt-6 rounded-2xl border-2 border-mok-green/40 bg-gradient-to-br from-element-wood via-mint/40 to-white px-4 py-4 text-sm">
+                <p className="text-xs font-bold uppercase tracking-wide text-mok-green">{t.kstHour}</p>
+                <p className="mt-1 text-base font-bold text-primary">{formatJijiDisplay(result.kstJiji, result.locale)}</p>
+                <p className="mt-1 text-xs text-plum/75">
                   {t.kstAt}: {result.kstJiji.kstTime} (KST) · {t.kstWindow}: {result.kstJiji.kstRange}
                 </p>
-                <p className="mt-1 text-xs text-plum/50">
+                <p className="mt-1 text-xs font-semibold text-mok-green">
                   {ELEMENT_META[result.kstJiji.element].hanja}{" "}
                   {ELEMENT_META[result.kstJiji.element].meaning} · {ELEMENT_META[result.kstJiji.element].hangul}
                 </p>
               </div>
             )}
-            <p className="mt-4 text-center text-xs text-plum/45">
+            <p className="mt-4 text-center text-xs text-plum/65">
               {t.stored}: {formatUtcForDisplay(result.birthUtc, result.timezone)} ({result.timezone})
             </p>
           </GlassCard>
         </div>
 
-        <aside className="space-y-6 lg:col-span-4">
-          <GlassCard className="relative overflow-hidden p-6 text-center">
-            <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl" />
-            <span className="relative mb-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+        <aside className="space-y-5 pb-6 max-lg:pb-28 lg:col-span-4">
+          <GlassCard className="relative overflow-hidden border-2 border-channel-saju/45 !bg-gradient-to-br !from-lavender !via-white !to-mint/60 p-6 text-center shadow-lg shadow-channel-saju/15">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-channel-saju/25 blur-3xl" />
+            <span className="relative mb-2 inline-block rounded-full bg-channel-saju px-2.5 py-1 text-[10px] font-bold text-white">
               {t.zodiacCtaBadge}
             </span>
-            <h3 className="relative text-base font-bold text-primary">{t.zodiacCta}</h3>
-            <p className="relative mt-3 text-sm leading-relaxed text-on-surface-variant">{t.zodiacBody}</p>
+            <h3 className="relative text-base font-bold text-channel-saju">{t.zodiacCta}</h3>
+            <p className="relative mt-3 text-sm leading-relaxed text-plum/85">{t.zodiacBody}</p>
             <Link
-              href={zodiacPaymentHref}
-              className="relative mt-5 inline-flex w-full justify-center rounded-full bg-primary/10 px-4 py-3 text-sm font-bold text-primary transition hover:bg-primary/20"
+              href={premiumPaymentHref}
+              className="relative mt-5 inline-flex w-full justify-center rounded-full bg-channel-saju px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-channel-saju/35 transition hover:brightness-110"
             >
               {t.zodiacCta} →
             </Link>
           </GlassCard>
 
-          <GlassCard className="relative overflow-hidden p-6 text-center">
-            <div className="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl" />
-            <span className="relative mb-2 inline-block rounded-full bg-petal/40 px-2 py-0.5 text-[10px] font-bold text-plum">
+          <GlassCard className="relative overflow-hidden border-2 border-hwa-red/40 !bg-gradient-to-br !from-petal !via-white !to-element-fire p-6 text-center shadow-lg shadow-hwa-red/10">
+            <div className="pointer-events-none absolute -bottom-10 -left-10 h-36 w-36 rounded-full bg-hwa-red/20 blur-3xl" />
+            <span className="relative mb-2 inline-block rounded-full bg-hwa-red px-2.5 py-1 text-[10px] font-bold text-white">
               {t.bondCtaBadge}
             </span>
-            <h3 className="relative text-base font-bold text-primary">{t.bondCta}</h3>
-            <p className="relative mt-3 text-sm leading-relaxed text-on-surface-variant">{t.bondBody}</p>
+            <h3 className="relative text-base font-bold text-[#8b3a3a]">{t.bondCta}</h3>
+            <p className="relative mt-3 text-sm leading-relaxed text-plum/85">{t.bondBody}</p>
             <Link
-              href={compatibilityPaymentHref}
-              className="relative mt-5 inline-flex w-full justify-center rounded-full bg-primary/10 px-4 py-3 text-sm font-bold text-primary transition hover:bg-primary/20"
+              href={premiumPaymentHref}
+              className="relative mt-5 inline-flex w-full justify-center rounded-full bg-[#6f4b8b] px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#6f4b8b]/35 transition hover:bg-[#5f3f78]"
             >
               {t.bondCta} →
             </Link>
           </GlassCard>
 
-          <GlassCard className="p-5">
+          <GlassCard className="border-2 border-mok-green/35 !bg-gradient-to-br !from-white !to-element-wood p-5">
             <div className="flex items-start gap-4">
-              <div className="rounded-2xl bg-mint p-3 text-xl" aria-hidden>
+              <div className="rounded-2xl bg-mok-green/15 p-3 text-xl" aria-hidden>
                 💡
               </div>
               <div>

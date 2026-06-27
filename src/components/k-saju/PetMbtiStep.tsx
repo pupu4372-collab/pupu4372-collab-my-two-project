@@ -13,6 +13,7 @@ interface PetMbtiStepProps {
   onSubmit: () => void;
   loading: boolean;
   locale: "ko" | "en";
+  error?: string | null;
 }
 
 const UI = {
@@ -45,6 +46,7 @@ export function PetMbtiStep({
   onSubmit,
   loading,
   locale,
+  error,
 }: PetMbtiStepProps) {
   const t = UI[locale];
   const answeredCount = Object.keys(answers).length;
@@ -114,8 +116,16 @@ export function PetMbtiStep({
       </div>
 
       <div className="space-y-3">
+        {error && (
+          <p
+            className="rounded-2xl border border-red-300/70 bg-white/95 px-4 py-2.5 text-sm font-semibold text-red-800 shadow-sm"
+            role="alert"
+          >
+            {error}
+          </p>
+        )}
         {!complete && answeredCount > 0 && (
-          <p className="text-center text-xs text-outline">{t.incomplete}</p>
+          <p className="text-center text-xs font-medium text-white/75">{t.incomplete}</p>
         )}
         <button
           type="button"
@@ -128,7 +138,7 @@ export function PetMbtiStep({
         <button
           type="button"
           onClick={onBack}
-          className="w-full rounded-full py-3 text-sm font-semibold text-on-surface-variant transition hover:text-primary"
+          className="w-full rounded-full border border-white/35 bg-white/10 py-3 text-sm font-semibold text-white/90 transition hover:bg-white/20 hover:text-white"
         >
           {t.back}
         </button>

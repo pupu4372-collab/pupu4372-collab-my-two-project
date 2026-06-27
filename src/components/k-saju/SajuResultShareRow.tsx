@@ -173,10 +173,10 @@ export function SajuResultShareRow(props: Props) {
   }
 
   const btnClass =
-    "flex-1 rounded-full border border-channel-saju/30 bg-white px-3 py-2.5 text-xs font-extrabold text-primary transition hover:bg-white/90 disabled:opacity-60";
+    "flex-1 rounded-full border-2 border-channel-saju/35 bg-white px-3 py-2.5 text-xs font-extrabold text-primary shadow-sm transition hover:border-channel-saju hover:shadow-md disabled:opacity-60";
 
   return (
-    <div className="rounded-[1.5rem] border border-channel-saju/25 bg-channel-saju/8 p-4">
+    <div className="rounded-[1.5rem] border-2 border-white/55 bg-gradient-to-br from-white via-lavender/45 to-petal/30 p-5 shadow-lg">
       <p className="text-center text-sm font-extrabold leading-6 text-primary">{t.intro}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" disabled={busy !== null} onClick={() => void handleKakao()} className={btnClass}>
@@ -186,7 +186,7 @@ export function SajuResultShareRow(props: Props) {
           type="button"
           disabled={busy !== null}
           onClick={() => void handleInstagram()}
-          className={`${btnClass} border-petal/50 bg-gradient-to-r from-petal/80 via-blush/80 to-gold/40`}
+          className={`${btnClass} border-hwa-red/35 bg-gradient-to-r from-petal via-blush to-gold/50 text-[#8b3a3a] hover:border-hwa-red`}
         >
           {busy === "instagram" ? "…" : t.instagram}
         </button>
@@ -194,7 +194,7 @@ export function SajuResultShareRow(props: Props) {
           {busy === "link" ? "…" : t.link}
         </button>
       </div>
-      {status && <p className="mt-3 text-center text-[11px] font-semibold text-plum/70">{status}</p>}
+      {status && <p className="mt-3 text-center text-[11px] font-semibold text-plum">{status}</p>}
     </div>
   );
 }
