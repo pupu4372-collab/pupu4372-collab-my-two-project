@@ -36,10 +36,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Supabase 유저 확인
-    let supabase;
+    let supabase: Awaited<ReturnType<typeof createSupabaseServerClient>> | null = null;
     try {
       supabase = await createSupabaseServerClient();
     } catch {
+      return NextResponse.json({ error: "db unavailable" }, { status: 503 });
+    }
+
+    if (!supabase) {
       return NextResponse.json({ error: "db unavailable" }, { status: 503 });
     }
 
