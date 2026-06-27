@@ -25,6 +25,7 @@ import {
   REPORT_TYPE_ORDER,
   REPORT_TYPE_SUBTITLES_EN,
   REPORT_TYPE_SUBTITLES_KO,
+  sumPaidReportPricing,
   sumCartAmount,
 } from "@/lib/reports/human-premium/pricing";
 import {
@@ -262,8 +263,8 @@ export function HumanPremiumShop() {
         </p>
         <h3 className="mt-2 text-xl font-bold sm:text-2xl">
           {isKo
-            ? `단품으로 모두 구매 시 ${formatKrw(Object.values(REPORT_PRICING).reduce((a, b) => a + b, 0))}`
-            : `Buying all singles: ${formatKrw(Object.values(REPORT_PRICING).reduce((a, b) => a + b, 0))}`}
+            ? `단품으로 모두 구매 시 ${formatKrw(sumPaidReportPricing())}`
+            : `Buying all singles: ${formatKrw(sumPaidReportPricing())}`}
         </h3>
         <p className="mt-2 text-lg font-semibold">
           → {isKo ? "올인원 번들" : "All-in-one bundle"}{" "}

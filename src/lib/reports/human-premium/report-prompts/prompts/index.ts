@@ -8,7 +8,6 @@ import * as mental from "./mental-wellness-report-prompt";
 import * as business from "./business-partner-report-prompt";
 import * as love from "./love-marriage-report-prompt";
 import * as dailyAction from "./daily-action-plan-report-prompt";
-import * as dailyEnergy from "./daily-energy-report-prompt";
 import * as decade from "./decade-life-strategy-report-prompt";
 import * as monthly from "./monthly-life-architecture-report-prompt";
 import * as annual from "./annual-report-prompt";
@@ -30,7 +29,7 @@ function def(
   };
 }
 
-/** Wired product keys → slot prompt definitions (No.01–10 paid + free daily preview). */
+/** Wired product keys → slot prompt definitions. */
 export const REPORT_PROMPT_DEFINITIONS: ReportPromptDefinition[] = [
   def("career", career),
   def("wealth", wealth),
@@ -38,7 +37,6 @@ export const REPORT_PROMPT_DEFINITIONS: ReportPromptDefinition[] = [
   def("business", business),
   def("love", love),
   def("daily", dailyAction),
-  def("free-daily-preview", dailyEnergy),
   def("decade", decade),
   def("monthly", monthly),
   def("yearly", annual),

@@ -3,11 +3,7 @@ import type { PremiumPromptContext } from "@/lib/saju/llm/prompts/premium-contex
 import type { LlmPromptPair } from "@/lib/saju/llm/types";
 import type { ReportType } from "../types";
 import { PROMPT_PRODUCT_PACKS } from "./packs";
-import {
-  FREE_DAILY_PREVIEW_PROMPT_PRODUCT,
-  HUMAN_PREMIUM_PROMPT_PRODUCT_LINE,
-  type HumanPremiumPromptProductKey,
-} from "./products";
+import { HUMAN_PREMIUM_PROMPT_PRODUCT_LINE, type HumanPremiumPromptProductKey } from "./products";
 import {
   buildPromptTemplateContext,
   mergePromptSlotOverride,
@@ -17,7 +13,6 @@ import { isPromptSlotFilled } from "./types";
 
 export function resolvePromptProduct(ctx: PremiumPromptContext): HumanPremiumPromptProductKey {
   if (ctx.promptProduct) return ctx.promptProduct;
-  if (ctx.deliveryMode === "free-preview") return FREE_DAILY_PREVIEW_PROMPT_PRODUCT;
   return ctx.reportType;
 }
 

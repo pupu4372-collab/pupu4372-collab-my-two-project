@@ -7,7 +7,6 @@ export {
   type ReportTypePromptSlot,
 } from "./types";
 export {
-  FREE_DAILY_PREVIEW_PROMPT_PRODUCT,
   HUMAN_PREMIUM_PROMPT_PRODUCT_LINE,
   PROMPT_PRODUCT_LABELS_EN,
   PROMPT_PRODUCT_LABELS_KO,

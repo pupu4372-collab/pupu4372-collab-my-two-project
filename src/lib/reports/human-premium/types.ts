@@ -33,7 +33,7 @@ export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
 };
 
 export const REPORT_TYPE_LABELS_EN: Record<ReportType, string> = {
-  daily: "Daily Routine",
+  daily: "Daily Lucky Routine",
   decade: "10-Year Life Blueprint",
   monthly: "Monthly Roadmap",
   yearly: "This Year's Major-Luck Plan",
@@ -182,7 +182,7 @@ export interface HumanPremiumCartMeta {
   deliverEmail: boolean;
 }
 
-export type HumanPremiumDeliveryMode = "free-preview" | "paid";
+export type HumanPremiumDeliveryMode = "paid";
 
 export interface HumanPremiumReportInput {
   personName: string;
@@ -198,7 +198,7 @@ export interface HumanPremiumReportInput {
   userId?: string | null;
   /** Defaults to {@link DEFAULT_REPORT_TYPE} when omitted */
   reportType?: ReportType;
-  /** free-preview = 오늘 운세 무료보기 (daily report, premium UI) */
+  /** Optional delivery channel; prompts follow reportType. */
   deliveryMode?: HumanPremiumDeliveryMode;
 }
 

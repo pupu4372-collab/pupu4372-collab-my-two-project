@@ -1,12 +1,22 @@
 "use client";
 
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
+import { HumanPremiumFreePreviewReport } from "@/components/human-premium/HumanPremiumFreePreviewReport";
+import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { Link } from "@/i18n/navigation";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import type { HumanPremiumProfile } from "@/lib/reports/human-premium/cart-session";
 import { saveHumanPremiumProfile } from "@/lib/reports/human-premium/cart-session";
-import type { DayPillarFreeFullView } from "@/lib/reports/human-premium/content";
+import {
+  REPORT_TYPE_SUBTITLES_EN,
+  REPORT_TYPE_SUBTITLES_KO,
+} from "@/lib/reports/human-premium/pricing";
+import {
+  REPORT_TYPE_LABELS,
+  REPORT_TYPE_LABELS_EN,
+  type HumanPremiumReportPayload,
+} from "@/lib/reports/human-premium/types";
 import {
   BIRTH_TIME_OPTIONS,
   getBirthTimeOptionLabel,
@@ -15,18 +25,6 @@ import {
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-
-interface DayPillarPreviewData {
-  dayPillar: string;
-  dayStem: string;
-  dayBranch: string;
-  dayPillarNickname: string;
-  dominantElement: string;
-  story: string;
-  traits: string[];
-  analysisMode: "three_pillars" | "four_pillars";
-  fullView: DayPillarFreeFullView;
-}
 
 export function DayPillarPreview({
   profile,
@@ -38,10 +36,14 @@ export function DayPillarPreview({
   const routeLocale = useLocale();
   const tNav = useTranslations("nav");
   const isKo = routeLocale === "ko";
+  const dailyTitle = isKo ? REPORT_TYPE_LABELS.daily : REPORT_TYPE_LABELS_EN.daily;
+  const dailySubtitles = isKo ? REPORT_TYPE_SUBTITLES_KO : REPORT_TYPE_SUBTITLES_EN;
+  const dailySubtitle = isKo
+    ? `무료 · ${dailySubtitles.daily}`
+    : `Free · ${dailySubtitles.daily}`;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [preview, setPreview] = useState<DayPillarPreviewData | null>(null);
-  const [showFullResult, setShowFullResult] = useState(false);
+  const [report, setReport] = useState<HumanPremiumReportPayload | null>(null);
 
   function patchProfile(partial: Partial<HumanPremiumProfile>) {
     const next = { ...profile, ...partial };
@@ -55,12 +57,11 @@ export function DayPillarPreview({
     return parseBirthTimeSelect(profile.birthTimeSelect).birthTime;
   }, [profile.birthTimeSelect, birthTimeUnknown]);
 
-  async function handlePreview() {
+  async function handleGenerate() {
     setError(null);
-    setShowFullResult(false);
     setLoading(true);
     try {
-      const res = await fetch("/api/human-premium/day-pillar-preview", {
+      const res = await fetch("/api/human-premium/daily-routine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -73,37 +74,55 @@ export function DayPillarPreview({
           calendarType: profile.calendarType,
           locale: routeLocale,
           privacyConsent: profile.privacyConsent,
+          gender: profile.gender || null,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Preview failed");
-      setPreview(data as DayPillarPreviewData);
+      if (!res.ok) throw new Error(data.error ?? "Report failed");
+      setReport(data.report as HumanPremiumReportPayload);
     } catch (err) {
-      const raw = err instanceof Error ? err.message : "Preview failed";
+      const raw = err instanceof Error ? err.message : "Report failed";
       setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
     } finally {
       setLoading(false);
     }
   }
 
-  function resetPreview() {
-    setPreview(null);
-    setShowFullResult(false);
+  function resetReport() {
+    setReport(null);
     setError(null);
   }
 
-  return (
-    <section className="human-premium-birth-card mx-auto w-full max-w-sm space-y-6 p-6 sm:max-w-md sm:p-8">
-      <div className="text-center">
-        <p className="human-premium-birth-eyebrow">
-          {isKo ? "집사님의 사주" : "Butler birth chart"}
+  if (report) {
+    return (
+      <div className="space-y-6">
+        <HumanPremiumFreePreviewReport report={report} />
+        <p className="text-center text-sm">
+          <button
+            type="button"
+            className="font-semibold text-white underline"
+            onClick={resetReport}
+          >
+            {isKo ? "다시 입력" : "Enter again"}
+          </button>
         </p>
-        <h2 className="mt-2 text-2xl font-bold">
-          {isKo ? "사주 정보 입력" : "Birth details"}
-        </h2>
       </div>
+    );
+  }
 
-      {!preview ? (
+  return (
+    <>
+      <ReportGenerateLoader isKo={isKo} active={loading} />
+      <section className="human-premium-birth-card mx-auto w-full max-w-sm space-y-6 p-6 sm:max-w-md sm:p-8">
+        <div className="text-center">
+          <p className="human-premium-birth-eyebrow">
+            {isKo ? "집사님의 사주" : "Butler birth chart"}
+          </p>
+          <h2 className="mt-2 text-2xl font-bold">
+            {isKo ? "사주 정보 입력" : "Birth details"}
+          </h2>
+        </div>
+
         <div className="human-premium-birth-form-inner space-y-4">
           <label className="human-premium-birth-field">
             {isKo ? "닉네임" : "Nickname"}
@@ -214,7 +233,7 @@ export function DayPillarPreview({
           <button
             type="button"
             disabled={!profile.birthDate || !profile.privacyConsent || loading}
-            onClick={handlePreview}
+            onClick={() => void handleGenerate()}
             className="human-premium-birth-submit human-premium-birth-submit--plan"
           >
             {!loading ? (
@@ -224,139 +243,23 @@ export function DayPillarPreview({
             ) : null}
             <span className="human-premium-birth-submit-body">
               {loading ? (
-                isKo ? "분석 중…" : "Analyzing…"
+                isKo ? "생성 중…" : "Generating…"
               ) : (
                 <>
-                  <span className="human-premium-birth-submit-title">
-                    {isKo ? "일별 인생 플랜 보기" : "View daily life plan"}
-                  </span>
-                  <span className="human-premium-birth-submit-sub">
-                    {isKo ? "시간대 활용법" : "Time-slot guide"}
-                  </span>
+                  <span className="human-premium-birth-submit-title">{dailyTitle}</span>
+                  <span className="human-premium-birth-submit-sub">{dailySubtitle}</span>
                 </>
               )}
             </span>
           </button>
         </div>
-      ) : (
-        <div className="space-y-6">
-          <article className="rounded-3xl border border-channel-saju/20 bg-lavender/30 p-6 text-center">
-            <p className="text-sm font-semibold text-channel-saju">{preview.dayPillarNickname}</p>
-            <p className="mt-2 text-3xl font-bold text-ink">{preview.dayPillar}</p>
-            <p className="mt-1 text-plum">
-              {preview.dayStem} · {preview.dayBranch}
-            </p>
-            <p className="mt-3 text-sm text-plum/80">
-              {isKo ? "주도 오행" : "Dominant element"}: {preview.dominantElement}
-            </p>
-            <p className="mt-4 text-left text-sm leading-relaxed text-ink/90">{preview.story}</p>
-            {preview.traits.length > 0 ? (
-              <ul className="mt-3 flex flex-wrap justify-center gap-2">
-                {preview.traits.map((trait) => (
-                  <li
-                    key={trait}
-                    className="rounded-full bg-white px-3 py-1 text-xs font-medium text-plum"
-                  >
-                    {trait}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </article>
 
-          {!showFullResult ? (
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setShowFullResult(true)}
-                className="rounded-full bg-channel-saju px-6 py-3 font-bold text-white shadow-lg transition hover:brightness-110"
-              >
-                {isKo ? "일주분석 보기" : "View day-pillar analysis"}
-              </button>
-              <p className="mt-3 text-xs text-plum/70">
-                {isKo
-                  ? "만세력·오행·일주 해석을 무료로 펼쳐봅니다."
-                  : "Open your free pillars, elements, and day-master reading."}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-5">
-              <header className="text-center">
-                <p className="text-xs font-semibold uppercase tracking-wide text-channel-saju">
-                  {preview.fullView.analysisModeLabel}
-                </p>
-                <h3 className="mt-2 text-lg font-bold text-ink">{preview.fullView.headline}</h3>
-              </header>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                {preview.fullView.pillars.map((row) => (
-                  <article
-                    key={row.slot}
-                    className="rounded-2xl border border-plum/10 bg-white p-4"
-                  >
-                    <p className="text-xs font-semibold text-channel-saju">{row.label}</p>
-                    <p className="mt-1 text-2xl font-bold text-ink">{row.pillar}</p>
-                    <p className="mt-1 text-sm text-plum/80">{row.detail}</p>
-                  </article>
-                ))}
-              </div>
-
-              <section className="rounded-2xl border border-plum/10 bg-white p-4">
-                <h4 className="font-semibold text-ink">
-                  {isKo ? "오행 분포" : "Element balance"}
-                </h4>
-                <ul className="mt-3 space-y-2">
-                  {preview.fullView.elements.map((item) => (
-                    <li key={item.label}>
-                      <div className="mb-1 flex justify-between text-xs text-plum/80">
-                        <span>{item.label}</span>
-                        <span>{item.percent}%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-white/80">
-                        <div
-                          className="h-full rounded-full bg-channel-saju/80"
-                          style={{ width: `${Math.max(item.percent, 4)}%` }}
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-
-              <section className="rounded-2xl border border-plum/10 bg-white p-5">
-                <h4 className="font-semibold text-ink">
-                  {isKo ? "일주 · 사주 구조 해석" : "Day pillar · chart structure"}
-                </h4>
-                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/90">
-                  {preview.fullView.structureBody}
-                </p>
-              </section>
-
-              <p className="text-center text-xs text-plum/65">
-                {isKo
-                  ? "점수·기회·리스크·로드맵 등 심층 리포트는 아래 프리미엄 상품에서 확인할 수 있어요."
-                  : "Scores, opportunities, risks, and roadmap live in the premium reports below."}
-              </p>
-            </div>
-          )}
-
-          <p className="text-center text-sm">
-            <button
-              type="button"
-              className="font-semibold text-channel-saju underline"
-              onClick={resetPreview}
-            >
-              {isKo ? "다시 입력" : "Enter again"}
-            </button>
-          </p>
-        </div>
-      )}
-
-      <p className="text-center text-xs text-plum/60">
-        <Link href="/saju" className="underline">
-          {tNav("saju")}
-        </Link>
-      </p>
-    </section>
+        <p className="text-center text-xs text-plum/60">
+          <Link href="/saju" className="underline">
+            {tNav("saju")}
+          </Link>
+        </p>
+      </section>
+    </>
   );
 }

@@ -1,7 +1,7 @@
 import type { ReportType } from "./types";
 
 export const REPORT_PRICING: Record<ReportType, number> = {
-  daily: 2900,
+  daily: 0,
   decade: 4900,
   monthly: 3900,
   yearly: 5900,
@@ -47,8 +47,8 @@ export const REPORT_TYPE_SUBTITLES_EN: Record<ReportType, string> = {
   lifetime: "Full major-luck life design",
 };
 
+/** Paid shop grid — `daily` (데일리 럭키 루틴) is free via DayPillarPreview */
 export const REPORT_TYPE_ORDER: ReportType[] = [
-  "daily",
   "decade",
   "monthly",
   "yearly",
@@ -121,9 +121,12 @@ export function formatKrw(amount: number): string {
   return `₩${amount.toLocaleString("ko-KR")}`;
 }
 
+export function sumPaidReportPricing(): number {
+  return REPORT_TYPE_ORDER.reduce((sum, type) => sum + REPORT_PRICING[type], 0);
+}
+
 export function getBundleSavings(): number {
-  const allSingle = Object.values(REPORT_PRICING).reduce((a, b) => a + b, 0);
-  return allSingle - BUNDLE_PRICING.all;
+  return sumPaidReportPricing() - BUNDLE_PRICING.all;
 }
 
 export function resolveCheckoutAmount(options: {

@@ -5,10 +5,7 @@ import {
   splitGanZhi,
 } from "@/lib/saju/ksaju-engine";
 import type { PremiumPromptContext } from "@/lib/saju/llm/prompts/premium-context";
-import {
-  FREE_DAILY_PREVIEW_PROMPT_PRODUCT,
-  type HumanPremiumPromptProductKey,
-} from "./products";
+import type { HumanPremiumPromptProductKey } from "./products";
 import { resolvePromptProduct } from "./registry";
 
 export interface ReportSpecificInputVars {
@@ -200,7 +197,6 @@ export function buildReportSpecificInputs(
 
   switch (key) {
     case "daily":
-    case FREE_DAILY_PREVIEW_PROMPT_PRODUCT:
       return formatTodayInputs(ctx);
     case "monthly":
       return formatMonthlyInputs(ctx);

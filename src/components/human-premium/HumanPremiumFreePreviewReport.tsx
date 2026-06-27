@@ -12,8 +12,8 @@ import { Link } from "@/i18n/navigation";
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 
 /**
- * Premium report body for free daily preview — same 8 sections as paid HumanPremiumReportView.
- * Wire from DayPillarPreview after buildHumanPremiumFreePreviewReport().
+ * Premium report body for free daily routine — same 8 sections as paid HumanPremiumReportView.
+ * Rendered from DayPillarPreview after POST /api/human-premium/daily-routine.
  */
 export function HumanPremiumFreePreviewReport({
   report,

@@ -1,8 +1,4 @@
-import {
-  FREE_DAILY_PREVIEW_PROMPT_PRODUCT,
-  HUMAN_PREMIUM_PROMPT_PRODUCT_LINE,
-  type HumanPremiumPromptProductKey,
-} from "./products";
+import { HUMAN_PREMIUM_PROMPT_PRODUCT_LINE, type HumanPremiumPromptProductKey } from "./products";
 import { BUILT_REPORT_PROMPT_PACKS } from "./prompts";
 import type {
   HumanPremiumPromptSlotKey,
@@ -56,7 +52,7 @@ export const PROMPT_PRODUCT_PACKS: PromptProductPackMap = {
 /** @deprecated Use PROMPT_PRODUCT_PACKS */
 export const REPORT_TYPE_PROMPT_PACKS = PROMPT_PRODUCT_PACKS;
 
-export { FREE_DAILY_PREVIEW_PROMPT_PRODUCT, HUMAN_PREMIUM_PROMPT_PRODUCT_LINE };
+export { HUMAN_PREMIUM_PROMPT_PRODUCT_LINE };
 
 /** @deprecated Use HUMAN_PREMIUM_PROMPT_PRODUCT_LINE */
 export const HUMAN_PREMIUM_PROMPT_PRODUCT_TYPES = HUMAN_PREMIUM_PROMPT_PRODUCT_LINE;
