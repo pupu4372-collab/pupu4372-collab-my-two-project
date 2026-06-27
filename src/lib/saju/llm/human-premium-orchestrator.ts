@@ -277,10 +277,12 @@ async function generateRoadmap(ctx: PremiumLlmContext, narrative: string) {
 }
 
 async function generateProphecyBundle(ctx: PremiumLlmContext, narrative: string) {
+  const currentYear = new Date().getFullYear();
+  const ctxWithYear = { ...ctx, currentYear };
   const result = await callPremiumJsonCached({
     callKind: "prophecy",
     ctx,
-    prompts: buildProphecyPrompts(ctx, narrative),
+    prompts: buildProphecyPrompts(ctxWithYear, narrative),
     maxTokens: 1000,
     narrative,
   });

@@ -20,4 +20,6 @@ export interface PremiumPromptContext {
   birthTime: string | null;
   birthTimeUnknown: boolean;
   gender?: "male" | "female" | null;
+  /** Issue year for prophecy slot (e.g. future-year anchors) */
+  currentYear?: number;
 }

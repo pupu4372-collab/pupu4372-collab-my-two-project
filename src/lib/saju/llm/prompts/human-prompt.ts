@@ -321,7 +321,9 @@ export function buildProphecyPrompts(ctx: PremiumPromptContext, narrative: strin
       ctx
     ),
     user:
-      (ctx.locale === "ko" ? "봉인된 예언과 코호트 인사이트.\n" : "Sealed prophecy and cohort insight.\n") +
+      (ctx.locale === "ko"
+        ? `봉인된 예언과 코호트 인사이트.\n현재 연도: ${ctx.currentYear ?? new Date().getFullYear()}년\n`
+        : `Sealed prophecy and cohort insight.\nCurrent year: ${ctx.currentYear ?? new Date().getFullYear()}\n`) +
       block +
       `\n\n[Master narrative]\n${narrative.slice(0, 1200)}`,
   };

@@ -10,7 +10,7 @@ export function isClaudeEnabled(): boolean {
 
 export async function callClaudeJson(
   prompts: LlmPromptPair,
-  maxTokens = 1800
+  maxTokens = 3000
 ): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) {
@@ -43,7 +43,7 @@ export async function callClaudeJson(
 
 export async function callClaudeJsonParsed(
   prompts: LlmPromptPair,
-  maxTokens = 1800
+  maxTokens = 3000
 ): Promise<unknown> {
   const text = await callClaudeJson(prompts, maxTokens);
   try {
