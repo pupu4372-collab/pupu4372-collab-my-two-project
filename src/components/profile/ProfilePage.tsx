@@ -8,6 +8,7 @@ import { useState } from "react";
 import { PetProfilesList } from "./PetProfilesList";
 import { PetShowPostsMiniGrid } from "./PetShowPostsMiniGrid";
 import { ProfileActivitySummary } from "./ProfileActivitySummary";
+import { AccountDeleteSection } from "./AccountDeleteSection";
 import { UserProfileCard } from "./UserProfileCard";
 
 type ProfileView = "overview" | "edit";
@@ -36,7 +37,7 @@ export function ProfilePage() {
           </p>
         </div>
 
-        <UserProfileCard showEditor presentation="settings" />
+        <UserProfileCard showEditor presentation="settings" hideDeleteAccount />
 
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-white">{isKo ? "펫 프로필 수정" : "Edit pet profiles"}</h2>
@@ -45,6 +46,8 @@ export function ProfilePage() {
           </p>
           <PetProfilesList editable cardStyle="glass" />
         </section>
+
+        <AccountDeleteSection />
       </div>
     );
   }

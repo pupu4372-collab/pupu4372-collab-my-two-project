@@ -106,6 +106,9 @@ export function LoginButtons({
     if (message.includes("non ISO-8859-1 code point")) {
       return t("authStorageError");
     }
+    if (message.includes("Session could not be saved")) {
+      return t("authStorageError");
+    }
     if (message.includes("Invalid login credentials")) {
       return t("invalidCredentials");
     }
@@ -208,7 +211,8 @@ export function LoginButtons({
         setMessage(t("signupSuccess", { email: cleanEmail }));
       } else {
         await signInWithEmail(cleanEmail, password, rememberMe);
-        window.location.replace("/");
+        const target = homeHref === "/ko" ? "/" : homeHref;
+        window.location.replace(target);
       }
     } catch (err) {
       setError(formatAuthError(err));

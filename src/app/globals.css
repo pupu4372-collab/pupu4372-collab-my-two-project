@@ -926,6 +926,561 @@ html.native-app body {
   transform: translate(0, 0);
 }
 
+/* Guest pet fortune — Stitch entry form + insights dashboard */
+.pet-fortune-guest-shell {
+  background: linear-gradient(165deg, #fffef9 0%, #f8f1e4 48%, #fffdf7 100%);
+  border: 2px solid #2a2520;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(201, 168, 108, 0.35) inset;
+  border-radius: 4px;
+  padding: 1.35rem 1.15rem;
+}
+
+@media (min-width: 768px) {
+  .pet-fortune-guest-shell {
+    padding: 1.75rem 1.5rem;
+  }
+}
+
+.pet-fortune-entry-frame {
+  position: relative;
+  padding: 0.35rem 0.15rem 0.15rem;
+}
+
+.pet-fortune-entry-corner {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.pet-fortune-entry-corner--tl {
+  top: -6px;
+  left: -6px;
+  border-top: 14px solid #8b1d1d;
+  border-left: 14px solid #8b1d1d;
+}
+
+.pet-fortune-entry-corner--tr {
+  top: -6px;
+  right: -6px;
+  border-top: 14px solid #8b1d1d;
+  border-right: 14px solid #8b1d1d;
+}
+
+.pet-fortune-entry-corner--bl {
+  bottom: -6px;
+  left: -6px;
+  border-bottom: 14px solid #8b1d1d;
+  border-left: 14px solid #8b1d1d;
+}
+
+.pet-fortune-entry-corner--br {
+  bottom: -6px;
+  right: -6px;
+  border-bottom: 14px solid #8b1d1d;
+  border-right: 14px solid #8b1d1d;
+}
+
+.pet-fortune-entry-ornate {
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(181, 164, 139, 0.55);
+  pointer-events: none;
+}
+
+.pet-fortune-entry-header {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.pet-fortune-entry-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #8b1d1d;
+}
+
+.pet-fortune-entry-title {
+  margin-top: 0.35rem;
+  font-family: var(--font-human-premium-serif, "Noto Serif KR", serif);
+  font-size: clamp(1.85rem, 5.5vw, 2.35rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  color: #1c1917;
+}
+
+.pet-fortune-entry-divider {
+  width: 2.5rem;
+  height: 2px;
+  margin: 0.75rem auto;
+  background: linear-gradient(90deg, transparent, #8b1d1d, transparent);
+}
+
+.pet-fortune-entry-subtitle {
+  max-width: 22rem;
+  margin: 0 auto;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.65;
+  color: #44403c;
+}
+
+.pet-fortune-entry-fields {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.pet-fortune-field {
+  display: block;
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.pet-fortune-field-label,
+.pet-fortune-field legend.pet-fortune-field-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #57534e;
+}
+
+.pet-fortune-date-cell {
+  display: block;
+  min-width: 0;
+}
+
+.pet-fortune-date-hint {
+  display: block;
+  margin-bottom: 0.35rem;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #78716c;
+}
+
+.pet-fortune-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 3.1rem;
+  padding: 0 0.85rem;
+  border: 2px solid #c4b49a;
+  border-radius: 14px;
+  background: #fffdf8;
+  box-shadow: 0 2px 8px rgba(61, 42, 74, 0.06);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pet-fortune-input:focus-within {
+  border-color: #8b1d1d;
+  box-shadow: 0 0 0 3px rgba(139, 29, 29, 0.12);
+}
+
+.pet-fortune-input::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(220, 211, 193, 0.9);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.pet-fortune-input--dark {
+  background: linear-gradient(145deg, #2f2f2f 0%, #1f1f1f 100%);
+  border-color: #c9a86c;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+.pet-fortune-input--dark::after {
+  border-color: rgba(201, 168, 108, 0.35);
+}
+
+.pet-fortune-input--dark:focus-within {
+  border-color: #e8c98a;
+  box-shadow: 0 0 0 3px rgba(201, 168, 108, 0.22);
+}
+
+.pet-fortune-input--saju {
+  background: linear-gradient(145deg, #ddd6fe 0%, #a78bfa 48%, #8b5cf6 100%);
+  border-color: #7c3aed;
+  box-shadow: 0 3px 14px rgba(139, 92, 246, 0.32);
+}
+
+.pet-fortune-input--saju::after {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.pet-fortune-input--saju:focus-within {
+  border-color: #c4b5fd;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.28);
+}
+
+.pet-fortune-input--saju .pet-fortune-input-field {
+  color: #fff;
+  font-weight: 700;
+}
+
+.pet-fortune-input--saju .pet-fortune-select-chevron {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.pet-fortune-input--date {
+  min-height: 2.85rem;
+  padding: 0 0.5rem;
+}
+
+.pet-fortune-input-field {
+  z-index: 5;
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #292524;
+  outline: none;
+}
+
+.pet-fortune-input--dark .pet-fortune-input-field {
+  color: #fafaf9;
+}
+
+.pet-fortune-input-field::placeholder {
+  color: #a8a29e;
+  font-weight: 500;
+}
+
+.pet-fortune-input--dark .pet-fortune-input-field::placeholder {
+  color: #a8a29e;
+}
+
+.pet-fortune-select {
+  cursor: pointer;
+  padding-right: 1.5rem;
+}
+
+.pet-fortune-select option {
+  color: #1c1917;
+  background: #fffdf8;
+}
+
+.pet-fortune-select-chevron {
+  position: absolute;
+  right: 0.85rem;
+  z-index: 6;
+  display: flex;
+  color: #c9a86c;
+  pointer-events: none;
+}
+
+.pet-fortune-entry-error {
+  position: relative;
+  z-index: 2;
+  margin-top: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(185, 28, 28, 0.25);
+  background: rgba(254, 242, 242, 0.95);
+  padding: 0.65rem 0.85rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b91c1c;
+}
+
+.pet-fortune-entry-cta {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  margin-top: 1.35rem;
+  padding: 1rem 1.25rem;
+  border: 2px solid #c9a86c;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #2a2a2a 0%, #141414 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pet-fortune-entry-cta:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+}
+
+.pet-fortune-entry-cta:disabled {
+  opacity: 0.72;
+  cursor: wait;
+}
+
+.pet-fortune-entry-stamp {
+  margin-right: 0.55rem;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #b52a2a 0%, #8b1d1d 100%);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.pet-fortune-insight-card {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(139, 115, 85, 0.2);
+  border-top-width: 4px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.pet-fortune-progress-bg {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #d1d5db;
+}
+
+.pet-fortune-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.7s ease;
+}
+
+.pet-fortune-dashboard-cta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1rem;
+  border: 1px solid rgba(168, 162, 158, 0.5);
+  border-radius: 0.5rem;
+  background: #e8e1d3;
+}
+
+@media (min-width: 640px) {
+  .pet-fortune-dashboard-cta {
+    flex-direction: row;
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+.pet-fortune-dashboard-login-btn {
+  display: inline-flex;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  background: #4a5568;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: background 0.2s ease;
+}
+
+.pet-fortune-dashboard-login-btn:hover {
+  background: #2d3748;
+}
+
+.pet-fortune-sample-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 9999px;
+  border: 2px solid #d97706;
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+  padding: 0.35rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #92400e;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+}
+
+.pet-fortune-care-reminder {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 0.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  background: linear-gradient(145deg, rgba(237, 233, 254, 0.95) 0%, rgba(245, 243, 255, 0.92) 100%);
+  padding: 0.85rem 1rem;
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.12);
+}
+
+.pet-fortune-quick-add {
+  position: relative;
+  z-index: 10;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(214, 211, 209, 0.85);
+  background: rgba(255, 253, 248, 0.92);
+  padding: 1rem 1.1rem;
+  box-shadow: 0 4px 18px rgba(41, 37, 36, 0.08);
+}
+
+.pet-fortune-saju-guide-box {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(167, 139, 250, 0.55);
+  background: linear-gradient(145deg, rgba(237, 233, 254, 0.94) 0%, rgba(221, 214, 254, 0.88) 100%);
+  padding: 0.85rem 1rem;
+  text-align: center;
+  box-shadow: 0 4px 18px rgba(91, 33, 182, 0.18);
+}
+
+.pet-fortune-saju-guide-line {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.55;
+  color: #3d2a4a;
+}
+
+.pet-fortune-saju-guide-line + .pet-fortune-saju-guide-line {
+  margin-top: 0.15rem;
+}
+
+.pet-fortune-saju-guide-link {
+  font-weight: 800;
+  color: #7c3aed;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.pet-fortune-saju-guide-link:hover {
+  color: #5b21b6;
+}
+
+.pet-fortune-quick-add-title {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #292524;
+}
+
+.pet-fortune-quick-add .pet-fortune-select {
+  min-width: 0;
+  padding-right: 2rem;
+  font-size: 0.875rem;
+}
+
+.pet-fortune-quick-add .pet-fortune-input--date .pet-fortune-select {
+  padding-right: 1.5rem;
+  padding-left: 0.15rem;
+  font-size: 0.8125rem;
+}
+
+.pet-fortune-quick-add .pet-fortune-select-chevron {
+  right: 0.55rem;
+}
+
+.pet-fortune-quick-add .pet-fortune-input--date .pet-fortune-select-chevron {
+  right: 0.35rem;
+}
+
+.pet-fortune-input--compact {
+  min-height: 2.45rem;
+}
+
+.pet-fortune-input--compact.pet-fortune-input--date {
+  min-height: 2.35rem;
+  padding: 0 0.35rem;
+}
+
+.pet-fortune-quick-add-btn {
+  width: 100%;
+  border-radius: 9999px;
+  border: none;
+  background: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 48%, #7c3aed 100%);
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.38);
+  transition: filter 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pet-fortune-quick-add-btn:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45);
+}
+
+.pet-fortune-quick-add-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pet-fortune-pet-chip {
+  display: flex;
+  min-width: 4.5rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 1.25rem;
+  border: 2px solid transparent;
+  padding: 0.55rem 0.65rem;
+  font-weight: 700;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.pet-fortune-pet-chip:hover {
+  transform: translateY(-2px);
+}
+
+.pet-fortune-pet-chip-label {
+  max-width: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+.pet-fortune-pet-chip--active {
+  border-color: #a78bfa;
+  background: linear-gradient(145deg, #c4b5fd 0%, #8b5cf6 52%, #7c3aed 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.42);
+}
+
+.pet-fortune-pet-chip--active .pet-fortune-pet-chip-label {
+  color: #fff;
+}
+
+.pet-fortune-pet-chip--idle {
+  border-color: #a78bfa;
+  background: linear-gradient(145deg, #ede9fe 0%, #ddd6fe 55%, #c4b5fd 100%);
+  color: #5b21b6;
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.22);
+}
+
+.pet-fortune-pet-chip--idle .pet-fortune-pet-chip-label {
+  color: #5b21b6;
+}
+
 @media print {
   body {
     background: #ffffff !important;

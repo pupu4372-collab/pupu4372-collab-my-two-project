@@ -20,11 +20,13 @@ export default async function SajuHubPage() {
                 {t("premiumSubtitle")}
               </p>
             </div>
-            <div className="flex shrink-0 flex-col items-start gap-2 self-start md:items-end md:self-center">
-              <p className="text-sm font-semibold text-cream/90">{t("premiumDailyFree")}</p>
+            <div className="flex w-full shrink-0 flex-col items-center justify-center gap-2.5 md:w-auto md:min-w-[11.5rem]">
+              <p className="w-full text-center text-sm font-semibold leading-tight text-cream/90">
+                {t("premiumDailyFree")}
+              </p>
               <Link
                 href="/premium/human"
-                className="inline-flex w-fit items-center justify-center rounded-full bg-cream px-6 py-3 text-sm font-bold text-primary transition hover:bg-white"
+                className="inline-flex w-full items-center justify-center rounded-full bg-cream px-6 py-3 text-sm font-bold leading-none text-primary transition hover:bg-white md:w-fit"
               >
                 {t("premium")}
               </Link>

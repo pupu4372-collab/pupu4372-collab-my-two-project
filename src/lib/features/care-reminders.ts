@@ -1,9 +1,9 @@
-/** Care calendar reminders on home fortune — enable via NEXT_PUBLIC_CARE_REMINDERS=true */
+/** Care calendar reminders on home fortune — opt out with NEXT_PUBLIC_CARE_REMINDERS=false */
 
 export type CareSubscriptionTier = "free" | "premium";
 
 export function isCareRemindersFeatureEnabled() {
-  return process.env.NEXT_PUBLIC_CARE_REMINDERS === "true";
+  return process.env.NEXT_PUBLIC_CARE_REMINDERS !== "false";
 }
 
 /** Max items shown in fortune banner (expand when subscription ships). */

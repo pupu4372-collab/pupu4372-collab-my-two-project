@@ -44,6 +44,12 @@ function todayKstISO() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: KST_TIMEZONE }).format(new Date());
 }
 
+function addDaysKstISO(fromISO: string, days: number) {
+  const [y, m, d] = fromISO.split("-").map(Number);
+  const shifted = new Date(Date.UTC(y, m - 1, d + days));
+  return new Intl.DateTimeFormat("en-CA", { timeZone: KST_TIMEZONE }).format(shifted);
+}
+
 function parseDateISO(value: string) {
   const [y, m, d] = value.split("-").map(Number);
   return Date.UTC(y, m - 1, d);
@@ -88,20 +94,15 @@ export async function fetchPetCareReminders(
   }
 
   const today = todayKstISO();
-  const overdueFrom = new Intl.DateTimeFormat("en-CA", { timeZone: KST_TIMEZONE }).format(
-    new Date(Date.now() - 14 * 86_400_000)
-  );
-  const upcomingTo = new Intl.DateTimeFormat("en-CA", { timeZone: KST_TIMEZONE }).format(
-    new Date(Date.now() + 7 * 86_400_000)
-  );
+  const windowTo = addDaysKstISO(today, 7);
 
   const { data, error } = await supabase
     .from("pet_care_events")
     .select("id, pet_id, event_date, category, title")
     .eq("user_id", ownerId)
     .eq("pet_id", petId)
-    .gte("event_date", overdueFrom)
-    .lte("event_date", upcomingTo)
+    .gte("event_date", today)
+    .lte("event_date", windowTo)
     .order("event_date", { ascending: true })
     .limit(20);
 
@@ -123,7 +124,9 @@ export async function fetchPetCareReminders(
 
   for (const row of rows) {
     const daysUntil = daysBetween(today, row.event_date);
-    const isOverdue = daysUntil < 0;
+    if (daysUntil < 0) continue;
+
+    const isOverdue = false;
     const core = {
       id: row.id,
       petId: row.pet_id,
@@ -138,7 +141,7 @@ export async function fetchPetCareReminders(
       ...core,
       label: reminderLabel(core, isKo),
     };
-    if (daysUntil === 0 || isOverdue) {
+    if (daysUntil === 0) {
       todayItems.push(item);
     } else {
       upcomingItems.push(item);
@@ -152,8 +155,8 @@ export async function fetchPetCareReminders(
   return {
     enabled: true,
     subscriptionTier: tier,
-    today: visible.filter((item) => item.isOverdue || item.daysUntil === 0),
-    upcoming: visible.filter((item) => !item.isOverdue && item.daysUntil > 0),
+    today: visible.filter((item) => item.daysUntil === 0),
+    upcoming: visible.filter((item) => item.daysUntil > 0),
     totalPending: merged.length,
   };
 }

@@ -32,20 +32,24 @@ function isValidTime(s: string | null): boolean {
 
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
-  const { success, limit, reset, remaining } = await ratelimit.limit(ip);
 
-  if (!success) {
-    return NextResponse.json(
-      { error: "요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요." },
-      {
-        status: 429,
-        headers: {
-          "X-RateLimit-Limit": limit.toString(),
-          "X-RateLimit-Remaining": remaining.toString(),
-          "X-RateLimit-Reset": reset.toString(),
-        },
-      }
-    );
+  try {
+    const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+    if (!success) {
+      return NextResponse.json(
+        { error: "요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요." },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          },
+        }
+      );
+    }
+  } catch {
+    // Upstash misconfigured — do not block saju in local/dev.
   }
 
   let body: Partial<SajuBasicRequest>;

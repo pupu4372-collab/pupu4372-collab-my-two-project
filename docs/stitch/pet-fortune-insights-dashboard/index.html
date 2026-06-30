@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>반려동물 운세 인사이트 대시보드</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts for a more traditional/premium feel -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&amp;family=Song+Myung&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="custom-fonts">
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .traditional-font {
+      font-family: 'Song Myung', serif;
+    }
+  </style>
+<style data-purpose="background-styles">
+    .parchment-bg {
+      background-color: #f8f4e9;
+      background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
+    }
+    .card-bg {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(139, 115, 85, 0.2);
+    }
+    .traditional-pattern {
+      opacity: 0.1;
+      pointer-events: none;
+    }
+  </style>
+<style data-purpose="decorations">
+    /* Decorative circular frame for the central score */
+    .score-circle {
+      border: 8px double #4a5568;
+      box-shadow: 0 0 0 4px #e2e8f0;
+    }
+    /* Progress bar styles */
+    .progress-bar-bg {
+      background: #d1d5db;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: #4b5563;
+    }
+  </style>
+</head>
+<body class="parchment-bg text-slate-800 min-h-screen flex flex-col relative">
+<!-- BEGIN: Navigation Bar -->
+<nav class="w-full px-8 py-4 flex justify-between items-center bg-white/50 backdrop-blur-md sticky top-0 z-50 border-b border-stone-200" data-purpose="main-navigation">
+<div class="flex items-center gap-3">
+<img alt="Logo" class="w-10 h-10 rounded-full object-cover border border-stone-300" src="/stitch/pet-fortune/dashboard-logo.jpg"/>
+<h1 class="text-xl font-bold traditional-font tracking-tight">반려동물 운세 인사이트 대시보드</h1>
+</div>
+<ul class="flex gap-10 font-medium text-stone-600">
+<li><a class="hover:text-stone-900 transition-colors" href="#">홈</a></li>
+<li><a class="hover:text-stone-900 transition-colors" href="#">내 아이</a></li>
+<li><a class="hover:text-stone-900 transition-colors" href="#">운세</a></li>
+<li><a class="hover:text-stone-900 transition-colors" href="#">프로필</a></li>
+</ul>
+</nav>
+<!-- END: Navigation Bar -->
+<!-- Main Content Area -->
+<main class="flex-grow flex flex-col items-center justify-center p-8 relative overflow-hidden">
+<!-- Decorative Background Icons (Clouds/Traditional Patterns) -->
+<div class="absolute top-10 left-10 opacity-20 w-32 h-32" data-purpose="decoration">
+<svg fill="currentColor" viewbox="0 0 100 100"><path d="M20 50 Q30 30 50 40 Q70 20 85 45 Q95 60 75 75 Q60 85 40 75 Q15 80 10 60 Q5 45 20 50"></path></svg>
+</div>
+<div class="absolute top-20 right-20 opacity-20 w-24 h-24 rotate-180" data-purpose="decoration">
+<svg fill="currentColor" viewbox="0 0 100 100"><path d="M20 50 Q30 30 50 40 Q70 20 85 45 Q95 60 75 75 Q60 85 40 75 Q15 80 10 60 Q5 45 20 50"></path></svg>
+</div>
+<div class="absolute left-0 top-1/2 -translate-y-1/2 opacity-10 w-48" data-purpose="decoration">
+<svg class="text-stone-800" viewbox="0 0 200 200"><circle cx="100" cy="100" fill="none" r="80" stroke="currentColor" stroke-width="2"></circle><path d="M100 20 V180 M20 100 H180" stroke="currentColor" stroke-width="1"></path></svg>
+</div>
+<!-- BEGIN: Central Harmony Dashboard -->
+<section class="relative w-full max-w-4xl flex flex-col items-center mb-12" data-purpose="central-score-section">
+<div class="relative w-[500px] h-[500px] flex items-center justify-center">
+<!-- Outer Decorative Ring -->
+<div class="absolute inset-0 border-[16px] border-double border-stone-400/30 rounded-full"></div>
+<!-- Score Circle Content -->
+<div class="relative z-10 w-80 h-80 bg-stone-700 rounded-full flex flex-col items-center justify-center text-white border-8 border-stone-200 shadow-2xl overflow-hidden">
+<div class="absolute inset-0 opacity-10 flex items-center justify-center">
+<svg class="w-full h-full" viewbox="0 0 100 100"><circle cx="50" cy="50" fill="none" r="45" stroke="white" stroke-dasharray="2 2" stroke-width="0.5"></circle></svg>
+</div>
+<span class="text-lg font-medium opacity-90 mb-1">운세 조화도</span>
+<!-- Pets Illustration Placeholder -->
+<div class="flex gap-4 items-center justify-center mb-2">
+<div class="w-20 h-20 bg-stone-100/20 rounded-full flex items-center justify-center">🐶</div>
+<div class="w-12 h-12 flex items-center justify-center text-yellow-400 text-3xl">☀️</div>
+<div class="w-20 h-20 bg-stone-100/20 rounded-full flex items-center justify-center">🐱</div>
+</div>
+<div class="text-7xl font-bold traditional-font">88</div>
+<div class="text-sm font-light mt-2 bg-stone-800/50 px-3 py-1 rounded-full border border-stone-500/50">
+            조화 점수 : 탁월한 균형
+          </div>
+<button class="mt-4 text-xs bg-white/10 hover:bg-white/20 px-4 py-1.5 rounded-full border border-white/20 transition-all">운세 공유하기</button>
+</div>
+<!-- Peripheral Stats -->
+<!-- Top Left: Health -->
+<div class="absolute top-10 left-0 w-40 text-right" data-purpose="stat-health">
+<div class="flex items-center justify-end gap-2 mb-1">
+<span class="font-bold">건강운</span>
+<span class="bg-stone-500 text-[10px] text-white px-1.5 rounded">건강</span>
+</div>
+<div class="progress-bar-bg w-full"><div class="progress-bar-fill w-[90%] bg-rose-400"></div></div>
+<span class="text-xs text-stone-500 mt-1 block">최고 활력</span>
+</div>
+<!-- Bottom Left: Energy -->
+<div class="absolute bottom-20 left-0 w-40 text-right" data-purpose="stat-energy">
+<div class="flex items-center justify-end gap-2 mb-1">
+<span class="font-bold">활력</span>
+<span class="bg-stone-500 text-[10px] text-white px-1.5 rounded">활력</span>
+</div>
+<div class="progress-bar-bg w-full"><div class="progress-bar-fill w-[85%] bg-blue-400"></div></div>
+<span class="text-xs text-stone-500 mt-1 block">넘치는 활기</span>
+</div>
+<!-- Top Right: Joy -->
+<div class="absolute top-10 right-0 w-40 text-left" data-purpose="stat-joy">
+<div class="flex items-center justify-start gap-2 mb-1">
+<span class="bg-stone-500 text-[10px] text-white px-1.5 rounded">기쁨</span>
+<span class="font-bold">기쁨</span>
+</div>
+<div class="progress-bar-bg w-full"><div class="progress-bar-fill w-[80%] bg-yellow-400"></div></div>
+<span class="text-xs text-stone-500 mt-1 block">넘치는 행복</span>
+</div>
+<!-- Bottom Right: Luck -->
+<div class="absolute bottom-20 right-0 w-40 text-left" data-purpose="stat-luck">
+<div class="flex items-center justify-start gap-2 mb-1">
+<span class="bg-stone-500 text-[10px] text-white px-1.5 rounded">행운</span>
+<span class="font-bold">행운</span>
+</div>
+<div class="progress-bar-bg w-full"><div class="progress-bar-fill w-[75%] bg-emerald-400"></div></div>
+<span class="text-xs text-stone-500 mt-1 block">균형 잡힌 행운</span>
+</div>
+</div>
+</section>
+<!-- END: Central Harmony Dashboard -->
+<!-- BEGIN: Information Cards Row -->
+<section class="grid grid-cols-3 gap-6 w-full max-w-6xl" data-purpose="info-cards">
+<!-- Card 1: Today's Status -->
+<article class="card-bg rounded-xl p-6 shadow-sm border-t-4 border-t-amber-200">
+<h3 class="text-center text-lg font-bold mb-4 traditional-font">오늘의 아이 상태</h3>
+<div class="flex items-start gap-4">
+<div class="w-16 h-16 bg-white rounded-lg shadow-inner flex items-center justify-center shrink-0 border border-stone-100">
+<span class="text-3xl">🐕</span>
+</div>
+<div class="text-sm leading-relaxed">
+<p class="mb-2"><strong>Mood:</strong> 장난기 넘치고 활기참.</p>
+<p><strong>Daily Luck:</strong> 야외 활동과 새로운 간식에 좋습니다! 과도한 흥분은 조심하세요.</p>
+</div>
+</div>
+</article>
+<!-- Card 2: Innate Personality -->
+<article class="card-bg rounded-xl p-6 shadow-sm border-t-4 border-t-stone-400">
+<h3 class="text-center text-lg font-bold mb-4 traditional-font">아이의 본성</h3>
+<div class="flex items-start gap-4">
+<div class="w-16 h-16 rounded-full flex items-center justify-center shrink-0 border-2 border-stone-300 bg-gradient-to-br from-stone-100 to-stone-400 overflow-hidden">
+<!-- Simulating Yin-Yang Pet Icon -->
+<svg class="w-full h-full" viewbox="0 0 100 100">
+<circle cx="50" cy="50" fill="#333" r="50"></circle>
+<path d="M 50 0 A 25 25 0 0 0 50 50 A 25 25 0 0 1 50 100 A 50 50 0 0 0 50 0" fill="#fff"></path>
+<circle cx="50" cy="25" fill="#333" r="8"></circle>
+<circle cx="50" cy="75" fill="#fff" r="8"></circle>
+</svg>
+</div>
+<div class="text-sm leading-relaxed">
+<p><strong>Innate Personality:</strong></p>
+<p>충성스럽고 직관적이며 애정이 넘칩니다. 일과를 잘 따르며 가까운 유대감을 중요시합니다. 강한 보호 본능이 있습니다.</p>
+</div>
+</div>
+</article>
+<!-- Card 3: Owner Advice -->
+<article class="card-bg rounded-xl p-6 shadow-sm border-t-4 border-t-stone-200">
+<h3 class="text-center text-lg font-bold mb-4 traditional-font">집사를 위한 팁</h3>
+<div class="flex items-start gap-4">
+<div class="w-16 h-16 bg-white rounded-lg shadow-inner flex items-center justify-center shrink-0 border border-stone-100">
+<span class="text-3xl">📜</span>
+</div>
+<div class="text-sm leading-relaxed">
+<p><strong>Owner Advice:</strong></p>
+<p>오늘은 평온한 환경을 만들어 주세요. 유대감을 강화하기 위해 털을 빗겨주거나 안아주는 시간을 보내세요. 급격한 일과 변화는 피하세요.</p>
+</div>
+</div>
+</article>
+</section>
+<!-- END: Information Cards Row -->
+</main>
+<!-- BEGIN: Bottom CTA Banner -->
+<footer class="w-full bg-[#e8e1d3] border-t border-stone-300/50 py-8 px-12 flex justify-between items-center relative" data-purpose="login-cta-banner">
+<!-- Traditional Decorative Corners -->
+<div class="absolute left-4 top-4 w-8 h-8 border-t-2 border-l-2 border-stone-400/50"></div>
+<div class="absolute right-4 top-4 w-8 h-8 border-t-2 border-r-2 border-stone-400/50"></div>
+<div class="absolute left-4 bottom-4 w-8 h-8 border-b-2 border-l-2 border-stone-400/50"></div>
+<div class="absolute right-4 bottom-4 w-8 h-8 border-b-2 border-r-2 border-stone-400/50"></div>
+<div class="flex-1 text-center">
+<p class="text-3xl font-bold traditional-font text-stone-800 tracking-wide">
+        로그인해서 내 아이를 등록하고 맞춤 케어를 해보세요
+      </p>
+</div>
+<div class="ml-8 shrink-0">
+<button class="bg-[#4a5568] hover:bg-[#2d3748] text-white px-8 py-3 rounded-lg font-bold text-lg shadow-lg transition-all border border-white/20">
+        로그인 / 회원가입
+      </button>
+</div>
+</footer>
+<!-- END: Bottom CTA Banner -->
+</body></html>

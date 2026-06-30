@@ -38,10 +38,18 @@ async function persistSession(session: { access_token: string; refresh_token: st
   const browserClient = getSupabaseBrowserClient();
   if (!browserClient || !session) return;
 
-  await browserClient.auth.setSession({
+  const { error } = await browserClient.auth.setSession({
     access_token: session.access_token,
     refresh_token: session.refresh_token,
   });
+  if (error) throw error;
+
+  const {
+    data: { session: verified },
+  } = await browserClient.auth.getSession();
+  if (!verified?.access_token) {
+    throw new Error("Session could not be saved.");
+  }
 }
 
 export async function signUpWithEmail(params: {
@@ -50,7 +58,7 @@ export async function signUpWithEmail(params: {
   displayName: string;
   locale: string;
 }) {
-  clearSupabaseBrowserSession();
+  await clearSupabaseBrowserSession();
 
   const client = getSupabaseAuthActionClient();
   if (!client) {
@@ -86,7 +94,7 @@ export async function signInWithEmail(
   password: string,
   rememberMe = false
 ) {
-  clearSupabaseBrowserSession();
+  await clearSupabaseBrowserSession();
 
   const client = getSupabaseAuthActionClient();
   if (!client) {

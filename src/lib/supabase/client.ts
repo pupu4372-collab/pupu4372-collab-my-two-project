@@ -40,12 +40,29 @@ function collectSupabaseStorageKeys() {
   return [...storageKeys];
 }
 
-export function clearSupabaseBrowserSession() {
+/** Cookie-backed browser client (PKCE + session). Use for OAuth and session reads. */
+let browserClient: SupabaseClient<Database> | null | undefined;
+
+export function getSupabaseBrowserClient(): SupabaseClient<Database> | null {
+  const { url, key } = readSupabaseEnv();
+  if (!isValidSupabaseEnv(url, key)) return null;
+
+  if (!browserClient) {
+    browserClient = createBrowserClient(url, key) as SupabaseClient<Database>;
+  }
+  return browserClient;
+}
+
+export async function clearSupabaseBrowserSession() {
   if (typeof window === "undefined") return;
 
   const client = getSupabaseBrowserClient();
   if (client) {
-    void client.auth.signOut();
+    try {
+      await client.auth.signOut({ scope: "local" });
+    } catch {
+      // Storage wipe below still runs if signOut fails.
+    }
   }
 
   for (const key of collectSupabaseStorageKeys()) {
@@ -76,14 +93,6 @@ export function getSupabaseAuthActionClient(): SupabaseClient<Database> | null {
       detectSessionInUrl: false,
     },
   });
-}
-
-/** Cookie-backed browser client (PKCE + session). Use for OAuth and session reads. */
-export function getSupabaseBrowserClient(): SupabaseClient<Database> | null {
-  const { url, key } = readSupabaseEnv();
-  if (!isValidSupabaseEnv(url, key)) return null;
-
-  return createBrowserClient(url, key) as SupabaseClient<Database>;
 }
 
 export function isSupabaseConfigured(): boolean {

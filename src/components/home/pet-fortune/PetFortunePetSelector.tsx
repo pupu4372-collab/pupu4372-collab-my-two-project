@@ -1,0 +1,46 @@
+"use client";
+
+import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
+import type { PetFortunePetMeta } from "@/lib/saju/pet-daily-fortune";
+
+type Props = {
+  pets: PetFortunePetMeta[];
+  selectedPetId: string;
+  onSelectPet: (petId: string) => void;
+};
+
+function chipClass(active: boolean) {
+  return active
+    ? "pet-fortune-pet-chip pet-fortune-pet-chip--active"
+    : "pet-fortune-pet-chip pet-fortune-pet-chip--idle";
+}
+
+export function PetFortunePetSelector({ pets, selectedPetId, onSelectPet }: Props) {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2.5">
+      {pets.map((pet) => {
+        const active = pet.id === selectedPetId;
+        return (
+          <button
+            key={pet.id}
+            type="button"
+            onClick={() => onSelectPet(pet.id)}
+            className={chipClass(active)}
+          >
+            {pet.profileImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={supabaseImageTransformUrl(pet.profileImageUrl, { width: 56, height: 56 })}
+                alt=""
+                className="h-9 w-9 rounded-full object-cover ring-2 ring-white/40"
+              />
+            ) : (
+              <span className="text-xl leading-none">{pet.icon}</span>
+            )}
+            <span className="pet-fortune-pet-chip-label">{pet.name}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}

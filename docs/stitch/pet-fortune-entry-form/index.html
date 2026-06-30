@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>반려동물 사주 - 오늘의 운세</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts for Korean Typography -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="typography">
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .korean-title {
+      font-weight: 700;
+      letter-spacing: -0.05em;
+    }
+  </style>
+<style data-purpose="background-and-frame">
+    /* Main background texture mimicking Hanji (Korean traditional paper) */
+    .bg-parchment {
+      background-color: #f7f3e9;
+      background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
+    }
+
+    /* Traditional Frame Styling */
+    .traditional-frame {
+      position: relative;
+      background-color: #fffdf7;
+      border: 2px solid #333;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      padding: 60px 40px;
+      max-width: 900px;
+      width: 90%;
+      margin: auto;
+    }
+
+    /* Decorative corners */
+    .frame-corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      z-index: 10;
+    }
+    .corner-tl { top: -5px; left: -5px; border-top: 15px solid #8b1d1d; border-left: 15px solid #8b1d1d; }
+    .corner-tr { top: -5px; right: -5px; border-top: 15px solid #8b1d1d; border-right: 15px solid #8b1d1d; }
+    .corner-bl { bottom: -5px; left: -5px; border-bottom: 15px solid #8b1d1d; border-left: 15px solid #8b1d1d; }
+    .corner-br { bottom: -5px; right: -5px; border-bottom: 15px solid #8b1d1d; border-right: 15px solid #8b1d1d; }
+
+    /* Ornate border accents (the swirly patterns in image corners) */
+    .ornate-border {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      border: 1px solid #d1c7b7;
+      margin: 10px;
+      width: calc(100% - 20px);
+      height: calc(100% - 20px);
+    }
+  </style>
+<style data-purpose="form-elements">
+    /* Custom Input Style: Decorative border with parchment feel */
+    .custom-input-container {
+      background: #fdfaf0;
+      border: 2px solid #b5a48b;
+      border-radius: 12px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      height: 60px;
+      transition: all 0.3s ease;
+    }
+    
+    /* The specific double-line border effect from the reference */
+    .custom-input-container::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      border: 1px solid #dcd3c1;
+      border-radius: 8px;
+      pointer-events: none;
+    }
+
+    /* Darker input container for pet type */
+    .custom-input-container.dark {
+      background: #2d2d2d;
+      border-color: #444;
+      color: #fff;
+    }
+    .custom-input-container.dark::after {
+      border-color: #555;
+    }
+
+    .input-field {
+      background: transparent;
+      border: none;
+      width: 100%;
+      font-size: 1.1rem;
+      color: #555;
+      outline: none;
+      z-index: 5;
+    }
+    .custom-input-container.dark .input-field {
+      color: #eee;
+    }
+
+    .input-field::placeholder {
+      color: #a59681;
+    }
+
+    /* CTA Button */
+    .cta-button {
+      background-color: #1a1a1a;
+      color: white;
+      padding: 18px 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      width: fit-content;
+      margin: 30px auto 0;
+      border: 2px solid #333;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .cta-button:hover {
+      transform: translateY(-2px);
+    }
+    .saju-stamp {
+      background-color: #a12323;
+      color: white;
+      font-size: 0.9rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 12px;
+      display: inline-block;
+      line-height: 1.2;
+    }
+  </style>
+</head>
+<body class="bg-parchment min-h-screen flex items-center justify-center p-4">
+<!-- BEGIN: MainContentContainer -->
+<main class="w-full max-w-4xl">
+<!-- BEGIN: TraditionalFormFrame -->
+<div class="traditional-frame rounded-sm" data-purpose="main-application-card">
+<!-- Decorative Corners -->
+<div class="frame-corner corner-tl"></div>
+<div class="frame-corner corner-tr"></div>
+<div class="frame-corner corner-bl"></div>
+<div class="frame-corner corner-br"></div>
+<div class="ornate-border"></div>
+<!-- Header Section -->
+<div class="text-center mb-10 relative z-10">
+<h1 class="text-6xl text-zinc-900 korean-title mb-6">오늘의 운세</h1>
+<p class="text-xl text-zinc-700">반려동물의 생년월일을 넣으면 운세와 성향을 알려드립니다.</p>
+</div>
+<!-- Form Inputs Section -->
+<div class="space-y-4 relative z-10">
+<!-- Row 1: Pet Type and Pet Name -->
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+<!-- Pet Type (Dark Styled) -->
+<div class="md:col-span-3">
+<div class="custom-input-container dark" data-purpose="pet-type-selector">
+<select class="input-field appearance-none cursor-pointer">
+<option disabled="" selected="" value="">반려동물 종류 (강아지, 고양이, 렙타일(기타))</option>
+<option value="dog">강아지</option>
+<option value="cat">고양이</option>
+<option value="reptile">렙타일(기타)</option>
+</select>
+<div class="ml-auto text-zinc-400">▼</div>
+</div>
+</div>
+<!-- Pet Name -->
+<div class="md:col-span-2">
+<div class="custom-input-container" data-purpose="pet-name-input">
+<input class="input-field" placeholder="반려동물 이름" type="text"/>
+</div>
+</div>
+</div>
+<!-- Row 2: Birthdate (Year, Month, Day) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Year -->
+<div class="custom-input-container" data-purpose="birth-year-input">
+<input class="input-field" placeholder="년 (YYYY)" type="number"/>
+<svg class="w-6 h-6 text-zinc-400 ml-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<!-- Month -->
+<div class="custom-input-container" data-purpose="birth-month-input">
+<input class="input-field" placeholder="월 (MM)" type="number"/>
+<svg class="w-6 h-6 text-zinc-400 ml-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<!-- Day -->
+<div class="custom-input-container" data-purpose="birth-day-input">
+<input class="input-field" placeholder="일 (DD)" type="number"/>
+<svg class="w-6 h-6 text-zinc-400 ml-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+</div>
+</div>
+<!-- Action Button -->
+<div class="relative z-10 flex justify-center">
+<button class="cta-button" data-purpose="submit-button">
+<span class="saju-stamp">사주</span>
+          사주 보고 내 아이 등록하기
+        </button>
+</div>
+</div>
+<!-- END: TraditionalFormFrame -->
+</main>
+<!-- END: MainContentContainer -->
+</body></html>

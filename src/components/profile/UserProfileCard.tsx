@@ -91,12 +91,14 @@ interface UserProfileCardProps {
   showEditor?: boolean;
   presentation?: "default" | "hero" | "settings";
   onEdit?: () => void;
+  hideDeleteAccount?: boolean;
 }
 
 export function UserProfileCard({
   showEditor = false,
   presentation = "default",
   onEdit,
+  hideDeleteAccount = false,
 }: UserProfileCardProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -221,7 +223,7 @@ export function UserProfileCard({
         throw new Error(data.error ?? (isKo ? "탈퇴 처리에 실패했어요." : "Could not delete account."));
       }
 
-      clearSupabaseBrowserSession();
+      await clearSupabaseBrowserSession();
       window.location.replace("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : isKo ? "탈퇴 처리에 실패했어요." : "Could not delete account.");
@@ -434,7 +436,7 @@ export function UserProfileCard({
   ) : null;
 
   const deleteAccountBlock =
-    showEditor && profile?.role !== "admin" ? (
+    showEditor && profile?.role !== "admin" && !hideDeleteAccount ? (
       <div className="rounded-[2rem] border border-red-200/80 bg-red-50/70 p-5">
         <div className="flex items-start gap-3">
           <span className="mt-0.5" aria-hidden>
