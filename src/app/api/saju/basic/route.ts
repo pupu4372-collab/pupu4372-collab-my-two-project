@@ -15,11 +15,24 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
 
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(5, "1 h"),
-  analytics: true,
-});
+let ratelimit: Ratelimit | null = null;
+
+function getRatelimit(): Ratelimit | null {
+  if (ratelimit) return ratelimit;
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return null;
+  }
+  try {
+    ratelimit = new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(5, "1 h"),
+      analytics: true,
+    });
+    return ratelimit;
+  } catch {
+    return null;
+  }
+}
 
 function isValidDate(s: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s));
@@ -33,9 +46,11 @@ function isValidTime(s: string | null): boolean {
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
 
-  try {
-    const { success, limit, reset, remaining } = await ratelimit.limit(ip);
-    if (!success) {
+  const limiter = getRatelimit();
+  if (limiter) {
+    try {
+      const { success, limit, reset, remaining } = await limiter.limit(ip);
+      if (!success) {
       return NextResponse.json(
         { error: "요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요." },
         {
@@ -47,9 +62,10 @@ export async function POST(request: Request) {
           },
         }
       );
+      }
+    } catch {
+      // Upstash misconfigured — do not block saju in local/dev.
     }
-  } catch {
-    // Upstash misconfigured — do not block saju in local/dev.
   }
 
   let body: Partial<SajuBasicRequest>;

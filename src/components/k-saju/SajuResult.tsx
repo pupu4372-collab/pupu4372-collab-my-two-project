@@ -2,6 +2,7 @@
 
 import { AdSlot } from "@/components/ads/AdSlot";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
+import { SajuPremiumPackagePanel } from "@/components/k-saju/SajuPremiumPackagePanel";
 import { SajuResultShareRow } from "@/components/k-saju/SajuResultShareRow";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
@@ -171,11 +172,15 @@ export function SajuResult({ result }: SajuResultProps) {
   const continuationQuery = new URLSearchParams({
     petName: result.petName,
     species: result.species,
+    petGender: result.petGender ?? "female",
     birthDate: result.birthUtc.slice(0, 10),
+    birthTime: "unknown",
+    timezone: result.timezone,
     locale: result.locale,
     ...(result.petId ? { petId: result.petId } : {}),
   }).toString();
   const premiumPaymentHref = `/payment?product=pet_premium_v1&${continuationQuery}`;
+  const premiumHubHref = `/saju/premium?${continuationQuery}`;
 
   const detailTraits = traitCards(result.traits, result.locale);
 
@@ -408,40 +413,8 @@ export function SajuResult({ result }: SajuResultProps) {
               {t.stored}: {formatUtcForDisplay(result.birthUtc, result.timezone)} ({result.timezone})
             </p>
           </GlassCard>
-        </div>
 
-        <aside className="space-y-5 pb-6 max-lg:pb-28 lg:col-span-4">
-          <GlassCard className="relative overflow-hidden border-2 border-channel-saju/45 !bg-gradient-to-br !from-lavender !via-white !to-mint/60 p-6 text-center shadow-lg shadow-channel-saju/15">
-            <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-channel-saju/25 blur-3xl" />
-            <span className="relative mb-2 inline-block rounded-full bg-channel-saju px-2.5 py-1 text-[10px] font-bold text-white">
-              {t.zodiacCtaBadge}
-            </span>
-            <h3 className="relative text-base font-bold text-channel-saju">{t.zodiacCta}</h3>
-            <p className="relative mt-3 text-sm leading-relaxed text-plum/85">{t.zodiacBody}</p>
-            <Link
-              href={premiumPaymentHref}
-              className="relative mt-5 inline-flex w-full justify-center rounded-full bg-channel-saju px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-channel-saju/35 transition hover:brightness-110"
-            >
-              {t.zodiacCta} →
-            </Link>
-          </GlassCard>
-
-          <GlassCard className="relative overflow-hidden border-2 border-hwa-red/40 !bg-gradient-to-br !from-petal !via-white !to-element-fire p-6 text-center shadow-lg shadow-hwa-red/10">
-            <div className="pointer-events-none absolute -bottom-10 -left-10 h-36 w-36 rounded-full bg-hwa-red/20 blur-3xl" />
-            <span className="relative mb-2 inline-block rounded-full bg-hwa-red px-2.5 py-1 text-[10px] font-bold text-white">
-              {t.bondCtaBadge}
-            </span>
-            <h3 className="relative text-base font-bold text-[#8b3a3a]">{t.bondCta}</h3>
-            <p className="relative mt-3 text-sm leading-relaxed text-plum/85">{t.bondBody}</p>
-            <Link
-              href={premiumPaymentHref}
-              className="relative mt-5 inline-flex w-full justify-center rounded-full bg-[#6f4b8b] px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#6f4b8b]/35 transition hover:bg-[#5f3f78]"
-            >
-              {t.bondCta} →
-            </Link>
-          </GlassCard>
-
-          <GlassCard className="border-2 border-mok-green/35 !bg-gradient-to-br !from-white !to-element-wood p-5">
+          <GlassCard className="border-2 border-mok-green/35 !bg-gradient-to-br !from-white !to-element-wood p-5 md:p-6">
             <div className="flex items-start gap-4">
               <div className="rounded-2xl bg-mok-green/15 p-3 text-xl" aria-hidden>
                 💡
@@ -454,8 +427,18 @@ export function SajuResult({ result }: SajuResultProps) {
               </div>
             </div>
           </GlassCard>
+        </div>
+
+        <aside className="pb-6 max-lg:pb-28 lg:col-span-4">
+          <SajuPremiumPackagePanel
+            locale={result.locale}
+            paymentHref={premiumPaymentHref}
+            premiumHubHref={premiumHubHref}
+          />
         </aside>
       </div>
+
+      <SajuResultShareRow kind="basic" result={result} />
 
       <div className="flex flex-col justify-center gap-3 sm:flex-row">
         <Link
@@ -473,8 +456,6 @@ export function SajuResult({ result }: SajuResultProps) {
           {t.another}
         </Link>
       </div>
-
-      <SajuResultShareRow kind="basic" result={result} />
 
       <AdSlot />
     </div>

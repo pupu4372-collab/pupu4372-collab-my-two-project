@@ -62,7 +62,7 @@ function RankingPreviewList({
           <div className="-mx-1 mt-1 max-w-full touch-pan-x overflow-x-auto overscroll-x-contain px-1 pb-2 pr-8 [scrollbar-width:thin]">
             <ol className="flex w-max min-w-full snap-x snap-mandatory gap-2">
               {rows.slice(0, 5).map((row, index) => (
-                <li key={row.id} className="w-[34vw] max-w-28 shrink-0 snap-start sm:w-28 md:w-24 lg:w-28">
+                <li key={row.id} className="w-[38vw] max-w-32 shrink-0 snap-start sm:w-32 md:w-28 lg:w-32">
                   <AuthRequiredLink
                     href={
                       row.id.startsWith("mock-")
@@ -223,8 +223,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             <div className="hidden min-w-0 md:block" aria-hidden />
           </div>
 
-          <div className="mt-8 grid gap-8 md:mt-8 md:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] md:items-start md:gap-x-14 lg:gap-x-20">
-            <div className="order-3 min-w-0 space-y-6 md:col-start-1 md:row-start-2 md:max-w-xl md:pr-2 lg:max-w-[34rem] lg:pr-4">
+          <div className="mt-8 grid gap-8 md:mt-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] md:items-start md:gap-x-10 lg:gap-x-14">
+            <div className="order-3 min-w-0 space-y-6 md:col-start-1 md:row-start-2 md:max-w-none md:pr-1 lg:pr-2">
               <div className="md:pt-[7.75rem] lg:pt-[8.5rem]">
                 {isNight ? (
                   <div>
@@ -373,7 +373,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
               </AuthRequiredLink>
             </div>
 
-            <div className="relative order-2 min-w-0 overflow-visible md:col-start-2 md:row-start-1 md:ml-6 md:row-span-2 md:self-start lg:ml-10 xl:ml-12">
+            <div className="relative order-2 min-w-0 overflow-visible md:col-start-2 md:row-start-1 md:ml-2 md:row-span-2 md:self-start lg:ml-4 xl:ml-6">
               {fortuneLoading ? (
                 <div className="pet-fortune-guest-shell flex min-h-[280px] items-center justify-center">
                   <p className="text-sm font-semibold text-stone-600">

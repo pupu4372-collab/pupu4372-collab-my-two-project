@@ -3,6 +3,7 @@
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { CompatibilityResult } from "@/components/k-saju/CompatibilityResult";
 import { PremiumMbtiReport } from "@/components/k-saju/PremiumMbtiReport";
+import { PremiumMbtiSurvey } from "@/components/k-saju/PremiumMbtiSurvey";
 import { ZodiacResult } from "@/components/k-saju/ZodiacResult";
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
@@ -16,7 +17,11 @@ import {
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import {
   buildPetMbtiPremiumInsight,
+  buildPetMbtiResult,
   buildPetMbtiResultFromType,
+  isPetMbtiComplete,
+  scoresFromAnswers,
+  type PetMbtiResult,
 } from "@/lib/pet/mbti-inference";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
@@ -24,29 +29,34 @@ import type { Gender, Locale, Species } from "@/lib/saju/types";
 import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
-export type PremiumHubProfile = {
-  petName: string;
-  species: Species;
-  petGender: Gender;
-  petBirthDate: string;
-  petBirthTime: string | null;
-  petBirthTimeUnknown: boolean;
+type ButlerSession = {
   ownerName: string;
   ownerGender: Gender;
   ownerBirthDate: string;
   ownerBirthTime: string | null;
   ownerBirthTimeUnknown: boolean;
   timezone: string;
-  locale: Locale;
-  petId: string | null;
-  mbtiType: string | null;
   privacyConsent: boolean;
 };
 
+type PetContext = {
+  petName: string;
+  species: Species;
+  petGender: Gender;
+  petBirthDate: string;
+  petBirthTime: string | null;
+  petBirthTimeUnknown: boolean;
+  timezone: string;
+  locale: Locale;
+  petId: string | null;
+};
+
+type HubPhase = "menu" | "butler-form";
+type ActiveView = "mbti" | "zodiac" | "compatibility" | null;
+
 const UI = {
   ko: {
-    intro: "궁합을 보려면 간단한 정보를 입력해 주세요.",
-    petSection: "반려동물 (사주에서 가져옴)",
+    petSection: "반려동물",
     ownerSection: "집사 (나)",
     petName: "이름",
     ownerName: "이름",
@@ -63,31 +73,27 @@ const UI = {
     birthDate: "생년월일",
     birthTime: "출생 시간",
     timezone: "출생 지역 시간대",
-    submit: "입력 완료",
+    butlerIntro: "궁합을 보려면 집사 정보를 입력해 주세요.",
+    butlerSubmit: "궁합 보기",
+    butlerCancel: "← 목록으로",
     errorConsent: "개인정보 동의가 필요합니다.",
-    ownerBirthNotice:
-      "생년월일 저장에 동의하시면 로그인할 때마다 오늘의 운세를 점쳐드립니다.",
     menuTitle: "프리미엄 결과 보기",
-    menuSubtitle: "원하는 항목을 하나씩 눌러 확인하세요.",
-    btnCompatibility: "집사와의 궁합 보기",
-    btnZodiac: "별자리 운세 보기",
+    menuSubtitle: "항목을 순서대로 눌러 확인하세요.",
     btnMbti: "상세 MBTI 보기",
-    editButler: "집사 정보 수정",
+    btnZodiac: "별자리 운세 보기",
+    btnCompatibility: "집사와의 궁합 보기",
     backToMenu: "← 프리미엄 결과 목록으로",
     loginRequired: "프리미엄을 보려면 로그인이 필요해요.",
     login: "로그인하기",
     missingPet: "펫 정보가 없어요. 사주를 먼저 본 뒤 결제해 주세요.",
     backSaju: "← 사주 보기",
-    backMenu: "← 목록으로",
     loading: "불러오는 중…",
     networkError: "네트워크 오류가 발생했어요.",
     premiumRequired: "프리미엄 결제가 필요해요.",
-    mbtiMissing:
-      "MBTI 설문을 완료하지 않았어요. 사주 페이지에서 MBTI를 완료한 뒤 다시 시도해 주세요.",
+    mbtiTypeTitle: (name: string, type: string) => `${name}은(는) ${type}형이에요`,
   },
   en: {
-    intro: "Enter a few details about you (the butler) to unlock premium readings.",
-    petSection: "Pet (from your K-Saju reading)",
+    petSection: "Pet",
     ownerSection: "Butler (you)",
     petName: "Name",
     ownerName: "Name",
@@ -104,27 +110,24 @@ const UI = {
     birthDate: "Birth date",
     birthTime: "Birth time",
     timezone: "Birth timezone",
-    submit: "Continue",
+    butlerIntro: "Enter your details to see pet–butler compatibility.",
+    butlerSubmit: "View bond",
+    butlerCancel: "← Back to menu",
     errorConsent: "Privacy consent is required.",
-    ownerBirthNotice:
-      "If you agree to save your birth date, we will show a small daily fortune whenever you log in.",
     menuTitle: "Your premium readings",
-    menuSubtitle: "Tap each item to view one at a time.",
-    btnCompatibility: "Pet & butler bond",
-    btnZodiac: "Zodiac fortune",
+    menuSubtitle: "Tap each item in order to view.",
     btnMbti: "Detailed MBTI",
-    editButler: "Edit butler details",
+    btnZodiac: "Zodiac fortune",
+    btnCompatibility: "Pet & butler bond",
     backToMenu: "← Back to premium menu",
     loginRequired: "Please log in to view premium content.",
     login: "Log in",
     missingPet: "Missing pet info. Complete K-Saju and payment first.",
     backSaju: "← K-Saju",
-    backMenu: "← Back to menu",
     loading: "Loading…",
     networkError: "Network error. Please try again.",
     premiumRequired: "Premium payment required.",
-    mbtiMissing:
-      "Complete the MBTI survey on the K-Saju page, then try again.",
+    mbtiTypeTitle: (name: string, type: string) => `${name} is ${type}`,
   },
 };
 
@@ -164,23 +167,26 @@ function formatPetBirthTime(value: string, locale: Locale): string {
   return getBirthTimeOptionLabel(option, locale);
 }
 
-type ActiveView = "compatibility" | "zodiac" | "mbti" | null;
-
 export function PremiumHub() {
   const { ready, configured, isAnonymous, accessToken } = useSupabaseSession();
   const routeLocale = useLocale();
 
   const [locale, setLocale] = useState<Locale>(routeLocale === "en" ? "en" : "ko");
-  const [phase, setPhase] = useState<"form" | "menu">("form");
-  const [profile, setProfile] = useState<PremiumHubProfile | null>(null);
+  const [phase, setPhase] = useState<HubPhase>("menu");
+  const [pet, setPet] = useState<PetContext | null>(null);
 
-  const [petName, setPetName] = useState("");
-  const [species, setSpecies] = useState<Species>("dog");
-  const [petGender, setPetGender] = useState<Gender>("female");
-  const [petBirthDate, setPetBirthDate] = useState("");
-  const [petBirthTime, setPetBirthTime] = useState("unknown");
-  const [petId, setPetId] = useState<string | null>(null);
   const [mbtiType, setMbtiType] = useState<string | null>(null);
+  const [mbtiAnswers, setMbtiAnswers] = useState<Record<string, string>>({});
+  const [mbtiResult, setMbtiResult] = useState<PetMbtiResult | null>(null);
+
+  const [butler, setButler] = useState<ButlerSession | null>(null);
+  const [ownerName, setOwnerName] = useState("");
+  const [ownerGender, setOwnerGender] = useState<Gender | "">("");
+  const [ownerBirthDate, setOwnerBirthDate] = useState("");
+  const [ownerBirthTime, setOwnerBirthTime] = useState("unknown");
+  const [timezone, setTimezone] = useState(detectTimezone);
+  const [consent, setConsent] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const [activeView, setActiveView] = useState<ActiveView>(null);
   const [menuLoading, setMenuLoading] = useState(false);
@@ -188,20 +194,16 @@ export function PremiumHub() {
   const [compatibilityResult, setCompatibilityResult] =
     useState<CompatibilityResponse | null>(null);
   const [zodiacResult, setZodiacResult] = useState<ZodiacFortuneResponse | null>(null);
-
-  const [ownerName, setOwnerName] = useState("");
-  const [ownerGender, setOwnerGender] = useState<Gender | "">("");
-  const [ownerBirthDate, setOwnerBirthDate] = useState("");
-  const [ownerBirthTime, setOwnerBirthTime] = useState("unknown");
-  const [timezone, setTimezone] = useState(detectTimezone);
-  const [consent, setConsent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState(false);
+  const [deeplinkView, setDeeplinkView] = useState<ActiveView | null>(null);
 
   const t = UI[locale];
   const timezoneOptions = useMemo(() => {
     const set = new Set<string>([...COMMON_TIMEZONES, timezone]);
     return Array.from(set);
   }, [timezone]);
+
+  const mbtiSurveyComplete = isPetMbtiComplete(mbtiAnswers);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -213,18 +215,158 @@ export function PremiumHub() {
     const nextBirthTime = params.get("birthTime");
     const nextTimezone = params.get("timezone");
     const nextPetId = params.get("petId");
-
-    if (isLocale(nextLocale)) setLocale(nextLocale);
-    if (isSpecies(nextSpecies)) setSpecies(nextSpecies);
-    if (isGender(nextPetGender)) setPetGender(nextPetGender);
-    if (nextName) setPetName(nextName);
-    if (nextBirthDate) setPetBirthDate(nextBirthDate);
-    if (isBirthTimeOption(nextBirthTime)) setPetBirthTime(nextBirthTime);
-    if (nextTimezone) setTimezone(nextTimezone);
-    if (nextPetId) setPetId(nextPetId);
     const nextMbtiType = params.get("mbtiType");
-    if (nextMbtiType) setMbtiType(nextMbtiType);
+    const nextView = params.get("view");
+
+    const resolvedLocale = isLocale(nextLocale) ? nextLocale : locale;
+    if (isLocale(nextLocale)) setLocale(nextLocale);
+
+    if (!nextName?.trim() || !nextBirthDate) {
+      setInitialized(true);
+      return;
+    }
+
+    const petTime = parseBirthTimeSelect(
+      isBirthTimeOption(nextBirthTime) ? nextBirthTime : "unknown"
+    );
+
+    setPet({
+      petName: nextName.trim(),
+      species: isSpecies(nextSpecies) ? nextSpecies : "dog",
+      petGender: isGender(nextPetGender) ? nextPetGender : "female",
+      petBirthDate: nextBirthDate,
+      petBirthTime: petTime.birthTime,
+      petBirthTimeUnknown: petTime.birthTimeUnknown,
+      timezone: nextTimezone ?? detectTimezone(),
+      locale: resolvedLocale,
+      petId: nextPetId,
+    });
+
+    if (nextTimezone) setTimezone(nextTimezone);
+    if (nextMbtiType) {
+      setMbtiType(nextMbtiType);
+      setMbtiResult(buildPetMbtiResultFromType(nextMbtiType));
+    }
+    if (nextView === "mbti" || nextView === "zodiac" || nextView === "compatibility") {
+      setDeeplinkView(nextView);
+    }
+    setInitialized(true);
   }, []);
+
+  useEffect(() => {
+    if (!pet || !deeplinkView) return;
+
+    if (deeplinkView === "mbti") {
+      setActiveView("mbti");
+      setPhase("menu");
+      setDeeplinkView(null);
+      return;
+    }
+
+    if (deeplinkView === "compatibility") {
+      setDeeplinkView(null);
+      if (!butler) {
+        setPhase("butler-form");
+        setActiveView(null);
+        return;
+      }
+
+      setActiveView("compatibility");
+      setPhase("menu");
+      if (compatibilityResult) return;
+
+      setMenuLoading(true);
+      void (async () => {
+        try {
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+          const res = await fetch("/api/saju/compatibility", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              petName: pet.petName,
+              ownerName: butler.ownerName,
+              species: pet.species,
+              petGender: pet.petGender,
+              ownerGender: butler.ownerGender,
+              petBirthDate: pet.petBirthDate,
+              ownerBirthDate: butler.ownerBirthDate,
+              petBirthTime: pet.petBirthTime,
+              petBirthTimeUnknown: pet.petBirthTimeUnknown,
+              ownerBirthTime: butler.ownerBirthTime,
+              ownerBirthTimeUnknown: butler.ownerBirthTimeUnknown,
+              timezone: butler.timezone,
+              locale: pet.locale,
+              privacyConsent: butler.privacyConsent,
+              petId: pet.petId,
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            setMenuError(
+              data.error === "premium_required"
+                ? UI[pet.locale].premiumRequired
+                : (data.error ?? UI[pet.locale].networkError)
+            );
+            return;
+          }
+          setCompatibilityResult(data as CompatibilityResponse);
+        } catch {
+          setMenuError(UI[pet.locale].networkError);
+        } finally {
+          setMenuLoading(false);
+        }
+      })();
+      return;
+    }
+
+    if (deeplinkView === "zodiac") {
+      setActiveView("zodiac");
+      setPhase("menu");
+      setDeeplinkView(null);
+      if (zodiacResult) return;
+
+      setMenuLoading(true);
+      void (async () => {
+        try {
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+          const res = await fetch("/api/saju/zodiac", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              petName: pet.petName,
+              species: pet.species,
+              birthDate: pet.petBirthDate,
+              locale: pet.locale,
+              petId: pet.petId,
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            setMenuError(
+              data.error === "premium_required" ? UI[pet.locale].premiumRequired : (data.error ?? UI[pet.locale].networkError)
+            );
+            return;
+          }
+          setZodiacResult(data as ZodiacFortuneResponse);
+        } catch {
+          setMenuError(UI[pet.locale].networkError);
+        } finally {
+          setMenuLoading(false);
+        }
+      })();
+    }
+  }, [pet, deeplinkView, butler, accessToken, zodiacResult, compatibilityResult]);
+
+  useEffect(() => {
+    if (!mbtiSurveyComplete || mbtiType) return;
+    const result = buildPetMbtiResult(scoresFromAnswers(mbtiAnswers));
+    setMbtiType(result.type);
+    setMbtiResult(result);
+  }, [mbtiAnswers, mbtiSurveyComplete, mbtiType]);
 
   if (configured && ready && isAnonymous) {
     return (
@@ -240,7 +382,15 @@ export function PremiumHub() {
     );
   }
 
-  if (!petName.trim() || !petBirthDate) {
+  if (!initialized) {
+    return (
+      <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6 text-center`}>
+        <p className="text-sm text-on-surface-variant">{t.loading}</p>
+      </div>
+    );
+  }
+
+  if (!pet) {
     return (
       <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-4 p-6 text-center`}>
         <p className="text-sm text-plum/70">{t.missingPet}</p>
@@ -254,356 +404,353 @@ export function PremiumHub() {
     );
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleMbtiAnswer(questionId: string, optionId: string) {
+    setMbtiAnswers((prev) => ({ ...prev, [questionId]: optionId }));
+  }
+
+  function openMbti() {
+    setActiveView("mbti");
+    setMenuError(null);
+    setPhase("menu");
+  }
+
+  async function openZodiac() {
+    setActiveView("zodiac");
+    setMenuError(null);
+    setPhase("menu");
+    if (zodiacResult) return;
+
+    setMenuLoading(true);
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+      const res = await fetch("/api/saju/zodiac", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          petName: pet.petName,
+          species: pet.species,
+          birthDate: pet.petBirthDate,
+          locale: pet.locale,
+          petId: pet.petId,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMenuError(
+          data.error === "premium_required" ? t.premiumRequired : (data.error ?? t.networkError)
+        );
+        return;
+      }
+      setZodiacResult(data as ZodiacFortuneResponse);
+    } catch {
+      setMenuError(t.networkError);
+    } finally {
+      setMenuLoading(false);
+    }
+  }
+
+  function openCompatibility() {
+    setMenuError(null);
+    if (!butler) {
+      setPhase("butler-form");
+      setActiveView(null);
+      return;
+    }
+    void fetchCompatibility(butler);
+  }
+
+  async function fetchCompatibility(session: ButlerSession) {
+    setActiveView("compatibility");
+    setPhase("menu");
+    if (compatibilityResult) return;
+
+    setMenuLoading(true);
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+      const res = await fetch("/api/saju/compatibility", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          petName: pet.petName,
+          ownerName: session.ownerName,
+          species: pet.species,
+          petGender: pet.petGender,
+          ownerGender: session.ownerGender,
+          petBirthDate: pet.petBirthDate,
+          ownerBirthDate: session.ownerBirthDate,
+          petBirthTime: pet.petBirthTime,
+          petBirthTimeUnknown: pet.petBirthTimeUnknown,
+          ownerBirthTime: session.ownerBirthTime,
+          ownerBirthTimeUnknown: session.ownerBirthTimeUnknown,
+          timezone: session.timezone,
+          locale: pet.locale,
+          privacyConsent: session.privacyConsent,
+          petId: pet.petId,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMenuError(
+          data.error === "premium_required" ? t.premiumRequired : (data.error ?? t.networkError)
+        );
+        return;
+      }
+      setCompatibilityResult(data as CompatibilityResponse);
+    } catch {
+      setMenuError(t.networkError);
+    } finally {
+      setMenuLoading(false);
+    }
+  }
+
+  function handleButlerSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
+    setFormError(null);
 
     if (!consent) {
-      setError(t.errorConsent);
+      setFormError(t.errorConsent);
       return;
     }
     if (!ownerGender) {
-      setError(t.selectGender);
+      setFormError(t.selectGender);
       return;
     }
 
-    const petTime = parseBirthTimeSelect(petBirthTime);
     const ownerTime = parseBirthTimeSelect(ownerBirthTime);
-
-    const nextProfile: PremiumHubProfile = {
-      petName: petName.trim(),
-      species,
-      petGender,
-      petBirthDate,
-      petBirthTime: petTime.birthTime,
-      petBirthTimeUnknown: petTime.birthTimeUnknown,
-      ownerName: ownerName.trim(),
+    const session: ButlerSession = {
+      ownerName: ownerName.trim() || (locale === "ko" ? "집사" : "Butler"),
       ownerGender,
       ownerBirthDate,
       ownerBirthTime: ownerTime.birthTime,
       ownerBirthTimeUnknown: ownerTime.birthTimeUnknown,
       timezone,
-      locale,
-      petId,
-      mbtiType,
       privacyConsent: consent,
     };
 
-    setProfile(nextProfile);
-    setActiveView(null);
-    setMenuError(null);
-    setPhase("menu");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setButler(session);
+    void fetchCompatibility(session);
   }
 
-  if (phase === "menu" && profile) {
-    const menuProfile = profile;
-
-    async function loadCompatibility() {
-      setActiveView("compatibility");
-      setMenuError(null);
-      if (compatibilityResult) return;
-
-      setMenuLoading(true);
-      try {
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
-
-        const res = await fetch("/api/saju/compatibility", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            petName: menuProfile.petName,
-            ownerName: menuProfile.ownerName,
-            species: menuProfile.species,
-            petGender: menuProfile.petGender,
-            ownerGender: menuProfile.ownerGender,
-            petBirthDate: menuProfile.petBirthDate,
-            ownerBirthDate: menuProfile.ownerBirthDate,
-            petBirthTime: menuProfile.petBirthTime,
-            petBirthTimeUnknown: menuProfile.petBirthTimeUnknown,
-            ownerBirthTime: menuProfile.ownerBirthTime,
-            ownerBirthTimeUnknown: menuProfile.ownerBirthTimeUnknown,
-            timezone: menuProfile.timezone,
-            locale: menuProfile.locale,
-            privacyConsent: menuProfile.privacyConsent,
-            petId: menuProfile.petId,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          setMenuError(
-            data.error === "premium_required" ? t.premiumRequired : (data.error ?? t.networkError)
-          );
-          return;
-        }
-        setCompatibilityResult(data as CompatibilityResponse);
-      } catch {
-        setMenuError(t.networkError);
-      } finally {
-        setMenuLoading(false);
-      }
-    }
-
-    async function loadZodiac() {
-      setActiveView("zodiac");
-      setMenuError(null);
-      if (zodiacResult) return;
-
-      setMenuLoading(true);
-      try {
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
-
-        const res = await fetch("/api/saju/zodiac", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            petName: menuProfile.petName,
-            species: menuProfile.species,
-            birthDate: menuProfile.petBirthDate,
-            locale: menuProfile.locale,
-            petId: menuProfile.petId,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          setMenuError(
-            data.error === "premium_required" ? t.premiumRequired : (data.error ?? t.networkError)
-          );
-          return;
-        }
-        setZodiacResult(data as ZodiacFortuneResponse);
-      } catch {
-        setMenuError(t.networkError);
-      } finally {
-        setMenuLoading(false);
-      }
-    }
-
-    function loadMbti() {
-      setActiveView("mbti");
-      setMenuError(null);
-      if (!menuProfile.mbtiType) {
-        setMenuError(t.mbtiMissing);
-      }
-    }
-
-    const mbtiResult = menuProfile.mbtiType
-      ? buildPetMbtiResultFromType(menuProfile.mbtiType)
+  const mbtiInsight =
+    mbtiResult && mbtiType
+      ? buildPetMbtiPremiumInsight(mbtiResult, pet.petName)
       : null;
-    const mbtiInsight =
-      mbtiResult && menuProfile.mbtiType
-        ? buildPetMbtiPremiumInsight(mbtiResult, menuProfile.petName)
-        : null;
 
+  if (phase === "butler-form") {
     return (
-      <div className="space-y-5 pb-32 md:pb-16">
-        <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-4 p-6 md:p-8`}>
-          {!activeView ? (
-            <>
-              <div>
-                <h2 className="text-lg font-extrabold text-primary">{t.menuTitle}</h2>
-                <p className="mt-1 text-sm text-on-surface-variant">{t.menuSubtitle}</p>
-              </div>
-              <div className="grid gap-3">
-                <button
-                  type="button"
-                  onClick={() => void loadCompatibility()}
-                  disabled={menuLoading}
-                  className="w-full rounded-full bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/15 transition hover:bg-primary/90 disabled:opacity-60"
-                >
-                  {t.btnCompatibility}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void loadZodiac()}
-                  disabled={menuLoading}
-                  className="w-full rounded-full border-2 border-channel-saju/40 bg-white py-4 text-sm font-bold text-primary transition hover:bg-channel-saju/10 disabled:opacity-60"
-                >
-                  {t.btnZodiac}
-                </button>
-                <button
-                  type="button"
-                  onClick={loadMbti}
-                  disabled={menuLoading}
-                  className="w-full rounded-full border-2 border-plum/20 bg-white py-4 text-sm font-bold text-plum transition hover:bg-petal/30 disabled:opacity-60"
-                >
-                  {t.btnMbti}
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              {menuLoading && (
-                <p className="text-sm text-on-surface-variant">{t.loading}</p>
-              )}
-              {menuError && (
-                <p className={FORM_ERROR_CLASS} role="alert">
-                  {menuError}
-                </p>
-              )}
-              {activeView === "compatibility" && compatibilityResult && !menuLoading && (
-                <CompatibilityResult result={compatibilityResult} isGuest={false} />
-              )}
-              {activeView === "zodiac" && zodiacResult && !menuLoading && (
-                <ZodiacResult result={zodiacResult} />
-              )}
-              {activeView === "mbti" && mbtiInsight && !menuError && (
-                <PremiumMbtiReport insight={mbtiInsight} locale={menuProfile.locale} />
-              )}
-            </>
-          )}
-          {activeView ? (
-            <button
-              type="button"
-              onClick={() => {
-                setActiveView(null);
-                setMenuError(null);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="w-full rounded-full border-2 border-channel-saju/40 bg-gradient-to-r from-lavender/50 via-white to-mint/40 py-3.5 text-sm font-bold text-primary shadow-md transition hover:border-channel-saju hover:shadow-lg"
+      <form
+        onSubmit={handleButlerSubmit}
+        className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-6 p-6 md:p-8`}
+      >
+        <p className="text-sm leading-relaxed text-on-surface-variant">{t.butlerIntro}</p>
+
+        <fieldset className="space-y-3 rounded-[2rem] border border-channel-saju/20 bg-sand/40 p-5">
+          <legend className="px-2 text-sm font-bold text-primary">🐾 {t.petSection}</legend>
+          <dl className="grid gap-2 text-sm">
+            <div className="flex justify-between gap-4">
+              <dt className="text-on-surface-variant">{t.petName}</dt>
+              <dd className="font-semibold text-primary">{pet.petName}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-on-surface-variant">{t.species}</dt>
+              <dd className="font-semibold text-primary">{t[pet.species]}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-on-surface-variant">{t.birthDate}</dt>
+              <dd className="font-semibold text-primary">{pet.petBirthDate}</dd>
+            </div>
+          </dl>
+        </fieldset>
+
+        <fieldset className="space-y-4 rounded-[2rem] border border-plum/15 bg-white p-5">
+          <legend className="px-2 text-sm font-bold text-primary">💞 {t.ownerSection}</legend>
+          <label className={FIELD_LABEL_CLASS}>
+            {t.ownerName}
+            <input
+              value={ownerName}
+              onChange={(e) => setOwnerName(e.target.value)}
+              className={STITCH_INPUT_CLASS}
+              placeholder={locale === "ko" ? "집사" : "Butler"}
+              maxLength={32}
+            />
+          </label>
+          <label className={FIELD_LABEL_CLASS}>
+            {t.gender}
+            <select
+              value={ownerGender}
+              onChange={(e) => setOwnerGender(e.target.value as Gender | "")}
+              className={STITCH_INPUT_CLASS}
+              required
             >
-              {t.backToMenu}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setPhase("form");
-                setActiveView(null);
-              }}
-              className="w-full py-2 text-sm font-semibold text-on-surface-variant underline"
-            >
-              {t.editButler}
-            </button>
-          )}
-        </section>
-      </div>
-    );
-  }
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-6 p-6 md:p-8`}
-    >
-      <p className="text-sm leading-relaxed text-on-surface-variant">{t.intro}</p>
-
-      <fieldset className="space-y-3 rounded-[2rem] border border-channel-saju/20 bg-sand/40 p-5">
-        <legend className="px-2 text-sm font-bold text-primary">🐾 {t.petSection}</legend>
-        <dl className="grid gap-2 text-sm">
-          <div className="flex justify-between gap-4">
-            <dt className="text-on-surface-variant">{t.petName}</dt>
-            <dd className="font-semibold text-primary">{petName}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-on-surface-variant">{t.species}</dt>
-            <dd className="font-semibold text-primary">{t[species]}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-on-surface-variant">{t.gender}</dt>
-            <dd className="font-semibold text-primary">
-              {petGender === "male" ? t.petMale : t.petFemale}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-on-surface-variant">{t.birthDate}</dt>
-            <dd className="font-semibold text-primary">{petBirthDate}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-on-surface-variant">{t.birthTime}</dt>
-            <dd className="font-semibold text-primary">
-              {formatPetBirthTime(petBirthTime, locale)}
-            </dd>
-          </div>
-        </dl>
-      </fieldset>
-
-      <fieldset className="space-y-4 rounded-[2rem] border border-plum/15 bg-white p-5">
-        <legend className="px-2 text-sm font-bold text-primary">💞 {t.ownerSection}</legend>
-        <p className="rounded-2xl bg-sand/50 px-4 py-2 text-xs leading-relaxed text-on-surface-variant">
-          {t.ownerBirthNotice}
-        </p>
-        <label className={FIELD_LABEL_CLASS}>
-          {t.ownerName}
-          <input
-            value={ownerName}
-            onChange={(e) => setOwnerName(e.target.value)}
-            className={STITCH_INPUT_CLASS}
-            placeholder={locale === "ko" ? "집사" : "Butler"}
-            required
-            maxLength={32}
+              <option value="">{t.selectGender}</option>
+              <option value="male">{t.ownerMale}</option>
+              <option value="female">{t.ownerFemale}</option>
+            </select>
+          </label>
+          <BirthDateSelect
+            value={ownerBirthDate}
+            onChange={setOwnerBirthDate}
+            label={t.birthDate}
+            locale={locale}
+            className={FIELD_LABEL_CLASS}
+            selectClassName={STITCH_INPUT_CLASS}
           />
-        </label>
+          <label className={FIELD_LABEL_CLASS}>
+            {t.birthTime}
+            <select
+              value={ownerBirthTime}
+              onChange={(e) => setOwnerBirthTime(e.target.value)}
+              className={STITCH_INPUT_CLASS}
+            >
+              {BIRTH_TIME_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {getBirthTimeOptionLabel(o, locale)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </fieldset>
+
         <label className={FIELD_LABEL_CLASS}>
-          {t.gender}
+          {t.timezone}
           <select
-            value={ownerGender}
-            onChange={(e) => setOwnerGender(e.target.value as Gender | "")}
-            className={STITCH_INPUT_CLASS}
-            required
-          >
-            <option value="">{t.selectGender}</option>
-            <option value="male">{t.ownerMale}</option>
-            <option value="female">{t.ownerFemale}</option>
-          </select>
-        </label>
-        <BirthDateSelect
-          value={ownerBirthDate}
-          onChange={setOwnerBirthDate}
-          label={t.birthDate}
-          locale={locale}
-          className={FIELD_LABEL_CLASS}
-          selectClassName={STITCH_INPUT_CLASS}
-        />
-        <label className={FIELD_LABEL_CLASS}>
-          {t.birthTime}
-          <select
-            value={ownerBirthTime}
-            onChange={(e) => setOwnerBirthTime(e.target.value)}
+            value={timezone}
+            onChange={(e) => setTimezone(e.target.value)}
             className={STITCH_INPUT_CLASS}
           >
-            {BIRTH_TIME_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {getBirthTimeOptionLabel(o, locale)}
+            {timezoneOptions.map((tz) => (
+              <option key={tz} value={tz}>
+                {tz}
               </option>
             ))}
           </select>
         </label>
-      </fieldset>
 
-      <label className={FIELD_LABEL_CLASS}>
-        {t.timezone}
-        <select
-          value={timezone}
-          onChange={(e) => setTimezone(e.target.value)}
-          className={STITCH_INPUT_CLASS}
+        <div className="rounded-[2rem] border border-white/35 bg-white p-5">
+          <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant="plain" />
+        </div>
+
+        {formError && (
+          <p className={FORM_ERROR_CLASS} role="alert">
+            {formError}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          className="w-full rounded-full bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/15 transition hover:bg-primary/90"
         >
-          {timezoneOptions.map((tz) => (
-            <option key={tz} value={tz}>
-              {tz}
-            </option>
-          ))}
-        </select>
-      </label>
+          {t.butlerSubmit}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setPhase("menu");
+            setFormError(null);
+          }}
+          className="w-full py-2 text-sm font-semibold text-on-surface-variant underline"
+        >
+          {t.butlerCancel}
+        </button>
+      </form>
+    );
+  }
 
-      <div className="rounded-[2rem] border border-white/35 bg-white p-5">
-        <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant="plain" />
-      </div>
-
-      {error && (
-        <p className={FORM_ERROR_CLASS} role="alert">
-          {error}
-        </p>
-      )}
-
-      <button
-        type="submit"
-        className="w-full rounded-full bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/15 transition hover:bg-primary/90 active:scale-[0.98]"
-      >
-        {t.submit}
-      </button>
-    </form>
+  return (
+    <div className="space-y-5 pb-32 md:pb-16">
+      <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-4 p-6 md:p-8`}>
+        {!activeView ? (
+          <>
+            <div>
+              <h2 className="text-lg font-extrabold text-primary">{t.menuTitle}</h2>
+              <p className="mt-1 text-sm text-on-surface-variant">{t.menuSubtitle}</p>
+            </div>
+            <div className="grid gap-3">
+              <button
+                type="button"
+                onClick={openMbti}
+                disabled={menuLoading}
+                className="w-full rounded-full bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/15 transition hover:bg-primary/90 disabled:opacity-60"
+              >
+                {t.btnMbti}
+              </button>
+              <button
+                type="button"
+                onClick={() => void openZodiac()}
+                disabled={menuLoading}
+                className="w-full rounded-full border-2 border-channel-saju/40 bg-white py-4 text-sm font-bold text-primary transition hover:bg-channel-saju/10 disabled:opacity-60"
+              >
+                {t.btnZodiac}
+              </button>
+              <button
+                type="button"
+                onClick={openCompatibility}
+                disabled={menuLoading}
+                className="w-full rounded-full border-2 border-plum/20 bg-white py-4 text-sm font-bold text-plum transition hover:bg-petal/30 disabled:opacity-60"
+              >
+                {t.btnCompatibility}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {menuLoading && (
+              <p className="text-sm text-on-surface-variant">{t.loading}</p>
+            )}
+            {menuError && (
+              <p className={FORM_ERROR_CLASS} role="alert">
+                {menuError}
+              </p>
+            )}
+            {activeView === "mbti" && !mbtiType && !menuError && (
+              <PremiumMbtiSurvey
+                locale={locale}
+                answers={mbtiAnswers}
+                onSelect={handleMbtiAnswer}
+              />
+            )}
+            {activeView === "mbti" && mbtiType && mbtiResult && mbtiInsight && !menuError && (
+              <div className="space-y-4">
+                <article className="rounded-[2rem] border border-channel-saju/25 bg-channel-saju/5 p-5 text-center">
+                  <p className="text-lg font-extrabold text-primary">
+                    {t.mbtiTypeTitle(pet.petName, mbtiType)}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-plum">
+                    {locale === "ko" ? mbtiResult.titleKo : mbtiResult.titleEn}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">
+                    {locale === "ko" ? mbtiResult.summaryKo : mbtiResult.summaryEn}
+                  </p>
+                </article>
+                <PremiumMbtiReport insight={mbtiInsight} locale={locale} />
+              </div>
+            )}
+            {activeView === "zodiac" && zodiacResult && !menuLoading && (
+              <ZodiacResult result={zodiacResult} />
+            )}
+            {activeView === "compatibility" && compatibilityResult && !menuLoading && (
+              <CompatibilityResult result={compatibilityResult} isGuest={false} />
+            )}
+          </>
+        )}
+        {activeView ? (
+          <button
+            type="button"
+            onClick={() => {
+              setActiveView(null);
+              setMenuError(null);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="w-full rounded-full border-2 border-channel-saju/40 bg-gradient-to-r from-lavender/50 via-white to-mint/40 py-3.5 text-sm font-bold text-primary shadow-md transition hover:border-channel-saju hover:shadow-lg"
+          >
+            {t.backToMenu}
+          </button>
+        ) : null}
+      </section>
+    </div>
   );
 }

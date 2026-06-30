@@ -45,6 +45,8 @@ function PaymentContent() {
 
   const petIdParam = params.get("petId") ?? "";
 
+  const mbtiTypeParam = params.get("mbtiType") ?? "";
+
   const continuationQuery = new URLSearchParams({
     petName: params.get("petName") ?? "",
     species: params.get("species") ?? "",
@@ -54,6 +56,7 @@ function PaymentContent() {
     timezone: params.get("timezone") ?? "",
     locale,
     ...(petIdParam ? { petId: petIdParam } : {}),
+    ...(mbtiTypeParam ? { mbtiType: mbtiTypeParam } : {}),
   }).toString();
 
   const successHref = `/saju/premium?${continuationQuery}`;

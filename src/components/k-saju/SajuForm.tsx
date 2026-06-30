@@ -42,6 +42,7 @@ const UI = {
     localeLabel: "Language",
     sessionPreparing: "Preparing session. Please try again soon.",
     networkError: "Network error. Please try again.",
+    serverError: "Server error. Please refresh the page and try again.",
     continueTitle: "Keep reading",
     continueSubtitle: "Use the same pet profile for zodiac and bond readings.",
     zodiacCta: "Zodiac fortune →",
@@ -71,6 +72,7 @@ const UI = {
     localeLabel: "언어",
     sessionPreparing: "세션 준비 중이에요. 잠시 후 다시 시도해 주세요.",
     networkError: "네트워크 오류가 발생했어요.",
+    serverError: "서버 오류가 발생했어요. 새로고침 후 다시 시도해 주세요.",
     continueTitle: "이 정보로 이어보기",
     continueSubtitle:
       "방금 입력한 이름과 생일을 그대로 가져가 별자리와 궁합도 이어서 볼 수 있어요.",
@@ -236,7 +238,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
         try {
           data = JSON.parse(raw) as { error?: string };
         } catch {
-          setError(res.ok ? t.networkError : t.networkError);
+          setError(res.status >= 500 ? t.serverError : t.networkError);
           return;
         }
       }
@@ -281,35 +283,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
         )}
 
         <SajuResult result={result} variant={embedded ? "pastel" : "default"} />
-
-        <section className="space-y-4 rounded-[2rem] border-2 border-white/50 bg-gradient-to-br from-white via-lavender/30 to-petal/20 p-6 shadow-lg">
-          <div>
-            <h3 className="font-bold text-primary">{t.continueTitle}</h3>
-            <p className="mt-1 text-sm leading-relaxed text-plum/80">
-              {t.continueSubtitle}
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Link
-              href={premiumPaymentHref}
-              className="group flex flex-col items-center rounded-2xl border-2 border-channel-saju/45 bg-gradient-to-b from-lavender to-white px-4 py-4 text-center shadow-md transition hover:border-channel-saju hover:shadow-lg"
-            >
-              <span className="mb-2 rounded-full bg-channel-saju px-2.5 py-1 text-[10px] font-bold text-white">
-                {t.premiumBadge}
-              </span>
-              <span className="text-sm font-bold text-channel-saju">{t.zodiacCta}</span>
-            </Link>
-            <Link
-              href={premiumPaymentHref}
-              className="group flex flex-col items-center rounded-2xl border-2 border-hwa-red/40 bg-gradient-to-b from-petal to-white px-4 py-4 text-center shadow-md transition hover:border-hwa-red hover:shadow-lg"
-            >
-              <span className="mb-2 rounded-full bg-hwa-red px-2.5 py-1 text-[10px] font-bold text-white">
-                {t.premiumBadge}
-              </span>
-              <span className="text-sm font-bold text-[#8b3a3a]">{t.compatibilityCta}</span>
-            </Link>
-          </div>
-        </section>
       </div>
     );
   }
