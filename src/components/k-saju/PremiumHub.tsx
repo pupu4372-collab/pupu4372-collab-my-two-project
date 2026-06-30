@@ -255,6 +255,7 @@ export function PremiumHub() {
 
   useEffect(() => {
     if (!pet || !deeplinkView) return;
+    const petCtx = pet;
 
     if (deeplinkView === "mbti") {
       setActiveView("mbti");
@@ -285,35 +286,35 @@ export function PremiumHub() {
             method: "POST",
             headers,
             body: JSON.stringify({
-              petName: pet.petName,
+              petName: petCtx.petName,
               ownerName: butler.ownerName,
-              species: pet.species,
-              petGender: pet.petGender,
+              species: petCtx.species,
+              petGender: petCtx.petGender,
               ownerGender: butler.ownerGender,
-              petBirthDate: pet.petBirthDate,
+              petBirthDate: petCtx.petBirthDate,
               ownerBirthDate: butler.ownerBirthDate,
-              petBirthTime: pet.petBirthTime,
-              petBirthTimeUnknown: pet.petBirthTimeUnknown,
+              petBirthTime: petCtx.petBirthTime,
+              petBirthTimeUnknown: petCtx.petBirthTimeUnknown,
               ownerBirthTime: butler.ownerBirthTime,
               ownerBirthTimeUnknown: butler.ownerBirthTimeUnknown,
               timezone: butler.timezone,
-              locale: pet.locale,
+              locale: petCtx.locale,
               privacyConsent: butler.privacyConsent,
-              petId: pet.petId,
+              petId: petCtx.petId,
             }),
           });
           const data = await res.json();
           if (!res.ok) {
             setMenuError(
               data.error === "premium_required"
-                ? UI[pet.locale].premiumRequired
-                : (data.error ?? UI[pet.locale].networkError)
+                ? UI[petCtx.locale].premiumRequired
+                : (data.error ?? UI[petCtx.locale].networkError)
             );
             return;
           }
           setCompatibilityResult(data as CompatibilityResponse);
         } catch {
-          setMenuError(UI[pet.locale].networkError);
+          setMenuError(UI[petCtx.locale].networkError);
         } finally {
           setMenuLoading(false);
         }
@@ -337,23 +338,23 @@ export function PremiumHub() {
             method: "POST",
             headers,
             body: JSON.stringify({
-              petName: pet.petName,
-              species: pet.species,
-              birthDate: pet.petBirthDate,
-              locale: pet.locale,
-              petId: pet.petId,
+              petName: petCtx.petName,
+              species: petCtx.species,
+              birthDate: petCtx.petBirthDate,
+              locale: petCtx.locale,
+              petId: petCtx.petId,
             }),
           });
           const data = await res.json();
           if (!res.ok) {
             setMenuError(
-              data.error === "premium_required" ? UI[pet.locale].premiumRequired : (data.error ?? UI[pet.locale].networkError)
+              data.error === "premium_required" ? UI[petCtx.locale].premiumRequired : (data.error ?? UI[petCtx.locale].networkError)
             );
             return;
           }
           setZodiacResult(data as ZodiacFortuneResponse);
         } catch {
-          setMenuError(UI[pet.locale].networkError);
+          setMenuError(UI[petCtx.locale].networkError);
         } finally {
           setMenuLoading(false);
         }
@@ -404,6 +405,8 @@ export function PremiumHub() {
     );
   }
 
+  const petCtx = pet;
+
   function handleMbtiAnswer(questionId: string, optionId: string) {
     setMbtiAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   }
@@ -429,11 +432,11 @@ export function PremiumHub() {
         method: "POST",
         headers,
         body: JSON.stringify({
-          petName: pet.petName,
-          species: pet.species,
-          birthDate: pet.petBirthDate,
-          locale: pet.locale,
-          petId: pet.petId,
+          petName: petCtx.petName,
+          species: petCtx.species,
+          birthDate: petCtx.petBirthDate,
+          locale: petCtx.locale,
+          petId: petCtx.petId,
         }),
       });
       const data = await res.json();
@@ -475,21 +478,21 @@ export function PremiumHub() {
         method: "POST",
         headers,
         body: JSON.stringify({
-          petName: pet.petName,
+          petName: petCtx.petName,
           ownerName: session.ownerName,
-          species: pet.species,
-          petGender: pet.petGender,
+          species: petCtx.species,
+          petGender: petCtx.petGender,
           ownerGender: session.ownerGender,
-          petBirthDate: pet.petBirthDate,
+          petBirthDate: petCtx.petBirthDate,
           ownerBirthDate: session.ownerBirthDate,
-          petBirthTime: pet.petBirthTime,
-          petBirthTimeUnknown: pet.petBirthTimeUnknown,
+          petBirthTime: petCtx.petBirthTime,
+          petBirthTimeUnknown: petCtx.petBirthTimeUnknown,
           ownerBirthTime: session.ownerBirthTime,
           ownerBirthTimeUnknown: session.ownerBirthTimeUnknown,
           timezone: session.timezone,
-          locale: pet.locale,
+          locale: petCtx.locale,
           privacyConsent: session.privacyConsent,
-          petId: pet.petId,
+          petId: petCtx.petId,
         }),
       });
       const data = await res.json();
