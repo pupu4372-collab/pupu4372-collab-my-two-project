@@ -41,6 +41,7 @@ export default async function PetShowSnapzonePage({ params }: PageProps) {
             eyebrow={isKo ? "Weekly Ranking" : "Weekly Ranking"}
             title={isKo ? "이번 주의 인기 펫 Top 5" : "This week's popular pets"}
             subtitle={isKo ? "가장 많은 사랑을 받은 사진을 가로로 넘겨보세요." : "Swipe through the photos that received the most love."}
+            onDark
             action={
               <div className="flex flex-wrap gap-2">
                 <AuthRequiredLink

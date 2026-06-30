@@ -203,9 +203,9 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   return (
     <div className="min-h-screen overflow-x-hidden bg-transparent">
       <AppTopNav active="home" />
-      <PageContainer className="space-y-10">
-        <section className="grid items-center gap-8 py-6 md:grid-cols-[1.05fr_0.95fr] md:py-12">
-          <div>
+      <PageContainer className="space-y-10 md:space-y-14">
+        <section className="grid items-center gap-8 py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-x-12 md:py-12 lg:gap-x-16">
+          <div className="min-w-0">
             <p
               className={`inline-flex rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] shadow-sm ${
                 isNight
@@ -251,7 +251,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             </div>
           </div>
 
-          <div className="pet-fortune-jigwanjae relative overflow-visible p-4 shadow-lg md:p-5">
+          <div className="pet-fortune-jigwanjae relative min-w-0 overflow-visible p-4 shadow-lg md:ml-6 md:p-5 lg:ml-10 xl:ml-12">
             <div className="jig-fortune-body">
               <JigFortuneOrnateCorners />
 
@@ -333,8 +333,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
           </div>
         </section>
 
-        <section className="grid items-start gap-6 md:grid-cols-[1.05fr_0.95fr]">
-          <div className="min-w-0 space-y-6">
+        <section className="mt-2 grid items-start gap-6 md:mt-4 md:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] md:gap-x-14 lg:gap-x-20">
+          <div className="min-w-0 space-y-6 md:max-w-xl md:pr-2 lg:max-w-[34rem] lg:pr-4">
             {isNight ? (
               <div>
                 <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#22c55e] drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">

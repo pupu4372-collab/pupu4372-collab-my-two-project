@@ -165,11 +165,13 @@ export default async function PetShowIndexPage({ params }: PageProps) {
         <section className="space-y-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community">Weekly Ranking</p>
-              <h2 className="mt-2 text-2xl font-extrabold text-primary md:text-3xl">
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">
+                Weekly Ranking
+              </p>
+              <h2 className="mt-2 text-2xl font-extrabold text-white md:text-3xl">
                 {isKo ? "이번 주의 인기 펫 Top 5" : "Popular pets Top 5"}
               </h2>
-              <p className="mt-2 text-sm font-semibold text-on-surface-variant">
+              <p className="mt-2 text-sm font-semibold text-white/75">
                 {isKo ? "가장 많은 사랑을 받은 사진을 가로로 넘겨보세요." : "Swipe through the photos that received the most love."}
               </p>
             </div>

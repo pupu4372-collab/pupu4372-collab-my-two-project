@@ -75,11 +75,28 @@ export async function fetchPetShowRanking(
     return { rows: getMockPetShowRanking(), source: "mock" };
   }
 
-  if (!data?.length) {
+  let rows = (data ?? []) as PetShowRankingRow[];
+
+  if ((period === "week" || period === "month") && rows.length < TOP_LIMIT) {
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from("community_posts")
+      .select("id, author_id, pet_id, title, image_urls, like_count, comment_count, country_code, created_at")
+      .eq("post_type", "photo_show")
+      .eq("is_hidden", false)
+      .order("like_count", { ascending: false })
+      .order("created_at", { ascending: true })
+      .limit(TOP_LIMIT * 4);
+
+    if (!fallbackError && fallbackData?.length) {
+      rows = mergeRankingRows(rows, fallbackData as PetShowRankingRow[]);
+    }
+  }
+
+  if (!rows.length) {
     return { rows: [], source: "supabase" };
   }
 
-  return { rows: data as PetShowRankingRow[], source: "supabase" };
+  return { rows, source: "supabase" };
 }
 
 export interface PetShowSpeciesRankings {
@@ -123,6 +140,83 @@ function resolvePostSpecies(
   );
 }
 
+async function loadSpeciesByPetId(
+  supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>,
+  posts: RankingPostRow[],
+): Promise<Map<string, PetShowSpecies>> {
+  const petIds = [...new Set(posts.map((row) => row.pet_id).filter(Boolean))] as string[];
+  const speciesByPetId = new Map<string, PetShowSpecies>();
+  if (petIds.length === 0) return speciesByPetId;
+
+  const { data: petRows } = await supabase.from("pets").select("id, species").in("id", petIds);
+  for (const pet of (petRows ?? []) as Array<{ id: string; species: PetShowSpecies }>) {
+    if (isPetShowSpecies(pet.species)) {
+      speciesByPetId.set(pet.id, pet.species);
+    }
+  }
+  return speciesByPetId;
+}
+
+function groupPostsBySpecies(
+  posts: RankingPostRow[],
+  speciesByPetId: Map<string, PetShowSpecies>,
+): PetShowSpeciesRankings {
+  const grouped: PetShowSpeciesRankings = { dog: [], cat: [], other: [] };
+  const usedIds = new Set<string>();
+
+  for (const post of posts) {
+    const species = resolvePostSpecies(post, speciesByPetId);
+    if (!species || grouped[species].length >= TOP_LIMIT || usedIds.has(post.id)) continue;
+    usedIds.add(post.id);
+    grouped[species].push({
+      ...post,
+      pet_species: species,
+      rank_position: grouped[species].length + 1,
+    });
+  }
+
+  return grouped;
+}
+
+function mergeSpeciesRankings(
+  primaryPosts: RankingPostRow[],
+  backfillPosts: RankingPostRow[],
+  speciesByPetId: Map<string, PetShowSpecies>,
+): PetShowSpeciesRankings {
+  const grouped = groupPostsBySpecies(primaryPosts, speciesByPetId);
+  const usedIds = new Set(
+    [...grouped.dog, ...grouped.cat, ...grouped.other].map((row) => row.id),
+  );
+
+  for (const post of backfillPosts) {
+    if (usedIds.has(post.id)) continue;
+    const species = resolvePostSpecies(post, speciesByPetId);
+    if (!species || grouped[species].length >= TOP_LIMIT) continue;
+    usedIds.add(post.id);
+    grouped[species].push({
+      ...post,
+      pet_species: species,
+      rank_position: grouped[species].length + 1,
+    });
+  }
+
+  return grouped;
+}
+
+function mergeRankingRows(
+  primaryRows: PetShowRankingRow[],
+  backfillRows: PetShowRankingRow[],
+): PetShowRankingRow[] {
+  const usedIds = new Set(primaryRows.map((row) => row.id));
+  const merged = [...primaryRows];
+  for (const row of backfillRows) {
+    if (merged.length >= TOP_LIMIT || usedIds.has(row.id)) continue;
+    usedIds.add(row.id);
+    merged.push({ ...row, rank_position: merged.length + 1 });
+  }
+  return merged;
+}
+
 export async function fetchPetShowSpeciesRankings(period: Extract<RankingPeriod, "week" | "month"> = "week"): Promise<{
   rows: PetShowSpeciesRankings;
   source: "supabase" | "mock";
@@ -160,45 +254,19 @@ export async function fetchPetShowSpeciesRankings(period: Extract<RankingPeriod,
     return { rows: getMockSpeciesRankings(), source: "mock" };
   }
 
-  let postRows = (periodPosts ?? []) as unknown as RankingPostRow[];
-  if (postRows.length === 0) {
-    const { data: latestPosts, error: latestError } = await buildRankingQuery(false);
-    if (latestError || !latestPosts?.length) {
-      return { rows: { dog: [], cat: [], other: [] }, source: "supabase" };
-    }
-    postRows = latestPosts as unknown as RankingPostRow[];
-  }
-
-  const petIds = [...new Set(postRows.map((row) => row.pet_id).filter(Boolean))] as string[];
-  const speciesByPetId = new Map<string, PetShowSpecies>();
-  if (petIds.length > 0) {
-    const { data: petRows } = await supabase.from("pets").select("id, species").in("id", petIds);
-    for (const pet of (petRows ?? []) as Array<{ id: string; species: PetShowSpecies }>) {
-      if (isPetShowSpecies(pet.species)) {
-        speciesByPetId.set(pet.id, pet.species);
-      }
-    }
-  }
-
-  const grouped: PetShowSpeciesRankings = { dog: [], cat: [], other: [] };
-  for (const post of postRows) {
-    const species = resolvePostSpecies(post, speciesByPetId);
-    if (!species) continue;
-    if (grouped[species].length >= TOP_LIMIT) continue;
-    grouped[species].push({
-      ...post,
-      pet_species: species,
-      rank_position: grouped[species].length + 1,
-    });
-  }
-
-  if (!grouped.dog.length && !grouped.cat.length && !grouped.other.length) {
-    // Posts exist but none have upload category tags — show empty rankings, not demo data.
-    if (postRows.length > 0) {
-      return { rows: grouped, source: "supabase" };
-    }
+  const periodRows = (periodPosts ?? []) as unknown as RankingPostRow[];
+  const { data: fallbackPosts, error: fallbackError } = await buildRankingQuery(false);
+  if (fallbackError) {
     return { rows: getMockSpeciesRankings(), source: "mock" };
   }
+
+  const fallbackRows = (fallbackPosts ?? []) as unknown as RankingPostRow[];
+  if (periodRows.length === 0 && fallbackRows.length === 0) {
+    return { rows: { dog: [], cat: [], other: [] }, source: "supabase" };
+  }
+
+  const speciesByPetId = await loadSpeciesByPetId(supabase, [...periodRows, ...fallbackRows]);
+  const grouped = mergeSpeciesRankings(periodRows, fallbackRows, speciesByPetId);
 
   return { rows: grouped, source: "supabase" };
 }
