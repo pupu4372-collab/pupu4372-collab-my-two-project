@@ -30,6 +30,7 @@ interface ElementRow {
   hangul: string;
   romanized: string;
   count: number;
+  percent: number;
 }
 
 function pdfSafeText(value: string): string {
@@ -52,6 +53,7 @@ function asElements(raw: Record<string, unknown>[]): ElementRow[] {
     hangul: String(item.hangul ?? ""),
     romanized: String(item.romanized ?? ""),
     count: Number(item.count ?? 0),
+    percent: Number(item.percent ?? 0),
   }));
 }
 

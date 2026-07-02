@@ -181,13 +181,166 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
     ? "border border-white/20 bg-white/12 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-md"
     : "";
 
+  const fortunePanel = fortuneLoading ? (
+    <div className="pet-fortune-guest-shell flex min-h-[280px] items-center justify-center">
+      <p className="text-sm font-semibold text-stone-600">
+        {isKo ? "오늘의 운세를 불러오는 중이에요…" : "Loading today's fortune…"}
+      </p>
+    </div>
+  ) : (
+    <HomePetFortuneCard
+      fortuneData={fortuneData}
+      careReminders={fortuneData?.careReminders}
+      onSelectPet={handleSelectPet}
+      onPetAdded={handleSelectPet}
+    />
+  );
+
+  const petShowSection = (
+    <div className="space-y-6">
+      {isNight ? (
+        <div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#22c55e] drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">
+            {isKo ? "Pet Show" : "Pet Show"}
+          </p>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white drop-shadow-[0_0_18px_rgba(245,217,255,0.2)] md:text-3xl">
+            {isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/80 md:text-base">
+            {isKo
+              ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요."
+              : "Top photos by likes from the last 7 days, grouped by species."}
+          </p>
+        </div>
+      ) : (
+        <SectionHeader
+          eyebrow={isKo ? "Pet Show" : "Pet Show"}
+          title={isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
+          subtitle={
+            isKo
+              ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요."
+              : "Top photos by likes from the last 7 days, grouped by species."
+          }
+        />
+      )}
+      {rankingSource === "mock" && (
+        <p className={`text-xs font-semibold ${isNight ? "text-white/60" : "text-plum/45"}`}>
+          {isKo
+            ? "데모 데이터 (DB 연결 또는 이번 주 게시물 없음)"
+            : "Demo data (no DB or no posts this week)"}
+        </p>
+      )}
+      <div className="flex flex-wrap gap-3">
+        <AuthRequiredLink
+          href="/community/pet-show/upload"
+          className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
+            isNight
+              ? "bg-[#22c55e] shadow-[0_0_22px_rgba(34,197,94,0.25)]"
+              : "bg-channel-community"
+          }`}
+        >
+          {isKo ? "사진 업로드하고 랭킹 참여" : "Upload and join ranking"}
+        </AuthRequiredLink>
+        <AuthRequiredLink
+          href="/community/pet-show/snapzone"
+          className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 ${
+            isNight
+              ? "border border-white/30 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25"
+              : "bg-white/75 text-channel-community hover:bg-white"
+          }`}
+        >
+          {isKo ? "우리아이 자랑 보기" : "View Pet Show"}
+        </AuthRequiredLink>
+        <AuthRequiredLink
+          href="/community/pet-show/fails"
+          className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 ${
+            isNight
+              ? "bg-[#ffd7ff] text-primary hover:brightness-105"
+              : "bg-[#ffd7ff] text-primary hover:brightness-105"
+          }`}
+        >
+          {isKo ? "웃긴 실패 사진" : "Funny fails"}
+        </AuthRequiredLink>
+      </div>
+      <GlassCard className={`min-w-0 p-4 sm:p-5 ${nightGlassCard}`}>
+        <div className="grid gap-3">
+          <RankingPreviewList
+            emoji="🐕"
+            label={isKo ? "강아지 Top 5" : "Dog Top 5"}
+            rows={rankingRows.dog}
+            emptyText={isKo ? "이번 주 강아지 사진을 기다려요." : "Waiting for dog photos."}
+            isNight={isNight}
+          />
+          <RankingPreviewList
+            emoji="🐈"
+            label={isKo ? "고양이 Top 5" : "Cat Top 5"}
+            rows={rankingRows.cat}
+            emptyText={isKo ? "이번 주 고양이 사진을 기다려요." : "Waiting for cat photos."}
+            isNight={isNight}
+          />
+          <RankingPreviewList
+            emoji="🐾"
+            label={isKo ? "렙타일(다른동물) Top 5" : "Other Animals Top 5"}
+            rows={rankingRows.other}
+            emptyText={
+              isKo ? "이번 주 렙타일(다른동물) 사진을 기다려요." : "Waiting for other animal photos."
+            }
+            isNight={isNight}
+          />
+        </div>
+      </GlassCard>
+    </div>
+  );
+
+  const challengeSection = (
+    <div>
+      {isNight ? (
+        <div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#22c55e] drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">
+            🏅
+          </p>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white drop-shadow-[0_0_18px_rgba(245,217,255,0.2)] md:text-3xl">
+            {isKo ? "챌린지" : "Challenge"}
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/80 md:text-base">
+            {isKo
+              ? "미션 인증하고 다른 집사들과 함께해요"
+              : "Complete missions with other pet parents"}
+          </p>
+        </div>
+      ) : (
+        <SectionHeader
+          eyebrow="🏅"
+          title={isKo ? "챌린지" : "Challenge"}
+          subtitle={
+            isKo
+              ? "미션 인증하고 다른 집사들과 함께해요"
+              : "Complete missions with other pet parents"
+          }
+        />
+      )}
+      <div className="mt-4 flex flex-wrap gap-3">
+        <AuthRequiredLink
+          href="/community/challenge"
+          className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
+            isNight
+              ? "bg-[#22c55e] shadow-[0_0_22px_rgba(34,197,94,0.25)]"
+              : "bg-channel-community"
+          }`}
+        >
+          {isKo ? "챌린지 참여하기" : "Join Challenge"}
+        </AuthRequiredLink>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-transparent">
       <AppTopNav active="home" />
       <PageContainer className="space-y-10 md:space-y-14">
         <section className="py-4 md:py-8">
-          <div className="min-w-0 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-x-12 lg:gap-x-16">
-            <div className="min-w-0">
+          <div className="md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-rows-[auto_auto_1fr] md:items-start md:gap-x-12 md:gap-y-8 lg:gap-x-16">
+            <div className="min-w-0 md:col-start-1 md:row-start-1">
               <p
                 className={`inline-flex rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] shadow-sm ${
                   isNight
@@ -220,147 +373,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                 ))}
               </ul>
             </div>
-            <div className="hidden min-w-0 md:block" aria-hidden />
-          </div>
 
-          <div className="mt-8 grid gap-8 md:mt-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] md:items-start md:gap-x-10 lg:gap-x-14">
-            <div className="order-3 min-w-0 space-y-6 md:col-start-1 md:row-start-2 md:max-w-none md:pr-1 lg:pr-2">
-              <div className="md:pt-[7.75rem] lg:pt-[8.5rem]">
-                {isNight ? (
-                  <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#22c55e] drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">
-                      🏅
-                    </p>
-                    <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white drop-shadow-[0_0_18px_rgba(245,217,255,0.2)] md:text-3xl">
-                      {isKo ? "챌린지" : "Challenge"}
-                    </h2>
-                    <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/80 md:text-base">
-                      {isKo
-                        ? "미션 인증하고 다른 집사들과 함께해요"
-                        : "Complete missions with other pet parents"}
-                    </p>
-                  </div>
-                ) : (
-                  <SectionHeader
-                    eyebrow="🏅"
-                    title={isKo ? "챌린지" : "Challenge"}
-                    subtitle={
-                      isKo
-                        ? "미션 인증하고 다른 집사들과 함께해요"
-                        : "Complete missions with other pet parents"
-                    }
-                  />
-                )}
-                <div className="mt-4 flex flex-wrap gap-3">
-                  <AuthRequiredLink
-                    href="/community/challenge"
-                    className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
-                      isNight
-                        ? "bg-[#22c55e] shadow-[0_0_22px_rgba(34,197,94,0.25)]"
-                        : "bg-channel-community"
-                    }`}
-                  >
-                    {isKo ? "챌린지 참여하기" : "Join Challenge"}
-                  </AuthRequiredLink>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                {isNight ? (
-                  <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#22c55e] drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">
-                      {isKo ? "Pet Show" : "Pet Show"}
-                    </p>
-                    <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white drop-shadow-[0_0_18px_rgba(245,217,255,0.2)] md:text-3xl">
-                      {isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
-                    </h2>
-                    <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/80 md:text-base">
-                      {isKo
-                        ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요."
-                        : "Top photos by likes from the last 7 days, grouped by species."}
-                    </p>
-                  </div>
-                ) : (
-                  <SectionHeader
-                    eyebrow={isKo ? "Pet Show" : "Pet Show"}
-                    title={isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
-                    subtitle={
-                      isKo
-                        ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요."
-                        : "Top photos by likes from the last 7 days, grouped by species."
-                    }
-                  />
-                )}
-                {rankingSource === "mock" && (
-                  <p className={`text-xs font-semibold ${isNight ? "text-white/60" : "text-plum/45"}`}>
-                    {isKo
-                      ? "데모 데이터 (DB 연결 또는 이번 주 게시물 없음)"
-                      : "Demo data (no DB or no posts this week)"}
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-3">
-                  <AuthRequiredLink
-                    href="/community/pet-show/upload"
-                    className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
-                      isNight
-                        ? "bg-[#22c55e] shadow-[0_0_22px_rgba(34,197,94,0.25)]"
-                        : "bg-channel-community"
-                    }`}
-                  >
-                    {isKo ? "사진 업로드하고 랭킹 참여" : "Upload and join ranking"}
-                  </AuthRequiredLink>
-                  <AuthRequiredLink
-                    href="/community/pet-show/snapzone"
-                    className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 ${
-                      isNight
-                        ? "border border-white/30 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25"
-                        : "bg-white/75 text-channel-community hover:bg-white"
-                    }`}
-                  >
-                    {isKo ? "우리아이 자랑 보기" : "View Pet Show"}
-                  </AuthRequiredLink>
-                  <AuthRequiredLink
-                    href="/community/pet-show/fails"
-                    className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 ${
-                      isNight
-                        ? "bg-[#ffd7ff] text-primary hover:brightness-105"
-                        : "bg-[#ffd7ff] text-primary hover:brightness-105"
-                    }`}
-                  >
-                    {isKo ? "웃긴 실패 사진" : "Funny fails"}
-                  </AuthRequiredLink>
-                </div>
-                <GlassCard className={`min-w-0 p-4 sm:p-5 ${nightGlassCard}`}>
-                  <div className="grid gap-3">
-                    <RankingPreviewList
-                      emoji="🐕"
-                      label={isKo ? "강아지 Top 5" : "Dog Top 5"}
-                      rows={rankingRows.dog}
-                      emptyText={isKo ? "이번 주 강아지 사진을 기다려요." : "Waiting for dog photos."}
-                      isNight={isNight}
-                    />
-                    <RankingPreviewList
-                      emoji="🐈"
-                      label={isKo ? "고양이 Top 5" : "Cat Top 5"}
-                      rows={rankingRows.cat}
-                      emptyText={isKo ? "이번 주 고양이 사진을 기다려요." : "Waiting for cat photos."}
-                      isNight={isNight}
-                    />
-                    <RankingPreviewList
-                      emoji="🐾"
-                      label={isKo ? "렙타일(다른동물) Top 5" : "Other Animals Top 5"}
-                      rows={rankingRows.other}
-                      emptyText={
-                        isKo ? "이번 주 렙타일(다른동물) 사진을 기다려요." : "Waiting for other animal photos."
-                      }
-                      isNight={isNight}
-                    />
-                  </div>
-                </GlassCard>
-              </div>
-            </div>
-
-            <div className="order-1 min-w-0 md:col-start-1 md:row-start-1">
+            <div className="mt-6 min-w-0 md:col-start-1 md:row-start-2 md:mt-0">
               <AuthRequiredLink
                 href="/profile"
                 className={`inline-flex rounded-full px-6 py-3.5 text-sm font-extrabold text-white shadow-sm transition hover:scale-[1.02] hover:brightness-105 ${
@@ -373,21 +387,15 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
               </AuthRequiredLink>
             </div>
 
-            <div className="relative order-2 min-w-0 overflow-visible md:col-start-2 md:row-start-1 md:ml-2 md:row-span-2 md:self-start lg:ml-4 xl:ml-6">
-              {fortuneLoading ? (
-                <div className="pet-fortune-guest-shell flex min-h-[280px] items-center justify-center">
-                  <p className="text-sm font-semibold text-stone-600">
-                    {isKo ? "오늘의 운세를 불러오는 중이에요…" : "Loading today's fortune…"}
-                  </p>
-                </div>
-              ) : (
-                <HomePetFortuneCard
-                  fortuneData={fortuneData}
-                  careReminders={fortuneData?.careReminders}
-                  onSelectPet={handleSelectPet}
-                  onPetAdded={handleSelectPet}
-                />
-              )}
+            <div className="mt-8 grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:contents md:gap-0">
+              <div className="min-w-0 space-y-8 md:col-start-1 md:row-start-3">
+                {petShowSection}
+                {challengeSection}
+              </div>
+
+              <div className="relative min-w-0 overflow-visible md:col-start-2 md:row-start-1 md:row-span-3 md:pl-2 md:sticky md:top-24 lg:pl-4">
+                {fortunePanel}
+              </div>
             </div>
           </div>
         </section>

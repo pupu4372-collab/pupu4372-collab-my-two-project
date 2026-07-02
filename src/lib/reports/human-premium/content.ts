@@ -896,7 +896,7 @@ ${summary.story}
 
 Dominant element: ${elLabel(saju.dominantElement, locale)}. Read the chart as a map, not a verdict.`;
 
-  const sections: Array<{ id: string; kind: HumanPremiumReportSection["kind"]; title: string; subtitle: string; body: string; bullets?: string[]; pageEstimate?: number }> = [
+  const sections: Array<{ id: string; kind: HumanPremiumReportSection["kind"]; title: string; subtitle?: string; body: string; bullets?: string[]; pageEstimate?: number }> = [
     {
       id: "section-cover",
       kind: "cover",
@@ -982,7 +982,7 @@ Dominant element: ${elLabel(saju.dominantElement, locale)}. Read the chart as a 
           ? locale === "ko"
             ? "풀버전"
             : "Full version"
-          : undefined,
+          : "",
       body: formatProphecyBody(
         structured.prophecy,
         structured.cohortInsight,

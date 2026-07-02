@@ -133,13 +133,13 @@ export function PetFortuneEntryForm({ loading, error, onSubmit }: Props) {
       <div className="pet-fortune-entry-fields">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <label className="pet-fortune-field">
-            <span className="pet-fortune-field-label">{t("labelSpecies")}</span>
             <div className="pet-fortune-input pet-fortune-input--dark">
               <select
                 className="pet-fortune-input-field pet-fortune-select"
                 value={species}
                 onChange={(e) => setSpecies(e.target.value as Species | "")}
                 required
+                aria-label={t("labelSpecies")}
               >
                 <option value="" disabled>
                   {t("speciesPlaceholder")}
@@ -155,7 +155,6 @@ export function PetFortuneEntryForm({ loading, error, onSubmit }: Props) {
           </label>
 
           <label className="pet-fortune-field">
-            <span className="pet-fortune-field-label">{t("labelName")}</span>
             <div className="pet-fortune-input">
               <input
                 className="pet-fortune-input-field"
@@ -166,16 +165,16 @@ export function PetFortuneEntryForm({ loading, error, onSubmit }: Props) {
                 required
                 maxLength={40}
                 autoComplete="off"
+                aria-label={t("labelName")}
               />
             </div>
           </label>
         </div>
 
         <fieldset className="pet-fortune-field">
-          <legend className="pet-fortune-field-label">{t("labelBirth")}</legend>
+          <legend className="sr-only">{t("labelBirth")}</legend>
           <div className="grid grid-cols-3 gap-3">
             <label className="pet-fortune-date-cell">
-              <span className="pet-fortune-date-hint">{t("yearPlaceholder")}</span>
               <div className="pet-fortune-input pet-fortune-input--date">
                 <select
                   className="pet-fortune-input-field pet-fortune-select text-center"
@@ -195,7 +194,6 @@ export function PetFortuneEntryForm({ loading, error, onSubmit }: Props) {
               </div>
             </label>
             <label className="pet-fortune-date-cell">
-              <span className="pet-fortune-date-hint">{t("monthPlaceholder")}</span>
               <div className="pet-fortune-input pet-fortune-input--date">
                 <select
                   className="pet-fortune-input-field pet-fortune-select text-center"
@@ -215,7 +213,6 @@ export function PetFortuneEntryForm({ loading, error, onSubmit }: Props) {
               </div>
             </label>
             <label className="pet-fortune-date-cell">
-              <span className="pet-fortune-date-hint">{t("dayPlaceholder")}</span>
               <div className="pet-fortune-input pet-fortune-input--date">
                 <select
                   className="pet-fortune-input-field pet-fortune-select text-center"
