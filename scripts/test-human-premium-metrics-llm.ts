@@ -18,6 +18,7 @@ config({ path: ".env" });
 
 const baseInput = {
   personName: "테스트",
+  email: "test@example.com",
   birthDate: "1990-05-15",
   birthTime: "14:30",
   birthTimeUnknown: false,
