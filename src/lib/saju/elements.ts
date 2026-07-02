@@ -74,6 +74,21 @@ const BRANCH_LABEL: Record<string, { hangul: string; romanized: string }> = {
   亥: { hangul: "해", romanized: "Hae" },
 };
 
+const BRANCH_ZODIAC_EN: Record<string, string> = {
+  子: "Rat",
+  丑: "Ox",
+  寅: "Tiger",
+  卯: "Rabbit",
+  辰: "Dragon",
+  巳: "Snake",
+  午: "Horse",
+  未: "Goat",
+  申: "Monkey",
+  酉: "Rooster",
+  戌: "Dog",
+  亥: "Pig",
+};
+
 export function charToElement(char: string): ElementKey | null {
   return STEM_BRANCH_ELEMENT[char] ?? HANJA_TO_ELEMENT[char] ?? null;
 }
@@ -191,5 +206,7 @@ export function formatStemBranchLabels(
 export function formatBranchSign(branchHanja: string, locale: Locale): string {
   const b = BRANCH_LABEL[branchHanja];
   if (!b) return branchHanja;
-  return locale === "ko" ? `${b.hangul}(${branchHanja})` : `${b.romanized} (${branchHanja})`;
+  if (locale === "ko") return `${b.hangul}(${branchHanja})`;
+  const zodiac = BRANCH_ZODIAC_EN[branchHanja] ?? b.romanized;
+  return `${zodiac} (${branchHanja})`;
 }

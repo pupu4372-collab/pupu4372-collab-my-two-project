@@ -305,38 +305,38 @@ const CAUTION_MSG: Record<
 const TIPS: Record<Species, { ko: string[][]; en: string[][] }> = {
   dog: {
     ko: [
-      ["🌿", "오전 산책 20분 이상 추천"],
-      ["💧", "물 그릇 깨끗이 교체해 주세요"],
-      ["🤗", "오후엔 조용히 옆에서 쉬어주세요"],
+      ["🌿", "오전 산책 20분 이상 추천해요."],
+      ["💧", "물 그릇을 깨끗이 교체해 주세요."],
+      ["🤗", "오후엔 조용히 옆에서 쉬어주세요."],
     ],
     en: [
-      ["🌿", "Morning walk 20+ minutes"],
-      ["💧", "Refresh the water bowl"],
-      ["🤗", "Quiet afternoon cuddle time"],
+      ["🌿", "Take a 20+ minute morning walk."],
+      ["💧", "Refresh the water bowl."],
+      ["🤗", "Quiet afternoon cuddle time."],
     ],
   },
   cat: {
     ko: [
-      ["🛋️", "좋아하는 자리에 담요 깔아주기"],
-      ["🔇", "조용한 환경 만들어주기"],
-      ["🐟", "좋아하는 간식으로 기분 업!"],
+      ["🛋️", "좋아하는 자리에 담요를 깔아주세요."],
+      ["🔇", "조용한 환경을 만들어주세요."],
+      ["🐟", "좋아하는 간식으로 기분을 업 시켜주세요."],
     ],
     en: [
-      ["🛋️", "Lay a blanket in their favorite spot"],
-      ["🔇", "Keep the room calm and quiet"],
-      ["🐟", "A favorite snack lifts the mood"],
+      ["🛋️", "Lay a blanket in their favorite spot."],
+      ["🔇", "Keep the room calm and quiet."],
+      ["🐟", "A favorite snack lifts the mood."],
     ],
   },
   other: {
     ko: [
-      ["🌡️", "온도·습도를 평소보다 꼼꼼히 확인"],
-      ["🧼", "사육장·케이지 청결 유지"],
-      ["👀", "식사·활동량 변화를 가볍게 기록"],
+      ["🌡️", "온도와 습도를 평소보다 꼼꼼히 확인해 주세요."],
+      ["🧼", "사육장·케이지 청결을 유지해 주세요."],
+      ["👀", "식사·활동량 변화를 가볍게 기록해 두세요."],
     ],
     en: [
-      ["🌡️", "Check temperature and humidity carefully"],
-      ["🧼", "Keep the habitat clean"],
-      ["👀", "Note any appetite or activity changes"],
+      ["🌡️", "Check temperature and humidity carefully."],
+      ["🧼", "Keep the habitat clean."],
+      ["👀", "Note any appetite or activity changes."],
     ],
   },
 };
@@ -432,18 +432,21 @@ function categoryScores(
         ];
 
   const weights: Record<(typeof labels)[number]["key"], number> = {
-    health: petElement === "earth" || petElement === "metal" ? 8 : 0,
-    appetite: petElement === "fire" || petElement === "earth" ? 8 : 0,
-    activity: petElement === "fire" || petElement === "wood" ? 10 : 0,
-    sleep: petElement === "water" || petElement === "earth" ? 10 : 0,
+    health: petElement === "earth" || petElement === "metal" ? 6 : 0,
+    appetite: petElement === "fire" || petElement === "earth" ? 6 : 0,
+    activity: petElement === "fire" || petElement === "wood" ? 7 : 0,
+    sleep: petElement === "water" || petElement === "earth" ? 7 : 0,
   };
 
-  return labels.map((item, index) => ({
-    icon: item.icon,
-    label: item.label,
-    score: clampScore(base + weights[item.key] + (seed % 17) - 8 + index * 3),
-    color: CATEGORY_COLORS[item.key],
-  }));
+  return labels.map((item) => {
+    const jitter = (hashSeed(String(seed), item.key) % 25) - 12;
+    return {
+      icon: item.icon,
+      label: item.label,
+      score: clampScore(base + weights[item.key] + jitter),
+      color: CATEGORY_COLORS[item.key],
+    };
+  });
 }
 
 export function buildCommonPetDailyFortune(
