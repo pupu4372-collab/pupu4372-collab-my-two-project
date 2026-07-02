@@ -34,7 +34,7 @@ import {
   type ReportType,
 } from "@/lib/reports/human-premium/types";
 import { useLocale } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function HumanPremiumShop() {
   const routeLocale = useLocale();
@@ -97,10 +97,13 @@ export function HumanPremiumShop() {
     routeLocale,
   ]);
 
-  function handleProfileChange(next: HumanPremiumProfile) {
-    setProfile(next);
-    saveHumanPremiumProfile(next);
-  }
+  const patchProfile = useCallback((partial: Partial<HumanPremiumProfile>) => {
+    setProfile((prev) => {
+      const next = { ...prev, ...partial };
+      saveHumanPremiumProfile(next);
+      return next;
+    });
+  }, []);
 
   function handleAddToCart(reportType: ReportType) {
     if (purchasedSet.has(reportType)) return;
@@ -122,7 +125,7 @@ export function HumanPremiumShop() {
 
   return (
     <div className="space-y-10">
-      <DayPillarPreview profile={profile} onProfileChange={handleProfileChange} />
+      <DayPillarPreview profile={profile} onPatchProfile={patchProfile} />
 
       <div className="space-y-6">
         <header className="text-center">

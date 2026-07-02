@@ -78,7 +78,7 @@ ${REPORT_PROMPT_SCORE_RULES}
 roadmap 6항목: 1~3월, 4~6월, 7~8월, 9~10월, 11~12월, 대운 전체.
 decisionMoments 4항목. 결정프레임 Q1~Q3는 roadmap 마지막 body에 포함.`,
 
-  prophecy: `■ S8 봉인 & 천명
+  prophecy: `■ S8 잠겨진 천명
 
 출력 스키마:
 {

@@ -5,6 +5,7 @@ import {
   formatTenGodLabel,
   STEM_META,
 } from "@/lib/saju/sipseong";
+import { branchHangulLabel, stemHangulLabel } from "@/lib/saju/elements";
 import type { SajuPillars } from "./report-helpers";
 import { hanjaPaleBg } from "./report-helpers";
 
@@ -165,7 +166,11 @@ export function ManseTable({
                     >
                       {pillar.stemHanja}
                     </span>
-                    <span className="text-sm font-bold">{pillar.stemLabel}</span>
+                    <span className="text-sm font-bold">
+                      {isKo
+                        ? stemHangulLabel(stemHanja)
+                        : pillar.stemLabel}
+                    </span>
                   </div>
                   <span className="absolute bottom-2 right-3 text-xs font-bold text-[var(--jig-muted)]">
                     {col.relation}
@@ -214,7 +219,11 @@ export function ManseTable({
                     <span className="human-premium-serif text-3xl font-bold sm:text-4xl">
                       {pillar.branchHanja}
                     </span>
-                    <span className="text-sm font-bold">{pillar.branchLabel}</span>
+                    <span className="text-sm font-bold">
+                      {isKo
+                        ? branchHangulLabel(branchHanja)
+                        : pillar.branchLabel}
+                    </span>
                   </div>
                   <span className="absolute bottom-2 right-3 text-xs font-bold text-[var(--jig-muted)]">
                     {col.emphasis ? (isKo ? "배우자" : "Partner") : col.relation}

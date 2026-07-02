@@ -262,14 +262,32 @@ html.native-app body {
 }
 
 .human-premium-birth-pill {
+  position: relative;
+  z-index: 1;
+  min-height: 2.75rem;
   border-radius: 9999px;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition:
     background-color 0.15s ease,
     color 0.15s ease,
     box-shadow 0.15s ease;
+}
+
+.human-premium-birth-calendar {
+  position: relative;
+  z-index: 2;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.human-premium-birth-calendar legend {
+  padding: 0;
 }
 
 .human-premium-birth-pill--idle {

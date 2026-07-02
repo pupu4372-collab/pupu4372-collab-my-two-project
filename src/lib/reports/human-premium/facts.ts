@@ -119,7 +119,7 @@ function stemEumyang(stem: string, locale: Locale): string {
 function elementLabel(key: ElementKey, locale: Locale): string {
   const meta = ELEMENT_META[key];
   if (locale === "ko") return `${meta.hangul}(${meta.hanja})`;
-  return `${meta.romanized} (${meta.hanja})`;
+  return `${meta.meaning} (${meta.hanja})`;
 }
 
 function pickStrongWeak(
@@ -154,14 +154,11 @@ export function buildHumanPremiumFacts(
   const ilganOhang = dayElement
     ? elementLabel(dayElement, locale)
     : saju.pillars.day.stemLabel;
-  const total =
-    saju.elements.reduce((sum, el) => sum + el.count, 0) || 1;
-
   const elements: HumanPremiumElementFact[] = saju.elements.map((el) => ({
     key: el.key,
     label: elementLabel(el.key, locale),
     count: el.count,
-    percent: Math.round((el.count / total) * 100),
+    percent: el.percent,
   }));
 
   const { strong, weak } = pickStrongWeak(elements);

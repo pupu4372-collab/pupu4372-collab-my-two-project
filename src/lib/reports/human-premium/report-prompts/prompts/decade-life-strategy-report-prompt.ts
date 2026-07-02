@@ -126,7 +126,7 @@ decisionMoments 4항목 (script 큰따옴표 80자):
 결정프레임 Q1~Q3는 roadmap 마지막 body:
 - 단순 vs 복잡? / 3년 후에도 계속? / 없어도 괜찮은가?`,
 
-  prophecy: `■ S8 봉인 & 천명 · 10년 (가장 구체적 예언)
+  prophecy: `■ S8 잠겨진 천명 · 10년 (가장 구체적 예언)
 
 출력 스키마:
 {

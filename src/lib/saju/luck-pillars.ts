@@ -13,8 +13,12 @@ const STEM_ORDER = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬
 const BRANCH_ORDER = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
 const YANG_STEMS = new Set(["甲", "丙", "戊", "庚", "壬"]);
 
-function pillarFromStemBranch(stem: string, branch: string): PillarDisplay {
-  const labels = formatStemBranchLabels(stem, branch);
+function pillarFromStemBranch(
+  stem: string,
+  branch: string,
+  locale: Locale = "ko"
+): PillarDisplay {
+  const labels = formatStemBranchLabels(stem, branch, locale);
   return {
     pillar: `${stem}${branch}`,
     stem,
@@ -25,9 +29,9 @@ function pillarFromStemBranch(stem: string, branch: string): PillarDisplay {
   };
 }
 
-function pillarFromGanZhi(ganzi: string): PillarDisplay {
+function pillarFromGanZhi(ganzi: string, locale: Locale = "ko"): PillarDisplay {
   const { stem, branch } = splitGanZhi(ganzi);
-  return pillarFromStemBranch(stem, branch);
+  return pillarFromStemBranch(stem, branch, locale);
 }
 
 function sexagenaryIndex(pillar: PillarDisplay): number {
@@ -41,9 +45,17 @@ function sexagenaryIndex(pillar: PillarDisplay): number {
   return 0;
 }
 
-function shiftPillar(pillar: PillarDisplay, offset: number): PillarDisplay {
+function shiftPillar(
+  pillar: PillarDisplay,
+  offset: number,
+  locale: Locale = "ko"
+): PillarDisplay {
   const next = (sexagenaryIndex(pillar) + offset + 600) % 60;
-  return pillarFromStemBranch(STEM_ORDER[next % 10], BRANCH_ORDER[next % 12]);
+  return pillarFromStemBranch(
+    STEM_ORDER[next % 10],
+    BRANCH_ORDER[next % 12],
+    locale
+  );
 }
 
 export function computeSeunPillar(year: number): PillarDisplay {
@@ -128,7 +140,11 @@ export function computeDaewoonCandidates(options: {
     const start = computeStartAge(options.birthUtc, direction, options.locale);
     const sign = direction === "forward" ? 1 : -1;
     const cycles = Array.from({ length: 8 }, (_, index) => {
-      const pillar = shiftPillar(options.monthPillar, sign * (index + 1));
+      const pillar = shiftPillar(
+        options.monthPillar,
+        sign * (index + 1),
+        options.locale
+      );
       const reading = describeLuckPillar(options.dayStem, pillar, options.locale);
       return {
         index: index + 1,

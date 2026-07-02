@@ -207,6 +207,12 @@ export function getZodiacSignByTime(timeString: string): JijiHourInfo {
   throw new Error(`No jiji slot for time: ${timeString}`);
 }
 
+/** Compact 12 지지 double-hour range for UI (e.g. "15:30~17:30"). */
+export function formatJijiTimeRangeDisplay(timeString: string): string {
+  const info = getZodiacSignByTime(timeString);
+  return info.kstRange.replace(/\s*~\s*/g, "~");
+}
+
 export function utcToKstTimeString(utcIso: string): string {
   const dtf = new Intl.DateTimeFormat("en-GB", {
     timeZone: KST_TIMEZONE,

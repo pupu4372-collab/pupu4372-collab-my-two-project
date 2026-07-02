@@ -123,7 +123,7 @@ decisionMoments 4항목 (script 큰따옴표, 80자):
 - 3년 뒤 상태?
 - 혼자 vs 함께할 때 더 빛나는가?`,
 
-  prophecy: `■ S8 봉인 & 천명 · 심리·멘탈
+  prophecy: `■ S8 잠겨진 천명 · 심리·멘탈
 
 출력 스키마:
 {

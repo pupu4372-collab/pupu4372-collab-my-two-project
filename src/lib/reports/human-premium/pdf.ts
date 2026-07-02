@@ -86,7 +86,6 @@ function elementSummaryBlocks(
   isKo: boolean
 ): Content[] {
   const elements = asElements(report.saju.elements);
-  const total = elements.reduce((sum, item) => sum + item.count, 0) || 1;
 
   const title = isKo ? "오행 에너지 균형" : "Element Balance";
   const subtitle = isKo
@@ -94,7 +93,7 @@ function elementSummaryBlocks(
     : "Structural analysis of five-element distribution";
 
   const rows: Content[] = elements.map((item) => {
-    const pct = Math.round((item.count / total) * 100);
+    const pct = item.percent;
     const label = isKo
       ? `${item.hangul} (${item.hanja})`
       : `${item.romanized} (${item.hanja})`;

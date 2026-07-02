@@ -12,9 +12,11 @@ import {
   OBANG_COLORS,
   asElements,
   asPillars,
+  formatBirthInputSummary,
   formatIssuedDate,
   obangPaleBg,
 } from "./report-helpers";
+import { branchHangulLabel, stemHangulLabel } from "@/lib/saju/elements";
 import { BodyText, ReportTypeTitle } from "./report-ui";
 
 interface CoverSectionProps {
@@ -30,7 +32,6 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
   const typeLabel = isKo
     ? REPORT_TYPE_LABELS[reportTypeKey]
     : REPORT_TYPE_LABELS_EN[reportTypeKey];
-  const total = elements.reduce((sum, item) => sum + item.count, 0) || 1;
   const dominant = elements.find(
     (item) =>
       item.key === report.saju.dominantElement ||
@@ -72,6 +73,9 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
                 {report.personName}
                 {isKo ? "님" : ""}
               </p>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--jig-muted)]">
+                {formatBirthInputSummary(report.birthBasis, report.calendarType, isKo)}
+              </p>
               <ReportTypeTitle className="mt-1">{typeLabel}</ReportTypeTitle>
             </div>
             <div className="border-l border-[var(--jig-ink)]/10 pl-6 text-left">
@@ -103,7 +107,7 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
         </p>
         <p className="human-premium-serif text-2xl font-bold text-[var(--jig-ink)]">
           {isKo
-            ? `${day.pillar} · ${day.stemLabel} · ${day.branchLabel}`
+            ? `${day.pillar} · ${stemHangulLabel(day.stemHanja)} · ${branchHangulLabel(day.branchHanja)}`
             : `${day.pillar} · ${day.stemLabel} · ${day.branchLabel}`}
         </p>
         <BodyText body={report.summary.story} className="mt-4 text-[var(--jig-ink)]/85" />
@@ -127,7 +131,7 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
         </header>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {elements.map((item) => {
-            const pct = Math.round((item.count / total) * 100);
+            const pct = item.percent;
             const color = OBANG_COLORS[item.key] ?? "#888";
             const isDominant = dominant?.key === item.key;
             return (
@@ -141,7 +145,7 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
               >
                 <div className="mb-3 flex items-start justify-between">
                   <span className="human-premium-label-caps" style={{ color }}>
-                    {isKo ? `${item.hangul} (${item.hanja})` : `${item.romanized} (${item.hanja})`}
+                    {isKo ? `${item.hangul} (${item.hanja})` : `${item.meaning} (${item.hanja})`}
                   </span>
                   <span className="text-lg font-semibold tabular-nums">{pct}%</span>
                 </div>

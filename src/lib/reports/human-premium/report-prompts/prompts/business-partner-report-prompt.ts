@@ -115,7 +115,7 @@ decisionMoments 4항목 (script는 큰따옴표 대화, 80자):
 - 설계자 vs 실행자?
 - 최악 시 가족 손실 한도?`,
 
-  prophecy: `■ S8 봉인 & 천명 · 비즈니스
+  prophecy: `■ S8 잠겨진 천명 · 비즈니스
 
 출력 스키마:
 {

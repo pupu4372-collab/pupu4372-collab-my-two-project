@@ -20,8 +20,8 @@ import type {
 import { getKstJijiFromUtc } from "./jiji-hours";
 import { localBirthToUtc } from "./timezone";
 
-function pillarFromKsaju(p: PillarInfo): PillarDisplay {
-  const labels = formatStemBranchLabels(p.stem, p.branch);
+function pillarFromKsaju(p: PillarInfo, locale: Locale): PillarDisplay {
+  const labels = formatStemBranchLabels(p.stem, p.branch, locale);
   return {
     pillar: p.ganzi,
     stem: p.stem,
@@ -61,10 +61,12 @@ export function buildBasicSajuResponse(
   );
 
   const pillars = {
-    year: pillarFromKsaju(saju.pillars[0]),
-    month: pillarFromKsaju(saju.pillars[1]),
-    day: pillarFromKsaju(saju.pillars[2]),
-    hour: input.birthTimeUnknown ? null : pillarFromKsaju(saju.pillars[3]),
+    year: pillarFromKsaju(saju.pillars[0], input.locale),
+    month: pillarFromKsaju(saju.pillars[1], input.locale),
+    day: pillarFromKsaju(saju.pillars[2], input.locale),
+    hour: input.birthTimeUnknown
+      ? null
+      : pillarFromKsaju(saju.pillars[3], input.locale),
   };
 
   const chars = collectPillarChars(pillars, !input.birthTimeUnknown);
@@ -127,5 +129,5 @@ export function computeKstDayPillar(dateKst: string): PillarDisplay {
     locale: "ko" as Locale,
     privacyConsent: true,
   });
-  return pillarFromKsaju(saju.pillars[2]);
+  return pillarFromKsaju(saju.pillars[2], "ko");
 }

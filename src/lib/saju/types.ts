@@ -20,6 +20,7 @@ export interface ElementDisplay {
   romanized: string;
   meaning: string;
   count: number;
+  percent: number;
 }
 
 /** KST-based 12 double-hour (지지) slot with hip romanization */

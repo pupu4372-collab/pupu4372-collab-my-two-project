@@ -122,7 +122,7 @@ decisionMoments 4항목 (script 큰따옴표, 80자):
 - 3년 뒤 편안 vs 바쁨?
 - 데이터·전문가·원칙 정렬?`,
 
-  prophecy: `■ S8 봉인 & 천명 · 재물
+  prophecy: `■ S8 잠겨진 천명 · 재물
 
 출력 스키마:
 {

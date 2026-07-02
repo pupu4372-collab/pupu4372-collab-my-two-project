@@ -7,7 +7,7 @@ import { SajuResultShareRow } from "@/components/k-saju/SajuResultShareRow";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
-import { charToElement, ELEMENT_META } from "@/lib/saju/elements";
+import { branchHangulLabel, charToElement, ELEMENT_META, stemHangulLabel } from "@/lib/saju/elements";
 import { formatJijiDisplay } from "@/lib/saju/jiji-hours";
 import { buildPetLuckyScores, dominantElementLabel } from "@/lib/saju/pet-lucky-scores";
 import type { Locale, PillarDisplay, SajuBasicResponse } from "@/lib/saju/types";
@@ -98,9 +98,11 @@ function elementPercent(count: number, total: number) {
 function PillarCell({
   pillar,
   emphasize,
+  locale,
 }: {
   pillar: PillarDisplay;
   emphasize?: boolean;
+  locale: Locale;
 }) {
   const stemEl = charToElement(pillar.stemHanja);
   const branchEl = charToElement(pillar.branchHanja);
@@ -117,7 +119,9 @@ function PillarCell({
         }`}
       >
         <div className="text-2xl font-bold text-primary">{pillar.stemHanja}</div>
-        <div className="mt-1 text-xs text-on-surface-variant">{pillar.stemLabel}</div>
+        <div className="mt-1 text-xs text-on-surface-variant">
+          {locale === "ko" ? stemHangulLabel(pillar.stemHanja) : pillar.stemLabel}
+        </div>
       </div>
       <div
         className={`rounded-2xl border px-2 py-5 ${
@@ -125,7 +129,9 @@ function PillarCell({
         }`}
       >
         <div className={`text-2xl font-bold ${branchAccent ? "" : "text-primary"}`}>{pillar.branchHanja}</div>
-        <div className="mt-1 text-xs opacity-80">{pillar.branchLabel}</div>
+        <div className="mt-1 text-xs opacity-80">
+          {locale === "ko" ? branchHangulLabel(pillar.branchHanja) : pillar.branchLabel}
+        </div>
       </div>
     </div>
   );
@@ -375,20 +381,20 @@ export function SajuResult({ result }: SajuResultProps) {
               {result.pillars.hour ? (
                 <div>
                   <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-on-surface-variant">{t.hour}</p>
-                  <PillarCell pillar={result.pillars.hour} />
+                  <PillarCell pillar={result.pillars.hour} locale={result.locale} />
                 </div>
               ) : null}
               <div>
                 <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-on-surface-variant">{t.day}</p>
-                <PillarCell pillar={result.pillars.day} emphasize />
+                <PillarCell pillar={result.pillars.day} emphasize locale={result.locale} />
               </div>
               <div>
                 <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-on-surface-variant">{t.month}</p>
-                <PillarCell pillar={result.pillars.month} />
+                <PillarCell pillar={result.pillars.month} locale={result.locale} />
               </div>
               <div>
                 <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-on-surface-variant">{t.year}</p>
-                <PillarCell pillar={result.pillars.year} />
+                <PillarCell pillar={result.pillars.year} locale={result.locale} />
               </div>
             </div>
             {!result.pillars.hour && (

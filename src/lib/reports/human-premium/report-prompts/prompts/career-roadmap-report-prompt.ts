@@ -117,7 +117,7 @@ decisionMoments 4항목 (script 큰따옴표, 80자):
 - 3년 뒤 위치?
 - 최악 시나리오 감당?`,
 
-  prophecy: `■ S8 봉인 & 천명 · 커리어
+  prophecy: `■ S8 잠겨진 천명 · 커리어
 
 출력 스키마:
 {

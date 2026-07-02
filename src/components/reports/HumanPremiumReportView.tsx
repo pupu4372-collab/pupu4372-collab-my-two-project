@@ -48,7 +48,7 @@ const UI = {
       "section-opportunity": "포착할 기회",
       "section-risk": "예측 리스크",
       "section-roadmap": "시간 로드맵",
-      "section-prophecy": "봉인된 예언",
+      "section-prophecy": "잠겨진 천명",
     },
   },
   en: {
@@ -80,7 +80,7 @@ const UI = {
       "section-opportunity": "Opportunities",
       "section-risk": "Risks",
       "section-roadmap": "Roadmap",
-      "section-prophecy": "Sealed prophecy",
+      "section-prophecy": "Locked destiny",
     },
   },
 } as const;

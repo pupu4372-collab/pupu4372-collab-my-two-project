@@ -25,12 +25,25 @@ import {
   buildDeepAnalysisPrompts,
   buildOpportunitiesPrompts,
   buildProphecyPrompts,
+  buildCohortInsightRetryPrompts,
   buildRisksPrompts,
   buildRoadmapPrompts,
   buildSajuStructurePrompts,
 } from "./prompts/human-prompt";
 import type { PremiumPromptContext } from "./prompts/premium-context";
 import { resolvePromptProduct, reportSpecificInputCacheFacet } from "@/lib/reports/human-premium/report-prompts";
+import {
+  parseCohortInsight,
+  parseDeepAnalysis,
+  parseDecisionMoments,
+  parseMasterNarrativeResult,
+  parseOpportunities,
+  parseProphecy,
+  parseRisks,
+  parseRoadmap,
+  parseSajuStructure,
+} from "./human-interpretation-parse";
+import { llmDebugLog } from "./debug-log";
 import {
   callClaudeJsonParsed,
   isClaudeEnabled,
@@ -39,17 +52,6 @@ import {
   callOpenAiJsonParsed,
   isOpenAiEnabled,
 } from "./providers/openai-provider";
-import {
-  parseCohortInsight,
-  parseDeepAnalysis,
-  parseDecisionMoments,
-  parseMasterNarrative,
-  parseOpportunities,
-  parseProphecy,
-  parseRisks,
-  parseRoadmap,
-  parseSajuStructure,
-} from "./human-interpretation-parse";
 import type { HumanInterpretationJson, LlmPromptPair } from "./types";
 
 export type PremiumLlmProvider = "claude" | "openai" | "gemini";
@@ -124,7 +126,10 @@ async function callProviderJson(
 
 function providerOrder(): PremiumLlmProvider[] {
   const forced = process.env.HUMAN_PREMIUM_LLM_PROVIDER?.trim().toLowerCase();
-  if (forced === "claude" && isClaudeEnabled()) return ["claude"];
+  if (forced === "claude" && isClaudeEnabled()) {
+    llmDebugLog("[LLM_PROVIDER_ORDER]", { forced, order: ["claude"], claudeEnabled: true });
+    return ["claude"];
+  }
   if (forced === "openai" && isOpenAiEnabled()) return ["openai"];
   if (forced === "gemini" && isGeminiEnabled()) return ["gemini"];
 
@@ -132,6 +137,14 @@ function providerOrder(): PremiumLlmProvider[] {
   if (isClaudeEnabled()) order.push("claude");
   if (isOpenAiEnabled()) order.push("openai");
   if (isGeminiEnabled()) order.push("gemini");
+  llmDebugLog("[LLM_PROVIDER_ORDER]", {
+    forced: forced || null,
+    order,
+    claudeEnabled: isClaudeEnabled(),
+    openaiEnabled: isOpenAiEnabled(),
+    geminiEnabled: isGeminiEnabled(),
+    anthropicModel: process.env.ANTHROPIC_MODEL?.trim() || "(default)",
+  });
   return order;
 }
 
@@ -163,8 +176,19 @@ async function callPremiumJsonCached(options: {
 
     const cached = await getCachedPremiumCallResult(cacheKey);
     if (cached) {
+      llmDebugLog("[LLM_CACHE_HIT]", {
+        callKind: options.callKind,
+        provider,
+        model,
+      });
       return { data: cached.data, provider: cached.provider as PremiumLlmProvider };
     }
+
+    llmDebugLog("[LLM_CACHE_MISS]", {
+      callKind: options.callKind,
+      provider,
+      model,
+    });
 
     const inFlight = getPremiumCallInFlight(cacheKey);
     if (inFlight) {
@@ -187,7 +211,13 @@ async function callPremiumJsonCached(options: {
           result
         );
         return result;
-      } catch {
+      } catch (error) {
+        console.error("[LLM_PROVIDER_ERROR]", {
+          callKind: options.callKind,
+          provider,
+          model,
+          message: error instanceof Error ? error.message : String(error),
+        });
         return null;
       }
     })().finally(() => {
@@ -220,8 +250,14 @@ async function generateMasterNarrative(ctx: PremiumLlmContext) {
     prompts: buildMasterNarrativePrompts(ctx),
     maxTokens: 2000,
   });
-  if (!result) return { value: null, provider: null };
-  return { value: parseMasterNarrative(result.data), provider: result.provider };
+  if (!result) return { narrative: null, scores: null, provider: null };
+  const parsed = parseMasterNarrativeResult(result.data);
+  if (!parsed) return { narrative: null, scores: null, provider: result.provider };
+  return {
+    narrative: parsed.narrative,
+    scores: parsed.scores,
+    provider: result.provider,
+  };
 }
 
 async function generateDeepAnalysis(ctx: PremiumLlmContext, narrative: string) {
@@ -265,7 +301,7 @@ async function generateRoadmap(ctx: PremiumLlmContext, narrative: string) {
     callKind: "roadmap",
     ctx,
     prompts: buildRoadmapPrompts(ctx, narrative),
-    maxTokens: 1500,
+    maxTokens: 3200,
     narrative,
   });
   if (!result) return { roadmap: null, decisionMoments: null, provider: null };
@@ -277,27 +313,64 @@ async function generateRoadmap(ctx: PremiumLlmContext, narrative: string) {
 }
 
 async function generateProphecyBundle(ctx: PremiumLlmContext, narrative: string) {
+  llmDebugLog("[LLM_SLOT_START]", { slot: "prophecy", reportType: ctx.reportType });
   const currentYear = new Date().getFullYear();
   const ctxWithYear = { ...ctx, currentYear };
   const result = await callPremiumJsonCached({
     callKind: "prophecy",
     ctx,
     prompts: buildProphecyPrompts(ctxWithYear, narrative),
-    maxTokens: 1000,
+    maxTokens: 1600,
     narrative,
   });
-  if (!result) return { prophecy: null, cohortInsight: null, provider: null };
+  if (!result) {
+    return {
+      prophecy: null,
+      cohortInsight: null,
+      provider: null,
+      cohortRetried: false,
+      cohortInsightProvider: null,
+    };
+  }
+
+  const prophecy = parseProphecy(result.data, ctx.reportType);
+  let cohortInsight = parseCohortInsight(result.data);
+  let cohortInsightProvider: PremiumLlmProvider | null = cohortInsight?.body
+    ? result.provider
+    : null;
+  let cohortRetried = false;
+
+  if (!cohortInsight?.body && prophecy) {
+    cohortRetried = true;
+    llmDebugLog("[COHORT_INSIGHT_RETRY]", { reportType: ctx.reportType });
+    const retry = await callPremiumJsonCached({
+      callKind: "cohort-insight",
+      ctx,
+      prompts: buildCohortInsightRetryPrompts(ctxWithYear, narrative),
+      maxTokens: 512,
+      narrative,
+    });
+    if (retry) {
+      cohortInsight = parseCohortInsight(retry.data);
+      if (cohortInsight?.body) {
+        cohortInsightProvider = retry.provider;
+        llmDebugLog("[COHORT_INSIGHT_RETRY_OK]", {
+          reportType: ctx.reportType,
+          provider: retry.provider,
+        });
+      }
+    }
+  }
+
   return {
-    prophecy: parseProphecy(result.data, ctx.reportType),
-    cohortInsight: parseCohortInsight(result.data),
+    prophecy,
+    cohortInsight,
     provider: result.provider,
+    cohortRetried,
+    cohortInsightProvider,
   };
 }
 
-
-function generateScores(saju: SajuBasicResponse, locale: Locale): ReportScore[] {
-  return buildHumanPremiumStructured(saju, locale, "lifetime").scores;
-}
 
 function generateCohortInsight(
   saju: SajuBasicResponse,
@@ -328,7 +401,6 @@ export async function buildHumanPremiumStructuredWithLlm(
 
   const structured: HumanPremiumReportStructured = {
     ...template,
-    scores: generateScores(ctx.saju, ctx.locale),
   };
 
   const mark = (
@@ -354,9 +426,18 @@ export async function buildHumanPremiumStructuredWithLlm(
 
   const skipDeepLlm = ctx.reportType === "daily";
   const narrativeResult = await generateMasterNarrative(ctx);
-  const narrative = narrativeResult.value ?? "";
-  if (narrativeResult.value) {
-    interpretation.masterNarrative = narrativeResult.value;
+  const narrative = narrativeResult.narrative ?? "";
+  if (narrativeResult.narrative) {
+    interpretation.masterNarrative = narrativeResult.narrative;
+  }
+
+  if (narrativeResult.scores?.length) {
+    structured.scores = narrativeResult.scores;
+    interpretation.scores = narrativeResult.scores;
+    mark("section-metrics", narrativeResult.provider, true);
+  } else {
+    interpretation.scores = structured.scores;
+    meta["section-metrics"] = { source: "template" };
   }
 
   if (skipDeepLlm) {
@@ -405,8 +486,6 @@ export async function buildHumanPremiumStructuredWithLlm(
     interpretation.decisionMoments = roadmapResult.decisionMoments;
   }
 
-  interpretation.scores = structured.scores;
-  meta["section-metrics"] = { source: "template" };
   meta["section-cover"] = { source: "template" };
 
   const prophecyResult = await generateProphecyBundle(ctx, narrative);
@@ -420,12 +499,26 @@ export async function buildHumanPremiumStructuredWithLlm(
   if (prophecyResult.cohortInsight?.body) {
     structured.cohortInsight = prophecyResult.cohortInsight;
     interpretation.cohortInsight = prophecyResult.cohortInsight;
+    mark(
+      "section-cohort-insight",
+      prophecyResult.cohortInsightProvider ?? prophecyResult.provider,
+      true
+    );
   } else {
+    console.error("[COHORT_INSIGHT_FALLBACK]", {
+      callKind: "cohortInsight",
+      reason: "parse_failed_or_empty",
+      reportType: ctx.reportType,
+      prophecyParsed: Boolean(prophecyResult.prophecy),
+      provider: prophecyResult.provider ?? null,
+      retried: prophecyResult.cohortRetried,
+    });
     structured.cohortInsight = generateCohortInsight(
       ctx.saju,
       ctx.locale,
       ctx.reportType
     );
+    mark("section-cohort-insight", null, false, "parse_failed_or_empty");
   }
 
   return { structured, interpretation, meta, primaryProvider };

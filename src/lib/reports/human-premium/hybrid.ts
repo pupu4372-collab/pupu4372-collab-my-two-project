@@ -92,16 +92,11 @@ export async function buildHumanPremiumReportHybrid(
   };
 
   try {
-    const { interpretation, meta, primaryProvider } =
-      await buildHumanPremiumStructuredWithLlm(ctx);
+    const { interpretation, meta } = await buildHumanPremiumStructuredWithLlm(ctx);
 
-    const applied = applyHumanInterpretationToPremiumReport(
-      payload,
-      interpretation,
-      primaryProvider ?? "template"
-    );
+    applyHumanInterpretationToPremiumReport(payload, interpretation);
 
-    Object.assign(llmMeta.sections, meta, applied);
+    Object.assign(llmMeta.sections, meta);
   } catch (error) {
     for (const sectionId of HUMAN_INTERPRET_SECTION_IDS) {
       llmMeta.sections[sectionId] = {

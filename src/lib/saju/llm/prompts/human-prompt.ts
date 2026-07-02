@@ -8,6 +8,8 @@ import {
   buildSlotPrompt,
   resolveReportTypeFocus,
 } from "@/lib/reports/human-premium/report-prompts";
+import { getProductSlotMap } from "@/lib/reports/human-premium/report-prompts";
+import { resolvePromptProduct } from "@/lib/reports/human-premium/report-prompts/registry";
 import type { HumanPremiumPromptSlotKey } from "@/lib/reports/human-premium/report-prompts/types";
 import type { HumanSajuMapping } from "@/lib/saju/human-trait-mapping";
 import { dominantElementLabel } from "@/lib/saju/pet-lucky-scores";
@@ -332,6 +334,63 @@ export function buildProphecyPrompts(ctx: PremiumPromptContext, narrative: strin
     focus,
     narrative,
   });
+}
+
+function extractCohortInsightSlotInstructions(ctx: PremiumPromptContext): string {
+  const slot = getProductSlotMap(resolvePromptProduct(ctx)).prophecy?.trim() ?? "";
+  const marker = "cohortInsight.body:";
+  const idx = slot.indexOf(marker);
+  if (idx < 0) {
+    return ctx.locale === "ko"
+      ? `${marker} 동일 명식 구조를 가진 사람들의 장기 통계 패턴 2줄 (120자)`
+      : `${marker} Cohort statistical pattern for the same chart structure (120 chars)`;
+  }
+
+  const prefixLines: string[] = [];
+  const hanjaException = slot.match(/★[^\n]*cohortInsight\.body[^\n]*/);
+  if (hanjaException && hanjaException.index !== undefined && hanjaException.index < idx) {
+    prefixLines.push(hanjaException[0]);
+  }
+
+  const body = slot.slice(idx).replace(/`\s*;?\s*$/, "").trim();
+  return [...prefixLines, body].filter(Boolean).join("\n\n");
+}
+
+/** cohortInsight-only retry when the prophecy bundle omits cohortInsight.body */
+export function buildCohortInsightRetryPrompts(
+  ctx: PremiumPromptContext,
+  narrative: string
+): LlmPromptPair {
+  const focus = typeFocus(ctx);
+  const block = pillarBlock(ctx);
+  const cohortInstructions = extractCohortInsightSlotInstructions(ctx);
+
+  const defaults: LlmPromptPair = {
+    system: withCommon(
+      ctx.locale === "ko"
+        ? [
+            "코호트 인사이트 전문가. cohortInsight.body 필드만 생성합니다.",
+            "prophecy.short / prophecy.full 은 출력하지 마십시오.",
+            'JSON만: { "cohortInsight": { "body": "string" } }',
+          ].join("\n")
+        : [
+            "Cohort insight expert. Output cohortInsight.body only.",
+            "Do not output prophecy.short or prophecy.full.",
+            'JSON only: { "cohortInsight": { "body": "string" } }',
+          ].join("\n"),
+      ctx
+    ),
+    user:
+      (ctx.locale === "ko"
+        ? "【cohortInsight 단독 재생성】\n이전 prophecy 응답에서 cohortInsight가 누락되어 재요청합니다.\n\n"
+        : "[cohortInsight retry]\nThe prior prophecy response omitted cohortInsight — regenerate it only.\n\n") +
+      block +
+      `\n\n포커스: ${focus}\n\n${cohortInstructions}\n\n` +
+      (ctx.locale === "ko" ? "[마스터 내러티브]\n" : "[Master narrative]\n") +
+      narrative.slice(0, 1200),
+  };
+
+  return defaults;
 }
 
 /** Legacy 3-field interpretSaju(human) — kept for interpret.ts */

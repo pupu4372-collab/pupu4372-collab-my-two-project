@@ -48,6 +48,28 @@ const DEFAULT_CART: HumanPremiumCartState = {
   paid: false,
 };
 
+function normalizeCalendarType(value: unknown): HumanPremiumProfile["calendarType"] {
+  if (value === "lunar") return "lunar";
+  return "solar";
+}
+
+export function normalizeHumanPremiumProfile(
+  profile: Partial<HumanPremiumProfile> & Record<string, unknown>
+): HumanPremiumProfile {
+  const calendarRaw =
+    profile.calendarType ??
+    (typeof profile.calendar_type === "string" ? profile.calendar_type : undefined);
+
+  return {
+    ...DEFAULT_PROFILE,
+    ...profile,
+    calendarType: normalizeCalendarType(calendarRaw),
+    gender:
+      profile.gender === "male" || profile.gender === "female" ? profile.gender : "",
+    privacyConsent: Boolean(profile.privacyConsent),
+  };
+}
+
 function readJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
@@ -81,7 +103,7 @@ function writeLocalJson(key: string, value: unknown) {
 }
 
 export function loadHumanPremiumProfile(): HumanPremiumProfile {
-  return readJson(PROFILE_KEY, DEFAULT_PROFILE);
+  return normalizeHumanPremiumProfile(readJson(PROFILE_KEY, DEFAULT_PROFILE));
 }
 
 export function saveHumanPremiumProfile(profile: HumanPremiumProfile) {

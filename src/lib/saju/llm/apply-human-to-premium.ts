@@ -2,8 +2,6 @@ import { formatStructuredSectionBodies } from "@/lib/reports/human-premium/conte
 import { patchSectionBody } from "@/lib/reports/human-premium/section-patch";
 import type { HumanPremiumPromptSlotKey } from "@/lib/reports/human-premium/report-prompts/types";
 import type {
-  HumanPremiumLlmSectionMeta,
-  HumanPremiumLlmSectionSource,
   HumanPremiumReportPayload,
   HumanPremiumReportStructured,
 } from "@/lib/reports/human-premium/types";
@@ -54,10 +52,8 @@ function mergeStructured(
 
 export function applyHumanInterpretationToPremiumReport(
   payload: HumanPremiumReportPayload,
-  interpretation: Partial<HumanInterpretationJson>,
-  provider: HumanPremiumLlmSectionSource
-): Record<string, HumanPremiumLlmSectionMeta> {
-  const meta: Record<string, HumanPremiumLlmSectionMeta> = {};
+  interpretation: Partial<HumanInterpretationJson>
+): void {
   const structured = mergeStructured(payload, interpretation);
   payload.structured = structured;
 
@@ -72,23 +68,11 @@ export function applyHumanInterpretationToPremiumReport(
   );
 
   for (const sectionId of HUMAN_INTERPRET_SECTION_IDS) {
-    if (SKIP_LLM_SECTIONS.has(sectionId)) {
-      meta[sectionId] = { source: "template" };
-      continue;
-    }
+    if (SKIP_LLM_SECTIONS.has(sectionId)) continue;
 
     const body = sectionBodies[sectionId];
-    if (!body?.trim()) {
-      meta[sectionId] = { source: "template" };
-      continue;
-    }
+    if (!body?.trim()) continue;
 
-    if (patchSectionBody(payload, sectionId, body.trim())) {
-      meta[sectionId] = { source: provider };
-    } else {
-      meta[sectionId] = { source: "template", error: "section_not_found" };
-    }
+    patchSectionBody(payload, sectionId, body.trim());
   }
-
-  return meta;
 }

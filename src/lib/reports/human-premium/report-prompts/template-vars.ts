@@ -22,6 +22,7 @@ export interface PromptTemplateContext {
   decade_sewun_list: string;
   daewoon_list: string;
   current_age: string;
+  currentYear: string;
 }
 
 export function buildPromptTemplateContext(
@@ -53,6 +54,7 @@ export function buildPromptTemplateContext(
     decade_sewun_list: reportInputs.decade_sewun_list,
     daewoon_list: reportInputs.daewoon_list,
     current_age: reportInputs.current_age,
+    currentYear: String(ctx.currentYear ?? new Date().getFullYear()),
   };
 }
 
@@ -74,7 +76,8 @@ export function applyPromptTemplate(
     .replaceAll("{{month_branch}}", vars.month_branch)
     .replaceAll("{{decade_sewun_list}}", vars.decade_sewun_list)
     .replaceAll("{{daewoon_list}}", vars.daewoon_list)
-    .replaceAll("{{current_age}}", vars.current_age);
+    .replaceAll("{{current_age}}", vars.current_age)
+    .replaceAll("{{currentYear}}", vars.currentYear);
 }
 
 export function mergePromptSlotOverride(

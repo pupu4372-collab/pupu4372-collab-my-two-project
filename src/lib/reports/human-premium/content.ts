@@ -79,8 +79,8 @@ const REPORT_FOCUS_EN: Record<ReportType, string> = {
 function elLabel(el: ElementKey, locale: Locale): string {
   const meta = ELEMENT_META[el];
   return locale === "ko"
-    ? `${meta.romanized}(${meta.hangul}, ${meta.hanja})`
-    : `${meta.romanized} (${meta.hanja})`;
+    ? `${meta.hangul}(${meta.hanja})`
+    : `${meta.meaning} (${meta.hanja})`;
 }
 
 function section(
@@ -139,12 +139,13 @@ function humanElementStory(
 ): { headline: string; story: string; traits: string[] } {
   const meta = ELEMENT_META[element];
   if (locale === "ko") {
+    const elementName = `${meta.hangul}(${meta.hanja})`;
     const stories: Record<ElementKey, string> = {
-      wood: `${name}님의 핵심 기운은 ${meta.romanized}(${meta.hangul})입니다. 성장, 확장, 새로운 시작의 흐름이 평생 테마로 이어집니다.`,
-      fire: `${name}님의 핵심 기운은 ${meta.romanized}(${meta.hangul})입니다. 열정, 표현, 영향력이 삶의 중심축이 됩니다.`,
-      earth: `${name}님의 핵심 기운은 ${meta.romanized}(${meta.hangul})입니다. 안정, 루틴, 책임감이 인생의 기반이 됩니다.`,
-      metal: `${name}님의 핵심 기운은 ${meta.romanized}(${meta.hangul})입니다. 정리, 기준, 결단력이 평생 자산이 됩니다.`,
-      water: `${name}님의 핵심 기운은 ${meta.romanized}(${meta.hangul})입니다. 직관, 공감, 유연함이 삶의 윤활유 역할을 합니다.`,
+      wood: `${name}님의 핵심 기운은 ${elementName}입니다. 성장, 확장, 새로운 시작의 흐름이 평생 테마로 이어집니다.`,
+      fire: `${name}님의 핵심 기운은 ${elementName}입니다. 열정, 표현, 영향력이 삶의 중심축이 됩니다.`,
+      earth: `${name}님의 핵심 기운은 ${elementName}입니다. 안정, 루틴, 책임감이 인생의 기반이 됩니다.`,
+      metal: `${name}님의 핵심 기운은 ${elementName}입니다. 정리, 기준, 결단력이 평생 자산이 됩니다.`,
+      water: `${name}님의 핵심 기운은 ${elementName}입니다. 직관, 공감, 유연함이 삶의 윤활유 역할을 합니다.`,
     };
     const traits: Record<ElementKey, string[]> = {
       wood: ["성장 지향", "탐색형 결단", "유연한 회복력"],
@@ -154,18 +155,19 @@ function humanElementStory(
       water: ["직관", "공감", "적응력"],
     };
     return {
-      headline: `${name} · ${meta.romanized}(${meta.hangul}, ${meta.hanja}) 평생 에너지`,
+      headline: `${name} · ${meta.hangul}(${meta.hanja}) 평생 에너지`,
       story: stories[element],
       traits: traits[element],
     };
   }
 
+  const elementName = `${meta.meaning} (${meta.hanja})`;
   const stories: Record<ElementKey, string> = {
-    wood: `${name}'s core tone is ${meta.romanized} (${meta.hanja}). Growth and renewal stay with you.`,
-    fire: `${name}'s core tone is ${meta.romanized} (${meta.hanja}). Passion and expression shape your path.`,
-    earth: `${name}'s core tone is ${meta.romanized} (${meta.hanja}). Stability and responsibility anchor you.`,
-    metal: `${name}'s core tone is ${meta.romanized} (${meta.hanja}). Clarity and decisive focus become assets.`,
-    water: `${name}'s core tone is ${meta.romanized} (${meta.hanja}). Intuition and adaptability keep your flow alive.`,
+    wood: `${name}'s core tone is ${elementName}. Growth and renewal stay with you.`,
+    fire: `${name}'s core tone is ${elementName}. Passion and expression shape your path.`,
+    earth: `${name}'s core tone is ${elementName}. Stability and responsibility anchor you.`,
+    metal: `${name}'s core tone is ${elementName}. Clarity and decisive focus become assets.`,
+    water: `${name}'s core tone is ${elementName}. Intuition and adaptability keep your flow alive.`,
   };
   const traits: Record<ElementKey, string[]> = {
     wood: ["Growth-minded", "Exploratory", "Resilient"],
@@ -175,7 +177,7 @@ function humanElementStory(
     water: ["Intuitive", "Empathic", "Adaptive"],
   };
   return {
-    headline: `${name} · Lifetime ${meta.romanized} (${meta.hanja}) energy`,
+    headline: `${name} · Lifetime ${meta.meaning} (${meta.hanja}) energy`,
     story: stories[element],
     traits: traits[element],
   };
@@ -353,6 +355,119 @@ function buildTemplateRisks(saju: SajuBasicResponse, locale: Locale): ReportRisk
   ];
 }
 
+function buildTemplateDailyRoadmap(
+  locale: Locale
+): { roadmap: ReportRoadmapItem[]; decisionMoments: ReportDecisionMoment[] } {
+  const roadmapKo: ReportRoadmapItem[] = [
+    {
+      period: "07~13시",
+      label: "오전 · 기획·정리",
+      body: "辰~午(진·오) — 오늘 할 일을 정리하고 중요한 연락·기획에 쓰기 좋은 시간입니다.",
+    },
+    {
+      period: "13~19시",
+      label: "오후 · 실행·협업",
+      body: "未~酉(미·유) — 미뤄둔 실행·협업·대면 일을 오늘 안에 밀어붙이기 좋습니다.",
+    },
+    {
+      period: "19~23시",
+      label: "밤 · 관계·대화",
+      body: "戌~亥(술·해) — 가까운 사람과의 대화·정리·감사 표현에 유리합니다.",
+    },
+    {
+      period: "23~01시",
+      label: "심야 · 사색·전략",
+      body: "子(자) — 오늘 배운 것을 짧게 기록하고 내일 첫 행동 한 가지를 정하세요.",
+    },
+    {
+      period: "01~03시",
+      label: "새벽 · 휴식·회복",
+      body: "丑(축) — 수면·스트레칭·디지털 디톡스로 내일 컨디션을 지키세요.",
+    },
+    {
+      period: "오늘 한 줄",
+      label: "오늘의 정렬",
+      body: "대운이 아닌 오늘 일진 기준 — 작은 루틴 하나만 지키면 오늘의 흐름이 정돈됩니다.",
+    },
+  ];
+
+  const roadmapEn: ReportRoadmapItem[] = [
+    {
+      period: "07:00–13:00",
+      label: "Morning · plan & sort",
+      body: "Chen–Wu hours — list today's tasks and handle key planning or outreach.",
+    },
+    {
+      period: "13:00–19:00",
+      label: "Afternoon · execute",
+      body: "Wei–You hours — push deferred execution, collaboration, and face-to-face work today.",
+    },
+    {
+      period: "19:00–23:00",
+      label: "Evening · bonds",
+      body: "Xu–Hai hours — conversations, gratitude, and relationship check-ins land well.",
+    },
+    {
+      period: "23:00–01:00",
+      label: "Late night · reflect",
+      body: "Zi hour — jot one lesson from today and name tomorrow's first action.",
+    },
+    {
+      period: "01:00–03:00",
+      label: "Pre-dawn · recovery",
+      body: "Chou hour — protect tomorrow with sleep, stretch, and a short digital break.",
+    },
+    {
+      period: "Today",
+      label: "Today's alignment",
+      body: "From today's day pillar, not major luck — one small routine kept steadies the whole day.",
+    },
+  ];
+
+  const decisionMomentsKo: ReportDecisionMoment[] = [
+    {
+      situation: "상황 1. 협상·제안을 망설일 때",
+      script: "오늘은 결론보다 정보를 한 가지 더 모으겠습니다. 밤 9시 전에 예·아니오만 정하겠습니다.",
+    },
+    {
+      situation: "상황 2. 가족·가까운 사람이 서운해할 때",
+      script: "오늘 저녁에 10분만 사실부터 맞추겠습니다. 감정보다 '무엇이 필요했는지'를 먼저 묻겠습니다.",
+    },
+    {
+      situation: "상황 3. 지출·투자가 흔들릴 때",
+      script: "오늘은 결제를 24시간 미루겠습니다. 필요 목록과 선택 목록을 나눠 적고 내일 다시 보겠습니다.",
+    },
+    {
+      situation: "상황 4. 업무가 과다해 막막할 때",
+      script: "지금 당장 25분만 한 가지에 집중하겠습니다. 오늘 끝낼 일은 최대 3개로 줄이겠습니다.",
+    },
+  ];
+
+  const decisionMomentsEn: ReportDecisionMoment[] = [
+    {
+      situation: "Moment 1. Hesitating on a deal or offer",
+      script: "Today I'll gather one more fact before deciding. Yes or no by 9 p.m.",
+    },
+    {
+      situation: "Moment 2. When someone close feels hurt",
+      script: "I'll spend ten minutes tonight aligning on facts before feelings.",
+    },
+    {
+      situation: "Moment 3. When spending or investing wobbles",
+      script: "I'll pause payment 24 hours and split needs vs wants on paper.",
+    },
+    {
+      situation: "Moment 4. When work feels overwhelming",
+      script: "I'll focus 25 minutes on one task and cap today's must-finish list at three.",
+    },
+  ];
+
+  return {
+    roadmap: locale === "ko" ? roadmapKo : roadmapEn,
+    decisionMoments: locale === "ko" ? decisionMomentsKo : decisionMomentsEn,
+  };
+}
+
 function buildTemplateRoadmap(
   saju: SajuBasicResponse,
   locale: Locale
@@ -468,25 +583,42 @@ function buildTemplateProphecy(
   });
   const next = daewoon[0]?.cycles[1];
   const birthYear = new Date(saju.birthUtc).getUTCFullYear();
-  const startYear = birthYear + (next?.startAge ?? 30);
+  const currentYear = new Date().getFullYear();
+  const daewoonStartYear = birthYear + (next?.startAge ?? 30);
+  const startYear = daewoonStartYear > currentYear ? daewoonStartYear : currentYear + 1;
   const endYear = startYear + 4;
   const nickname = dayPillarNickname(saju, locale);
   const directionKo = elLabel(saju.dominantElement, locale);
+  const directionEn = elLabel(saju.dominantElement, locale);
+  const dominantMeta = ELEMENT_META[saju.dominantElement];
 
-  const shortKo = `${startYear}년~${endYear}년 사이, ${directionKo} 방향에서 오는 기회가 ${nickname}의 다음 장면을 바꾸는 계기가 됩니다.`;
-  const shortEn = `Between ${startYear} and ${endYear}, an opening aligned with ${elLabel(saju.dominantElement, locale)} can reshape ${nickname}'s next chapter.`;
+  const keywordShortKo = `${dominantMeta.hangul} · 집중·정리`;
+  const keywordShortEn = `${dominantMeta.meaning} · focus & sort`;
 
-  const fullKo = `${shortKo}
+  const sealedNarrativeKo = `이번 주 안에, 미뤄둔 일 하나가 연락이나 제안으로 이어질 수 있습니다. 그리고 다음 달쯤, 가볍게 나눈 대화가 새 흐름의 계기가 됩니다.`;
+  const sealedNarrativeEn = `This week, one deferred task may turn into a call or offer. Next month, a light conversation could become the start of a new flow.`;
+
+  const rangeNarrativeKo = `${startYear}년~${endYear}년 사이, ${directionKo} 방향에서 오는 기회가 ${nickname}의 다음 장면을 바꾸는 계기가 됩니다.`;
+  const rangeNarrativeEn = `Between ${startYear} and ${endYear}, an opening aligned with ${directionEn} can reshape ${nickname}'s next chapter.`;
+
+  const fullKo = `${rangeNarrativeKo}
 
 이 구간은 겉으로는 평범해 보여도, 루틴과 인연의 질이 바뀌는 '조용한 전환점'입니다. 준비된 사람에게는 기회처럼, 준비되지 않은 사람에게는 조정처럼 보입니다. 지금부터 쌓는 기록과 신뢰가 그때의 선택을 넓혀 줍니다.`;
 
-  const fullEn = `${shortEn}
+  const fullEn = `${rangeNarrativeEn}
 
 Outwardly ordinary, this span is a quiet pivot where routine and bond quality shift. Prepared readers meet opportunity; unprepared ones meet adjustment. Records and trust you build now widen choices later.`;
 
   return {
-    short: locale === "ko" ? shortKo : shortEn,
-    full: reportType === "lifetime" ? (locale === "ko" ? fullKo : fullEn) : undefined,
+    short: locale === "ko" ? keywordShortKo : keywordShortEn,
+    full:
+      reportType === "lifetime"
+        ? locale === "ko"
+          ? fullKo
+          : fullEn
+        : locale === "ko"
+          ? sealedNarrativeKo
+          : sealedNarrativeEn,
   };
 }
 
@@ -495,17 +627,17 @@ function buildTemplateCohortInsight(
   locale: Locale,
   reportType: ReportType
 ): ReportCohortInsight {
-  const label = reportTypeLabel(reportType, locale);
   const nickname = dayPillarNickname(saju, locale);
+  const elementLabel = elLabel(saju.dominantElement, locale);
 
   if (locale === "ko") {
     return {
-      body: `COHORT INSIGHT · ${label}을 선택한 ${nickname} 독자들은 '속도를 절반으로, 깊이를 두 배로' 전략을 가장 많이 성공시킵니다. 같은 시기에 태어난 사람들도 선택의 질에서 갈리며, 당신의 강점은 ${elLabel(saju.dominantElement, locale)} 기운을 일상 루틴에 녹이는 능력입니다.`,
+      body: `COHORT INSIGHT · ${elementLabel} 기운이 두드러진 ${nickname}과 같은 명식 구조를 가진 사람들은 '속도를 절반으로, 깊이를 두 배로' 전략을 가장 많이 성공시킵니다. 같은 시기에 태어난 사람들도 선택의 질에서 갈리며, ${elementLabel} 기운을 일상 루틴에 녹였을 때 만족도가 높은 경향을 보입니다.`,
     };
   }
 
   return {
-    body: `COHORT INSIGHT · ${label} readers with ${nickname} most often succeed with "half the speed, double the depth." People born in the same era diverge by choice quality; your edge is weaving ${elLabel(saju.dominantElement, locale)} into daily routines.`,
+    body: `COHORT INSIGHT · People with a chart structure like ${nickname}, where ${elementLabel} is prominent, most often succeed with "half the speed, double the depth." Those born in the same era diverge by choice quality; weaving ${elementLabel} into daily routines tends to raise satisfaction.`,
   };
 }
 
@@ -514,7 +646,10 @@ export function buildHumanPremiumStructured(
   locale: Locale,
   reportType: ReportType
 ): HumanPremiumReportStructured {
-  const { roadmap, decisionMoments } = buildTemplateRoadmap(saju, locale);
+  const { roadmap, decisionMoments } =
+    reportType === "daily"
+      ? buildTemplateDailyRoadmap(locale)
+      : buildTemplateRoadmap(saju, locale);
 
   return {
     scores: buildTemplateScores(saju, locale),
@@ -556,12 +691,17 @@ export function formatRisksBody(risks: ReportRisk[]): string {
 export function formatRoadmapBody(
   roadmap: ReportRoadmapItem[],
   moments: ReportDecisionMoment[],
-  locale: Locale
+  locale: Locale,
+  reportType?: ReportType
 ): string {
   const header =
-    locale === "ko"
-      ? "대운별 행동 전략과 결정의 순간을 함께 봅니다."
-      : "Major-cycle strategies paired with decision moments.";
+    reportType === "daily"
+      ? locale === "ko"
+        ? "오늘 하루 시간대별 루틴과 결정의 순간을 함께 봅니다."
+        : "Today's time-band routine paired with decision moments."
+      : locale === "ko"
+        ? "대운별 행동 전략과 결정의 순간을 함께 봅니다."
+        : "Major-cycle strategies paired with decision moments.";
   const phases = roadmap
     .map((item) => `· ${item.period} · ${item.label}\n${item.body}`)
     .join("\n\n");
@@ -575,11 +715,8 @@ export function formatProphecyBody(
   reportType: ReportType,
   locale: Locale
 ): string {
-  const sealed =
-    reportType === "lifetime" && prophecy.full
-      ? prophecy.full
-      : prophecy.short;
-  const sealedLabel = locale === "ko" ? "봉인된 예언" : "Sealed prophecy";
+  const sealed = prophecy.full ?? prophecy.short;
+  const sealedLabel = locale === "ko" ? "잠겨진 천명" : "Locked destiny";
   const cohortLabel = locale === "ko" ? "COHORT INSIGHT" : "COHORT INSIGHT";
   return [`【${sealedLabel}】`, sealed, `【${cohortLabel}】`, cohort.body].join("\n\n");
 }
@@ -602,7 +739,8 @@ export function formatStructuredSectionBodies(
     "section-roadmap": formatRoadmapBody(
       structured.roadmap,
       structured.decisionMoments,
-      locale
+      locale,
+      reportType
     ),
     "section-prophecy": formatProphecyBody(
       structured.prophecy,
@@ -639,7 +777,7 @@ function buildStructureBody(
     return `${nickname}의 사주 구조는 ${focus}를 읽는 열쇠입니다.
 
 【명리 진단】
-일간 ${saju.pillars.day.stemLabel}(${saju.pillars.day.stemHanja}) · 주도 오행 ${elLabel(saju.dominantElement, locale)}
+일간 ${saju.pillars.day.stemLabel} · 주도 오행 ${elLabel(saju.dominantElement, locale)}
 ${saju.birthTimeUnknown ? "시주 미상 — 삼주(년·월·일) 중심으로 해석합니다." : `시주 ${pillarText(saju.pillars.hour!)} 포함 사주(四柱) 해석입니다.`}
 
 【십신 연결】
@@ -819,26 +957,32 @@ Dominant element: ${elLabel(saju.dominantElement, locale)}. Read the chart as a 
       id: "section-roadmap",
       kind: "roadmap",
       title: locale === "ko" ? "시간 로드맵" : "Time roadmap",
-      subtitle: locale === "ko" ? "대운별 전략 · 결정의 순간 4" : "Cycle strategy · four decision moments",
+      subtitle:
+        reportType === "daily"
+          ? locale === "ko"
+            ? "오늘 시간대별 루틴 · 결정의 순간 4"
+            : "Today's time bands · four decision moments"
+          : locale === "ko"
+            ? "대운별 전략 · 결정의 순간 4"
+            : "Cycle strategy · four decision moments",
       body: formatRoadmapBody(
         structured.roadmap,
         structured.decisionMoments,
-        locale
+        locale,
+        reportType
       ),
       pageEstimate: 4,
     },
     {
       id: "section-prophecy",
       kind: "prophecy",
-      title: locale === "ko" ? "봉인된 예언 · COHORT INSIGHT" : "Sealed prophecy · cohort insight",
+      title: locale === "ko" ? "잠겨진 천명" : "Locked destiny",
       subtitle:
         reportType === "lifetime"
           ? locale === "ko"
             ? "풀버전"
             : "Full version"
-          : locale === "ko"
-            ? "요약"
-            : "Short",
+          : undefined,
       body: formatProphecyBody(
         structured.prophecy,
         structured.cohortInsight,
@@ -919,15 +1063,13 @@ export function buildDayPillarFreeFullView(
       };
     });
 
-  const total = saju.elements.reduce((sum, item) => sum + item.count, 0) || 1;
-
   return {
     headline: summary.headline,
     pillars,
     elements: saju.elements.map((item) => ({
       label: elLabel(item.key, locale),
       count: item.count,
-      percent: Math.round((item.count / total) * 100),
+      percent: item.percent,
     })),
     dayInsight: summary.story,
     structureBody: buildStructureBody(saju, locale, "lifetime"),

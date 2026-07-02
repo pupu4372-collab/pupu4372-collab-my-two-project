@@ -44,6 +44,18 @@ export function parseMasterNarrative(value: unknown): string | null {
   );
 }
 
+export interface MasterNarrativeParseResult {
+  narrative: string;
+  scores: ReportScore[] | null;
+}
+
+/** Parses master-narrative JSON; optional scores reuse parseScores() for backward compatibility. */
+export function parseMasterNarrativeResult(value: unknown): MasterNarrativeParseResult | null {
+  const narrative = parseMasterNarrative(value);
+  if (!narrative) return null;
+  return { narrative, scores: parseScores(value) };
+}
+
 export function parseOpportunities(value: unknown): ReportOpportunity[] | null {
   if (!value || typeof value !== "object") return null;
   const raw =

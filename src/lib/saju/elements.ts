@@ -97,6 +97,43 @@ export function countElements(chars: string[]): ElementKey {
   );
 }
 
+export function computeElementPercents(
+  counts: Record<ElementKey, number>
+): Record<ElementKey, number> {
+  const total = ELEMENT_ORDER.reduce((sum, key) => sum + counts[key], 0);
+  const percents = Object.fromEntries(ELEMENT_ORDER.map((key) => [key, 0])) as Record<
+    ElementKey,
+    number
+  >;
+
+  if (total <= 0) return percents;
+
+  const floors = ELEMENT_ORDER.map((key, index) => {
+    const count = counts[key];
+    if (count <= 0) {
+      return { index, key, count, floor: 0, fraction: 0 };
+    }
+    const exact = (count / total) * 100;
+    const floor = Math.floor(exact);
+    return { index, key, count, floor, fraction: exact - floor };
+  });
+
+  for (const entry of floors) {
+    percents[entry.key] = entry.floor;
+  }
+
+  let remainder = 100 - floors.reduce((sum, entry) => sum + entry.floor, 0);
+  const ranked = floors
+    .filter((entry) => entry.count > 0)
+    .sort((a, b) => b.fraction - a.fraction || a.index - b.index);
+
+  for (let i = 0; i < remainder && i < ranked.length; i += 1) {
+    percents[ranked[i]!.key] += 1;
+  }
+
+  return percents;
+}
+
 export function buildElementBreakdown(chars: string[]): ElementDisplay[] {
   const counts: Record<ElementKey, number> = {
     wood: 0,
@@ -111,22 +148,43 @@ export function buildElementBreakdown(chars: string[]): ElementDisplay[] {
     if (el) counts[el] += 1;
   }
 
+  const percents = computeElementPercents(counts);
+
   return ELEMENT_ORDER.map((key) => ({
-      key,
-      ...ELEMENT_META[key],
-      count: counts[key],
-    }));
+    key,
+    ...ELEMENT_META[key],
+    count: counts[key],
+    percent: percents[key],
+  }));
 }
 
-export function formatStemBranchLabels(stem: string, branch: string): {
+export function stemHangulLabel(stem: string): string {
+  return STEM_LABEL[stem]?.hangul ?? stem;
+}
+
+export function branchHangulLabel(branch: string): string {
+  return BRANCH_LABEL[branch]?.hangul ?? branch;
+}
+
+export function formatStemBranchLabels(
+  stem: string,
+  branch: string,
+  locale: Locale = "ko"
+): {
   stemLabel: string;
   branchLabel: string;
 } {
   const s = STEM_LABEL[stem];
   const b = BRANCH_LABEL[branch];
+  if (locale === "en") {
+    return {
+      stemLabel: s ? `${s.hangul} (${s.romanized})` : stem,
+      branchLabel: b ? `${b.hangul} (${b.romanized})` : branch,
+    };
+  }
   return {
-    stemLabel: s ? `${s.hangul} (${s.romanized})` : stem,
-    branchLabel: b ? `${b.hangul} (${b.romanized})` : branch,
+    stemLabel: s ? `${s.hangul}(${stem})` : stem,
+    branchLabel: b ? `${b.hangul}(${branch})` : branch,
   };
 }
 

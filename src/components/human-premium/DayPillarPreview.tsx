@@ -7,7 +7,6 @@ import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { Link } from "@/i18n/navigation";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import type { HumanPremiumProfile } from "@/lib/reports/human-premium/cart-session";
-import { saveHumanPremiumProfile } from "@/lib/reports/human-premium/cart-session";
 import {
   REPORT_TYPE_SUBTITLES_EN,
   REPORT_TYPE_SUBTITLES_KO,
@@ -28,10 +27,10 @@ import { useMemo, useState } from "react";
 
 export function DayPillarPreview({
   profile,
-  onProfileChange,
+  onPatchProfile,
 }: {
   profile: HumanPremiumProfile;
-  onProfileChange: (next: HumanPremiumProfile) => void;
+  onPatchProfile: (partial: Partial<HumanPremiumProfile>) => void;
 }) {
   const routeLocale = useLocale();
   const tNav = useTranslations("nav");
@@ -46,10 +45,10 @@ export function DayPillarPreview({
   const [report, setReport] = useState<HumanPremiumReportPayload | null>(null);
 
   function patchProfile(partial: Partial<HumanPremiumProfile>) {
-    const next = { ...profile, ...partial };
-    onProfileChange(next);
-    saveHumanPremiumProfile(next);
+    onPatchProfile(partial);
   }
+
+  const calendarType = profile.calendarType === "lunar" ? "lunar" : "solar";
 
   const birthTimeUnknown = profile.birthTimeSelect === "unknown";
   const birthTime = useMemo(() => {
@@ -71,7 +70,7 @@ export function DayPillarPreview({
           birthTime,
           birthTimeUnknown,
           timezone: profile.timezone,
-          calendarType: profile.calendarType,
+          calendarType,
           locale: routeLocale,
           privacyConsent: profile.privacyConsent,
           gender: profile.gender || null,
@@ -175,30 +174,37 @@ export function DayPillarPreview({
               ))}
             </select>
           </label>
-          <div className="flex gap-3 text-sm">
-            <button
-              type="button"
-              onClick={() => patchProfile({ calendarType: "solar" })}
-              className={`human-premium-birth-pill ${
-                profile.calendarType === "solar"
-                  ? "human-premium-birth-pill--active"
-                  : "human-premium-birth-pill--idle"
-              }`}
-            >
-              {isKo ? "양력" : "Solar"}
-            </button>
-            <button
-              type="button"
-              onClick={() => patchProfile({ calendarType: "lunar" })}
-              className={`human-premium-birth-pill ${
-                profile.calendarType === "lunar"
-                  ? "human-premium-birth-pill--active"
-                  : "human-premium-birth-pill--idle"
-              }`}
-            >
-              {isKo ? "음력" : "Lunar"}
-            </button>
-          </div>
+          <fieldset className="human-premium-birth-calendar">
+            <legend className="human-premium-birth-field">
+              {isKo ? "양력 / 음력" : "Solar / Lunar"}
+            </legend>
+            <div className="mt-1 flex gap-3">
+              <button
+                type="button"
+                onClick={() => patchProfile({ calendarType: "solar" })}
+                className={`human-premium-birth-pill flex-1 ${
+                  calendarType === "solar"
+                    ? "human-premium-birth-pill--active"
+                    : "human-premium-birth-pill--idle"
+                }`}
+                aria-pressed={calendarType === "solar"}
+              >
+                {isKo ? "양력" : "Solar"}
+              </button>
+              <button
+                type="button"
+                onClick={() => patchProfile({ calendarType: "lunar" })}
+                className={`human-premium-birth-pill flex-1 ${
+                  calendarType === "lunar"
+                    ? "human-premium-birth-pill--active"
+                    : "human-premium-birth-pill--idle"
+                }`}
+                aria-pressed={calendarType === "lunar"}
+              >
+                {isKo ? "음력" : "Lunar"}
+              </button>
+            </div>
+          </fieldset>
           <label className="human-premium-birth-field">
             {isKo ? "타임존" : "Timezone"}
             <select

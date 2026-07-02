@@ -41,6 +41,6 @@ export function buildPetLuckyScores(
 export function dominantElementLabel(element: ElementKey, locale: Locale) {
   const meta = ELEMENT_META[element];
   return locale === "ko"
-    ? `${meta.romanized}(${meta.hanja}) · ${meta.hangul}`
-    : `${meta.romanized} (${meta.hanja}) · ${meta.meaning}`;
+    ? `${meta.hangul}(${meta.hanja})`
+    : `${meta.meaning} (${meta.hanja})`;
 }

@@ -48,8 +48,8 @@ const LUCKY_BY_ELEMENT: Record<
 function elLabel(el: ElementKey, locale: Locale): string {
   const meta = ELEMENT_META[el];
   return locale === "ko"
-    ? `${meta.romanized}(${meta.hangul}, ${meta.hanja})`
-    : `${meta.romanized} (${meta.hanja})`;
+    ? `${meta.hangul}(${meta.hanja})`
+    : `${meta.meaning} (${meta.hanja})`;
 }
 
 function pillarText(pillar: PillarDisplay): string {
