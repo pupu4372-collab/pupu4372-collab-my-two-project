@@ -5,6 +5,7 @@ import { getPaidHumanPremiumOrderIds } from "@/lib/reports/human-premium/cart-se
 import { useEffect, useState } from "react";
 
 type FooterNavLinksProps = {
+  aboutLabel: string;
   termsLabel: string;
   privacyLabel: string;
   supportLabel: string;
@@ -13,6 +14,7 @@ type FooterNavLinksProps = {
 };
 
 export function FooterNavLinks({
+  aboutLabel,
   termsLabel,
   privacyLabel,
   supportLabel,
@@ -35,6 +37,7 @@ export function FooterNavLinks({
   }, [hasServerPayments]);
 
   const links = [
+    { href: "/about" as const, label: aboutLabel },
     { href: "/terms" as const, label: termsLabel },
     { href: "/privacy" as const, label: privacyLabel },
     { href: "/support" as const, label: supportLabel },

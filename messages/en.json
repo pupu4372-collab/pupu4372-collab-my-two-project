@@ -18,7 +18,30 @@
     "account": "My account",
     "logout": "Log out",
     "loggingOut": "Wait",
-    "brand": "K-Saju Pet"
+    "brand": "K-Saju Pet",
+    "about": "About"
+  },
+  "about": {
+    "metaTitle": "About Us | K-Saju Pet",
+    "metaDescription": "Learn about Petstrology and the K-Saju Pet platform for pet Saju readings.",
+    "aboutUsTitle": "About Us",
+    "aboutUsBody": "Petstrology is a pet lifestyle tech company based in South Korea. We combine traditional Korean fortune-reading (Saju) with modern web technology to deliver personalized content based on your pet's date of birth.",
+    "productTitle": "Our Product — K-Saju Pet",
+    "productIntro": "K-Saju Pet (ksajupet.com) is a pet lifestyle platform built on Korean Saju readings.",
+    "bulletDailyFortune": "Daily Fortune (Free): Enter your pet's birth date to get daily health, activity, appetite, and sleep fortunes with care tips that change every day.",
+    "bulletPersonality": "Pet Personality Analysis (Paid): MBTI-style personality analysis for pets, zodiac fortunes, and owner-pet compatibility readings.",
+    "bulletPremium": "Premium Saju Reports (Paid): We offer 11 in-depth Saju report products for pet owners, covering lifetime luck cycles, love, career, wealth, and more. Reports are available individually or as bundles.",
+    "bulletCommunity": "Community: Weekly Pet Show rankings and challenge boards where pet parents connect.",
+    "paymentsNote": "Payments are securely processed via TossPayments and PayPal.",
+    "screenshotsTitle": "Product Screenshots",
+    "screenshot1Caption": "Daily Fortune (Free)",
+    "screenshot2Caption": "Premium Saju Report (Paid)",
+    "screenshot3Caption": "Report Catalog",
+    "contactTitle": "Contact",
+    "contactLine1": "Business name: Petstrology | CEO: Keyongmi Lee",
+    "contactLine2": "Business registration no.: 536-17-02581",
+    "contactLine3": "Address: 806-32, 8F, 1688 Dongseo-daero, Dong-gu, Daejeon, South Korea",
+    "contactLine4": "Email: jungho@ksajupet.com | Tel: +82-42-300-5388"
   },
   "saju": {
     "hubTitle": "Pet Saju · K-Saju",

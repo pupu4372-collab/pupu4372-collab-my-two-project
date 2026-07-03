@@ -34,6 +34,7 @@ export async function AppFooter() {
         <p className="text-xs text-white/50">© {year} K-Saju Pet. All rights reserved.</p>
 
         <FooterNavLinks
+          aboutLabel={nav("about")}
           termsLabel={auth("terms")}
           privacyLabel={auth("privacy")}
           supportLabel={nav("support")}
