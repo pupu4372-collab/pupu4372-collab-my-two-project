@@ -219,6 +219,37 @@ export function DayPillarPreview({
               ))}
             </select>
           </label>
+          <fieldset className="human-premium-birth-calendar">
+            <legend className="human-premium-birth-field">
+              {isKo ? "성별" : "Gender"}
+            </legend>
+            <div className="mt-1 flex gap-3">
+              <button
+                type="button"
+                onClick={() => patchProfile({ gender: "male" })}
+                className={`human-premium-birth-pill flex-1 ${
+                  profile.gender === "male"
+                    ? "human-premium-birth-pill--active"
+                    : "human-premium-birth-pill--idle"
+                }`}
+                aria-pressed={profile.gender === "male"}
+              >
+                {isKo ? "남성" : "Male"}
+              </button>
+              <button
+                type="button"
+                onClick={() => patchProfile({ gender: "female" })}
+                className={`human-premium-birth-pill flex-1 ${
+                  profile.gender === "female"
+                    ? "human-premium-birth-pill--active"
+                    : "human-premium-birth-pill--idle"
+                }`}
+                aria-pressed={profile.gender === "female"}
+              >
+                {isKo ? "여성" : "Female"}
+              </button>
+            </div>
+          </fieldset>
           <div className="human-premium-birth-consent">
             <PrivacyConsent
               checked={profile.privacyConsent}
