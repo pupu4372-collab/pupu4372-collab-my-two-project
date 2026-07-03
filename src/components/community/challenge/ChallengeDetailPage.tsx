@@ -10,11 +10,19 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { NightPageShell, PageContainer } from "@/components/layout/StitchLayout";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
+import { localizeChallenge } from "@/lib/community/challenge-localize";
 import { compressImageForUpload } from "@/lib/images/upload-compression";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import type { Challenge, ChallengeChannel, ChallengePostWithRelations } from "@/lib/supabase/types";
 import { useLocale } from "next-intl";
 import { use, useEffect, useRef, useState } from "react";
+
+function speciesLabel(species: string | undefined, isKo: boolean) {
+  if (!species) return "";
+  if (species === "dog") return isKo ? "강아지" : "Dog";
+  if (species === "cat") return isKo ? "고양이" : "Cat";
+  return isKo ? "다른 동물" : "Other pet";
+}
 
 function channelLabel(channel: ChallengeChannel, isKo: boolean) {
   if (channel === "all") return isKo ? "전체" : "All";
@@ -78,7 +86,7 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
           setError(isKo ? "챌린지를 찾을 수 없어요." : "Challenge not found.");
           return;
         }
-        setChallenge(found);
+        setChallenge(localizeChallenge(found, isKo ? "ko" : "en"));
         await loadPosts();
       } catch (err) {
         setError(err instanceof Error ? err.message : isKo ? "오류가 발생했어요." : "Something went wrong.");
@@ -288,7 +296,7 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
                           {post.pets?.name && (
                             <p className="text-xs text-plum/60">
                               {post.pets.name}
-                              {post.pets.species ? ` · ${post.pets.species}` : ""}
+                              {post.pets.species ? ` · ${speciesLabel(post.pets.species, isKo)}` : ""}
                             </p>
                           )}
                         </div>

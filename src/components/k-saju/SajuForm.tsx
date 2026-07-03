@@ -144,8 +144,8 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const t = UI[locale];
   const birthTimeUnknown = birthTime === "unknown";
   const mbtiQuestions = useMemo(
-    () => getQuestionsBySpecies(species),
-    [species]
+    () => getQuestionsBySpecies(species, locale),
+    [species, locale]
   );
 
   const inputClass = embedded

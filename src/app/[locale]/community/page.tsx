@@ -130,7 +130,11 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                   ) : (
                     <>
                       <p className="mt-1 text-[10px] font-medium text-plum/50">
-                        {rows.length > 3 ? "옆으로 밀어 5위까지 볼 수 있어요." : "\u00a0"}
+                        {rows.length > 3
+                          ? isKo
+                            ? "옆으로 밀어 5위까지 볼 수 있어요."
+                            : "Swipe sideways to see up to 5th place."
+                          : "\u00a0"}
                       </p>
                       <div className="-mx-1 mt-1 max-w-full touch-pan-x overflow-x-auto overscroll-x-contain px-1 pb-2 pr-8 [scrollbar-width:thin]">
                         <ol className="flex w-max min-w-full snap-x snap-mandatory gap-2">
@@ -181,6 +185,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                 ? "강아지·고양이·렙타일(다른동물) 채널에서 환경·식단·건강 가이드를 모았어요."
                 : "Browse dog, cat, and reptile & other pet care guides."
             }
+            onDark
           />
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {([
@@ -226,6 +231,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
             eyebrow={isKo ? "Boards" : "Boards"}
             title={isKo ? "집사님들과 나누는 이야기" : "Stories from pet parents"}
             subtitle={isKo ? "Q&A, 꿀팁, 자유게시판, 품종별 경험담을 목적에 맞게 둘러보세요." : "Explore Q&A, tips, free board, and breed experiences."}
+            onDark
           />
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {sections.map((section) => (

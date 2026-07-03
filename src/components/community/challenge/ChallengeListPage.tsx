@@ -4,6 +4,7 @@ import { AppTopNav } from "@/components/layout/AppTopNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { PageContainer, NightPageShell, SectionHeader } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
+import { localizeChallenges } from "@/lib/community/challenge-localize";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import type { Challenge, ChallengeChannel } from "@/lib/supabase/types";
 import { useLocale } from "next-intl";
@@ -45,7 +46,7 @@ export function ChallengeListPage() {
           setChallenges([]);
           return;
         }
-        setChallenges(data.challenges ?? []);
+        setChallenges(localizeChallenges(data.challenges ?? [], isKo ? "ko" : "en"));
       } catch {
         setError(isKo ? "네트워크 오류가 발생했어요." : "Network error.");
         setChallenges([]);

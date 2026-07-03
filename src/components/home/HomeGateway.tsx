@@ -30,12 +30,14 @@ function RankingPreviewList({
   rows,
   emptyText,
   isNight = false,
+  isKo = true,
 }: {
   emoji: string;
   label: string;
   rows: PetShowRankingRow[];
   emptyText: string;
   isNight?: boolean;
+  isKo?: boolean;
 }) {
   return (
     <div
@@ -57,7 +59,11 @@ function RankingPreviewList({
       ) : (
         <>
           <p className={`mt-1 text-[10px] font-extrabold ${isNight ? "text-plum/80" : "text-plum/40"}`}>
-            {rows.length > 3 ? "옆으로 밀어 5위까지 볼 수 있어요." : "\u00a0"}
+            {rows.length > 3
+              ? isKo
+                ? "옆으로 밀어 5위까지 볼 수 있어요."
+                : "Swipe sideways to see up to 5th place."
+              : "\u00a0"}
           </p>
           <div className="-mx-1 mt-1 max-w-full touch-pan-x overflow-x-auto overscroll-x-contain px-1 pb-2 pr-8 [scrollbar-width:thin]">
             <ol className="flex w-max min-w-full snap-x snap-mandatory gap-2">
@@ -270,6 +276,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             rows={rankingRows.dog}
             emptyText={isKo ? "이번 주 강아지 사진을 기다려요." : "Waiting for dog photos."}
             isNight={isNight}
+            isKo={isKo}
           />
           <RankingPreviewList
             emoji="🐈"
@@ -277,6 +284,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             rows={rankingRows.cat}
             emptyText={isKo ? "이번 주 고양이 사진을 기다려요." : "Waiting for cat photos."}
             isNight={isNight}
+            isKo={isKo}
           />
           <RankingPreviewList
             emoji="🐾"
@@ -286,6 +294,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
               isKo ? "이번 주 렙타일(다른동물) 사진을 기다려요." : "Waiting for other animal photos."
             }
             isNight={isNight}
+            isKo={isKo}
           />
         </div>
       </GlassCard>

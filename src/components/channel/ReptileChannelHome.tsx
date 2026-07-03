@@ -64,7 +64,13 @@ export function ReptileChannelHome({
 }: ReptileChannelHomeProps) {
   const heroFeatured = featured ?? content.featured;
   const guideArticles = articles?.length ? articles : content.articles;
-  const guideCards = [heroFeatured, ...guideArticles].slice(0, 4);
+  const editorialGuideCards =
+    source === "supabase" ? [heroFeatured, ...guideArticles].slice(0, 4) : [];
+  const guideCards = isKo
+    ? editorialGuideCards
+    : [content.featured, ...content.articles].slice(0, 4);
+  const displayGuideCards =
+    guideCards.length > 0 ? guideCards : [content.featured, ...content.articles].slice(0, 4);
 
   return (
     <div className="space-y-10">
@@ -195,14 +201,12 @@ export function ReptileChannelHome({
               <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-channel-community">Guide</p>
               <h2 className="mt-2 text-2xl font-extrabold text-white">{isKo ? "추천 가이드" : "Featured guides"}</h2>
             </div>
-            {source && (
-              <span className="rounded-full bg-cream px-3 py-1 text-xs font-bold text-plum/60">
-                {source === "supabase" ? "DB" : "Static"}
-              </span>
+            {isKo && source === "supabase" && (
+              <span className="rounded-full bg-cream px-3 py-1 text-xs font-bold text-plum/60">DB</span>
             )}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            {guideCards.map((article, index) => (
+            {displayGuideCards.map((article, index) => (
               <Link
                 key={article.id}
                 href={`/reptile/guide/${article.id}`}
@@ -220,7 +224,9 @@ export function ReptileChannelHome({
                     {article.category}
                   </span>
                   <h3 className="mt-3 line-clamp-2 text-lg font-extrabold leading-snug">{article.title}</h3>
-                  <p className="mt-2 text-xs font-bold text-white/75">READ GUIDE →</p>
+                  <p className="mt-2 text-xs font-bold text-white/75">
+                    {isKo ? "가이드 읽기" : "Read guide"} →
+                  </p>
                 </div>
               </Link>
             ))}

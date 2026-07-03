@@ -106,8 +106,11 @@ export function DogChannelHome({
   isKo,
 }: DogChannelHomeProps) {
   const heroFeatured = featured ?? content.featured;
+  const heroGuide = isKo && source === "supabase" ? heroFeatured : content.featured;
   const guideArticles = articles?.length ? articles : content.articles;
-  const guideCards = [heroFeatured, ...guideArticles].slice(0, 3);
+  const editorialGuideCards =
+    source === "supabase" ? [heroFeatured, ...guideArticles].slice(0, 3) : [];
+  const guideCards = isKo ? editorialGuideCards : [content.featured, ...content.articles].slice(0, 3);
 
   return (
     <div className="space-y-10">
@@ -143,7 +146,7 @@ export function DogChannelHome({
               : "Protect seasonal health with practical care and K-Saju guidance."}
           </p>
           <Link
-            href={`/dog/guide/${heroFeatured.id}`}
+            href={`/dog/guide/${heroGuide.id}`}
             className="mt-6 w-fit rounded-full bg-white px-10 py-4 text-sm font-extrabold text-primary shadow-lg transition hover:bg-lavender active:scale-95"
           >
             {isKo ? "자세히 보기" : "Learn more"}
@@ -269,19 +272,21 @@ export function DogChannelHome({
             </Link>
           ))}
         </div>
-        {source && guideCards.length > 0 && (
+        {guideCards.length > 0 && (isKo ? source === "supabase" : true) && (
           <div className="mt-12 grid gap-4 md:grid-cols-3">
             {guideCards.map((article) => (
               <Link
                 key={article.id}
                 href={`/dog/guide/${article.id}`}
-                className="rounded-[1.5rem] border border-channel-dog/15 bg-white/80 p-5 shadow-sm transition hover:-translate-y-0.5"
+                className="rounded-[1.5rem] border border-white/20 bg-cream p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
               >
                 <span className="text-xs font-extrabold uppercase tracking-wider text-channel-dog">
                   {article.category}
                 </span>
-                <h3 className="mt-2 line-clamp-2 font-extrabold text-primary">{article.title}</h3>
-                <p className="mt-2 text-xs font-bold text-plum/50">READ GUIDE →</p>
+                <h3 className="mt-2 line-clamp-2 font-extrabold text-ink">{article.title}</h3>
+                <p className="mt-2 text-xs font-bold text-channel-dog">
+                  {isKo ? "가이드 읽기" : "Read guide"} →
+                </p>
               </Link>
             ))}
           </div>
