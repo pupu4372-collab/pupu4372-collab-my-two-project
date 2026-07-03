@@ -95,25 +95,6 @@ interface HumanPremiumReportViewProps {
   backHref?: string;
 }
 
-interface FileSystemWritableFileStreamLike {
-  write(data: Blob): Promise<void>;
-  close(): Promise<void>;
-}
-
-interface FileSystemFileHandleLike {
-  createWritable(): Promise<FileSystemWritableFileStreamLike>;
-}
-
-type SavePickerWindow = Window & {
-  showSaveFilePicker?: (options: {
-    suggestedName: string;
-    types: Array<{
-      description: string;
-      accept: Record<string, string[]>;
-    }>;
-  }) => Promise<FileSystemFileHandleLike>;
-};
-
 function safePdfFilename(name: string): string {
   const safe = name.replace(/[^\p{L}\p{N}\-_]+/gu, "-").replace(/-+/g, "-");
   return `jigwanjae-${safe || "report"}.pdf`;
@@ -251,31 +232,14 @@ export function HumanPremiumReportView({
       if (!blob.type.includes("pdf")) throw new Error("PDF response invalid");
 
       const filename = safePdfFilename(report.personName);
-      const picker = window as SavePickerWindow;
-
-      if (picker.showSaveFilePicker) {
-        const handle = await picker.showSaveFilePicker({
-          suggestedName: filename,
-          types: [
-            {
-              description: "PDF file",
-              accept: { "application/pdf": [".pdf"] },
-            },
-          ],
-        });
-        const writable = await handle.createWritable();
-        await writable.write(blob);
-        await writable.close();
-      } else {
-        const objectUrl = URL.createObjectURL(blob);
-        const anchor = document.createElement("a");
-        anchor.href = objectUrl;
-        anchor.download = filename;
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        URL.revokeObjectURL(objectUrl);
-      }
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(objectUrl);
 
       setPdfState("idle");
     } catch (error) {
