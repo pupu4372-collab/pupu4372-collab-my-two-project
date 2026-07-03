@@ -1,11 +1,8 @@
 import { HumanPremiumReportView } from "@/components/reports/HumanPremiumReportView";
 import { Link } from "@/i18n/navigation";
 import { parseCartParentOrderId } from "@/lib/reports/human-premium/cart";
-import { isDeliverableHumanPremiumEmail } from "@/lib/reports/human-premium/email-policy";
 import { scheduleHumanPremiumPdfPrewarm } from "@/lib/reports/human-premium/pdf-cache";
 import { resolveHumanPremiumReportByToken } from "@/lib/reports/human-premium/resolve";
-import { resolveAppBaseUrlFromHeaders } from "@/lib/app-url";
-import { headers } from "next/headers";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
 
@@ -45,9 +42,6 @@ export default async function HumanPremiumReportRoute({
     scheduleHumanPremiumPdfPrewarm(resolved!.row, resolved!.payload);
   });
 
-  const baseUrl = resolveAppBaseUrlFromHeaders(await headers());
-  const shareUrl = `${baseUrl}/${locale}/reports/human/${token}`;
-  const canSendEmail = isDeliverableHumanPremiumEmail(resolved.row.email);
   const parentOrderId = parseCartParentOrderId(resolved.row.payment_order_id);
   const backHref = parentOrderId
     ? `/premium/human/vault`
@@ -56,9 +50,7 @@ export default async function HumanPremiumReportRoute({
   return (
     <HumanPremiumReportView
       report={resolved.payload}
-      shareUrl={shareUrl}
       webToken={token}
-      canSendEmail={canSendEmail}
       backHref={backHref}
     />
   );

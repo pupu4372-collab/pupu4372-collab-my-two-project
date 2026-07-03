@@ -13,7 +13,6 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Link } from "@/i18n/navigation";
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import { HUMAN_PREMIUM_SECTION_IDS } from "@/lib/reports/human-premium/types";
-import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { useEffect, useMemo, useState } from "react";
 import { markSessionAlive } from "@/lib/supabase/auth-session-policy";
 
@@ -89,9 +88,7 @@ type UiStrings = (typeof UI)["ko"] | (typeof UI)["en"];
 
 interface HumanPremiumReportViewProps {
   report: HumanPremiumReportPayload;
-  shareUrl: string;
   webToken: string;
-  canSendEmail: boolean;
   backHref?: string;
 }
 
@@ -152,18 +149,11 @@ function ReportToc({
 
 export function HumanPremiumReportView({
   report,
-  shareUrl,
   webToken,
-  canSendEmail,
   backHref,
 }: HumanPremiumReportViewProps) {
   const isKo = report.locale === "ko";
   const t = UI[report.locale];
-  const [copied, setCopied] = useState(false);
-  const [emailState, setEmailState] = useState<"idle" | "sending" | "sent" | "failed">(
-    "idle"
-  );
-  const [emailError, setEmailError] = useState<string | null>(null);
   const [pdfState, setPdfState] = useState<"idle" | "downloading" | "failed">("idle");
   const [pdfError, setPdfError] = useState<string | null>(null);
 
@@ -180,41 +170,6 @@ export function HumanPremiumReportView({
       })),
     [t.saju, t.sectionTitles]
   );
-
-  async function copyLink() {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
-    }
-  }
-
-  async function sendEmail() {
-    if (!canSendEmail) return;
-    setEmailState("sending");
-    setEmailError(null);
-    try {
-      const res = await fetch("/api/premium/human/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: webToken }),
-      });
-      const data = (await res.json().catch(() => null)) as { error?: string } | null;
-      if (!res.ok) {
-        throw new Error(data?.error ?? "Email failed");
-      }
-      setEmailState("sent");
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? formatHumanPremiumError(error.message, report.locale)
-          : t.emailFailed;
-      setEmailError(message);
-      setEmailState("failed");
-    }
-  }
 
   async function downloadPdf() {
     setPdfState("downloading");
@@ -293,14 +248,7 @@ export function HumanPremiumReportView({
               <p className="human-premium-serif text-center text-sm font-semibold text-[var(--jig-ink)]">
                 {t.shareSectionHint}
               </p>
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-                <button
-                  type="button"
-                  onClick={() => void copyLink()}
-                  className="human-premium-share-btn human-premium-share-btn--link"
-                >
-                  {copied ? t.shared : t.copyLink}
-                </button>
+              <div className="grid grid-cols-1 gap-2.5">
                 <button
                   type="button"
                   onClick={() => void downloadPdf()}
@@ -310,28 +258,7 @@ export function HumanPremiumReportView({
                 >
                   {pdfState === "downloading" ? t.pdfDownloading : t.downloadChoice}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => void sendEmail()}
-                  disabled={!canSendEmail || emailState === "sending"}
-                  title={canSendEmail ? undefined : t.emailUnavailable}
-                  className="human-premium-share-btn human-premium-share-btn--email disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {emailState === "sending"
-                    ? t.emailSending
-                    : emailState === "sent"
-                      ? t.emailSent
-                      : t.email}
-                </button>
               </div>
-              {emailState === "failed" && (
-                <p className="text-center text-xs text-[var(--jig-seal)]">
-                  {emailError ?? t.emailFailed}
-                </p>
-              )}
-              {!canSendEmail ? (
-                <p className="text-center text-xs text-[var(--jig-muted)]">{t.emailUnavailable}</p>
-              ) : null}
               {pdfState === "failed" && (
                 <p className="text-center text-xs text-[var(--jig-seal)]">
                   {t.pdfFailed}
