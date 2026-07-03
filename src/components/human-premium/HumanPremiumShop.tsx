@@ -2,6 +2,7 @@
 
 import { DayPillarPreview } from "@/components/human-premium/DayPillarPreview";
 import { Link } from "@/i18n/navigation";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import {
   addManyToHumanPremiumCart,
   addToHumanPremiumCart,
@@ -11,6 +12,7 @@ import {
   loadHumanPremiumProfile,
   removeFromHumanPremiumCart,
   resetHumanPremiumCart,
+  resolveHumanPremiumStorageUserId,
   saveHumanPremiumProfile,
   syncPaidOrdersFromVault,
   type HumanPremiumCartState,
@@ -40,13 +42,13 @@ export function HumanPremiumShop() {
   const routeLocale = useLocale();
   const isKo = routeLocale === "ko";
   const cartRef = useRef<HTMLDivElement>(null);
+  const { userId, isAnonymous } = useSupabaseSession();
+  const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
 
-  const [profile, setProfile] = useState<HumanPremiumProfile>(() => loadHumanPremiumProfile());
+  const [profile, setProfile] = useState<HumanPremiumProfile>(() => loadHumanPremiumProfile(storageUserId));
   const [cart, setCart] = useState<HumanPremiumCartState>({ items: [], orderId: null, paid: false });
   const [cartFlash, setCartFlash] = useState(false);
-  const [purchasedTypes, setPurchasedTypes] = useState<ReportType[]>(() =>
-    getPurchasedReportTypes(loadHumanPremiumProfile())
-  );
+  const [purchasedTypes, setPurchasedTypes] = useState<ReportType[]>([]);
 
   const savings = getBundleSavings();
   const subtitles = isKo ? REPORT_TYPE_SUBTITLES_KO : REPORT_TYPE_SUBTITLES_EN;
@@ -59,20 +61,23 @@ export function HumanPremiumShop() {
   );
 
   useEffect(() => {
-    const stored = loadHumanPremiumCart();
+    const nextProfile = loadHumanPremiumProfile(storageUserId);
+    setProfile(nextProfile);
+    const stored = loadHumanPremiumCart(storageUserId);
     if (stored.paid) {
-      setCart(resetHumanPremiumCart());
+      setCart(resetHumanPremiumCart(storageUserId));
     } else {
       setCart(stored);
     }
-  }, []);
+    setPurchasedTypes(getPurchasedReportTypes(storageUserId, nextProfile));
+  }, [storageUserId]);
 
   useEffect(() => {
-    setPurchasedTypes(getPurchasedReportTypes(profile));
+    setPurchasedTypes(getPurchasedReportTypes(storageUserId, profile));
 
     async function syncPurchasedFromVault() {
       try {
-        const orderIds = getPaidHumanPremiumOrderIds();
+        const orderIds = getPaidHumanPremiumOrderIds(storageUserId);
         const params = new URLSearchParams({ locale: routeLocale });
         if (orderIds.length) params.set("orderIds", orderIds.join(","));
         if (profile.email.trim()) params.set("email", profile.email.trim());
@@ -81,8 +86,8 @@ export function HumanPremiumShop() {
         const data = await res.json();
         if (!res.ok) return;
 
-        syncPaidOrdersFromVault(data.orders ?? []);
-        setPurchasedTypes(getPurchasedReportTypes(profile));
+        syncPaidOrdersFromVault(storageUserId, data.orders ?? []);
+        setPurchasedTypes(getPurchasedReportTypes(storageUserId, profile));
       } catch {
         // ignore vault sync errors; local paid orders still apply
       }
@@ -95,32 +100,36 @@ export function HumanPremiumShop() {
     profile.birthTimeSelect,
     profile.email,
     routeLocale,
+    storageUserId,
   ]);
 
-  const patchProfile = useCallback((partial: Partial<HumanPremiumProfile>) => {
-    setProfile((prev) => {
-      const next = { ...prev, ...partial };
-      saveHumanPremiumProfile(next);
-      return next;
-    });
-  }, []);
+  const patchProfile = useCallback(
+    (partial: Partial<HumanPremiumProfile>) => {
+      setProfile((prev) => {
+        const next = { ...prev, ...partial };
+        saveHumanPremiumProfile(storageUserId, next);
+        return next;
+      });
+    },
+    [storageUserId]
+  );
 
   function handleAddToCart(reportType: ReportType) {
     if (purchasedSet.has(reportType)) return;
-    setCart(addToHumanPremiumCart(reportType, profile));
+    setCart(addToHumanPremiumCart(storageUserId, reportType, profile));
     setCartFlash(true);
     window.setTimeout(() => setCartFlash(false), 600);
   }
 
   function handleAddBundle() {
-    setCart(addManyToHumanPremiumCart(REPORT_TYPE_ORDER, profile));
+    setCart(addManyToHumanPremiumCart(storageUserId, REPORT_TYPE_ORDER, profile));
     setCartFlash(true);
     window.setTimeout(() => setCartFlash(false), 600);
     cartRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function handleRemove(reportType: ReportType) {
-    setCart(removeFromHumanPremiumCart(reportType));
+    setCart(removeFromHumanPremiumCart(storageUserId, reportType));
   }
 
   return (

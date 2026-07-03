@@ -6,6 +6,7 @@ import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-erro
 import {
   getPaidHumanPremiumOrderIds,
   loadHumanPremiumProfile,
+  resolveHumanPremiumStorageUserId,
   syncPaidOrdersFromVault,
 } from "@/lib/reports/human-premium/cart-session";
 import { formatKrw } from "@/lib/reports/human-premium/pricing";
@@ -59,7 +60,8 @@ export function PaymentHistoryClient() {
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
   const petProductLabels = PET_PREMIUM_PRODUCT_LABELS[locale];
   const petIncludes = PET_PREMIUM_INCLUDES[locale];
-  const { accessToken } = useSupabaseSession();
+  const { accessToken, userId, isAnonymous } = useSupabaseSession();
+  const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
 
   const [humanOrders, setHumanOrders] = useState<HumanPaymentOrder[]>([]);
   const [petOrders, setPetOrders] = useState<PetPremiumPaymentRecord[]>([]);
@@ -80,8 +82,8 @@ export function PaymentHistoryClient() {
     setLoading(true);
     setError(null);
     try {
-      const profile = loadHumanPremiumProfile();
-      const orderIds = getPaidHumanPremiumOrderIds();
+      const profile = loadHumanPremiumProfile(storageUserId);
+      const orderIds = getPaidHumanPremiumOrderIds(storageUserId);
       const params = new URLSearchParams({ locale: routeLocale });
       if (orderIds.length) params.set("orderIds", orderIds.join(","));
       if (profile.email.trim()) params.set("email", profile.email.trim());
@@ -105,7 +107,7 @@ export function PaymentHistoryClient() {
       }
 
       const nextHumanOrders = (humanData.orders ?? []) as HumanPaymentOrder[];
-      syncPaidOrdersFromVault(nextHumanOrders);
+      syncPaidOrdersFromVault(storageUserId, nextHumanOrders);
       setHumanOrders(nextHumanOrders);
       setPetOrders((petData.orders ?? []) as PetPremiumPaymentRecord[]);
     } catch (err) {
@@ -116,7 +118,7 @@ export function PaymentHistoryClient() {
     } finally {
       setLoading(false);
     }
-  }, [accessToken, routeLocale]);
+  }, [accessToken, routeLocale, storageUserId]);
 
   useEffect(() => {
     void refresh();

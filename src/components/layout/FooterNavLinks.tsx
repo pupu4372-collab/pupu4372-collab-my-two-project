@@ -1,7 +1,8 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { getPaidHumanPremiumOrderIds } from "@/lib/reports/human-premium/cart-session";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { getPaidHumanPremiumOrderIds, resolveHumanPremiumStorageUserId } from "@/lib/reports/human-premium/cart-session";
 import { useEffect, useState } from "react";
 
 type FooterNavLinksProps = {
@@ -21,11 +22,13 @@ export function FooterNavLinks({
   paymentsLabel,
   hasServerPayments,
 }: FooterNavLinksProps) {
+  const { userId, isAnonymous } = useSupabaseSession();
+  const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
   const [showPayments, setShowPayments] = useState(hasServerPayments);
 
   useEffect(() => {
     const sync = () => {
-      setShowPayments(hasServerPayments || getPaidHumanPremiumOrderIds().length > 0);
+      setShowPayments(hasServerPayments || getPaidHumanPremiumOrderIds(storageUserId).length > 0);
     };
     sync();
     window.addEventListener("human-premium-paid", sync);
@@ -34,7 +37,7 @@ export function FooterNavLinks({
       window.removeEventListener("human-premium-paid", sync);
       window.removeEventListener("storage", sync);
     };
-  }, [hasServerPayments]);
+  }, [hasServerPayments, storageUserId]);
 
   const links = [
     { href: "/about" as const, label: aboutLabel },

@@ -1,10 +1,12 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import {
   getPaidHumanPremiumOrderIds,
   loadHumanPremiumProfile,
+  resolveHumanPremiumStorageUserId,
 } from "@/lib/reports/human-premium/cart-session";
 import {
   formatKrw,
@@ -35,6 +37,8 @@ export function HumanPremiumVaultClient() {
   const routeLocale = useLocale();
   const isKo = routeLocale === "ko";
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
+  const { userId, isAnonymous } = useSupabaseSession();
+  const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
 
   const [orders, setOrders] = useState<VaultOrder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,8 +50,8 @@ export function HumanPremiumVaultClient() {
     setLoading(true);
     setError(null);
     try {
-      const profile = loadHumanPremiumProfile();
-      const orderIds = getPaidHumanPremiumOrderIds();
+      const profile = loadHumanPremiumProfile(storageUserId);
+      const orderIds = getPaidHumanPremiumOrderIds(storageUserId);
       const params = new URLSearchParams({ locale: routeLocale });
       if (orderIds.length) params.set("orderIds", orderIds.join(","));
       if (profile.email.trim()) params.set("email", profile.email.trim());
@@ -63,7 +67,7 @@ export function HumanPremiumVaultClient() {
     } finally {
       setLoading(false);
     }
-  }, [routeLocale]);
+  }, [routeLocale, storageUserId]);
 
   async function handleGenerate(orderId: string, reportType: ReportType) {
     const key = `${orderId}:${reportType}`;

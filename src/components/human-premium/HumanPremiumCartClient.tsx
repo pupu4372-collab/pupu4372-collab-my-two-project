@@ -2,6 +2,7 @@
 
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { Link } from "@/i18n/navigation";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import {
   loadHumanPremiumCart,
@@ -10,6 +11,7 @@ import {
   profileHasBirthData,
   removeFromHumanPremiumCart,
   resetHumanPremiumCart,
+  resolveHumanPremiumStorageUserId,
   saveHumanPremiumCart,
   type HumanPremiumCartState,
 } from "@/lib/reports/human-premium/cart-session";
@@ -49,6 +51,8 @@ export function HumanPremiumCartClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
+  const { userId, isAnonymous } = useSupabaseSession();
+  const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
 
   const [cart, setCart] = useState<HumanPremiumCartState>({ items: [], orderId: null, paid: false });
   const [profileReady, setProfileReady] = useState(false);
@@ -61,9 +65,9 @@ export function HumanPremiumCartClient() {
   const orderIdFromUrl = searchParams.get("orderId");
 
   const refreshCart = useCallback(() => {
-    setCart(loadHumanPremiumCart());
-    setProfileReady(profileHasBirthData(loadHumanPremiumProfile()));
-  }, []);
+    setCart(loadHumanPremiumCart(storageUserId));
+    setProfileReady(profileHasBirthData(loadHumanPremiumProfile(storageUserId)));
+  }, [storageUserId]);
 
   const loadOrderSnapshot = useCallback(
     async (orderId: string) => {
@@ -76,16 +80,16 @@ export function HumanPremiumCartClient() {
         orderId,
         paid: true,
       };
-      saveHumanPremiumCart(nextCart);
+      saveHumanPremiumCart(storageUserId, nextCart);
       setCart(nextCart);
       setGenerated(snapshotToUrls(data.generated ?? {}, routeLocale));
     },
-    [routeLocale]
+    [routeLocale, storageUserId]
   );
 
   useEffect(() => {
     refreshCart();
-  }, [refreshCart]);
+  }, [refreshCart, storageUserId]);
 
   useEffect(() => {
     if (!orderIdFromUrl) return;
@@ -111,7 +115,7 @@ export function HumanPremiumCartClient() {
   }, [cart.orderId, cart.paid, loadOrderSnapshot, routeLocale]);
 
   function buildCheckoutBody() {
-    const profile = loadHumanPremiumProfile();
+    const profile = loadHumanPremiumProfile(storageUserId);
     const birthTimeUnknown = profile.birthTimeSelect === "unknown";
     const birthTime = birthTimeUnknown
       ? null
@@ -153,7 +157,11 @@ export function HumanPremiumCartClient() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Payment failed");
 
-      const next = markHumanPremiumCartPaid(String(data.orderId), loadHumanPremiumProfile());
+      const next = markHumanPremiumCartPaid(
+        storageUserId,
+        String(data.orderId),
+        loadHumanPremiumProfile(storageUserId)
+      );
       setCart(next);
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Payment failed";
@@ -197,7 +205,7 @@ export function HumanPremiumCartClient() {
 
   function handleRemove(reportType: ReportType) {
     if (cart.paid) return;
-    setCart(removeFromHumanPremiumCart(reportType));
+    setCart(removeFromHumanPremiumCart(storageUserId, reportType));
   }
 
   return (
@@ -354,7 +362,7 @@ export function HumanPremiumCartClient() {
           ) : null}
           <Link
             href="/premium/human"
-            onClick={() => resetHumanPremiumCart()}
+            onClick={() => resetHumanPremiumCart(storageUserId)}
             className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white"
           >
             {isKo ? "리포트 더 담기" : "Add more"}

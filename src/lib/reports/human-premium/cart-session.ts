@@ -18,9 +18,18 @@ export type HumanPremiumCartState = {
   paid: boolean;
 };
 
-const PROFILE_KEY = "human_premium_profile";
-const CART_KEY = "human_premium_cart";
-const PAID_ORDERS_KEY = "human_premium_paid_orders";
+export const GUEST_STORAGE_USER_ID = "guest";
+
+const PROFILE_KEY = (userId: string) => `human_premium_profile:${userId}`;
+const CART_KEY = (userId: string) => `human_premium_cart:${userId}`;
+const PAID_ORDERS_KEY = (userId: string) => `human_premium_paid_orders:${userId}`;
+
+export function resolveHumanPremiumStorageUserId(
+  userId: string | null,
+  isAnonymous: boolean
+): string {
+  return userId && !isAnonymous ? userId : GUEST_STORAGE_USER_ID;
+}
 
 export type SavedHumanPremiumOrder = {
   orderId: string;
@@ -102,12 +111,12 @@ function writeLocalJson(key: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function loadHumanPremiumProfile(): HumanPremiumProfile {
-  return normalizeHumanPremiumProfile(readJson(PROFILE_KEY, DEFAULT_PROFILE));
+export function loadHumanPremiumProfile(userId: string): HumanPremiumProfile {
+  return normalizeHumanPremiumProfile(readJson(PROFILE_KEY(userId), DEFAULT_PROFILE));
 }
 
-export function saveHumanPremiumProfile(profile: HumanPremiumProfile) {
-  writeJson(PROFILE_KEY, profile);
+export function saveHumanPremiumProfile(userId: string, profile: HumanPremiumProfile) {
+  writeJson(PROFILE_KEY(userId), profile);
 }
 
 function normalizeCartItems(items: ReportType[]): ReportType[] {
@@ -120,19 +129,19 @@ function normalizeCartItems(items: ReportType[]): ReportType[] {
   return next;
 }
 
-export function loadHumanPremiumCart(): HumanPremiumCartState {
-  const cart = readJson(CART_KEY, DEFAULT_CART);
+export function loadHumanPremiumCart(userId: string): HumanPremiumCartState {
+  const cart = readJson(CART_KEY(userId), DEFAULT_CART);
   cart.items = normalizeCartItems(cart.items);
   return cart;
 }
 
-export function saveHumanPremiumCart(cart: HumanPremiumCartState) {
-  writeJson(CART_KEY, cart);
+export function saveHumanPremiumCart(userId: string, cart: HumanPremiumCartState) {
+  writeJson(CART_KEY(userId), cart);
 }
 
 /** Clears the active checkout cart so a new purchase can start. Paid orders stay in the vault list. */
-export function resetHumanPremiumCart(): HumanPremiumCartState {
-  saveHumanPremiumCart(DEFAULT_CART);
+export function resetHumanPremiumCart(userId: string): HumanPremiumCartState {
+  saveHumanPremiumCart(userId, DEFAULT_CART);
   return { ...DEFAULT_CART };
 }
 
@@ -142,73 +151,82 @@ function ensureWritableCart(cart: HumanPremiumCartState): HumanPremiumCartState 
 }
 
 export function addToHumanPremiumCart(
+  userId: string,
   reportType: ReportType,
-  profile: HumanPremiumProfile = loadHumanPremiumProfile()
+  profile?: HumanPremiumProfile
 ): HumanPremiumCartState {
-  if (isHumanPremiumReportPurchased(reportType, profile)) {
-    return ensureWritableCart(loadHumanPremiumCart());
+  const resolvedProfile = profile ?? loadHumanPremiumProfile(userId);
+  if (isHumanPremiumReportPurchased(userId, reportType, resolvedProfile)) {
+    return ensureWritableCart(loadHumanPremiumCart(userId));
   }
-  const cart = ensureWritableCart(loadHumanPremiumCart());
+  const cart = ensureWritableCart(loadHumanPremiumCart(userId));
   if (!cart.items.includes(reportType)) {
     cart.items = [...cart.items, reportType];
-    saveHumanPremiumCart(cart);
+    saveHumanPremiumCart(userId, cart);
   }
   return cart;
 }
 
-export function removeFromHumanPremiumCart(reportType: ReportType): HumanPremiumCartState {
-  const cart = loadHumanPremiumCart();
+export function removeFromHumanPremiumCart(
+  userId: string,
+  reportType: ReportType
+): HumanPremiumCartState {
+  const cart = loadHumanPremiumCart(userId);
   cart.items = cart.items.filter((item) => item !== reportType);
-  saveHumanPremiumCart(cart);
+  saveHumanPremiumCart(userId, cart);
   return cart;
 }
 
 export function addManyToHumanPremiumCart(
+  userId: string,
   reportTypes: ReportType[],
-  profile: HumanPremiumProfile = loadHumanPremiumProfile()
+  profile?: HumanPremiumProfile
 ): HumanPremiumCartState {
-  const cart = ensureWritableCart(loadHumanPremiumCart());
-  const purchased = new Set(getPurchasedReportTypes(profile));
+  const resolvedProfile = profile ?? loadHumanPremiumProfile(userId);
+  const cart = ensureWritableCart(loadHumanPremiumCart(userId));
+  const purchased = new Set(getPurchasedReportTypes(userId, resolvedProfile));
   const next = new Set(cart.items);
   for (const type of reportTypes) {
     if (!purchased.has(type)) next.add(type);
   }
   cart.items = [...next];
-  saveHumanPremiumCart(cart);
+  saveHumanPremiumCart(userId, cart);
   return cart;
 }
 
 export function markHumanPremiumCartPaid(
+  userId: string,
   orderId: string,
-  profile: HumanPremiumProfile = loadHumanPremiumProfile()
+  profile?: HumanPremiumProfile
 ): HumanPremiumCartState {
-  const cart = loadHumanPremiumCart();
+  const resolvedProfile = profile ?? loadHumanPremiumProfile(userId);
+  const cart = loadHumanPremiumCart(userId);
   cart.orderId = orderId;
   cart.paid = true;
-  saveHumanPremiumCart(cart);
-  savePaidHumanPremiumOrder({
+  saveHumanPremiumCart(userId, cart);
+  savePaidHumanPremiumOrder(userId, {
     orderId,
     paidAt: new Date().toISOString(),
     items: cart.items,
-    personName: profile.personName.trim(),
-    birthDate: profile.birthDate,
-    birthTimeSelect: profile.birthTimeSelect,
+    personName: resolvedProfile.personName.trim(),
+    birthDate: resolvedProfile.birthDate,
+    birthTimeSelect: resolvedProfile.birthTimeSelect,
   });
   return cart;
 }
 
-export function getPaidHumanPremiumOrderIds(): string[] {
-  return loadPaidHumanPremiumOrders().map((order) => order.orderId);
+export function getPaidHumanPremiumOrderIds(userId: string): string[] {
+  return loadPaidHumanPremiumOrders(userId).map((order) => order.orderId);
 }
 
-export function loadPaidHumanPremiumOrders(): SavedHumanPremiumOrder[] {
-  return readLocalJson<SavedHumanPremiumOrder[]>(PAID_ORDERS_KEY, []);
+export function loadPaidHumanPremiumOrders(userId: string): SavedHumanPremiumOrder[] {
+  return readLocalJson<SavedHumanPremiumOrder[]>(PAID_ORDERS_KEY(userId), []);
 }
 
-export function savePaidHumanPremiumOrder(order: SavedHumanPremiumOrder) {
-  const existing = loadPaidHumanPremiumOrders();
+export function savePaidHumanPremiumOrder(userId: string, order: SavedHumanPremiumOrder) {
+  const existing = loadPaidHumanPremiumOrders(userId);
   if (existing.some((entry) => entry.orderId === order.orderId)) return;
-  writeLocalJson(PAID_ORDERS_KEY, [order, ...existing].slice(0, 30));
+  writeLocalJson(PAID_ORDERS_KEY(userId), [order, ...existing].slice(0, 30));
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("human-premium-paid"));
   }
@@ -224,24 +242,28 @@ function orderMatchesProfile(order: SavedHumanPremiumOrder, profile: HumanPremiu
 }
 
 export function getPurchasedReportTypes(
-  profile: HumanPremiumProfile = loadHumanPremiumProfile()
+  userId: string,
+  profile?: HumanPremiumProfile
 ): ReportType[] {
+  const resolvedProfile = profile ?? loadHumanPremiumProfile(userId);
   const types = new Set<ReportType>();
-  for (const order of loadPaidHumanPremiumOrders()) {
-    if (!orderMatchesProfile(order, profile)) continue;
+  for (const order of loadPaidHumanPremiumOrders(userId)) {
+    if (!orderMatchesProfile(order, resolvedProfile)) continue;
     for (const item of normalizeCartItems(order.items)) types.add(item);
   }
   return [...types];
 }
 
 export function isHumanPremiumReportPurchased(
+  userId: string,
   reportType: ReportType,
-  profile: HumanPremiumProfile = loadHumanPremiumProfile()
+  profile?: HumanPremiumProfile
 ): boolean {
-  return getPurchasedReportTypes(profile).includes(reportType);
+  return getPurchasedReportTypes(userId, profile).includes(reportType);
 }
 
 export function syncPaidOrdersFromVault(
+  userId: string,
   orders: Array<{
     orderId: string;
     items: ReportType[];
@@ -253,7 +275,7 @@ export function syncPaidOrdersFromVault(
   }>
 ) {
   for (const order of orders) {
-    savePaidHumanPremiumOrder({
+    savePaidHumanPremiumOrder(userId, {
       orderId: order.orderId,
       paidAt: order.createdAt ?? new Date().toISOString(),
       items: normalizeCartItems(order.items),
