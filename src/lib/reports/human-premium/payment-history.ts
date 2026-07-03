@@ -41,7 +41,7 @@ export async function listHumanPremiumPaymentHistory(options: {
   return orders.map((order) => ({
     orderId: order.orderId,
     amount: order.amount,
-    currency: "KRW" as const,
+    currency: order.currency ?? "KRW",
     items: order.items,
     itemCount: order.items.length,
     personName: order.personName,

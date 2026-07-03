@@ -18,9 +18,9 @@ import {
 import { humanPremiumRetentionNotice } from "@/lib/reports/human-premium/retention";
 import { parseBirthTimeSelect } from "@/lib/saju/birth-time-options";
 import {
-  formatKrw,
+  formatPrice,
+  getReportPrice,
   REPORT_CARD_THEMES,
-  REPORT_PRICING,
   sumCartAmount,
 } from "@/lib/reports/human-premium/pricing";
 import {
@@ -48,6 +48,7 @@ function snapshotToUrls(
 export function HumanPremiumCartClient() {
   const routeLocale = useLocale();
   const isKo = routeLocale === "ko";
+  const priceLocale = isKo ? "ko" : "en";
   const router = useRouter();
   const searchParams = useSearchParams();
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
@@ -61,7 +62,7 @@ export function HumanPremiumCartClient() {
   const [generated, setGenerated] = useState<Partial<Record<ReportType, string>>>({});
   const [error, setError] = useState<string | null>(null);
 
-  const total = useMemo(() => sumCartAmount(cart.items), [cart.items]);
+  const total = useMemo(() => sumCartAmount(cart.items, priceLocale), [cart.items, priceLocale]);
   const orderIdFromUrl = searchParams.get("orderId");
 
   const refreshCart = useCallback(() => {
@@ -274,7 +275,9 @@ export function HumanPremiumCartClient() {
                     <p className="font-semibold text-ink" style={{ color: theme.accent }}>
                       {typeLabels[reportType]}
                     </p>
-                    <p className="text-sm font-bold text-ink">{formatKrw(REPORT_PRICING[reportType])}</p>
+                    <p className="text-sm font-bold text-ink">
+                      {formatPrice(getReportPrice(reportType, priceLocale), priceLocale)}
+                    </p>
                     {cart.paid ? (
                       <p className="text-[11px] text-plum/55">
                         {ready
@@ -324,7 +327,7 @@ export function HumanPremiumCartClient() {
 
           {cart.items.length > 0 ? (
             <p className="border-t border-plum/10 pt-3 text-right text-lg font-bold text-ink">
-              {isKo ? "합계" : "Total"} {formatKrw(total)}
+              {isKo ? "합계" : "Total"} {formatPrice(total, priceLocale)}
             </p>
           ) : null}
         </section>
@@ -348,8 +351,8 @@ export function HumanPremiumCartClient() {
                   ? "결제 처리 중…"
                   : "Processing…"
                 : isKo
-                  ? `결제하기 ${formatKrw(total)}`
-                  : `Pay ${formatKrw(total)}`}
+                  ? `결제하기 ${formatPrice(total, priceLocale)}`
+                  : `Pay ${formatPrice(total, priceLocale)}`}
             </button>
           ) : null}
           {cart.paid ? (

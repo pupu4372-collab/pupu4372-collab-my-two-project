@@ -9,7 +9,7 @@ import {
   resolveHumanPremiumStorageUserId,
   syncPaidOrdersFromVault,
 } from "@/lib/reports/human-premium/cart-session";
-import { formatKrw } from "@/lib/reports/human-premium/pricing";
+import { formatMoney } from "@/lib/reports/human-premium/pricing";
 import {
   REPORT_TYPE_LABELS,
   REPORT_TYPE_LABELS_EN,
@@ -194,7 +194,9 @@ export function PaymentHistoryClient() {
                     {isKo ? "주문번호" : "Order"}: {entry.order.orderId}
                   </p>
                 </div>
-                <p className="text-xl font-extrabold text-channel-saju">{formatKrw(entry.order.amount)}</p>
+                <p className="text-xl font-extrabold text-channel-saju">
+                  {formatMoney(entry.order.amount, entry.order.currency)}
+                </p>
               </div>
 
               <ul className="mt-4 flex flex-wrap gap-2">
@@ -242,7 +244,9 @@ export function PaymentHistoryClient() {
                     {isKo ? "결제번호" : "Payment"}: {entry.order.paymentId}
                   </p>
                 </div>
-                <p className="text-xl font-extrabold text-channel-saju">{formatKrw(entry.order.amount)}</p>
+                <p className="text-xl font-extrabold text-channel-saju">
+                  {formatMoney(entry.order.amount, entry.order.currency)}
+                </p>
               </div>
 
               <ul className="mt-4 flex flex-wrap gap-2">

@@ -9,9 +9,11 @@ import {
   resolveHumanPremiumStorageUserId,
 } from "@/lib/reports/human-premium/cart-session";
 import {
-  formatKrw,
+  formatMoney,
+  formatPrice,
+  getCheckoutCurrency,
+  getReportPrice,
   REPORT_CARD_THEMES,
-  REPORT_PRICING,
 } from "@/lib/reports/human-premium/pricing";
 import { humanPremiumRetentionNotice } from "@/lib/reports/human-premium/retention";
 import {
@@ -25,6 +27,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type VaultOrder = {
   orderId: string;
   amount: number;
+  currency: string;
   items: ReportType[];
   generated: Partial<Record<ReportType, { reportId: string; webToken: string }>>;
   personName: string;
@@ -149,7 +152,7 @@ export function HumanPremiumVaultClient() {
               <p className="text-sm font-bold text-ink">{order.personName}</p>
               <p className="mt-1 text-xs text-plum/60">
                 {new Date(order.createdAt).toLocaleDateString(isKo ? "ko-KR" : "en-US")} ·{" "}
-                {formatKrw(order.amount)}
+                {formatMoney(order.amount, order.currency ?? getCheckoutCurrency(order.locale))}
               </p>
               <p className="mt-1 text-[11px] text-plum/50">
                 {isKo ? "보관 만료" : "Available until"}{" "}
@@ -172,7 +175,12 @@ export function HumanPremiumVaultClient() {
                     <p className="font-semibold" style={{ color: theme.accent }}>
                       {typeLabels[reportType]}
                     </p>
-                    <p className="text-sm font-bold text-ink">{formatKrw(REPORT_PRICING[reportType])}</p>
+                    <p className="text-sm font-bold text-ink">
+                      {formatPrice(
+                        getReportPrice(reportType, order.locale === "en" ? "en" : "ko"),
+                        order.locale === "en" ? "en" : "ko"
+                      )}
+                    </p>
                     <p className="text-[11px] text-plum/55">
                       {ready
                         ? isKo

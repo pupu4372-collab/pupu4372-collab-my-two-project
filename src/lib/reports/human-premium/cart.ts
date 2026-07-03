@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { buildHumanPremiumReportUrl } from "./email";
 import { resolveHumanPremiumEmail } from "./email-policy";
 import { humanPremiumWebExpiresAt } from "./retention";
-import { REPORT_TYPE_ORDER, sumCartAmount } from "./pricing";
+import { REPORT_TYPE_ORDER, getCheckoutCurrency, sumCartAmount } from "./pricing";
 import {
   completeHumanPremiumPayment,
   parseHumanPremiumReportInput,
@@ -102,7 +102,8 @@ export async function createPaidCartOrder(
     throw new Error("cart_items_already_purchased");
   }
 
-  const amount = sumCartAmount(items);
+  const amount = sumCartAmount(items, input.locale);
+  const currency = getCheckoutCurrency(input.locale);
   const orderId = `hp_cart_${randomBytes(10).toString("hex")}`;
 
   const birthBasis: HumanPremiumBirthBasis = {
@@ -130,7 +131,7 @@ export async function createPaidCartOrder(
       checkoutSessionId: `cart:${orderId}`,
       amountPaid: amount,
       amountOriginal: amount,
-      currency: "KRW",
+      currency,
     }
   );
 
@@ -393,6 +394,7 @@ export function cartOrderSnapshot(row: HumanPremiumReportRow) {
   return {
     orderId: row.payment_order_id,
     amount: Number(row.amount_paid ?? 0),
+    currency: row.currency ?? "KRW",
     items: cart.items,
     generated: cart.generated,
     deliverEmail: cart.deliverEmail,

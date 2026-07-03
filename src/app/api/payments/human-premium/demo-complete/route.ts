@@ -10,6 +10,7 @@ import {
   getHumanPremiumReportById,
 } from "@/lib/reports/human-premium/storage";
 import {
+  getCheckoutCurrency,
   resolveCheckoutAmount,
   type HumanPremiumBundleKind,
 } from "@/lib/reports/human-premium/pricing";
@@ -59,11 +60,15 @@ export async function POST(request: Request) {
       const input = parseHumanPremiumReportInput(body, userId);
       const bundle = parseBundle(body.bundle);
       const isBundle = Boolean(body.isBundle ?? body.isBunde);
-      const amount = resolveCheckoutAmount({
-        reportType: input.reportType,
-        bundle,
-        isBundle,
-      });
+      const amount = resolveCheckoutAmount(
+        {
+          reportType: input.reportType,
+          bundle,
+          isBundle,
+        },
+        input.locale
+      );
+      const currency = getCheckoutCurrency(input.locale);
       const paymentId = `hp_demo_${randomBytes(8).toString("hex")}`;
       const bundleMeta = bundle ?? (isBundle ? "all" : null);
 
@@ -74,7 +79,7 @@ export async function POST(request: Request) {
         checkoutSessionId: bundleMeta ? `bundle:${bundleMeta}` : null,
         amountPaid: amount,
         amountOriginal: amount,
-        currency: "KRW",
+        currency,
       });
     }
 

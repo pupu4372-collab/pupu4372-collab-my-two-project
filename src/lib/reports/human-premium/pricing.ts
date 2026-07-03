@@ -1,5 +1,7 @@
 import type { ReportType } from "./types";
 
+export type PricingLocale = "ko" | "en";
+
 export const REPORT_PRICING: Record<ReportType, number> = {
   daily: 0,
   decade: 4900,
@@ -13,10 +15,30 @@ export const REPORT_PRICING: Record<ReportType, number> = {
   lifetime: 9900,
 };
 
+/** EN shop display + checkout (whole USD) */
+export const REPORT_PRICING_USD: Record<ReportType, number> = {
+  daily: 0,
+  decade: 5,
+  monthly: 4,
+  yearly: 6,
+  mental: 4,
+  love: 5,
+  career: 5,
+  business: 5,
+  wealth: 6,
+  lifetime: 10,
+};
+
 export const BUNDLE_PRICING = {
   all: 30000,
   themepack: 9900,
   timepack: 9900,
+} as const;
+
+export const BUNDLE_PRICING_USD = {
+  all: 33,
+  themepack: 11,
+  timepack: 11,
 } as const;
 
 export type HumanPremiumBundleKind = keyof typeof BUNDLE_PRICING;
@@ -121,28 +143,62 @@ export function formatKrw(amount: number): string {
   return `₩${amount.toLocaleString("ko-KR")}`;
 }
 
-export function sumPaidReportPricing(): number {
-  return REPORT_TYPE_ORDER.reduce((sum, type) => sum + REPORT_PRICING[type], 0);
+export function formatUsd(amount: number): string {
+  return `$${amount}`;
 }
 
-export function getBundleSavings(): number {
-  return sumPaidReportPricing() - BUNDLE_PRICING.all;
+export function getReportPricing(locale: PricingLocale = "ko"): Record<ReportType, number> {
+  return locale === "en" ? REPORT_PRICING_USD : REPORT_PRICING;
 }
 
-export function resolveCheckoutAmount(options: {
-  reportType?: ReportType;
-  bundle?: HumanPremiumBundleKind | null;
-  isBundle?: boolean;
-  cartItems?: ReportType[];
-}): number {
-  if (options.cartItems?.length) return sumCartAmount(options.cartItems);
-  if (options.bundle) return BUNDLE_PRICING[options.bundle];
-  if (options.isBundle) return BUNDLE_PRICING.all;
-  if (options.reportType) return REPORT_PRICING[options.reportType];
-  return REPORT_PRICING.lifetime;
+export function getBundlePricing(locale: PricingLocale = "ko") {
+  return locale === "en" ? BUNDLE_PRICING_USD : BUNDLE_PRICING;
 }
 
-export function sumCartAmount(items: ReportType[]): number {
+export function getReportPrice(type: ReportType, locale: PricingLocale = "ko"): number {
+  return getReportPricing(locale)[type];
+}
+
+export function getCheckoutCurrency(locale: PricingLocale = "ko"): "KRW" | "USD" {
+  return locale === "en" ? "USD" : "KRW";
+}
+
+export function formatPrice(amount: number, locale: PricingLocale = "ko"): string {
+  return locale === "en" ? formatUsd(amount) : formatKrw(amount);
+}
+
+export function formatMoney(amount: number, currency: string): string {
+  return currency === "USD" ? formatUsd(amount) : formatKrw(amount);
+}
+
+export function sumPaidReportPricing(locale: PricingLocale = "ko"): number {
+  return REPORT_TYPE_ORDER.reduce((sum, type) => sum + getReportPrice(type, locale), 0);
+}
+
+export function getBundleSavings(locale: PricingLocale = "ko"): number {
+  return sumPaidReportPricing(locale) - getBundlePricing(locale).all;
+}
+
+export function resolveCheckoutAmount(
+  options: {
+    reportType?: ReportType;
+    bundle?: HumanPremiumBundleKind | null;
+    isBundle?: boolean;
+    cartItems?: ReportType[];
+  },
+  locale: PricingLocale = "ko"
+): number {
+  if (options.cartItems?.length) return sumCartAmount(options.cartItems, locale);
+  const bundles = getBundlePricing(locale);
+  const pricing = getReportPricing(locale);
+  if (options.bundle) return bundles[options.bundle];
+  if (options.isBundle) return bundles.all;
+  if (options.reportType) return pricing[options.reportType];
+  return pricing.lifetime;
+}
+
+export function sumCartAmount(items: ReportType[], locale: PricingLocale = "ko"): number {
+  const pricing = getReportPricing(locale);
   const unique = [...new Set(items)];
-  return unique.reduce((sum, type) => sum + REPORT_PRICING[type], 0);
+  return unique.reduce((sum, type) => sum + pricing[type], 0);
 }

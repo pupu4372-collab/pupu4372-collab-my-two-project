@@ -19,10 +19,10 @@ import {
   type HumanPremiumProfile,
 } from "@/lib/reports/human-premium/cart-session";
 import {
-  BUNDLE_PRICING,
-  formatKrw,
+  formatPrice,
+  getBundlePricing,
   getBundleSavings,
-  REPORT_PRICING,
+  getReportPrice,
   REPORT_CARD_THEMES,
   REPORT_TYPE_ORDER,
   REPORT_TYPE_SUBTITLES_EN,
@@ -41,6 +41,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 export function HumanPremiumShop() {
   const routeLocale = useLocale();
   const isKo = routeLocale === "ko";
+  const priceLocale = isKo ? "ko" : "en";
   const cartRef = useRef<HTMLDivElement>(null);
   const { userId, isAnonymous } = useSupabaseSession();
   const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
@@ -50,10 +51,11 @@ export function HumanPremiumShop() {
   const [cartFlash, setCartFlash] = useState(false);
   const [purchasedTypes, setPurchasedTypes] = useState<ReportType[]>([]);
 
-  const savings = getBundleSavings();
+  const savings = getBundleSavings(priceLocale);
+  const bundlePricing = getBundlePricing(priceLocale);
   const subtitles = isKo ? REPORT_TYPE_SUBTITLES_KO : REPORT_TYPE_SUBTITLES_EN;
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
-  const cartTotal = useMemo(() => sumCartAmount(cart.items), [cart.items]);
+  const cartTotal = useMemo(() => sumCartAmount(cart.items, priceLocale), [cart.items, priceLocale]);
   const purchasedSet = useMemo(() => new Set(purchasedTypes), [purchasedTypes]);
   const bundleAddableCount = useMemo(
     () => REPORT_TYPE_ORDER.filter((type) => !purchasedSet.has(type) && !cart.items.includes(type)).length,
@@ -170,7 +172,7 @@ export function HumanPremiumShop() {
                 </p>
                 <p className="mt-2 text-sm text-ink/80">{subtitles[reportType]}</p>
                 <p className="mt-4 text-2xl font-bold text-ink">
-                  {formatKrw(REPORT_PRICING[reportType])}
+                  {formatPrice(getReportPrice(reportType, priceLocale), priceLocale)}
                 </p>
                 <button
                   type="button"
@@ -214,8 +216,8 @@ export function HumanPremiumShop() {
             <h3 className="text-lg font-bold text-ink">{isKo ? "장바구니" : "Cart"}</h3>
             <p className="mt-1 text-sm text-plum/70">
               {isKo
-                ? `${cart.items.length}개 · 합계 ${formatKrw(cartTotal)}`
-                : `${cart.items.length} item(s) · ${formatKrw(cartTotal)}`}
+                ? `${cart.items.length}개 · 합계 ${formatPrice(cartTotal, priceLocale)}`
+                : `${cart.items.length} item(s) · ${formatPrice(cartTotal, priceLocale)}`}
             </p>
           </header>
 
@@ -240,7 +242,7 @@ export function HumanPremiumShop() {
                     </span>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-bold text-ink">
-                        {formatKrw(REPORT_PRICING[reportType])}
+                        {formatPrice(getReportPrice(reportType, priceLocale), priceLocale)}
                       </span>
                       <button
                         type="button"
@@ -262,7 +264,7 @@ export function HumanPremiumShop() {
                 href="/premium/human/cart"
                 className="rounded-full bg-channel-saju px-6 py-3 text-sm font-bold text-white"
               >
-                {isKo ? `결제하기 ${formatKrw(cartTotal)}` : `Checkout ${formatKrw(cartTotal)}`}
+                {isKo ? `결제하기 ${formatPrice(cartTotal, priceLocale)}` : `Checkout ${formatPrice(cartTotal, priceLocale)}`}
               </Link>
             </div>
           ) : null}
@@ -275,14 +277,14 @@ export function HumanPremiumShop() {
         </p>
         <h3 className="mt-2 text-xl font-bold sm:text-2xl">
           {isKo
-            ? `단품으로 모두 구매 시 ${formatKrw(sumPaidReportPricing())}`
-            : `Buying all singles: ${formatKrw(sumPaidReportPricing())}`}
+            ? `단품으로 모두 구매 시 ${formatPrice(sumPaidReportPricing(priceLocale), priceLocale)}`
+            : `Buying all singles: ${formatPrice(sumPaidReportPricing(priceLocale), priceLocale)}`}
         </h3>
         <p className="mt-2 text-lg font-semibold">
           → {isKo ? "올인원 번들" : "All-in-one bundle"}{" "}
-          <span className="text-2xl">{formatKrw(BUNDLE_PRICING.all)}</span>
+          <span className="text-2xl">{formatPrice(bundlePricing.all, priceLocale)}</span>
           <span className="ml-2 text-sm text-white/90">
-            ({isKo ? `${formatKrw(savings)} 절약` : `save ${formatKrw(savings)}`})
+            ({isKo ? `${formatPrice(savings, priceLocale)} 절약` : `save ${formatPrice(savings, priceLocale)}`})
           </span>
         </p>
         <button

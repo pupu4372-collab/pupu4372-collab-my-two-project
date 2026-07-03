@@ -12,6 +12,7 @@ import {
 import { parseHumanPremiumReportInput } from "@/lib/reports/human-premium/service";
 import { createHumanPremiumReportDraft } from "@/lib/reports/human-premium/storage";
 import {
+  getCheckoutCurrency,
   resolveCheckoutAmount,
   type HumanPremiumBundleKind,
 } from "@/lib/reports/human-premium/pricing";
@@ -44,11 +45,15 @@ export async function POST(request: Request) {
     const bundle = parseBundle(body.bundle);
     const isBundle = Boolean(body.isBundle ?? body.isBunde);
     const paymentMethod = parsePaymentMethod(body.paymentMethod);
-    const amount = resolveCheckoutAmount({
-      reportType: input.reportType,
-      bundle,
-      isBundle,
-    });
+    const amount = resolveCheckoutAmount(
+      {
+        reportType: input.reportType,
+        bundle,
+        isBundle,
+      },
+      input.locale
+    );
+    const currency = getCheckoutCurrency(input.locale);
 
     const paymentId = `hp_${randomBytes(12).toString("hex")}`;
     const bundleMeta = bundle ?? (isBundle ? "all" : null);
@@ -70,7 +75,7 @@ export async function POST(request: Request) {
       checkoutSessionId: bundleMeta ? `bundle:${bundleMeta}` : null,
       amountPaid: amount,
       amountOriginal: amount,
-      currency: "KRW",
+      currency,
     });
 
     const storeId = getPortOneShopId();
@@ -96,7 +101,7 @@ export async function POST(request: Request) {
       paymentId,
       storeId,
       amount,
-      currency: "KRW",
+      currency,
       orderName: bundleMeta
         ? input.locale === "ko"
           ? "K-Saju 올인원 번들"
