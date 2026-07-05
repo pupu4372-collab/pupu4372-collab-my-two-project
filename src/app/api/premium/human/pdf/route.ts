@@ -1,3 +1,4 @@
+import { buildHumanPremiumPdfFilename } from "@/lib/reports/human-premium/filename";
 import { getOrRenderHumanPremiumPdf } from "@/lib/reports/human-premium/pdf-cache";
 import { resolveHumanPremiumReportByToken } from "@/lib/reports/human-premium/resolve";
 import { markHumanPremiumReportFailed } from "@/lib/reports/human-premium/storage";
@@ -5,12 +6,6 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
-
-/** HTTP header filenames must be ASCII (ByteString). Korean name goes via client save picker. */
-function pdfHeaderFilename(personName: string): string {
-  const ascii = personName.replace(/[^\x20-\x7E]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-  return `jigwanjae-${ascii || "report"}.pdf`;
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -27,11 +22,13 @@ export async function GET(request: Request) {
 
   try {
     const pdf = await getOrRenderHumanPremiumPdf(resolved.row, resolved.payload);
+    const { display, asciiFallback } = buildHumanPremiumPdfFilename(resolved.payload);
 
     return new NextResponse(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${pdfHeaderFilename(resolved.payload.personName)}"`,
+        "Content-Disposition":
+          `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encodeURIComponent(display)}`,
         "Cache-Control": "private, max-age=3600",
       },
     });

@@ -16,13 +16,16 @@ const JIG_INK = "#222222";
 const JIG_SEAL = "#B22222";
 const JIG_MUTED = "#747878";
 
-const OBANG_COLORS: Record<string, string> = {
-  wood: "#3E5C76",
-  fire: "#9A3B3B",
-  earth: "#D4A373",
-  metal: "#BDBDBD",
-  water: "#3D3D3D",
+const ELEMENT_COLORS: Record<string, string> = {
+  wood: "#5B8C5A",
+  fire: "#C0453A",
+  earth: "#B98A3E",
+  metal: "#9B9B93",
+  water: "#3A5A78",
 };
+
+const ELEMENT_TRACK_COLOR = "#EFEAE0";
+const ELEMENT_COLOR_FALLBACK = "#999999";
 
 interface ElementRow {
   key: string;
@@ -55,6 +58,21 @@ function asElements(raw: Record<string, unknown>[]): ElementRow[] {
     count: Number(item.count ?? 0),
     percent: Number(item.percent ?? 0),
   }));
+}
+
+function elementColor(key: string): string {
+  return ELEMENT_COLORS[key] ?? ELEMENT_COLOR_FALLBACK;
+}
+
+function elementBar(percent: number, color: string, maxWidth = 200): Content {
+  const clamped = Math.max(0, Math.min(100, percent));
+  return {
+    canvas: [
+      { type: "rect", x: 0, y: 0, w: maxWidth, h: 10, color: ELEMENT_TRACK_COLOR },
+      { type: "rect", x: 0, y: 0, w: (maxWidth * clamped) / 100, h: 10, color },
+    ],
+    margin: [0, 2, 0, 6],
+  };
 }
 
 function sectionBlocks(section: HumanPremiumReportSection): Content[] {
@@ -95,27 +113,31 @@ function elementSummaryBlocks(
     : "Structural analysis of five-element distribution";
 
   const rows: Content[] = elements.map((item) => {
-    const pct = item.percent;
     const label = isKo
       ? `${item.hangul} (${item.hanja})`
       : `${item.romanized} (${item.hanja})`;
+    const barColor = elementColor(item.key);
     return {
       columns: [
         {
-          width: "*",
           text: pdfSafeText(label),
-          style: "body",
-          color: OBANG_COLORS[item.key] ?? JIG_INK,
+          width: 80,
+          style: "elementLabel",
+          color: barColor,
         },
         {
+          stack: [elementBar(item.percent, barColor)],
+          width: 220,
+        },
+        {
+          text: `${item.percent}%`,
           width: 40,
-          text: `${pct}%`,
           alignment: "right",
-          style: "body",
-          bold: true,
+          style: "elementPercent",
         },
       ],
-      margin: [0, 0, 0, 4],
+      columnGap: 8,
+      margin: [0, 4, 0, 4],
     };
   });
 
@@ -288,6 +310,8 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
       sectionTitle: { fontSize: 12, bold: true, color: JIG_INK, margin: [0, 10, 0, 4] },
       sectionSubtitle: { fontSize: 10, color: JIG_MUTED },
       body: { fontSize: 10.5, color: JIG_INK },
+      elementLabel: { fontSize: 10.5, bold: true },
+      elementPercent: { fontSize: 10.5, bold: true, color: JIG_INK },
       disclaimer: { fontSize: 10, color: JIG_MUTED, alignment: "center" },
     },
     background(_currentPage, pageSize) {

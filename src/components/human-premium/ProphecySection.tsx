@@ -2,22 +2,12 @@
 
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import { DEFAULT_REPORT_TYPE } from "@/lib/reports/human-premium/types";
+import {
+  COHORT_INSIGHT_TITLE_EN,
+  COHORT_INSIGHT_TITLE_KO,
+  stripCohortBodyPrefix,
+} from "@/lib/reports/human-premium/cohort-insight-labels";
 import { BodyText, SectionHeading } from "./report-ui";
-
-const COHORT_TITLE_KO = "나와 같은 운명의 통찰";
-const COHORT_TITLE_EN = "Insight for people like you";
-
-/** Template fallback embeds "COHORT INSIGHT · " in body; UI already shows the card label. */
-function stripCohortBodyPrefix(body: string, isKo: boolean): string {
-  let text = body.trim();
-  text = text.replace(/^\s*COHORT\s+INSIGHT\s*·\s*/i, "");
-  if (isKo) {
-    text = text.replace(new RegExp(`^\\s*${COHORT_TITLE_KO}\\s*·\\s*`), "");
-  } else {
-    text = text.replace(new RegExp(`^\\s*${COHORT_TITLE_EN}\\s*·\\s*`, "i"), "");
-  }
-  return text.trim();
-}
 
 export function ProphecySection({
   report,
@@ -62,10 +52,10 @@ export function ProphecySection({
       {cohort?.body ? (
         <article className="human-premium-paper rounded-lg p-6">
           <p className="human-premium-label-caps text-[var(--jig-seal)]">
-            {isKo ? COHORT_TITLE_KO : COHORT_TITLE_EN}
+            {isKo ? COHORT_INSIGHT_TITLE_KO : COHORT_INSIGHT_TITLE_EN}
           </p>
           <BodyText
-            body={stripCohortBodyPrefix(cohort.body, isKo)}
+            body={stripCohortBodyPrefix(cohort.body, isKo ? "ko" : "en")}
             className="mt-3"
           />
         </article>

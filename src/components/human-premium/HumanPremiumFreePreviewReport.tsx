@@ -9,6 +9,7 @@ import { RisksSection } from "@/components/human-premium/RisksSection";
 import { RoadmapSection } from "@/components/human-premium/RoadmapSection";
 import { SajuStructureSection } from "@/components/human-premium/SajuStructureSection";
 import { Link } from "@/i18n/navigation";
+import { buildHumanPremiumPdfFilename } from "@/lib/reports/human-premium/filename";
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import { useState } from "react";
 
@@ -32,11 +33,6 @@ const UI = {
     copyright: "This report is proprietary to Jigwanjae (知觀齋).",
   },
 } as const;
-
-function safePdfFilename(name: string): string {
-  const safe = name.replace(/[^\p{L}\p{N}\-_]+/gu, "-").replace(/-+/g, "-");
-  return `jigwanjae-${safe || "report"}.pdf`;
-}
 
 /**
  * Premium report body for free daily routine — same 8 sections as paid HumanPremiumReportView.
@@ -69,11 +65,11 @@ export function HumanPremiumFreePreviewReport({
       const blob = await res.blob();
       if (!blob.type.includes("pdf")) throw new Error("PDF response invalid");
 
-      const filename = safePdfFilename(report.personName);
+      const { display: pdfFilename } = buildHumanPremiumPdfFilename(report);
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = objectUrl;
-      anchor.download = filename;
+      anchor.download = pdfFilename;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();

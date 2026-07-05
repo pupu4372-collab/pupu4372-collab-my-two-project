@@ -1,9 +1,11 @@
 "use client";
 
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
+import { DailyQuotaModal } from "@/components/human-premium/DailyQuotaModal";
 import { HumanPremiumFreePreviewReport } from "@/components/human-premium/HumanPremiumFreePreviewReport";
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import type { HumanPremiumProfile } from "@/lib/reports/human-premium/cart-session";
@@ -23,7 +25,44 @@ import {
 } from "@/lib/saju/birth-time-options";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+const LOGIN_UI = {
+  ko: {
+    title: "로그인이 필요해요",
+    body: "로그인하면 매일 1회 무료로 데일리 럭키 루틴을 볼 수 있어요.",
+    login: "로그인하기",
+  },
+  en: {
+    title: "Sign in required",
+    body: "Sign in for one free Daily Lucky Routine per day (KST).",
+    login: "Sign in",
+  },
+} as const;
+
+function buildRequestBody(
+  profile: HumanPremiumProfile,
+  routeLocale: string,
+  birthTime: string | null,
+  birthTimeUnknown: boolean,
+  calendarType: "solar" | "lunar",
+  isKo: boolean,
+  dailyExtraPaymentId?: string
+) {
+  return {
+    personName: profile.personName.trim() || (isKo ? "게스트" : "Guest"),
+    email: profile.email.trim(),
+    birthDate: profile.birthDate,
+    birthTime,
+    birthTimeUnknown,
+    timezone: profile.timezone,
+    calendarType,
+    locale: routeLocale,
+    privacyConsent: profile.privacyConsent,
+    gender: profile.gender || null,
+    ...(dailyExtraPaymentId ? { dailyExtraPaymentId } : {}),
+  };
+}
 
 export function DayPillarPreview({
   profile,
@@ -35,15 +74,33 @@ export function DayPillarPreview({
   const routeLocale = useLocale();
   const tNav = useTranslations("nav");
   const isKo = routeLocale === "ko";
+  const { accessToken, isAnonymous, ready: sessionReady } = useSupabaseSession();
   const dailyTitle = isKo ? REPORT_TYPE_LABELS.daily : REPORT_TYPE_LABELS_EN.daily;
   const dailySubtitles = isKo ? REPORT_TYPE_SUBTITLES_KO : REPORT_TYPE_SUBTITLES_EN;
   const dailySubtitle = isKo
-    ? `무료 · ${dailySubtitles.daily}`
-    : `Free · ${dailySubtitles.daily}`;
+    ? `로그인 · 하루 1회 무료 · ${dailySubtitles.daily}`
+    : `Sign in · 1 free/day (KST) · ${dailySubtitles.daily}`;
   const [loading, setLoading] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loginPrompt, setLoginPrompt] = useState(false);
+  const [quotaOpen, setQuotaOpen] = useState(false);
+  const [todayReportToken, setTodayReportToken] = useState<string | null>(null);
+  const [portoneReady, setPortoneReady] = useState(false);
   const [report, setReport] = useState<HumanPremiumReportPayload | null>(null);
   const [webToken, setWebToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (document.querySelector('script[src*="cdn.portone.io"]')) {
+      setPortoneReady(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://cdn.portone.io/v2/browser-sdk.js";
+    script.async = true;
+    script.onload = () => setPortoneReady(true);
+    document.head.appendChild(script);
+  }, []);
 
   function patchProfile(partial: Partial<HumanPremiumProfile>) {
     onPatchProfile(partial);
@@ -57,34 +114,159 @@ export function DayPillarPreview({
     return parseBirthTimeSelect(profile.birthTimeSelect).birthTime;
   }, [profile.birthTimeSelect, birthTimeUnknown]);
 
-  async function handleGenerate() {
+  async function requestDailyReport(dailyExtraPaymentId?: string) {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+    const res = await fetch("/api/human-premium/daily-routine", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(
+        buildRequestBody(
+          profile,
+          routeLocale,
+          birthTime,
+          birthTimeUnknown,
+          calendarType,
+          isKo,
+          dailyExtraPaymentId
+        )
+      ),
+    });
+    const data = (await res.json()) as Record<string, unknown>;
+
+    if (res.status === 401 && data.error === "login_required") {
+      setLoginPrompt(true);
+      return null;
+    }
+    if (res.status === 402 && data.error === "daily_quota_exceeded") {
+      setTodayReportToken(String(data.todayReportToken ?? "") || null);
+      setQuotaOpen(true);
+      return null;
+    }
+    if (!res.ok) {
+      throw new Error(String(data.error ?? "Report failed"));
+    }
+
+    setReport(data.report as HumanPremiumReportPayload);
+    setWebToken(String(data.webToken ?? ""));
+    setQuotaOpen(false);
+    setLoginPrompt(false);
+    return data;
+  }
+
+  async function handleGenerate(dailyExtraPaymentId?: string) {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/human-premium/daily-routine", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          personName: profile.personName.trim() || (isKo ? "게스트" : "Guest"),
-          email: profile.email.trim(),
-          birthDate: profile.birthDate,
-          birthTime,
-          birthTimeUnknown,
-          timezone: profile.timezone,
-          calendarType,
-          locale: routeLocale,
-          privacyConsent: profile.privacyConsent,
-          gender: profile.gender || null,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Report failed");
-      setReport(data.report as HumanPremiumReportPayload);
-      setWebToken(String(data.webToken ?? ""));
+      await requestDailyReport(dailyExtraPaymentId);
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Report failed";
       setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
     } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDailyExtraPay() {
+    if (!accessToken || isAnonymous) {
+      setLoginPrompt(true);
+      return;
+    }
+
+    setPaying(true);
+    setError(null);
+    try {
+      const checkoutRes = await fetch("/api/payments/human-premium/daily-extra/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ locale: routeLocale }),
+      });
+      const checkout = (await checkoutRes.json()) as Record<string, unknown>;
+      if (!checkoutRes.ok) {
+        throw new Error(String(checkout.error ?? "Checkout failed"));
+      }
+
+      const paymentId = String(checkout.paymentId ?? "");
+      if (!paymentId) throw new Error("Checkout failed");
+
+      if (isKo) {
+        const PortOne = (
+          window as unknown as {
+            PortOne?: { requestPayment: (args: unknown) => Promise<{ code?: string }> };
+          }
+        ).PortOne;
+        if (!PortOne || !portoneReady || !process.env.NEXT_PUBLIC_PORTONE_SHOP_ID) {
+          throw new Error(isKo ? "결제 모듈을 불러오지 못했어요." : "Payment module unavailable.");
+        }
+
+        const payResult = await PortOne.requestPayment({
+          storeId: process.env.NEXT_PUBLIC_PORTONE_SHOP_ID,
+          paymentId,
+          orderName: String(checkout.orderName ?? dailyTitle),
+          totalAmount: Number(checkout.amount ?? 1900),
+          currency: "KRW",
+          channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
+          payMethod: "CARD",
+        });
+
+        if (payResult.code !== undefined) {
+          throw new Error(isKo ? "결제가 취소되었어요." : "Payment cancelled.");
+        }
+
+        const verifyRes = await fetch("/api/payments/human-premium/daily-extra/verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ paymentId, locale: routeLocale, paymentMethod: "portone" }),
+        });
+        if (!verifyRes.ok) {
+          const verifyData = (await verifyRes.json()) as { error?: string };
+          throw new Error(verifyData.error ?? "Payment verify failed");
+        }
+      } else {
+        const paypalLink = String((checkout.paypal as { link?: string } | undefined)?.link ?? "");
+        if (paypalLink) {
+          window.open(paypalLink, "_blank", "noopener,noreferrer");
+        }
+        const confirmed = window.confirm(
+          isKo
+            ? "PayPal 결제를 완료하셨나요?"
+            : "Have you completed PayPal checkout?"
+        );
+        if (!confirmed) return;
+
+        const verifyRes = await fetch("/api/payments/human-premium/daily-extra/verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            paymentId,
+            locale: routeLocale,
+            paymentMethod: "paypal_link",
+          }),
+        });
+        if (!verifyRes.ok) {
+          const verifyData = (await verifyRes.json()) as { error?: string };
+          throw new Error(verifyData.error ?? "Payment verify failed");
+        }
+      }
+
+      setQuotaOpen(false);
+      setLoading(true);
+      await requestDailyReport(paymentId);
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : "Payment failed";
+      setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
+    } finally {
+      setPaying(false);
       setLoading(false);
     }
   }
@@ -112,9 +294,19 @@ export function DayPillarPreview({
     );
   }
 
+  const loginUi = LOGIN_UI[isKo ? "ko" : "en"];
+
   return (
     <>
-      <ReportGenerateLoader isKo={isKo} active={loading} />
+      <DailyQuotaModal
+        open={quotaOpen}
+        isKo={isKo}
+        todayReportToken={todayReportToken}
+        paying={paying}
+        onClose={() => setQuotaOpen(false)}
+        onPay={() => void handleDailyExtraPay()}
+      />
+      <ReportGenerateLoader isKo={isKo} active={loading || paying} />
       <section className="human-premium-birth-card mx-auto w-full max-w-sm space-y-6 p-6 sm:max-w-md sm:p-8">
         <div className="text-center">
           <p className="human-premium-birth-eyebrow">
@@ -124,6 +316,22 @@ export function DayPillarPreview({
             {isKo ? "사주 정보 입력" : "Birth details"}
           </h2>
         </div>
+
+        {loginPrompt ? (
+          <div
+            role="alert"
+            className="rounded-2xl border border-channel-saju/30 bg-white/90 px-4 py-4 text-sm"
+          >
+            <p className="font-bold text-ink">{loginUi.title}</p>
+            <p className="mt-2 text-plum/80">{loginUi.body}</p>
+            <Link
+              href="/login"
+              className="mt-3 inline-block font-semibold text-channel-saju underline"
+            >
+              {loginUi.login}
+            </Link>
+          </div>
+        ) : null}
 
         <div className="human-premium-birth-form-inner space-y-4">
           <label className="human-premium-birth-field">
@@ -272,7 +480,13 @@ export function DayPillarPreview({
           ) : null}
           <button
             type="button"
-            disabled={!profile.birthDate || !profile.privacyConsent || loading}
+            disabled={
+              !profile.birthDate ||
+              !profile.privacyConsent ||
+              loading ||
+              paying ||
+              !sessionReady
+            }
             onClick={() => void handleGenerate()}
             className="human-premium-birth-submit human-premium-birth-submit--plan"
           >

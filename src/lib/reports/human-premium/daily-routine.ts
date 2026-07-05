@@ -7,6 +7,7 @@ import {
   markHumanPremiumReportReady,
 } from "./storage";
 import type {
+  HumanPremiumPaymentProvider,
   HumanPremiumReportInput,
   HumanPremiumReportPayload,
   HumanPremiumReportRow,
@@ -25,10 +26,20 @@ export async function buildHumanPremiumDailyRoutineReport(
   });
 }
 
-/** Persist free daily report so PDF + web link work like paid reports. */
+/** Persist daily report so PDF + web link work like paid reports. */
 export async function persistHumanPremiumDailyRoutineReport(
   input: HumanPremiumReportInput,
-  options?: { sendEmail?: boolean; request?: Request | null }
+  options?: {
+    sendEmail?: boolean;
+    request?: Request | null;
+    paymentProvider?: HumanPremiumPaymentProvider;
+    paymentOrderId?: string;
+    amountPaid?: number;
+    amountOriginal?: number;
+    currency?: string;
+    checkoutSessionId?: string | null;
+    pgProvider?: string | null;
+  }
 ): Promise<{
   row: HumanPremiumReportRow;
   payload: HumanPremiumReportPayload;
@@ -38,12 +49,16 @@ export async function persistHumanPremiumDailyRoutineReport(
   const dailyInput = { ...input, reportType: DAILY_ROUTINE_REPORT_TYPE };
   const payload = await buildHumanPremiumDailyRoutineReport(dailyInput);
 
+  const isPaidExtra = (options?.amountPaid ?? 0) > 0;
   const draft = await createHumanPremiumReportDraft(dailyInput, {
     status: "draft",
-    paymentProvider: "demo",
-    paymentOrderId: `daily-${randomUUID()}`,
-    amountPaid: 0,
-    amountOriginal: 0,
+    paymentProvider: options?.paymentProvider ?? "demo",
+    paymentOrderId: options?.paymentOrderId ?? `daily-free-${randomUUID()}`,
+    amountPaid: options?.amountPaid ?? 0,
+    amountOriginal: options?.amountOriginal ?? 0,
+    currency: options?.currency ?? "KRW",
+    checkoutSessionId: options?.checkoutSessionId ?? (isPaidExtra ? "daily-extra" : "daily-free"),
+    pgProvider: options?.pgProvider ?? null,
   });
 
   let ready = await markHumanPremiumReportReady(

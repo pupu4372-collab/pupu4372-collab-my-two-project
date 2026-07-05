@@ -11,6 +11,7 @@ import { SajuStructureSection } from "@/components/human-premium/SajuStructureSe
 import { AppTopNav } from "@/components/layout/AppTopNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Link } from "@/i18n/navigation";
+import { buildHumanPremiumPdfFilename } from "@/lib/reports/human-premium/filename";
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import { HUMAN_PREMIUM_SECTION_IDS } from "@/lib/reports/human-premium/types";
 import { useEffect, useMemo, useState } from "react";
@@ -90,11 +91,6 @@ interface HumanPremiumReportViewProps {
   report: HumanPremiumReportPayload;
   webToken: string;
   backHref?: string;
-}
-
-function safePdfFilename(name: string): string {
-  const safe = name.replace(/[^\p{L}\p{N}\-_]+/gu, "-").replace(/-+/g, "-");
-  return `jigwanjae-${safe || "report"}.pdf`;
 }
 
 function TocTextRows({
@@ -186,11 +182,11 @@ export function HumanPremiumReportView({
       const blob = await res.blob();
       if (!blob.type.includes("pdf")) throw new Error("PDF response invalid");
 
-      const filename = safePdfFilename(report.personName);
+      const { display: pdfFilename } = buildHumanPremiumPdfFilename(report);
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = objectUrl;
-      anchor.download = filename;
+      anchor.download = pdfFilename;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();

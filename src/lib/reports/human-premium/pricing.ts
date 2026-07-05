@@ -43,6 +43,28 @@ export const BUNDLE_PRICING_USD = {
 
 export type HumanPremiumBundleKind = keyof typeof BUNDLE_PRICING;
 
+/** Paid add-on when daily free quota (1/day KST) is exhausted. */
+export const DAILY_EXTRA_PRODUCT = "daily-extra" as const;
+
+export const DAILY_EXTRA_PRICING = {
+  ko: 1900,
+  en: 2,
+} as const;
+
+export function getDailyExtraPrice(locale: PricingLocale = "ko"): number {
+  return locale === "en" ? DAILY_EXTRA_PRICING.en : DAILY_EXTRA_PRICING.ko;
+}
+
+export function resolveDailyExtraCheckout(locale: PricingLocale = "ko"): {
+  amount: number;
+  currency: "KRW" | "USD";
+} {
+  return {
+    amount: getDailyExtraPrice(locale),
+    currency: getCheckoutCurrency(locale),
+  };
+}
+
 export const REPORT_TYPE_SUBTITLES_KO: Record<ReportType, string> = {
   daily: "오늘 행운 플랜",
   decade: "10년 전략 로드맵",

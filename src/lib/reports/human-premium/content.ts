@@ -28,6 +28,11 @@ import {
   REPORT_TYPE_LABELS_EN,
 } from "./types";
 import { buildZiweiSections } from "./ziwei-narratives";
+import {
+  COHORT_INSIGHT_TITLE_EN,
+  COHORT_INSIGHT_TITLE_KO,
+  stripCohortBodyPrefix,
+} from "./cohort-insight-labels";
 
 const SCORE_LABELS_KO = [
   "재물운",
@@ -632,12 +637,12 @@ function buildTemplateCohortInsight(
 
   if (locale === "ko") {
     return {
-      body: `COHORT INSIGHT · ${elementLabel} 기운이 두드러진 ${nickname}과 같은 명식 구조를 가진 사람들은 '속도를 절반으로, 깊이를 두 배로' 전략을 가장 많이 성공시킵니다. 같은 시기에 태어난 사람들도 선택의 질에서 갈리며, ${elementLabel} 기운을 일상 루틴에 녹였을 때 만족도가 높은 경향을 보입니다.`,
+      body: `${elementLabel} 기운이 두드러진 ${nickname}과 같은 명식 구조를 가진 사람들은 '속도를 절반으로, 깊이를 두 배로' 전략을 가장 많이 성공시킵니다. 같은 시기에 태어난 사람들도 선택의 질에서 갈리며, ${elementLabel} 기운을 일상 루틴에 녹였을 때 만족도가 높은 경향을 보입니다.`,
     };
   }
 
   return {
-    body: `COHORT INSIGHT · People with a chart structure like ${nickname}, where ${elementLabel} is prominent, most often succeed with "half the speed, double the depth." Those born in the same era diverge by choice quality; weaving ${elementLabel} into daily routines tends to raise satisfaction.`,
+    body: `People with a chart structure like ${nickname}, where ${elementLabel} is prominent, most often succeed with "half the speed, double the depth." Those born in the same era diverge by choice quality; weaving ${elementLabel} into daily routines tends to raise satisfaction.`,
   };
 }
 
@@ -717,8 +722,10 @@ export function formatProphecyBody(
 ): string {
   const sealed = prophecy.full ?? prophecy.short;
   const sealedLabel = locale === "ko" ? "잠겨진 천명" : "Locked destiny";
-  const cohortLabel = locale === "ko" ? "COHORT INSIGHT" : "COHORT INSIGHT";
-  return [`【${sealedLabel}】`, sealed, `【${cohortLabel}】`, cohort.body].join("\n\n");
+  const cohortLabel =
+    locale === "ko" ? COHORT_INSIGHT_TITLE_KO : COHORT_INSIGHT_TITLE_EN;
+  const cohortBody = stripCohortBodyPrefix(cohort.body, locale);
+  return [`【${sealedLabel}】`, sealed, `【${cohortLabel}】`, cohortBody].join("\n\n");
 }
 
 export function formatStructuredSectionBodies(

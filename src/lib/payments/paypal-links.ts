@@ -54,6 +54,16 @@ export function resolvePayPalPaymentLink(options: {
   return augmentPayPalLink(base, options);
 }
 
+/** Daily-extra add-on (after free quota) — prefers PAYPAL_LINK_DAILY_EXTRA. */
+export function resolveDailyExtraPayPalLink(paymentId: string): string | null {
+  const base =
+    readPayPalLink("PAYPAL_LINK_DAILY_EXTRA") ??
+    readPayPalLink("PAYPAL_LINK_DAILY") ??
+    readPayPalLink("PAYPAL_LINK_DEFAULT");
+  if (!base) return null;
+  return augmentPayPalLink(base, { reportId: paymentId, paymentId });
+}
+
 function augmentPayPalLink(
   base: string,
   context: { reportId: string; paymentId: string }
