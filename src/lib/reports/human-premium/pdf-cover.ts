@@ -27,7 +27,7 @@ function paragraph(text: string, style: string = "body"): Content {
 }
 
 function asPillars(raw: Record<string, unknown>): PdfMansePillars {
-  return raw as PdfMansePillars;
+  return raw as unknown as PdfMansePillars;
 }
 
 export function buildPdfCoverBlocks(
