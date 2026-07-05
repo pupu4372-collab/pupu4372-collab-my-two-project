@@ -26,26 +26,13 @@ const supportCards = [
     icon: "💭",
     koTitle: "1:1 문의",
     enTitle: "1:1 Inquiry",
-    koDesc: "",
-    enDesc: "",
+    koDesc: "사이트 내부 문의로 접수",
+    enDesc: "Submit inside this site",
     panel: "form" as const,
     tone: {
       card: "border-[#e9bbc9] bg-[#fff0f4] hover:bg-[#fff8fa]",
       active: "border-[#dfa8bc] bg-[#fff8fa]",
       icon: "bg-[#f5dbe4] text-[#7a4058]",
-    },
-  },
-  {
-    icon: "💌",
-    koTitle: "메일문의",
-    enTitle: "Email",
-    koDesc: "사이트 내부 문의로 접수",
-    enDesc: "Submit inside this site",
-    panel: "form" as const,
-    tone: {
-      card: "border-[#e0c4b6] bg-[#f7eee9] hover:bg-[#fff8f3]",
-      active: "border-[#d4b5a5] bg-[#fff8f3]",
-      icon: "bg-[#ead8ce] text-[#6f493c]",
     },
   },
   {
@@ -70,7 +57,7 @@ export function SupportQuickActions() {
 
   return (
     <>
-      <section className="relative z-10 mt-10 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5">
+      <section className="relative z-10 mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5">
         {supportCards.map((card) => {
           const desc = isKo ? card.koDesc : card.enDesc;
           const isActive = "panel" in card && activePanel === card.panel;

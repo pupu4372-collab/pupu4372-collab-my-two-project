@@ -49,3 +49,6 @@ create policy "support_inquiries_admin_all" on public.support_inquiries
       where p.id = auth.uid() and p.role = 'admin'
     )
   );
+
+create policy "support_inquiries_insert_public" on public.support_inquiries
+  for insert with check (true);

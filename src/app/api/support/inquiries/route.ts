@@ -96,7 +96,16 @@ export async function POST(request: Request) {
     .single();
 
   if (error || !data) {
-    return NextResponse.json({ error: "Failed to submit inquiry." }, { status: 500 });
+    console.error("[support/inquiries] insert failed:", error?.message, error?.code);
+    const missingTable = error?.code === "42P01" || error?.message?.includes("support_inquiries");
+    return NextResponse.json(
+      {
+        error: missingTable
+          ? "Support inquiry storage is not set up. Please apply migration 026_support_inquiries.sql."
+          : "Failed to submit inquiry.",
+      },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ inquiry: data }, { status: 201 });
