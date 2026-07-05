@@ -6,35 +6,19 @@ import type {
   HumanPremiumReportSection,
 } from "./types";
 import {
-  DEFAULT_REPORT_TYPE,
-  REPORT_TYPE_LABELS,
-  REPORT_TYPE_LABELS_EN,
-} from "./types";
+  ELEMENT_TRACK_COLOR,
+  elementAccentColor,
+  formatElementDisplayLabel,
+  parseElementRows,
+} from "./element-display";
+import { loadJigwanjaeCoverLogoDataUrl } from "./pdf-assets";
+import { buildPdfCoverBlocks } from "./pdf-cover";
+import { buildOrderedPdfBodySections } from "./pdf-sections";
 
 const JIG_HANJI = "#F4F1EA";
 const JIG_INK = "#222222";
 const JIG_SEAL = "#B22222";
 const JIG_MUTED = "#747878";
-
-const ELEMENT_COLORS: Record<string, string> = {
-  wood: "#5B8C5A",
-  fire: "#C0453A",
-  earth: "#B98A3E",
-  metal: "#9B9B93",
-  water: "#3A5A78",
-};
-
-const ELEMENT_TRACK_COLOR = "#EFEAE0";
-const ELEMENT_COLOR_FALLBACK = "#999999";
-
-interface ElementRow {
-  key: string;
-  hanja: string;
-  hangul: string;
-  romanized: string;
-  count: number;
-  percent: number;
-}
 
 function pdfSafeText(value: string): string {
   return value
@@ -49,19 +33,48 @@ function paragraph(text: string, style: string = "body"): Content {
   return { text: pdfSafeText(text), style, margin: [0, 0, 0, 8] };
 }
 
-function asElements(raw: Record<string, unknown>[]): ElementRow[] {
-  return raw.map((item) => ({
-    key: String(item.key ?? ""),
-    hanja: String(item.hanja ?? ""),
-    hangul: String(item.hangul ?? ""),
-    romanized: String(item.romanized ?? ""),
-    count: Number(item.count ?? 0),
-    percent: Number(item.percent ?? 0),
-  }));
+function sectionBlocks(
+  section: HumanPremiumReportSection,
+  options?: { hideTitle?: boolean; hideBody?: boolean }
+): Content[] {
+  const blocks: Content[] = [];
+
+  if (!options?.hideTitle) {
+    blocks.push({ text: pdfSafeText(section.title), style: "sectionTitle" });
+  }
+
+  if (section.subtitle) {
+    blocks.push({
+      text: pdfSafeText(section.subtitle),
+      style: "sectionSubtitle",
+      margin: [0, 0, 0, 6],
+    });
+  }
+
+  if (!options?.hideBody) {
+    blocks.push(paragraph(section.body));
+  }
+
+  if (section.bullets?.length) {
+    blocks.push({
+      ul: section.bullets.map((item) => pdfSafeText(item)),
+      style: "body",
+      margin: [8, 0, 0, 10],
+    });
+  }
+
+  return blocks;
 }
 
-function elementColor(key: string): string {
-  return ELEMENT_COLORS[key] ?? ELEMENT_COLOR_FALLBACK;
+function findCoverSection(
+  report: HumanPremiumReportPayload
+): HumanPremiumReportSection | undefined {
+  for (const chapter of report.saju.chapters) {
+    for (const section of chapter.sections) {
+      if (section.id === "section-cover") return section;
+    }
+  }
+  return undefined;
 }
 
 function elementBar(percent: number, color: string, maxWidth = 200): Content {
@@ -75,37 +88,12 @@ function elementBar(percent: number, color: string, maxWidth = 200): Content {
   };
 }
 
-function sectionBlocks(section: HumanPremiumReportSection): Content[] {
-  const blocks: Content[] = [
-    { text: pdfSafeText(section.title), style: "sectionTitle" },
-  ];
-
-  if (section.subtitle) {
-    blocks.push({
-      text: pdfSafeText(section.subtitle),
-      style: "sectionSubtitle",
-      margin: [0, 0, 0, 6],
-    });
-  }
-
-  blocks.push(paragraph(section.body));
-
-  if (section.bullets?.length) {
-    blocks.push({
-      ul: section.bullets.map((item) => pdfSafeText(item)),
-      style: "body",
-      margin: [8, 0, 0, 10],
-    });
-  }
-
-  return blocks;
-}
-
 function elementSummaryBlocks(
   report: HumanPremiumReportPayload,
-  isKo: boolean
+  isKo: boolean,
+  options?: { pageBreak?: boolean }
 ): Content[] {
-  const elements = asElements(report.saju.elements);
+  const elements = parseElementRows(report.saju.elements);
 
   const title = isKo ? "오행 에너지 균형" : "Element Balance";
   const subtitle = isKo
@@ -113,10 +101,8 @@ function elementSummaryBlocks(
     : "Structural analysis of five-element distribution";
 
   const rows: Content[] = elements.map((item) => {
-    const label = isKo
-      ? `${item.hangul} (${item.hanja})`
-      : `${item.romanized} (${item.hanja})`;
-    const barColor = elementColor(item.key);
+    const label = formatElementDisplayLabel(item, isKo);
+    const barColor = elementAccentColor(item.key);
     return {
       columns: [
         {
@@ -146,13 +132,15 @@ function elementSummaryBlocks(
   , elements[0]);
 
   const dominantLabel = dominant
-    ? isKo
-      ? `${dominant.hangul} (${dominant.hanja})`
-      : `${dominant.romanized} (${dominant.hanja})`
+    ? formatElementDisplayLabel(dominant, isKo)
     : "-";
 
+  const titleBlock: Content = options?.pageBreak === false
+    ? { text: title, style: "chapterTitle", margin: [0, 16, 0, 4] }
+    : { text: title, style: "chapterTitle", pageBreak: "before" };
+
   return [
-    { text: title, style: "chapterTitle", pageBreak: "before" },
+    titleBlock,
     { text: subtitle, style: "chapterSubtitle", margin: [0, 0, 0, 10] },
     paragraph(
       isKo
@@ -165,113 +153,24 @@ function elementSummaryBlocks(
   ];
 }
 
-function formatIssuedDate(iso: string, isKo: boolean): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso.slice(0, 10);
-  if (isKo) {
-    return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, "0")}. ${String(date.getDate()).padStart(2, "0")}`;
-  }
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDefinitions {
+function buildDocumentDefinition(
+  report: HumanPremiumReportPayload,
+  logoDataUrl?: string | null
+): TDocumentDefinitions {
   const isKo = report.locale === "ko";
   const footerLabel = isKo
     ? "지관재(知觀齋) Premium Report"
     : "Jigwanjae Premium Report";
-  const brandLine = isKo ? "知觀齋" : "Jigwanjae (知觀齋)";
-  const motto = isKo
-    ? "운명을 아는 것(知)에서 그치지 않고, 그 흐름을 멀리서 관조(觀)하며 대처하는 법을 익히는 서재"
-    : "A study where knowing fate (知) meets observing its flow (觀).";
-  const maxim = isKo
-    ? "[知運者無礙 - 운명을 아는 자는 거침이 없나니.]"
-    : "[He who knows his destiny is without obstacles.]";
-  const recipientLabel = isKo ? "수신" : "RECIPIENT";
-  const issuedLabel = isKo ? "발행일" : "ISSUED DATE";
-  const reportTypeKey = report.reportType ?? DEFAULT_REPORT_TYPE;
-  const reportType = isKo
-    ? REPORT_TYPE_LABELS[reportTypeKey]
-    : REPORT_TYPE_LABELS_EN[reportTypeKey];
 
-  const content: Content[] = [
-    { text: brandLine, style: "coverBrand", alignment: "center" },
-    {
-      text: pdfSafeText(report.cover.subtitle),
-      style: "coverSubtitle",
-      alignment: "center",
-      margin: [0, 4, 0, 12],
-    },
-    { text: motto, style: "coverMotto", alignment: "center", margin: [0, 0, 0, 8] },
-    { text: maxim, style: "coverMaxim", alignment: "center", margin: [0, 0, 0, 20] },
-    {
-      columns: [
-        {
-          width: "*",
-          stack: [
-            { text: recipientLabel, style: "labelCaps" },
-            {
-              text: pdfSafeText(`${report.personName}${isKo ? "님" : ""}`),
-              style: "personName",
-              margin: [0, 4, 0, 0],
-            },
-            { text: reportType, style: "reportTypeTitle", margin: [0, 4, 0, 0] },
-          ],
-        },
-        {
-          width: "*",
-          stack: [
-            { text: issuedLabel, style: "labelCaps", alignment: "right" },
-            {
-              text: formatIssuedDate(report.generatedAt, isKo),
-              style: "personName",
-              alignment: "right",
-              margin: [0, 4, 0, 0],
-            },
-            {
-              text: pdfSafeText(report.cover.tagline),
-              style: "bodyMuted",
-              alignment: "right",
-              margin: [0, 2, 0, 0],
-            },
-          ],
-        },
-      ],
-      margin: [0, 0, 0, 16],
-    },
-    paragraph(report.summary.story),
-  ];
+  const content: Content[] = buildPdfCoverBlocks(report, { logoDataUrl });
 
-  if (report.summary.traits.length) {
-    content.push({
-      ul: report.summary.traits.map((item) => pdfSafeText(item)),
-      style: "body",
-      margin: [8, 0, 0, 14],
-    });
+  const coverSection = findCoverSection(report);
+  if (coverSection) {
+    content.push(...sectionBlocks(coverSection, { hideTitle: true, hideBody: true }));
   }
 
-  content.push(...elementSummaryBlocks(report, isKo));
-
-  for (const chapter of report.saju.chapters) {
-    content.push({
-      text: pdfSafeText(chapter.title),
-      style: "chapterTitle",
-      pageBreak: "before",
-    });
-    if (chapter.subtitle) {
-      content.push({
-        text: pdfSafeText(chapter.subtitle),
-        style: "chapterSubtitle",
-        margin: [0, 0, 0, 8],
-      });
-    }
-    for (const section of chapter.sections) {
-      content.push(...sectionBlocks(section));
-    }
-  }
+  content.push(...elementSummaryBlocks(report, isKo, { pageBreak: false }));
+  content.push(...buildOrderedPdfBodySections(report, isKo));
 
   content.push(
     paragraph(
@@ -312,6 +211,9 @@ function buildDocumentDefinition(report: HumanPremiumReportPayload): TDocumentDe
       body: { fontSize: 10.5, color: JIG_INK },
       elementLabel: { fontSize: 10.5, bold: true },
       elementPercent: { fontSize: 10.5, bold: true, color: JIG_INK },
+      prophecySealed: { fontSize: 11.5, italics: true, color: JIG_INK, lineHeight: 1.6 },
+      prophecyMantra: { fontSize: 10.5, italics: true, color: JIG_MUTED, lineHeight: 1.5 },
+      decisionQuote: { fontSize: 11, italics: false, color: JIG_INK, lineHeight: 1.55 },
       disclaimer: { fontSize: 10, color: JIG_MUTED, alignment: "center" },
     },
     background(_currentPage, pageSize) {
@@ -359,7 +261,8 @@ export async function renderHumanPremiumReportPdf(
   report: HumanPremiumReportPayload
 ): Promise<Buffer> {
   await ensurePdfFontsAsync();
-  const docDefinition = buildDocumentDefinition(report);
+  const logoDataUrl = await loadJigwanjaeCoverLogoDataUrl();
+  const docDefinition = buildDocumentDefinition(report, logoDataUrl);
   const pdfDoc = pdfMake.createPdf(docDefinition);
   return pdfDoc.getBuffer();
 }

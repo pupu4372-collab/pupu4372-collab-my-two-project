@@ -1,6 +1,7 @@
 "use client";
 
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
+import { DEFAULT_REPORT_TYPE } from "@/lib/reports/human-premium/types";
 import { BodyText, SectionHeading } from "./report-ui";
 
 export function RoadmapSection({
@@ -12,13 +13,22 @@ export function RoadmapSection({
 }) {
   const roadmap = report.structured?.roadmap ?? [];
   const moments = report.structured?.decisionMoments ?? [];
+  const reportType = report.reportType ?? DEFAULT_REPORT_TYPE;
+  const subtitle =
+    reportType === "daily"
+      ? isKo
+        ? "오늘 시간대별 루틴 · 결정의 순간 4"
+        : "Today's time bands · four decision moments"
+      : isKo
+        ? "대운별 전략 · 결정의 순간 4"
+        : "Cycle strategy · four decision moments";
 
   return (
     <section id="section-roadmap" className="scroll-mt-24 space-y-6">
       <SectionHeading
         id="section-roadmap-heading"
         title={isKo ? "시간 로드맵" : "Time roadmap"}
-        subtitle={isKo ? "대운별 전략 · 결정의 순간 4" : "Cycle strategy · four decision moments"}
+        subtitle={subtitle}
       />
       <div className="space-y-4 border-l-2 border-[var(--jig-seal)]/30 pl-6">
         {roadmap.map((item) => (

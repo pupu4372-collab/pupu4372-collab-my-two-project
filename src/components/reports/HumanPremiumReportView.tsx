@@ -13,7 +13,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Link } from "@/i18n/navigation";
 import { buildHumanPremiumPdfFilename } from "@/lib/reports/human-premium/filename";
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
-import { HUMAN_PREMIUM_SECTION_IDS } from "@/lib/reports/human-premium/types";
+import { visibleHumanPremiumSectionIds } from "@/lib/reports/human-premium/section-visibility";
 import { useEffect, useMemo, useState } from "react";
 import { markSessionAlive } from "@/lib/supabase/auth-session-policy";
 
@@ -159,12 +159,12 @@ export function HumanPremiumReportView({
 
   const toc = useMemo(
     () =>
-      HUMAN_PREMIUM_SECTION_IDS.map((id) => ({
+      visibleHumanPremiumSectionIds(report).map((id) => ({
         id,
         title: t.sectionTitles[id],
         group: t.saju,
       })),
-    [t.saju, t.sectionTitles]
+    [report, t.saju, t.sectionTitles]
   );
 
   async function downloadPdf() {

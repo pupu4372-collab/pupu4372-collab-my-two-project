@@ -3,6 +3,10 @@
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import { DEFAULT_REPORT_TYPE } from "@/lib/reports/human-premium/types";
 import {
+  lockedDestinyTitle,
+  prophecyMantra,
+} from "@/lib/reports/human-premium/prophecy-labels";
+import {
   COHORT_INSIGHT_TITLE_EN,
   COHORT_INSIGHT_TITLE_KO,
   stripCohortBodyPrefix,
@@ -20,15 +24,14 @@ export function ProphecySection({
   const prophecy = report.structured?.prophecy;
   const cohort = report.structured?.cohortInsight;
   const sealed = prophecy?.full ?? prophecy?.short ?? "";
-  const mantra = isKo
-    ? "운명을 아는 자는 거침이 없나니 — 지금의 선택이 다음 계절을 만듭니다."
-    : "He who knows his destiny moves without obstacle — today's choice shapes the next season.";
+  const mantra = prophecyMantra(isKo);
+  const destinyTitle = lockedDestinyTitle(isKo);
 
   return (
     <section id="section-prophecy" className="scroll-mt-24 space-y-6">
       <SectionHeading
         id="section-prophecy-heading"
-        title={isKo ? "잠겨진 천명" : "Locked destiny"}
+        title={destinyTitle}
         subtitle={
           reportType === "lifetime"
             ? isKo
@@ -38,9 +41,7 @@ export function ProphecySection({
         }
       />
       <article className="rounded-2xl bg-[#2a2433] p-8 text-[#f4f1ea] shadow-inner sm:p-10">
-        <p className="human-premium-label-caps text-[#d4a373]">
-          {isKo ? "잠겨진 천명" : "Locked destiny"}
-        </p>
+        <p className="human-premium-label-caps text-[#d4a373]">{destinyTitle}</p>
         <p className="human-premium-serif mt-4 text-lg italic leading-[2] text-[#f8f4ec]">
           {sealed}
         </p>

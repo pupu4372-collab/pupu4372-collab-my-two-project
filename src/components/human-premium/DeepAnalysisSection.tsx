@@ -12,6 +12,7 @@ export function DeepAnalysisSection({
   isKo: boolean;
 }) {
   const body = findSectionBody(report, "section-depth");
+  if (!body.trim()) return null;
 
   return (
     <section id="section-depth" className="scroll-mt-24 space-y-6">
