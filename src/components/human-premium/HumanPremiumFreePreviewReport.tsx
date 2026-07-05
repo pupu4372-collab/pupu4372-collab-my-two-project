@@ -10,6 +10,33 @@ import { RoadmapSection } from "@/components/human-premium/RoadmapSection";
 import { SajuStructureSection } from "@/components/human-premium/SajuStructureSection";
 import { Link } from "@/i18n/navigation";
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
+import { useState } from "react";
+
+const UI = {
+  ko: {
+    shareSectionLabel: "저장 · 공유",
+    shareSectionHint: "PDF 저장",
+    pdfReady: "한글 폰트가 포함된 PDF를 바로 저장합니다",
+    downloadChoice: "PDF 저장",
+    pdfDownloading: "PDF 생성 중…",
+    pdfFailed: "PDF 저장에 실패했습니다",
+    copyright: "본 리포트는 지관재(知觀齋)의 고유 자산이며 무단 복제를 금합니다.",
+  },
+  en: {
+    shareSectionLabel: "Save · Share",
+    shareSectionHint: "Save PDF",
+    pdfReady: "Download a PDF with embedded Korean fonts",
+    downloadChoice: "Save PDF",
+    pdfDownloading: "Preparing PDF…",
+    pdfFailed: "PDF download failed",
+    copyright: "This report is proprietary to Jigwanjae (知觀齋).",
+  },
+} as const;
+
+function safePdfFilename(name: string): string {
+  const safe = name.replace(/[^\p{L}\p{N}\-_]+/gu, "-").replace(/-+/g, "-");
+  return `jigwanjae-${safe || "report"}.pdf`;
+}
 
 /**
  * Premium report body for free daily routine — same 8 sections as paid HumanPremiumReportView.
@@ -17,10 +44,51 @@ import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/type
  */
 export function HumanPremiumFreePreviewReport({
   report,
+  webToken,
 }: {
   report: HumanPremiumReportPayload;
+  webToken: string;
 }) {
   const isKo = report.locale === "ko";
+  const t = UI[report.locale];
+  const [pdfState, setPdfState] = useState<"idle" | "downloading" | "failed">("idle");
+  const [pdfError, setPdfError] = useState<string | null>(null);
+
+  async function downloadPdf() {
+    setPdfState("downloading");
+    setPdfError(null);
+    try {
+      const res = await fetch(
+        `/api/premium/human/pdf?token=${encodeURIComponent(webToken)}`
+      );
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "PDF failed");
+      }
+
+      const blob = await res.blob();
+      if (!blob.type.includes("pdf")) throw new Error("PDF response invalid");
+
+      const filename = safePdfFilename(report.personName);
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(objectUrl);
+
+      setPdfState("idle");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        setPdfState("idle");
+        return;
+      }
+      setPdfError(error instanceof Error ? error.message : null);
+      setPdfState("failed");
+    }
+  }
 
   return (
     <div className="human-premium-stage">
@@ -33,6 +101,33 @@ export function HumanPremiumFreePreviewReport({
         <RisksSection report={report} isKo={isKo} />
         <RoadmapSection report={report} isKo={isKo} />
         <ProphecySection report={report} isKo={isKo} />
+
+        <section className="no-print human-premium-share-panel mt-10 space-y-3">
+          <p className="human-premium-label-caps text-center text-[var(--jig-seal)]">
+            {t.shareSectionLabel}
+          </p>
+          <p className="human-premium-serif text-center text-sm font-semibold text-[var(--jig-ink)]">
+            {t.shareSectionHint}
+          </p>
+          <div className="grid grid-cols-1 gap-2.5">
+            <button
+              type="button"
+              onClick={() => void downloadPdf()}
+              disabled={pdfState === "downloading"}
+              title={t.pdfReady}
+              className="human-premium-share-btn human-premium-share-btn--pdf disabled:opacity-60"
+            >
+              {pdfState === "downloading" ? t.pdfDownloading : t.downloadChoice}
+            </button>
+          </div>
+          {pdfState === "failed" && (
+            <p className="text-center text-xs text-[var(--jig-seal)]">
+              {t.pdfFailed}
+              {pdfError ? `: ${pdfError.slice(0, 120)}` : ""}
+            </p>
+          )}
+          <p className="text-center text-xs text-[var(--jig-muted)]">{t.copyright}</p>
+        </section>
 
         <p className="mt-10 text-center text-sm text-[var(--jig-muted)]">
           {isKo

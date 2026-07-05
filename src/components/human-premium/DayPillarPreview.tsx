@@ -43,6 +43,7 @@ export function DayPillarPreview({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<HumanPremiumReportPayload | null>(null);
+  const [webToken, setWebToken] = useState<string | null>(null);
 
   function patchProfile(partial: Partial<HumanPremiumProfile>) {
     onPatchProfile(partial);
@@ -79,6 +80,7 @@ export function DayPillarPreview({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Report failed");
       setReport(data.report as HumanPremiumReportPayload);
+      setWebToken(String(data.webToken ?? ""));
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Report failed";
       setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
@@ -89,13 +91,14 @@ export function DayPillarPreview({
 
   function resetReport() {
     setReport(null);
+    setWebToken(null);
     setError(null);
   }
 
-  if (report) {
+  if (report && webToken) {
     return (
       <div className="space-y-6">
-        <HumanPremiumFreePreviewReport report={report} />
+        <HumanPremiumFreePreviewReport report={report} webToken={webToken} />
         <p className="text-center text-sm">
           <button
             type="button"
