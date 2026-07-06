@@ -98,24 +98,43 @@ export async function togglePostLike(
   postId: string,
   userId: string
 ): Promise<{ liked: boolean; like_count: number }> {
-  const { data: existing } = await supabase
+  const { data: existing, error: readError } = await supabase
     .from("post_likes")
     .select("id")
     .eq("post_id", postId)
     .eq("user_id", userId)
     .maybeSingle();
 
-  if (existing) {
-    await supabase.from("post_likes").delete().eq("id", (existing as { id: string }).id);
-  } else {
-    await supabase.from("post_likes").insert({ post_id: postId, user_id: userId } as never);
+  if (readError) {
+    throw new Error(readError.message);
   }
 
-  const { data: post } = await supabase
+  if (existing) {
+    const { error: deleteError } = await supabase
+      .from("post_likes")
+      .delete()
+      .eq("id", (existing as { id: string }).id);
+    if (deleteError) {
+      throw new Error(deleteError.message);
+    }
+  } else {
+    const { error: insertError } = await supabase
+      .from("post_likes")
+      .insert({ post_id: postId, user_id: userId } as never);
+    if (insertError) {
+      throw new Error(insertError.message);
+    }
+  }
+
+  const { data: post, error: postError } = await supabase
     .from("community_posts")
     .select("like_count")
     .eq("id", postId)
     .single();
+
+  if (postError) {
+    throw new Error(postError.message);
+  }
 
   return {
     liked: !existing,

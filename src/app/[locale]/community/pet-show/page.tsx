@@ -2,78 +2,12 @@ import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { COMMUNITY_SOLID_CARD_CLASS, COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PetShowFeed } from "@/components/community/PetShowFeed";
 import { PetShowShell } from "@/components/community/PetShowShell";
+import { PetShowTopFiveStrip } from "@/components/community/PetShowTopFiveStrip";
 import { Link } from "@/i18n/navigation";
 import { fetchPetShowRanking } from "@/lib/community/ranking";
-import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
-import type { PetShowRankingRow } from "@/lib/supabase/types";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
-}
-
-function rankingImage(row: PetShowRankingRow, index: number) {
-  const src = row.image_urls?.[0];
-  if (!src) return null;
-  return supabaseImageTransformUrl(src, { width: index === 0 ? 900 : 560, height: index === 0 ? 620 : 560 });
-}
-
-function RankingCard({
-  row,
-  index,
-  isKo,
-}: {
-  row: PetShowRankingRow;
-  index: number;
-  isKo: boolean;
-}) {
-  const rank = index + 1;
-  const href = row.id.startsWith("mock-") ? "/community/pet-show/snapzone" : `/community/pet-show/${row.id}`;
-  const featured = index === 0;
-  const imageUrl = rankingImage(row, index);
-
-  return (
-    <Link href={href} className={`shrink-0 snap-start ${featured ? "w-[280px] md:w-[400px]" : "w-[240px]"}`}>
-      <article className={`${COMMUNITY_SOLID_CARD_CLASS} group relative h-full overflow-hidden`}>
-        <div className="absolute left-4 top-4 z-10 rounded-full bg-primary px-3 py-1 text-sm font-extrabold text-cream shadow-lg">
-          {isKo ? `${rank}위` : `#${rank}`}
-        </div>
-        <div className={featured ? "aspect-[1.49] overflow-hidden bg-surface-container" : "aspect-square overflow-hidden bg-surface-container"}>
-          {imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={imageUrl}
-              alt=""
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-5xl">🐾</div>
-          )}
-        </div>
-        <div className={featured ? "space-y-2 p-6" : "p-4"}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h3 className={featured ? "truncate text-xl font-extrabold text-primary" : "truncate text-lg font-bold text-primary"}>
-                {row.title ?? (isKo ? "무제 사진 자랑" : "Untitled Pet Show")}
-              </h3>
-              <p className="mt-1 text-sm text-on-surface-variant">
-                {row.pet_species === "dog"
-                  ? isKo ? "강아지" : "Dog"
-                  : row.pet_species === "cat"
-                    ? isKo ? "고양이" : "Cat"
-                    : row.pet_species === "other"
-                      ? isKo ? "렙타일(다른동물)" : "Other animal"
-                      : "Pet Show"}
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-1 text-hwa-red">
-              <span aria-hidden>♥</span>
-              <span className="font-bold">{row.like_count}</span>
-            </div>
-          </div>
-        </div>
-      </article>
-    </Link>
-  );
 }
 
 export default async function PetShowIndexPage({ params }: PageProps) {
@@ -181,16 +115,11 @@ export default async function PetShowIndexPage({ params }: PageProps) {
               </span>
             )}
           </div>
-          <div className="-mx-5 flex snap-x gap-4 overflow-x-auto px-5 pb-5 hide-scrollbar md:mx-0 md:px-0">
-            {rankingRows.map((row, index) => (
-              <RankingCard key={row.id} row={row} index={index} isKo={isKo} />
-            ))}
-            {rankingRows.length === 0 && (
-              <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} w-full p-8 text-center text-sm text-plum/70`}>
-                {isKo ? "이번 주 첫 사진을 기다리고 있어요." : "Waiting for the first photo this week."}
-              </div>
-            )}
-          </div>
+          <PetShowTopFiveStrip
+            rows={rankingRows}
+            isKo={isKo}
+            emptyText={isKo ? "이번 주 첫 사진을 기다리고 있어요." : "Waiting for the first photo this week."}
+          />
         </section>
 
         <nav className="flex gap-2 overflow-x-auto rounded-[2rem] border border-white/35 bg-white/95 p-1.5 shadow-sm hide-scrollbar md:w-fit" aria-label={isKo ? "Pet Show 카테고리" : "Pet Show categories"}>

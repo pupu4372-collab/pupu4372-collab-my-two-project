@@ -74,6 +74,12 @@ export function useSupabaseSession(): SessionInfo {
     let { data: { session } } = await client.auth.getSession();
 
     if (session && !session.user.is_anonymous) {
+      const { error: userError } = await client.auth.getUser();
+      if (userError) {
+        const { data: refreshed } = await client.auth.refreshSession();
+        session = refreshed.session ?? session;
+      }
+
       finalizeOAuthLoginPolicy();
       ensurePolicyInitialized(session.user.is_anonymous ?? false);
 
