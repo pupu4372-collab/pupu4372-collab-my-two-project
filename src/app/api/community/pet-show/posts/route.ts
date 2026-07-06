@@ -4,11 +4,12 @@ import {
   getBearerToken,
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
+import { isPetSpecies } from "@/lib/pets/species";
 import type { PetShowSpecies } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
 function isPetShowSpecies(value: unknown): value is PetShowSpecies {
-  return value === "dog" || value === "cat" || value === "other";
+  return isPetSpecies(value);
 }
 
 export async function POST(request: Request) {

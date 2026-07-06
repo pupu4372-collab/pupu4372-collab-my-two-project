@@ -28,7 +28,7 @@ const THEME: Record<
     border: "border-channel-cat/30",
   },
   reptile: {
-    label: { ko: "렙타일(다른동물)", en: "Reptile & Other" },
+    label: { ko: "렙타일", en: "Reptiles" },
     emoji: "🦎",
     accent: "text-[#3d8b64]",
     bg: "bg-channel-community/15",
@@ -77,6 +77,10 @@ interface ChannelShellProps {
   narrowHero?: boolean;
   /** Skip the hero GlassCard (content only) */
   hideHero?: boolean;
+  /** Hide back link and top-right shortcut row (Pet Show uses global header only). */
+  hideBreadcrumbRow?: boolean;
+  /** Smaller hero: no channel label, tighter title/subtitle padding. */
+  compactHero?: boolean;
 }
 
 export function ChannelShell({
@@ -94,6 +98,8 @@ export function ChannelShell({
   hideThemeLabel = false,
   narrowHero = false,
   hideHero = false,
+  hideBreadcrumbRow = false,
+  compactHero = false,
 }: ChannelShellProps) {
   const t = THEME[theme];
   const tc = useTranslations("common");
@@ -129,7 +135,8 @@ export function ChannelShell({
     <div className="min-h-screen night-sky-page">
       <AppTopNav active={topNavActive} />
       <PageContainer>
-        {topBar && <div className="mb-5">{topBar}</div>}
+        {topBar && <div className={compactHero ? "mb-3" : "mb-5"}>{topBar}</div>}
+        {!hideBreadcrumbRow && (
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <Link
             href={backHref}
@@ -157,28 +164,29 @@ export function ChannelShell({
             ))}
           </nav>
         </div>
+        )}
         <GlassCard
           variant={heroSolid ? "solid" : "glass"}
-          className={`relative overflow-hidden ${heroSolid ? "" : `border-2 ${t.border}`} px-6 py-8 md:px-10 ${narrowHero ? "mx-auto w-full max-w-sm sm:max-w-md" : ""} ${hideHero ? "hidden" : ""}`}
+          className={`relative overflow-hidden ${heroSolid ? "" : `border-2 ${t.border}`} ${compactHero ? "px-4 py-4 md:px-5 md:py-5" : "px-6 py-8 md:px-10"} ${narrowHero ? "mx-auto w-full max-w-sm sm:max-w-md" : ""} ${hideHero ? "hidden" : ""}`}
         >
           <div className={`absolute -right-10 -top-14 h-44 w-44 rounded-full ${t.bg} blur-3xl`} />
           <div className={heroMedia ? "relative grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(260px,42%)] sm:items-center" : "relative"}>
             <div>
-              {beforeTitle && <div className="mb-6">{beforeTitle}</div>}
+              {beforeTitle && <div className={compactHero ? "mb-3" : "mb-6"}>{beforeTitle}</div>}
               {comingSoon && (
                 <p className="mb-4 inline-block rounded-full bg-gold/40 px-3 py-1 text-xs font-medium text-plum">
                   {isKo ? "준비 중" : "Coming soon"}
                 </p>
               )}
-              {!hideThemeLabel && (
+              {!hideThemeLabel && !compactHero && (
                 <p className={`text-sm font-extrabold ${t.accent}`}>
                   {t.emoji} {isKo ? t.label.ko : t.label.en}
                 </p>
               )}
-              <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary md:text-5xl">{title}</h1>
+              <h1 className={`font-extrabold tracking-tight text-primary ${compactHero ? "text-xl md:text-2xl" : "mt-2 text-3xl md:text-5xl"}`}>{title}</h1>
               {subtitle && (
                 <p
-                  className={`mt-3 text-sm font-semibold leading-relaxed ${heroSolid ? "text-on-surface-variant" : "text-plum"}`}
+                  className={`font-semibold leading-relaxed ${compactHero ? "mt-1 text-sm text-on-surface-variant" : `mt-3 text-sm ${heroSolid ? "text-on-surface-variant" : "text-plum"}`}`}
                 >
                   {subtitle}
                 </p>
@@ -187,7 +195,7 @@ export function ChannelShell({
             {heroMedia && <div>{heroMedia}</div>}
           </div>
         </GlassCard>
-        <div className="mt-8">{children}</div>
+        <div className={compactHero ? "mt-4" : "mt-8"}>{children}</div>
       </PageContainer>
       <MobileBottomNav active={mobileNavActive} />
     </div>

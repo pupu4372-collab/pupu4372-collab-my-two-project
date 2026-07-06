@@ -2,7 +2,9 @@
 
 import { AppTopNav } from "@/components/layout/AppTopNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { PageContainer, NightPageShell, SectionHeader } from "@/components/layout/StitchLayout";
+import { PetShowPageHeader } from "@/components/community/PetShowPageHeader";
+import { PetShowSectionTabs } from "@/components/community/PetShowSectionTabs";
+import { PageContainer, NightPageShell } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
 import { localizeChallenges } from "@/lib/community/challenge-localize";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
@@ -61,10 +63,9 @@ export function ChallengeListPage() {
   return (
     <NightPageShell>
       <AppTopNav active="challenge" />
-      <PageContainer className="space-y-8 py-8">
-        <SectionHeader
-          onDark
-          eyebrow={isKo ? "🏅 챌린지" : "🏅 Challenge"}
+      <PageContainer className="space-y-4 py-4">
+        <PetShowSectionTabs />
+        <PetShowPageHeader
           title={isKo ? "미션에 참여해 보세요" : "Join a mission"}
           subtitle={
             isKo

@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { compressImageForUpload } from "@/lib/images/upload-compression";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 interface SajuReading {
@@ -36,7 +36,7 @@ interface PetRow {
 
 type PetEditDraft = {
   name: string;
-  species: "dog" | "cat" | "other";
+  species: "dog" | "cat" | "reptile" | "other";
   gender: "male" | "female" | "unknown";
   birthDate: string;
   birthTime: string;
@@ -62,16 +62,23 @@ const TYPE_LABELS = {
   },
 } as const;
 
-function speciesLabel(species: string, isKo: boolean) {
-  if (species === "dog") return isKo ? "강아지" : "Dog";
-  if (species === "cat") return isKo ? "고양이" : "Cat";
-  return isKo ? "다른 동물" : "Other pet";
+function speciesLabel(species: string, labels: { dog: string; cat: string; reptile: string; otherFriends: string }) {
+  if (species === "dog") return labels.dog;
+  if (species === "cat") return labels.cat;
+  if (species === "reptile") return labels.reptile;
+  return labels.otherFriends;
 }
 
 function speciesEmoji(species: string) {
   if (species === "dog") return "🐕";
   if (species === "cat") return "🐈";
+  if (species === "reptile") return "🦎";
   return "🐾";
+}
+
+function normalizeSpecies(species: string): PetEditDraft["species"] {
+  if (species === "cat" || species === "reptile" || species === "other") return species;
+  return "dog";
 }
 
 function petQuery(pet: PetRow, locale: string) {
@@ -88,7 +95,7 @@ function petQuery(pet: PetRow, locale: string) {
 function draftFromPet(pet: PetRow): PetEditDraft {
   return {
     name: pet.name,
-    species: pet.species === "cat" || pet.species === "other" ? pet.species : "dog",
+    species: normalizeSpecies(pet.species),
     gender: pet.gender === "male" || pet.gender === "female" ? pet.gender : "unknown",
     birthDate: pet.birth_date,
     birthTime: pet.birth_time?.slice(0, 5) ?? "12:00",
@@ -109,6 +116,13 @@ export function PetProfilesList({
 }) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const tSpecies = useTranslations("petSpecies");
+  const speciesLabels = {
+    dog: tSpecies("dog"),
+    cat: tSpecies("cat"),
+    reptile: tSpecies("reptile"),
+    otherFriends: tSpecies("otherFriends"),
+  };
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const [pets, setPets] = useState<PetRow[]>([]);
   const [drafts, setDrafts] = useState<Record<string, PetEditDraft>>({});
@@ -504,14 +518,14 @@ export function PetProfilesList({
                     </p>
                     {useGlassCards && (
                       <span className="rounded-full bg-channel-community/10 px-2 py-0.5 text-[10px] font-bold text-channel-community">
-                        {speciesLabel(pet.species, isKo)}
+                        {speciesLabel(pet.species, speciesLabels)}
                       </span>
                     )}
                   </div>
                   <p
                     className={`text-plum/75 ${useGlassCards ? "text-sm" : isCompactView ? "text-[10px] leading-snug" : "text-[11px]"}`}
                   >
-                    {speciesLabel(pet.species, isKo)} · {gender}
+                    {speciesLabel(pet.species, speciesLabels)} · {gender}
                     {isCompactView ? (
                       <>
                         {" · "}
@@ -576,15 +590,15 @@ export function PetProfilesList({
                       value={drafts[pet.id].species}
                       onChange={(e) =>
                         updateDraft(pet.id, {
-                          species:
-                            e.target.value === "cat" || e.target.value === "other" ? e.target.value : "dog",
+                          species: normalizeSpecies(e.target.value),
                         })
                       }
                       className="pastel-input"
                     >
-                      <option value="dog">{isKo ? "강아지" : "Dog"}</option>
-                      <option value="cat">{isKo ? "고양이" : "Cat"}</option>
-                      <option value="other">{isKo ? "다른 동물" : "Other pet"}</option>
+                      <option value="dog">{speciesLabels.dog}</option>
+                      <option value="cat">{speciesLabels.cat}</option>
+                      <option value="reptile">{speciesLabels.reptile}</option>
+                      <option value="other">{speciesLabels.otherFriends}</option>
                     </select>
                   </label>
 

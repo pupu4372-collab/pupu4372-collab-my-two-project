@@ -39,12 +39,6 @@ export default async function PetShowFailsPage({ params }: PageProps) {
           ? "완벽하지 않아서 더 귀여운 흔들림, 표정, 도망샷을 모아보세요."
           : "Collect the blurry, silly, not-quite-perfect moments that make pets even cuter."
       }
-      backHref="/community/pet-show"
-      backLabel={isKo ? "← 우리아이 자랑" : "← Pet Show"}
-      rightLinks={[
-        { href: "/", label: isKo ? "홈" : "Home" },
-        { href: "/community/pet-show/upload", label: isKo ? "사진 올리기" : "Upload" },
-      ]}
     >
       <div className="space-y-10">
         <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} relative overflow-hidden p-6 md:p-8`}>

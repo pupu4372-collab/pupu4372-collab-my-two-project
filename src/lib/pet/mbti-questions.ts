@@ -289,6 +289,7 @@ const OTHER_QUESTIONS: MbtiQuestionRaw[] = [
 const QUESTIONS_BY_SPECIES: Record<Species, MbtiQuestionRaw[]> = {
   dog: DOG_QUESTIONS,
   cat: CAT_QUESTIONS,
+  reptile: OTHER_QUESTIONS,
   other: OTHER_QUESTIONS,
 };
 

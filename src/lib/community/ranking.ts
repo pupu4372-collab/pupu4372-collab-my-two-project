@@ -1,3 +1,5 @@
+import { loadSpeciesByPetId, resolvePostSpecies } from "@/lib/community/pet-show-species";
+import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
 import type { PetShowRankingRow, PetShowSpecies, RankingPeriod } from "@/lib/supabase/types";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -102,7 +104,17 @@ export async function fetchPetShowRanking(
 export interface PetShowSpeciesRankings {
   dog: PetShowRankingRow[];
   cat: PetShowRankingRow[];
+  reptile: PetShowRankingRow[];
   other: PetShowRankingRow[];
+}
+
+export function getPetShowSpeciesRankingRows(
+  grouped: PetShowSpeciesRankings,
+  species: PetShowSpecies,
+): PetShowRankingRow[] {
+  if (species === "dog") return grouped.dog;
+  if (species === "cat") return grouped.cat;
+  return mergeReptileChannelRankingRows(grouped.reptile, grouped.other);
 }
 
 type RankingPostRow = Omit<PetShowRankingRow, "pet_species"> & {
@@ -110,58 +122,11 @@ type RankingPostRow = Omit<PetShowRankingRow, "pet_species"> & {
   animal_type?: PetShowSpecies | null;
 };
 
-function isPetShowSpecies(value: string | null | undefined): value is PetShowSpecies {
-  return value === "dog" || value === "cat" || value === "other";
-}
-
-function speciesFromPetShowTag(tags?: string[] | null): PetShowSpecies | undefined {
-  const tag = tags?.find((item) => item.startsWith("pet-show:"));
-  const species = tag?.replace("pet-show:", "");
-  return isPetShowSpecies(species) ? species : undefined;
-}
-
-function speciesFromLegacyTags(tags?: string[] | null): PetShowSpecies | undefined {
-  if (!tags?.length) return undefined;
-  if (tags.includes("dog")) return "dog";
-  if (tags.includes("cat")) return "cat";
-  if (tags.includes("other")) return "other";
-  return undefined;
-}
-
-function resolvePostSpecies(
-  post: RankingPostRow,
-  speciesByPetId: Map<string, PetShowSpecies>,
-): PetShowSpecies | undefined {
-  return (
-    speciesFromPetShowTag(post.tags) ??
-    (isPetShowSpecies(post.animal_type) ? post.animal_type : undefined) ??
-    speciesFromLegacyTags(post.tags) ??
-    (post.pet_id ? speciesByPetId.get(post.pet_id) : undefined)
-  );
-}
-
-async function loadSpeciesByPetId(
-  supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>,
-  posts: RankingPostRow[],
-): Promise<Map<string, PetShowSpecies>> {
-  const petIds = [...new Set(posts.map((row) => row.pet_id).filter(Boolean))] as string[];
-  const speciesByPetId = new Map<string, PetShowSpecies>();
-  if (petIds.length === 0) return speciesByPetId;
-
-  const { data: petRows } = await supabase.from("pets").select("id, species").in("id", petIds);
-  for (const pet of (petRows ?? []) as Array<{ id: string; species: PetShowSpecies }>) {
-    if (isPetShowSpecies(pet.species)) {
-      speciesByPetId.set(pet.id, pet.species);
-    }
-  }
-  return speciesByPetId;
-}
-
 function groupPostsBySpecies(
   posts: RankingPostRow[],
   speciesByPetId: Map<string, PetShowSpecies>,
 ): PetShowSpeciesRankings {
-  const grouped: PetShowSpeciesRankings = { dog: [], cat: [], other: [] };
+  const grouped: PetShowSpeciesRankings = { dog: [], cat: [], reptile: [], other: [] };
   const usedIds = new Set<string>();
 
   for (const post of posts) {
@@ -185,7 +150,7 @@ function mergeSpeciesRankings(
 ): PetShowSpeciesRankings {
   const grouped = groupPostsBySpecies(primaryPosts, speciesByPetId);
   const usedIds = new Set(
-    [...grouped.dog, ...grouped.cat, ...grouped.other].map((row) => row.id),
+    [...grouped.dog, ...grouped.cat, ...grouped.reptile, ...grouped.other].map((row) => row.id),
   );
 
   for (const post of backfillPosts) {
@@ -262,7 +227,7 @@ export async function fetchPetShowSpeciesRankings(period: Extract<RankingPeriod,
 
   const fallbackRows = (fallbackPosts ?? []) as unknown as RankingPostRow[];
   if (periodRows.length === 0 && fallbackRows.length === 0) {
-    return { rows: { dog: [], cat: [], other: [] }, source: "supabase" };
+    return { rows: { dog: [], cat: [], reptile: [], other: [] }, source: "supabase" };
   }
 
   const speciesByPetId = await loadSpeciesByPetId(supabase, [...periodRows, ...fallbackRows]);
@@ -323,6 +288,7 @@ function getMockSpeciesRankings(): PetShowSpeciesRankings {
       { ...dog2, pet_species: "dog", rank_position: 2 },
     ],
     cat: [{ ...cat1, pet_species: "cat", rank_position: 1 }],
+    reptile: [],
     other: [],
   };
 }

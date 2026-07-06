@@ -1,6 +1,10 @@
+"use client";
+
 import type { ChannelContent } from "@/lib/channel/content";
 import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 interface ReptileChannelHomeProps {
   content: ChannelContent;
@@ -62,6 +66,8 @@ export function ReptileChannelHome({
   source,
   isKo,
 }: ReptileChannelHomeProps) {
+  const t = useTranslations("reptileChannel");
+  const [subTab, setSubTab] = useState<"reptile" | "other">("reptile");
   const heroFeatured = featured ?? content.featured;
   const guideArticles = articles?.length ? articles : content.articles;
   const editorialGuideCards =
@@ -71,9 +77,39 @@ export function ReptileChannelHome({
     : [content.featured, ...content.articles].slice(0, 4);
   const displayGuideCards =
     guideCards.length > 0 ? guideCards : [content.featured, ...content.articles].slice(0, 4);
+  const visibleSpecies = SPECIES.filter((item) =>
+    subTab === "reptile" ? item.key === "reptiles" : item.key !== "reptiles",
+  );
+  const breedGuideAnimal = subTab === "reptile" ? "reptile" : "other";
 
   return (
     <div className="space-y-10">
+      <nav
+        className="grid grid-cols-2 gap-2 rounded-2xl border border-white/35 bg-white/95 p-1.5 text-sm font-extrabold text-plum shadow-md"
+        aria-label={t("channelTitle")}
+      >
+        {(
+          [
+            { id: "reptile" as const, label: t("tabReptile") },
+            { id: "other" as const, label: t("tabOtherFriends") },
+          ] as const
+        ).map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setSubTab(tab.id)}
+            className={
+              subTab === tab.id
+                ? "rounded-xl bg-channel-community px-3 py-3 text-center text-white shadow-sm"
+                : "rounded-xl px-3 py-3 text-center text-plum/60 transition hover:bg-channel-community/10 hover:text-channel-community"
+            }
+            aria-current={subTab === tab.id ? "page" : undefined}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
       <section className="relative overflow-hidden rounded-[2rem] bg-[#fbfaee] p-4 shadow-xl md:p-6">
         <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-channel-community/10 blur-3xl" />
         <div className="absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-gold/20 blur-3xl" />
@@ -87,15 +123,13 @@ export function ReptileChannelHome({
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-10">
             <span className="inline-flex rounded-full bg-channel-community px-4 py-1.5 text-xs font-extrabold tracking-[0.18em]">
-              REPTILE & OTHER PETS
+              REPTILE CHANNEL
             </span>
             <h2 className="mt-4 max-w-3xl text-3xl font-extrabold leading-tight md:text-5xl">
-              {isKo ? "렙타일(다른동물) 케어 허브" : "Reptile & Other Pets Care Hub"}
+              {t("careHubTitle")}
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/90 md:text-lg">
-              {isKo
-                ? "파충류, 앵무새, 토끼·햄스터까지. 온도·습도·식단 정보를 한 곳에서 확인하세요."
-                : "Reptiles, birds, rabbits, and hamsters. Check habitat, humidity, diet, and care in one place."}
+              {subTab === "reptile" ? t("reptileCareSubtitle") : t("otherFriendsCareSubtitle")}
             </p>
           </div>
         </div>
@@ -126,23 +160,27 @@ export function ReptileChannelHome({
               {isKo ? "품종별 가이드" : "Breed guide"}
             </h2>
             <p className="mt-1 text-sm text-white/75">
-              {isKo
-                ? "파충류·조류·소동물 가이드를 커뮤니티에서 확인하세요"
-                : "Browse reptile, bird, and small-pet guides in the community"}
+              {subTab === "reptile"
+                ? isKo
+                  ? "파충류 가이드를 커뮤니티에서 확인하세요"
+                  : "Browse reptile guides in the community"
+                : isKo
+                  ? "조류·소동물 가이드를 커뮤니티에서 확인하세요"
+                  : "Browse bird and small-pet guides in the community"}
             </p>
           </div>
           <Link
-            href="/community/breeds?animal=other"
+            href={`/community/breeds?animal=${breedGuideAnimal}`}
             className="text-sm font-extrabold text-[#ffd7ff]"
           >
             {isKo ? "전체 가이드" : "All guides"} →
           </Link>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          {SPECIES.map((item) => (
+          {visibleSpecies.map((item) => (
             <Link
               key={item.key}
-              href="/community/breeds?animal=other"
+              href={`/community/breeds?animal=${breedGuideAnimal}`}
               className="group overflow-hidden rounded-[1.75rem] border border-white/15 bg-cream shadow-sm transition hover:-translate-y-1 hover:bg-white"
             >
               <div className="relative h-44 overflow-hidden">
@@ -172,10 +210,24 @@ export function ReptileChannelHome({
       <section className="grid gap-6 lg:grid-cols-12">
         <div className="rounded-[2rem] border border-white/20 bg-cream p-6 shadow-sm lg:col-span-5">
           <h2 className="text-2xl font-extrabold text-ink">
-            {isKo ? "건강한 생활 환경 체크" : "Healthy habitat checklist"}
+            {subTab === "reptile"
+              ? isKo
+                ? "건강한 생활 환경 체크"
+                : "Healthy habitat checklist"
+              : isKo
+                ? "그외친구들 케어 체크"
+                : "Other friends care checklist"}
           </h2>
           <ul className="mt-6 space-y-4">
-            {CHECKLIST.map((item, index) => (
+            {(subTab === "reptile"
+              ? CHECKLIST
+              : [
+                  { ko: "넓은 활동 공간", en: "Enough activity space", sub: "SPACE & ENRICHMENT" },
+                  { ko: "규칙적인 급여", en: "Regular feeding routine", sub: "DIET ROUTINE" },
+                  { ko: "청결한 환경", en: "Clean habitat", sub: "HYGIENE" },
+                  { ko: "스트레스 신호 관찰", en: "Watch stress signals", sub: "BEHAVIOR" },
+                ]
+            ).map((item, index) => (
               <li key={item.sub} className="flex gap-3">
                 <span
                   className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${
@@ -253,6 +305,8 @@ export function ReptileChannelHome({
         <div className="my-8 border-t border-channel-community/15" />
 
         <div className="pb-24 md:pb-0">
+          {subTab === "reptile" ? (
+            <>
           <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community">
             {isKo ? "분양 정보" : "Adoption & Breeding"}
           </p>
@@ -308,6 +362,8 @@ export function ReptileChannelHome({
               ? "* K-Saju Pet은 외부 분양 사이트와 무관하며, 거래에 대한 책임을 지지 않습니다."
               : "* K-Saju Pet is not affiliated with external sites and is not responsible for transactions."}
           </p>
+            </>
+          ) : null}
         </div>
       </section>
     </div>

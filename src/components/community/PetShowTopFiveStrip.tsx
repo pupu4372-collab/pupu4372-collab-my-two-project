@@ -1,16 +1,20 @@
+"use client";
+
 import { COMMUNITY_SOLID_CARD_CLASS, COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { Link } from "@/i18n/navigation";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import type { PetShowRankingRow } from "@/lib/supabase/types";
+import { useTranslations } from "next-intl";
 
 function rankingHref(row: PetShowRankingRow): string {
   return row.id.startsWith("mock-") ? "/community/pet-show/snapzone" : `/community/pet-show/${row.id}`;
 }
 
-function speciesLabel(row: PetShowRankingRow, isKo: boolean): string | null {
-  if (row.pet_species === "dog") return isKo ? "강아지" : "Dog";
-  if (row.pet_species === "cat") return isKo ? "고양이" : "Cat";
-  if (row.pet_species === "other") return isKo ? "렙타일(다른동물)" : "Other animal";
+function speciesLabel(row: PetShowRankingRow, labels: { dog: string; cat: string; reptile: string; otherFriends: string }): string | null {
+  if (row.pet_species === "dog") return labels.dog;
+  if (row.pet_species === "cat") return labels.cat;
+  if (row.pet_species === "reptile") return labels.reptile;
+  if (row.pet_species === "other") return labels.otherFriends;
   return null;
 }
 
@@ -18,16 +22,18 @@ function RankingStripCard({
   row,
   rank,
   isKo,
+  labels,
 }: {
   row: PetShowRankingRow;
   rank: number;
   isKo: boolean;
+  labels: { dog: string; cat: string; reptile: string; otherFriends: string };
 }) {
   const href = rankingHref(row);
   const imageUrl = row.image_urls?.[0]
     ? supabaseImageTransformUrl(row.image_urls[0], { width: 720, height: 900 })
     : null;
-  const species = speciesLabel(row, isKo);
+  const species = speciesLabel(row, labels);
 
   return (
     <article
@@ -76,6 +82,14 @@ export function PetShowTopFiveStrip({
   isKo: boolean;
   emptyText: string;
 }) {
+  const tSpecies = useTranslations("petSpecies");
+  const speciesLabels = {
+    dog: tSpecies("dog"),
+    cat: tSpecies("cat"),
+    reptile: tSpecies("reptile"),
+    otherFriends: tSpecies("otherFriends"),
+  };
+
   const sorted = [...rows]
     .sort((a, b) => {
       if (b.like_count !== a.like_count) return b.like_count - a.like_count;
@@ -95,7 +109,7 @@ export function PetShowTopFiveStrip({
     <div className="-mx-5 mt-6 touch-pan-x overscroll-x-contain md:mx-0">
       <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 pt-1 pr-10 hide-scrollbar scroll-pr-10 md:px-0 md:pr-12 md:scroll-pr-12">
         {sorted.map((row, index) => (
-          <RankingStripCard key={row.id} row={row} rank={index + 1} isKo={isKo} />
+          <RankingStripCard key={row.id} row={row} rank={index + 1} isKo={isKo} labels={speciesLabels} />
         ))}
         <div className="w-3 shrink-0 snap-none md:w-6" aria-hidden />
       </div>

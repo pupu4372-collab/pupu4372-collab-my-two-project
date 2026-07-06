@@ -1252,7 +1252,7 @@ K-Saju 활용 팁
   {
     breed_name: "레오파드 게코",
     breed_name_en: "Leopard Gecko",
-    animal_type: "other",
+    animal_type: "reptile",
     size_category: "small",
     lifespan: "10–20년",
     personality:
@@ -1289,7 +1289,7 @@ K-Saju 활용 팁
   {
     breed_name: "크레스티드 게코",
     breed_name_en: "Crested Gecko",
-    animal_type: "other",
+    animal_type: "reptile",
     size_category: "small",
     lifespan: "15–20년",
     personality:
@@ -1326,7 +1326,7 @@ K-Saju 활용 팁
   {
     breed_name: "비어디드 드래곤",
     breed_name_en: "Bearded Dragon",
-    animal_type: "other",
+    animal_type: "reptile",
     size_category: "medium",
     lifespan: "8–12년",
     personality:
@@ -1363,7 +1363,7 @@ K-Saju 활용 팁
   {
     breed_name: "반수생 거북",
     breed_name_en: "Semi-aquatic Turtle",
-    animal_type: "other",
+    animal_type: "reptile",
     size_category: "medium",
     lifespan: "20–40년",
     personality:

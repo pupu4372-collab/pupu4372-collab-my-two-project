@@ -1,6 +1,7 @@
 import { PetShowWeeklySpeciesRanking } from "@/components/community/PetShowRanking";
 import { PetShowShell } from "@/components/community/PetShowShell";
 import { Link } from "@/i18n/navigation";
+import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
 import { fetchPetShowSpeciesRankings } from "@/lib/community/ranking";
 import type { RankingPeriod } from "@/lib/supabase/types";
 
@@ -35,14 +36,8 @@ export default async function PetShowRankingPage({ params, searchParams }: PageP
             ? "최근 7일간 좋아요 순위예요."
             : "Ranked by likes from the last 7 days."
       }
-      backHref="/community"
-      backLabel={isKo ? "← 커뮤니티" : "← Community"}
-      rightLinks={[
-        { href: "/", label: isKo ? "홈" : "Home" },
-        { href: "/community", label: isKo ? "커뮤니티" : "Community" },
-      ]}
     >
-      <div className="mb-5 inline-flex rounded-full border border-white/35 bg-white/95 p-1.5 shadow-sm">
+      <div className="mb-3 inline-flex rounded-full border border-white/35 bg-white/95 p-1.5 shadow-sm">
         <Link
           href="/community/pet-show/ranking?period=week"
           className={`rounded-full px-5 py-2.5 text-sm font-extrabold transition ${
@@ -63,7 +58,7 @@ export default async function PetShowRankingPage({ params, searchParams }: PageP
       <PetShowWeeklySpeciesRanking
         dogRows={ranking.rows.dog}
         catRows={ranking.rows.cat}
-        otherRows={ranking.rows.other}
+        otherRows={mergeReptileChannelRankingRows(ranking.rows.reptile, ranking.rows.other)}
         period={period}
         source={ranking.source}
       />

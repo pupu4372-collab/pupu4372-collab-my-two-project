@@ -7,6 +7,7 @@ import {
 } from "@/components/community/CommunityDetailSurface";
 import { AppTopNav } from "@/components/layout/AppTopNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { PetShowSectionTabs } from "@/components/community/PetShowSectionTabs";
 import { NightPageShell, PageContainer } from "@/components/layout/StitchLayout";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
@@ -176,7 +177,8 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
   return (
     <NightPageShell>
       <AppTopNav active="challenge" />
-      <PageContainer className="space-y-8 py-8">
+      <PageContainer className="space-y-4 py-4">
+        <PetShowSectionTabs />
         <Link
           href="/community/challenge"
           className="inline-flex text-sm font-extrabold text-channel-community hover:underline"

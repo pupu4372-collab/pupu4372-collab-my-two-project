@@ -70,16 +70,18 @@ const SEED: Array<{
 
 export const PET_CATEGORY_FILTER_TAGS = [
   { id: "all", ko: "전체", en: "All" },
-  { id: "dog", ko: "강아지", en: "Dog" },
-  { id: "cat", ko: "고양이", en: "Cat" },
-  { id: "other", ko: "렙타일(다른동물)", en: "Reptile & other pets" },
+  { id: "dog", ko: "강아지", en: "Dogs" },
+  { id: "cat", ko: "고양이", en: "Cats" },
+  { id: "reptile", ko: "렙타일", en: "Reptiles" },
+  { id: "other", ko: "그외친구들", en: "Other Pals" },
 ] as const;
 
 export const QA_FILTER_TAGS = [
   { id: "all", label: "전체" },
   { id: "dog", label: "강아지" },
   { id: "cat", label: "고양이" },
-  { id: "other", label: "렙타일(다른동물)" },
+  { id: "reptile", label: "렙타일" },
+  { id: "other", label: "그외친구들" },
   { id: "training", label: "훈련" },
   { id: "health", label: "건강" },
   { id: "food", label: "식단" },

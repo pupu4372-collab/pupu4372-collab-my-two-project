@@ -1,7 +1,7 @@
 /** DB types for Supabase client (sync with supabase/migrations). */
 
-export type PetSpecies = "dog" | "cat" | "other";
-export type PetShowSpecies = PetSpecies | "other";
+export type PetSpecies = "dog" | "cat" | "reptile" | "other";
+export type PetShowSpecies = PetSpecies;
 export type AppChannel = "home" | "dog" | "cat" | "reptile" | "community" | "pet_saju";
 export type PostType = "photo_show" | "qa" | "free" | "saju_review";
 export type ReportStatus = "pending" | "reviewing" | "resolved" | "rejected";
@@ -137,7 +137,7 @@ export interface ChallengePostWithRelations extends ChallengePost {
   pets: Pick<Pet, "name" | "species"> | null;
 }
 
-export type PetAnimalType = "dog" | "cat" | "other";
+export type PetAnimalType = "dog" | "cat" | "reptile" | "other";
 
 export interface CommunityPost {
   id: string;

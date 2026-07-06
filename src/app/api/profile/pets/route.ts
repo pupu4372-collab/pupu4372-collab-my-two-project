@@ -3,11 +3,12 @@ import {
   getBearerToken,
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
+import { isPetSpecies } from "@/lib/pets/species";
 import type { PetSpecies, SajuType } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
 function isSpecies(value: unknown): value is PetSpecies {
-  return value === "dog" || value === "cat" || value === "other";
+  return isPetSpecies(value);
 }
 
 function isGender(value: unknown): value is "male" | "female" | "unknown" {

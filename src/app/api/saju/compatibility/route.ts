@@ -1,3 +1,4 @@
+import { isPetSpecies } from "@/lib/pets/species";
 import { computeCompatibility } from "@/lib/saju/compatibility/engine";
 import { persistCompatibilityResult } from "@/lib/saju/persist-compatibility";
 import { validatePetName } from "@/lib/saju/moderation";
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Owner: ${ownerNameError}` }, { status: 400 });
   }
 
-  if (!body.species || !["dog", "cat", "other"].includes(String(body.species))) {
+  if (!body.species || !isPetSpecies(String(body.species))) {
     return NextResponse.json({ error: "Invalid species." }, { status: 400 });
   }
 

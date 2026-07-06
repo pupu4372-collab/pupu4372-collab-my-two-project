@@ -11,7 +11,8 @@ const ANIMAL_TABS: Array<{ id: PetAnimalType | "all"; ko: string; en: string }> 
   { id: "all", ko: "전체", en: "All" },
   { id: "dog", ko: "강아지", en: "Dogs" },
   { id: "cat", ko: "고양이", en: "Cats" },
-  { id: "other", ko: "렙타일(다른동물)", en: "Other" },
+  { id: "reptile", ko: "렙타일", en: "Reptiles" },
+  { id: "other", ko: "그외친구들", en: "Other friends" },
 ];
 
 interface BreedGuideHubProps {

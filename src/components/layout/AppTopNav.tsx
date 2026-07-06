@@ -8,7 +8,9 @@ import { signOut } from "@/lib/supabase/auth-client";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
-type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "challenge" | "community" | "support" | "profile";
+type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "community";
+/** Removed from nav bar but still accepted so sub-pages do not break active-state typing. */
+type NavActiveKey = NavKey | "challenge" | "support" | "profile";
 
 function splitNavLabel(label: string): string[] {
   if (label.length < 4) return [label];
@@ -46,35 +48,25 @@ function NavLabel({ label }: { label: string }) {
   );
 }
 
-const NAV_LINK_CLASS =
-  "inline-flex min-h-[2.25rem] min-w-[2.5rem] items-center justify-center rounded-full px-2 py-1 text-center text-[11px] font-bold leading-none sm:px-2.5 sm:text-xs lg:px-3 lg:text-sm";
+const NAV_LINK_BASE =
+  "inline-flex min-h-[2.25rem] min-w-[2.5rem] items-center justify-center border-b-2 px-2 py-1 text-center text-[11px] font-bold leading-none transition sm:px-2.5 sm:text-xs lg:px-3 lg:text-sm";
 
-const NAV_LINKS: Array<{
-  key: NavKey;
-  href:
-    | "/"
-    | "/dog"
-    | "/cat"
-    | "/reptile"
-    | "/saju"
-    | "/community/challenge"
-    | "/community"
-    | "/support"
-    | "/profile";
+const MAIN_NAV_LINKS: Array<{
+  key: Exclude<NavKey, "saju">;
+  href: "/" | "/dog" | "/cat" | "/reptile" | "/community";
 }> = [
   { key: "home", href: "/" },
   { key: "dog", href: "/dog" },
   { key: "cat", href: "/cat" },
   { key: "reptile", href: "/reptile" },
-  { key: "saju", href: "/saju" },
-  { key: "challenge", href: "/community/challenge" },
   { key: "community", href: "/community" },
-  { key: "support", href: "/support" },
-  { key: "profile", href: "/profile" },
 ];
 
+const SAJU_CTA_BASE =
+  "inline-flex shrink-0 items-center justify-center rounded-full bg-primary px-3 py-2 text-xs font-extrabold text-white shadow-sm transition hover:brightness-105 lg:px-4 lg:text-sm";
+
 interface AppTopNavProps {
-  active?: NavKey;
+  active?: NavActiveKey;
 }
 
 export function AppTopNav({ active = "home" }: AppTopNavProps) {
@@ -96,6 +88,8 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
   }
 
   const isSignedIn = configured && ready && !isAnonymous;
+  const accountLabel = email?.split("@")[0] ?? nav("account");
+  const isSajuActive = active === "saju";
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/45 bg-cream/80 shadow-sm backdrop-blur-xl">
@@ -111,22 +105,27 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
           className="hidden flex-1 flex-wrap items-center justify-center gap-1 md:flex lg:gap-1.5"
           aria-label={isKo ? "주요 메뉴" : "Main navigation"}
         >
-          {NAV_LINKS.map((item) => {
-            const className =
-              active === item.key
-                ? `${NAV_LINK_CLASS} bg-primary font-extrabold text-white shadow-sm`
-                : `${NAV_LINK_CLASS} text-plum/65 transition hover:bg-white/65 hover:text-primary`;
+          {MAIN_NAV_LINKS.map((item) => {
+            const isActive = active === item.key;
+            const className = isActive
+              ? `${NAV_LINK_BASE} border-primary font-extrabold text-primary`
+              : `${NAV_LINK_BASE} border-transparent text-plum/65 hover:border-primary/25 hover:text-primary`;
 
             if (item.key === "home") {
               return (
-                <Link key={item.key} href={item.href} className={className}>
+                <Link key={item.key} href={item.href} className={className} aria-current={isActive ? "page" : undefined}>
                   <NavLabel label={nav(item.key)} />
                 </Link>
               );
             }
 
             return (
-              <AuthRequiredLink key={item.key} href={item.href} className={className}>
+              <AuthRequiredLink
+                key={item.key}
+                href={item.href}
+                className={className}
+                aria-current={isActive ? "page" : undefined}
+              >
                 <NavLabel label={nav(item.key)} />
               </AuthRequiredLink>
             );
@@ -134,6 +133,13 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
         </nav>
 
         <div className="flex items-center gap-2">
+          <AuthRequiredLink
+            href="/saju"
+            className={`${SAJU_CTA_BASE} hidden md:inline-flex ${isSajuActive ? "brightness-95 shadow-md" : ""}`}
+            aria-current={isSajuActive ? "page" : undefined}
+          >
+            <span className="whitespace-nowrap">{nav("saju")}</span>
+          </AuthRequiredLink>
           <ul className="block">
             <LanguageSwitcher />
           </ul>
@@ -141,10 +147,11 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
             <div className="flex items-center gap-2">
               <Link
                 href="/profile"
-                className="hidden max-w-32 truncate rounded-full bg-white/70 px-3 py-2 text-xs font-extrabold text-primary shadow-sm transition hover:bg-white sm:block"
+                className="max-w-[5.25rem] cursor-pointer truncate rounded-full bg-white/70 px-2.5 py-2 text-xs font-extrabold text-primary shadow-sm transition hover:bg-white hover:shadow-md active:bg-white/90 sm:max-w-32 sm:px-3"
                 title={email ?? nav("account")}
+                aria-label={`${nav("profile")}: ${accountLabel}`}
               >
-                {email?.split("@")[0] ?? nav("account")}
+                {accountLabel}
               </Link>
               <button
                 type="button"

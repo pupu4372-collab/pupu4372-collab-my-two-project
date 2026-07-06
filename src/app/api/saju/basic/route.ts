@@ -1,3 +1,4 @@
+import { isPetSpecies } from "@/lib/pets/species";
 import { computePetSajuBundle } from "@/lib/saju/engine";
 import { generateGeminiNarrative } from "@/lib/saju/gemini-narrative";
 import { applyPetInterpretationToBasicResponse } from "@/lib/saju/llm/apply-pet-to-basic";
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: nameError }, { status: 400 });
   }
 
-  if (!body.species || !["dog", "cat", "other"].includes(body.species)) {
+  if (!body.species || !isPetSpecies(body.species)) {
     return NextResponse.json({ error: "Invalid species." }, { status: 400 });
   }
 

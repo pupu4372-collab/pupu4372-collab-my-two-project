@@ -12,7 +12,7 @@ import {
   type PetAnimalType,
 } from "@/lib/community/board-categories";
 import { Link } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 interface QaComposerProps {
@@ -23,6 +23,7 @@ interface QaComposerProps {
 export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const tSpecies = useTranslations("petSpecies");
   const { accessToken, isAnonymous, configured } = useSupabaseSession();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -149,11 +150,10 @@ export function QaComposer({ onPosted, board = "qa" }: QaComposerProps) {
               onChange={(e) => setExperienceTag(e.target.value)}
               className={inputClass}
             >
-              <option value="experience:dog">{isKo ? "강아지 견종" : "Dog breeds"}</option>
-              <option value="experience:cat">{isKo ? "고양이 묘종" : "Cat breeds"}</option>
-              <option value="experience:other">
-                {isKo ? "렙타일(다른동물) (토끼·햄스터·새·파충류·물고기 등)" : "Other animals"}
-              </option>
+              <option value="experience:dog">{tSpecies("dog")}</option>
+              <option value="experience:cat">{tSpecies("cat")}</option>
+              <option value="experience:reptile">{tSpecies("reptile")}</option>
+              <option value="experience:other">{tSpecies("otherFriends")}</option>
             </select>
           </label>
           <label className={labelClass}>

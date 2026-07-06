@@ -6,10 +6,11 @@ import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState, type FormEvent } from "react";
 
-const SPECIES_OPTIONS: { value: Species; emoji: string; labelKey: "dog" | "cat" | "other" }[] = [
+const SPECIES_OPTIONS: { value: Species; emoji: string; labelKey: "dog" | "cat" | "reptile" | "otherFriends" }[] = [
   { value: "dog", emoji: "🐕", labelKey: "dog" },
   { value: "cat", emoji: "🐱", labelKey: "cat" },
-  { value: "other", emoji: "🦎", labelKey: "other" },
+  { value: "reptile", emoji: "🦎", labelKey: "reptile" },
+  { value: "other", emoji: "🐾", labelKey: "otherFriends" },
 ];
 
 const MIN_BIRTH_YEAR = 1990;

@@ -4,6 +4,7 @@ import type { ElementKey, Species } from "../types";
 const SPECIES_LABEL: Record<Species, string> = {
   dog: "pup",
   cat: "kitty",
+  reptile: "reptile",
   other: "pet",
 };
 

@@ -5,18 +5,18 @@ import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { compressImageForUpload } from "@/lib/images/upload-compression";
 import { isNativeImagePickerAvailable, pickNativeImage } from "@/lib/mobile/native-image-picker";
-import { useLocale } from "next-intl";
+import type { PetShowSpecies } from "@/lib/supabase/types";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 interface PetShowComposerProps {
   onPosted?: () => void;
 }
 
-type PetShowSpecies = "dog" | "cat" | "other";
-
 export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const tSpecies = useTranslations("petSpecies");
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const fileRef = useRef<HTMLInputElement>(null);
   const [petSpecies, setPetSpecies] = useState<PetShowSpecies | "">("");
@@ -255,9 +255,10 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
           <p className="text-sm font-extrabold text-primary">{isKo ? "카테고리" : "Category"}</p>
           <div className="mt-3 flex flex-wrap gap-3">
             {([
-              ["dog", isKo ? "강아지" : "Dog", "🐕"],
-              ["cat", isKo ? "고양이" : "Cat", "🐈"],
-              ["other", isKo ? "렙타일(다른동물)" : "Other animal", "🐾"],
+              ["dog", tSpecies("dog"), "🐕"],
+              ["cat", tSpecies("cat"), "🐈"],
+              ["reptile", tSpecies("reptile"), "🦎"],
+              ["other", tSpecies("otherFriends"), "🐾"],
             ] as const).map(([value, label, emoji]) => (
               <button
                 key={value}

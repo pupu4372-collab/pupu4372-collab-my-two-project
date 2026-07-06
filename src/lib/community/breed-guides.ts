@@ -38,8 +38,12 @@ export async function fetchBreedGuides(options?: {
 
   const { data, error } = await query;
   if (error || !data?.length) {
-    const mock = filterMockBreedGuides(options?.animalType);
-    return { guides: mock.length ? mock : MOCK_BREED_GUIDES, source: "mock" };
+    if (process.env.NODE_ENV === "development") {
+      console.warn("breed guides: Supabase 결과 없음, mock 폴백");
+      const mock = filterMockBreedGuides(options?.animalType);
+      return { guides: mock.length ? mock : MOCK_BREED_GUIDES, source: "mock" };
+    }
+    return { guides: [], source: "supabase" };
   }
 
   return { guides: data as BreedGuide[], source: "supabase" };

@@ -24,8 +24,8 @@ function fmtEl(el: ElementKey, locale: Locale): string {
     : `${m.meaning} (${m.hanja})`;
 }
 
-const SPECIES_KO: Record<Species, string> = { dog: "강아지", cat: "고양이", other: "반려동물" };
-const SPECIES_EN: Record<Species, string> = { dog: "pup", cat: "cat", other: "pet" };
+const SPECIES_KO: Record<Species, string> = { dog: "강아지", cat: "고양이", reptile: "렙타일", other: "그외친구" };
+const SPECIES_EN: Record<Species, string> = { dog: "pup", cat: "cat", reptile: "reptile", other: "pet" };
 
 const SIGN_DEPTH: Record<
   ZodiacSignKey,

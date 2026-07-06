@@ -1,6 +1,6 @@
 import type { CommunityBoardKind } from "./qa-feed";
 
-export type PetAnimalType = "dog" | "cat" | "other";
+export type PetAnimalType = "dog" | "cat" | "reptile" | "other";
 
 export interface BoardCategoryOption {
   id: string;
@@ -20,6 +20,12 @@ const QA_CATEGORIES: Record<PetAnimalType, BoardCategoryOption[]> = {
     { id: "health-disease", ko: "건강·질병", en: "Health & illness" },
     { id: "behavior-habits", ko: "행동·습성", en: "Behavior & habits" },
     { id: "food-nutrition", ko: "사료·영양", en: "Food & nutrition" },
+    { id: "saju-fortune", ko: "사주·운세", en: "Saju & fortune" },
+  ],
+  reptile: [
+    { id: "health-disease", ko: "건강·질병", en: "Health & illness" },
+    { id: "habitat", ko: "사육 환경", en: "Habitat & setup" },
+    { id: "feeding", ko: "먹이", en: "Feeding" },
     { id: "saju-fortune", ko: "사주·운세", en: "Saju & fortune" },
   ],
   other: [
@@ -113,6 +119,45 @@ const TIPS_CATEGORIES: Record<PetAnimalType, BoardCategoryOption[]> = {
       ],
     },
   ],
+  reptile: [
+    {
+      id: "habitat-setup",
+      ko: "사육 환경 세팅",
+      en: "Habitat setup",
+      children: [
+        { id: "reptile-temperature", ko: "온도·습도", en: "Temperature & humidity" },
+        { id: "reptile-uvb", ko: "UVB·조명", en: "UVB & lighting" },
+        { id: "reptile-cleaning", ko: "청소", en: "Cleaning" },
+      ],
+    },
+    {
+      id: "feeding-care",
+      ko: "먹이 관리",
+      en: "Feeding",
+      children: [
+        { id: "reptile-food", ko: "먹이 종류", en: "Food types" },
+        { id: "reptile-schedule", ko: "급여 주기", en: "Feeding schedule" },
+      ],
+    },
+    {
+      id: "health-care",
+      ko: "건강 관리",
+      en: "Health care",
+      children: [
+        { id: "reptile-shedding", ko: "탈피·피부", en: "Shedding & skin" },
+        { id: "reptile-checkup", ko: "예방·검진", en: "Prevention & checkups" },
+      ],
+    },
+    {
+      id: "saju-tips",
+      ko: "사주 활용법",
+      en: "Saju tips",
+      children: [
+        { id: "reptile-personality", ko: "성향 이해", en: "Personality" },
+        { id: "reptile-routine", ko: "루틴 추천", en: "Routine tips" },
+      ],
+    },
+  ],
   other: [
     {
       id: "habitat-setup",
@@ -166,11 +211,12 @@ function withOtherSubcategories(categories: BoardCategoryOption[]): BoardCategor
 const PET_ANIMAL_OPTIONS = [
   { value: "dog" as const, ko: "강아지", en: "Dog" },
   { value: "cat" as const, ko: "고양이", en: "Cat" },
-  { value: "other" as const, ko: "렙타일(다른동물)", en: "Reptile & other pets" },
+  { value: "reptile" as const, ko: "렙타일", en: "Reptile" },
+  { value: "other" as const, ko: "그외친구들", en: "Other friends" },
 ];
 
 export function isPetAnimalType(value: unknown): value is PetAnimalType {
-  return value === "dog" || value === "cat" || value === "other";
+  return value === "dog" || value === "cat" || value === "reptile" || value === "other";
 }
 
 export function getPetAnimalOptions(isKo: boolean) {

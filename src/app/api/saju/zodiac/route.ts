@@ -1,3 +1,4 @@
+import { isPetSpecies } from "@/lib/pets/species";
 import { persistZodiacFortune } from "@/lib/saju/persist-zodiac";
 import { computeZodiacFortune } from "@/lib/saju/zodiac/engine";
 import { validatePetName } from "@/lib/saju/moderation";
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: nameError }, { status: 400 });
   }
 
-  if (!body.species || !["dog", "cat", "other"].includes(body.species)) {
+  if (!body.species || !isPetSpecies(body.species)) {
     return NextResponse.json({ error: "Invalid species." }, { status: 400 });
   }
 

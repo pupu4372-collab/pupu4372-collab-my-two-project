@@ -8,6 +8,7 @@ import { HomePetFortuneCard } from "@/components/home/pet-fortune/HomePetFortune
 import { type FortuneTodayState } from "@/components/home/PetDailyFortunePanel";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
+import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
 import type { PetShowRankingRow } from "@/lib/supabase/types";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -15,12 +16,14 @@ import { useEffect, useState } from "react";
 type WeeklyRankingRows = {
   dog: PetShowRankingRow[];
   cat: PetShowRankingRow[];
+  reptile: PetShowRankingRow[];
   other: PetShowRankingRow[];
 };
 
 const emptyRankingRows: WeeklyRankingRows = {
   dog: [],
   cat: [],
+  reptile: [],
   other: [],
 };
 
@@ -108,6 +111,7 @@ interface HomeGatewayProps {
 export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   const locale = useLocale();
   const t = useTranslations("home");
+  const tPetShow = useTranslations("petshow");
   const isKo = locale === "ko";
   const { ready, accessToken } = useSupabaseSession();
   const [rankingRows, setRankingRows] = useState<WeeklyRankingRows>(emptyRankingRows);
@@ -127,6 +131,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
         setRankingRows({
           dog: data.rows?.dog ?? [],
           cat: data.rows?.cat ?? [],
+          reptile: data.rows?.reptile ?? [],
           other: data.rows?.other ?? [],
         });
         setRankingSource(data.source ?? null);
@@ -267,6 +272,16 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
         >
           {isKo ? "웃긴 실패 사진" : "Funny fails"}
         </AuthRequiredLink>
+        <AuthRequiredLink
+          href="/community/challenge"
+          className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 hover:brightness-105 ${
+            isNight
+              ? "border border-white/30 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25"
+              : "border border-channel-community/25 bg-white/75 text-channel-community hover:bg-white"
+          }`}
+        >
+          {isKo ? "챌린지 참여하기" : "Join Challenge"}
+        </AuthRequiredLink>
       </div>
       <GlassCard className={`min-w-0 p-4 sm:p-5 ${nightGlassCard}`}>
         <div className="grid gap-3">
@@ -287,59 +302,15 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             isKo={isKo}
           />
           <RankingPreviewList
-            emoji="🐾"
-            label={isKo ? "렙타일(다른동물) Top 5" : "Other Animals Top 5"}
-            rows={rankingRows.other}
-            emptyText={
-              isKo ? "이번 주 렙타일(다른동물) 사진을 기다려요." : "Waiting for other animal photos."
-            }
+            emoji="🦎"
+            label={tPetShow("reptileTop5")}
+            rows={mergeReptileChannelRankingRows(rankingRows.reptile, rankingRows.other)}
+            emptyText={tPetShow("reptileTop5Empty")}
             isNight={isNight}
             isKo={isKo}
           />
         </div>
       </GlassCard>
-    </div>
-  );
-
-  const challengeSection = (
-    <div>
-      {isNight ? (
-        <div>
-          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#22c55e] drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">
-            🏅
-          </p>
-          <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white drop-shadow-[0_0_18px_rgba(245,217,255,0.2)] md:text-3xl">
-            {isKo ? "챌린지" : "Challenge"}
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/80 md:text-base">
-            {isKo
-              ? "미션 인증하고 다른 집사들과 함께해요"
-              : "Complete missions with other pet parents"}
-          </p>
-        </div>
-      ) : (
-        <SectionHeader
-          eyebrow="🏅"
-          title={isKo ? "챌린지" : "Challenge"}
-          subtitle={
-            isKo
-              ? "미션 인증하고 다른 집사들과 함께해요"
-              : "Complete missions with other pet parents"
-          }
-        />
-      )}
-      <div className="mt-4 flex flex-wrap gap-3">
-        <AuthRequiredLink
-          href="/community/challenge"
-          className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
-            isNight
-              ? "bg-[#22c55e] shadow-[0_0_22px_rgba(34,197,94,0.25)]"
-              : "bg-channel-community"
-          }`}
-        >
-          {isKo ? "챌린지 참여하기" : "Join Challenge"}
-        </AuthRequiredLink>
-      </div>
     </div>
   );
 
@@ -399,7 +370,6 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             <div className="mt-8 grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:contents md:gap-0">
               <div className="min-w-0 space-y-8 md:col-start-1 md:row-start-3">
                 {petShowSection}
-                {challengeSection}
               </div>
 
               <div className="relative min-w-0 overflow-visible md:col-start-2 md:row-start-1 md:row-span-3 md:pl-2 md:sticky md:top-24 lg:pl-4">

@@ -1,8 +1,11 @@
-import { COMMUNITY_SOLID_CARD_CLASS, COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
+"use client";
+
+import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
+import { FirstPlaceCard, RunnerUpCard, petShowRankingHref } from "@/components/community/PetShowRankingCards";
 import type { PetShowRankingRow, RankingPeriod } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
-import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
 
 interface PetShowRankingProps {
   rows: PetShowRankingRow[];
@@ -18,6 +21,8 @@ interface PetShowWeeklySpeciesRankingProps {
   source: "supabase" | "mock";
 }
 
+type RankingSpeciesTab = "dog" | "cat" | "reptile";
+
 export function PetShowRanking({ rows, period, source }: PetShowRankingProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -26,9 +31,7 @@ export function PetShowRanking({ rows, period, source }: PetShowRankingProps) {
   return (
     <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6`}>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-bold text-channel-community">
-          📸 Pet Show · {label}
-        </h2>
+        <h2 className="text-lg font-bold text-channel-community">📸 Pet Show · {label}</h2>
         {source === "mock" && (
           <span className="text-xs text-plum/50">{isKo ? "데모 데이터" : "Demo data"}</span>
         )}
@@ -37,7 +40,7 @@ export function PetShowRanking({ rows, period, source }: PetShowRankingProps) {
         {rows.map((row, i) => (
           <li key={row.id}>
             <Link
-              href={`/community/pet-show/${row.id}`}
+              href={petShowRankingHref(row)}
               className="flex items-center gap-4 rounded-2xl bg-channel-community/10 px-4 py-3 transition hover:bg-channel-community/15"
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-channel-community text-sm font-bold text-white">
@@ -59,59 +62,38 @@ export function PetShowRanking({ rows, period, source }: PetShowRankingProps) {
   );
 }
 
-function SpeciesList({
+function SpeciesRankingPanel({
   rows,
-  emoji,
-  title,
   emptyText,
-  locale,
+  isKo,
 }: {
   rows: PetShowRankingRow[];
-  emoji: string;
-  title: string;
   emptyText: string;
-  locale: string;
+  isKo: boolean;
 }) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-channel-community/25 bg-white px-6 py-10 text-center">
+        <p className="text-sm leading-relaxed text-plum/65">{emptyText}</p>
+        <Link
+          href="/community/pet-show/upload"
+          className="mt-4 inline-flex rounded-full bg-channel-community px-5 py-2.5 text-sm font-extrabold text-white"
+        >
+          {isKo ? "사진 올리기" : "Upload photo"}
+        </Link>
+      </div>
+    );
+  }
+
+  const [first, ...rest] = rows.slice(0, 5);
+
   return (
-    <div className={`${COMMUNITY_SOLID_CARD_CLASS} rounded-2xl p-4`}>
-      <h3 className="text-sm font-bold text-plum">
-        {emoji} {title}
-      </h3>
-      {rows.length === 0 ? (
-        <div className="mt-3 rounded-2xl border border-dashed border-channel-community/25 bg-white px-4 py-4 text-center">
-          <p className="text-xs leading-relaxed text-plum/60">{emptyText}</p>
-          <Link
-            href="/community/pet-show/upload"
-            className="mt-2 inline-flex rounded-full bg-channel-community px-4 py-2 text-[11px] font-bold text-white"
-          >
-            {locale === "ko" ? "사진 올리기" : "Upload photo"}
-          </Link>
-        </div>
-      ) : (
-        <ol className="mt-3 space-y-2">
-          {rows.slice(0, 5).map((row, i) => (
-            <li key={row.id}>
-              <Link
-                href={`/community/pet-show/${row.id}`}
-                className="flex items-center gap-3 rounded-xl bg-channel-community/10 p-2 transition hover:bg-channel-community/15"
-              >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-channel-community text-xs font-bold text-white">
-                  {row.rank_position ?? i + 1}
-                </span>
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/70">
-                  {row.image_urls?.[0] ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={supabaseImageTransformUrl(row.image_urls[0], { width: 96, height: 96 })} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="flex h-full w-full items-center justify-center text-xl">{emoji}</span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-plum">{row.title ?? "Pet Show"}</p>
-                  <p className="text-xs text-plum/55">♥ {row.like_count} · 💬 {row.comment_count}</p>
-                </div>
-              </Link>
-            </li>
+    <div className="space-y-4">
+      <FirstPlaceCard row={first} isKo={isKo} />
+      {rest.length > 0 && (
+        <ol className="space-y-3">
+          {rest.map((row, index) => (
+            <RunnerUpCard key={row.id} row={row} rank={row.rank_position ?? index + 2} isKo={isKo} />
           ))}
         </ol>
       )}
@@ -128,29 +110,38 @@ export function PetShowWeeklySpeciesRanking({
 }: PetShowWeeklySpeciesRankingProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const t = useTranslations("petshow");
+  const tSpecies = useTranslations("petSpecies");
+  const [activeSpecies, setActiveSpecies] = useState<RankingSpeciesTab>("dog");
   const isMonthly = period === "month";
 
+  const rowsBySpecies: Record<RankingSpeciesTab, PetShowRankingRow[]> = {
+    dog: dogRows,
+    cat: catRows,
+    reptile: otherRows,
+  };
+
+  const emptyBySpecies: Record<RankingSpeciesTab, string> = {
+    dog: isMonthly ? t("rankingEmptyDogMonth") : t("rankingEmptyDogWeek"),
+    cat: isMonthly ? t("rankingEmptyCatMonth") : t("rankingEmptyCatWeek"),
+    reptile: isMonthly ? t("rankingEmptyReptileMonth") : t("rankingEmptyReptileWeek"),
+  };
+
+  const speciesTabs: Array<{ id: RankingSpeciesTab; label: string }> = [
+    { id: "dog", label: tSpecies("dog") },
+    { id: "cat", label: tSpecies("cat") },
+    { id: "reptile", label: tSpecies("reptile") },
+  ];
+
   return (
-    <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-5`}>
+    <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-5 md:p-6`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-extrabold text-channel-community">
-            {isMonthly
-              ? isKo
-                ? "우리아이 자랑 월간 랭킹 Top 5"
-                : "Pet Show Monthly Top 5"
-              : isKo
-                ? "우리아이 자랑 주간 랭킹 Top 5"
-                : "Pet Show Weekly Top 5"}
+          <h2 className="text-lg font-extrabold text-channel-community md:text-xl">
+            {isMonthly ? t("rankingTitleMonth") : t("rankingTitleWeek")}
           </h2>
-          <p className="mt-1 text-xs text-plum/55">
-            {isMonthly
-              ? isKo
-                ? "최근 30일간 좋아요 순위입니다. 동점일 때는 먼저 올린 사진이 앞에 배정돼요."
-                : "Ranked by likes from the last 30 days. Ties go to earlier uploads first."
-              : isKo
-                ? "최근 7일간 좋아요 순위입니다. 동점일 때는 먼저 올린 사진이 앞에 배정돼요."
-                : "Ranked by likes from the last 7 days. Ties go to earlier uploads first."}
+          <p className="mt-1 text-xs text-plum/55 md:text-sm">
+            {isMonthly ? t("rankingDescMonth") : t("rankingDescWeek")}
           </p>
         </div>
         {source === "mock" && (
@@ -159,51 +150,33 @@ export function PetShowWeeklySpeciesRanking({
           </span>
         )}
       </div>
-      <div className="mt-4 grid gap-4 md:grid-cols-3">
-        <SpeciesList
-          rows={dogRows}
-          emoji="🐕"
-          title={isKo ? "강아지 Top 5" : "Dog Top 5"}
-          emptyText={
-            isMonthly
-              ? isKo
-                ? "이번 달 강아지 사진을 기다리는 중이에요."
-                : "Waiting for dog photos this month."
-              : isKo
-                ? "이번 주 강아지 사진을 기다리는 중이에요."
-                : "Waiting for dog photos this week."
-          }
-          locale={locale}
-        />
-        <SpeciesList
-          rows={catRows}
-          emoji="🐈"
-          title={isKo ? "고양이 Top 5" : "Cat Top 5"}
-          emptyText={
-            isMonthly
-              ? isKo
-                ? "이번 달 고양이 사진을 기다리는 중이에요."
-                : "Waiting for cat photos this month."
-              : isKo
-                ? "이번 주 고양이 사진을 기다리는 중이에요."
-                : "Waiting for cat photos this week."
-          }
-          locale={locale}
-        />
-        <SpeciesList
-          rows={otherRows}
-          emoji="🐾"
-          title={isKo ? "렙타일(다른동물) Top 5" : "Other Animals Top 5"}
-          emptyText={
-            isMonthly
-              ? isKo
-                ? "이번 달 렙타일(다른동물) 사진을 기다리는 중이에요."
-                : "Waiting for other animal photos this month."
-              : isKo
-                ? "이번 주 렙타일(다른동물) 사진을 기다리는 중이에요."
-                : "Waiting for other animal photos this week."
-          }
-          locale={locale}
+
+      <nav
+        className="mt-5 inline-flex w-full max-w-full gap-1 overflow-x-auto rounded-full border border-white/35 bg-white/95 p-1.5 shadow-sm hide-scrollbar sm:w-auto"
+        aria-label={t("rankingSpeciesNav")}
+      >
+        {speciesTabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveSpecies(tab.id)}
+            className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-extrabold transition ${
+              activeSpecies === tab.id
+                ? "bg-channel-community text-white shadow-sm"
+                : "text-plum/60 hover:bg-channel-community/10 hover:text-channel-community"
+            }`}
+            aria-current={activeSpecies === tab.id ? "page" : undefined}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      <div className="mt-5">
+        <SpeciesRankingPanel
+          rows={rowsBySpecies[activeSpecies]}
+          emptyText={emptyBySpecies[activeSpecies]}
+          isKo={isKo}
         />
       </div>
     </section>

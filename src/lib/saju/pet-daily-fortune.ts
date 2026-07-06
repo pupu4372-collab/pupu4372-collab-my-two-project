@@ -99,7 +99,8 @@ const SPECIES_META: Record<
 > = {
   dog: { icon: "🐕", ko: "강아지", en: "Dog" },
   cat: { icon: "🐱", ko: "고양이", en: "Cat" },
-  other: { icon: "🐾", ko: "다른동물", en: "Other pet" },
+  reptile: { icon: "🦎", ko: "렙타일", en: "Reptile" },
+  other: { icon: "🐾", ko: "그외친구들", en: "Other friends" },
 };
 
 const COMMON_FORTUNES = [
@@ -187,12 +188,14 @@ const ELEMENT_LUCKY = {
 const SPECIES_SNACK: Record<Species, { ko: string[]; en: string[] }> = {
   dog: { ko: ["닭가슴살", "당근"], en: ["chicken treat", "carrot stick"] },
   cat: { ko: ["참치", "츄르"], en: ["tuna", "cat treat"] },
+  reptile: { ko: ["곤충 사료", "칼슘 보충"], en: ["insect feed", "calcium supplement"] },
   other: { ko: ["좋아하는 간식", "신선한 채소"], en: ["favorite treat", "fresh greens"] },
 };
 
 const SPECIES_ACT: Record<Species, { ko: string[]; en: string[] }> = {
   dog: { ko: ["산책", "공 놀이", "드라이브"], en: ["walk", "ball play", "car ride"] },
   cat: { ko: ["낮잠", "캣타워", "레이저 포인터"], en: ["nap", "cat tower", "laser play"] },
+  reptile: { ko: ["온욕", "은신처 점검", "UVB 램프 확인"], en: ["warm soak", "hide check", "UVB lamp check"] },
   other: { ko: ["온욕", "손길 케어", "조용한 관찰"], en: ["warm soak", "gentle handling", "quiet watch"] },
 };
 
@@ -327,15 +330,27 @@ const TIPS: Record<Species, { ko: string[][]; en: string[][] }> = {
       ["🐟", "A favorite snack lifts the mood."],
     ],
   },
-  other: {
+  reptile: {
     ko: [
       ["🌡️", "온도와 습도를 평소보다 꼼꼼히 확인해 주세요."],
-      ["🧼", "사육장·케이지 청결을 유지해 주세요."],
-      ["👀", "식사·활동량 변화를 가볍게 기록해 두세요."],
+      ["💡", "UVB 램프 교체 주기를 확인해 주세요."],
+      ["👀", "탈피·식욕 변화를 가볍게 기록해 두세요."],
     ],
     en: [
       ["🌡️", "Check temperature and humidity carefully."],
-      ["🧼", "Keep the habitat clean."],
+      ["💡", "Review your UVB lamp replacement cycle."],
+      ["👀", "Note shedding or appetite changes."],
+    ],
+  },
+  other: {
+    ko: [
+      ["🧼", "케이지·사육 공간 청결을 유지해 주세요."],
+      ["🎵", "조용한 환경과 규칙적인 급여를 유지해 주세요."],
+      ["👀", "식사·활동량 변화를 가볍게 기록해 두세요."],
+    ],
+    en: [
+      ["🧼", "Keep the habitat or cage clean."],
+      ["🎵", "Keep a calm room and regular feeding routine."],
       ["👀", "Note any appetite or activity changes."],
     ],
   },

@@ -25,7 +25,7 @@ export default async function DogChannelPage({ params }: DogChannelPageProps) {
       backLabel={isKo ? "← 홈" : "← Home"}
       rightLinks={[
         { href: "/cat", label: isKo ? "고양이 채널" : "Cat Channel" },
-        { href: "/reptile", label: isKo ? "렙타일(다른동물)" : "Reptile" },
+        { href: "/reptile", label: isKo ? "렙타일" : "Reptiles" },
         { href: "/community", label: isKo ? "커뮤니티" : "Community" },
       ]}
     >

@@ -3,9 +3,10 @@ import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { COMMUNITY_SOLID_CARD_CLASS } from "@/components/community/CommunityDetailSurface";
 import { GlassCard, SectionHeader } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
+import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
 import { fetchWeeklyPetShowSpeciesRankings } from "@/lib/community/ranking";
-import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { getTranslations } from "next-intl/server";
+import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 
 interface CommunityHubPageProps {
   params: Promise<{ locale: string }>;
@@ -16,6 +17,12 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
   const isKo = locale !== "en";
   const t = await getTranslations("community");
   const weeklyRanking = await fetchWeeklyPetShowSpeciesRankings();
+  const tPetShow = await getTranslations({ locale, namespace: "petshow" });
+  const tSpecies = await getTranslations({ locale, namespace: "petSpecies" });
+  const reptileTop5Rows = mergeReptileChannelRankingRows(
+    weeklyRanking.rows.reptile,
+    weeklyRanking.rows.other,
+  );
 
   const sections = [
     { href: "/community/qa" as const, emoji: "❓", title: t("qa"), desc: t("qaDesc") },
@@ -99,8 +106,8 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                   </h2>
                   <p className="mt-2 max-w-xl text-sm leading-6 text-white/85">
                     {isKo
-                      ? "최근 7일간 좋아요 순위로 강아지, 고양이, 렙타일(다른동물) Top 5를 보여줘요."
-                      : "Dog, cat, and other animal Top 5 by likes from the last 7 days."}
+                      ? "최근 7일간 좋아요 순위로 강아지, 고양이, 렙타일 Top 5를 보여줘요."
+                      : "Dog, cat, and reptile Top 5 by likes from the last 7 days."}
                   </p>
                 </div>
               </div>
@@ -117,7 +124,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
               {([
                 ["🐕", isKo ? "강아지" : "Dog", weeklyRanking.rows.dog],
                 ["🐈", isKo ? "고양이" : "Cat", weeklyRanking.rows.cat],
-                ["🐾", isKo ? "렙타일(다른동물)" : "Other Animals", weeklyRanking.rows.other],
+                ["🦎", tSpecies("reptile"), reptileTop5Rows],
               ] as const).map(([emoji, label, rows]) => (
                 <div key={label} className="max-w-full overflow-hidden rounded-[1.75rem] border border-white/35 bg-sand/40 p-4 shadow-sm">
                   <p className="text-xs font-extrabold text-primary">
@@ -206,7 +213,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
               {
                 href: "/reptile" as const,
                 emoji: "🦎",
-                title: isKo ? "렙타일(다른동물)" : "Reptile & Other",
+                title: tSpecies("reptile"),
                 desc: isKo ? "파충류·앵무새(조류)·소동물 케어" : "Reptiles, birds, and small pets",
                 className: "bg-channel-community/12 text-channel-community",
               },

@@ -4,6 +4,7 @@ import {
   buildPetFortunePetMeta,
   type PetProfileForFortune,
 } from "@/lib/saju/pet-daily-fortune";
+import { isPetSpecies } from "@/lib/pets/species";
 import type { Locale } from "@/lib/saju/types";
 import type { PetSpecies } from "@/lib/supabase/types";
 import { emptyCareReminders, fetchPetCareReminders } from "@/lib/pet-care/reminders";
@@ -15,7 +16,7 @@ import {
 import { NextResponse } from "next/server";
 
 function isSpecies(value: unknown): value is PetSpecies {
-  return value === "dog" || value === "cat" || value === "other";
+  return isPetSpecies(value);
 }
 
 export async function GET(request: Request) {

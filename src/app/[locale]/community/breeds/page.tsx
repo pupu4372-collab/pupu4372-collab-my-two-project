@@ -9,7 +9,7 @@ interface PageProps {
 }
 
 function parseAnimal(value?: string): PetAnimalType | "all" {
-  if (value === "dog" || value === "cat" || value === "other") return value;
+  if (value === "dog" || value === "cat" || value === "reptile" || value === "other") return value;
   return "all";
 }
 

@@ -1,4 +1,5 @@
 import { createQaPost } from "@/lib/community/qa-feed";
+import type { PetAnimalType } from "@/lib/supabase/types";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -6,7 +7,20 @@ import {
 } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
 
-const ALLOWED_TAGS = new Set(["experience:dog", "experience:cat", "experience:other"]);
+const ALLOWED_TAGS = new Set([
+  "experience:dog",
+  "experience:cat",
+  "experience:reptile",
+  "experience:other",
+]);
+
+function animalTypeFromExperienceTag(tag: string): PetAnimalType | undefined {
+  if (tag === "experience:dog") return "dog";
+  if (tag === "experience:cat") return "cat";
+  if (tag === "experience:reptile") return "reptile";
+  if (tag === "experience:other") return "other";
+  return undefined;
+}
 
 export async function POST(request: Request) {
   const userId = await getUserIdFromRequest(request);
@@ -36,6 +50,8 @@ export async function POST(request: Request) {
   }
 
   const tags = (body.tags ?? []).filter((tag) => ALLOWED_TAGS.has(tag));
+  const experienceTag = tags[0] ?? "experience:dog";
+  const animalType = animalTypeFromExperienceTag(experienceTag);
 
   try {
     const post = await createQaPost(supabase, {
@@ -44,7 +60,8 @@ export async function POST(request: Request) {
       content: body.content,
       language: body.language,
       board: "experience",
-      tags: tags.length ? tags : ["experience:dog"],
+      tags: [experienceTag],
+      animalType,
     });
     return NextResponse.json({ post }, { status: 201 });
   } catch (err) {

@@ -32,7 +32,8 @@ const UI = {
     petMale: "Male",
     dog: "Dog",
     cat: "Cat",
-    other: "Other pet",
+    reptile: "Reptile",
+    other: "Other friends",
     birthDate: "Birth date",
     birthTime: "Birth time",
     timezone: "Birth timezone",
@@ -62,7 +63,8 @@ const UI = {
     petMale: "수",
     dog: "강아지",
     cat: "고양이",
-    other: "다른 동물",
+    reptile: "렙타일",
+    other: "그외친구들",
     birthDate: "생년월일",
     birthTime: "출생 시간",
     timezone: "출생 지역 시간대",
@@ -94,7 +96,8 @@ const STITCH_INPUT_CLASS =
 const SPECIES_OPTIONS = [
   { value: "dog", emoji: "🐶", icon: "🐾" },
   { value: "cat", emoji: "🐱", icon: "🐾" },
-  { value: "other", emoji: "🐰", icon: "🦎" },
+  { value: "reptile", emoji: "🦎", icon: "🦎" },
+  { value: "other", emoji: "🐾", icon: "🐰" },
 ] as const;
 
 const ELEMENT_DOTS = [
@@ -335,6 +338,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
                 >
                   <option value="dog">{t.dog}</option>
                   <option value="cat">{t.cat}</option>
+                  <option value="reptile">{t.reptile}</option>
                   <option value="other">{t.other}</option>
                 </select>
               </label>
