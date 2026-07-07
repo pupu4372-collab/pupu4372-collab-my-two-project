@@ -1,5 +1,6 @@
 "use client";
 
+import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
@@ -224,6 +225,7 @@ export function CompatibilityForm() {
 
   return (
     <div className="space-y-5">
+      <ReportGenerateLoader isKo={locale === "ko"} active={loading} />
       <form onSubmit={handleSubmit} className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-7 p-6 md:p-8`}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>

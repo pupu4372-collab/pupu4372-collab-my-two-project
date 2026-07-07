@@ -8,6 +8,7 @@ import type {
   ReportScore,
   ReportType,
 } from "@/lib/reports/human-premium/types";
+import { sanitizeLlmSlotText } from "./slot-output-sanitize";
 
 const MIN_SCORE = 40;
 const MAX_SCORE = 100;
@@ -16,20 +17,26 @@ function nonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }
 
+function parsedSlotString(slot: string, value: unknown): string | null {
+  const raw = nonEmptyString(value);
+  if (!raw) return null;
+  return sanitizeLlmSlotText(slot, raw);
+}
+
 export function parseSajuStructure(value: unknown): string | null {
-  if (typeof value === "string") return nonEmptyString(value);
+  if (typeof value === "string") return parsedSlotString("saju-structure", value);
   if (!value || typeof value !== "object") return null;
-  return nonEmptyString((value as { sajuStructure?: unknown }).sajuStructure);
+  return parsedSlotString("saju-structure", (value as { sajuStructure?: unknown }).sajuStructure);
 }
 
 export function parseDeepAnalysis(value: unknown): string | null {
-  if (typeof value === "string") return nonEmptyString(value);
+  if (typeof value === "string") return parsedSlotString("deep-analysis", value);
   if (!value || typeof value !== "object") return null;
-  return nonEmptyString((value as { deepAnalysis?: unknown }).deepAnalysis);
+  return parsedSlotString("deep-analysis", (value as { deepAnalysis?: unknown }).deepAnalysis);
 }
 
 export function parseMasterNarrative(value: unknown): string | null {
-  if (typeof value === "string") return nonEmptyString(value);
+  if (typeof value === "string") return parsedSlotString("master-narrative", value);
   if (!value || typeof value !== "object") return null;
   const v = value as {
     narrative?: unknown;
@@ -38,9 +45,9 @@ export function parseMasterNarrative(value: unknown): string | null {
     deepAnalysis?: unknown;
   };
   return (
-    nonEmptyString(v.narrative) ??
-    nonEmptyString(v.masterNarrative) ??
-    nonEmptyString(v.deepAnalysis)
+    parsedSlotString("master-narrative", v.narrative) ??
+    parsedSlotString("master-narrative", v.masterNarrative) ??
+    parsedSlotString("master-narrative", v.deepAnalysis)
   );
 }
 
@@ -67,9 +74,9 @@ export function parseOpportunities(value: unknown): ReportOpportunity[] | null {
     .map((item) => {
       if (!item || typeof item !== "object") return null;
       const o = item as Partial<ReportOpportunity>;
-      const title = nonEmptyString(o.title);
-      const body = nonEmptyString(o.body);
-      const tip = nonEmptyString(o.tip);
+      const title = parsedSlotString("opportunities.title", o.title);
+      const body = parsedSlotString("opportunities.body", o.body);
+      const tip = parsedSlotString("opportunities.tip", o.tip);
       if (!title || !body || !tip) return null;
       return { title, body, tip };
     })
@@ -87,9 +94,9 @@ export function parseRisks(value: unknown): ReportRisk[] | null {
     .map((item) => {
       if (!item || typeof item !== "object") return null;
       const o = item as Partial<ReportRisk>;
-      const title = nonEmptyString(o.title);
-      const body = nonEmptyString(o.body);
-      const countermeasure = nonEmptyString(o.countermeasure);
+      const title = parsedSlotString("risks.title", o.title);
+      const body = parsedSlotString("risks.body", o.body);
+      const countermeasure = parsedSlotString("risks.countermeasure", o.countermeasure);
       if (!title || !body || !countermeasure) return null;
       return { title, body, countermeasure };
     })
@@ -107,9 +114,9 @@ export function parseRoadmap(value: unknown): ReportRoadmapItem[] | null {
     .map((item) => {
       if (!item || typeof item !== "object") return null;
       const o = item as Partial<ReportRoadmapItem>;
-      const period = nonEmptyString(o.period);
-      const label = nonEmptyString(o.label);
-      const body = nonEmptyString(o.body);
+      const period = parsedSlotString("roadmap.period", o.period);
+      const label = parsedSlotString("roadmap.label", o.label);
+      const body = parsedSlotString("roadmap.body", o.body);
       if (!period || !label || !body) return null;
       return { period, label, body };
     })
@@ -127,8 +134,8 @@ export function parseDecisionMoments(value: unknown): ReportDecisionMoment[] | n
     .map((item) => {
       if (!item || typeof item !== "object") return null;
       const o = item as Partial<ReportDecisionMoment>;
-      const situation = nonEmptyString(o.situation);
-      const script = nonEmptyString(o.script);
+      const situation = parsedSlotString("roadmap.decisionMoments.situation", o.situation);
+      const script = parsedSlotString("roadmap.decisionMoments.script", o.script);
       if (!situation || !script) return null;
       return { situation, script };
     })
@@ -144,8 +151,8 @@ export function parseProphecy(value: unknown, reportType: ReportType): ReportPro
     v.prophecy && typeof v.prophecy === "object"
       ? (v.prophecy as { short?: unknown; full?: unknown })
       : null;
-  const short = nonEmptyString(nested?.short ?? v.short);
-  const full = nonEmptyString(nested?.full ?? v.full);
+  const short = parsedSlotString("prophecy.short", nested?.short ?? v.short);
+  const full = parsedSlotString("prophecy.full", nested?.full ?? v.full);
   if (!short) return null;
   if (reportType === "lifetime" && full) return { short, full };
   return { short, ...(full ? { full } : {}) };
@@ -158,7 +165,7 @@ export function parseCohortInsight(value: unknown): ReportCohortInsight | null {
     v.cohortInsight && typeof v.cohortInsight === "object"
       ? (v.cohortInsight as { body?: unknown })
       : null;
-  const body = nonEmptyString(nested?.body ?? v.body ?? v.cohortInsight);
+  const body = parsedSlotString("cohortInsight.body", nested?.body ?? v.body ?? v.cohortInsight);
   return body ? { body } : null;
 }
 
@@ -171,8 +178,8 @@ export function parseScores(value: unknown): ReportScore[] | null {
     .map((item) => {
       if (!item || typeof item !== "object") return null;
       const o = item as Partial<ReportScore>;
-      const label = nonEmptyString(o.label);
-      const description = nonEmptyString(o.description);
+      const label = parsedSlotString("master-narrative.scores.label", o.label);
+      const description = parsedSlotString("master-narrative.scores.description", o.description);
       const score =
         typeof o.score === "number" && Number.isFinite(o.score)
           ? Math.max(MIN_SCORE, Math.min(MAX_SCORE, Math.round(o.score)))

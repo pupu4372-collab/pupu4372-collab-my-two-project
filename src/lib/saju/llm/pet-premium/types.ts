@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/saju/types";
+import type { PetMbtiAxisPercents, PetMbtiType } from "@/lib/pet/mbti-inference";
 
 export type PetPremiumNarrativeSource = "template" | "llm";
 
@@ -35,6 +36,8 @@ export interface PetMbtiPremiumInsight {
   butlerFit: string;
   health: string;
   dailyCare: string;
+  mbtiType: PetMbtiType;
+  axisPercents: PetMbtiAxisPercents;
   narrativeSource?: PetPremiumNarrativeSource;
 }
 
@@ -57,7 +60,7 @@ export function isPetMbtiPremiumLlmJson(value: unknown): value is PetMbtiPremium
 export function isPetCompatibilityLlmJson(value: unknown): value is PetCompatibilityLlmJson {
   if (!value || typeof value !== "object") return false;
   const o = value as Record<string, unknown>;
-  if (!Array.isArray(o.details) || o.details.length < 1) return false;
+  if (!Array.isArray(o.details) || o.details.length !== 3) return false;
   if (!Array.isArray(o.careTips) || o.careTips.length < 1) return false;
   const detailsOk = o.details.every(
     (d) =>

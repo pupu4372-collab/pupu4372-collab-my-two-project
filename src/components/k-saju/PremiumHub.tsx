@@ -347,6 +347,9 @@ export function PremiumHub() {
               petName: petCtx.petName,
               species: petCtx.species,
               birthDate: petCtx.petBirthDate,
+              birthTime: petCtx.petBirthTime,
+              birthTimeUnknown: petCtx.petBirthTimeUnknown,
+              timezone: petCtx.timezone,
               locale: petCtx.locale,
               petId: petCtx.petId,
             }),
@@ -403,6 +406,7 @@ export function PremiumHub() {
             timezone: petCtx.timezone,
             locale: petCtx.locale,
             mbtiType,
+            mbtiAnswers,
             petId: petCtx.petId,
           }),
         });
@@ -422,7 +426,7 @@ export function PremiumHub() {
         setMbtiInsightLoading(false);
       }
     })();
-  }, [activeView, pet, mbtiType, mbtiResult, mbtiInsight, mbtiInsightLoading, accessToken]);
+  }, [activeView, pet, mbtiType, mbtiResult, mbtiInsight, mbtiInsightLoading, mbtiAnswers, accessToken]);
 
   if (configured && ready && isAnonymous) {
     return (
@@ -490,6 +494,9 @@ export function PremiumHub() {
           petName: petCtx.petName,
           species: petCtx.species,
           birthDate: petCtx.petBirthDate,
+          birthTime: petCtx.petBirthTime,
+          birthTimeUnknown: petCtx.petBirthTimeUnknown,
+          timezone: petCtx.timezone,
           locale: petCtx.locale,
           petId: petCtx.petId,
         }),

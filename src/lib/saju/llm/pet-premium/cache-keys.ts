@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import type { Locale } from "@/lib/saju/types";
 import type { PetPremiumFeature } from "./types";
 
-export const PET_PREMIUM_PROMPT_VERSION = 1;
+export const PET_PREMIUM_PROMPT_VERSION = 3;
 
 function stableStringify(value: unknown): string {
   return JSON.stringify(value, (_key, current) => {

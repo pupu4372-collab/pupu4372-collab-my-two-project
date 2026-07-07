@@ -409,6 +409,8 @@ export function buildPetMbtiPremiumInsight(
       : isJudger
         ? "Mini routines at the same time and order work well—praise within 3 seconds after success."
         : "Several short sessions beat one long drill—switch to play before boredom hits.",
+    mbtiType: type,
+    axisPercents: computePetMbtiAxisPercents(result.scores),
     narrativeSource: "template",
   };
 }
@@ -423,4 +425,79 @@ export function scoresFromAnswers(answers: Record<string, string>): PetMbtiScore
     scores = applyPetMbtiAnswer(scores, questionId, optionId);
   }
   return scores;
+}
+
+export type PetMbtiAxisPercents = {
+  EI: { E: number; I: number };
+  SN: { S: number; N: number };
+  TF: { T: number; F: number };
+  JP: { J: number; P: number };
+};
+
+/** Four-axis percent split from 15-question survey scores. */
+export function computePetMbtiAxisPercents(scores: PetMbtiScores): PetMbtiAxisPercents {
+  const pct = (a: number, b: number) => {
+    const total = a + b;
+    if (total <= 0) return 50;
+    return Math.round((a / total) * 100);
+  };
+  return {
+    EI: { E: pct(scores.E, scores.I), I: pct(scores.I, scores.E) },
+    SN: { S: pct(scores.S, scores.N), N: pct(scores.N, scores.S) },
+    TF: { T: pct(scores.T, scores.F), F: pct(scores.F, scores.T) },
+    JP: { J: pct(scores.J, scores.P), P: pct(scores.P, scores.J) },
+  };
+}
+
+export interface PetMbtiExtremeResponse {
+  questionId: string;
+  axis: MbtiAxis;
+  question: string;
+  answer: string;
+}
+
+/** Pick 2–3 survey items that best reflect the pet's strongest axis lean. */
+export function pickExtremeMbtiResponses(
+  answers: Record<string, string>,
+  locale: "ko" | "en",
+  limit = 3
+): PetMbtiExtremeResponse[] {
+  const scores = scoresFromAnswers(answers);
+  const percents = computePetMbtiAxisPercents(scores);
+  const type = inferPetMbtiType(scores);
+  const axisLetters: Record<MbtiAxis, { pos: MbtiLetter; neg: MbtiLetter }> = {
+    EI: { pos: "E", neg: "I" },
+    SN: { pos: "S", neg: "N" },
+    TF: { pos: "T", neg: "F" },
+    JP: { pos: "J", neg: "P" },
+  };
+
+  const rankedAxes = (["EI", "SN", "TF", "JP"] as MbtiAxis[])
+    .map((axis) => {
+      const { pos, neg } = axisLetters[axis];
+      const dominant = type.includes(pos) ? pos : neg;
+      const dominantPct = percents[axis][dominant as keyof PetMbtiAxisPercents[typeof axis]];
+      return { axis, dominant, dominantPct };
+    })
+    .sort((a, b) => b.dominantPct - a.dominantPct);
+
+  const picked: PetMbtiExtremeResponse[] = [];
+  for (const { axis, dominant } of rankedAxes) {
+    if (picked.length >= limit) break;
+    const question = PET_MBTI_QUESTIONS.find((q) => {
+      if (q.axis !== axis) return false;
+      const optionId = answers[q.id];
+      if (!optionId) return false;
+      return q.options.find((o) => o.id === optionId)?.letter === dominant;
+    });
+    if (!question) continue;
+    const option = question.options.find((o) => o.id === answers[question.id])!;
+    picked.push({
+      questionId: question.id,
+      axis,
+      question: locale === "ko" ? question.promptKo : question.promptEn,
+      answer: locale === "ko" ? option.labelKo : option.labelEn,
+    });
+  }
+  return picked;
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { ZodiacResult } from "@/components/k-saju/ZodiacResult";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
@@ -144,6 +145,7 @@ export function ZodiacForm() {
 
   return (
     <div className="space-y-5">
+      <ReportGenerateLoader isKo={locale === "ko"} active={loading} />
       <form ref={formRef} onSubmit={handleSubmit} className="pastel-card space-y-6 p-6 md:p-8">
         <div className="grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>

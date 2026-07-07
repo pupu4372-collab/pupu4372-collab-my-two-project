@@ -22,6 +22,9 @@ export async function POST(request: Request) {
     petName?: string;
     species?: string;
     birthDate?: string;
+    birthTime?: string | null;
+    birthTimeUnknown?: boolean;
+    timezone?: string;
     locale?: string;
     petId?: string | null;
   };
@@ -77,12 +80,17 @@ export async function POST(request: Request) {
     locale,
   };
 
+  const enrichInput = {
+    birthDate: requestPayload.birthDate,
+    birthTime: body.birthTime ?? null,
+    birthTimeUnknown: Boolean(body.birthTimeUnknown ?? !body.birthTime),
+    timezone: body.timezone ?? "Asia/Seoul",
+    petId: body.petId ?? null,
+  };
+
   try {
     const base = computeZodiacFortune(requestPayload);
-    const result = await enrichZodiacWithPremiumLlm(base, {
-      birthDate: requestPayload.birthDate,
-      petId: body.petId ?? null,
-    });
+    const result = await enrichZodiacWithPremiumLlm(base, enrichInput);
 
     let persisted = false;
     let petId: string | null = null;

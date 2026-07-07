@@ -181,6 +181,19 @@ export function branchHangulLabel(branch: string): string {
   return BRANCH_LABEL[branch]?.hangul ?? branch;
 }
 
+/** Map a single stem/branch/element hanja to hangul (formatStemBranchLabels family). */
+export function hanjaCharToHangul(hanja: string): string | null {
+  if (hanja.length !== 1) return null;
+  const stem = STEM_LABEL[hanja];
+  if (stem) return stem.hangul;
+  const branch = BRANCH_LABEL[hanja];
+  if (branch) return branch.hangul;
+  for (const meta of Object.values(ELEMENT_META)) {
+    if (meta.hanja === hanja) return meta.hangul;
+  }
+  return null;
+}
+
 export function formatStemBranchLabels(
   stem: string,
   branch: string,

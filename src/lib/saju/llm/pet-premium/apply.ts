@@ -1,7 +1,7 @@
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
 import type { PetMbtiResult } from "@/lib/pet/mbti-inference";
-import { buildPetMbtiPremiumInsight } from "@/lib/pet/mbti-inference";
+import { buildPetMbtiPremiumInsight, computePetMbtiAxisPercents } from "@/lib/pet/mbti-inference";
 import type {
   PetCompatibilityLlmJson,
   PetMbtiPremiumInsight,
@@ -11,6 +11,7 @@ import type {
 
 export function applyMbtiPremiumLlm(
   llm: PetMbtiPremiumLlmJson,
+  mbti: PetMbtiResult,
   locale: "ko" | "en"
 ): PetMbtiPremiumInsight {
   return {
@@ -19,6 +20,8 @@ export function applyMbtiPremiumLlm(
     butlerFit: llm.butlerFit.trim(),
     health: llm.health.trim(),
     dailyCare: llm.dailyCare.trim(),
+    mbtiType: mbti.type,
+    axisPercents: computePetMbtiAxisPercents(mbti.scores),
     narrativeSource: "llm",
   };
 }
@@ -41,7 +44,7 @@ export function applyCompatibilityPremiumLlm(
     relationDescription: llm.relationDescription.trim(),
     petElementNote: llm.petElementNote.trim(),
     ownerElementNote: llm.ownerElementNote.trim(),
-    details: llm.details.map((d) => ({
+    details: llm.details.slice(0, 3).map((d) => ({
       title: d.title.trim(),
       body: d.body.trim(),
     })),

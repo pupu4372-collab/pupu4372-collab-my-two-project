@@ -13,7 +13,7 @@ import type { InterpretSajuInput, LlmProviderName } from "./types";
 export const LLM_CACHE_PROMPT_VERSION = 1;
 
 /** Bump when human premium section prompts change materially */
-export const HUMAN_PREMIUM_PROMPT_VERSION = 18;
+export const HUMAN_PREMIUM_PROMPT_VERSION = 19;
 
 function stableStringify(value: unknown): string {
   return JSON.stringify(value, (_key, current) => {

@@ -1,4 +1,5 @@
 import type { PetMbtiResult } from "@/lib/pet/mbti-inference";
+import { pickExtremeMbtiResponses } from "@/lib/pet/mbti-inference";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import { computePetSajuBundle } from "@/lib/saju/engine";
 import type { SajuBasicRequest } from "@/lib/saju/types";
@@ -21,7 +22,7 @@ import {
   clearPetPremiumInFlight,
 } from "./cache";
 import { buildPetPremiumCacheKey, zodiacDailyCacheFacet, zodiacPersonalityCacheFacet } from "./cache-keys";
-import { buildPetMbtiPremiumPrompts } from "./prompts/mbti-prompt";
+import { buildPetMbtiPremiumPrompts, mappingSummaryForLlm } from "./prompts/mbti-prompt";
 import { buildPetCompatibilityPremiumPrompts } from "./prompts/compatibility-prompt";
 import { buildPetZodiacPremiumPrompts, buildZodiacMappingSummary } from "./prompts/zodiac-prompt";
 import {
@@ -42,6 +43,18 @@ import {
 
 export function isPetPremiumLlmEnabled(): boolean {
   return isClaudeEnabled() || isOpenAiEnabled();
+}
+
+function logPetPremiumFallback(
+  feature: PetPremiumCachePayload["feature"],
+  reason: string,
+  error?: unknown
+): void {
+  console.error("[PET_PREMIUM_FALLBACK]", {
+    feature,
+    reason,
+    message: error instanceof Error ? error.message : error != null ? String(error) : null,
+  });
 }
 
 async function callProvider(provider: LlmProviderName, prompts: { system: string; user: string }) {
@@ -102,7 +115,7 @@ async function withPetPremiumCache<T>(options: {
         lastError = error;
       }
     }
-    console.error(`[pet_premium_${options.feature}_llm_fallback]`, lastError);
+    logPetPremiumFallback(options.feature, "llm_failed_or_unavailable", lastError);
     return null;
   })().finally(() => clearPetPremiumInFlight(cacheKey));
 
@@ -144,6 +157,7 @@ export async function generatePetMbtiPremiumInsight(input: {
   locale: "ko" | "en";
   mbti: PetMbtiResult;
   petId?: string | null;
+  mbtiAnswers?: Record<string, string>;
 }): Promise<PetMbtiPremiumInsight> {
   const template = templateMbtiPremiumInsight(input.mbti, input.petName, input.locale);
   const { mapping } = computePetSajuBundle(
@@ -158,6 +172,10 @@ export async function generatePetMbtiPremiumInsight(input: {
       locale: input.locale,
     })
   );
+
+  const extremeResponses = input.mbtiAnswers
+    ? pickExtremeMbtiResponses(input.mbtiAnswers, input.locale, 3)
+    : [];
 
   const llm = await withPetPremiumCache({
     feature: "mbti",
@@ -177,11 +195,15 @@ export async function generatePetMbtiPremiumInsight(input: {
         species: input.species,
         mbti: input.mbti,
         mapping,
+        extremeResponses,
       }),
   });
 
-  if (!llm) return template;
-  return applyMbtiPremiumLlm(llm.data, input.locale);
+  if (!llm) {
+    logPetPremiumFallback("mbti", "llm_failed_or_unavailable");
+    return template;
+  }
+  return applyMbtiPremiumLlm(llm.data, input.mbti, input.locale);
 }
 
 export async function enrichCompatibilityWithPremiumLlm(
@@ -197,6 +219,29 @@ export async function enrichCompatibilityWithPremiumLlm(
     petId?: string | null;
   }
 ): Promise<CompatibilityResponse> {
+  const petBundle = computePetSajuBundle(
+    petSajuRequestFromContext({
+      petName: result.petName,
+      species: result.species,
+      birthDate: input.petBirthDate,
+      birthTime: input.petBirthTime,
+      birthTimeUnknown: input.petBirthTimeUnknown,
+      timezone: input.timezone,
+      locale: result.locale,
+    })
+  );
+  const ownerBundle = computePetSajuBundle(
+    petSajuRequestFromContext({
+      petName: result.ownerName,
+      species: result.species,
+      birthDate: input.ownerBirthDate,
+      birthTime: input.ownerBirthTime,
+      birthTimeUnknown: input.ownerBirthTimeUnknown,
+      timezone: input.timezone,
+      locale: result.locale,
+    })
+  );
+
   const llm = await withPetPremiumCache({
     feature: "compatibility",
     locale: result.locale,
@@ -214,10 +259,15 @@ export async function enrichCompatibilityWithPremiumLlm(
       buildPetCompatibilityPremiumPrompts({
         locale: result.locale,
         result,
+        petChartSummary: mappingSummaryForLlm(petBundle.mapping, result.locale),
+        ownerChartSummary: mappingSummaryForLlm(ownerBundle.mapping, result.locale),
       }),
   });
 
-  if (!llm) return { ...result, narrativeSource: "template" };
+  if (!llm) {
+    logPetPremiumFallback("compatibility", "llm_failed_or_unavailable");
+    return { ...result, narrativeSource: "template" };
+  }
   return applyCompatibilityPremiumLlm(result, llm.data);
 }
 
@@ -267,6 +317,8 @@ export async function enrichZodiacWithPremiumLlm(
   if (personalityLlm) {
     enriched = applyZodiacPersonalityLlm(enriched, personalityLlm.data);
     enriched.narrativeSource = "llm";
+  } else {
+    logPetPremiumFallback("zodiac_personality", "llm_failed_or_unavailable");
   }
 
   const dailyEnd = new Date(`${fortune.fortuneDateKst}T23:59:59+09:00`).toISOString();
@@ -295,8 +347,11 @@ export async function enrichZodiacWithPremiumLlm(
   if (dailyLlm) {
     enriched = applyZodiacDailyLlm(enriched, dailyLlm.data.dailyToday);
     enriched.narrativeSource = "llm";
-  } else if (!personalityLlm) {
-    enriched = { ...enriched, narrativeSource: "template" };
+  } else {
+    logPetPremiumFallback("zodiac_daily", "llm_failed_or_unavailable");
+    if (!personalityLlm) {
+      enriched = { ...enriched, narrativeSource: "template" };
+    }
   }
 
   return enriched;

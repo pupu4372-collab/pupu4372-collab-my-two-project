@@ -1,5 +1,10 @@
 import { isPetSpecies } from "@/lib/pets/species";
-import { buildPetMbtiResultFromType } from "@/lib/pet/mbti-inference";
+import {
+  buildPetMbtiResult,
+  buildPetMbtiResultFromType,
+  isPetMbtiComplete,
+  scoresFromAnswers,
+} from "@/lib/pet/mbti-inference";
 import { generatePetMbtiPremiumInsight } from "@/lib/saju/llm/pet-premium/orchestrator";
 import { validatePetName } from "@/lib/saju/moderation";
 import { hasPetPremiumUnlock } from "@/lib/payments/portone/entitlement";
@@ -19,6 +24,18 @@ function isValidDate(s: string): boolean {
 function isValidTime(s: string | null): boolean {
   if (s === null) return true;
   return /^\d{2}:\d{2}$/.test(s);
+}
+
+function parseMbtiAnswers(body: Record<string, unknown>): Record<string, string> | null {
+  const raw = body.mbtiAnswers;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const answers: Record<string, string> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (typeof value === "string" && value.trim()) {
+      answers[key] = value.trim();
+    }
+  }
+  return isPetMbtiComplete(answers) ? answers : null;
 }
 
 export async function POST(request: Request) {
@@ -87,10 +104,19 @@ export async function POST(request: Request) {
   }
 
   try {
-    const mbti = buildPetMbtiResultFromType(mbtiType);
+    const mbtiAnswers = parseMbtiAnswers(body);
+    let mbti = mbtiAnswers
+      ? buildPetMbtiResult(scoresFromAnswers(mbtiAnswers))
+      : buildPetMbtiResultFromType(mbtiType);
+
     if (!mbti) {
       return NextResponse.json({ error: "Invalid MBTI type." }, { status: 400 });
     }
+
+    if (mbti.type !== mbtiType) {
+      return NextResponse.json({ error: "MBTI type does not match survey answers." }, { status: 400 });
+    }
+
     const insight = await generatePetMbtiPremiumInsight({
       petName: String(body.petName).trim(),
       species: body.species as Species,
@@ -102,6 +128,7 @@ export async function POST(request: Request) {
       locale,
       mbti,
       petId: body.petId ? String(body.petId) : null,
+      mbtiAnswers: mbtiAnswers ?? undefined,
     });
 
     return NextResponse.json(insight);
