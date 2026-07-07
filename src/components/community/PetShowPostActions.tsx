@@ -6,13 +6,16 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useState } from "react";
 import { ReportButton } from "./ReportButton";
+import { PetShowDeleteButton } from "./PetShowDeleteButton";
 
 interface PetShowPostActionsProps {
   postId: string;
+  authorId?: string;
   initialLikeCount: number;
   commentCount: number;
   commentsHref?: string;
   disabled?: boolean;
+  showOwnerDelete?: boolean;
 }
 
 async function resolveAccessToken(fallback: string | null): Promise<string | null> {
@@ -28,10 +31,12 @@ async function resolveAccessToken(fallback: string | null): Promise<string | nul
 
 export function PetShowPostActions({
   postId,
+  authorId,
   initialLikeCount,
   commentCount,
   commentsHref,
   disabled = false,
+  showOwnerDelete = false,
 }: PetShowPostActionsProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -134,6 +139,14 @@ export function PetShowPostActions({
           </span>
         )}
         <ReportButton postId={postId} compact />
+        {showOwnerDelete && authorId ? (
+          <PetShowDeleteButton
+            postId={postId}
+            authorId={authorId}
+            redirectTo="/community/pet-show/snapzone"
+            disabled={disabled}
+          />
+        ) : null}
       </div>
       {error ? (
         <p role="alert" className="text-xs font-semibold text-red-700">

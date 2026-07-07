@@ -53,10 +53,12 @@ export default async function PetShowDetailPage({ params }: PetShowDetailPagePro
           <div className="flex flex-wrap items-center gap-3">
             <PetShowPostActions
               postId={post.id}
+              authorId={post.author_id}
               initialLikeCount={post.like_count}
               commentCount={post.comment_count}
               commentsHref="#comments"
               disabled={post.id.startsWith("mock-")}
+              showOwnerDelete
             />
             <span className="rounded-full border border-white/35 bg-white px-3 py-1.5 text-sm font-bold text-plum/65">
               👀 {post.view_count}

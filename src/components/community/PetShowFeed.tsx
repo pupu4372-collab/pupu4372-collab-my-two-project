@@ -5,6 +5,7 @@ import type { CommunityPost, PetShowSpecies } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { PetShowPostActions } from "./PetShowPostActions";
+import { PetShowDeleteButton } from "./PetShowDeleteButton";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -84,6 +85,10 @@ export function PetShowFeed({
     return () => observer.disconnect();
   }, [nextCursor, load]);
 
+  const handleDeleted = useCallback((postId: string) => {
+    setPosts((prev) => prev.filter((post) => post.id !== postId));
+  }, []);
+
   return (
     <section className="space-y-5">
       {variant === "masonry" && (
@@ -108,7 +113,7 @@ export function PetShowFeed({
         <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
           {posts.map((post) => (
             <li key={post.id}>
-              <SnapzoneGridCard post={post} isKo={isKo} />
+              <SnapzoneGridCard post={post} isKo={isKo} onDeleted={() => handleDeleted(post.id)} />
             </li>
           ))}
         </ul>
@@ -129,31 +134,49 @@ export function PetShowFeed({
   );
 }
 
-function SnapzoneGridCard({ post, isKo }: { post: CommunityPost; isKo: boolean }) {
+function SnapzoneGridCard({
+  post,
+  isKo,
+  onDeleted,
+}: {
+  post: CommunityPost;
+  isKo: boolean;
+  onDeleted: () => void;
+}) {
   return (
     <article className={`${COMMUNITY_SOLID_CARD_CLASS} overflow-hidden p-2 transition hover:-translate-y-0.5 hover:bg-white`}>
-      <Link href={`/community/pet-show/${post.id}`} className="block">
-        <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-channel-community/10">
-          {post.image_urls?.[0] ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={supabaseImageTransformUrl(post.image_urls[0], { width: 640, height: 800 })}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <span className="flex h-full w-full items-center justify-center text-4xl" aria-hidden>
-              🐾
-            </span>
-          )}
-        </div>
-        <h3 className="mt-2 line-clamp-2 px-1 text-sm font-extrabold text-primary">
-          {post.title ?? (isKo ? "무제" : "Untitled")}
-        </h3>
-        <p className="mt-1 px-1 text-xs font-bold text-plum/60">
-          ♥ {post.like_count} · 💬 {post.comment_count}
-        </p>
-      </Link>
+      <div className="relative">
+        <Link href={`/community/pet-show/${post.id}`} className="block">
+          <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-channel-community/10">
+            {post.image_urls?.[0] ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={supabaseImageTransformUrl(post.image_urls[0], { width: 640, height: 800 })}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center text-4xl" aria-hidden>
+                🐾
+              </span>
+            )}
+          </div>
+          <h3 className="mt-2 line-clamp-2 px-1 text-sm font-extrabold text-primary">
+            {post.title ?? (isKo ? "무제" : "Untitled")}
+          </h3>
+          <p className="mt-1 px-1 text-xs font-bold text-plum/60">
+            ♥ {post.like_count} · 💬 {post.comment_count}
+          </p>
+        </Link>
+        <PetShowDeleteButton
+          postId={post.id}
+          authorId={post.author_id}
+          variant="icon"
+          onDeleted={onDeleted}
+          disabled={post.id.startsWith("mock-")}
+          className="absolute right-3 top-3"
+        />
+      </div>
     </article>
   );
 }

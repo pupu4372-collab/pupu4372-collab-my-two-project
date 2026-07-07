@@ -35,6 +35,13 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
     setNativePickerAvailable(isNativeImagePickerAvailable());
   }, []);
 
+  function clearPreview() {
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview(null);
+    setFile(null);
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
   async function setPickedImage(picked: File | null) {
     if (!picked) return;
     try {
@@ -141,6 +148,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
       setFile(null);
       setPetSpecies("");
       setIsFails(false);
+      if (preview) URL.revokeObjectURL(preview);
       setPreview(null);
       if (fileRef.current) fileRef.current.value = "";
       setSuccess(true);
@@ -202,28 +210,42 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
       <form onSubmit={handleSubmit} className="mt-8 space-y-8">
         <section>
           <label className="text-sm font-extrabold text-primary">{isKo ? "사진 업로드" : "Photo upload"}</label>
-          <button
-            type="button"
-            onClick={() => {
-              if (nativePickerAvailable) {
-                setShowImageOptions((value) => !value);
-                return;
-              }
-              fileRef.current?.click();
-            }}
-            className="group mt-4 flex min-h-[280px] w-full items-center justify-center overflow-hidden rounded-[2rem] border-2 border-dashed border-outline/25 bg-white text-center transition hover:bg-sand/40"
-          >
-            {preview ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={preview} alt="" className="h-full max-h-[420px] w-full object-cover" />
-            ) : (
-              <span className="flex flex-col items-center px-6">
-                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-lavender text-4xl transition group-hover:scale-110">📷</span>
-                <span className="mt-4 text-lg font-extrabold text-primary">{isKo ? "사진 선택하기" : "Choose a photo"}</span>
-                <span className="mt-2 text-sm text-plum/50">{isKo ? "권장 사이즈: 4:3 또는 1:1, 최대 10MB" : "Recommended: 4:3 or 1:1, max 10MB"}</span>
-              </span>
+          <div className="relative mt-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (nativePickerAvailable) {
+                  setShowImageOptions((value) => !value);
+                  return;
+                }
+                fileRef.current?.click();
+              }}
+              className="group flex aspect-[4/5] w-full items-center justify-center overflow-hidden rounded-[2rem] border-2 border-dashed border-outline/25 bg-white text-center transition hover:bg-sand/40"
+            >
+              {preview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={preview} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="flex flex-col items-center px-6">
+                  <span className="flex h-20 w-20 items-center justify-center rounded-full bg-lavender text-4xl transition group-hover:scale-110">📷</span>
+                  <span className="mt-4 text-lg font-extrabold text-primary">{isKo ? "사진 선택하기" : "Choose a photo"}</span>
+                  <span className="mt-2 text-sm text-plum/50">
+                    {isKo ? "권장 비율: 4:5 (세로), 최대 10MB" : "Recommended: 4:5 portrait, max 10MB"}
+                  </span>
+                </span>
+              )}
+            </button>
+            {preview && (
+              <button
+                type="button"
+                onClick={clearPreview}
+                className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/55 text-lg font-bold text-white shadow-sm backdrop-blur-sm transition hover:bg-black/70"
+                aria-label={isKo ? "선택한 사진 취소" : "Remove selected photo"}
+              >
+                ✕
+              </button>
             )}
-          </button>
+          </div>
           {nativePickerAvailable && showImageOptions && (
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               <button
