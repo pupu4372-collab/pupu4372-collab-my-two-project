@@ -20,7 +20,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const fileRef = useRef<HTMLInputElement>(null);
   const [petSpecies, setPetSpecies] = useState<PetShowSpecies | "">("");
-  const [isFails, setIsFails] = useState(false);
+  const [photoCategory, setPhotoCategory] = useState<"cute" | "funny">("cute");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
@@ -134,7 +134,8 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
           content: content.trim() || undefined,
           imageUrl: uploadData.imageUrl,
           petSpecies,
-          tags: isFails ? ["fails"] : [],
+          photoCategory,
+          tags: [],
         }),
       });
       const postData = await postRes.json();
@@ -147,7 +148,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
       setContent("");
       setFile(null);
       setPetSpecies("");
-      setIsFails(false);
+      setPhotoCategory("cute");
       if (preview) URL.revokeObjectURL(preview);
       setPreview(null);
       if (fileRef.current) fileRef.current.value = "";
@@ -203,8 +204,8 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
       </p>
       <p className="mt-3 rounded-2xl bg-[#ffd7ff]/40 px-4 py-3 text-sm font-semibold leading-6 text-primary">
         {isKo
-          ? "웃긴 실패 사진이면 제목에 ‘실패샷’ 또는 ‘웃긴 사진’을 넣어 올려보세요."
-          : "For funny fails, add “fail” or “funny” to the title."}
+          ? "귀여움 / 웃김 중 하나를 고른 뒤 종류(강아지·고양이 등)도 함께 선택해 주세요."
+          : "Pick Cute or Funny, then choose your pet species too."}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-8">
@@ -274,7 +275,30 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
         </section>
 
         <section>
-          <p className="text-sm font-extrabold text-primary">{isKo ? "카테고리" : "Category"}</p>
+          <p className="text-sm font-extrabold text-primary">{isKo ? "사진 분류" : "Photo tone"}</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            {([
+              ["cute", isKo ? "귀여움" : "Cute", "🥰"],
+              ["funny", isKo ? "웃김" : "Funny", "😂"],
+            ] as const).map(([value, label, emoji]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setPhotoCategory(value)}
+                className={
+                  photoCategory === value
+                    ? "rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-sm"
+                    : "rounded-full border border-primary/15 bg-white px-6 py-3 text-sm font-extrabold text-primary transition hover:bg-sand/50"
+                }
+              >
+                {emoji} {label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <p className="text-sm font-extrabold text-primary">{isKo ? "반려동물 종류" : "Pet species"}</p>
           <div className="mt-3 flex flex-wrap gap-3">
             {([
               ["dog", tSpecies("dog"), "🐕"],
@@ -296,17 +320,6 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
               </button>
             ))}
           </div>
-          <label className="mt-4 flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={isFails}
-              onChange={(e) => setIsFails(e.target.checked)}
-              className="h-4 w-4 accent-primary"
-            />
-            <span className="text-sm font-bold text-plum">
-              {isKo ? "😂 웃긴 실패 사진으로 올리기" : "😂 Post as Funny Fail"}
-            </span>
-          </label>
         </section>
 
         <section className="space-y-5">

@@ -119,6 +119,7 @@ export interface ChallengePost {
   pet_id: string | null;
   content: string | null;
   image_url: string | null;
+  category: "cute" | "funny";
   created_at: string;
   updated_at: string;
 }
@@ -130,6 +131,7 @@ export type ChallengePostInsert = Pick<
   pet_id?: string | null;
   content?: string | null;
   image_url?: string | null;
+  category?: "cute" | "funny";
 };
 
 export interface ChallengePostWithRelations extends ChallengePost {

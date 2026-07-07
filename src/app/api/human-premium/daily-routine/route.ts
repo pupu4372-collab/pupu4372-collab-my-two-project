@@ -1,5 +1,6 @@
 import {
   assertDailyExtraPaymentForGeneration,
+  getDailyExtraOrderByPaymentId,
   markDailyExtraOrderConsumed,
 } from "@/lib/reports/human-premium/daily-extra-payment";
 import {
@@ -17,6 +18,7 @@ import {
 import { parseHumanPremiumReportInput } from "@/lib/reports/human-premium/service";
 import type { HumanPremiumReportInput } from "@/lib/reports/human-premium/types";
 import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
+import { getHumanPremiumReportById } from "@/lib/reports/human-premium/storage";
 import { NextResponse, after } from "next/server";
 
 export const maxDuration = 120;
@@ -55,6 +57,30 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "login_required" }, { status: 401 });
       }
 
+      const priorOrder = await getDailyExtraOrderByPaymentId(dailyExtraPaymentId);
+      if (
+        priorOrder?.user_id === userId &&
+        priorOrder.status === "consumed" &&
+        priorOrder.consumed_report_id
+      ) {
+        const priorRow = await getHumanPremiumReportById(priorOrder.consumed_report_id);
+        if (priorRow?.web_access_token) {
+          const reused = await buildDailyRoutineResponseFromToken(
+            priorRow.web_access_token,
+            request
+          );
+          if (reused) {
+            return NextResponse.json({
+              report: reused.payload,
+              webToken: reused.webToken,
+              webUrl: reused.webUrl,
+              paidExtra: true,
+              reused: true,
+            });
+          }
+        }
+      }
+
       const order = await assertDailyExtraPaymentForGeneration(
         userId,
         dailyExtraPaymentId
@@ -69,7 +95,6 @@ export async function POST(request: Request) {
           amountPaid: getDailyExtraPrice(priceLocale),
           amountOriginal: getDailyExtraPrice(priceLocale),
           currency: getCheckoutCurrency(priceLocale),
-          checkoutSessionId: "daily-extra",
           pgProvider: order.payment_provider,
         }
       );

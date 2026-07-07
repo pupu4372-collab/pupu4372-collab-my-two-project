@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     imageUrl?: string;
     petId?: string | null;
     petSpecies?: string;
+    photoCategory?: "cute" | "funny";
     language?: string;
     tags?: string[];
   };
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
       imageUrl: body.imageUrl,
       petId: null,
       petShowSpecies: body.petSpecies,
+      photoCategory: body.photoCategory === "funny" ? "funny" : "cute",
       language: body.language,
       tags: Array.isArray(body.tags) ? body.tags : [],
     });

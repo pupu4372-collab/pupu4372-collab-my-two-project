@@ -93,7 +93,7 @@ export function PetShowTopFiveStrip({
   const sorted = [...rows]
     .sort((a, b) => {
       if (b.like_count !== a.like_count) return b.like_count - a.like_count;
-      return String(a.created_at ?? "").localeCompare(String(b.created_at ?? ""));
+      return String(b.created_at ?? "").localeCompare(String(a.created_at ?? ""));
     })
     .slice(0, 5);
 

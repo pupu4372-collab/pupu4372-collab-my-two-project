@@ -72,7 +72,7 @@ export async function POST(request: Request) {
       paymentProvider,
       pgProvider: paymentMethod === "portone" && portoneConfigured ? "portone" : null,
       paymentOrderId: paymentId,
-      checkoutSessionId: bundleMeta ? `bundle:${bundleMeta}` : null,
+      checkoutSessionId: paymentId,
       amountPaid: amount,
       amountOriginal: amount,
       currency,

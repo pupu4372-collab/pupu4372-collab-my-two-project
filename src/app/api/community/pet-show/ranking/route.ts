@@ -14,13 +14,14 @@ export async function GET(request: Request) {
   }
 
   if (searchParams.get("group") === "species") {
-    const { rows, source } = await fetchWeeklyPetShowSpeciesRankings();
+    const { rows, funny, source } = await fetchWeeklyPetShowSpeciesRankings();
     return NextResponse.json({
       period: "week",
       group: "species",
       source,
       limit: 5,
       rows,
+      funny,
     });
   }
 

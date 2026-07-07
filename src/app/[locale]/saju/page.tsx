@@ -1,39 +1,31 @@
-import { ChannelShell } from "@/components/layout/ChannelShell";
 import { SajuForm } from "@/components/k-saju/SajuForm";
-import { Link } from "@/i18n/navigation";
+import { SajuHubHero } from "@/components/k-saju/SajuHubHero";
+import { SajuHubPremiumSidebar } from "@/components/k-saju/SajuHubPremiumSidebar";
+import { ChannelShell } from "@/components/layout/ChannelShell";
 import { getTranslations } from "next-intl/server";
 
 export default async function SajuHubPage() {
   const t = await getTranslations("saju");
 
   return (
-    <ChannelShell theme="saju" title={t("hubTitle")} subtitle={t("hubSubtitle")}>
-      <div className="mx-auto max-w-4xl space-y-6">
-        <section className="overflow-hidden rounded-[2rem] bg-primary p-6 text-cream shadow-xl md:p-8">
-          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div className="min-w-0">
-              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-cream/70">
-                Premium
-              </p>
-              <h2 className="mt-2 text-2xl font-extrabold">{t("premiumTitle")}</h2>
-              <p className="mt-2 max-w-xl text-sm leading-relaxed text-cream/80">
-                {t("premiumSubtitle")}
-              </p>
-            </div>
-            <div className="flex w-full shrink-0 flex-col items-center justify-center gap-2.5 md:w-auto md:min-w-[11.5rem]">
-              <p className="w-full text-center text-sm font-semibold leading-tight text-cream/90">
-                {t("premiumDailyFree")}
-              </p>
-              <Link
-                href="/premium/human"
-                className="inline-flex w-full items-center justify-center rounded-full bg-cream px-6 py-3 text-sm font-bold leading-none text-primary transition hover:bg-white md:w-fit"
-              >
-                {t("premium")}
-              </Link>
-            </div>
+    <ChannelShell
+      theme="saju"
+      title={t("hubTitle")}
+      subtitle={t("hubSubtitle")}
+      hideHero
+      hideBreadcrumbRow
+    >
+      <div className="mx-auto max-w-6xl">
+        <div className="grid gap-6 lg:grid-cols-3 lg:items-start lg:gap-8">
+          <div className="order-1 space-y-4 lg:col-span-2 lg:space-y-5">
+            <SajuHubHero />
+            <SajuForm />
           </div>
-        </section>
-        <SajuForm />
+
+          <div className="order-2 lg:sticky lg:top-24 lg:col-span-1 lg:self-start">
+            <SajuHubPremiumSidebar />
+          </div>
+        </div>
       </div>
     </ChannelShell>
   );

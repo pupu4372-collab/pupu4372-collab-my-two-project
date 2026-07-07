@@ -15,6 +15,7 @@ export interface PetShowFeedPage {
 export interface PetShowFeedOptions {
   tags?: string[];
   species?: PetShowSpecies;
+  photoCategory?: "cute" | "funny";
 }
 
 function mockFeed(cursor: string | null, options?: PetShowFeedOptions): PetShowFeedPage {
@@ -39,8 +40,9 @@ function mockFeed(cursor: string | null, options?: PetShowFeedOptions): PetShowF
 async function fetchRawBatch(
   supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>,
   cursor: string | null | undefined,
-  tags?: string[],
+  options?: Pick<PetShowFeedOptions, "tags" | "photoCategory">,
 ): Promise<CommunityPost[]> {
+  const tags = options?.tags;
   let query = supabase
     .from("community_posts")
     .select(COMMUNITY_POST_SELECT)
@@ -48,6 +50,12 @@ async function fetchRawBatch(
     .eq("is_hidden", false)
     .order("created_at", { ascending: false })
     .limit(SCAN_BATCH_SIZE);
+
+  if (options?.photoCategory === "funny") {
+    query = query.eq("category", "funny");
+  } else if (options?.photoCategory === "cute") {
+    query = query.or("category.eq.cute,category.is.null");
+  }
 
   if (tags?.length) {
     query = query.contains("tags", tags);
@@ -75,7 +83,7 @@ async function fetchPetShowFeedBySpecies(
   supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>,
   cursor: string | null | undefined,
   species: PetShowSpecies,
-  tags?: string[],
+  options?: Pick<PetShowFeedOptions, "tags" | "photoCategory">,
 ): Promise<PetShowFeedPage> {
   const collected: CommunityPost[] = [];
   let scanCursor = cursor ?? null;
@@ -83,7 +91,7 @@ async function fetchPetShowFeedBySpecies(
   let exhausted = false;
 
   while (collected.length < PAGE_SIZE && !exhausted) {
-    const batch = await fetchRawBatch(supabase, scanCursor, tags);
+    const batch = await fetchRawBatch(supabase, scanCursor, options);
     if (!batch.length) {
       exhausted = true;
       break;
@@ -119,11 +127,12 @@ export async function fetchPetShowFeed(
 ): Promise<PetShowFeedPage> {
   const tags = options?.tags;
   const species = options?.species;
+  const photoCategory = options?.photoCategory;
   const supabase = getSupabaseServerClient();
   if (!supabase) return mockFeed(cursor ?? null, options);
 
   if (species) {
-    return fetchPetShowFeedBySpecies(supabase, cursor, species, tags);
+    return fetchPetShowFeedBySpecies(supabase, cursor, species, { tags, photoCategory });
   }
 
   let query = supabase
@@ -133,6 +142,12 @@ export async function fetchPetShowFeed(
     .eq("is_hidden", false)
     .order("created_at", { ascending: false })
     .limit(PAGE_SIZE);
+
+  if (photoCategory === "funny") {
+    query = query.eq("category", "funny");
+  } else if (photoCategory === "cute") {
+    query = query.or("category.eq.cute,category.is.null");
+  }
 
   if (tags?.length) {
     query = query.contains("tags", tags);

@@ -76,7 +76,7 @@ export async function POST(request: Request) {
         status: "payment_pending",
         paymentProvider: "demo",
         paymentOrderId: paymentId,
-        checkoutSessionId: bundleMeta ? `bundle:${bundleMeta}` : null,
+        checkoutSessionId: paymentId,
         amountPaid: amount,
         amountOriginal: amount,
         currency,

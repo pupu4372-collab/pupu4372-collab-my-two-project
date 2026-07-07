@@ -40,6 +40,10 @@ function rowFromDb(data: unknown): HumanPremiumReportRow {
   return data as HumanPremiumReportRow;
 }
 
+function isUniqueViolation(error: { code?: string } | null): boolean {
+  return error?.code === "23505";
+}
+
 export function buildHumanPremiumPdfPath(reportId: string): string {
   return `${reportId}/report.pdf`;
 }
@@ -64,6 +68,17 @@ export async function createHumanPremiumReportDraft(
   const supabase = requireDb();
   const amountOriginal = options?.amountOriginal ?? HUMAN_PREMIUM_AMOUNT_ORIGINAL_USD;
   const currency = options?.currency ?? "USD";
+  const checkoutSessionId = options?.checkoutSessionId ?? null;
+  const paymentOrderId = options?.paymentOrderId ?? null;
+
+  if (checkoutSessionId) {
+    const existing = await getHumanPremiumReportByCheckoutSession(checkoutSessionId);
+    if (existing) return existing;
+  }
+  if (paymentOrderId) {
+    const existing = await getHumanPremiumReportByPaymentOrderId(paymentOrderId);
+    if (existing) return existing;
+  }
 
   const { data, error } = await supabase
     .from("human_premium_reports")
@@ -83,8 +98,8 @@ export async function createHumanPremiumReportDraft(
       status: options?.status ?? "draft",
       payment_provider: options?.paymentProvider ?? null,
       pg_provider: options?.pgProvider ?? null,
-      payment_order_id: options?.paymentOrderId ?? null,
-      checkout_session_id: options?.checkoutSessionId ?? null,
+      payment_order_id: paymentOrderId,
+      checkout_session_id: checkoutSessionId,
       amount_original: amountOriginal,
       amount_paid: options?.amountPaid ?? 0,
       currency,
@@ -92,8 +107,21 @@ export async function createHumanPremiumReportDraft(
     .select("*")
     .single();
 
-  if (error || !data) {
-    throw new Error(error?.message ?? "Failed to create human premium report.");
+  if (error) {
+    if (isUniqueViolation(error)) {
+      if (checkoutSessionId) {
+        const existing = await getHumanPremiumReportByCheckoutSession(checkoutSessionId);
+        if (existing) return existing;
+      }
+      if (paymentOrderId) {
+        const existing = await getHumanPremiumReportByPaymentOrderId(paymentOrderId);
+        if (existing) return existing;
+      }
+    }
+    throw new Error(error.message ?? "Failed to create human premium report.");
+  }
+  if (!data) {
+    throw new Error("Failed to create human premium report.");
   }
 
   return rowFromDb(data);

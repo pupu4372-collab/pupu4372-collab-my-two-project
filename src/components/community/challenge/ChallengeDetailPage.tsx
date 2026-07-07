@@ -51,6 +51,7 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
   const [content, setContent] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [photoCategory, setPhotoCategory] = useState<"cute" | "funny">("cute");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -153,6 +154,7 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
         body: JSON.stringify({
           content: content.trim() || null,
           image_url: uploadData.imageUrl,
+          category: photoCategory,
         }),
       });
       const postData = await postRes.json();
@@ -164,6 +166,7 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
       setContent("");
       setFile(null);
       setPreview(null);
+      setPhotoCategory("cute");
       setShowComposer(false);
       if (fileRef.current) fileRef.current.value = "";
       await loadPosts();
@@ -231,6 +234,28 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
                   placeholder={isKo ? "오늘의 미션 인증 메모 (선택)" : "Optional note about your mission"}
                   className="pastel-input w-full resize-none px-4 py-3 text-sm"
                 />
+                <div>
+                  <p className="text-sm font-extrabold text-primary">{isKo ? "사진 분류" : "Photo tone"}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {([
+                      ["cute", isKo ? "귀여움" : "Cute", "🥰"],
+                      ["funny", isKo ? "웃김" : "Funny", "😂"],
+                    ] as const).map(([value, label, emoji]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setPhotoCategory(value)}
+                        className={
+                          photoCategory === value
+                            ? "rounded-full bg-channel-community px-4 py-2 text-sm font-extrabold text-white"
+                            : "rounded-full border border-white/40 bg-white/80 px-4 py-2 text-sm font-extrabold text-plum/70"
+                        }
+                      >
+                        {emoji} {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="space-y-3">
                   <input
                     ref={fileRef}

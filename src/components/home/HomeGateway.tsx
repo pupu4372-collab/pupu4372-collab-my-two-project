@@ -115,6 +115,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   const isKo = locale === "ko";
   const { ready, accessToken } = useSupabaseSession();
   const [rankingRows, setRankingRows] = useState<WeeklyRankingRows>(emptyRankingRows);
+  const [funnyRankingRows, setFunnyRankingRows] = useState<PetShowRankingRow[]>([]);
   const [rankingSource, setRankingSource] = useState<"supabase" | "mock" | null>(null);
   const [fortuneData, setFortuneData] = useState<FortuneTodayState | null>(null);
   const [fortuneLoading, setFortuneLoading] = useState(true);
@@ -126,6 +127,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
         if (!res.ok) return;
         const data = (await res.json()) as {
           rows?: Partial<WeeklyRankingRows>;
+          funny?: PetShowRankingRow[];
           source?: "supabase" | "mock";
         };
         setRankingRows({
@@ -134,9 +136,11 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
           reptile: data.rows?.reptile ?? [],
           other: data.rows?.other ?? [],
         });
+        setFunnyRankingRows(data.funny ?? []);
         setRankingSource(data.source ?? null);
       } catch {
         setRankingRows(emptyRankingRows);
+        setFunnyRankingRows([]);
         setRankingSource(null);
       }
     }
@@ -306,6 +310,14 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             label={tPetShow("reptileTop5")}
             rows={mergeReptileChannelRankingRows(rankingRows.reptile, rankingRows.other)}
             emptyText={tPetShow("reptileTop5Empty")}
+            isNight={isNight}
+            isKo={isKo}
+          />
+          <RankingPreviewList
+            emoji="😂"
+            label={isKo ? "웃긴 사진 Top 5" : "Funny Top 5"}
+            rows={funnyRankingRows}
+            emptyText={isKo ? "이번 주 웃긴 사진을 기다려요." : "Waiting for funny photos this week."}
             isNight={isNight}
             isKo={isKo}
           />

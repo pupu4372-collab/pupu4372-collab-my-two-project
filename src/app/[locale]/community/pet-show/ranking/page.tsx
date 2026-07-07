@@ -59,6 +59,7 @@ export default async function PetShowRankingPage({ params, searchParams }: PageP
         dogRows={ranking.rows.dog}
         catRows={ranking.rows.cat}
         otherRows={mergeReptileChannelRankingRows(ranking.rows.reptile, ranking.rows.other)}
+        funnyRows={ranking.funny}
         period={period}
         source={ranking.source}
       />

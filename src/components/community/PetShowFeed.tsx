@@ -20,6 +20,7 @@ export type PetShowSpeciesFilter = "all" | PetShowSpecies;
 interface PetShowFeedProps {
   refreshKey?: number;
   tags?: string[];
+  photoCategory?: "cute" | "funny";
   species?: PetShowSpeciesFilter;
   variant?: "masonry" | "grid";
 }
@@ -27,6 +28,7 @@ interface PetShowFeedProps {
 export function PetShowFeed({
   refreshKey = 0,
   tags,
+  photoCategory,
   species = "all",
   variant = "masonry",
 }: PetShowFeedProps) {
@@ -49,6 +51,7 @@ export function PetShowFeed({
         const params = new URLSearchParams();
         if (pageCursor) params.set("cursor", pageCursor);
         tags?.forEach((tag) => params.append("tag", tag));
+        if (photoCategory) params.set("photoCategory", photoCategory);
         if (species !== "all") params.set("species", species);
         const qs = params.toString() ? `?${params.toString()}` : "";
         const res = await fetch(`/api/community/pet-show/feed${qs}`);
@@ -61,7 +64,7 @@ export function PetShowFeed({
         loadingMoreRef.current = false;
       }
     },
-    [tags, species],
+    [tags, photoCategory, species],
   );
 
   useEffect(() => {

@@ -2,6 +2,7 @@
 
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { FirstPlaceCard, RunnerUpCard, petShowRankingHref } from "@/components/community/PetShowRankingCards";
+import { PetShowTopFiveStrip } from "@/components/community/PetShowTopFiveStrip";
 import type { PetShowRankingRow, RankingPeriod } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -17,6 +18,7 @@ interface PetShowWeeklySpeciesRankingProps {
   dogRows: PetShowRankingRow[];
   catRows: PetShowRankingRow[];
   otherRows: PetShowRankingRow[];
+  funnyRows?: PetShowRankingRow[];
   period?: Extract<RankingPeriod, "week" | "month">;
   source: "supabase" | "mock";
 }
@@ -105,6 +107,7 @@ export function PetShowWeeklySpeciesRanking({
   dogRows,
   catRows,
   otherRows,
+  funnyRows = [],
   period = "week",
   source,
 }: PetShowWeeklySpeciesRankingProps) {
@@ -177,6 +180,20 @@ export function PetShowWeeklySpeciesRanking({
           rows={rowsBySpecies[activeSpecies]}
           emptyText={emptyBySpecies[activeSpecies]}
           isKo={isKo}
+        />
+      </div>
+
+      <div className="mt-8 border-t border-channel-community/15 pt-6">
+        <h3 className="text-base font-extrabold text-channel-community md:text-lg">
+          {t("rankingFunnyTitle")}
+        </h3>
+        <p className="mt-1 text-xs text-plum/55 md:text-sm">
+          {isMonthly ? t("rankingFunnyDescMonth") : t("rankingFunnyDesc")}
+        </p>
+        <PetShowTopFiveStrip
+          rows={funnyRows}
+          isKo={isKo}
+          emptyText={isMonthly ? t("rankingEmptyFunnyMonth") : t("rankingEmptyFunnyWeek")}
         />
       </div>
     </section>

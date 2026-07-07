@@ -9,9 +9,14 @@ export async function GET(request: Request) {
   const speciesParam = searchParams.get("species");
   const species = isPetSpecies(speciesParam) ? speciesParam : undefined;
 
+  const photoCategoryParam = searchParams.get("photoCategory");
+  const photoCategory =
+    photoCategoryParam === "funny" ? "funny" : photoCategoryParam === "cute" ? "cute" : undefined;
+
   const page = await fetchPetShowFeed(cursor, {
     tags: tags.length > 0 ? tags : undefined,
     species,
+    photoCategory,
   });
 
   return NextResponse.json({

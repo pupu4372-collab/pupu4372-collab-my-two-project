@@ -17,6 +17,7 @@ select
 from public.community_posts p
 where p.post_type = 'photo_show'
   and p.is_hidden = false
+  and (p.category is null or p.category = 'cute')
   and p.created_at >= (now() at time zone 'utc') - interval '7 days';
 
 comment on view public.pet_show_ranking_weekly is

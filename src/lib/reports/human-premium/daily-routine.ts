@@ -2,8 +2,10 @@ import { randomUUID } from "node:crypto";
 import { buildHumanPremiumReportUrl, sendHumanPremiumReportEmail } from "./email";
 import { isDeliverableHumanPremiumEmail } from "./email-policy";
 import { buildHumanPremiumReportHybrid } from "./hybrid";
+import { buildHumanPremiumReportUrl } from "./email";
 import {
   createHumanPremiumReportDraft,
+  getHumanPremiumReportByPaymentOrderId,
   markHumanPremiumReportReady,
 } from "./storage";
 import type {
@@ -47,17 +49,34 @@ export async function persistHumanPremiumDailyRoutineReport(
   webUrl: string;
 }> {
   const dailyInput = { ...input, reportType: DAILY_ROUTINE_REPORT_TYPE };
+  const isPaidExtra = (options?.amountPaid ?? 0) > 0;
+  const paymentOrderId = options?.paymentOrderId ?? `daily-free-${randomUUID()}`;
+  const checkoutSessionId =
+    options?.checkoutSessionId ?? (isPaidExtra ? paymentOrderId : null);
+
+  if (isPaidExtra && paymentOrderId) {
+    const existing = await getHumanPremiumReportByPaymentOrderId(paymentOrderId);
+    if (existing?.report_payload) {
+      const payload = existing.report_payload as unknown as HumanPremiumReportPayload;
+      return {
+        row: existing,
+        payload,
+        webToken: existing.web_access_token,
+        webUrl: buildHumanPremiumReportUrl(existing, options?.request),
+      };
+    }
+  }
+
   const payload = await buildHumanPremiumDailyRoutineReport(dailyInput);
 
-  const isPaidExtra = (options?.amountPaid ?? 0) > 0;
   const draft = await createHumanPremiumReportDraft(dailyInput, {
     status: "draft",
     paymentProvider: options?.paymentProvider ?? "demo",
-    paymentOrderId: options?.paymentOrderId ?? `daily-free-${randomUUID()}`,
+    paymentOrderId,
     amountPaid: options?.amountPaid ?? 0,
     amountOriginal: options?.amountOriginal ?? 0,
     currency: options?.currency ?? "KRW",
-    checkoutSessionId: options?.checkoutSessionId ?? (isPaidExtra ? "daily-extra" : "daily-free"),
+    checkoutSessionId,
     pgProvider: options?.pgProvider ?? null,
   });
 

@@ -291,32 +291,26 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   }
 
   return (
-    <div className={embedded ? "space-y-4" : "space-y-8 pb-28 md:pb-10"}>
+    <div className={embedded ? "space-y-4" : "space-y-5 pb-28 md:pb-10"}>
       {!embedded && (
-        <section className="relative overflow-hidden rounded-[2rem] bg-surface px-6 py-8 shadow-sm md:px-8">
+        <section className="relative overflow-hidden rounded-[1.75rem] border border-channel-saju/15 bg-surface px-5 py-5 shadow-sm md:px-6">
           <span
-            className="absolute right-6 top-6 text-4xl text-gold/60"
+            className="absolute right-4 top-4 text-2xl text-gold/50"
             aria-hidden
           >
             ✨
           </span>
-          <span
-            className="absolute -left-2 bottom-8 text-3xl text-petal/80"
-            aria-hidden
-          >
-            🐾
-          </span>
-          <h2 className="max-w-xl text-3xl font-extrabold tracking-tight text-primary md:text-4xl">
+          <h2 className="max-w-xl text-xl font-extrabold tracking-tight text-primary md:text-2xl">
             {locale === "ko" ? "우리 아이 K-사주 보기" : "Read your pet's K-Saju"}
           </h2>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-on-surface-variant md:text-base">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-on-surface-variant">
             {locale === "ko"
               ? "이름과 생일 정보를 입력하면 성향, 오행 밸런스, 케어 포인트를 알려드려요. 출생 시간을 몰라도 결과를 볼 수 있어요."
               : "Enter your pet's name and birth data to reveal personality, elemental balance, and care cues. Unknown birth time is okay."}
           </p>
-          <div className="mt-6 flex gap-2">
+          <div className="mt-4 flex gap-1.5">
             {ELEMENT_DOTS.map((dot) => (
-              <span key={dot} className={`h-3 w-3 rounded-full ${dot}`} />
+              <span key={dot} className={`h-2.5 w-2.5 rounded-full ${dot}`} />
             ))}
           </div>
         </section>
@@ -324,7 +318,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
 
       <form
         onSubmit={handleFormNext}
-        className={embedded ? "space-y-3" : "space-y-6"}
+        className={embedded ? "space-y-3" : "space-y-5"}
       >
         {embedded ? (
           <>
@@ -367,11 +361,11 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
             </label>
           </>
         ) : (
-          <section className="rounded-[2rem] bg-white p-6 shadow-sm">
-            <h3 className="text-2xl font-extrabold text-primary">
+          <section className="rounded-[1.75rem] bg-white p-5 shadow-sm md:p-6">
+            <h3 className="text-xl font-extrabold text-primary md:text-[1.35rem]">
               {locale === "ko" ? "우리 아이는 누구인가요?" : "Who is your pet?"}
             </h3>
-            <div className="mt-6 space-y-6">
+            <div className="mt-5 space-y-5">
               <label className="block text-sm font-bold uppercase tracking-[0.08em] text-outline">
                 {t.petName}
                 <input

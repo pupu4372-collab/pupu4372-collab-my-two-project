@@ -6,6 +6,10 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 const TOP_LIMIT = 5;
 const WEEK_DAYS = 7;
 const MONTH_DAYS = 30;
+const SPECIES_SCAN_LIMIT = 120;
+const FUNNY_SCAN_LIMIT = 40;
+
+export type PetShowPhotoCategory = "cute" | "funny";
 
 /** SQL reference — weekly Top 5 (uses denormalized like_count + partial index). */
 export const PET_SHOW_RANKING_WEEKLY_SQL = `
@@ -21,8 +25,9 @@ select
 from public.community_posts
 where post_type = 'photo_show'
   and is_hidden = false
+  and (category is null or category = 'cute')
   and created_at >= now() - interval '7 days'
-order by like_count desc, created_at asc
+order by like_count desc, created_at desc
 limit ${TOP_LIMIT};
 `;
 
@@ -40,12 +45,73 @@ select
 from public.community_posts
 where post_type = 'photo_show'
   and is_hidden = false
+  and (category is null or category = 'cute')
 order by like_count desc, created_at desc
 limit ${TOP_LIMIT};
 `;
 
+function compareRankingRows(a: PetShowRankingRow, b: PetShowRankingRow): number {
+  if (b.like_count !== a.like_count) return b.like_count - a.like_count;
+  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+}
+
+export function sortRankingRows(rows: PetShowRankingRow[]): PetShowRankingRow[] {
+  return [...rows]
+    .sort(compareRankingRows)
+    .slice(0, TOP_LIMIT)
+    .map((row, index) => ({ ...row, rank_position: index + 1 }));
+}
+
+function periodStartDate(period: Extract<RankingPeriod, "week" | "month">): Date {
+  const start = new Date();
+  start.setDate(start.getDate() - (period === "month" ? MONTH_DAYS : WEEK_DAYS));
+  return start;
+}
+
+function hasPetShowEntryTag(tags?: string[] | null): boolean {
+  return Boolean(tags?.includes("pet-show"));
+}
+
+type RankingPostRow = Omit<PetShowRankingRow, "pet_species"> & {
+  tags?: string[] | null;
+  animal_type?: PetShowSpecies | null;
+  category?: string | null;
+};
+
+function buildPhotoShowRankingQuery(
+  supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>,
+  options: {
+    photoCategory: PetShowPhotoCategory;
+    period?: Extract<RankingPeriod, "week" | "month">;
+    limit: number;
+  },
+) {
+  let query = supabase
+    .from("community_posts")
+    .select(
+      "id, author_id, pet_id, title, image_urls, tags, animal_type, category, like_count, comment_count, country_code, created_at",
+    )
+    .eq("post_type", "photo_show")
+    .eq("is_hidden", false)
+    .order("like_count", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(options.limit);
+
+  if (options.photoCategory === "funny") {
+    query = query.eq("category", "funny");
+  } else {
+    query = query.or("category.eq.cute,category.is.null");
+  }
+
+  if (options.period) {
+    query = query.gte("created_at", periodStartDate(options.period).toISOString());
+  }
+
+  return query;
+}
+
 export async function fetchPetShowRanking(
-  period: RankingPeriod = "week"
+  period: RankingPeriod = "week",
 ): Promise<{ rows: PetShowRankingRow[]; source: "supabase" | "mock" }> {
   const supabase = getSupabaseServerClient();
 
@@ -53,47 +119,18 @@ export async function fetchPetShowRanking(
     return { rows: getMockPetShowRanking(), source: "mock" };
   }
 
-  const query = supabase
-    .from("community_posts")
-    .select("id, author_id, pet_id, title, image_urls, like_count, comment_count, country_code, created_at")
-    .eq("post_type", "photo_show")
-    .eq("is_hidden", false)
-    .order("like_count", { ascending: false })
-    .order("created_at", { ascending: period !== "realtime" })
-    .limit(TOP_LIMIT);
-
-  if (period === "week") {
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - WEEK_DAYS);
-    query.gte("created_at", weekAgo.toISOString());
-  } else if (period === "month") {
-    const monthAgo = new Date();
-    monthAgo.setDate(monthAgo.getDate() - MONTH_DAYS);
-    query.gte("created_at", monthAgo.toISOString());
-  }
+  const query = buildPhotoShowRankingQuery(supabase, {
+    photoCategory: "cute",
+    period: period === "month" ? "month" : period === "week" ? "week" : undefined,
+    limit: TOP_LIMIT,
+  });
 
   const { data, error } = await query;
   if (error) {
     return { rows: getMockPetShowRanking(), source: "mock" };
   }
 
-  let rows = (data ?? []) as PetShowRankingRow[];
-
-  if ((period === "week" || period === "month") && rows.length < TOP_LIMIT) {
-    const { data: fallbackData, error: fallbackError } = await supabase
-      .from("community_posts")
-      .select("id, author_id, pet_id, title, image_urls, like_count, comment_count, country_code, created_at")
-      .eq("post_type", "photo_show")
-      .eq("is_hidden", false)
-      .order("like_count", { ascending: false })
-      .order("created_at", { ascending: true })
-      .limit(TOP_LIMIT * 4);
-
-    if (!fallbackError && fallbackData?.length) {
-      rows = mergeRankingRows(rows, fallbackData as PetShowRankingRow[]);
-    }
-  }
-
+  const rows = sortRankingRows((data ?? []) as PetShowRankingRow[]);
   if (!rows.length) {
     return { rows: [], source: "supabase" };
   }
@@ -108,6 +145,12 @@ export interface PetShowSpeciesRankings {
   other: PetShowRankingRow[];
 }
 
+export interface PetShowRankingsBundle {
+  rows: PetShowSpeciesRankings;
+  funny: PetShowRankingRow[];
+  source: "supabase" | "mock";
+}
+
 export function getPetShowSpeciesRankingRows(
   grouped: PetShowSpeciesRankings,
   species: PetShowSpecies,
@@ -117,123 +160,83 @@ export function getPetShowSpeciesRankingRows(
   return mergeReptileChannelRankingRows(grouped.reptile, grouped.other);
 }
 
-type RankingPostRow = Omit<PetShowRankingRow, "pet_species"> & {
-  tags?: string[] | null;
-  animal_type?: PetShowSpecies | null;
-};
-
 function groupPostsBySpecies(
   posts: RankingPostRow[],
   speciesByPetId: Map<string, PetShowSpecies>,
 ): PetShowSpeciesRankings {
   const grouped: PetShowSpeciesRankings = { dog: [], cat: [], reptile: [], other: [] };
-  const usedIds = new Set<string>();
+  const buckets: Record<PetShowSpecies, PetShowRankingRow[]> = {
+    dog: [],
+    cat: [],
+    reptile: [],
+    other: [],
+  };
 
   for (const post of posts) {
+    if (!hasPetShowEntryTag(post.tags)) continue;
     const species = resolvePostSpecies(post, speciesByPetId);
-    if (!species || grouped[species].length >= TOP_LIMIT || usedIds.has(post.id)) continue;
-    usedIds.add(post.id);
-    grouped[species].push({
+    if (!species) continue;
+    buckets[species].push({
       ...post,
       pet_species: species,
-      rank_position: grouped[species].length + 1,
+      rank_position: 0,
     });
+  }
+
+  for (const species of Object.keys(buckets) as PetShowSpecies[]) {
+    grouped[species] = sortRankingRows(buckets[species]);
   }
 
   return grouped;
 }
 
-function mergeSpeciesRankings(
-  primaryPosts: RankingPostRow[],
-  backfillPosts: RankingPostRow[],
-  speciesByPetId: Map<string, PetShowSpecies>,
-): PetShowSpeciesRankings {
-  const grouped = groupPostsBySpecies(primaryPosts, speciesByPetId);
-  const usedIds = new Set(
-    [...grouped.dog, ...grouped.cat, ...grouped.reptile, ...grouped.other].map((row) => row.id),
-  );
-
-  for (const post of backfillPosts) {
-    if (usedIds.has(post.id)) continue;
-    const species = resolvePostSpecies(post, speciesByPetId);
-    if (!species || grouped[species].length >= TOP_LIMIT) continue;
-    usedIds.add(post.id);
-    grouped[species].push({
-      ...post,
-      pet_species: species,
-      rank_position: grouped[species].length + 1,
-    });
-  }
-
-  return grouped;
+function groupFunnyPosts(posts: RankingPostRow[]): PetShowRankingRow[] {
+  const rows = posts
+    .filter((post) => hasPetShowEntryTag(post.tags))
+    .map((post) => ({ ...post, rank_position: 0 }));
+  return sortRankingRows(rows);
 }
 
-function mergeRankingRows(
-  primaryRows: PetShowRankingRow[],
-  backfillRows: PetShowRankingRow[],
-): PetShowRankingRow[] {
-  const usedIds = new Set(primaryRows.map((row) => row.id));
-  const merged = [...primaryRows];
-  for (const row of backfillRows) {
-    if (merged.length >= TOP_LIMIT || usedIds.has(row.id)) continue;
-    usedIds.add(row.id);
-    merged.push({ ...row, rank_position: merged.length + 1 });
-  }
-  return merged;
-}
-
-export async function fetchPetShowSpeciesRankings(period: Extract<RankingPeriod, "week" | "month"> = "week"): Promise<{
-  rows: PetShowSpeciesRankings;
-  source: "supabase" | "mock";
-}> {
+export async function fetchPetShowSpeciesRankings(
+  period: Extract<RankingPeriod, "week" | "month"> = "week",
+): Promise<PetShowRankingsBundle> {
   const supabase = getSupabaseServerClient();
 
   if (!supabase) {
-    return { rows: getMockSpeciesRankings(), source: "mock" };
+    const mock = getMockSpeciesRankings();
+    return { rows: mock, funny: getMockFunnyRanking(), source: "mock" };
   }
 
-  const periodStart = new Date();
-  periodStart.setDate(periodStart.getDate() - (period === "month" ? MONTH_DAYS : WEEK_DAYS));
+  const [cuteResult, funnyResult] = await Promise.all([
+    buildPhotoShowRankingQuery(supabase, {
+      photoCategory: "cute",
+      period,
+      limit: SPECIES_SCAN_LIMIT,
+    }),
+    buildPhotoShowRankingQuery(supabase, {
+      photoCategory: "funny",
+      period,
+      limit: FUNNY_SCAN_LIMIT,
+    }),
+  ]);
 
-  const buildRankingQuery = (withPeriod: boolean) => {
-    let query = supabase
-      .from("community_posts")
-      .select(
-        "id, author_id, pet_id, title, image_urls, tags, animal_type, like_count, comment_count, country_code, created_at",
-      )
-      .eq("post_type", "photo_show")
-      .eq("is_hidden", false)
-      .order("like_count", { ascending: false })
-      .order("created_at", { ascending: true })
-      .limit(60);
-
-    if (withPeriod) {
-      query = query.gte("created_at", periodStart.toISOString());
-    }
-
-    return query;
-  };
-
-  const { data: periodPosts, error } = await buildRankingQuery(true);
-  if (error) {
-    return { rows: getMockSpeciesRankings(), source: "mock" };
+  if (cuteResult.error || funnyResult.error) {
+    const mock = getMockSpeciesRankings();
+    return { rows: mock, funny: getMockFunnyRanking(), source: "mock" };
   }
 
-  const periodRows = (periodPosts ?? []) as unknown as RankingPostRow[];
-  const { data: fallbackPosts, error: fallbackError } = await buildRankingQuery(false);
-  if (fallbackError) {
-    return { rows: getMockSpeciesRankings(), source: "mock" };
+  const cuteRows = (cuteResult.data ?? []) as unknown as RankingPostRow[];
+  const funnyRows = (funnyResult.data ?? []) as unknown as RankingPostRow[];
+
+  if (cuteRows.length === 0 && funnyRows.length === 0) {
+    return { rows: { dog: [], cat: [], reptile: [], other: [] }, funny: [], source: "supabase" };
   }
 
-  const fallbackRows = (fallbackPosts ?? []) as unknown as RankingPostRow[];
-  if (periodRows.length === 0 && fallbackRows.length === 0) {
-    return { rows: { dog: [], cat: [], reptile: [], other: [] }, source: "supabase" };
-  }
+  const speciesByPetId = await loadSpeciesByPetId(supabase, [...cuteRows, ...funnyRows]);
+  const grouped = groupPostsBySpecies(cuteRows, speciesByPetId);
+  const funny = groupFunnyPosts(funnyRows);
 
-  const speciesByPetId = await loadSpeciesByPetId(supabase, [...periodRows, ...fallbackRows]);
-  const grouped = mergeSpeciesRankings(periodRows, fallbackRows, speciesByPetId);
-
-  return { rows: grouped, source: "supabase" };
+  return { rows: grouped, funny, source: "supabase" };
 }
 
 export function fetchWeeklyPetShowSpeciesRankings() {
@@ -243,7 +246,7 @@ export function fetchWeeklyPetShowSpeciesRankings() {
 /** Dev/demo fallback when Supabase env is not set. */
 function getMockPetShowRanking(): PetShowRankingRow[] {
   const now = Date.now();
-  return [
+  return sortRankingRows([
     {
       id: "mock-1",
       author_id: "mock-user",
@@ -277,7 +280,7 @@ function getMockPetShowRanking(): PetShowRankingRow[] {
       country_code: null,
       created_at: new Date(now - 259200000).toISOString(),
     },
-  ];
+  ]);
 }
 
 function getMockSpeciesRankings(): PetShowSpeciesRankings {
@@ -291,4 +294,21 @@ function getMockSpeciesRankings(): PetShowSpeciesRankings {
     reptile: [],
     other: [],
   };
+}
+
+function getMockFunnyRanking(): PetShowRankingRow[] {
+  const now = Date.now();
+  return sortRankingRows([
+    {
+      id: "mock-funny-1",
+      author_id: "mock-user",
+      pet_id: null,
+      title: "흔들린 한 컷 🤪",
+      image_urls: [],
+      like_count: 52,
+      comment_count: 4,
+      country_code: "KR",
+      created_at: new Date(now - 43200000).toISOString(),
+    },
+  ]);
 }

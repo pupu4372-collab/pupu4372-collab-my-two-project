@@ -60,6 +60,7 @@ export async function POST(
       pet_id: body.pet_id ?? null,
       content: body.content ?? null,
       image_url: body.image_url ?? null,
+      category: body.category === "funny" ? "funny" : "cute",
     } as never)
     .select()
     .single();

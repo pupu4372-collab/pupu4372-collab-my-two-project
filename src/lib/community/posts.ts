@@ -45,6 +45,7 @@ export interface CreatePetShowPostInput {
   imageUrl: string;
   petId?: string | null;
   petShowSpecies: PetShowSpecies;
+  photoCategory?: "cute" | "funny";
   language?: string;
   tags?: string[];
 }
@@ -65,6 +66,8 @@ export async function createPetShowPost(
   input: CreatePetShowPostInput
 ): Promise<CommunityPost> {
   const countryCode = await getVisibleCountryCode(supabase, input.authorId);
+  const photoCategory = input.photoCategory === "funny" ? "funny" : "cute";
+  const extraTags = Array.isArray(input.tags) ? input.tags.filter((tag) => tag !== "fails") : [];
   const { data, error } = await supabase
     .from("community_posts")
     .insert({
@@ -78,8 +81,11 @@ export async function createPetShowPost(
       tags: [
         "pet-show",
         `pet-show:${input.petShowSpecies}`,
-        ...(Array.isArray(input.tags) ? input.tags : []),
+        ...extraTags,
+        ...(photoCategory === "funny" ? ["fails"] : []),
       ],
+      animal_type: input.petShowSpecies,
+      category: photoCategory,
       language: input.language ?? "ko",
       country_code: countryCode,
     } as never)

@@ -145,7 +145,17 @@ export function DayPillarPreview({
       return null;
     }
     if (!res.ok) {
+      if (data.webUrl && (data.reused || data.duplicate)) {
+        window.location.assign(String(data.webUrl));
+        return data;
+      }
       throw new Error(String(data.error ?? "Report failed"));
+    }
+
+    const webUrl = String(data.webUrl ?? "");
+    if (webUrl && (data.reused || data.duplicate)) {
+      window.location.assign(webUrl);
+      return data;
     }
 
     setReport(data.report as HumanPremiumReportPayload);
