@@ -1,4 +1,5 @@
 import { isPetSpecies } from "@/lib/pets/species";
+import { enrichCompatibilityWithPremiumLlm } from "@/lib/saju/llm/pet-premium/orchestrator";
 import { computeCompatibility } from "@/lib/saju/compatibility/engine";
 import { persistCompatibilityResult } from "@/lib/saju/persist-compatibility";
 import { validatePetName } from "@/lib/saju/moderation";
@@ -120,7 +121,17 @@ export async function POST(request: Request) {
   // ─────────────────────────────────────────────────────────
 
   try {
-    const result = computeCompatibility(requestPayload);
+    const base = computeCompatibility(requestPayload);
+    const result = await enrichCompatibilityWithPremiumLlm(base, {
+      petBirthDate: requestPayload.petBirthDate,
+      petBirthTime: requestPayload.petBirthTime,
+      petBirthTimeUnknown: requestPayload.petBirthTimeUnknown,
+      ownerBirthDate: requestPayload.ownerBirthDate,
+      ownerBirthTime: requestPayload.ownerBirthTime,
+      ownerBirthTimeUnknown: requestPayload.ownerBirthTimeUnknown,
+      timezone: requestPayload.timezone,
+      petId: String(body.petId ?? "") || null,
+    });
 
     let persisted = false;
     let petId: string | null = null;

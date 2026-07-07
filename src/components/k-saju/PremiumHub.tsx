@@ -1,5 +1,6 @@
 "use client";
 
+import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { CompatibilityResult } from "@/components/k-saju/CompatibilityResult";
 import { PremiumMbtiReport } from "@/components/k-saju/PremiumMbtiReport";
@@ -16,11 +17,11 @@ import {
 } from "@/lib/saju/birth-time-options";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import {
-  buildPetMbtiPremiumInsight,
   buildPetMbtiResult,
   buildPetMbtiResultFromType,
   isPetMbtiComplete,
   scoresFromAnswers,
+  type PetMbtiPremiumInsight,
   type PetMbtiResult,
 } from "@/lib/pet/mbti-inference";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
@@ -180,6 +181,8 @@ export function PremiumHub() {
   const [mbtiType, setMbtiType] = useState<string | null>(null);
   const [mbtiAnswers, setMbtiAnswers] = useState<Record<string, string>>({});
   const [mbtiResult, setMbtiResult] = useState<PetMbtiResult | null>(null);
+  const [mbtiInsight, setMbtiInsight] = useState<PetMbtiPremiumInsight | null>(null);
+  const [mbtiInsightLoading, setMbtiInsightLoading] = useState(false);
 
   const [butler, setButler] = useState<ButlerSession | null>(null);
   const [ownerName, setOwnerName] = useState("");
@@ -248,6 +251,7 @@ export function PremiumHub() {
     if (nextMbtiType) {
       setMbtiType(nextMbtiType);
       setMbtiResult(buildPetMbtiResultFromType(nextMbtiType));
+      setMbtiInsight(null);
     }
     if (nextView === "mbti" || nextView === "zodiac" || nextView === "compatibility") {
       setDeeplinkView(nextView);
@@ -369,7 +373,56 @@ export function PremiumHub() {
     const result = buildPetMbtiResult(scoresFromAnswers(mbtiAnswers));
     setMbtiType(result.type);
     setMbtiResult(result);
+    setMbtiInsight(null);
   }, [mbtiAnswers, mbtiSurveyComplete, mbtiType]);
+
+  useEffect(() => {
+    if (activeView !== "mbti" || !pet || !mbtiType || !mbtiResult || mbtiInsight || mbtiInsightLoading) {
+      return;
+    }
+
+    const petCtx = pet;
+    setMbtiInsightLoading(true);
+    setMenuError(null);
+
+    void (async () => {
+      try {
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+        const res = await fetch("/api/saju/premium/mbti", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            petName: petCtx.petName,
+            species: petCtx.species,
+            petGender: petCtx.petGender,
+            birthDate: petCtx.petBirthDate,
+            birthTime: petCtx.petBirthTime,
+            birthTimeUnknown: petCtx.petBirthTimeUnknown,
+            timezone: petCtx.timezone,
+            locale: petCtx.locale,
+            mbtiType,
+            petId: petCtx.petId,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setMenuError(
+            data.error === "premium_required"
+              ? UI[petCtx.locale].premiumRequired
+              : (data.error ?? UI[petCtx.locale].networkError)
+          );
+          return;
+        }
+        setMbtiInsight(data as PetMbtiPremiumInsight);
+      } catch {
+        setMenuError(UI[petCtx.locale].networkError);
+      } finally {
+        setMbtiInsightLoading(false);
+      }
+    })();
+  }, [activeView, pet, mbtiType, mbtiResult, mbtiInsight, mbtiInsightLoading, accessToken]);
 
   if (configured && ready && isAnonymous) {
     return (
@@ -540,10 +593,7 @@ export function PremiumHub() {
     void fetchCompatibility(session);
   }
 
-  const mbtiInsight =
-    mbtiResult && mbtiType
-      ? buildPetMbtiPremiumInsight(mbtiResult, pet.petName)
-      : null;
+  const reportGenerating = menuLoading || mbtiInsightLoading;
 
   if (phase === "butler-form") {
     return (
@@ -667,6 +717,7 @@ export function PremiumHub() {
 
   return (
     <div className="space-y-5 pb-32 md:pb-16">
+      <ReportGenerateLoader isKo={locale === "ko"} active={reportGenerating} />
       <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-4 p-6 md:p-8`}>
         {!activeView ? (
           <>
@@ -703,7 +754,7 @@ export function PremiumHub() {
           </>
         ) : (
           <>
-            {menuLoading && (
+            {menuLoading && !reportGenerating && (
               <p className="text-sm text-on-surface-variant">{t.loading}</p>
             )}
             {menuError && (

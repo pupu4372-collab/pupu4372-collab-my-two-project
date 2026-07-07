@@ -366,47 +366,50 @@ export function buildPetMbtiResultFromType(type: string): PetMbtiResult | null {
   };
 }
 
-export interface PetMbtiPremiumInsight {
-  sajuComboKo: string;
-  sajuComboEn: string;
-  butlerFitKo: string;
-  butlerFitEn: string;
-  healthKo: string;
-  healthEn: string;
-  trainingKo: string;
-  trainingEn: string;
-}
+import type { PetMbtiPremiumInsight } from "@/lib/saju/llm/pet-premium/types";
+
+export type { PetMbtiPremiumInsight };
 
 export function buildPetMbtiPremiumInsight(
   result: PetMbtiResult,
-  petName: string
+  petName: string,
+  locale: "ko" | "en" = "ko"
 ): PetMbtiPremiumInsight {
   const { type } = result;
   const isFeeler = type.includes("F");
   const isSensor = type.includes("S");
   const isJudger = type.includes("J");
+  const isKo = locale === "ko";
 
   return {
-    sajuComboKo: `${petName}의 ${type} 기질은 사주의 일간 에너지와 맞물리면 '표현 방식'이 더 선명해집니다. 기질은 타고난 연출이고, 사주는 타이밍과 강약의 지도예요.`,
-    sajuComboEn: `${petName}'s ${type} temperament shapes how saju day-master energy is expressed—temperament is the style, saju is the timing map.`,
-    butlerFitKo: isFeeler
-      ? "집사님의 감정 변화에 민감해요. 훈련보다 안정적인 톤과 예측 가능한 스킨십이 궁합을 높입니다."
-      : "집사님과는 명확한 규칙 공유가 잘 맞아요. 짧고 일관된 신호가 신뢰를 만듭니다.",
-    butlerFitEn: isFeeler
-      ? "Sensitive to your mood—steady tone and predictable affection build trust."
-      : "Clear, consistent cues work best for trust and teamwork.",
-    healthKo: isSensor
-      ? "환경 변화·소음 스트레스를 주의하세요. 익숙한 산책 코스와 식사 루틴이 회복에 도움이 됩니다."
-      : "과자극과 불규칙한 일정에 피로가 쌓일 수 있어요. 휴식 공간을 고정해 주세요.",
-    healthEn: isSensor
-      ? "Watch stress from noise or routine shifts—familiar walks and meals help recovery."
-      : "Overstimulation and irregular schedules can drain energy—keep a fixed rest zone.",
-    trainingKo: isJudger
-      ? "같은 시간·같은 순서의 미니 루틴이 효과적입니다. 성공 직후 3초 칭찬을 반복하세요."
-      : "짧은 세션 여러 번이 좋아요. 지루해지기 전에 놀이로 전환하면 집중이 유지됩니다.",
-    trainingEn: isJudger
-      ? "Mini routines at the same time and order work well—praise within 3 seconds after success."
-      : "Several short sessions beat one long drill—switch to play before boredom hits.",
+    personalityBlend: isKo
+      ? `${petName}은(는) ${result.titleKo} 기질이에요. ${result.summaryKo}`
+      : `${petName} shows a ${result.titleEn} temperament. ${result.summaryEn}`,
+    sajuCombo: isKo
+      ? `${petName}의 ${type} 기질은 사주의 일간 에너지와 맞물리면 '표현 방식'이 더 선명해집니다. 기질은 타고난 연출이고, 사주는 타이밍과 강약의 지도예요.`
+      : `${petName}'s ${type} temperament shapes how chart energy is expressed—temperament is the style, chart is the timing map.`,
+    butlerFit: isKo
+      ? isFeeler
+        ? "집사님의 감정 변화에 민감해요. 훈련보다 안정적인 톤과 예측 가능한 스킨십이 궁합을 높입니다."
+        : "집사님과는 명확한 규칙 공유가 잘 맞아요. 짧고 일관된 신호가 신뢰를 만듭니다."
+      : isFeeler
+        ? "Sensitive to your mood—steady tone and predictable affection build trust."
+        : "Clear, consistent cues work best for trust and teamwork.",
+    health: isKo
+      ? isSensor
+        ? "환경 변화·소음 스트레스를 주의하세요. 익숙한 산책 코스와 식사 루틴이 회복에 도움이 됩니다."
+        : "과자극과 불규칙한 일정에 피로가 쌓일 수 있어요. 휴식 공간을 고정해 주세요."
+      : isSensor
+        ? "Watch stress from noise or routine shifts—familiar walks and meals help recovery."
+        : "Overstimulation and irregular schedules can drain energy—keep a fixed rest zone.",
+    dailyCare: isKo
+      ? isJudger
+        ? "같은 시간·같은 순서의 미니 루틴이 효과적입니다. 성공 직후 3초 칭찬을 반복하세요."
+        : "짧은 세션 여러 번이 좋아요. 지루해지기 전에 놀이로 전환하면 집중이 유지됩니다."
+      : isJudger
+        ? "Mini routines at the same time and order work well—praise within 3 seconds after success."
+        : "Several short sessions beat one long drill—switch to play before boredom hits.",
+    narrativeSource: "template",
   };
 }
 

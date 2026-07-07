@@ -50,6 +50,7 @@ export interface ZodiacFortuneResponse {
     caution: string;
     ownerTip: string;
   };
+  narrativeSource?: "template" | "llm";
 }
 
 export function computeZodiacFortune(input: ZodiacFortuneRequest): ZodiacFortuneResponse {

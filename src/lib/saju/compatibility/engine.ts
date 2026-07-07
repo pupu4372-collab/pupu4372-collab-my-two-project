@@ -55,6 +55,7 @@ export interface CompatibilityResponse {
   relationDescription: string;
   petElementNote: string;
   ownerElementNote: string;
+  narrativeSource?: "template" | "llm";
 }
 
 export function computeCompatibility(input: CompatibilityRequest): CompatibilityResponse {

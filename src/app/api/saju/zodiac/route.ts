@@ -1,5 +1,6 @@
 import { isPetSpecies } from "@/lib/pets/species";
 import { persistZodiacFortune } from "@/lib/saju/persist-zodiac";
+import { enrichZodiacWithPremiumLlm } from "@/lib/saju/llm/pet-premium/orchestrator";
 import { computeZodiacFortune } from "@/lib/saju/zodiac/engine";
 import { validatePetName } from "@/lib/saju/moderation";
 import { hasPetPremiumUnlock } from "@/lib/payments/portone/entitlement";
@@ -77,7 +78,11 @@ export async function POST(request: Request) {
   };
 
   try {
-    const result = computeZodiacFortune(requestPayload);
+    const base = computeZodiacFortune(requestPayload);
+    const result = await enrichZodiacWithPremiumLlm(base, {
+      birthDate: requestPayload.birthDate,
+      petId: body.petId ?? null,
+    });
 
     let persisted = false;
     let petId: string | null = null;

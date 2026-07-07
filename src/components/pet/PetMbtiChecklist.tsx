@@ -28,7 +28,7 @@ export function PetMbtiChecklist() {
   }, [answers, complete]);
 
   const premium = result && petName.trim()
-    ? buildPetMbtiPremiumInsight(result, petName.trim())
+    ? buildPetMbtiPremiumInsight(result, petName.trim(), isKo ? "ko" : "en")
     : null;
 
   function selectOption(questionId: string, optionId: string) {
@@ -137,35 +137,33 @@ export function PetMbtiChecklist() {
             <div className="space-y-4">
               <article className="pastel-card p-5">
                 <h4 className="font-semibold text-ink">
+                  {isKo ? "성격 융합" : "Personality blend"}
+                </h4>
+                <p className="mt-2 text-sm leading-relaxed text-plum/90">{premium.personalityBlend}</p>
+              </article>
+              <article className="pastel-card p-5">
+                <h4 className="font-semibold text-ink">
                   {isKo ? "사주 × MBTI 조합" : "Saju × MBTI blend"}
                 </h4>
-                <p className="mt-2 text-sm leading-relaxed text-plum/90">
-                  {isKo ? premium.sajuComboKo : premium.sajuComboEn}
-                </p>
+                <p className="mt-2 text-sm leading-relaxed text-plum/90">{premium.sajuCombo}</p>
               </article>
               <article className="pastel-card p-5">
                 <h4 className="font-semibold text-ink">
                   {isKo ? "집사와의 궁합" : "Bond with butler"}
                 </h4>
-                <p className="mt-2 text-sm leading-relaxed text-plum/90">
-                  {isKo ? premium.butlerFitKo : premium.butlerFitEn}
-                </p>
+                <p className="mt-2 text-sm leading-relaxed text-plum/90">{premium.butlerFit}</p>
               </article>
               <article className="pastel-card p-5">
                 <h4 className="font-semibold text-ink">
                   {isKo ? "건강 주의" : "Health notes"}
                 </h4>
-                <p className="mt-2 text-sm leading-relaxed text-plum/90">
-                  {isKo ? premium.healthKo : premium.healthEn}
-                </p>
+                <p className="mt-2 text-sm leading-relaxed text-plum/90">{premium.health}</p>
               </article>
               <article className="pastel-card p-5">
                 <h4 className="font-semibold text-ink">
-                  {isKo ? "행동 교정 팁" : "Behavior tips"}
+                  {isKo ? "일상 케어" : "Daily care"}
                 </h4>
-                <p className="mt-2 text-sm leading-relaxed text-plum/90">
-                  {isKo ? premium.trainingKo : premium.trainingEn}
-                </p>
+                <p className="mt-2 text-sm leading-relaxed text-plum/90">{premium.dailyCare}</p>
               </article>
               <p className="text-center text-xs text-plum/60">
                 {isKo

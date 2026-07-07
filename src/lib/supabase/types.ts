@@ -372,7 +372,7 @@ type TableDef<Row, Insert, Update = Partial<Row>> = {
 
 export interface SajuLlmCacheRow {
   cache_key: string;
-  cache_kind: "interpret_pet" | "interpret_human" | "human_premium_section";
+  cache_kind: "interpret_pet" | "interpret_human" | "human_premium_section" | "pet_premium";
   locale: "ko" | "en";
   provider: string;
   model: string;
