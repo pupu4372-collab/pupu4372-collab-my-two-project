@@ -55,7 +55,7 @@ export async function persistZodiacFortune(
       daily: result.daily,
       elementMeta: ELEMENT_META[el],
     },
-    is_premium: false,
+    is_premium: true,
   };
 
   const { data: sajuRow, error } = await supabase

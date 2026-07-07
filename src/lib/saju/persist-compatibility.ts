@@ -36,6 +36,7 @@ export async function persistCompatibilityResult(
     petName: request.petName,
     species: request.species,
     birthDate: request.petBirthDate,
+    calendarType: request.petCalendarType ?? "solar",
     birthTime: request.petBirthTime,
     birthTimeUnknown: request.petBirthTimeUnknown,
     timezone: request.timezone,
@@ -52,10 +53,12 @@ export async function persistCompatibilityResult(
     analysis_mode: analysisMode,
     birth_basis: {
       petBirthDate: request.petBirthDate,
+      petCalendarType: request.petCalendarType ?? "solar",
       petBirthTime: request.petBirthTime,
       petBirthTimeUnknown: request.petBirthTimeUnknown,
       petGender: request.petGender,
       ownerBirthDate: request.ownerBirthDate,
+      ownerCalendarType: request.ownerCalendarType ?? "solar",
       ownerBirthTime: request.ownerBirthTime,
       ownerBirthTimeUnknown: request.ownerBirthTimeUnknown,
       ownerName: request.ownerName,
@@ -92,7 +95,7 @@ export async function persistCompatibilityResult(
       petElementLabel: result.petElementLabel,
       ownerElementLabel: result.ownerElementLabel,
     },
-    is_premium: false,
+    is_premium: true,
   };
 
   const { data: sajuRow, error } = await supabase

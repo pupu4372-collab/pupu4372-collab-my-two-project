@@ -9,6 +9,7 @@ import {
 } from "./ksaju-adapter";
 import type { PillarInfo, SajuResult } from "./ksaju-engine";
 import { buildNarrative } from "./narratives";
+import { resolveSolarBirthDate } from "./resolve-birth-date";
 import type { PetSajuMapping } from "./pet-trait-mapping";
 import type {
   Locale,
@@ -54,8 +55,10 @@ export function buildBasicSajuResponse(
   input: SajuBasicRequest,
   saju: SajuResult
 ): SajuBasicResponse {
+  const calendarType = input.calendarType ?? "solar";
+  const solarBirthDate = resolveSolarBirthDate(input.birthDate, calendarType);
   const birthUtc = localBirthToUtc(
-    input.birthDate,
+    solarBirthDate,
     input.birthTimeUnknown ? null : input.birthTime,
     input.timezone
   );
@@ -87,6 +90,8 @@ export function buildBasicSajuResponse(
     petGender: input.petGender ?? null,
     locale: input.locale,
     birthUtc,
+    birthDate: input.birthDate,
+    calendarType,
     timezone: input.timezone,
     birthTimeUnknown: input.birthTimeUnknown,
     kstJiji,

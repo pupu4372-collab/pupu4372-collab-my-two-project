@@ -1,4 +1,5 @@
 import type { SajuBasicRequest, SajuBasicResponse } from "./types";
+import { sanitizePetGeminiNarrative } from "./llm/pet-output-sanitize";
 
 const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 const DEFAULT_MODEL = "gemini-2.5-flash";
@@ -28,8 +29,8 @@ interface GeminiApiResponse {
 function buildPrompt(request: SajuBasicRequest, result: SajuBasicResponse) {
   const localeInstruction =
     request.locale === "ko"
-      ? "한국어로 작성하세요. 따뜻하고 부드러운 반려동물 서비스 톤을 사용하세요."
-      : "Write in English with a warm, gentle pet service tone.";
+      ? "한국어로 작성하세요. 따뜻하고 부드러운 반려동물 서비스 톤을 사용하세요. 한자·일간·일주·십신 등 명리 전문 용어는 본문에 쓰지 마세요."
+      : "Write in English with a warm, gentle pet service tone. No hanja or myeongri jargon in the body.";
 
   const hourPillar = result.pillars.hour
     ? `${result.pillars.hour.pillar} (${result.pillars.hour.stemLabel}, ${result.pillars.hour.branchLabel})`
@@ -87,14 +88,15 @@ function isValidPayload(value: unknown): value is GeminiPayload {
 }
 
 function toNarrative(payload: GeminiPayload): GeminiNarrative {
-  return {
+  const story = payload.storyParagraphs
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .join("\n\n");
+  return sanitizePetGeminiNarrative({
     headline: payload.headline.trim(),
-    story: payload.storyParagraphs
-      .map((p) => p.trim())
-      .filter(Boolean)
-      .join("\n\n"),
+    story,
     traits: payload.traits.slice(0, 5).map((trait) => trait.trim()).filter(Boolean),
-  };
+  });
 }
 
 export async function generateGeminiNarrative(

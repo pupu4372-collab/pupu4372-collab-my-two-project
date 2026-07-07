@@ -50,6 +50,7 @@ export async function persistSajuResult(
     analysis_mode: analysisMode,
     birth_basis: {
       birthDate: request.birthDate,
+      calendarType: request.calendarType ?? "solar",
       petGender: request.petGender ?? null,
       birthTime: request.birthTime,
       birthTimeUnknown: request.birthTimeUnknown,

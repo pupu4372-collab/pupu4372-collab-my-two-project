@@ -2,7 +2,9 @@
 
 import { AdSlot } from "@/components/ads/AdSlot";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
-import { SajuResultShareRow } from "@/components/k-saju/SajuResultShareRow";
+import { PetPremiumPdfSaveRow } from "@/components/k-saju/PetPremiumPdfSaveRow";
+import { ZodiacCompatInstaShareRow } from "@/components/k-saju/ZodiacCompatInstaShareRow";
+import type { PetPremiumPdfRequest } from "@/lib/reports/pet-premium/types";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
@@ -13,6 +15,9 @@ interface ZodiacResultProps {
   result: ZodiacFortuneResponse;
   isGuest?: boolean;
   onBack?: () => void;
+  shareMode?: "insta" | "pdf" | "none";
+  pdfContext?: PetPremiumPdfRequest;
+  accessToken?: string | null;
 }
 
 const LABELS = {
@@ -63,7 +68,14 @@ function LuckStars({ score }: { score: number }) {
   );
 }
 
-export function ZodiacResult({ result, isGuest, onBack }: ZodiacResultProps) {
+export function ZodiacResult({
+  result,
+  isGuest,
+  onBack,
+  shareMode = "insta",
+  pdfContext,
+  accessToken,
+}: ZodiacResultProps) {
   const t = LABELS[result.locale];
   const el = ELEMENT_META[result.elementAffinity];
   const accent = ELEMENT_ACCENT[result.elementAffinity];
@@ -211,7 +223,11 @@ export function ZodiacResult({ result, isGuest, onBack }: ZodiacResultProps) {
         </dl>
       </GlassCard>
 
-      <SajuResultShareRow kind="zodiac" result={result} />
+      {shareMode === "pdf" && pdfContext ? (
+        <PetPremiumPdfSaveRow locale={result.locale} context={pdfContext} accessToken={accessToken} />
+      ) : shareMode === "insta" ? (
+        <ZodiacCompatInstaShareRow kind="zodiac" result={result} />
+      ) : null}
 
       <AdSlot />
 

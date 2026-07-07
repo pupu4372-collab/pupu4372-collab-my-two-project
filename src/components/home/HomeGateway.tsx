@@ -368,7 +368,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
 
             <div className="mt-6 min-w-0 md:col-start-1 md:row-start-2 md:mt-0">
               <AuthRequiredLink
-                href="/profile"
+                href="/saju"
                 className={`inline-flex rounded-full px-6 py-3.5 text-sm font-extrabold text-white shadow-sm transition hover:scale-[1.02] hover:brightness-105 ${
                   isNight
                     ? "bg-channel-saju shadow-[0_0_24px_rgba(139,92,246,0.35)]"

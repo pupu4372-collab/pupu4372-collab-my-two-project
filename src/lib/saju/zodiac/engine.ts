@@ -1,5 +1,6 @@
 import { ELEMENT_META } from "../elements";
-import type { ElementKey, Locale, Species } from "../types";
+import { resolveSolarBirthDate } from "../resolve-birth-date";
+import type { BirthCalendarType, ElementKey, Locale, Species } from "../types";
 import { buildDailyFortune, getTodayKstDateString } from "./fortunes";
 import { buildZodiacPersonality } from "./personality";
 import { getZodiacSignFromBirthDate, type ZodiacSignMeta } from "./signs";
@@ -8,6 +9,7 @@ export interface ZodiacFortuneRequest {
   petName: string;
   species: Species;
   birthDate: string;
+  calendarType?: BirthCalendarType;
   locale: Locale;
 }
 
@@ -54,7 +56,11 @@ export interface ZodiacFortuneResponse {
 }
 
 export function computeZodiacFortune(input: ZodiacFortuneRequest): ZodiacFortuneResponse {
-  const signMeta = getZodiacSignFromBirthDate(input.birthDate);
+  const solarBirthDate = resolveSolarBirthDate(
+    input.birthDate,
+    input.calendarType ?? "solar"
+  );
+  const signMeta = getZodiacSignFromBirthDate(solarBirthDate);
   const fortuneDateKst = getTodayKstDateString();
   const el = signMeta.elementAffinity;
   const elementMeta = ELEMENT_META[el];

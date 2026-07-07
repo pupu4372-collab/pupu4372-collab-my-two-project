@@ -1,10 +1,11 @@
 import { isPetSpecies } from "@/lib/pets/species";
+import { checkPetPremiumLlmGate } from "@/lib/payments/pet-premium-llm-gate";
 import { persistZodiacFortune } from "@/lib/saju/persist-zodiac";
 import { enrichZodiacWithPremiumLlm } from "@/lib/saju/llm/pet-premium/orchestrator";
 import { computeZodiacFortune } from "@/lib/saju/zodiac/engine";
 import { validatePetName } from "@/lib/saju/moderation";
-import { hasPetPremiumUnlock } from "@/lib/payments/portone/entitlement";
 import type { Locale, Species } from "@/lib/saju/types";
+import { normalizeBirthCalendarType } from "@/lib/saju/resolve-birth-date";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
     petName?: string;
     species?: string;
     birthDate?: string;
+    calendarType?: string;
     birthTime?: string | null;
     birthTimeUnknown?: boolean;
     timezone?: string;
@@ -48,28 +50,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid birth date." }, { status: 400 });
   }
 
-  // ── 유료 게이트 ──────────────────────────────────────────
-  if (isSupabaseConfigured()) {
-    const userId = await getUserIdFromRequest(request);
-    const token = getBearerToken(request);
-    const userClient = token ? createUserSupabaseClient(token) : null;
-
-    if (!userId || !userClient) {
-      return NextResponse.json({ error: "login_required" }, { status: 401 });
-    }
-
-    const unlocked = await hasPetPremiumUnlock(
-      userClient,
-      userId,
-      "pet_premium_v1",
-      body.petId
-    );
-
-    if (!unlocked) {
-      return NextResponse.json({ error: "premium_required" }, { status: 403 });
-    }
+  const gateError = await checkPetPremiumLlmGate(request, body.petId ?? null);
+  if (gateError) {
+    return NextResponse.json({ error: gateError.error }, { status: gateError.status });
   }
-  // ─────────────────────────────────────────────────────────
 
   const locale: Locale = body.locale === "en" ? "en" : "ko";
 
@@ -77,6 +61,7 @@ export async function POST(request: Request) {
     petName: (body.petName ?? "").trim(),
     species: body.species as Species,
     birthDate: body.birthDate,
+    calendarType: normalizeBirthCalendarType(body.calendarType),
     locale,
   };
 

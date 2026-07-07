@@ -4,9 +4,13 @@ import { AdSlot } from "@/components/ads/AdSlot";
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { BondScoreRing } from "@/components/k-saju/BondScoreRing";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
-import { SajuResultShareRow } from "@/components/k-saju/SajuResultShareRow";
+import { PetPremiumPdfSaveRow } from "@/components/k-saju/PetPremiumPdfSaveRow";
+import { ZodiacCompatInstaShareRow } from "@/components/k-saju/ZodiacCompatInstaShareRow";
+import type { PetPremiumPdfRequest } from "@/lib/reports/pet-premium/types";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
+import type { ElementRelation } from "@/lib/saju/compatibility/elements-cycle";
+import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import type { ElementKey } from "@/lib/saju/types";
 
 const RELATION_LABEL: Record<
@@ -97,12 +101,28 @@ function ElementCard({
   );
 }
 
+function relationCardClass(relation: ElementRelation): string {
+  if (relation.includes("nourishes")) {
+    return "border-mok-green/40 bg-gradient-to-br from-mint/35 via-white to-mint/15";
+  }
+  if (relation.includes("controls")) {
+    return "border-to-yellow/45 bg-gradient-to-br from-amber-50 via-white to-gold/20";
+  }
+  return "border-channel-saju/25 bg-gradient-to-br from-sand/70 via-white to-lavender/30";
+}
+
 export function CompatibilityResult({
   result,
   isGuest,
+  shareMode = "insta",
+  pdfContext,
+  accessToken,
 }: {
   result: CompatibilityResponse;
   isGuest?: boolean;
+  shareMode?: "insta" | "pdf" | "none";
+  pdfContext?: PetPremiumPdfRequest;
+  accessToken?: string | null;
 }) {
   const t = LABELS[result.locale];
   const rel = RELATION_LABEL[result.relation][result.locale];
@@ -126,7 +146,7 @@ export function CompatibilityResult({
           {result.bondEmoji}
         </p>
         <div className="mt-4 flex justify-center">
-          <BondScoreRing score={result.bondScore} />
+          <BondScoreRing score={result.bondScore} bondLabel={result.bondLabel} />
         </div>
         <p className="mt-3 text-sm font-medium text-plum/60">{t.score}</p>
         <p className="mt-1 text-xl font-extrabold text-primary">{result.bondLabel}</p>
@@ -137,10 +157,14 @@ export function CompatibilityResult({
       <GlassCard variant="solid">
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/45">{t.details}</p>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {result.details.map((detail) => (
+          {result.details.map((detail, index) => (
             <section
               key={detail.title}
-              className="rounded-xl border border-white/35 bg-sand/45 px-4 py-3"
+              className={`rounded-xl border bg-sand/45 px-4 py-3 border-l-4 ${
+                index % 2 === 0
+                  ? `${ELEMENT_ACCENT[result.petElement].cardBorder}`
+                  : `${ELEMENT_ACCENT[result.ownerElement].cardBorder}`
+              }`}
             >
               <h3 className="text-sm font-bold text-primary">{detail.title}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-plum/75">{detail.body}</p>
@@ -176,7 +200,7 @@ export function CompatibilityResult({
 
       <GlassCard
         variant="solid"
-        className="border border-channel-saju/25 bg-gradient-to-br from-sand/70 via-white to-lavender/30 text-center"
+        className={`border text-center ${relationCardClass(result.relation)}`}
       >
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary/80">{t.relation}</p>
         <p className="mt-2 text-2xl font-extrabold text-primary">{rel}</p>
@@ -199,7 +223,11 @@ export function CompatibilityResult({
         </ul>
       </GlassCard>
 
-      <SajuResultShareRow kind="compatibility" result={result} />
+      {shareMode === "pdf" && pdfContext ? (
+        <PetPremiumPdfSaveRow locale={result.locale} context={pdfContext} accessToken={accessToken} />
+      ) : shareMode === "insta" ? (
+        <ZodiacCompatInstaShareRow kind="compatibility" result={result} />
+      ) : null}
 
       <AdSlot />
     </div>

@@ -4,6 +4,11 @@ import {
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
 import type { Pet, SajuResultRow } from "@/lib/supabase/types";
+import {
+  isVisibleInVault,
+  vaultMetaForReport,
+  type VaultReportRow,
+} from "@/lib/reports/vault-policy";
 import { NextResponse } from "next/server";
 
 const REPORT_SELECT =
@@ -30,13 +35,13 @@ export async function GET(request: Request) {
     .select(REPORT_SELECT)
     .eq("owner_id", ownerId)
     .order("created_at", { ascending: false })
-    .limit(100);
+    .limit(200);
 
   if (error) {
     return NextResponse.json({ error: error.message, reports: [] }, { status: 500 });
   }
 
-  const reportRows = (reports ?? []) as SajuResultRow[];
+  const reportRows = ((reports ?? []) as SajuResultRow[]).filter(isVisibleInVault);
   const petIds = [...new Set(reportRows.map((report) => report.pet_id))];
   const petsById = new Map<string, Pet>();
 
@@ -52,10 +57,15 @@ export async function GET(request: Request) {
     }
   }
 
+  const enriched: VaultReportRow[] = reportRows.map((report) => ({
+    ...report,
+    pet: petsById.get(report.pet_id) ?? null,
+    vault: vaultMetaForReport(report),
+  }));
+
   return NextResponse.json({
-    reports: reportRows.map((report) => ({
-      ...report,
-      pet: petsById.get(report.pet_id) ?? null,
-    })),
+    reports: enriched,
+    premiumReports: enriched.filter((report) => report.vault.tier === "premium"),
+    freeReports: enriched.filter((report) => report.vault.tier === "free"),
   });
 }

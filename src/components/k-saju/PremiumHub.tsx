@@ -1,8 +1,10 @@
 "use client";
 
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
+import { BirthCalendarToggle } from "@/components/k-saju/BirthCalendarToggle";
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { CompatibilityResult } from "@/components/k-saju/CompatibilityResult";
+import { PetPremiumPdfSaveRow } from "@/components/k-saju/PetPremiumPdfSaveRow";
 import { PremiumMbtiReport } from "@/components/k-saju/PremiumMbtiReport";
 import { PremiumMbtiSurvey } from "@/components/k-saju/PremiumMbtiSurvey";
 import { ZodiacResult } from "@/components/k-saju/ZodiacResult";
@@ -26,7 +28,9 @@ import {
 } from "@/lib/pet/mbti-inference";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
-import type { Gender, Locale, Species } from "@/lib/saju/types";
+import type { PetPremiumPdfRequest } from "@/lib/reports/pet-premium/types";
+import { computeBasicSaju } from "@/lib/saju/engine";
+import type { BirthCalendarType, Gender, Locale, Species } from "@/lib/saju/types";
 import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
@@ -34,6 +38,7 @@ type ButlerSession = {
   ownerName: string;
   ownerGender: Gender;
   ownerBirthDate: string;
+  ownerCalendarType: BirthCalendarType;
   ownerBirthTime: string | null;
   ownerBirthTimeUnknown: boolean;
   timezone: string;
@@ -45,6 +50,7 @@ type PetContext = {
   species: Species;
   petGender: Gender;
   petBirthDate: string;
+  petCalendarType: BirthCalendarType;
   petBirthTime: string | null;
   petBirthTimeUnknown: boolean;
   timezone: string;
@@ -164,6 +170,10 @@ function isBirthTimeOption(value: string | null): value is string {
   return Boolean(value && BIRTH_TIME_OPTIONS.some((option) => option.value === value));
 }
 
+function isCalendarType(value: string | null): value is BirthCalendarType {
+  return value === "solar" || value === "lunar";
+}
+
 function formatPetBirthTime(value: string, locale: Locale): string {
   const option = BIRTH_TIME_OPTIONS.find((o) => o.value === value);
   if (!option) return value;
@@ -188,6 +198,7 @@ export function PremiumHub() {
   const [ownerName, setOwnerName] = useState("");
   const [ownerGender, setOwnerGender] = useState<Gender | "">("");
   const [ownerBirthDate, setOwnerBirthDate] = useState("");
+  const [ownerCalendarType, setOwnerCalendarType] = useState<BirthCalendarType>("solar");
   const [ownerBirthTime, setOwnerBirthTime] = useState("unknown");
   const [timezone, setTimezone] = useState(detectTimezone);
   const [consent, setConsent] = useState(false);
@@ -210,6 +221,47 @@ export function PremiumHub() {
 
   const mbtiSurveyComplete = isPetMbtiComplete(mbtiAnswers);
 
+  const dominantElement = useMemo(() => {
+    if (!pet) return undefined;
+    return computeBasicSaju({
+      petName: pet.petName,
+      species: pet.species,
+      petGender: pet.petGender,
+      birthDate: pet.petBirthDate,
+      calendarType: pet.petCalendarType,
+      birthTime: pet.petBirthTime,
+      birthTimeUnknown: pet.petBirthTimeUnknown,
+      timezone: pet.timezone,
+      locale: pet.locale,
+      privacyConsent: true,
+    }).dominantElement;
+  }, [pet]);
+
+  const pdfContext = useMemo((): PetPremiumPdfRequest | null => {
+    if (!pet) return null;
+    return {
+      petName: pet.petName,
+      species: pet.species,
+      petGender: pet.petGender,
+      birthDate: pet.petBirthDate,
+      calendarType: pet.petCalendarType,
+      birthTime: pet.petBirthTime,
+      birthTimeUnknown: pet.petBirthTimeUnknown,
+      timezone: pet.timezone,
+      locale: pet.locale,
+      petId: pet.petId,
+      mbtiType: mbtiType ?? undefined,
+      mbtiAnswers: mbtiSurveyComplete ? mbtiAnswers : undefined,
+      ownerName: butler?.ownerName,
+      ownerGender: butler?.ownerGender,
+      ownerBirthDate: butler?.ownerBirthDate,
+      ownerCalendarType: butler?.ownerCalendarType,
+      ownerBirthTime: butler?.ownerBirthTime,
+      ownerBirthTimeUnknown: butler?.ownerBirthTimeUnknown,
+      privacyConsent: butler?.privacyConsent,
+    };
+  }, [pet, butler, mbtiType, mbtiAnswers, mbtiSurveyComplete]);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const nextLocale = params.get("locale");
@@ -217,6 +269,7 @@ export function PremiumHub() {
     const nextPetGender = params.get("petGender");
     const nextName = params.get("petName");
     const nextBirthDate = params.get("birthDate");
+    const nextCalendarType = params.get("calendarType");
     const nextBirthTime = params.get("birthTime");
     const nextTimezone = params.get("timezone");
     const nextPetId = params.get("petId");
@@ -240,6 +293,7 @@ export function PremiumHub() {
       species: isSpecies(nextSpecies) ? nextSpecies : "dog",
       petGender: isGender(nextPetGender) ? nextPetGender : "female",
       petBirthDate: nextBirthDate,
+      petCalendarType: isCalendarType(nextCalendarType) ? nextCalendarType : "solar",
       petBirthTime: petTime.birthTime,
       petBirthTimeUnknown: petTime.birthTimeUnknown,
       timezone: nextTimezone ?? detectTimezone(),
@@ -299,6 +353,8 @@ export function PremiumHub() {
               ownerGender: butler.ownerGender,
               petBirthDate: petCtx.petBirthDate,
               ownerBirthDate: butler.ownerBirthDate,
+              petCalendarType: petCtx.petCalendarType,
+              ownerCalendarType: butler.ownerCalendarType,
               petBirthTime: petCtx.petBirthTime,
               petBirthTimeUnknown: petCtx.petBirthTimeUnknown,
               ownerBirthTime: butler.ownerBirthTime,
@@ -347,6 +403,7 @@ export function PremiumHub() {
               petName: petCtx.petName,
               species: petCtx.species,
               birthDate: petCtx.petBirthDate,
+              calendarType: petCtx.petCalendarType,
               birthTime: petCtx.petBirthTime,
               birthTimeUnknown: petCtx.petBirthTimeUnknown,
               timezone: petCtx.timezone,
@@ -401,6 +458,7 @@ export function PremiumHub() {
             species: petCtx.species,
             petGender: petCtx.petGender,
             birthDate: petCtx.petBirthDate,
+            calendarType: petCtx.petCalendarType,
             birthTime: petCtx.petBirthTime,
             birthTimeUnknown: petCtx.petBirthTimeUnknown,
             timezone: petCtx.timezone,
@@ -494,6 +552,7 @@ export function PremiumHub() {
           petName: petCtx.petName,
           species: petCtx.species,
           birthDate: petCtx.petBirthDate,
+          calendarType: petCtx.petCalendarType,
           birthTime: petCtx.petBirthTime,
           birthTimeUnknown: petCtx.petBirthTimeUnknown,
           timezone: petCtx.timezone,
@@ -547,6 +606,8 @@ export function PremiumHub() {
           ownerGender: session.ownerGender,
           petBirthDate: petCtx.petBirthDate,
           ownerBirthDate: session.ownerBirthDate,
+          petCalendarType: petCtx.petCalendarType,
+          ownerCalendarType: session.ownerCalendarType,
           petBirthTime: petCtx.petBirthTime,
           petBirthTimeUnknown: petCtx.petBirthTimeUnknown,
           ownerBirthTime: session.ownerBirthTime,
@@ -590,6 +651,7 @@ export function PremiumHub() {
       ownerName: ownerName.trim() || (locale === "ko" ? "집사" : "Butler"),
       ownerGender,
       ownerBirthDate,
+      ownerCalendarType,
       ownerBirthTime: ownerTime.birthTime,
       ownerBirthTimeUnknown: ownerTime.birthTimeUnknown,
       timezone,
@@ -660,6 +722,12 @@ export function PremiumHub() {
             locale={locale}
             className={FIELD_LABEL_CLASS}
             selectClassName={STITCH_INPUT_CLASS}
+          />
+          <BirthCalendarToggle
+            value={ownerCalendarType}
+            onChange={setOwnerCalendarType}
+            locale={locale}
+            compact
           />
           <label className={FIELD_LABEL_CLASS}>
             {t.birthTime}
@@ -789,14 +857,36 @@ export function PremiumHub() {
                     {locale === "ko" ? mbtiResult.summaryKo : mbtiResult.summaryEn}
                   </p>
                 </article>
-                <PremiumMbtiReport insight={mbtiInsight} locale={locale} />
+                <PremiumMbtiReport
+                  insight={mbtiInsight}
+                  locale={locale}
+                  dominantElement={dominantElement}
+                />
+                {pdfContext ? (
+                  <PetPremiumPdfSaveRow
+                    locale={locale}
+                    context={pdfContext}
+                    accessToken={accessToken}
+                  />
+                ) : null}
               </div>
             )}
             {activeView === "zodiac" && zodiacResult && !menuLoading && (
-              <ZodiacResult result={zodiacResult} />
+              <ZodiacResult
+                result={zodiacResult}
+                shareMode="pdf"
+                pdfContext={pdfContext ?? undefined}
+                accessToken={accessToken}
+              />
             )}
             {activeView === "compatibility" && compatibilityResult && !menuLoading && (
-              <CompatibilityResult result={compatibilityResult} isGuest={false} />
+              <CompatibilityResult
+                result={compatibilityResult}
+                isGuest={false}
+                shareMode="pdf"
+                pdfContext={pdfContext ?? undefined}
+                accessToken={accessToken}
+              />
             )}
           </>
         )}

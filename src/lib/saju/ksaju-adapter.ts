@@ -54,7 +54,7 @@ export function sajuBasicRequestToBirthInput(request: SajuBasicRequest): BirthIn
     hour: request.birthTimeUnknown ? DEFAULT_UNKNOWN_HOUR : hour,
     minute: request.birthTimeUnknown ? DEFAULT_UNKNOWN_MINUTE : minute,
     gender: petGenderToKsajuGender(request.petGender),
-    isLunar: false,
+    isLunar: request.calendarType === "lunar",
   };
 }
 

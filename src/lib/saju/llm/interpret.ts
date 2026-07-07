@@ -28,6 +28,7 @@ import {
   type LlmPromptPair,
   type LlmProviderName,
 } from "./types";
+import { sanitizePetInterpretationJson } from "./pet-output-sanitize";
 
 export function isSajuInterpretLlmEnabled(): boolean {
   return isClaudeEnabled() || isOpenAiEnabled();
@@ -69,7 +70,7 @@ async function interpretWithProvider(
       if (!isPetInterpretationJson(parsed)) {
         throw new SajuInterpretationError(`Pet JSON schema validation failed (attempt ${attempt}).`);
       }
-      return { tier: "pet", provider, data: parsed };
+      return { tier: "pet", provider, data: sanitizePetInterpretationJson(parsed) };
     }
     if (!isLegacyHumanInterpretationJson(parsed)) {
       throw new SajuInterpretationError(`Human JSON schema validation failed (attempt ${attempt}).`);

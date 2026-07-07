@@ -5,9 +5,11 @@ import {
   isPetMbtiComplete,
   scoresFromAnswers,
 } from "@/lib/pet/mbti-inference";
+import { checkPetPremiumLlmGate } from "@/lib/payments/pet-premium-llm-gate";
 import { generatePetMbtiPremiumInsight } from "@/lib/saju/llm/pet-premium/orchestrator";
 import { validatePetName } from "@/lib/saju/moderation";
-import { hasPetPremiumUnlock } from "@/lib/payments/portone/entitlement";
+import { persistMbtiPremiumResult } from "@/lib/saju/persist-mbti";
+import { normalizeBirthCalendarType } from "@/lib/saju/resolve-birth-date";
 import type { Gender, Locale, Species } from "@/lib/saju/types";
 import {
   createUserSupabaseClient,
@@ -82,30 +84,17 @@ export async function POST(request: Request) {
       ? body.petGender
       : undefined;
 
-  if (isSupabaseConfigured()) {
-    const userId = await getUserIdFromRequest(request);
-    const token = getBearerToken(request);
-    const userClient = token ? createUserSupabaseClient(token) : null;
-
-    if (!userId || !userClient) {
-      return NextResponse.json({ error: "login_required" }, { status: 401 });
-    }
-
-    const unlocked = await hasPetPremiumUnlock(
-      userClient,
-      userId,
-      "pet_premium_v1",
-      String(body.petId ?? "") || null
-    );
-
-    if (!unlocked) {
-      return NextResponse.json({ error: "premium_required" }, { status: 403 });
-    }
+  const gateError = await checkPetPremiumLlmGate(
+    request,
+    body.petId ? String(body.petId) : null
+  );
+  if (gateError) {
+    return NextResponse.json({ error: gateError.error }, { status: gateError.status });
   }
 
   try {
     const mbtiAnswers = parseMbtiAnswers(body);
-    let mbti = mbtiAnswers
+    const mbti = mbtiAnswers
       ? buildPetMbtiResult(scoresFromAnswers(mbtiAnswers))
       : buildPetMbtiResultFromType(mbtiType);
 
@@ -131,7 +120,48 @@ export async function POST(request: Request) {
       mbtiAnswers: mbtiAnswers ?? undefined,
     });
 
-    return NextResponse.json(insight);
+    let persisted = false;
+    let petId: string | null = body.petId ? String(body.petId) : null;
+    let sajuResultId: string | null = null;
+    let persistError: string | null = null;
+
+    if (isSupabaseConfigured()) {
+      const ownerId = await getUserIdFromRequest(request);
+      const token = getBearerToken(request);
+      const userClient = token ? createUserSupabaseClient(token) : null;
+
+      if (ownerId && userClient) {
+        try {
+          const saved = await persistMbtiPremiumResult(userClient, ownerId, {
+            petName: String(body.petName).trim(),
+            species: body.species as Species,
+            petGender,
+            birthDate,
+            calendarType: normalizeBirthCalendarType(body.calendarType),
+            birthTime: (body.birthTime as string) ?? null,
+            birthTimeUnknown: Boolean(body.birthTimeUnknown ?? !body.birthTime),
+            timezone,
+            locale,
+            mbtiAnswers: mbtiAnswers ?? undefined,
+            insight,
+          });
+          persisted = true;
+          petId = saved.petId;
+          sajuResultId = saved.sajuResultId;
+        } catch (err) {
+          persistError =
+            err instanceof Error ? err.message : "Could not save to database.";
+        }
+      }
+    }
+
+    return NextResponse.json({
+      ...insight,
+      persisted,
+      petId,
+      sajuResultId,
+      persistError,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "MBTI premium generation failed.";
     return NextResponse.json({ error: message }, { status: 500 });

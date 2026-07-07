@@ -2,12 +2,20 @@
 
 import { useId } from "react";
 
-export function BondScoreRing({ score }: { score: number }) {
+function ringGradient(score: number): { from: string; to: string } {
+  if (score >= 90) return { from: "#B8860B", to: "#FFD700" };
+  if (score >= 82) return { from: "#2563EB", to: "#93C5FD" };
+  if (score >= 64) return { from: "#16A34A", to: "#86EFAC" };
+  return { from: "#442656", to: "#d1abe4" };
+}
+
+export function BondScoreRing({ score, bondLabel }: { score: number; bondLabel?: string }) {
   const gradientId = useId();
   const radius = 58;
   const circumference = 2 * Math.PI * radius;
   const clamped = Math.min(100, Math.max(0, score));
   const offset = circumference * (1 - clamped / 100);
+  const gradient = ringGradient(clamped);
 
   return (
     <div className="relative inline-flex h-32 w-32 items-center justify-center">
@@ -34,16 +42,21 @@ export function BondScoreRing({ score }: { score: number }) {
         />
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#442656" />
-            <stop offset="100%" stopColor="#d1abe4" />
+            <stop offset="0%" stopColor={gradient.from} />
+            <stop offset="100%" stopColor={gradient.to} />
           </linearGradient>
         </defs>
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-3xl font-extrabold text-primary">
           {clamped}
           <span className="text-sm font-bold">%</span>
         </span>
+        {bondLabel ? (
+          <span className="mt-0.5 max-w-[5.5rem] text-center text-[10px] font-bold leading-tight text-plum/75">
+            {bondLabel}
+          </span>
+        ) : null}
       </div>
     </div>
   );

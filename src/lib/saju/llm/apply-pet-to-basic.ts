@@ -1,6 +1,7 @@
 import type { PetSajuMapping } from "@/lib/saju/pet-trait-mapping";
 import { finalizePetHeadline } from "@/lib/saju/pet-headline";
 import type { SajuBasicResponse } from "@/lib/saju/types";
+import { sanitizePetInterpretationJson } from "./pet-output-sanitize";
 import type { LlmProviderName, PetInterpretationJson } from "./types";
 
 export function applyPetInterpretationToBasicResponse(
@@ -9,8 +10,9 @@ export function applyPetInterpretationToBasicResponse(
   mapping: PetSajuMapping,
   provider: LlmProviderName
 ): void {
-  result.headline = interpretation.characterIntro.trim();
-  result.story = [interpretation.personality, interpretation.healthNote, interpretation.compatibility]
+  const clean = sanitizePetInterpretationJson(interpretation);
+  result.headline = clean.characterIntro.trim();
+  result.story = [clean.personality, clean.healthNote, clean.compatibility]
     .map((part) => part.trim())
     .filter(Boolean)
     .join("\n\n");

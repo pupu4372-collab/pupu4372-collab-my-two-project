@@ -1,12 +1,13 @@
 "use client";
 
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
+import { BirthCalendarToggle } from "@/components/k-saju/BirthCalendarToggle";
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { ZodiacResult } from "@/components/k-saju/ZodiacResult";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
-import type { Locale, Species } from "@/lib/saju/types";
+import type { BirthCalendarType, Locale, Species } from "@/lib/saju/types";
 import { useLocale } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
@@ -51,6 +52,10 @@ function isSpecies(value: string | null): value is Species {
   return value === "dog" || value === "cat" || value === "other";
 }
 
+function isCalendarType(value: string | null): value is BirthCalendarType {
+  return value === "solar" || value === "lunar";
+}
+
 export function ZodiacForm() {
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const routeLocale = useLocale();
@@ -59,6 +64,7 @@ export function ZodiacForm() {
   const [petName, setPetName] = useState("");
   const [species, setSpecies] = useState<Species>("dog");
   const [birthDate, setBirthDate] = useState("");
+  const [calendarType, setCalendarType] = useState<BirthCalendarType>("solar");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ZodiacFortuneResponse | null>(null);
@@ -72,11 +78,13 @@ export function ZodiacForm() {
     const nextSpecies = params.get("species");
     const nextName = params.get("petName");
     const nextBirthDate = params.get("birthDate");
+    const nextCalendarType = params.get("calendarType");
 
     if (isLocale(nextLocale)) setLocale(nextLocale);
     if (isSpecies(nextSpecies)) setSpecies(nextSpecies);
     if (nextName) setPetName(nextName);
     if (nextBirthDate) setBirthDate(nextBirthDate);
+    if (isCalendarType(nextCalendarType)) setCalendarType(nextCalendarType);
 
     const nextPetId = params.get("petId");
     if (nextPetId) setPetId(nextPetId);
@@ -99,6 +107,7 @@ export function ZodiacForm() {
           petName,
           species,
           birthDate,
+          calendarType,
           locale,
           petId: petId ?? null,
         }),
@@ -209,13 +218,19 @@ export function ZodiacForm() {
           className={FIELD_LABEL_CLASS}
           selectClassName={STITCH_INPUT_CLASS}
         />
+        <BirthCalendarToggle
+          value={calendarType}
+          onChange={setCalendarType}
+          locale={locale}
+          compact
+        />
 
         {error && (
           error === "premium_required" ? (
             <div className="rounded-2xl bg-petal/40 px-4 py-3 text-sm text-plum space-y-2">
               <p>{t.premiumRequired}</p>
               <Link
-                href={`/payment?product=pet_premium_v1&type=zodiac&petName=${encodeURIComponent(petName)}&species=${species}&birthDate=${birthDate}&locale=${locale}${petId ? `&petId=${petId}` : ""}`}
+                href={`/payment?product=pet_premium_v1&type=zodiac&petName=${encodeURIComponent(petName)}&species=${species}&birthDate=${birthDate}&calendarType=${calendarType}&locale=${locale}${petId ? `&petId=${petId}` : ""}`}
                 className="inline-block font-bold text-primary underline"
               >
                 {t.goToPay}

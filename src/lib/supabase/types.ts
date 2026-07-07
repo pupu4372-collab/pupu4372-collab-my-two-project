@@ -11,6 +11,7 @@ export type SajuType =
   | "zodiac"
   | "compatibility"
   | "character_card"
+  | "mbti"
   | "premium";
 export type AnalysisMode = "three_pillars" | "four_pillars";
 export type RankingPeriod = "realtime" | "week" | "month";

@@ -1,6 +1,7 @@
 "use client";
 
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
+import { BirthCalendarToggle } from "@/components/k-saju/BirthCalendarToggle";
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
@@ -14,7 +15,7 @@ import {
 } from "@/lib/saju/birth-time-options";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
-import type { Gender, Locale, Species } from "@/lib/saju/types";
+import type { BirthCalendarType, Gender, Locale, Species } from "@/lib/saju/types";
 import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
@@ -103,6 +104,10 @@ function isBirthTimeOption(value: string | null): value is string {
   return Boolean(value && BIRTH_TIME_OPTIONS.some((option) => option.value === value));
 }
 
+function isCalendarType(value: string | null): value is BirthCalendarType {
+  return value === "solar" || value === "lunar";
+}
+
 export function CompatibilityForm() {
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const routeLocale = useLocale();
@@ -114,6 +119,8 @@ export function CompatibilityForm() {
   const [ownerGender, setOwnerGender] = useState<Gender | "">("");
   const [petBirthDate, setPetBirthDate] = useState("");
   const [ownerBirthDate, setOwnerBirthDate] = useState("");
+  const [petCalendarType, setPetCalendarType] = useState<BirthCalendarType>("solar");
+  const [ownerCalendarType, setOwnerCalendarType] = useState<BirthCalendarType>("solar");
   const [petBirthTime, setPetBirthTime] = useState("unknown");
   const [ownerBirthTime, setOwnerBirthTime] = useState("unknown");
   const [timezone, setTimezone] = useState(detectTimezone);
@@ -136,6 +143,7 @@ export function CompatibilityForm() {
     const nextPetGender = params.get("petGender");
     const nextName = params.get("petName");
     const nextBirthDate = params.get("birthDate");
+    const nextCalendarType = params.get("calendarType");
     const nextBirthTime = params.get("birthTime");
     const nextTimezone = params.get("timezone");
 
@@ -144,6 +152,7 @@ export function CompatibilityForm() {
     if (isGender(nextPetGender)) setPetGender(nextPetGender);
     if (nextName) setPetName(nextName);
     if (nextBirthDate) setPetBirthDate(nextBirthDate);
+    if (isCalendarType(nextCalendarType)) setPetCalendarType(nextCalendarType);
     if (isBirthTimeOption(nextBirthTime)) setPetBirthTime(nextBirthTime);
     if (nextTimezone) setTimezone(nextTimezone);
 
@@ -196,6 +205,8 @@ export function CompatibilityForm() {
           ownerGender,
           petBirthDate,
           ownerBirthDate,
+          petCalendarType,
+          ownerCalendarType,
           petBirthTime: petTime.birthTime,
           petBirthTimeUnknown: petTime.birthTimeUnknown,
           ownerBirthTime: ownerTime.birthTime,
@@ -304,6 +315,12 @@ export function CompatibilityForm() {
             className={FIELD_LABEL_CLASS}
             selectClassName={STITCH_INPUT_CLASS}
           />
+          <BirthCalendarToggle
+            value={petCalendarType}
+            onChange={setPetCalendarType}
+            locale={locale}
+            compact
+          />
           <label className={FIELD_LABEL_CLASS}>
             {t.birthTime}
             <select
@@ -322,9 +339,11 @@ export function CompatibilityForm() {
 
         <fieldset className="space-y-4 rounded-[2rem] border border-plum/15 bg-white p-5">
           <legend className="px-2 text-sm font-bold text-primary">💞 {t.ownerSection}</legend>
-          <p className="rounded-2xl bg-sand/50 px-4 py-2 text-xs leading-relaxed text-on-surface-variant">
-            {t.ownerBirthNotice}
-          </p>
+          {isAnonymous ? (
+            <p className="rounded-2xl bg-sand/50 px-4 py-2 text-xs leading-relaxed text-on-surface-variant">
+              {t.ownerBirthNotice}
+            </p>
+          ) : null}
           <label className={FIELD_LABEL_CLASS}>
             {t.ownerName}
             <input
@@ -356,6 +375,12 @@ export function CompatibilityForm() {
             locale={locale}
             className={FIELD_LABEL_CLASS}
             selectClassName={STITCH_INPUT_CLASS}
+          />
+          <BirthCalendarToggle
+            value={ownerCalendarType}
+            onChange={setOwnerCalendarType}
+            locale={locale}
+            compact
           />
           <label className={FIELD_LABEL_CLASS}>
             {t.birthTime}
@@ -397,7 +422,7 @@ export function CompatibilityForm() {
             <div className="rounded-2xl bg-petal/40 px-4 py-3 text-sm text-plum space-y-2">
               <p>{t.premiumRequired}</p>
               <Link
-                href={`/payment?product=pet_premium_v1&type=compatibility&petName=${encodeURIComponent(petName)}&species=${species}&birthDate=${petBirthDate}&locale=${locale}${petId ? `&petId=${petId}` : ""}`}
+                href={`/payment?product=pet_premium_v1&type=compatibility&petName=${encodeURIComponent(petName)}&species=${species}&birthDate=${petBirthDate}&calendarType=${petCalendarType}&locale=${locale}${petId ? `&petId=${petId}` : ""}`}
                 className="inline-block font-bold text-primary underline"
               >
                 {t.goToPay}

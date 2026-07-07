@@ -7,6 +7,7 @@ import { finalizePetHeadline } from "@/lib/saju/pet-headline";
 import { validatePetName } from "@/lib/saju/moderation";
 import { persistSajuResult } from "@/lib/saju/persist";
 import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
+import { normalizeBirthCalendarType } from "@/lib/saju/resolve-birth-date";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -123,6 +124,7 @@ export async function POST(request: Request) {
     species: body.species as Species,
     petGender,
     birthDate: body.birthDate,
+    calendarType: normalizeBirthCalendarType(body.calendarType),
     birthTime: body.birthTime ?? null,
     birthTimeUnknown: Boolean(body.birthTimeUnknown),
     timezone: body.timezone,

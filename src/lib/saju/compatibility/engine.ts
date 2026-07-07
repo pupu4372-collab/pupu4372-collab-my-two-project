@@ -15,9 +15,11 @@ export interface CompatibilityRequest {
   petGender: Gender;
   ownerGender: Gender;
   petBirthDate: string;
+  petCalendarType?: "solar" | "lunar";
   petBirthTime: string | null;
   petBirthTimeUnknown: boolean;
   ownerBirthDate: string;
+  ownerCalendarType?: "solar" | "lunar";
   ownerBirthTime: string | null;
   ownerBirthTimeUnknown: boolean;
   timezone: string;
@@ -63,6 +65,7 @@ export function computeCompatibility(input: CompatibilityRequest): Compatibility
     petName: input.petName,
     species: input.species,
     birthDate: input.petBirthDate,
+    calendarType: input.petCalendarType ?? "solar",
     birthTime: input.petBirthTime,
     birthTimeUnknown: input.petBirthTimeUnknown,
     timezone: input.timezone,
@@ -74,6 +77,7 @@ export function computeCompatibility(input: CompatibilityRequest): Compatibility
     petName: input.ownerName,
     species: input.species,
     birthDate: input.ownerBirthDate,
+    calendarType: input.ownerCalendarType ?? "solar",
     birthTime: input.ownerBirthTime,
     birthTimeUnknown: input.ownerBirthTimeUnknown,
     timezone: input.timezone,

@@ -10,7 +10,7 @@ import type { Locale } from "@/lib/saju/types";
 import type { InterpretSajuInput, LlmProviderName } from "./types";
 
 /** Bump when interpret prompts or mapping shape changes materially */
-export const LLM_CACHE_PROMPT_VERSION = 1;
+export const LLM_CACHE_PROMPT_VERSION = 2;
 
 /** Bump when human premium section prompts change materially */
 export const HUMAN_PREMIUM_PROMPT_VERSION = 19;

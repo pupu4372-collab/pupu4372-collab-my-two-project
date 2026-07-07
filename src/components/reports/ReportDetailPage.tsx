@@ -1,6 +1,7 @@
 "use client";
 
 import { CompatibilityResult } from "@/components/k-saju/CompatibilityResult";
+import { PremiumMbtiReport } from "@/components/k-saju/PremiumMbtiReport";
 import { PremiumReportView } from "@/components/k-saju/PremiumReportView";
 import { SajuResult } from "@/components/k-saju/SajuResult";
 import { ZodiacResult } from "@/components/k-saju/ZodiacResult";
@@ -9,6 +10,8 @@ import { GlassCard } from "@/components/layout/StitchLayout";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
+import type { PetMbtiAxisPercents, PetMbtiType } from "@/lib/pet/mbti-inference";
+import type { PetMbtiPremiumInsight } from "@/lib/saju/llm/pet-premium/types";
 import type { PremiumReport } from "@/lib/saju/premium-report";
 import type { ElementKey, ElementDisplay, Gender, Locale, SajuBasicResponse, Species } from "@/lib/saju/types";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
@@ -68,6 +71,8 @@ function baseSajuResult(report: ReportDetailRow): SajuBasicResponse {
     petGender: (asString(birth.petGender, report.pet?.gender ?? "") as Gender) || null,
     locale,
     birthUtc,
+    birthDate: asString(birth.birthDate, report.pet?.birth_date ?? birthUtc.slice(0, 10)),
+    calendarType: birth.calendarType === "lunar" ? "lunar" : "solar",
     timezone: asString(birth.timezone, report.pet?.birth_timezone ?? "Asia/Seoul"),
     birthTimeUnknown: asBoolean(birth.birthTimeUnknown, report.pet?.birth_time_unknown ?? false),
     kstJiji: (payload.kstJiji as SajuBasicResponse["kstJiji"]) ?? null,
@@ -146,6 +151,39 @@ function compatibilityResult(report: ReportDetailRow): CompatibilityResponse {
   };
 }
 
+function mbtiInsightFromReport(report: ReportDetailRow): {
+  insight: PetMbtiPremiumInsight;
+  dominantElement?: ElementKey;
+  locale: Locale;
+} {
+  const birth = asObject(report.birth_basis);
+  const payload = asObject(report.storytelling_payload);
+  const locale = localeFrom(birth.locale);
+  const axisPercents = payload.axisPercents as PetMbtiAxisPercents | undefined;
+  const mbtiType = asString(payload.mbtiType, asString(birth.mbtiType, "ISTJ")) as PetMbtiType;
+  const dominantRaw = asString(payload.dominantElement, elementFrom(report));
+
+  return {
+    locale,
+    dominantElement: dominantRaw as ElementKey,
+    insight: {
+      mbtiType,
+      axisPercents: axisPercents ?? {
+        EI: { E: 50, I: 50 },
+        SN: { S: 50, N: 50 },
+        TF: { T: 50, F: 50 },
+        JP: { J: 50, P: 50 },
+      },
+      personalityBlend: asString(payload.personalityBlend, report.summary ?? ""),
+      sajuCombo: asString(payload.sajuCombo),
+      butlerFit: asString(payload.butlerFit),
+      health: asString(payload.health),
+      dailyCare: asString(payload.dailyCare),
+      narrativeSource: asString(payload.narrativeSource, "template") as PetMbtiPremiumInsight["narrativeSource"],
+    },
+  };
+}
+
 function premiumResult(report: ReportDetailRow): PremiumReport {
   const payload = asObject(report.storytelling_payload);
   const basic = baseSajuResult(report);
@@ -162,6 +200,15 @@ function premiumResult(report: ReportDetailRow): PremiumReport {
 }
 
 function ReportRenderer({ report }: { report: ReportDetailRow }) {
+  if (report.saju_type === "mbti") {
+    const { insight, dominantElement, locale } = mbtiInsightFromReport(report);
+    return (
+      <div className="space-y-4">
+        <PremiumMbtiReport insight={insight} locale={locale} dominantElement={dominantElement} />
+      </div>
+    );
+  }
+
   if (report.saju_type === "zodiac") {
     return <ZodiacResult result={zodiacResult(report)} />;
   }
@@ -200,7 +247,11 @@ export function ReportDetailPage({ reportId }: { reportId: string }) {
         });
         const data = await res.json();
         if (!res.ok) {
-          setError(data.error ?? (isKo ? "리포트를 불러오지 못했어요." : "Could not load report."));
+          setError(
+            res.status === 410
+              ? (isKo ? "보관 기간이 만료된 리포트예요." : "This report has expired.")
+              : (data.error ?? (isKo ? "리포트를 불러오지 못했어요." : "Could not load report."))
+          );
           return;
         }
         setReport(data.report as ReportDetailRow);

@@ -3,6 +3,7 @@ import {
   getBearerToken,
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
+import { isVisibleInVault } from "@/lib/reports/vault-policy";
 import type { Pet, SajuResultRow } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
@@ -45,6 +46,11 @@ export async function GET(
   }
 
   const reportRow = report as SajuResultRow;
+
+  if (!isVisibleInVault(reportRow)) {
+    return NextResponse.json({ error: "Report expired." }, { status: 410 });
+  }
+
   const { data: pet } = await supabase
     .from("pets")
     .select(PET_SELECT)

@@ -3,7 +3,7 @@
 import { AdSlot } from "@/components/ads/AdSlot";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
 import { SajuPremiumPackagePanel } from "@/components/k-saju/SajuPremiumPackagePanel";
-import { SajuResultShareRow } from "@/components/k-saju/SajuResultShareRow";
+import { BasicSajuInstaShareRow } from "@/components/k-saju/BasicSajuInstaShareRow";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
@@ -54,7 +54,7 @@ const LABELS = {
       `For ${name}, ${color} accessories may bring extra luck today.`,
     routineUnit: "times",
     home: "Back to home",
-    another: "Read another pet",
+    another: "Another personalized care",
   },
   ko: {
     reading: "K-Saju 사주",
@@ -88,7 +88,7 @@ const LABELS = {
       `${name}에게 오늘은 ${color} 액세서리가 행운을 가져다줄 거예요.`,
     routineUnit: "회",
     home: "홈으로",
-    another: "다른 펫 사주",
+    another: "다른 아이 맞춤 케어",
   },
 } as const;
 
@@ -178,7 +178,8 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
     petName: result.petName,
     species: result.species,
     petGender: result.petGender ?? "female",
-    birthDate: result.birthUtc.slice(0, 10),
+    birthDate: result.birthDate,
+    calendarType: result.calendarType,
     birthTime: "unknown",
     timezone: result.timezone,
     locale: result.locale,
@@ -432,6 +433,8 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
               </div>
             </div>
           </GlassCard>
+
+          <BasicSajuInstaShareRow result={result} mbtiType={mbtiType} />
         </div>
 
         <aside className="pb-6 max-lg:pb-28 lg:col-span-4">
@@ -442,8 +445,6 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
           />
         </aside>
       </div>
-
-      <SajuResultShareRow kind="basic" result={result} mbtiType={mbtiType} />
 
       <div className="flex flex-col justify-center gap-3 sm:flex-row">
         <Link

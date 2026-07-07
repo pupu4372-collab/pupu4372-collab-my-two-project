@@ -2,6 +2,7 @@ export type ElementKey = "wood" | "fire" | "earth" | "metal" | "water";
 export type Species = "dog" | "cat" | "reptile" | "other";
 export type Locale = "en" | "ko";
 export type Gender = "male" | "female";
+export type BirthCalendarType = "solar" | "lunar";
 
 export interface PillarDisplay {
   pillar: string;
@@ -42,6 +43,7 @@ export interface SajuBasicRequest {
   species: Species;
   petGender?: Gender | null;
   birthDate: string;
+  calendarType?: BirthCalendarType;
   birthTime: string | null;
   birthTimeUnknown: boolean;
   timezone: string;
@@ -55,6 +57,8 @@ export interface SajuBasicResponse {
   petGender?: Gender | null;
   locale: Locale;
   birthUtc: string;
+  birthDate: string;
+  calendarType: BirthCalendarType;
   timezone: string;
   birthTimeUnknown: boolean;
   kstJiji: KstJijiHour | null;
