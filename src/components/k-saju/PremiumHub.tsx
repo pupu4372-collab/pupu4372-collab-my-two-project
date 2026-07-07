@@ -50,7 +50,6 @@ type PetContext = {
   species: Species;
   petGender: Gender;
   petBirthDate: string;
-  petCalendarType: BirthCalendarType;
   petBirthTime: string | null;
   petBirthTimeUnknown: boolean;
   timezone: string;
@@ -170,9 +169,6 @@ function isBirthTimeOption(value: string | null): value is string {
   return Boolean(value && BIRTH_TIME_OPTIONS.some((option) => option.value === value));
 }
 
-function isCalendarType(value: string | null): value is BirthCalendarType {
-  return value === "solar" || value === "lunar";
-}
 
 function formatPetBirthTime(value: string, locale: Locale): string {
   const option = BIRTH_TIME_OPTIONS.find((o) => o.value === value);
@@ -228,7 +224,7 @@ export function PremiumHub() {
       species: pet.species,
       petGender: pet.petGender,
       birthDate: pet.petBirthDate,
-      calendarType: pet.petCalendarType,
+      calendarType: "solar",
       birthTime: pet.petBirthTime,
       birthTimeUnknown: pet.petBirthTimeUnknown,
       timezone: pet.timezone,
@@ -244,7 +240,7 @@ export function PremiumHub() {
       species: pet.species,
       petGender: pet.petGender,
       birthDate: pet.petBirthDate,
-      calendarType: pet.petCalendarType,
+      calendarType: "solar",
       birthTime: pet.petBirthTime,
       birthTimeUnknown: pet.petBirthTimeUnknown,
       timezone: pet.timezone,
@@ -269,7 +265,6 @@ export function PremiumHub() {
     const nextPetGender = params.get("petGender");
     const nextName = params.get("petName");
     const nextBirthDate = params.get("birthDate");
-    const nextCalendarType = params.get("calendarType");
     const nextBirthTime = params.get("birthTime");
     const nextTimezone = params.get("timezone");
     const nextPetId = params.get("petId");
@@ -293,7 +288,6 @@ export function PremiumHub() {
       species: isSpecies(nextSpecies) ? nextSpecies : "dog",
       petGender: isGender(nextPetGender) ? nextPetGender : "female",
       petBirthDate: nextBirthDate,
-      petCalendarType: isCalendarType(nextCalendarType) ? nextCalendarType : "solar",
       petBirthTime: petTime.birthTime,
       petBirthTimeUnknown: petTime.birthTimeUnknown,
       timezone: nextTimezone ?? detectTimezone(),
@@ -353,7 +347,7 @@ export function PremiumHub() {
               ownerGender: butler.ownerGender,
               petBirthDate: petCtx.petBirthDate,
               ownerBirthDate: butler.ownerBirthDate,
-              petCalendarType: petCtx.petCalendarType,
+              petCalendarType: "solar",
               ownerCalendarType: butler.ownerCalendarType,
               petBirthTime: petCtx.petBirthTime,
               petBirthTimeUnknown: petCtx.petBirthTimeUnknown,
@@ -403,7 +397,7 @@ export function PremiumHub() {
               petName: petCtx.petName,
               species: petCtx.species,
               birthDate: petCtx.petBirthDate,
-              calendarType: petCtx.petCalendarType,
+              calendarType: "solar",
               birthTime: petCtx.petBirthTime,
               birthTimeUnknown: petCtx.petBirthTimeUnknown,
               timezone: petCtx.timezone,
@@ -458,7 +452,7 @@ export function PremiumHub() {
             species: petCtx.species,
             petGender: petCtx.petGender,
             birthDate: petCtx.petBirthDate,
-            calendarType: petCtx.petCalendarType,
+            calendarType: "solar",
             birthTime: petCtx.petBirthTime,
             birthTimeUnknown: petCtx.petBirthTimeUnknown,
             timezone: petCtx.timezone,
@@ -552,7 +546,7 @@ export function PremiumHub() {
           petName: petCtx.petName,
           species: petCtx.species,
           birthDate: petCtx.petBirthDate,
-          calendarType: petCtx.petCalendarType,
+          calendarType: "solar",
           birthTime: petCtx.petBirthTime,
           birthTimeUnknown: petCtx.petBirthTimeUnknown,
           timezone: petCtx.timezone,
@@ -606,7 +600,7 @@ export function PremiumHub() {
           ownerGender: session.ownerGender,
           petBirthDate: petCtx.petBirthDate,
           ownerBirthDate: session.ownerBirthDate,
-          petCalendarType: petCtx.petCalendarType,
+          petCalendarType: "solar",
           ownerCalendarType: session.ownerCalendarType,
           petBirthTime: petCtx.petBirthTime,
           petBirthTimeUnknown: petCtx.petBirthTimeUnknown,

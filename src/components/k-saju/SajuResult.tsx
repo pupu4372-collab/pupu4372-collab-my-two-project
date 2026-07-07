@@ -179,7 +179,6 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
     species: result.species,
     petGender: result.petGender ?? "female",
     birthDate: result.birthDate,
-    calendarType: result.calendarType,
     birthTime: "unknown",
     timezone: result.timezone,
     locale: result.locale,

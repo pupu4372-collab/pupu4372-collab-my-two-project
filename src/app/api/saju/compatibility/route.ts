@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     petGender: body.petGender as Gender,
     ownerGender: body.ownerGender as Gender,
     petBirthDate: String(body.petBirthDate),
-    petCalendarType: normalizeBirthCalendarType(body.petCalendarType ?? body.calendarType),
+    petCalendarType: normalizeBirthCalendarType(body.petCalendarType ?? "solar"),
     petBirthTime: (body.petBirthTime as string) ?? null,
     petBirthTimeUnknown: Boolean(body.petBirthTimeUnknown),
     ownerBirthDate: String(body.ownerBirthDate),

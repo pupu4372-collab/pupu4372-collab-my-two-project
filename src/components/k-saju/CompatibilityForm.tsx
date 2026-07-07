@@ -104,9 +104,6 @@ function isBirthTimeOption(value: string | null): value is string {
   return Boolean(value && BIRTH_TIME_OPTIONS.some((option) => option.value === value));
 }
 
-function isCalendarType(value: string | null): value is BirthCalendarType {
-  return value === "solar" || value === "lunar";
-}
 
 export function CompatibilityForm() {
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
@@ -119,7 +116,6 @@ export function CompatibilityForm() {
   const [ownerGender, setOwnerGender] = useState<Gender | "">("");
   const [petBirthDate, setPetBirthDate] = useState("");
   const [ownerBirthDate, setOwnerBirthDate] = useState("");
-  const [petCalendarType, setPetCalendarType] = useState<BirthCalendarType>("solar");
   const [ownerCalendarType, setOwnerCalendarType] = useState<BirthCalendarType>("solar");
   const [petBirthTime, setPetBirthTime] = useState("unknown");
   const [ownerBirthTime, setOwnerBirthTime] = useState("unknown");
@@ -143,7 +139,6 @@ export function CompatibilityForm() {
     const nextPetGender = params.get("petGender");
     const nextName = params.get("petName");
     const nextBirthDate = params.get("birthDate");
-    const nextCalendarType = params.get("calendarType");
     const nextBirthTime = params.get("birthTime");
     const nextTimezone = params.get("timezone");
 
@@ -152,7 +147,6 @@ export function CompatibilityForm() {
     if (isGender(nextPetGender)) setPetGender(nextPetGender);
     if (nextName) setPetName(nextName);
     if (nextBirthDate) setPetBirthDate(nextBirthDate);
-    if (isCalendarType(nextCalendarType)) setPetCalendarType(nextCalendarType);
     if (isBirthTimeOption(nextBirthTime)) setPetBirthTime(nextBirthTime);
     if (nextTimezone) setTimezone(nextTimezone);
 
@@ -205,7 +199,7 @@ export function CompatibilityForm() {
           ownerGender,
           petBirthDate,
           ownerBirthDate,
-          petCalendarType,
+          petCalendarType: "solar",
           ownerCalendarType,
           petBirthTime: petTime.birthTime,
           petBirthTimeUnknown: petTime.birthTimeUnknown,
@@ -315,12 +309,6 @@ export function CompatibilityForm() {
             className={FIELD_LABEL_CLASS}
             selectClassName={STITCH_INPUT_CLASS}
           />
-          <BirthCalendarToggle
-            value={petCalendarType}
-            onChange={setPetCalendarType}
-            locale={locale}
-            compact
-          />
           <label className={FIELD_LABEL_CLASS}>
             {t.birthTime}
             <select
@@ -422,7 +410,7 @@ export function CompatibilityForm() {
             <div className="rounded-2xl bg-petal/40 px-4 py-3 text-sm text-plum space-y-2">
               <p>{t.premiumRequired}</p>
               <Link
-                href={`/payment?product=pet_premium_v1&type=compatibility&petName=${encodeURIComponent(petName)}&species=${species}&birthDate=${petBirthDate}&calendarType=${petCalendarType}&locale=${locale}${petId ? `&petId=${petId}` : ""}`}
+                href={`/payment?product=pet_premium_v1&type=compatibility&petName=${encodeURIComponent(petName)}&species=${species}&birthDate=${petBirthDate}&locale=${locale}${petId ? `&petId=${petId}` : ""}`}
                 className="inline-block font-bold text-primary underline"
               >
                 {t.goToPay}

@@ -1,6 +1,5 @@
 "use client";
 
-import { BirthCalendarToggle } from "@/components/k-saju/BirthCalendarToggle";
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { PetMbtiAccordion } from "@/components/k-saju/PetMbtiAccordion";
 import { SajuResult } from "@/components/k-saju/SajuResult";
@@ -12,7 +11,7 @@ import {
 } from "@/lib/saju/birth-time-options";
 import { Link } from "@/i18n/navigation";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
-import type { BirthCalendarType, Gender, Locale, SajuBasicResponse, Species } from "@/lib/saju/types";
+import type { Gender, Locale, SajuBasicResponse, Species } from "@/lib/saju/types";
 import type { MbtiAnswerMap } from "@/lib/pet/calc-mbti";
 import { calcMbti, isMbtiComplete } from "@/lib/pet/calc-mbti";
 import { getQuestionsBySpecies } from "@/lib/pet/mbti-questions";
@@ -135,7 +134,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const [species, setSpecies] = useState<Species>("dog");
   const [petGender, setPetGender] = useState<Gender>("female");
   const [birthDate, setBirthDate] = useState("");
-  const [calendarType, setCalendarType] = useState<BirthCalendarType>("solar");
   const [birthTime, setBirthTime] = useState("unknown");
   const [timezone, setTimezone] = useState(detectTimezone);
   const [consent, setConsent] = useState(false);
@@ -177,7 +175,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     species,
     petGender,
     birthDate,
-    calendarType,
     birthTime,
     timezone,
     locale,
@@ -227,7 +224,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
           species,
           petGender,
           birthDate,
-          calendarType,
+          calendarType: "solar",
           birthTime: birthTimeUnknown ? null : birthTime,
           birthTimeUnknown,
           timezone,
@@ -465,14 +462,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
                 ? inputClass
                 : "w-full rounded-2xl border-0 bg-surface-container-low px-3 py-3 text-center text-sm font-bold text-primary focus:ring-4 focus:ring-primary/10"
             }
-          />
-          <BirthCalendarToggle
-            value={calendarType}
-            onChange={setCalendarType}
-            locale={locale}
-            className={embedded ? "mt-3" : "mt-4"}
-            legendClassName={labelClass}
-            compact={embedded}
           />
 
           <div className={embedded ? "space-y-3" : "mt-6 space-y-4"}>
