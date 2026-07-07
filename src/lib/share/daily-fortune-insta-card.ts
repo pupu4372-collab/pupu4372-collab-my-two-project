@@ -43,7 +43,7 @@ export function statScoreBand(score: number, isKo: boolean): string {
   return isKo ? "차분한 하루" : "A calm day";
 }
 
-export function truncateInstaBody(text: string, max = 90): string {
+export function truncateInstaBody(text: string, max = 75): string {
   const normalized = text.replace(/\s+/g, " ").trim();
   if (normalized.length <= max) return normalized;
   return `${normalized.slice(0, max - 1)}…`;
@@ -151,13 +151,19 @@ function downloadBlob(blob: Blob, fileName: string) {
 }
 
 export async function captureDailyFortuneInstaCard(cardEl: HTMLElement): Promise<Blob> {
+  const INSTA_SIZE = 1080;
+
   const canvas = await html2canvas(cardEl, {
     backgroundColor: "#F6F1E4",
     scale: 1,
     useCORS: true,
-    width: 1080,
-    height: 1350,
+    width: INSTA_SIZE,
+    height: INSTA_SIZE,
   });
+
+  if (canvas.width !== INSTA_SIZE || canvas.height !== INSTA_SIZE) {
+    throw new Error(`INSTA_CAPTURE_SIZE_MISMATCH:${canvas.width}x${canvas.height}`);
+  }
 
   const blob = await new Promise<Blob | null>((resolve) => {
     canvas.toBlob(resolve, "image/png");

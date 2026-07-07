@@ -1377,7 +1377,7 @@ html.native-app body {
   display: flex;
   flex-direction: column;
   width: 1080px;
-  height: 1350px;
+  height: 1080px;
   overflow: hidden;
   background: #f6f1e4;
   color: #3a362d;
@@ -1389,7 +1389,7 @@ html.native-app body {
   flex: 1;
   flex-direction: column;
   min-height: 0;
-  padding: 52px 48px 24px;
+  padding: 70px 70px 10px;
 }
 
 .daily-fortune-insta-card__header {
@@ -1397,31 +1397,31 @@ html.native-app body {
 }
 
 .daily-fortune-insta-card__date {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
   color: #6b6458;
 }
 
 .daily-fortune-insta-card__title {
-  margin-top: 12px;
-  font-size: 40px;
+  margin-top: 8px;
+  font-size: 34px;
   font-weight: 800;
-  line-height: 1.25;
+  line-height: 1.22;
   color: #3a362d;
 }
 
 .daily-fortune-insta-card__hero {
   display: flex;
-  gap: 28px;
+  gap: 16px;
   align-items: flex-start;
-  margin-top: 36px;
+  margin-top: 18px;
 }
 
 .daily-fortune-insta-card__harmony-wrap {
   position: relative;
-  flex: 0 0 330px;
-  width: 330px;
-  height: 330px;
+  flex: 0 0 260px;
+  width: 260px;
+  height: 260px;
 }
 
 .daily-fortune-insta-card__harmony-ring {
@@ -1436,8 +1436,8 @@ html.native-app body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 330px;
-  height: 330px;
+  width: 260px;
+  height: 260px;
   border-radius: 50%;
   background: #3a362d;
   color: #fff;
@@ -1445,61 +1445,61 @@ html.native-app body {
 }
 
 .daily-fortune-insta-card__harmony-label {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.92);
 }
 
 .daily-fortune-insta-card__harmony-score {
-  margin-top: 8px;
-  font-size: 88px;
+  margin-top: 4px;
+  font-size: 68px;
   font-weight: 800;
   line-height: 1;
 }
 
 .daily-fortune-insta-card__harmony-pill {
-  margin-top: 16px;
-  max-width: 250px;
+  margin-top: 10px;
+  max-width: 210px;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.22);
   background: rgba(0, 0, 0, 0.22);
-  padding: 10px 18px;
-  font-size: 18px;
+  padding: 6px 14px;
+  font-size: 15px;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 .daily-fortune-insta-card__stats {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 18px;
+  gap: 10px;
   min-width: 0;
-  padding-top: 8px;
+  padding-top: 4px;
 }
 
 .daily-fortune-insta-card__stat-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .daily-fortune-insta-card__stat-label {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   color: #3a362d;
 }
 
 .daily-fortune-insta-card__stat-band {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: #6b6458;
 }
 
 .daily-fortune-insta-card__stat-bar-bg {
-  height: 12px;
+  height: 8px;
   overflow: hidden;
   border-radius: 9999px;
   background: #ddd5c4;
@@ -1514,40 +1514,40 @@ html.native-app body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   min-height: 0;
-  margin-top: 28px;
+  margin-top: 14px;
 }
 
 .daily-fortune-insta-card__section {
   flex: 1;
   min-height: 0;
   border: 1px solid #e4dcc8;
-  border-top-width: 3px;
-  border-radius: 16px;
+  border-top-width: 2px;
+  border-radius: 12px;
   background: #fdfaf1;
-  padding: 18px 22px;
+  padding: 12px 16px;
 }
 
 .daily-fortune-insta-card__section-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   color: #3a362d;
 }
 
 .daily-fortune-insta-card__section-body {
-  margin-top: 10px;
-  font-size: 20px;
+  margin-top: 6px;
+  font-size: 17px;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.4;
   color: #4a453c;
 }
 
 .daily-fortune-insta-card__watermark {
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 6px;
   text-align: right;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.04em;
   color: #8a8274;
@@ -1558,10 +1558,10 @@ html.native-app body {
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  height: 105px;
+  height: 85px;
   background: #3a362d;
   color: #fff;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.01em;
   text-align: center;
