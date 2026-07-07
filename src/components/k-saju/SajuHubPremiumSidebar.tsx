@@ -1,10 +1,12 @@
 "use client";
 
+import { PremiumReportPreviewSample } from "@/components/k-saju/PremiumReportPreviewSample";
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 
 export function SajuHubPremiumSidebar() {
+  const routeLocale = useLocale();
+  const locale = routeLocale === "en" ? "en" : "ko";
   const t = useTranslations("saju");
 
   return (
@@ -29,27 +31,9 @@ export function SajuHubPremiumSidebar() {
       <section className="overflow-hidden rounded-[1.75rem] border border-channel-saju/20 bg-white shadow-sm">
         <div className="border-b border-channel-saju/10 px-4 py-3">
           <p className="text-xs font-extrabold text-channel-saju">{t("premiumSidebarSampleLabel")}</p>
+          <p className="mt-0.5 text-[11px] leading-relaxed text-plum/65">{t("premiumSidebarSampleHint")}</p>
         </div>
-        <div className="relative aspect-[4/5] overflow-hidden bg-surface-container-low">
-          <Image
-            src="/about/premium-report.png"
-            alt=""
-            fill
-            className="object-cover object-top"
-            sizes="(max-width: 1024px) 100vw, 320px"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/25 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 p-4">
-            <p className="text-sm font-extrabold text-white">{t("premiumSidebarSampleTitle")}</p>
-            <p className="mt-1 text-[11px] leading-relaxed text-white/85">
-              {t("premiumSidebarSampleHint")}
-            </p>
-          </div>
-          <div
-            className="pointer-events-none absolute inset-0 backdrop-blur-[2px] [mask-image:linear-gradient(to_top,black_35%,transparent_72%)]"
-            aria-hidden
-          />
-        </div>
+        <PremiumReportPreviewSample locale={locale} />
       </section>
 
       <section className="rounded-[1.75rem] border border-channel-saju/15 bg-lavender/35 px-4 py-4">
