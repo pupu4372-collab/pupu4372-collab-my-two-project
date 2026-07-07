@@ -4,7 +4,6 @@ import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import type { SajuBasicResponse } from "@/lib/saju/types";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
 import {
-  buildBasicSajuStorySlide,
   buildCompatibilityStorySlide,
   buildZodiacStorySlide,
   copySajuShareLink,
@@ -12,6 +11,7 @@ import {
   getCompatibilityShareUrl,
   getZodiacShareUrl,
   saveSajuStorySlide,
+  shareBasicSajuInstaCarousel,
   shareBasicSajuToKakao,
   shareCompatibilityToKakao,
   shareZodiacToKakao,
@@ -27,7 +27,7 @@ const COPY = {
       link: "링크 복사",
       kakaoFail:
         "카카오 공유 검증 실패예요. developers.kakao.com 에서 Web 도메인(ksajupet.com, localhost) 등록을 확인해 주세요.",
-      instagramOk: "스토리용 이미지를 저장했어요. 인스타에서 올려 주세요.",
+      instagramOk: "인스타용 이미지 3장을 저장했어요. 1→3 순서로 올려 주세요.",
       instagramFail: "인스타 스토리 이미지를 저장할 수 없어요.",
       linkOk: "링크를 복사했어요!",
       linkFail: "링크 복사에 실패했어요.",
@@ -67,7 +67,7 @@ const COPY = {
       instagram: "Instagram",
       link: "Copy link",
       kakaoFail: "Kakao share verification failed. Register ksajupet.com in Kakao Developers.",
-      instagramOk: "Story image saved. Upload it on Instagram.",
+      instagramOk: "Saved 3 carousel images. Upload them in order on Instagram.",
       instagramFail: "Could not save the Instagram story image.",
       linkOk: "Link copied!",
       linkFail: "Failed to copy link.",
@@ -101,7 +101,7 @@ const COPY = {
 } as const;
 
 type Props =
-  | { kind: "basic"; result: SajuBasicResponse }
+  | { kind: "basic"; result: SajuBasicResponse; mbtiType?: string | null }
   | { kind: "zodiac"; result: ZodiacFortuneResponse }
   | { kind: "compatibility"; result: CompatibilityResponse };
 
@@ -144,14 +144,17 @@ export function SajuResultShareRow(props: Props) {
     setBusy("instagram");
     setStatus(null);
     try {
-      const slide =
-        props.kind === "basic"
-          ? await buildBasicSajuStorySlide(props.result)
-          : props.kind === "zodiac"
+      if (props.kind === "basic") {
+        const outcome = await shareBasicSajuInstaCarousel(props.result, props.mbtiType);
+        if (outcome === "downloaded") setStatus(t.instagramOk);
+      } else {
+        const slide =
+          props.kind === "zodiac"
             ? await buildZodiacStorySlide(props.result)
             : await buildCompatibilityStorySlide(props.result);
-      await saveSajuStorySlide(slide, fileStem || t.fileStem);
-      setStatus(t.instagramOk);
+        await saveSajuStorySlide(slide, fileStem || t.fileStem);
+        setStatus(t.instagramOk);
+      }
     } catch {
       setStatus(t.instagramFail);
     } finally {

@@ -3,6 +3,7 @@ import { computePetSajuBundle } from "@/lib/saju/engine";
 import { generateGeminiNarrative } from "@/lib/saju/gemini-narrative";
 import { applyPetInterpretationToBasicResponse } from "@/lib/saju/llm/apply-pet-to-basic";
 import { interpretSaju, isSajuInterpretLlmEnabled } from "@/lib/saju/llm/interpret";
+import { finalizePetHeadline } from "@/lib/saju/pet-headline";
 import { validatePetName } from "@/lib/saju/moderation";
 import { persistSajuResult } from "@/lib/saju/persist";
 import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
@@ -172,6 +173,8 @@ export async function POST(request: Request) {
           err instanceof Error ? err.message : "Gemini narrative generation failed.";
       }
     }
+
+    finalizePetHeadline(result, mapping);
 
     let persisted = false;
     let petId: string | null = null;

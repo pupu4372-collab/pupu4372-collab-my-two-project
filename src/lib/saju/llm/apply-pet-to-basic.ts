@@ -1,4 +1,5 @@
 import type { PetSajuMapping } from "@/lib/saju/pet-trait-mapping";
+import { finalizePetHeadline } from "@/lib/saju/pet-headline";
 import type { SajuBasicResponse } from "@/lib/saju/types";
 import type { LlmProviderName, PetInterpretationJson } from "./types";
 
@@ -23,4 +24,5 @@ export function applyPetInterpretationToBasicResponse(
     .slice(0, 5);
   result.narrativeSource = provider;
   result.narrativeError = null;
+  finalizePetHeadline(result, mapping);
 }

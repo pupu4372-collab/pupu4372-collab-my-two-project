@@ -40,6 +40,7 @@ function buildPrompt(request: SajuBasicRequest, result: SajuBasicResponse) {
     localeInstruction,
     "Use only the calculated saju facts below. Do not claim medical, financial, or guaranteed future outcomes.",
     'Return JSON with keys: headline (string), storyParagraphs (array of 5-7 strings), traits (array of 5 short strings).',
+    "headline: one short line about the pet only. Never use butler, pet parent, guardian, 집사님, or other human honorifics.",
     "Each storyParagraphs item must be 2-3 sentences. Cover personality, emotions, play/social style, care routine, cautions, and a lucky daily ritual.",
     "Avoid vague filler; tie content to the pillars or element mix.",
     "",

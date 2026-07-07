@@ -26,12 +26,16 @@ export function buildPetInterpretationPrompts(options: {
         "입력 JSON의 사실만 사용하고, 의학적 진단·치료 단정·미래 확정 예언은 금지합니다.",
         "건강은 '주의 포인트' 수준까지만, 따뜻하고 친근한 보호자 톤으로 작성합니다.",
         '반드시 JSON만 출력하세요. 키: characterIntro, personality, healthNote, compatibility (모두 string).',
+        "characterIntro는 펫 이름·일간 캐릭터를 주어로 한 한 줄(15~30자). '집사님' '보호자님' '주인님' 등 사람 호칭·호칭 어미 금지.",
+        "characterIntro 예: '뭉치 · 마이페이스 우리집 낭만가', '나비 · 호기심 탐험가'",
       ].join("\n")
     : [
         "You write K-Saju pet fortune copy for guardians.",
         "Use only the provided mapping facts. No medical diagnoses, treatment claims, or guaranteed predictions.",
         "Health notes stay at 'care watchpoints' level with a warm, friendly tone.",
         'Return JSON only with keys: characterIntro, personality, healthNote, compatibility (all strings).',
+        "characterIntro: one line about the pet (not the guardian). Never use butler, pet parent, guardian, or human honorifics.",
+        'Example characterIntro: "Mochi · curious home explorer"',
       ].join("\n");
 
   const user = isKo
@@ -45,7 +49,7 @@ export function buildPetInterpretationPrompts(options: {
         `- 오행 균형 점수: ${mapping.balanceScore}/100`,
         `- 보호자 궁합: ${mapping.dominantTraits.compatibilityTag}`,
         "",
-        "characterIntro: 한 줄 캐릭터 소개",
+        "characterIntro: 한 줄 캐릭터 소개 (펫 주어, 사람 호칭 금지)",
         "personality: 2~3문장 성격",
         "healthNote: 1~2문장 건강 주의(단정 금지)",
         "compatibility: 1~2문장 보호자에게 한마디",

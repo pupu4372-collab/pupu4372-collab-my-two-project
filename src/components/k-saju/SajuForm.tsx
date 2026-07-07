@@ -279,13 +279,17 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
             <p className="mt-1 text-sm leading-6 text-on-surface-variant">
               {mbtiTypeData.descKo}
             </p>
-            <span className="mt-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-extrabold text-primary">
+            <span className="mt-4 inline-flex rounded-full bg-channel-saju/20 px-4 py-1.5 text-xl font-bold tracking-wide text-channel-saju">
               {mbtiResult.type}
             </span>
           </section>
         )}
 
-        <SajuResult result={result} variant={embedded ? "pastel" : "default"} />
+        <SajuResult
+          result={result}
+          variant={embedded ? "pastel" : "default"}
+          mbtiType={isMbtiComplete(mbtiAnswers, mbtiQuestions) ? mbtiResult.type : undefined}
+        />
       </div>
     );
   }

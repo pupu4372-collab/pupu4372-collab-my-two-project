@@ -7,6 +7,7 @@ import { SajuResultShareRow } from "@/components/k-saju/SajuResultShareRow";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
+import { formatPetBirthDisplayLabel } from "@/lib/saju/pet-birth-display";
 import { branchHangulLabel, charToElement, ELEMENT_META, stemHangulLabel } from "@/lib/saju/elements";
 import { formatJijiDisplay } from "@/lib/saju/jiji-hours";
 import { buildPetLuckyScores, dominantElementLabel } from "@/lib/saju/pet-lucky-scores";
@@ -17,6 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 interface SajuResultProps {
   result: SajuBasicResponse;
   variant?: "default" | "pastel";
+  mbtiType?: string | null;
 }
 
 const LABELS = {
@@ -90,11 +92,6 @@ const LABELS = {
   },
 } as const;
 
-function elementPercent(count: number, total: number) {
-  if (total <= 0) return 0;
-  return Math.round((count / total) * 100);
-}
-
 function PillarCell({
   pillar,
   emphasize,
@@ -149,17 +146,13 @@ function traitCards(traits: string[], locale: Locale) {
   }));
 }
 
-export function SajuResult({ result }: SajuResultProps) {
+export function SajuResult({ result, mbtiType }: SajuResultProps) {
   const t = LABELS[result.locale];
   const isKo = result.locale === "ko";
   const meta = ELEMENT_META[result.dominantElement];
   const accent = ELEMENT_ACCENT[result.dominantElement];
   const [barsReady, setBarsReady] = useState(false);
 
-  const totalCount = useMemo(
-    () => result.elements.reduce((sum, el) => sum + el.count, 0),
-    [result.elements]
-  );
   const sortedElements = useMemo(() => {
     const dominant = result.dominantElement;
     return [...result.elements].sort((a, b) => {
@@ -174,7 +167,13 @@ export function SajuResult({ result }: SajuResultProps) {
     [result.petName, result.birthUtc, result.dominantElement, result.locale]
   );
 
-  const birthDateLabel = formatUtcForDisplay(result.birthUtc, result.timezone).split(",")[0]?.trim() ?? result.birthUtc.slice(0, 10);
+  const birthDateLabel = formatPetBirthDisplayLabel({
+    birthUtc: result.birthUtc,
+    timezone: result.timezone,
+    locale: result.locale,
+    birthTimeUnknown: result.birthTimeUnknown,
+    kstJiji: result.kstJiji,
+  });
   const continuationQuery = new URLSearchParams({
     petName: result.petName,
     species: result.species,
@@ -239,7 +238,7 @@ export function SajuResult({ result }: SajuResultProps) {
             </div>
             <div className="space-y-6">
               {sortedElements.map((el) => {
-                const percent = elementPercent(el.count, totalCount);
+                const percent = el.percent;
                 const elAccent = ELEMENT_ACCENT[el.key];
                 const isDominant = el.key === result.dominantElement;
                 const width = barsReady ? `${Math.max(isDominant ? 8 : 4, percent)}%` : "0%";
@@ -266,7 +265,7 @@ export function SajuResult({ result }: SajuResultProps) {
                 {sortedElements
                   .filter((el) => el.key !== result.dominantElement)
                   .map((el) => {
-                    const percent = elementPercent(el.count, totalCount);
+                    const percent = el.percent;
                     const elAccent = ELEMENT_ACCENT[el.key];
                     const width = barsReady ? `${Math.max(4, percent)}%` : "0%";
 
@@ -444,7 +443,7 @@ export function SajuResult({ result }: SajuResultProps) {
         </aside>
       </div>
 
-      <SajuResultShareRow kind="basic" result={result} />
+      <SajuResultShareRow kind="basic" result={result} mbtiType={mbtiType} />
 
       <div className="flex flex-col justify-center gap-3 sm:flex-row">
         <Link

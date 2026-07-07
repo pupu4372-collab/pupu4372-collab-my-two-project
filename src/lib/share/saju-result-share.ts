@@ -7,6 +7,10 @@ import {
   resolveShareImageUrl,
   saveFortuneStorySlidesToDevice,
 } from "@/lib/share/pet-fortune-share";
+import {
+  buildPetSajuInstaCarouselSlides,
+  sharePetSajuInstaCarouselSlides,
+} from "@/lib/share/pet-saju-insta-carousel";
 import { shareKakaoFeed } from "@/lib/share/kakao-share";
 
 const SHARE_FONT = '"SUIT Variable", "Noto Sans KR", sans-serif';
@@ -261,18 +265,23 @@ export async function shareCompatibilityToKakao(result: CompatibilityResponse) {
 }
 
 export async function buildBasicSajuStorySlide(result: SajuBasicResponse) {
-  await ensureFonts();
-  const isKo = result.locale === "ko";
-  const el = ELEMENT_META[result.dominantElement];
+  const slides = await buildBasicSajuInstaCarouselSlides(result);
+  return slides[0]!;
+}
 
-  return renderStorySlide({
-    badge: isKo ? "우리 아이 K-사주" : "Pet K-Saju reading",
-    title: `${result.petName}${isKo ? "의 사주" : "'s chart"}`,
-    subtitle: `${el.hanja} ${el.meaning} · ${el.hangul}`,
-    body: `${result.headline}\n${result.story}`.slice(0, 320),
-    footer: isKo ? "ksajupet.com" : "ksajupet.com",
-    emoji: result.species === "dog" ? "🐕" : result.species === "cat" ? "🐈" : "🐾",
-  });
+export async function buildBasicSajuInstaCarouselSlides(
+  result: SajuBasicResponse,
+  mbtiType?: string | null
+) {
+  return buildPetSajuInstaCarouselSlides(result, mbtiType);
+}
+
+export async function shareBasicSajuInstaCarousel(
+  result: SajuBasicResponse,
+  mbtiType?: string | null
+) {
+  const slides = await buildPetSajuInstaCarouselSlides(result, mbtiType);
+  return sharePetSajuInstaCarouselSlides(slides, result.petName);
 }
 
 export async function buildZodiacStorySlide(result: ZodiacFortuneResponse) {
