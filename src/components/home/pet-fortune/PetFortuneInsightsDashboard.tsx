@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
+import { PetFortuneInstagramShareButton } from "@/components/home/pet-fortune/PetFortuneInstagramShareButton";
 import { PetFortunePetSelector } from "@/components/home/pet-fortune/PetFortunePetSelector";
 import type { PetDailyFortune, PetFortunePetMeta } from "@/lib/saju/pet-daily-fortune";
 import { useLocale, useTranslations } from "next-intl";
@@ -15,6 +16,8 @@ type Props = {
   selectedPetId?: string;
   onSelectPet?: (petId: string) => void;
   onResetPreview?: () => void;
+  /** Hide sample badge and login CTA when the viewer is already signed in. */
+  suppressGuestChrome?: boolean;
 };
 
 function findCategory(fortune: PetDailyFortune, labelKo: string, labelEn: string) {
@@ -77,6 +80,7 @@ export function PetFortuneInsightsDashboard({
   selectedPetId,
   onSelectPet,
   onResetPreview,
+  suppressGuestChrome = false,
 }: Props) {
   const t = useTranslations("home.guestFortune");
   const locale = useLocale();
@@ -97,12 +101,12 @@ export function PetFortuneInsightsDashboard({
     sleep ? { cat: sleep, badge: t("badgeLuck") } : null,
   ].filter((item): item is { cat: NonNullable<typeof health>; badge: string } => item !== null);
 
-  const showLoginCta = mode === "demo" || mode === "live";
+  const showLoginCta = !suppressGuestChrome && (mode === "demo" || mode === "live");
   const showPetSelector = mode === "registered" && pets && pets.length > 0 && onSelectPet && selectedPetId;
 
   return (
     <div className="pet-fortune-dashboard relative z-10 space-y-6">
-      {mode === "demo" ? (
+      {mode === "demo" && !suppressGuestChrome ? (
         <div className="flex justify-center">
           <span className="pet-fortune-sample-badge">{t("sampleBadge")}</span>
         </div>
@@ -233,6 +237,8 @@ export function PetFortuneInsightsDashboard({
           </AuthRequiredLink>
         </footer>
       ) : null}
+
+      <PetFortuneInstagramShareButton pet={pet} fortune={fortune} />
 
       <p className="text-center text-xs font-semibold text-stone-600">{fortune.disclaimer}</p>
     </div>

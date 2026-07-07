@@ -22,8 +22,8 @@ type Props = {
 export function HomePetFortuneCard({ fortuneData, careReminders, onSelectPet, onPetAdded }: Props) {
   const locale = useLocale();
   const t = useTranslations("home.guestFortune");
-  const { ready, isAnonymous, accessToken } = useSupabaseSession();
-  const isLoggedIn = ready && !isAnonymous && Boolean(accessToken);
+  const { ready, isAnonymous, configured } = useSupabaseSession();
+  const isLoggedIn = configured && ready && !isAnonymous;
   const resultRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +99,6 @@ export function HomePetFortuneCard({ fortuneData, careReminders, onSelectPet, on
 
   return (
     <div className="space-y-3">
-      {isLoggedIn ? <PetFortuneSajuGuide /> : null}
       <div className="pet-fortune-guest-shell relative min-w-0 space-y-6">
       {isLoggedIn ? (
         <PetFortuneQuickAddForm onAdded={onPetAdded} />
@@ -107,10 +106,14 @@ export function HomePetFortuneCard({ fortuneData, careReminders, onSelectPet, on
         <PetFortuneEntryForm loading={loading} error={error} onSubmit={handleSubmit} />
       )}
 
-      <div className="relative z-10 px-1 text-center">
-        <p className="text-sm font-semibold leading-relaxed text-stone-700">{t("previewHint")}</p>
-        <div className="mx-auto mt-2 h-px w-16 bg-stone-300" aria-hidden />
-      </div>
+      {isLoggedIn ? (
+        <PetFortuneSajuGuide />
+      ) : (
+        <div className="relative z-10 px-1 text-center">
+          <p className="text-sm font-semibold leading-relaxed text-stone-700">{t("previewHint")}</p>
+          <div className="mx-auto mt-2 h-px w-16 bg-stone-300" aria-hidden />
+        </div>
+      )}
 
       <div ref={resultRef} className="relative">
         <PetFortuneInsightsDashboard
@@ -118,6 +121,7 @@ export function HomePetFortuneCard({ fortuneData, careReminders, onSelectPet, on
           pet={resultPet}
           fortune={resultFortune}
           onResetPreview={resultMode === "live" ? handleResetLive : undefined}
+          suppressGuestChrome={isLoggedIn}
         />
       </div>
     </div>

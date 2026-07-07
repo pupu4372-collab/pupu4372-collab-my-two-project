@@ -249,7 +249,12 @@
       "quickAddSpeciesPlaceholder": "종류 선택",
       "quickAddYear": "년",
       "quickAddMonth": "월",
-      "quickAddDay": "일"
+      "quickAddDay": "일",
+      "instagramShareNative": "인스타로 공유하기",
+      "instagramShareDownload": "이미지 저장하기",
+      "instagramShareLoading": "이미지 만드는 중…",
+      "instagramShareSavedToast": "이미지가 저장됐어요. 인스타그램에 올려보세요!",
+      "instagramShareFailed": "인스타 스토리 공유를 열 수 없어요."
     }
   }
 }

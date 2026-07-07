@@ -249,7 +249,12 @@
       "quickAddSpeciesPlaceholder": "Type",
       "quickAddYear": "Year",
       "quickAddMonth": "Month",
-      "quickAddDay": "Day"
+      "quickAddDay": "Day",
+      "instagramShareNative": "Share on Instagram",
+      "instagramShareDownload": "Save image",
+      "instagramShareLoading": "Creating image…",
+      "instagramShareSavedToast": "Image saved. Try posting it on Instagram!",
+      "instagramShareFailed": "Could not open Instagram story share."
     }
   }
 }
