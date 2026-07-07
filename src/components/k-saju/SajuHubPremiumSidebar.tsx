@@ -36,9 +36,9 @@ export function SajuHubPremiumSidebar() {
         <PremiumReportPreviewSample locale={locale} />
       </section>
 
-      <section className="rounded-[1.75rem] border border-channel-saju/15 bg-lavender/35 px-4 py-4">
-        <p className="text-xs font-extrabold text-primary">{t("premiumSidebarInfoTitle")}</p>
-        <p className="mt-2 text-xs leading-relaxed text-plum/80">{t("premiumSidebarInfo")}</p>
+      <section className="rounded-[1.75rem] border border-channel-saju/20 bg-cream px-4 py-4 shadow-sm">
+        <p className="text-xs font-extrabold text-ink">{t("premiumSidebarInfoTitle")}</p>
+        <p className="mt-2 text-xs leading-relaxed text-plum">{t("premiumSidebarInfo")}</p>
       </section>
     </aside>
   );
