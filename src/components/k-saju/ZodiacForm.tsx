@@ -2,6 +2,8 @@
 
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
+import { PetPremiumPaywall } from "@/components/k-saju/PetPremiumPaywall";
+import { PetPremiumUnlockGate } from "@/components/k-saju/PetPremiumUnlockGate";
 import { ZodiacResult } from "@/components/k-saju/ZodiacResult";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
@@ -21,8 +23,6 @@ const UI = {
     submit: "Read today's zodiac care",
     loading: "Reading the cosmos…",
     localeLabel: "Language",
-    premiumRequired: "This feature requires premium. Please complete payment to continue.",
-    goToPay: "Go to payment →",
   },
   ko: {
     petName: "이름",
@@ -34,8 +34,6 @@ const UI = {
     submit: "오늘의 별자리 케어 보기",
     loading: "별자리 읽는 중…",
     localeLabel: "언어",
-    premiumRequired: "이 기능은 프리미엄 전용이에요. 결제 후 이용할 수 있어요.",
-    goToPay: "결제하러 가기 →",
   },
 };
 
@@ -60,6 +58,7 @@ export function ZodiacForm() {
   const [species, setSpecies] = useState<Species>("dog");
   const [birthDate, setBirthDate] = useState("");
   const [loading, setLoading] = useState(false);
+  const [premiumBlocked, setPremiumBlocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ZodiacFortuneResponse | null>(null);
   const [petId, setPetId] = useState<string | null>(null);
@@ -86,6 +85,7 @@ export function ZodiacForm() {
     e.preventDefault();
     setError(null);
     setResult(null);
+    setPremiumBlocked(false);
 
     setLoading(true);
     try {
@@ -107,7 +107,7 @@ export function ZodiacForm() {
       const data = await res.json();
       if (!res.ok) {
         if (data.error === "premium_required") {
-          setError("premium_required");
+          setPremiumBlocked(true);
         } else {
           setError(data.error ?? "Something went wrong.");
         }
@@ -144,103 +144,116 @@ export function ZodiacForm() {
     );
   }
 
+  const continuation = {
+    petName,
+    species,
+    birthDate,
+    locale,
+    petId,
+  };
+
+  if (premiumBlocked) {
+    return (
+      <PetPremiumPaywall
+        locale={locale}
+        continuation={continuation}
+        returnTo="zodiac-page"
+      />
+    );
+  }
+
   return (
-    <div className="space-y-5">
-      <ReportGenerateLoader isKo={locale === "ko"} active={loading} />
-      <form ref={formRef} onSubmit={handleSubmit} className="pastel-card space-y-6 p-6 md:p-8">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className={FIELD_LABEL_CLASS}>
-            {t.localeLabel}
-            <select
-              value={locale}
-              onChange={(e) => setLocale(e.target.value as Locale)}
-              className={STITCH_INPUT_CLASS}
-            >
-              <option value="ko">한국어</option>
-              <option value="en">English</option>
-            </select>
-          </label>
-          <fieldset className="space-y-3 sm:col-span-2">
-            <legend className="flex items-center gap-2 text-sm font-bold text-primary">
-              <span aria-hidden>🐾</span>
-              {t.species}
-            </legend>
-            <div className="grid grid-cols-2 gap-3">
-              {(["dog", "cat", "other"] as const).map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setSpecies(item)}
-                  className={
-                    species === item
-                      ? "rounded-[2rem] border border-primary bg-primary px-4 py-4 text-center text-white shadow-lg shadow-primary/15"
-                      : "rounded-[2rem] border border-outline/20 bg-white/45 px-4 py-4 text-center text-primary transition hover:bg-lavender/50"
-                  }
-                  aria-pressed={species === item}
-                >
-                  <span className="block text-3xl" aria-hidden>
-                    {item === "dog" ? "🐶" : item === "cat" ? "🐱" : "🐾"}
-                  </span>
-                  <span className="mt-2 block text-xs font-extrabold uppercase tracking-wide">
-                    {t[item]}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </fieldset>
-        </div>
-
-        <label className={FIELD_LABEL_CLASS}>
-          {t.petName}
-          <input
-            value={petName}
-            onChange={(e) => setPetName(e.target.value)}
-            className={STITCH_INPUT_CLASS}
-            placeholder="모찌"
-            required
-            maxLength={32}
-          />
-        </label>
-
-        <BirthDateSelect
-          value={birthDate}
-          onChange={setBirthDate}
-          label={t.birthDate}
-          locale={locale}
-          className={FIELD_LABEL_CLASS}
-          selectClassName={STITCH_INPUT_CLASS}
-        />
-
-        {error && (
-          error === "premium_required" ? (
-            <div className="rounded-2xl bg-petal/40 px-4 py-3 text-sm text-plum space-y-2">
-              <p>{t.premiumRequired}</p>
-              <Link
-                href={`/payment?product=pet_premium_v1&type=zodiac&petName=${encodeURIComponent(petName)}&species=${species}&birthDate=${birthDate}&locale=${locale}${petId ? `&petId=${petId}` : ""}`}
-                className="inline-block font-bold text-primary underline"
+    <PetPremiumUnlockGate
+      locale={locale}
+      petId={petId}
+      continuation={continuation}
+      returnTo="zodiac-page"
+    >
+      <div className="space-y-5">
+        <ReportGenerateLoader isKo={locale === "ko"} active={loading} />
+        <form ref={formRef} onSubmit={handleSubmit} className="pastel-card space-y-6 p-6 md:p-8">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className={FIELD_LABEL_CLASS}>
+              {t.localeLabel}
+              <select
+                value={locale}
+                onChange={(e) => setLocale(e.target.value as Locale)}
+                className={STITCH_INPUT_CLASS}
               >
-                {t.goToPay}
-              </Link>
-            </div>
-          ) : (
+                <option value="ko">한국어</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+            <fieldset className="space-y-3 sm:col-span-2">
+              <legend className="flex items-center gap-2 text-sm font-bold text-primary">
+                <span aria-hidden>🐾</span>
+                {t.species}
+              </legend>
+              <div className="grid grid-cols-2 gap-3">
+                {(["dog", "cat", "other"] as const).map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setSpecies(item)}
+                    className={
+                      species === item
+                        ? "rounded-[2rem] border border-primary bg-primary px-4 py-4 text-center text-white shadow-lg shadow-primary/15"
+                        : "rounded-[2rem] border border-outline/20 bg-white/45 px-4 py-4 text-center text-primary transition hover:bg-lavender/50"
+                    }
+                    aria-pressed={species === item}
+                  >
+                    <span className="block text-3xl" aria-hidden>
+                      {item === "dog" ? "🐶" : item === "cat" ? "🐱" : "🐾"}
+                    </span>
+                    <span className="mt-2 block text-xs font-extrabold uppercase tracking-wide">
+                      {t[item]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </div>
+
+          <label className={FIELD_LABEL_CLASS}>
+            {t.petName}
+            <input
+              value={petName}
+              onChange={(e) => setPetName(e.target.value)}
+              className={STITCH_INPUT_CLASS}
+              placeholder="모찌"
+              required
+              maxLength={32}
+            />
+          </label>
+
+          <BirthDateSelect
+            value={birthDate}
+            onChange={setBirthDate}
+            label={t.birthDate}
+            locale={locale}
+            className={FIELD_LABEL_CLASS}
+            selectClassName={STITCH_INPUT_CLASS}
+          />
+
+          {error && (
             <p className="rounded-2xl bg-petal/40 px-4 py-2 text-sm text-plum" role="alert">
               {error}
             </p>
-          )
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-full bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/15 transition hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60"
+          >
+            {loading ? t.loading : t.submit}
+          </button>
+        </form>
+
+        {result && (
+          <ZodiacResult result={result} isGuest={isAnonymous} onBack={handleBackToForm} />
         )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-full bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/15 transition hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60"
-        >
-          {loading ? t.loading : t.submit}
-        </button>
-      </form>
-
-      {result && (
-        <ZodiacResult result={result} isGuest={isAnonymous} onBack={handleBackToForm} />
-      )}
-    </div>
+      </div>
+    </PetPremiumUnlockGate>
   );
 }

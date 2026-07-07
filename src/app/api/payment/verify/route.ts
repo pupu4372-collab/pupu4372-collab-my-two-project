@@ -26,12 +26,21 @@ export async function POST(req: NextRequest) {
     // 1. PortOne V2 서버에서 결제 정보 검증
     const payment = await fetchPortOnePayment(payment_id);
     if (!payment) {
+      console.error(
+        `[PET_PREMIUM_VERIFY_FAILED] paymentId=${payment_id} status=400 error=payment_not_found`
+      );
       return NextResponse.json({ error: "payment not found" }, { status: 400 });
     }
     if (!isPortOnePaymentPaid(payment)) {
+      console.error(
+        `[PET_PREMIUM_VERIFY_FAILED] paymentId=${payment_id} status=400 error=not_paid`
+      );
       return NextResponse.json({ error: "not paid" }, { status: 400 });
     }
     if (!verifyPortOneAmount(payment, expectedAmount)) {
+      console.error(
+        `[PET_PREMIUM_VERIFY_FAILED] paymentId=${payment_id} status=400 error=amount_mismatch`
+      );
       return NextResponse.json({ error: "amount mismatch" }, { status: 400 });
     }
 
@@ -82,12 +91,17 @@ export async function POST(req: NextRequest) {
       );
 
     if (dbError) {
-      console.error("pet_premium_unlocks upsert error:", dbError);
+      console.error(
+        `[PET_PREMIUM_VERIFY_FAILED] paymentId=${payment_id} status=500 error=unlock_save_failed`,
+        dbError
+      );
+      return NextResponse.json({ error: "unlock_save_failed" }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("payment verify error:", err);
+    const message = err instanceof Error ? err.message : "internal error";
+    console.error(`[PET_PREMIUM_VERIFY_FAILED] paymentId=unknown status=500 error=${message}`, err);
     return NextResponse.json({ error: "internal error" }, { status: 500 });
   }
 }

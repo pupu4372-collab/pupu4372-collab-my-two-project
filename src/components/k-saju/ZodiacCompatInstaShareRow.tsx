@@ -77,14 +77,14 @@ export function ZodiacCompatInstaShareRow(props: Props) {
   }
 
   return (
-    <div className="rounded-[1.5rem] border-2 border-channel-saju/30 bg-gradient-to-br from-white via-lavender/40 to-mint/25 p-5 shadow-lg">
+    <div className="pastel-card border-2 border-channel-saju/20 p-5">
       <p className="text-center text-sm font-extrabold leading-6 text-primary">{t.intro}</p>
       <div className="mt-4">
         <button
           type="button"
           disabled={busy}
           onClick={() => void handleInstagram()}
-          className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-hwa-red/35 bg-gradient-to-br from-petal via-blush to-gold/40 px-4 py-3.5 text-sm font-extrabold text-[#8b3a3a] shadow-sm transition hover:border-hwa-red hover:shadow-md disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-hwa-red/35 bg-petal/55 px-4 py-3.5 text-sm font-extrabold text-[#8b3a3a] transition hover:border-hwa-red hover:bg-petal/75 disabled:opacity-60"
         >
           <span className="text-lg leading-none" aria-hidden>
             📷

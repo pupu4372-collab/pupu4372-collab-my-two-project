@@ -1,8 +1,23 @@
 "use client";
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { buildPetPremiumSuccessHref } from "@/lib/payments/pet-premium-unlock-client";
+import {
+  clearPendingPetPremiumPaymentId,
+  readPetPremiumCheckout,
+  savePetPremiumCheckout,
+  savePendingPetPremiumPaymentId,
+} from "@/lib/payments/pet-premium-checkout-storage";
+import {
+  buildCleanPaymentSearch,
+  parsePortOneRedirectReturn,
+  portOneReturnNotice,
+  stripPortOneRedirectParams,
+} from "@/lib/payments/portone-redirect-return";
+import { normalizePetPremiumReturnTo } from "@/lib/payments/pet-premium-return-to";
+import { verifyPetPremiumPayment } from "@/lib/payments/pet-premium-verify-client";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const UI = {
   ko: {
@@ -17,6 +32,9 @@ const UI = {
     successMsg: "결제 완료! 이동 중...",
     errorMsg: "결제에 실패했어요. 다시 시도해 주세요.",
     sdkError: "결제 모듈을 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.",
+    verifyFailedMsg: "결제 확인 중 문제가 발생했어요.",
+    verifyRetryCta: "다시 확인하기",
+    verifyRetryNote: "결제가 이미 완료된 경우 요금이 중복 청구되지 않습니다.",
     cancel: "취소",
   },
   en: {
@@ -31,23 +49,26 @@ const UI = {
     successMsg: "Payment complete! Redirecting...",
     errorMsg: "Payment failed. Please try again.",
     sdkError: "Failed to load payment module. Please refresh and try again.",
+    verifyFailedMsg: "We could not confirm your payment.",
+    verifyRetryCta: "Check again",
+    verifyRetryNote: "If payment already went through, you will not be charged again.",
     cancel: "Cancel",
   },
 } as const;
 
-function PaymentContent() {
-  const router = useRouter();
-  const params = useSearchParams();
-  const { accessToken } = useSupabaseSession();
+type PaymentUiStatus =
+  | "idle"
+  | "processing"
+  | "success"
+  | "error"
+  | "sdk_error"
+  | "verify_failed";
 
-  const locale = (params.get("locale") ?? "ko") as "ko" | "en";
-  const t = UI[locale];
-
+function buildContinuationQuery(params: URLSearchParams, locale: string): string {
   const petIdParam = params.get("petId") ?? "";
-
   const mbtiTypeParam = params.get("mbtiType") ?? "";
 
-  const continuationQuery = new URLSearchParams({
+  return new URLSearchParams({
     petName: params.get("petName") ?? "",
     species: params.get("species") ?? "",
     petGender: params.get("petGender") ?? "",
@@ -58,13 +79,54 @@ function PaymentContent() {
     ...(petIdParam ? { petId: petIdParam } : {}),
     ...(mbtiTypeParam ? { mbtiType: mbtiTypeParam } : {}),
   }).toString();
+}
 
-  const successHref = `/saju/premium?${continuationQuery}`;
+function buildPortOneRedirectUrl(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  const url = new URL(window.location.href);
+  for (const key of ["paymentId", "code", "message", "pgCode", "pgMessage"] as const) {
+    url.searchParams.delete(key);
+  }
+  return url.toString();
+}
 
-  const [status, setStatus] = useState<"idle" | "processing" | "success" | "error" | "sdk_error">("idle");
+function PaymentContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const { accessToken } = useSupabaseSession();
+  const redirectHandled = useRef(false);
+
+  const locale = (params.get("locale") ?? "ko") as "ko" | "en";
+  const t = UI[locale];
+
+  const normalizedReturnTo = useMemo(
+    () => normalizePetPremiumReturnTo(params.get("returnTo")),
+    [params]
+  );
+
+  const continuationQuery = useMemo(
+    () => buildContinuationQuery(params, locale),
+    [params, locale]
+  );
+
+  const successHref = useMemo(
+    () => buildPetPremiumSuccessHref(continuationQuery, normalizedReturnTo),
+    [continuationQuery, normalizedReturnTo]
+  );
+
+  const [status, setStatus] = useState<PaymentUiStatus>("idle");
   const [sdkReady, setSdkReady] = useState(false);
+  const [returnNotice, setReturnNotice] = useState<string | null>(null);
+  const [verifyFailedPaymentId, setVerifyFailedPaymentId] = useState<string | null>(null);
 
-  // PortOne V2 브라우저 SDK 로드
+  useEffect(() => {
+    savePetPremiumCheckout({
+      continuationQuery,
+      returnTo: normalizedReturnTo,
+    });
+  }, [continuationQuery, normalizedReturnTo]);
+
   useEffect(() => {
     if (document.querySelector('script[src*="cdn.portone.io"]')) {
       setSdkReady(true);
@@ -78,10 +140,87 @@ function PaymentContent() {
     document.head.appendChild(script);
   }, []);
 
+  const replaceWithCleanCheckoutUrl = useCallback(() => {
+    const cleanQs = buildCleanPaymentSearch(stripPortOneRedirectParams(params));
+    const href = cleanQs ? `${pathname}?${cleanQs}` : pathname;
+    router.replace(href);
+  }, [params, pathname, router]);
+
+  const completeVerifiedPayment = useCallback(
+    (paymentId: string) => {
+      const stored = readPetPremiumCheckout();
+      const returnTo =
+        normalizePetPremiumReturnTo(params.get("returnTo")) ?? stored?.returnTo ?? null;
+      const continuation =
+        stored?.continuationQuery ?? buildContinuationQuery(params, locale);
+      const nextHref = buildPetPremiumSuccessHref(continuation, returnTo);
+
+      clearPendingPetPremiumPaymentId();
+      setVerifyFailedPaymentId(null);
+      setReturnNotice(null);
+      setStatus("success");
+      setTimeout(() => router.push(nextHref), 800);
+    },
+    [locale, params, router]
+  );
+
+  const runVerify = useCallback(
+    async (paymentId: string) => {
+      setStatus("processing");
+      setReturnNotice(null);
+
+      const result = await verifyPetPremiumPayment({
+        paymentId,
+        petId: params.get("petId"),
+        accessToken,
+      });
+
+      if (result.ok) {
+        completeVerifiedPayment(paymentId);
+        return;
+      }
+
+      setVerifyFailedPaymentId(paymentId);
+      setStatus("verify_failed");
+      replaceWithCleanCheckoutUrl();
+    },
+    [accessToken, completeVerifiedPayment, params, replaceWithCleanCheckoutUrl]
+  );
+
+  useEffect(() => {
+    if (redirectHandled.current || !accessToken) return;
+
+    const redirect = parsePortOneRedirectReturn(params);
+
+    if (redirect.kind === "cancel_or_fail") {
+      redirectHandled.current = true;
+      clearPendingPetPremiumPaymentId();
+      setVerifyFailedPaymentId(null);
+      setReturnNotice(portOneReturnNotice(redirect.code, locale));
+      setStatus("idle");
+      replaceWithCleanCheckoutUrl();
+      return;
+    }
+
+    if (redirect.kind === "success_pending_verify") {
+      redirectHandled.current = true;
+      void runVerify(redirect.paymentId);
+    }
+  }, [accessToken, locale, params, replaceWithCleanCheckoutUrl, runVerify]);
+
+  async function handleRetryVerify() {
+    if (!verifyFailedPaymentId) return;
+    await runVerify(verifyFailedPaymentId);
+  }
+
   async function handlePay() {
     setStatus("processing");
+    setReturnNotice(null);
+    setVerifyFailedPaymentId(null);
 
-    const PortOne = (window as unknown as { PortOne: { requestPayment: (args: unknown) => Promise<{ code?: string }> } }).PortOne;
+    const PortOne = (window as unknown as {
+      PortOne: { requestPayment: (args: unknown) => Promise<{ code?: string }> };
+    }).PortOne;
     if (!PortOne || !sdkReady) {
       setStatus("sdk_error");
       return;
@@ -92,8 +231,14 @@ function PaymentContent() {
       return;
     }
 
-    // V2 방식: paymentId는 우리가 직접 생성
     const paymentId = `pet_premium_v1_${Date.now()}`;
+    savePendingPetPremiumPaymentId(paymentId);
+    savePetPremiumCheckout({
+      continuationQuery,
+      returnTo: normalizedReturnTo,
+    });
+
+    const redirectUrl = buildPortOneRedirectUrl();
 
     try {
       const response = await PortOne.requestPayment({
@@ -107,39 +252,42 @@ function PaymentContent() {
         customer: {
           fullName: params.get("petName") ?? "펫",
         },
+        ...(redirectUrl
+          ? {
+              redirectUrl,
+              forceRedirect: true,
+            }
+          : {}),
       });
 
-      if (response.code !== undefined) {
-        // 결제 실패 or 사용자 취소
-        setStatus("error");
+      if (response?.code !== undefined) {
+        clearPendingPetPremiumPaymentId();
+        setReturnNotice(portOneReturnNotice(response.code, locale));
+        setStatus("idle");
         return;
       }
 
-      // 서버 검증
-      const res = await fetch("/api/payment/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
-        body: JSON.stringify({
-          payment_id: paymentId,
-          product_code: "pet_premium_v1",
-          pet_id: params.get("petId") ?? null,
-        }),
+      const result = await verifyPetPremiumPayment({
+        paymentId,
+        petId: params.get("petId"),
+        accessToken,
       });
 
-      if (!res.ok) {
-        console.error("verify failed");
-        // 검증 실패해도 UX는 성공 처리 (webhook으로 보완)
+      if (!result.ok) {
+        setVerifyFailedPaymentId(paymentId);
+        setStatus("verify_failed");
+        return;
       }
 
-      setStatus("success");
-      setTimeout(() => router.push(successHref), 1200);
+      completeVerifiedPayment(paymentId);
     } catch {
+      clearPendingPetPremiumPaymentId();
       setStatus("error");
     }
   }
+
+  const payDisabled =
+    status === "processing" || status === "success" || !sdkReady;
 
   return (
     <div className="mx-auto max-w-md space-y-6 px-4 py-12">
@@ -164,11 +312,32 @@ function PaymentContent() {
           <p className="mt-1 text-xs text-on-surface-variant">{t.priceNote}</p>
         </div>
 
+        {returnNotice && status === "idle" && (
+          <p className="mt-4 rounded-2xl bg-sand/60 px-4 py-2.5 text-sm text-plum" role="status">
+            {returnNotice}
+          </p>
+        )}
+
         {(status === "error" || status === "sdk_error") && (
           <p className="mt-4 rounded-2xl bg-petal/40 px-4 py-2.5 text-sm text-plum" role="alert">
             {status === "sdk_error" ? t.sdkError : t.errorMsg}
           </p>
         )}
+
+        {status === "verify_failed" && (
+          <div className="mt-4 space-y-3 rounded-2xl bg-petal/40 px-4 py-3 text-sm text-plum" role="alert">
+            <p>{t.verifyFailedMsg}</p>
+            <p className="text-xs text-plum/80">{t.verifyRetryNote}</p>
+            <button
+              type="button"
+              onClick={() => void handleRetryVerify()}
+              className="w-full rounded-full bg-[#6f4b8b] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#5f3f78]"
+            >
+              {t.verifyRetryCta}
+            </button>
+          </div>
+        )}
+
         {status === "success" && (
           <p className="mt-4 rounded-2xl bg-mint/40 px-4 py-2.5 text-sm text-primary" role="status">
             {t.successMsg}
@@ -176,8 +345,8 @@ function PaymentContent() {
         )}
 
         <button
-          onClick={handlePay}
-          disabled={status === "processing" || status === "success" || !sdkReady}
+          onClick={() => void handlePay()}
+          disabled={payDisabled}
           className="mt-6 w-full rounded-full bg-[#6f4b8b] px-8 py-4 text-base font-extrabold text-white shadow-xl shadow-[#6f4b8b]/25 transition hover:bg-[#5f3f78] active:scale-[0.98] disabled:opacity-60"
         >
           {status === "processing" ? t.processing : t.cta}

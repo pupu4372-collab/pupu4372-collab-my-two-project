@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 /**
  * user_id + product_code 기준으로 unlock 여부 확인.
  * pet_id가 있으면 pet_id까지 같이 확인 (더 엄격).
+ * payment_id가 있는 행만 유효 결제로 간주.
  */
 export async function hasPetPremiumUnlock(
   supabase: SupabaseClient,
@@ -15,6 +16,7 @@ export async function hasPetPremiumUnlock(
     .select("id")
     .eq("user_id", userId)
     .eq("product_code", productCode)
+    .not("payment_id", "is", null)
     .limit(1);
 
   if (petId) {

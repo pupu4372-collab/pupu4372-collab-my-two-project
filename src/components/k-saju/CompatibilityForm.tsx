@@ -6,6 +6,8 @@ import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { CompatibilityResult } from "@/components/k-saju/CompatibilityResult";
+import { PetPremiumPaywall } from "@/components/k-saju/PetPremiumPaywall";
+import { PetPremiumUnlockGate } from "@/components/k-saju/PetPremiumUnlockGate";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import {
@@ -122,6 +124,7 @@ export function CompatibilityForm() {
   const [timezone, setTimezone] = useState(detectTimezone);
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [premiumBlocked, setPremiumBlocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CompatibilityResponse | null>(null);
   const [petId, setPetId] = useState<string | null>(null);
@@ -174,6 +177,7 @@ export function CompatibilityForm() {
     e.preventDefault();
     setError(null);
     setResult(null);
+    setPremiumBlocked(false);
 
     if (!consent) {
       setError(t.errorConsent);
@@ -214,7 +218,7 @@ export function CompatibilityForm() {
       const data = await res.json();
       if (!res.ok) {
         if (data.error === "premium_required") {
-          setError("premium_required");
+          setPremiumBlocked(true);
         } else {
           setError(data.error ?? "Error");
         }
@@ -228,8 +232,35 @@ export function CompatibilityForm() {
     }
   }
 
+  const continuation = {
+    petName,
+    species,
+    petGender: petGender || undefined,
+    birthDate: petBirthDate,
+    birthTime: petBirthTime,
+    timezone,
+    locale,
+    petId,
+  };
+
+  if (premiumBlocked) {
+    return (
+      <PetPremiumPaywall
+        locale={locale}
+        continuation={continuation}
+        returnTo="compatibility-page"
+      />
+    );
+  }
+
   return (
-    <div className="space-y-5">
+    <PetPremiumUnlockGate
+      locale={locale}
+      petId={petId}
+      continuation={continuation}
+      returnTo="compatibility-page"
+    >
+      <div className="space-y-5">
       <ReportGenerateLoader isKo={locale === "ko"} active={loading} />
       <form onSubmit={handleSubmit} className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-7 p-6 md:p-8`}>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -406,21 +437,9 @@ export function CompatibilityForm() {
         </div>
 
         {error && (
-          error === "premium_required" ? (
-            <div className="rounded-2xl bg-petal/40 px-4 py-3 text-sm text-plum space-y-2">
-              <p>{t.premiumRequired}</p>
-              <Link
-                href={`/payment?product=pet_premium_v1&type=compatibility&petName=${encodeURIComponent(petName)}&species=${species}&birthDate=${petBirthDate}&locale=${locale}${petId ? `&petId=${petId}` : ""}`}
-                className="inline-block font-bold text-primary underline"
-              >
-                {t.goToPay}
-              </Link>
-            </div>
-          ) : (
-            <p className="rounded-2xl bg-petal/40 px-4 py-2 text-sm text-plum" role="alert">
-              {error}
-            </p>
-          )
+          <p className="rounded-2xl bg-petal/40 px-4 py-2 text-sm text-plum" role="alert">
+            {error}
+          </p>
         )}
 
         <button
@@ -434,5 +453,6 @@ export function CompatibilityForm() {
 
       {result && <CompatibilityResult result={result} isGuest={isAnonymous} />}
     </div>
+    </PetPremiumUnlockGate>
   );
 }

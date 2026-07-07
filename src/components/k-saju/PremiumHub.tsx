@@ -4,13 +4,17 @@ import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateL
 import { BirthCalendarToggle } from "@/components/k-saju/BirthCalendarToggle";
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { CompatibilityResult } from "@/components/k-saju/CompatibilityResult";
+import { PetPremiumPaywall } from "@/components/k-saju/PetPremiumPaywall";
 import { PetPremiumPdfSaveRow } from "@/components/k-saju/PetPremiumPdfSaveRow";
+import { PetPremiumUnlockSkeleton } from "@/components/k-saju/PetPremiumUnlockSkeleton";
 import { PremiumMbtiReport } from "@/components/k-saju/PremiumMbtiReport";
 import { PremiumMbtiSurvey } from "@/components/k-saju/PremiumMbtiSurvey";
 import { ZodiacResult } from "@/components/k-saju/ZodiacResult";
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
+import { usePetPremiumUnlock } from "@/hooks/usePetPremiumUnlock";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import type { PetPremiumReturnTo } from "@/lib/payments/pet-premium-unlock-client";
 import { Link } from "@/i18n/navigation";
 import {
   BIRTH_TIME_OPTIONS,
@@ -208,6 +212,15 @@ export function PremiumHub() {
   const [zodiacResult, setZodiacResult] = useState<ZodiacFortuneResponse | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [deeplinkView, setDeeplinkView] = useState<ActiveView | null>(null);
+  const [premiumBlocked, setPremiumBlocked] = useState(false);
+  const [premiumReturnTo, setPremiumReturnTo] = useState<PetPremiumReturnTo>("mbti");
+
+  const unlockCheckEnabled = configured && ready && !isAnonymous;
+  const { unlocked, loading: unlockLoading } = usePetPremiumUnlock(
+    pet?.petId,
+    accessToken,
+    unlockCheckEnabled && Boolean(pet)
+  );
 
   const t = UI[locale];
   const timezoneOptions = useMemo(() => {
@@ -303,12 +316,13 @@ export function PremiumHub() {
     }
     if (nextView === "mbti" || nextView === "zodiac" || nextView === "compatibility") {
       setDeeplinkView(nextView);
+      setPremiumReturnTo(nextView);
     }
     setInitialized(true);
   }, []);
 
   useEffect(() => {
-    if (!pet || !deeplinkView) return;
+    if (!pet || !deeplinkView || !unlocked || premiumBlocked) return;
     const petCtx = pet;
 
     if (deeplinkView === "mbti") {
@@ -361,11 +375,13 @@ export function PremiumHub() {
           });
           const data = await res.json();
           if (!res.ok) {
-            setMenuError(
-              data.error === "premium_required"
-                ? UI[petCtx.locale].premiumRequired
-                : (data.error ?? UI[petCtx.locale].networkError)
-            );
+            if (data.error === "premium_required") {
+              setPremiumBlocked(true);
+              setPremiumReturnTo("compatibility");
+              setActiveView(null);
+            } else {
+              setMenuError(data.error ?? UI[petCtx.locale].networkError);
+            }
             return;
           }
           setCompatibilityResult(data as CompatibilityResponse);
@@ -407,9 +423,13 @@ export function PremiumHub() {
           });
           const data = await res.json();
           if (!res.ok) {
-            setMenuError(
-              data.error === "premium_required" ? UI[petCtx.locale].premiumRequired : (data.error ?? UI[petCtx.locale].networkError)
-            );
+            if (data.error === "premium_required") {
+              setPremiumBlocked(true);
+              setPremiumReturnTo("zodiac");
+              setActiveView(null);
+            } else {
+              setMenuError(data.error ?? UI[petCtx.locale].networkError);
+            }
             return;
           }
           setZodiacResult(data as ZodiacFortuneResponse);
@@ -420,7 +440,7 @@ export function PremiumHub() {
         }
       })();
     }
-  }, [pet, deeplinkView, butler, accessToken, zodiacResult, compatibilityResult]);
+  }, [pet, deeplinkView, butler, accessToken, zodiacResult, compatibilityResult, unlocked, premiumBlocked]);
 
   useEffect(() => {
     if (!mbtiSurveyComplete || mbtiType) return;
@@ -464,11 +484,13 @@ export function PremiumHub() {
         });
         const data = await res.json();
         if (!res.ok) {
-          setMenuError(
-            data.error === "premium_required"
-              ? UI[petCtx.locale].premiumRequired
-              : (data.error ?? UI[petCtx.locale].networkError)
-          );
+          if (data.error === "premium_required") {
+            setPremiumBlocked(true);
+            setPremiumReturnTo("mbti");
+            setActiveView(null);
+          } else {
+            setMenuError(data.error ?? UI[petCtx.locale].networkError);
+          }
           return;
         }
         setMbtiInsight(data as PetMbtiPremiumInsight);
@@ -518,17 +540,47 @@ export function PremiumHub() {
 
   const petCtx = pet;
 
+  const premiumContinuation = {
+    petName: petCtx.petName,
+    species: petCtx.species,
+    petGender: petCtx.petGender,
+    birthDate: petCtx.petBirthDate,
+    birthTime: petCtx.petBirthTime ?? "unknown",
+    timezone: petCtx.timezone,
+    locale: petCtx.locale,
+    petId: petCtx.petId,
+    ...(mbtiType ? { mbtiType } : {}),
+  };
+
+  if (unlockCheckEnabled && unlockLoading) {
+    return <PetPremiumUnlockSkeleton />;
+  }
+
+  if (premiumBlocked || (unlockCheckEnabled && !unlocked)) {
+    return (
+      <PetPremiumPaywall
+        locale={petCtx.locale}
+        continuation={premiumContinuation}
+        returnTo={premiumReturnTo}
+      />
+    );
+  }
+
   function handleMbtiAnswer(questionId: string, optionId: string) {
     setMbtiAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   }
 
   function openMbti() {
+    setPremiumReturnTo("mbti");
+    setPremiumBlocked(false);
     setActiveView("mbti");
     setMenuError(null);
     setPhase("menu");
   }
 
   async function openZodiac() {
+    setPremiumReturnTo("zodiac");
+    setPremiumBlocked(false);
     setActiveView("zodiac");
     setMenuError(null);
     setPhase("menu");
@@ -556,9 +608,13 @@ export function PremiumHub() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setMenuError(
-          data.error === "premium_required" ? t.premiumRequired : (data.error ?? t.networkError)
-        );
+        if (data.error === "premium_required") {
+          setPremiumBlocked(true);
+          setPremiumReturnTo("zodiac");
+          setActiveView(null);
+        } else {
+          setMenuError(data.error ?? t.networkError);
+        }
         return;
       }
       setZodiacResult(data as ZodiacFortuneResponse);
@@ -570,6 +626,8 @@ export function PremiumHub() {
   }
 
   function openCompatibility() {
+    setPremiumReturnTo("compatibility");
+    setPremiumBlocked(false);
     setMenuError(null);
     if (!butler) {
       setPhase("butler-form");
@@ -614,9 +672,13 @@ export function PremiumHub() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setMenuError(
-          data.error === "premium_required" ? t.premiumRequired : (data.error ?? t.networkError)
-        );
+        if (data.error === "premium_required") {
+          setPremiumBlocked(true);
+          setPremiumReturnTo("compatibility");
+          setActiveView(null);
+        } else {
+          setMenuError(data.error ?? t.networkError);
+        }
         return;
       }
       setCompatibilityResult(data as CompatibilityResponse);

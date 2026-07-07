@@ -3,6 +3,8 @@
 import { AdSlot } from "@/components/ads/AdSlot";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
 import { SajuPremiumPackagePanel } from "@/components/k-saju/SajuPremiumPackagePanel";
+import { usePetPremiumUnlock } from "@/hooks/usePetPremiumUnlock";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { BasicSajuInstaShareRow } from "@/components/k-saju/BasicSajuInstaShareRow";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
@@ -165,6 +167,14 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
   const lucky = useMemo(
     () => buildPetLuckyScores(result.petName, result.birthUtc, result.dominantElement, result.locale),
     [result.petName, result.birthUtc, result.dominantElement, result.locale]
+  );
+
+  const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
+  const unlockCheckEnabled = configured && ready && !isAnonymous;
+  const { unlocked, loading: unlockLoading } = usePetPremiumUnlock(
+    result.petId,
+    accessToken,
+    unlockCheckEnabled
   );
 
   const birthDateLabel = formatPetBirthDisplayLabel({
@@ -441,28 +451,42 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
             locale={result.locale}
             paymentHref={premiumPaymentHref}
             premiumHubHref={premiumHubHref}
+            petId={result.petId}
+            unlocked={unlocked}
+            unlockLoading={unlockCheckEnabled && unlockLoading}
+            continuation={{
+              petName: result.petName,
+              species: result.species,
+              petGender: result.petGender ?? "female",
+              birthDate: result.birthDate,
+              birthTime: "unknown",
+              timezone: result.timezone,
+            }}
           />
         </aside>
       </div>
 
-      <div className="flex flex-col justify-center gap-3 sm:flex-row">
-        <Link
-          href="/"
-          className="pastel-card inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary/10 px-8 py-4 text-sm font-bold text-primary transition hover:scale-[1.02]"
-        >
-          <span aria-hidden>🏠</span>
-          {t.home}
-        </Link>
-        <Link
-          href="/saju"
-          className="pastel-card inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary/10 px-8 py-4 text-sm font-bold text-primary transition hover:scale-[1.02]"
-        >
-          <span aria-hidden>🐾</span>
-          {t.another}
-        </Link>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-12">
+        <div className="space-y-3 lg:col-span-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-start">
+            <Link
+              href="/"
+              className="pastel-card inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary/10 px-8 py-4 text-sm font-bold text-primary transition hover:scale-[1.02]"
+            >
+              <span aria-hidden>🏠</span>
+              {t.home}
+            </Link>
+            <Link
+              href="/saju"
+              className="pastel-card inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary/10 px-8 py-4 text-sm font-bold text-primary transition hover:scale-[1.02]"
+            >
+              <span aria-hidden>🐾</span>
+              {t.another}
+            </Link>
+          </div>
+          <AdSlot />
+        </div>
       </div>
-
-      <AdSlot />
     </div>
   );
 }
