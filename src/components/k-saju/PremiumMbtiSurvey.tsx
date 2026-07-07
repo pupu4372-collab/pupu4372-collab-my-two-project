@@ -16,8 +16,8 @@ export function PremiumMbtiSurvey({ locale, answers, onSelect }: PremiumMbtiSurv
     <div className="space-y-4">
       <p className="text-sm leading-relaxed text-on-surface-variant">
         {isKo
-          ? "15문항을 모두 선택하면 상세 MBTI 리포트를 볼 수 있어요."
-          : "Answer all 15 questions to unlock your detailed MBTI report."}
+          ? "15문항을 모두 선택하면 맞춤 MBTI 케어 가이드를 볼 수 있어요."
+          : "Answer all 15 questions to unlock your personalized MBTI care guide."}
       </p>
       <p className="text-xs font-semibold text-channel-saju">
         {isKo ? `${answered} / ${PET_MBTI_QUESTIONS.length} 완료` : `${answered} / ${PET_MBTI_QUESTIONS.length} done`}

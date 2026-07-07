@@ -364,8 +364,8 @@ function renderSlide3(result: SajuBasicResponse): string {
   const cardW = (CONTENT_W - gap * 2) / 3;
   const cardH = 148;
   const labels = isKo
-    ? { routine: "행운 루틴", treat: "간식운", health: "컨디션운", traits: "상세 특징", cta: "내 아이 사주도 보러가기 →" }
-    : { routine: "Lucky routine", treat: "Treat luck", health: "Condition", traits: "Trait highlights", cta: "Read your pet's K-Saju →" };
+    ? { routine: "행운 루틴", treat: "간식운", health: "컨디션운", traits: "상세 특징", cta: "우리 아이 맞춤 케어법 보러가기 →" }
+    : { routine: "Lucky routine", treat: "Treat luck", health: "Condition", traits: "Trait highlights", cta: "Get personalized pet care →" };
   const routineUnit = isKo ? "회" : "x";
 
   drawLuckyCard(ctx, PAD, y, cardW, cardH, labels.routine, String(lucky.luckyNumber), routineUnit);

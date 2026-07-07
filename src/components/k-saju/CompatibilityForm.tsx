@@ -41,7 +41,7 @@ const UI = {
     errorConsent: "개인정보 동의가 필요합니다.",
     localeLabel: "언어",
     ownerBirthNotice:
-      "생년월일 저장에 동의하시면 로그인할때마다 오늘의 운세를 점쳐드립니다",
+      "로그인하면 매일 달라지는 맞춤 케어 팁을 받아보실 수 있어요",
     premiumRequired: "이 기능은 프리미엄 전용이에요. 결제 후 이용할 수 있어요.",
     goToPay: "결제하러 가기 →",
   },
@@ -68,7 +68,7 @@ const UI = {
     errorConsent: "Privacy consent required.",
     localeLabel: "Language",
     ownerBirthNotice:
-      "If you agree to save your birth date, we will show a small daily fortune whenever you log in.",
+      "Log in to get personalized care tips that update every day.",
     premiumRequired: "This feature requires premium. Please complete payment to continue.",
     goToPay: "Go to payment →",
   },

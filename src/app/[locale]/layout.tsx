@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
     title: t("title"),
     description: t("description"),
     openGraph: {
-      title: "K-Saju Pet",
+      title: t("title"),
       description: t("description"),
       type: "website",
     },

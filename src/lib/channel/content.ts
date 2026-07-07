@@ -97,7 +97,7 @@ export const CHANNEL_CONTENT: Record<PetChannel, ChannelContent> = {
       },
     ],
     keywords: ["산책", "분리불안", "노즈워크", "견종", "간식", "기초훈련"],
-    sajuCta: "우리 강아지 사주 보기",
+    sajuCta: "우리 강아지 맞춤 케어 보기",
   },
   cat: {
     channel: "cat",
@@ -157,7 +157,7 @@ export const CHANNEL_CONTENT: Record<PetChannel, ChannelContent> = {
       },
     ],
     keywords: ["우다다", "화장실", "사냥놀이", "골골송", "음수량", "숨숨집"],
-    sajuCta: "우리 고양이 사주 보기",
+    sajuCta: "우리 고양이 맞춤 케어 보기",
   },
   reptile: {
     channel: "reptile",
@@ -214,7 +214,7 @@ export const CHANNEL_CONTENT: Record<PetChannel, ChannelContent> = {
       },
     ],
     keywords: ["파충류", "앵무새", "온습도", "사육장", "토끼", "햄스터"],
-    sajuCta: "우리 아이 사주 보기",
+    sajuCta: "우리 아이 맞춤 케어 보기",
   },
 };
 
@@ -271,7 +271,7 @@ export const CHANNEL_CONTENT_EN: Record<PetChannel, ChannelContent> = {
       { title: "Night care routine", items: ["Wipe paws and check pads", "Check ears and eyes", "Avoid overexciting play near bedtime"] },
     ],
     keywords: ["walks", "separation anxiety", "nose work", "breed", "treats", "basic training"],
-    sajuCta: "Read my dog's saju",
+    sajuCta: "Personalized dog care",
   },
   cat: {
     channel: "cat",
@@ -325,7 +325,7 @@ export const CHANNEL_CONTENT_EN: Record<PetChannel, ChannelContent> = {
       { title: "Night hunting routine", items: ["10 minutes with a wand toy", "Let the cat catch the prey", "Feed a small meal and dim the lights"] },
     ],
     keywords: ["zoomies", "litter", "hunting play", "purring", "hydration", "hideout"],
-    sajuCta: "Read my cat's saju",
+    sajuCta: "Personalized cat care",
   },
   reptile: {
     channel: "reptile",
@@ -376,7 +376,7 @@ export const CHANNEL_CONTENT_EN: Record<PetChannel, ChannelContent> = {
       { title: "Evening care routine", items: ["Clean and ventilate the enclosure", "Short bonding or play time", "Lower noise and harsh light at rest time"] },
     ],
     keywords: ["reptiles", "birds", "humidity", "enclosure", "rabbit", "hamster"],
-    sajuCta: "Read my pet's saju",
+    sajuCta: "Personalized pet care",
   },
 };
 

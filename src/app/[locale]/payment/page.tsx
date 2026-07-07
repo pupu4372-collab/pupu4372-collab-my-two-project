@@ -7,9 +7,9 @@ import { Suspense, useEffect, useState } from "react";
 const UI = {
   ko: {
     title: "프리미엄 잠금 해제",
-    subtitle: "상세 MBTI · 별자리 운세 · 펫·집사 궁합을 한 번에 열어보세요.",
+    subtitle: "상세 MBTI · 별자리 · 집사 궁합까지 — 우리 아이 맞춤 케어 가이드를 한 번에 받아보세요.",
     product: "펫 프리미엄 패키지",
-    includes: ["🧠 상세 MBTI", "🔭 별자리 운세", "💞 펫·집사 궁합"],
+    includes: ["🧠 상세 MBTI 케어", "🔭 별자리 케어 가이드", "💞 펫·집사 궁합 케어"],
     price: "₩4,500",
     priceNote: "1회 결제 · 해당 펫 영구 잠금 해제",
     cta: "₩4,500 결제하기",
@@ -21,9 +21,9 @@ const UI = {
   },
   en: {
     title: "Unlock Premium",
-    subtitle: "Unlock detailed MBTI, zodiac fortune, and pet–butler bond in one go.",
+    subtitle: "Detailed MBTI, zodiac, and pet–butler bond—personalized care guides for your pet, all in one unlock.",
     product: "Pet Premium Package",
-    includes: ["🧠 Detailed MBTI", "🔭 Zodiac fortune", "💞 Pet & butler bond"],
+    includes: ["🧠 Detailed MBTI care", "🔭 Zodiac care guide", "💞 Pet & butler bond care"],
     price: "₩4,500",
     priceNote: "One-time payment · Permanent unlock for this pet",
     cta: "Pay ₩4,500",

@@ -36,7 +36,7 @@ export function SharedPetFortuneLanding({
               {isKo ? "지관재 (知觀齋)" : "Jigwanjae (知觀齋)"}
             </p>
             <h2 className="human-premium-serif mt-1.5 text-2xl font-bold text-[var(--jig-ink)] md:text-3xl">
-              {isKo ? `${pet.name}의 오늘 운세` : `${pet.name}'s fortune today`}
+              {isKo ? `${pet.name}의 오늘 케어 가이드` : `${pet.name}'s care guide today`}
             </h2>
             <div className="mx-auto my-2 h-0.5 w-10 bg-[var(--jig-ink)]/20" />
           </div>
@@ -57,7 +57,7 @@ export function SharedPetFortuneLanding({
               className="jig-fortune-reveal-btn mx-auto flex flex-1 items-center justify-center bg-[var(--jig-ink)] px-4 py-3 text-white transition hover:opacity-90"
             >
               <span className="human-premium-label-caps text-sm tracking-widest">
-                {isKo ? "내 아이 사주 보기" : "Get your pet's saju"}
+                {isKo ? "우리 아이 맞춤 케어 보기" : "Personalized pet care"}
               </span>
             </Link>
             <Link

@@ -359,7 +359,7 @@ export function CatChannelHome({
           href="/saju"
           className="mt-5 inline-flex rounded-full bg-[#6f4b8b] px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-110"
         >
-          {isKo ? "우리 아이 사주 보기" : "Read K-Saju"}
+          {isKo ? "우리 아이 맞춤 케어 보기" : "Personalized pet care"}
         </AuthRequiredLink>
       </section>
     </div>

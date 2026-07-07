@@ -21,7 +21,7 @@ import { useState } from "react";
 const COPY = {
   ko: {
     basic: {
-      intro: "우리 아이 사주가 재밌어요! 친구에게도 알려주세요",
+      intro: "우리 아이 맞춤 케어가 도움이 됐어요! 친구에게도 알려주세요",
       kakao: "카카오 공유",
       instagram: "인스타 스토리",
       link: "링크 복사",
@@ -34,7 +34,7 @@ const COPY = {
       fileStem: "k-saju",
     },
     zodiac: {
-      intro: "오늘 별자리 운세, 친구 펫도 같이 봐요!",
+      intro: "오늘 별자리 케어 가이드, 친구 펫도 같이 봐요!",
       kakao: "카카오 공유",
       instagram: "인스타 스토리",
       link: "링크 복사",
@@ -47,7 +47,7 @@ const COPY = {
       fileStem: "zodiac",
     },
     compatibility: {
-      intro: "펫과 집사 궁합 결과, 같이 공유해 보세요!",
+      intro: "펫과 집사가 서로 맞춰가는 케어 방법, 같이 공유해 보세요!",
       kakao: "카카오 공유",
       instagram: "인스타 스토리",
       link: "링크 복사",
@@ -62,7 +62,7 @@ const COPY = {
   },
   en: {
     basic: {
-      intro: "Love this K-Saju reading? Share it with a friend.",
+      intro: "Love this personalized care guide? Share it with a friend.",
       kakao: "Kakao",
       instagram: "Instagram",
       link: "Copy link",
@@ -74,7 +74,7 @@ const COPY = {
       fileStem: "k-saju",
     },
     zodiac: {
-      intro: "Share today's zodiac fortune with a friend.",
+      intro: "Share today's zodiac care guide with a friend.",
       kakao: "Kakao",
       instagram: "Instagram",
       link: "Copy link",
@@ -86,7 +86,7 @@ const COPY = {
       fileStem: "zodiac",
     },
     compatibility: {
-      intro: "Share your pet-parent bond reading.",
+      intro: "Share how you and your pet care for each other.",
       kakao: "Kakao",
       instagram: "Instagram",
       link: "Copy link",

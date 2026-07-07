@@ -302,7 +302,7 @@ export function DogChannelHome({
           href="/saju"
           className="mt-5 inline-flex rounded-full bg-channel-dog px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
         >
-          {isKo ? "우리 아이 사주 보기" : "Read K-Saju"}
+          {isKo ? "우리 아이 맞춤 케어 보기" : "Personalized pet care"}
         </AuthRequiredLink>
       </section>
     </div>

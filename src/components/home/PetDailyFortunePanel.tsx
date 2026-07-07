@@ -93,8 +93,8 @@ function CommonFortunePanel({
         {revealed && showRegisterCta && (
           <p className="jig-fortune-notice text-center text-[11px] font-semibold leading-5 text-[var(--jig-muted)]">
             {isKo
-              ? "반려동물 생일을 입력하면 내 아이 맞춤 운세가 열려요."
-              : "Enter your pet's birthday to unlock your pet's personalized fortune."}
+              ? "반려동물 생일을 입력하면 내 아이 맞춤 케어 가이드가 열려요."
+              : "Enter your pet's birthday to unlock personalized care guides."}
           </p>
         )}
 
@@ -483,7 +483,7 @@ function PersonalizedFortunePanel({
         <div className="mt-4">
           <div className="text-5xl">{heroIcon}</div>
           <h3 className={`mt-3 text-xl font-extrabold ${textPrimary}`}>
-            {revealed ? fortune.title : isKo ? "오늘의 운세를 확인하세요" : "Check today's fortune"}
+            {revealed ? fortune.title : isKo ? "오늘의 케어 가이드를 확인하세요" : "Check today's care guide"}
           </h3>
           <p className={`mt-1 text-sm font-semibold ${textSecondary}`}>
             {revealed

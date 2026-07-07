@@ -13,8 +13,8 @@ const noto = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "K-Saju Pet",
-  description: "반려동물 K-사주와 커뮤니티",
+  title: "K-Saju Pet — 사주로 알아보는 우리 아이 맞춤 케어",
+  description: "생일만 입력하면 우리 아이 타고난 성향과 오늘의 맞춤 케어 팁을 알려드려요.",
   icons: {
     icon: [
       { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },

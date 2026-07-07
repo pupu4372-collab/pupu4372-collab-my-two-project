@@ -199,7 +199,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   const fortunePanel = fortuneLoading ? (
     <div className="pet-fortune-guest-shell flex min-h-[280px] items-center justify-center">
       <p className="text-sm font-semibold text-stone-600">
-        {isKo ? "오늘의 운세를 불러오는 중이에요…" : "Loading today's fortune…"}
+        {isKo ? "오늘의 케어 가이드를 불러오는 중이에요…" : "Loading today's care guide…"}
       </p>
     </div>
   ) : (

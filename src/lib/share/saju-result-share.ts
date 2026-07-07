@@ -226,7 +226,7 @@ export async function shareBasicSajuToKakao(result: SajuBasicResponse) {
       : `Jigwanjae · ${result.petName} K-Saju`,
     description: `${el.hanja} ${el.hangul} · ${result.headline} ${result.story}`.replace(/\s+/g, " ").trim(),
     shareUrl,
-    buttonTitle: isKo ? "사주 보기" : "View reading",
+    buttonTitle: isKo ? "케어 가이드 보기" : "View care guide",
   });
 }
 
@@ -236,14 +236,14 @@ export async function shareZodiacToKakao(result: ZodiacFortuneResponse) {
 
   await kakaoFeed({
     title: isKo
-      ? `지관재 · ${result.petName} 별자리 운세`
-      : `Jigwanjae · ${result.petName} zodiac fortune`,
+      ? `지관재 · ${result.petName} 별자리 케어`
+      : `Jigwanjae · ${result.petName} zodiac care`,
     description: `${result.sign.displayName} · ${result.daily.keyword} · ${result.daily.today}`.replace(
       /\s+/g,
       " "
     ),
     shareUrl,
-    buttonTitle: isKo ? "운세 보기" : "View fortune",
+    buttonTitle: isKo ? "케어 가이드 보기" : "View care guide",
   });
 }
 
@@ -289,7 +289,7 @@ export async function buildZodiacStorySlide(result: ZodiacFortuneResponse) {
   const isKo = result.locale === "ko";
 
   return renderStorySlide({
-    badge: isKo ? "별자리 운세" : "Zodiac fortune",
+    badge: isKo ? "별자리 케어" : "Zodiac care",
     title: result.petName,
     subtitle: `${result.sign.displayName} · ${"★".repeat(result.daily.luckScore)}${"☆".repeat(5 - result.daily.luckScore)}`,
     body: `${result.daily.keyword} · ${result.daily.today}`.slice(0, 320),

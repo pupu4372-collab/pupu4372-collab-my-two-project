@@ -24,7 +24,7 @@ type Step = "form" | "result";
 const UI = {
   en: {
     title: "K-Saju for your pet",
-    subtitle: "Enter birth data using the birth-region timezone.",
+    subtitle: "Enter name and birth date—we'll share innate traits and care tips you can use starting today. Unknown birth time is OK.",
     petName: "Pet name",
     species: "Species",
     petGender: "Pet gender",
@@ -37,17 +37,17 @@ const UI = {
     birthDate: "Birth date",
     birthTime: "Birth time",
     timezone: "Birth timezone",
-    submit: "Read K-Saju",
-    loading: "Reading your pet's energy...",
+    submit: "Get personalized care",
+    loading: "Preparing your pet's care guide...",
     errorConsent: "Please agree to the privacy notice.",
     localeLabel: "Language",
     sessionPreparing: "Preparing session. Please try again soon.",
     networkError: "Network error. Please try again.",
     serverError: "Server error. Please refresh the page and try again.",
-    continueTitle: "Keep reading",
-    continueSubtitle: "Use the same pet profile for zodiac and bond readings.",
-    zodiacCta: "Zodiac fortune →",
-    compatibilityCta: "Pet & butler bond →",
+    continueTitle: "Keep going",
+    continueSubtitle: "Use the same pet profile for zodiac and bond care guides.",
+    zodiacCta: "Zodiac care guide →",
+    compatibilityCta: "Pet & butler bond care →",
     premiumBadge: "Premium ₩4,500",
     mbtiResultTitle: (name: string, typeTitle: string) =>
       `${name} is "${typeTitle}"`,
@@ -68,8 +68,8 @@ const UI = {
     birthDate: "생년월일",
     birthTime: "출생 시간",
     timezone: "출생 지역 시간대",
-    submit: "사주 보기",
-    loading: "우리 아이 기운을 읽고 있어요...",
+    submit: "맞춤 케어 보기",
+    loading: "맞춤 케어 가이드를 준비하고 있어요...",
     errorConsent: "개인정보 동의가 필요합니다.",
     localeLabel: "언어",
     sessionPreparing: "세션 준비 중이에요. 잠시 후 다시 시도해 주세요.",
@@ -77,9 +77,9 @@ const UI = {
     serverError: "서버 오류가 발생했어요. 새로고침 후 다시 시도해 주세요.",
     continueTitle: "이 정보로 이어보기",
     continueSubtitle:
-      "방금 입력한 이름과 생일을 그대로 가져가 별자리와 궁합도 이어서 볼 수 있어요.",
-    zodiacCta: "별자리 운세 보기 →",
-    compatibilityCta: "펫·집사 궁합 보기 →",
+      "방금 입력한 이름과 생일을 그대로 가져가 별자리·궁합 케어 가이드도 이어서 볼 수 있어요.",
+    zodiacCta: "별자리 케어 가이드 →",
+    compatibilityCta: "펫·집사 궁합 케어 →",
     premiumBadge: "프리미엄 ₩4,500",
     mbtiResultTitle: (name: string, typeTitle: string) =>
       `${name}은(는) "${typeTitle}"`,
@@ -305,12 +305,12 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
             ✨
           </span>
           <h2 className="max-w-xl text-xl font-extrabold tracking-tight text-primary md:text-2xl">
-            {locale === "ko" ? "우리 아이 K-사주 보기" : "Read your pet's K-Saju"}
+            {locale === "ko" ? "우리 아이 맞춤 케어 보기" : "Personalized pet care"}
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-on-surface-variant">
             {locale === "ko"
-              ? "이름과 생일 정보를 입력하면 성향, 오행 밸런스, 케어 포인트를 알려드려요. 출생 시간을 몰라도 결과를 볼 수 있어요."
-              : "Enter your pet's name and birth data to reveal personality, elemental balance, and care cues. Unknown birth time is okay."}
+              ? "이름과 생일만 입력하면 우리 아이 타고난 성향과 오늘부터 쓸 수 있는 맞춤 케어 팁을 알려드려요. 출생 시간을 몰라도 괜찮아요."
+              : "Enter name and birth date only—we'll share innate traits and care tips you can use starting today. Unknown birth time is OK."}
           </p>
           <div className="mt-4 flex gap-1.5">
             {ELEMENT_DOTS.map((dot) => (

@@ -51,7 +51,7 @@ export const DailyFortuneInstaCard = forwardRef<HTMLDivElement, Props>(function 
           <p className="daily-fortune-insta-card__date">{dateLabel}</p>
           <h2 className="daily-fortune-insta-card__title">
             {petEmoji} {pet.name}
-            {isKo ? "의 오늘의 운세" : "'s fortune today"}
+            {isKo ? "의 오늘 케어 가이드" : "'s care guide today"}
           </h2>
         </header>
 
@@ -60,7 +60,7 @@ export const DailyFortuneInstaCard = forwardRef<HTMLDivElement, Props>(function 
             <div className="daily-fortune-insta-card__harmony-ring" aria-hidden />
             <div className="daily-fortune-insta-card__harmony">
               <p className="daily-fortune-insta-card__harmony-label">
-                {isKo ? "운세 조화도" : "Harmony"}
+                {isKo ? "케어 조화도" : "Care harmony"}
               </p>
               <p className="daily-fortune-insta-card__harmony-score">{harmony}%</p>
               <span className="daily-fortune-insta-card__harmony-pill">{fortune.title}</span>
@@ -102,7 +102,7 @@ export const DailyFortuneInstaCard = forwardRef<HTMLDivElement, Props>(function 
       </div>
 
       <footer className="daily-fortune-insta-card__footer">
-        {isKo ? "내 아이 운세 보러가기  ksajupet.com" : "See my pet's fortune  ksajupet.com"}
+        {isKo ? "내 아이 오늘의 케어법 보기  ksajupet.com" : "See my pet's care guide today  ksajupet.com"}
       </footer>
     </div>
   );
