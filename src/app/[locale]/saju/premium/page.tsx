@@ -11,13 +11,16 @@ export default async function PremiumHubPage() {
       theme="saju"
       title={t("premiumHubTitle")}
       subtitle={t("premiumHubSubtitle")}
+      narrowHero
     >
-      <PremiumHub />
-      <p className="mt-8 text-center text-sm text-white/75">
-        <Link href="/saju" className="underline hover:text-white">
-          {t("backSaju")}
-        </Link>
-      </p>
+      <div className="mx-auto w-full max-w-xl md:max-w-2xl">
+        <PremiumHub />
+        <p className="mt-8 text-center text-sm text-white/75">
+          <Link href="/saju" className="underline hover:text-white">
+            {t("backSaju")}
+          </Link>
+        </p>
+      </div>
     </ChannelShell>
   );
 }
