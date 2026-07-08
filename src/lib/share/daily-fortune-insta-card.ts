@@ -102,19 +102,22 @@ export function buildInstaSectionBodies(
 ) {
   const moodBody = fortune.messages[0]?.body ?? "";
   const dailyBody = fortune.messages[1]?.body ?? "";
-  const todayState = truncateInstaBody(
-    isKo
-      ? `Mood: ${moodBody} Daily Luck: ${dailyBody}`
-      : `Mood: ${moodBody} Daily Luck: ${dailyBody}`,
-  );
-  const nature = truncateInstaBody(
-    isKo
-      ? `Innate Personality: ${fortune.elementLabel}. ${pet.dayBranchSign}의 기운을 지녔어요.`
-      : `Innate Personality: ${fortune.elementLabel}. ${pet.dayBranchSign} energy.`,
-  );
-  const tipBody = truncateInstaBody(
-    fortune.tips.map((tip) => tip.text).join(" "),
-  );
+  const labels = isKo
+    ? {
+        mood: "기분:",
+        daily: "오늘의 컨디션:",
+        innate: "타고난 성향:",
+        tip: "집사 팁:",
+      }
+    : {
+        mood: "Mood:",
+        daily: "Daily Luck:",
+        innate: "Innate Personality:",
+        tip: "Owner Advice:",
+      };
+  const todayState = truncateInstaBody(`${labels.mood} ${moodBody} ${labels.daily} ${dailyBody}`);
+  const nature = truncateInstaBody(`${labels.innate} ${fortune.innatePersonality}`);
+  const tipBody = truncateInstaBody(`${labels.tip} ${fortune.tips.map((tip) => tip.text).join(" ")}`);
 
   return { todayState, nature, tipBody };
 }

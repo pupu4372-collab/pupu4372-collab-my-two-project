@@ -9,12 +9,14 @@ import { BasicSajuInstaShareRow } from "@/components/k-saju/BasicSajuInstaShareR
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
+import { buildPetPremiumPaymentHref } from "@/lib/payments/pet-premium-unlock-client";
 import { formatPetBirthDisplayLabel } from "@/lib/saju/pet-birth-display";
 import { branchHangulLabel, charToElement, ELEMENT_META, stemHangulLabel } from "@/lib/saju/elements";
 import { formatJijiDisplay } from "@/lib/saju/jiji-hours";
 import { buildPetLuckyScores, dominantElementLabel } from "@/lib/saju/pet-lucky-scores";
 import type { Locale, PillarDisplay, SajuBasicResponse } from "@/lib/saju/types";
 import { formatUtcForDisplay } from "@/lib/saju/timezone";
+import { clearSajuResultSession } from "@/lib/saju/saju-result-session";
 import { useEffect, useMemo, useState } from "react";
 
 interface SajuResultProps {
@@ -184,7 +186,7 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
     birthTimeUnknown: result.birthTimeUnknown,
     kstJiji: result.kstJiji,
   });
-  const continuationQuery = new URLSearchParams({
+  const continuationBase = {
     petName: result.petName,
     species: result.species,
     petGender: result.petGender ?? "female",
@@ -192,9 +194,26 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
     birthTime: "unknown",
     timezone: result.timezone,
     locale: result.locale,
-    ...(result.petId ? { petId: result.petId } : {}),
+    petId: result.petId,
+    sajuResultId: result.sajuResultId,
+  };
+  const continuationQuery = new URLSearchParams({
+    petName: continuationBase.petName,
+    species: continuationBase.species,
+    petGender: continuationBase.petGender,
+    birthDate: continuationBase.birthDate,
+    birthTime: continuationBase.birthTime,
+    timezone: continuationBase.timezone,
+    locale: continuationBase.locale,
+    ...(continuationBase.petId ? { petId: continuationBase.petId } : {}),
+    ...(continuationBase.sajuResultId ? { sajuResultId: continuationBase.sajuResultId } : {}),
+    ...(mbtiType ? { mbtiType } : {}),
   }).toString();
-  const premiumPaymentHref = `/payment?product=pet_premium_v1&${continuationQuery}`;
+  const premiumPaymentHref = buildPetPremiumPaymentHref({
+    ...continuationBase,
+    mbtiType: mbtiType ?? undefined,
+    returnTo: "basic",
+  });
   const premiumHubHref = `/saju/premium?${continuationQuery}`;
 
   const detailTraits = traitCards(result.traits, result.locale);
@@ -477,7 +496,8 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
               {t.home}
             </Link>
             <Link
-              href="/saju"
+              href="/saju?new=1"
+              onClick={() => clearSajuResultSession()}
               className="pastel-card inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary/10 px-8 py-4 text-sm font-bold text-primary transition hover:scale-[1.02]"
             >
               <span aria-hidden>🐾</span>

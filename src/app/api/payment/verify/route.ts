@@ -1,3 +1,4 @@
+import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   fetchPortOnePayment,
@@ -12,6 +13,11 @@ const PRODUCT_AMOUNT: Record<string, number> = {
 
 export async function POST(req: NextRequest) {
   try {
+    const registeredUserId = await getRegisteredUserIdFromRequest(req);
+    if (!registeredUserId) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
     const { payment_id, product_code, pet_id } = await req.json();
 
     if (!payment_id || !product_code) {
@@ -56,29 +62,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "db unavailable" }, { status: 503 });
     }
 
-    // Bearer 토큰 우선, 없으면 쿠키 세션 fallback
-    const authHeader = req.headers.get("authorization");
-    let user = null;
-    if (authHeader?.startsWith("Bearer ")) {
-      const token = authHeader.slice(7);
-      const { data } = await supabase.auth.getUser(token);
-      user = data.user;
-    }
-    if (!user) {
-      const { data } = await supabase.auth.getUser();
-      user = data.user;
-    }
-
-    if (!user) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    }
+    const userId = registeredUserId;
 
     // 3. pet_premium_unlocks 저장
     const { error: dbError } = await supabase
       .from("pet_premium_unlocks")
       .upsert(
         {
-          user_id: user.id,
+          user_id: userId,
           product_code,
           payment_id,
           price_krw: expectedAmount,

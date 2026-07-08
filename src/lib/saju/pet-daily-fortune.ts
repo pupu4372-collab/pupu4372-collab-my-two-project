@@ -1,4 +1,5 @@
 import { computeBasicSaju, computeKstDayPillar } from "@/lib/saju/engine";
+import { firstNarrativeStoryParagraph } from "@/lib/saju/narratives";
 import {
   charToElement,
   ELEMENT_META,
@@ -59,6 +60,7 @@ export interface PetDailyFortune {
   subtitle: string;
   dayBranchSign: string;
   elementLabel: string;
+  innatePersonality: string;
   categories: PetFortuneCategory[];
   messages: PetFortuneMessage[];
   lucky: PetFortuneLucky[];
@@ -586,6 +588,7 @@ export function buildPetDailyFortune(
       locale === "ko"
         ? `${elementMeta.hangul}(${elementMeta.hanja}) 기운`
         : `${elementMeta.romanized} (${elementMeta.meaning}) energy`,
+    innatePersonality: firstNarrativeStoryParagraph(saju.story),
     categories,
     messages: [
       {

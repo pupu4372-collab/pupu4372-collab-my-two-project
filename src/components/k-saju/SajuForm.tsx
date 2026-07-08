@@ -9,7 +9,7 @@ import {
   BIRTH_TIME_OPTIONS,
   getBirthTimeOptionLabel,
 } from "@/lib/saju/birth-time-options";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import type { Gender, Locale, SajuBasicResponse, Species } from "@/lib/saju/types";
 import type { MbtiAnswerMap } from "@/lib/pet/calc-mbti";
@@ -17,7 +17,13 @@ import { calcMbti, isMbtiComplete } from "@/lib/pet/calc-mbti";
 import { getQuestionsBySpecies } from "@/lib/pet/mbti-questions";
 import { getMbtiTypeData } from "@/lib/pet/mbti-types";
 import { useLocale } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  clearSajuResultSession,
+  isBackForwardNavigation,
+  readSajuResultSession,
+  saveSajuResultSession,
+} from "@/lib/saju/saju-result-session";
 
 type Step = "form" | "result";
 
@@ -121,6 +127,7 @@ interface SajuFormProps {
 }
 
 export function SajuForm({ embedded = false }: SajuFormProps) {
+  const router = useRouter();
   const { ready: sessionReady, accessToken, configured, isAnonymous } =
     useSupabaseSession();
   const routeLocale = useLocale();
@@ -162,6 +169,40 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     const set = new Set<string>([...COMMON_TIMEZONES, timezone]);
     return Array.from(set);
   }, [timezone]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("new") === "1") {
+      clearSajuResultSession();
+      router.replace("/saju");
+      return;
+    }
+
+    const shouldRestore =
+      params.get("restore") === "1" || isBackForwardNavigation();
+    if (!shouldRestore) return;
+
+    const saved = readSajuResultSession();
+    if (!saved) return;
+
+    setLocale(saved.locale);
+    setPetName(saved.petName);
+    setSpecies(saved.species);
+    setPetGender(saved.petGender);
+    setBirthDate(saved.birthDate);
+    setBirthTime(saved.birthTime);
+    setTimezone(saved.timezone);
+    setConsent(true);
+    if (saved.mbtiAnswers) setMbtiAnswers(saved.mbtiAnswers);
+    setResult(saved.result);
+    setStep("result");
+
+    if (params.get("restore") === "1") {
+      router.replace("/saju");
+    }
+  }, [router]);
 
   const petId = result?.petId ?? null;
 
@@ -205,6 +246,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
 
   async function handleApiSubmit() {
     setError(null);
+    clearSajuResultSession();
     setLoading(true);
 
     const mbtiResult = calcMbti(mbtiAnswers, mbtiQuestions);
@@ -252,6 +294,17 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
       }
       setResult(data as SajuBasicResponse);
       setStep("result");
+      saveSajuResultSession({
+        result: data as SajuBasicResponse,
+        petName,
+        species,
+        petGender,
+        birthDate,
+        birthTime,
+        timezone,
+        locale,
+        mbtiAnswers,
+      });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       setError(t.networkError);

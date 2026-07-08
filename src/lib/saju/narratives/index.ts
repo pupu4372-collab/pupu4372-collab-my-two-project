@@ -12,3 +12,8 @@ export function buildNarrative(params: {
   if (locale === "ko") return narrativeKo(element, species, petName);
   return narrativeEn(element, species, petName);
 }
+
+export function firstNarrativeStoryParagraph(story: string): string {
+  const paragraph = story.split(/\n\n+/)[0]?.trim();
+  return paragraph || story.trim();
+}

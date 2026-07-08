@@ -202,9 +202,7 @@ export function PetFortuneInsightsDashboard({
             </div>
             <div className="text-sm leading-relaxed text-stone-800">
               <p>
-                <strong className="text-stone-900">{t("innateLabel")}</strong> {fortune.elementLabel}.{" "}
-                {pet.dayBranchSign}
-                {isKo ? "의 기운을 지녔어요." : " energy."}
+                <strong className="text-stone-900">{t("innateLabel")}</strong> {fortune.innatePersonality}
               </p>
             </div>
           </div>

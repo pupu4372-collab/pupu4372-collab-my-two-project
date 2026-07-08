@@ -1,4 +1,5 @@
 export type PetPremiumReturnTo =
+  | "basic"
   | "mbti"
   | "zodiac"
   | "compatibility"
@@ -6,6 +7,7 @@ export type PetPremiumReturnTo =
   | "compatibility-page";
 
 const ALLOWED_RETURN_TO = new Set<PetPremiumReturnTo>([
+  "basic",
   "mbti",
   "zodiac",
   "compatibility",

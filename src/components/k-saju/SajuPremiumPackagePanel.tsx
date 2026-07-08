@@ -1,12 +1,19 @@
 "use client";
 
 import { GlassCard } from "@/components/layout/StitchLayout";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
 import { Link } from "@/i18n/navigation";
 import {
   buildPetPremiumPaymentHref,
   type PetPremiumReturnTo,
 } from "@/lib/payments/pet-premium-unlock-client";
 import type { Locale } from "@/lib/saju/types";
+
+function hrefOrLoginGate(target: string, isGuest: boolean) {
+  if (!isGuest) return target;
+  return `/login?next=${encodeURIComponent(getSafeInternalReturnPath(target))}`;
+}
 
 const UI = {
   ko: {
@@ -15,6 +22,7 @@ const UI = {
     price: "₩4,500",
     priceNote: "1회 결제 · 해당 펫 영구 잠금 해제",
     payCta: "₩4,500 결제하기",
+    loginPayCta: "로그인하고 결제하기",
     included: "포함",
     viewBadge: "보기",
     viewCta: "보기",
@@ -31,6 +39,7 @@ const UI = {
     price: "₩4,500",
     priceNote: "One-time payment · Permanent unlock for this pet",
     payCta: "Pay ₩4,500",
+    loginPayCta: "Log in to pay",
     included: "Included",
     viewBadge: "View",
     viewCta: "View",
@@ -70,6 +79,8 @@ export function SajuPremiumPackagePanel({
   continuation,
 }: SajuPremiumPackagePanelProps) {
   const t = UI[locale];
+  const { ready, configured, isAnonymous } = useSupabaseSession();
+  const isGuest = configured && ready && isAnonymous;
 
   const sections = [
     {
@@ -131,10 +142,10 @@ export function SajuPremiumPackagePanel({
             <p className="mt-4 text-3xl font-extrabold text-primary">{t.price}</p>
             <p className="mt-1 text-xs text-on-surface-variant">{t.priceNote}</p>
             <Link
-              href={paymentHref}
+              href={hrefOrLoginGate(paymentHref, isGuest)}
               className="mt-5 inline-flex w-full justify-center rounded-full bg-[#6f4b8b] px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#6f4b8b]/35 transition hover:bg-[#5f3f78] active:scale-[0.98]"
             >
-              {t.payCta}
+              {isGuest ? t.loginPayCta : t.payCta}
             </Link>
           </>
         ) : null}
@@ -148,6 +159,7 @@ export function SajuPremiumPackagePanel({
                 ...payBase,
                 returnTo: section.returnTo,
               });
+          const linkHref = hrefOrLoginGate(sectionHref, isGuest && !unlocked);
           const badgeLabel = unlocked ? t.viewBadge : t.included;
           const buttonLabel = unlocked ? `${t.viewCta} →` : `${section.title} →`;
 
@@ -176,10 +188,10 @@ export function SajuPremiumPackagePanel({
                 <div className="relative mx-auto mt-5 h-12 w-full max-w-xs animate-pulse rounded-full bg-sand/70" />
               ) : (
                 <Link
-                  href={sectionHref}
+                  href={linkHref}
                   className={`relative mt-5 inline-flex w-full justify-center rounded-full px-4 py-3.5 text-sm font-bold text-white shadow-lg transition ${section.buttonClass}`}
                 >
-                  {buttonLabel}
+                  {isGuest && !unlocked ? t.loginPayCta : buttonLabel}
                 </Link>
               )}
             </div>

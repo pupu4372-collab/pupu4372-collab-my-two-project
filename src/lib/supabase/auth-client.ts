@@ -5,6 +5,7 @@ import {
   commitLoginPolicy,
   prepareOAuthLogin,
 } from "@/lib/supabase/auth-session-policy";
+import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
 import {
   clearSupabaseBrowserSession,
   getSupabaseAuthActionClient,
@@ -115,6 +116,10 @@ export async function signInWithEmail(
 function setOAuthNextCookie(path: string) {
   if (typeof document === "undefined") return;
   document.cookie = `auth_oauth_next=${encodeURIComponent(path)}; path=/; max-age=600; SameSite=Lax`;
+}
+
+export function saveAuthReturnPath(path: string) {
+  setOAuthNextCookie(getSafeInternalReturnPath(path));
 }
 
 async function signInWithOAuthProvider(

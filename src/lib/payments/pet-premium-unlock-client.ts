@@ -1,8 +1,9 @@
-import type { Locale } from "@/lib/saju/types";
 import {
   normalizePetPremiumReturnTo,
   type PetPremiumReturnTo,
 } from "@/lib/payments/pet-premium-return-to";
+import { readSajuResultSession } from "@/lib/saju/saju-result-session";
+import type { Locale } from "@/lib/saju/types";
 
 export type { PetPremiumReturnTo };
 
@@ -15,6 +16,7 @@ export type PetPremiumContinuation = {
   timezone?: string;
   locale: Locale;
   petId?: string | null;
+  sajuResultId?: string | null;
   mbtiType?: string;
   returnTo?: PetPremiumReturnTo;
 };
@@ -31,6 +33,7 @@ export function buildPetPremiumPaymentHref(input: PetPremiumContinuation): strin
   if (input.birthTime) params.set("birthTime", input.birthTime);
   if (input.timezone) params.set("timezone", input.timezone);
   if (input.petId) params.set("petId", input.petId);
+  if (input.sajuResultId) params.set("sajuResultId", input.sajuResultId);
   if (input.mbtiType) params.set("mbtiType", input.mbtiType);
   const safeReturnTo = normalizePetPremiumReturnTo(input.returnTo ?? null);
   if (safeReturnTo) params.set("returnTo", safeReturnTo);
@@ -57,4 +60,37 @@ export function buildPetPremiumSuccessHref(
     hubQs.set("view", safeReturnTo);
   }
   return `/saju/premium?${hubQs.toString()}`;
+}
+
+export function buildPetPremiumCancelHref(
+  continuationQuery: string,
+  returnTo: string | null | undefined
+): string {
+  const safeReturnTo = normalizePetPremiumReturnTo(returnTo);
+  const params = new URLSearchParams(continuationQuery);
+  const sajuResultId = params.get("sajuResultId");
+
+  if (safeReturnTo === "basic") {
+    if (sajuResultId) return `/reports/${sajuResultId}`;
+    // Guests cannot reach /payment by policy; defensive fallback only.
+    return "/saju?restore=1";
+  }
+
+  if (safeReturnTo === "zodiac-page") {
+    return `/saju/zodiac?${params.toString()}`;
+  }
+  if (safeReturnTo === "compatibility-page") {
+    return `/saju/compatibility?${params.toString()}`;
+  }
+  if (safeReturnTo === "mbti" || safeReturnTo === "zodiac" || safeReturnTo === "compatibility") {
+    params.set("view", safeReturnTo);
+    return `/saju/premium?${params.toString()}`;
+  }
+
+  if (sajuResultId) return `/reports/${sajuResultId}`;
+  if (readSajuResultSession()) return "/saju?restore=1";
+  if (params.get("petName") && params.get("birthDate")) {
+    return `/saju/premium?${params.toString()}`;
+  }
+  return "/saju";
 }

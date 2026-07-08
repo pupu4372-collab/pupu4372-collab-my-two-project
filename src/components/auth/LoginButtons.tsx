@@ -2,6 +2,7 @@
 
 import {
   checkSignupEmail,
+  saveAuthReturnPath,
   sendPasswordResetEmail,
   signInWithEmail,
   signInWithGoogle,
@@ -79,9 +80,11 @@ function AuthInput({
 export function LoginButtons({
   homeHref = "/",
   initialMode = "login",
+  returnTo,
 }: {
   homeHref?: string;
   initialMode?: Mode;
+  returnTo?: string;
 }) {
   const t = useTranslations("auth");
   const locale = useLocale();
@@ -99,6 +102,7 @@ export function LoginButtons({
   const configured = isSupabaseConfigured();
   const isKo = locale === "ko";
   const isSignup = mode === "signup";
+  const postLoginHref = returnTo ?? (homeHref === "/ko" ? "/" : homeHref);
 
   function formatAuthError(err: unknown) {
     const message = err instanceof Error ? err.message : t("genericError");
@@ -211,8 +215,7 @@ export function LoginButtons({
         setMessage(t("signupSuccess", { email: cleanEmail }));
       } else {
         await signInWithEmail(cleanEmail, password, rememberMe);
-        const target = homeHref === "/ko" ? "/" : homeHref;
-        window.location.replace(target);
+        window.location.replace(postLoginHref);
       }
     } catch (err) {
       setError(formatAuthError(err));
@@ -227,6 +230,7 @@ export function LoginButtons({
     setLoading("google");
 
     try {
+      saveAuthReturnPath(postLoginHref);
       await signInWithGoogle(rememberMe);
     } catch (err) {
       setError(formatAuthError(err));

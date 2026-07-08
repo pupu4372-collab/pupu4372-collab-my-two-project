@@ -1,7 +1,9 @@
 "use client";
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
-import { buildPetPremiumSuccessHref } from "@/lib/payments/pet-premium-unlock-client";
+import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
+import { buildPetPremiumSuccessHref, buildPetPremiumCancelHref } from "@/lib/payments/pet-premium-unlock-client";
+import { assertPetPremiumCheckoutAllowed } from "@/lib/payments/pet-premium-checkout-client";
 import {
   clearPendingPetPremiumPaymentId,
   readPetPremiumCheckout,
@@ -16,7 +18,8 @@ import {
 } from "@/lib/payments/portone-redirect-return";
 import { normalizePetPremiumReturnTo } from "@/lib/payments/pet-premium-return-to";
 import { verifyPetPremiumPayment } from "@/lib/payments/pet-premium-verify-client";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const UI = {
@@ -67,6 +70,7 @@ type PaymentUiStatus =
 function buildContinuationQuery(params: URLSearchParams, locale: string): string {
   const petIdParam = params.get("petId") ?? "";
   const mbtiTypeParam = params.get("mbtiType") ?? "";
+  const sajuResultIdParam = params.get("sajuResultId") ?? "";
 
   return new URLSearchParams({
     petName: params.get("petName") ?? "",
@@ -78,6 +82,7 @@ function buildContinuationQuery(params: URLSearchParams, locale: string): string
     locale,
     ...(petIdParam ? { petId: petIdParam } : {}),
     ...(mbtiTypeParam ? { mbtiType: mbtiTypeParam } : {}),
+    ...(sajuResultIdParam ? { sajuResultId: sajuResultIdParam } : {}),
   }).toString();
 }
 
@@ -94,8 +99,9 @@ function PaymentContent() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const { accessToken } = useSupabaseSession();
+  const { accessToken, ready, configured, isAnonymous } = useSupabaseSession();
   const redirectHandled = useRef(false);
+  const loginRedirected = useRef(false);
 
   const locale = (params.get("locale") ?? "ko") as "ko" | "en";
   const t = UI[locale];
@@ -114,6 +120,29 @@ function PaymentContent() {
     () => buildPetPremiumSuccessHref(continuationQuery, normalizedReturnTo),
     [continuationQuery, normalizedReturnTo]
   );
+
+  const cancelHref = useMemo(() => {
+    const stored = readPetPremiumCheckout();
+    const returnTo = normalizedReturnTo ?? stored?.returnTo ?? null;
+    const continuation = stored?.continuationQuery ?? continuationQuery;
+    return buildPetPremiumCancelHref(continuation, returnTo);
+  }, [continuationQuery, normalizedReturnTo]);
+
+  function handleCancel() {
+    router.push(cancelHref);
+  }
+
+  const sessionAllowed = configured && ready && !isAnonymous && Boolean(accessToken);
+
+  useEffect(() => {
+    if (!configured || !ready || loginRedirected.current) return;
+    if (!isAnonymous && accessToken) return;
+
+    loginRedirected.current = true;
+    const qs = params.toString();
+    const returnPath = getSafeInternalReturnPath(qs ? `/payment?${qs}` : "/payment");
+    router.replace(`/login?next=${encodeURIComponent(returnPath)}`);
+  }, [accessToken, configured, isAnonymous, params, ready, router]);
 
   const [status, setStatus] = useState<PaymentUiStatus>("idle");
   const [sdkReady, setSdkReady] = useState(false);
@@ -214,9 +243,23 @@ function PaymentContent() {
   }
 
   async function handlePay() {
+    if (!sessionAllowed || !accessToken) return;
+
     setStatus("processing");
     setReturnNotice(null);
     setVerifyFailedPaymentId(null);
+
+    const checkout = await assertPetPremiumCheckoutAllowed(accessToken);
+    if (!checkout.ok) {
+      if (checkout.status === 401) {
+        const qs = params.toString();
+        const returnPath = getSafeInternalReturnPath(qs ? `/payment?${qs}` : "/payment");
+        router.replace(`/login?next=${encodeURIComponent(returnPath)}`);
+        return;
+      }
+      setStatus("error");
+      return;
+    }
 
     const PortOne = (window as unknown as {
       PortOne: { requestPayment: (args: unknown) => Promise<{ code?: string }> };
@@ -287,7 +330,11 @@ function PaymentContent() {
   }
 
   const payDisabled =
-    status === "processing" || status === "success" || !sdkReady;
+    status === "processing" || status === "success" || !sdkReady || !sessionAllowed;
+
+  if (!configured || !ready || !sessionAllowed) {
+    return null;
+  }
 
   return (
     <div className="mx-auto max-w-md space-y-6 px-4 py-12">
@@ -353,7 +400,8 @@ function PaymentContent() {
         </button>
 
         <button
-          onClick={() => router.back()}
+          type="button"
+          onClick={handleCancel}
           className="mt-3 w-full rounded-full py-3 text-sm text-on-surface-variant transition hover:text-primary"
         >
           {t.cancel}
