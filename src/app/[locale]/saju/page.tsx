@@ -1,5 +1,5 @@
 import { SajuForm } from "@/components/k-saju/SajuForm";
-import { SajuHubHero } from "@/components/k-saju/SajuHubHero";
+import { SajuHubTopRow } from "@/components/k-saju/SajuHubTopRow";
 import { SajuHubPremiumSidebar } from "@/components/k-saju/SajuHubPremiumSidebar";
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { getTranslations } from "next-intl/server";
@@ -18,7 +18,7 @@ export default async function SajuHubPage() {
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-6 lg:grid-cols-3 lg:items-start lg:gap-8">
           <div className="order-1 space-y-4 lg:col-span-2 lg:space-y-5">
-            <SajuHubHero />
+            <SajuHubTopRow />
             <SajuForm />
           </div>
 

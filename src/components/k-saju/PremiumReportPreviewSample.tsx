@@ -44,7 +44,7 @@ export function PremiumReportPreviewSample({ locale }: { locale: "ko" | "en" }) 
       <div
         className="human-premium-paper-sheet max-h-[32rem] overflow-y-auto overscroll-y-contain px-3 py-4 sm:max-h-[36rem] sm:px-4 [&_.human-premium-accent-bar]:h-5 [&_.human-premium-accent-bar]:w-1 [&_.human-premium-label-caps]:text-[10px] [&_.human-premium-serif]:text-base [&_h2]:text-lg [&_h3]:text-sm [&_section]:scroll-mt-0 [&_section]:space-y-3 [&_section_h2]:text-lg"
         tabIndex={0}
-        aria-label={isKo ? "프리미엄 리포트 미리보기" : "Premium report preview"}
+        aria-label={isKo ? "프리미엄 리포트 샘플" : "Premium report sample"}
       >
         <div className="space-y-8">
           <OpportunitiesSection report={report} isKo={isKo} />
@@ -53,7 +53,7 @@ export function PremiumReportPreviewSample({ locale }: { locale: "ko" | "en" }) 
           <ProphecySection report={report} isKo={isKo} />
         </div>
         <p className="mt-4 border-t border-[var(--jig-seal)]/15 pt-3 text-center text-[10px] text-[var(--jig-muted)]">
-          {isKo ? "샘플 미리보기 · 실제 리포트는 내 사주 기준으로 생성됩니다" : "Sample preview · your report is generated from your birth chart"}
+          {isKo ? "리포트 샘플 · 실제 리포트는 내 사주 기준으로 생성됩니다" : "Report sample · your report is generated from your birth chart"}
         </p>
       </div>
     </div>

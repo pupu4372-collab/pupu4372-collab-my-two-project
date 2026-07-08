@@ -62,6 +62,16 @@ const TYPE_LABELS = {
   },
 } as const;
 
+function speciesBadgeClass(species: string) {
+  if (species === "dog") return "bg-sky/45 text-channel-dog ring-1 ring-channel-dog/15";
+  if (species === "cat") return "bg-blush/90 text-channel-cat ring-1 ring-channel-cat/15";
+  if (species === "reptile") return "bg-mint/70 text-mok-green ring-1 ring-mok-green/15";
+  return "bg-lavender/55 text-channel-saju ring-1 ring-channel-saju/15";
+}
+
+const PET_PROFILE_CARD =
+  "pet-profile-card rounded-[2rem] p-5 text-ink transition active:scale-[0.99]";
+
 function speciesLabel(species: string, labels: { dog: string; cat: string; reptile: string; otherFriends: string }) {
   if (species === "dog") return labels.dog;
   if (species === "cat") return labels.cat;
@@ -457,7 +467,7 @@ export function PetProfilesList({
               key={pet.id}
               className={
                 useGlassCards
-                  ? "glass-card rounded-[2rem] p-5 text-primary transition active:scale-[0.99]"
+                  ? PET_PROFILE_CARD
                   : isCompactView
                     ? "rounded-xl border border-white/20 bg-white/90 px-2 py-2 shadow-sm"
                     : "glass-card rounded-[2rem] p-5 text-primary"
@@ -467,7 +477,7 @@ export function PetProfilesList({
                 <div
                   className={`relative flex shrink-0 items-center justify-center overflow-hidden ${
                     useGlassCards
-                      ? "h-16 w-16 rounded-[2rem] bg-blush/50 text-2xl"
+                      ? "h-16 w-16 rounded-[2rem] bg-white ring-2 ring-white text-2xl shadow-sm"
                       : isCompactView
                         ? "h-8 w-8 rounded-lg bg-lavender/30 text-sm"
                         : "h-14 w-14 rounded-2xl bg-lavender/30 text-2xl"
@@ -512,18 +522,18 @@ export function PetProfilesList({
                 <div className="min-w-0 flex-1">
                   <div className={`flex flex-wrap items-center gap-2 ${useGlassCards ? "mb-0.5" : ""}`}>
                     <p
-                      className={`truncate font-bold text-on-surface ${useGlassCards ? "text-base" : isCompactView ? "text-xs text-plum" : "text-sm text-plum"}`}
+                    className={`truncate font-bold ${useGlassCards ? "text-base text-ink" : isCompactView ? "text-xs text-plum" : "text-sm text-plum"}`}
                     >
                       {pet.name}
                     </p>
                     {useGlassCards && (
-                      <span className="rounded-full bg-channel-community/10 px-2 py-0.5 text-[10px] font-bold text-channel-community">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${speciesBadgeClass(pet.species)}`}>
                         {speciesLabel(pet.species, speciesLabels)}
                       </span>
                     )}
                   </div>
                   <p
-                    className={`text-plum/75 ${useGlassCards ? "text-sm" : isCompactView ? "text-[10px] leading-snug" : "text-[11px]"}`}
+                    className={`${useGlassCards ? "text-sm text-plum/85" : "text-plum/75"} ${useGlassCards ? "" : isCompactView ? "text-[10px] leading-snug" : "text-[11px]"}`}
                   >
                     {speciesLabel(pet.species, speciesLabels)} · {gender}
                     {isCompactView ? (
@@ -556,7 +566,7 @@ export function PetProfilesList({
                   </p>
                 </div>
                 {useGlassCards && !editable && (
-                  <span className="shrink-0 text-xl text-plum/50" aria-hidden>
+                  <span className="shrink-0 text-xl text-channel-saju/45" aria-hidden>
                     ›
                   </span>
                 )}
@@ -565,14 +575,14 @@ export function PetProfilesList({
               {useGlassCards && !editable && (
                 <Link
                   href={`/profile/pets/${pet.id}`}
-                  className="mt-4 block rounded-2xl bg-primary/15 px-4 py-2.5 text-center text-xs font-bold text-primary transition hover:bg-primary hover:text-white"
+                  className="mt-4 block rounded-2xl bg-petal px-4 py-2.5 text-center text-xs font-extrabold text-plum shadow-sm ring-1 ring-white/80 transition hover:bg-white hover:shadow-md"
                 >
                   {isKo ? "상세 프로필 보기" : "View pet profile"}
                 </Link>
               )}
 
               {editable && drafts[pet.id] && (
-                <div className="mt-4 grid gap-3 rounded-2xl border border-plum/10 bg-white/85 p-4 sm:grid-cols-2">
+                <div className="mt-4 grid gap-3 rounded-2xl border border-petal/50 bg-white p-4 sm:grid-cols-2">
                   <label className="block text-xs font-medium text-plum/80 sm:col-span-2">
                     {isKo ? "펫 이름" : "Pet name"}
                     <input
@@ -715,7 +725,7 @@ export function PetProfilesList({
                 </div>
               )}
               {isCompactView && pet.readings.length > 0 && (
-                <p className="mt-1 text-[10px] font-medium text-channel-saju">
+                <p className="mt-1 text-[10px] font-bold text-channel-saju">
                   {isKo ? `사주 ${pet.readings.length}개` : `${pet.readings.length} saju`}
                 </p>
               )}
@@ -723,8 +733,8 @@ export function PetProfilesList({
                 <p
                   className={
                     isCompactView
-                      ? "mt-1 line-clamp-1 text-[10px] text-plum/72"
-                      : "mt-3 line-clamp-2 text-xs leading-relaxed text-plum/75"
+                      ? "mt-1 line-clamp-1 text-[10px] text-ink/75"
+                      : "mt-3 line-clamp-2 text-xs leading-relaxed text-plum/80"
                   }
                 >
                   {isKo ? "최근" : "Latest"}: {pet.latestSaju.title ?? (isKo ? "K-Saju 결과" : "K-Saju result")}
@@ -735,8 +745,8 @@ export function PetProfilesList({
                   href={`/saju/zodiac?${q}`}
                   className={
                     isCompactView
-                      ? "rounded-full bg-channel-saju/15 px-2 py-0.5 text-[10px] font-medium text-channel-saju"
-                      : "rounded-full bg-channel-saju/15 px-3 py-1.5 text-xs font-medium text-channel-saju transition hover:bg-channel-saju/25"
+                      ? "rounded-full bg-sky/50 px-2 py-0.5 text-[10px] font-semibold text-channel-saju ring-1 ring-channel-saju/15"
+                      : "rounded-full bg-sky/50 px-3 py-1.5 text-xs font-semibold text-channel-saju ring-1 ring-channel-saju/15 transition hover:bg-sky/70"
                   }
                 >
                   {isKo ? "별자리" : "Zodiac"}
@@ -745,8 +755,8 @@ export function PetProfilesList({
                   href={`/saju/compatibility?${q}`}
                   className={
                     isCompactView
-                      ? "rounded-full bg-petal/50 px-2 py-0.5 text-[10px] font-medium text-plum"
-                      : "rounded-full bg-petal/50 px-3 py-1.5 text-xs font-medium text-plum transition hover:bg-petal/70"
+                      ? "rounded-full bg-petal px-2 py-0.5 text-[10px] font-semibold text-plum ring-1 ring-petal/80"
+                      : "rounded-full bg-petal px-3 py-1.5 text-xs font-semibold text-plum ring-1 ring-petal/80 transition hover:bg-white"
                   }
                 >
                   {isKo ? "궁합" : "Match"}

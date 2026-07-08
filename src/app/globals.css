@@ -146,11 +146,17 @@ html.native-app body {
 
 .night-sky-page .glass-card {
   border: 1px solid rgba(255, 255, 255, 0.55);
-  background: linear-gradient(165deg, #ffffff 0%, #f6f0ff 48%, #fff5f8 100%);
+  background: #ffffff;
   backdrop-filter: none;
   box-shadow:
     0 18px 44px -22px rgba(9, 15, 50, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.pet-profile-card {
+  border: 1px solid rgba(184, 230, 216, 0.95);
+  background: #e1f5f0;
+  box-shadow: 0 18px 44px -22px rgba(9, 15, 50, 0.34);
 }
 
 .bg-dream-sky .pastel-input,

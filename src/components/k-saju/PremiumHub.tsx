@@ -5,6 +5,7 @@ import { BirthCalendarToggle } from "@/components/k-saju/BirthCalendarToggle";
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { CompatibilityResult } from "@/components/k-saju/CompatibilityResult";
 import { PetPremiumPaywall } from "@/components/k-saju/PetPremiumPaywall";
+import { PremiumHubBackToBasicLink } from "@/components/k-saju/PremiumHubBackToBasicLink";
 import { PetPremiumPdfSaveRow } from "@/components/k-saju/PetPremiumPdfSaveRow";
 import { PetPremiumUnlockSkeleton } from "@/components/k-saju/PetPremiumUnlockSkeleton";
 import { PremiumMbtiReport } from "@/components/k-saju/PremiumMbtiReport";
@@ -98,6 +99,7 @@ const UI = {
     login: "로그인하기",
     missingPet: "펫 정보가 없어요. 사주를 먼저 본 뒤 결제해 주세요.",
     backSaju: "← 사주 보기",
+    backBasicResult: "← 사주 결과로 돌아가기",
     loading: "불러오는 중…",
     networkError: "네트워크 오류가 발생했어요.",
     premiumRequired: "프리미엄 결제가 필요해요.",
@@ -136,6 +138,7 @@ const UI = {
     login: "Log in",
     missingPet: "Missing pet info. Complete K-Saju and payment first.",
     backSaju: "← K-Saju",
+    backBasicResult: "← Back to saju result",
     loading: "Loading…",
     networkError: "Network error. Please try again.",
     premiumRequired: "Premium payment required.",
@@ -214,6 +217,7 @@ export function PremiumHub() {
   const [deeplinkView, setDeeplinkView] = useState<ActiveView | null>(null);
   const [premiumBlocked, setPremiumBlocked] = useState(false);
   const [premiumReturnTo, setPremiumReturnTo] = useState<PetPremiumReturnTo>("mbti");
+  const [sajuResultId, setSajuResultId] = useState<string | null>(null);
 
   const unlockCheckEnabled = configured && ready && !isAnonymous;
   const { unlocked, loading: unlockLoading } = usePetPremiumUnlock(
@@ -283,6 +287,9 @@ export function PremiumHub() {
     const nextPetId = params.get("petId");
     const nextMbtiType = params.get("mbtiType");
     const nextView = params.get("view");
+    const nextSajuResultId = params.get("sajuResultId");
+
+    if (nextSajuResultId) setSajuResultId(nextSajuResultId);
 
     const resolvedLocale = isLocale(nextLocale) ? nextLocale : locale;
     if (isLocale(nextLocale)) setLocale(nextLocale);
@@ -502,9 +509,21 @@ export function PremiumHub() {
     })();
   }, [activeView, pet, mbtiType, mbtiResult, mbtiInsight, mbtiInsightLoading, mbtiAnswers, accessToken]);
 
+  function backToBasicResultLink(petId?: string | null) {
+    return (
+      <PremiumHubBackToBasicLink
+        locale={locale}
+        sajuResultId={sajuResultId}
+        petId={petId ?? pet?.petId ?? null}
+      />
+    );
+  }
+
   if (configured && ready && isAnonymous) {
     return (
-      <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6 text-center`}>
+      <div className="space-y-4">
+        {backToBasicResultLink()}
+        <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6 text-center`}>
         <p className="text-sm text-plum/70">{t.loginRequired}</p>
         <Link
           href="/login"
@@ -512,21 +531,27 @@ export function PremiumHub() {
         >
           {t.login}
         </Link>
+        </div>
       </div>
     );
   }
 
   if (!initialized) {
     return (
-      <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6 text-center`}>
+      <div className="space-y-4">
+        {backToBasicResultLink()}
+        <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6 text-center`}>
         <p className="text-sm text-on-surface-variant">{t.loading}</p>
+      </div>
       </div>
     );
   }
 
   if (!pet) {
     return (
-      <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-4 p-6 text-center`}>
+      <div className="space-y-4">
+        {backToBasicResultLink()}
+        <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-4 p-6 text-center`}>
         <p className="text-sm text-plum/70">{t.missingPet}</p>
         <Link
           href="/saju"
@@ -534,6 +559,7 @@ export function PremiumHub() {
         >
           {t.backSaju}
         </Link>
+        </div>
       </div>
     );
   }
@@ -550,19 +576,28 @@ export function PremiumHub() {
     locale: petCtx.locale,
     petId: petCtx.petId,
     ...(mbtiType ? { mbtiType } : {}),
+    ...(sajuResultId ? { sajuResultId } : {}),
   };
 
   if (unlockCheckEnabled && unlockLoading) {
-    return <PetPremiumUnlockSkeleton />;
+    return (
+      <div className="space-y-4">
+        {backToBasicResultLink(petCtx.petId)}
+        <PetPremiumUnlockSkeleton />
+      </div>
+    );
   }
 
   if (premiumBlocked || (unlockCheckEnabled && !unlocked)) {
     return (
-      <PetPremiumPaywall
+      <div className="space-y-4">
+        {backToBasicResultLink(petCtx.petId)}
+        <PetPremiumPaywall
         locale={petCtx.locale}
         continuation={premiumContinuation}
         returnTo={premiumReturnTo}
       />
+      </div>
     );
   }
 
@@ -722,6 +757,8 @@ export function PremiumHub() {
 
   if (phase === "butler-form") {
     return (
+      <div className="space-y-4">
+        {backToBasicResultLink(petCtx.petId)}
       <form
         onSubmit={handleButlerSubmit}
         className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-6 p-6 md:p-8`}
@@ -843,11 +880,13 @@ export function PremiumHub() {
           {t.butlerCancel}
         </button>
       </form>
+      </div>
     );
   }
 
   return (
     <div className="space-y-5 pb-32 md:pb-16">
+      {backToBasicResultLink(petCtx.petId)}
       <ReportGenerateLoader isKo={locale === "ko"} active={reportGenerating} />
       <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-4 p-6 md:p-8`}>
         {!activeView ? (
