@@ -1,7 +1,8 @@
 "use client";
 
 import type { PetDailyFortune, PetFortunePetMeta } from "@/lib/saju/pet-daily-fortune";
-import { elementBarHex, elementSoftHex } from "@/lib/saju/element-colors";
+import { ELEMENT_META, ELEMENT_ORDER } from "@/lib/saju/elements";
+import { elementBarHex } from "@/lib/saju/element-colors";
 import {
   buildPhotoInstaCardContent,
   resolveImageForCanvasCapture,
@@ -23,29 +24,20 @@ export const DailyFortuneInstaCardWithPhoto = forwardRef<HTMLDivElement, Props>(
       [pet, fortune, isKo]
     );
     const accent = elementBarHex(pet.dominantElement);
-    const soft = elementSoftHex(pet.dominantElement);
     const [displaySrc, setDisplaySrc] = useState<string | null>(null);
 
-    const luckyChips = useMemo(
-      () => [
-        {
-          label: isKo ? "컬러" : "Color",
-          value: content.luckyColor,
-          icon: fortune.lucky.find((l) => l.type === "color")?.icon ?? "🎨",
-        },
-        {
-          label: isKo ? "간식" : "Snack",
-          value: content.luckySnack,
-          icon: fortune.lucky.find((l) => l.type === "food")?.icon ?? "🍖",
-        },
-        {
-          label: isKo ? "활동" : "Activity",
-          value: content.luckyActivity,
-          icon: fortune.lucky.find((l) => l.type === "act")?.icon ?? "✨",
-        },
-      ],
-      [content, fortune.lucky, isKo]
-    );
+    const elementBars = useMemo(() => {
+      const byKey = new Map((pet.elements ?? []).map((el) => [el.key, el.percent]));
+      return ELEMENT_ORDER.map((key) => {
+        const meta = ELEMENT_META[key];
+        return {
+          key,
+          label: isKo ? `${meta.hangul}(${meta.hanja})` : `${meta.romanized}(${meta.hanja})`,
+          percent: byKey.get(key) ?? 0,
+          color: elementBarHex(key),
+        };
+      });
+    }, [isKo, pet.elements]);
 
     useEffect(() => {
       let cancelled = false;
@@ -72,64 +64,61 @@ export const DailyFortuneInstaCardWithPhoto = forwardRef<HTMLDivElement, Props>(
     return (
       <div ref={ref} className="daily-fortune-insta-card daily-fortune-insta-card--photo">
         <div className="daily-fortune-insta-card--photo__body">
-          <div className="daily-fortune-insta-card--photo__media">
-            {displaySrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={displaySrc}
-                alt=""
-                className="daily-fortune-insta-card--photo__media-img"
-                onLoad={() => onPhotoReady?.()}
-                onError={() => onPhotoReady?.()}
-              />
-            ) : (
-              <div
-                className="daily-fortune-insta-card--photo__media-img daily-fortune-insta-card--photo__media-img--loading"
-                aria-hidden
-              />
-            )}
-            <div
-              className="daily-fortune-insta-card--photo__media-fade"
-              style={{
-                background: `linear-gradient(to bottom, transparent 0%, ${soft}44 55%, ${accent}99 100%)`,
-              }}
-              aria-hidden
-            />
-          </div>
-
-          <div
-            className="daily-fortune-insta-card--photo__info-panel"
-            style={{
-              background: `linear-gradient(180deg, transparent 0%, ${soft}cc 12%, rgba(18, 16, 14, 0.94) 32%, rgba(12, 11, 10, 0.98) 100%)`,
-            }}
-          >
-            <div className="daily-fortune-insta-card--photo__info-head">
-              <h2 className="daily-fortune-insta-card--photo__pet-title">{content.petTitle}</h2>
-              <div className="daily-fortune-insta-card--photo__harmony" style={{ color: accent }}>
-                <span className="daily-fortune-insta-card--photo__harmony-score">{content.harmony}%</span>
-                <span className="daily-fortune-insta-card--photo__harmony-label">
-                  {isKo ? "케어 조화도" : "Care harmony"}
-                </span>
-              </div>
+          <div className="daily-fortune-insta-card--photo__top">
+            <div className="daily-fortune-insta-card--photo__media">
+              {displaySrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={displaySrc}
+                  alt=""
+                  className="daily-fortune-insta-card--photo__media-img"
+                  onLoad={() => onPhotoReady?.()}
+                  onError={() => onPhotoReady?.()}
+                />
+              ) : (
+                <div
+                  className="daily-fortune-insta-card--photo__media-img daily-fortune-insta-card--photo__media-img--loading"
+                  aria-hidden
+                />
+              )}
             </div>
 
-            <p className="daily-fortune-insta-card--photo__fortune-title">{content.fortuneTitle}</p>
-
-            <div className="daily-fortune-insta-card--photo__lucky-row">
-              {luckyChips.map((chip) => (
-                <div
-                  key={chip.label}
-                  className="daily-fortune-insta-card--photo__lucky-chip"
-                  style={{ borderColor: `${accent}88` }}
-                >
-                  <span className="daily-fortune-insta-card--photo__lucky-chip-text">
-                    {chip.icon} {chip.label} · {chip.value}
-                  </span>
+            <div className="daily-fortune-insta-card--photo__elements">
+              {elementBars.map((el) => (
+                <div key={el.key} className="daily-fortune-insta-card--photo__element-row">
+                  <div className="daily-fortune-insta-card--photo__element-head">
+                    <span className="daily-fortune-insta-card--photo__element-label">{el.label}</span>
+                    <span className="daily-fortune-insta-card--photo__element-pct">{el.percent}%</span>
+                  </div>
+                  <div className="daily-fortune-insta-card--photo__element-track">
+                    <div
+                      className="daily-fortune-insta-card--photo__element-fill"
+                      style={{ width: `${Math.max(4, el.percent)}%`, backgroundColor: el.color }}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
+          </div>
 
-            <p className="daily-fortune-insta-card--photo__today-line">{content.todayLine}</p>
+          <div className="daily-fortune-insta-card--photo__info-panel">
+            <div className="daily-fortune-insta-card--photo__info-head">
+              <h2 className="daily-fortune-insta-card--photo__pet-title">{content.petTitle}</h2>
+              <p className="daily-fortune-insta-card--photo__harmony" style={{ color: accent }}>
+                {isKo ? `케어조화도 ${content.harmony}%` : `Care harmony ${content.harmony}%`}
+              </p>
+            </div>
+
+            <div className="daily-fortune-insta-card--photo__sections">
+              <article className="daily-fortune-insta-card--photo__section">
+                <h3 className="daily-fortune-insta-card--photo__section-title">{content.todayStateTitle}</h3>
+                <p className="daily-fortune-insta-card--photo__section-body">{content.todayStateBody}</p>
+              </article>
+              <article className="daily-fortune-insta-card--photo__section">
+                <h3 className="daily-fortune-insta-card--photo__section-title">{content.tipTitle}</h3>
+                <p className="daily-fortune-insta-card--photo__section-body">{content.tipBody}</p>
+              </article>
+            </div>
 
             <p className="daily-fortune-insta-card--photo__watermark">#ksajupet</p>
           </div>

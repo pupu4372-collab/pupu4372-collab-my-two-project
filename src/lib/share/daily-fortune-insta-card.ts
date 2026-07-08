@@ -152,15 +152,12 @@ export function stripLuckyPrefix(text: string, isKo: boolean): string {
 }
 
 export type PhotoInstaCardContent = {
-  dateLabel: string;
   petTitle: string;
   harmony: number;
-  fortuneTitle: string;
-  elementLabel: string;
-  luckyColor: string;
-  luckySnack: string;
-  luckyActivity: string;
-  todayLine: string;
+  todayStateTitle: string;
+  todayStateBody: string;
+  tipTitle: string;
+  tipBody: string;
 };
 
 export function buildPhotoInstaCardContent(
@@ -168,23 +165,17 @@ export function buildPhotoInstaCardContent(
   fortune: PetDailyFortune,
   isKo: boolean,
 ): PhotoInstaCardContent {
-  const luckyColor = fortune.lucky.find((item) => item.type === "color");
-  const luckySnack = fortune.lucky.find((item) => item.type === "food");
-  const luckyAct = fortune.lucky.find((item) => item.type === "act");
-  const moodBody = fortune.messages[0]?.body ?? fortune.subtitle;
+  const sections = buildInstaSectionBodies(pet, fortune, isKo);
 
   return {
-    dateLabel: formatInstaCardKstDate(isKo),
     petTitle: isKo
       ? `${petInstaEmoji(pet.species)} ${pet.name}의 오늘 케어`
       : `${petInstaEmoji(pet.species)} ${pet.name}'s care today`,
     harmony: harmonyScore(fortune),
-    fortuneTitle: fortune.title,
-    elementLabel: fortune.elementLabel,
-    luckyColor: stripLuckyPrefix(luckyColor?.text ?? fortune.title, isKo),
-    luckySnack: stripLuckyPrefix(luckySnack?.text ?? "—", isKo),
-    luckyActivity: stripLuckyPrefix(luckyAct?.text ?? "—", isKo),
-    todayLine: truncateInstaBody(moodBody, 110),
+    todayStateTitle: isKo ? "오늘의 아이 상태" : "Today's mood",
+    todayStateBody: truncateInstaBody(sections.todayState, 140),
+    tipTitle: isKo ? "집사를 위한 팁" : "Tip for butler",
+    tipBody: truncateInstaBody(sections.tipBody, 140),
   };
 }
 

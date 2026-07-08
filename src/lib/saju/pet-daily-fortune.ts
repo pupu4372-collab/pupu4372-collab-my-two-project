@@ -10,7 +10,7 @@ import {
   scoreFromRelation,
 } from "@/lib/saju/compatibility/elements-cycle";
 import { getTodayKstDateString } from "@/lib/saju/zodiac/fortunes";
-import type { ElementKey, Locale, Species } from "@/lib/saju/types";
+import type { ElementDisplay, ElementKey, Locale, Species } from "@/lib/saju/types";
 
 export interface PetFortuneCategory {
   icon: string;
@@ -53,6 +53,7 @@ export interface PetFortunePetMeta {
   profileImageUrl: string | null;
   photoUrl: string | null;
   dominantElement: ElementKey;
+  elements: ElementDisplay[];
 }
 
 export interface PetDailyFortune {
@@ -516,6 +517,7 @@ export function buildPetFortunePetMeta(
     profileImageUrl: pet.profileImageUrl ?? null,
     photoUrl: pet.photoUrl ?? null,
     dominantElement: saju.dominantElement,
+    elements: saju.elements,
   };
 }
 

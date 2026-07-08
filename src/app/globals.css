@@ -1587,9 +1587,16 @@ html.native-app body {
   min-height: 0;
 }
 
+.daily-fortune-insta-card--photo__top {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
 .daily-fortune-insta-card--photo__media {
   position: relative;
   flex: 1 1 0;
+  min-width: 0;
   min-height: 0;
   overflow: hidden;
   background: #1a1814;
@@ -1611,25 +1618,67 @@ html.native-app body {
   background: #2a2620;
 }
 
-.daily-fortune-insta-card--photo__media-fade {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  height: 140px;
-  pointer-events: none;
+.daily-fortune-insta-card--photo__elements {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 0;
+  padding: 28px 32px;
+  background: #141210;
+}
+
+.daily-fortune-insta-card--photo__element-row {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  gap: 8px;
+}
+
+.daily-fortune-insta-card--photo__element-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.daily-fortune-insta-card--photo__element-label {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.daily-fortune-insta-card--photo__element-pct {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.daily-fortune-insta-card--photo__element-track {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.daily-fortune-insta-card--photo__element-fill {
+  height: 100%;
+  border-radius: 9999px;
 }
 
 .daily-fortune-insta-card--photo__info-panel {
   position: relative;
-  z-index: 2;
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
   min-height: 0;
-  margin-top: -72px;
-  padding: 88px 44px 28px;
+  padding: 36px 44px 28px;
+  background: #12100e;
   color: #fff;
 }
 
@@ -1637,12 +1686,13 @@ html.native-app body {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
 }
 
 .daily-fortune-insta-card--photo__pet-title {
   flex: 1;
-  font-size: 36px;
+  min-width: 0;
+  font-size: 34px;
   font-weight: 800;
   line-height: 1.25;
   color: #fff;
@@ -1651,68 +1701,39 @@ html.native-app body {
 }
 
 .daily-fortune-insta-card--photo__harmony {
-  display: flex;
   flex-shrink: 0;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  margin-top: 2px;
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.daily-fortune-insta-card--photo__harmony-score {
-  font-size: 40px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.daily-fortune-insta-card--photo__harmony-label {
-  font-size: 15px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.78);
-}
-
-.daily-fortune-insta-card--photo__fortune-title {
-  margin-top: 14px;
-  display: inline-flex;
-  align-self: flex-start;
-  padding: 8px 16px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.14);
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.daily-fortune-insta-card--photo__lucky-row {
+.daily-fortune-insta-card--photo__sections {
   display: flex;
-  gap: 10px;
-  margin-top: 18px;
+  flex: 1;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 24px;
+  min-height: 0;
 }
 
-.daily-fortune-insta-card--photo__lucky-chip {
-  flex: 1 1 0;
+.daily-fortune-insta-card--photo__section {
   min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
 }
 
-.daily-fortune-insta-card--photo__lucky-chip-text {
-  display: block;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.95);
-  word-break: keep-all;
-  overflow-wrap: anywhere;
+.daily-fortune-insta-card--photo__section-title {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.88);
 }
 
-.daily-fortune-insta-card--photo__today-line {
-  margin-top: 20px;
-  font-size: 22px;
+.daily-fortune-insta-card--photo__section-body {
+  margin-top: 10px;
+  font-size: 26px;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.45;
   color: rgba(255, 255, 255, 0.94);
   word-break: keep-all;
   overflow-wrap: anywhere;
@@ -1720,12 +1741,11 @@ html.native-app body {
 
 .daily-fortune-insta-card--photo__watermark {
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 18px;
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.62);
-  text-align: center;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .pet-fortune-care-reminder {
