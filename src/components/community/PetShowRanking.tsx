@@ -3,6 +3,7 @@
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { FirstPlaceCard, RunnerUpCard, petShowRankingHref } from "@/components/community/PetShowRankingCards";
 import { PetShowTopFiveStrip } from "@/components/community/PetShowTopFiveStrip";
+import type { PetShowRankingFallbackFlags } from "@/lib/community/ranking";
 import type { PetShowRankingRow, RankingPeriod } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -21,6 +22,7 @@ interface PetShowWeeklySpeciesRankingProps {
   funnyRows?: PetShowRankingRow[];
   period?: Extract<RankingPeriod, "week" | "month">;
   source: "supabase" | "mock";
+  lastWeekFallback?: PetShowRankingFallbackFlags;
 }
 
 type RankingSpeciesTab = "dog" | "cat" | "reptile";
@@ -68,10 +70,14 @@ function SpeciesRankingPanel({
   rows,
   emptyText,
   isKo,
+  isLastWeekFallback = false,
+  lastWeekLabel,
 }: {
   rows: PetShowRankingRow[];
   emptyText: string;
   isKo: boolean;
+  isLastWeekFallback?: boolean;
+  lastWeekLabel: string;
 }) {
   if (rows.length === 0) {
     return (
@@ -91,6 +97,11 @@ function SpeciesRankingPanel({
 
   return (
     <div className="space-y-4">
+      {isLastWeekFallback && (
+        <p className="inline-flex rounded-full bg-[#ffd7ff]/55 px-3 py-1 text-xs font-extrabold text-primary">
+          {lastWeekLabel}
+        </p>
+      )}
       <FirstPlaceCard row={first} isKo={isKo} />
       {rest.length > 0 && (
         <ol className="space-y-3">
@@ -110,6 +121,7 @@ export function PetShowWeeklySpeciesRanking({
   funnyRows = [],
   period = "week",
   source,
+  lastWeekFallback,
 }: PetShowWeeklySpeciesRankingProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -135,6 +147,12 @@ export function PetShowWeeklySpeciesRanking({
     { id: "cat", label: tSpecies("cat") },
     { id: "reptile", label: tSpecies("reptile") },
   ];
+
+  const fallbackBySpecies: Record<RankingSpeciesTab, boolean> = {
+    dog: Boolean(lastWeekFallback?.dog),
+    cat: Boolean(lastWeekFallback?.cat),
+    reptile: Boolean(lastWeekFallback?.reptile),
+  };
 
   return (
     <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-5 md:p-6`}>
@@ -180,6 +198,8 @@ export function PetShowWeeklySpeciesRanking({
           rows={rowsBySpecies[activeSpecies]}
           emptyText={emptyBySpecies[activeSpecies]}
           isKo={isKo}
+          isLastWeekFallback={!isMonthly && fallbackBySpecies[activeSpecies]}
+          lastWeekLabel={t("rankingLastWeekLabel")}
         />
       </div>
 
@@ -194,6 +214,8 @@ export function PetShowWeeklySpeciesRanking({
           rows={funnyRows}
           isKo={isKo}
           emptyText={isMonthly ? t("rankingEmptyFunnyMonth") : t("rankingEmptyFunnyWeek")}
+          isLastWeekFallback={!isMonthly && Boolean(lastWeekFallback?.funny)}
+          lastWeekLabel={t("rankingLastWeekLabel")}
         />
       </div>
     </section>

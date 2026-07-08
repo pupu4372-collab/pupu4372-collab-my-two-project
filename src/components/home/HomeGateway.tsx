@@ -9,6 +9,7 @@ import { type FortuneTodayState } from "@/components/home/PetDailyFortunePanel";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
+import type { PetShowRankingFallbackFlags } from "@/lib/community/ranking";
 import type { PetShowRankingRow } from "@/lib/supabase/types";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -34,6 +35,8 @@ function RankingPreviewList({
   emptyText,
   isNight = false,
   isKo = true,
+  isLastWeekFallback = false,
+  lastWeekLabel,
 }: {
   emoji: string;
   label: string;
@@ -41,6 +44,8 @@ function RankingPreviewList({
   emptyText: string;
   isNight?: boolean;
   isKo?: boolean;
+  isLastWeekFallback?: boolean;
+  lastWeekLabel?: string;
 }) {
   return (
     <div
@@ -50,6 +55,11 @@ function RankingPreviewList({
     >
       <p className={`text-xs font-extrabold ${isNight ? "text-primary" : "text-primary"}`}>
         {emoji} {label}
+        {isLastWeekFallback && lastWeekLabel ? (
+          <span className="ml-2 rounded-full bg-[#ffd7ff]/55 px-2 py-0.5 text-[10px] font-extrabold text-primary">
+            {lastWeekLabel}
+          </span>
+        ) : null}
       </p>
       {rows.length === 0 ? (
         <p
@@ -116,6 +126,12 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   const { ready, accessToken } = useSupabaseSession();
   const [rankingRows, setRankingRows] = useState<WeeklyRankingRows>(emptyRankingRows);
   const [funnyRankingRows, setFunnyRankingRows] = useState<PetShowRankingRow[]>([]);
+  const [rankingFallback, setRankingFallback] = useState<PetShowRankingFallbackFlags>({
+    dog: false,
+    cat: false,
+    reptile: false,
+    funny: false,
+  });
   const [rankingSource, setRankingSource] = useState<"supabase" | "mock" | null>(null);
   const [fortuneData, setFortuneData] = useState<FortuneTodayState | null>(null);
   const [fortuneLoading, setFortuneLoading] = useState(true);
@@ -129,6 +145,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
           rows?: Partial<WeeklyRankingRows>;
           funny?: PetShowRankingRow[];
           source?: "supabase" | "mock";
+          lastWeekFallback?: PetShowRankingFallbackFlags;
         };
         setRankingRows({
           dog: data.rows?.dog ?? [],
@@ -137,10 +154,12 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
           other: data.rows?.other ?? [],
         });
         setFunnyRankingRows(data.funny ?? []);
+        setRankingFallback(data.lastWeekFallback ?? { dog: false, cat: false, reptile: false, funny: false });
         setRankingSource(data.source ?? null);
       } catch {
         setRankingRows(emptyRankingRows);
         setFunnyRankingRows([]);
+        setRankingFallback({ dog: false, cat: false, reptile: false, funny: false });
         setRankingSource(null);
       }
     }
@@ -294,6 +313,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             label={isKo ? "강아지 Top 5" : "Dog Top 5"}
             rows={rankingRows.dog}
             emptyText={isKo ? "이번 주 강아지 사진을 기다려요." : "Waiting for dog photos."}
+            isLastWeekFallback={rankingFallback.dog}
+            lastWeekLabel={tPetShow("rankingLastWeekLabel")}
             isNight={isNight}
             isKo={isKo}
           />
@@ -302,6 +323,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             label={isKo ? "고양이 Top 5" : "Cat Top 5"}
             rows={rankingRows.cat}
             emptyText={isKo ? "이번 주 고양이 사진을 기다려요." : "Waiting for cat photos."}
+            isLastWeekFallback={rankingFallback.cat}
+            lastWeekLabel={tPetShow("rankingLastWeekLabel")}
             isNight={isNight}
             isKo={isKo}
           />
@@ -310,6 +333,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             label={tPetShow("reptileTop5")}
             rows={mergeReptileChannelRankingRows(rankingRows.reptile, rankingRows.other)}
             emptyText={tPetShow("reptileTop5Empty")}
+            isLastWeekFallback={rankingFallback.reptile}
+            lastWeekLabel={tPetShow("rankingLastWeekLabel")}
             isNight={isNight}
             isKo={isKo}
           />
@@ -318,6 +343,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             label={isKo ? "웃긴 사진 Top 5" : "Funny Top 5"}
             rows={funnyRankingRows}
             emptyText={isKo ? "이번 주 웃긴 사진을 기다려요." : "Waiting for funny photos this week."}
+            isLastWeekFallback={rankingFallback.funny}
+            lastWeekLabel={tPetShow("rankingLastWeekLabel")}
             isNight={isNight}
             isKo={isKo}
           />

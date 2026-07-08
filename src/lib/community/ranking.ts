@@ -1,17 +1,17 @@
 import { loadSpeciesByPetId, resolvePostSpecies } from "@/lib/community/pet-show-species";
 import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
+import { getKstWeekEndUtc, getKstWeekStartUtc } from "@/lib/time/kst-week";
 import type { PetShowRankingRow, PetShowSpecies, RankingPeriod } from "@/lib/supabase/types";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const TOP_LIMIT = 5;
-const WEEK_DAYS = 7;
 const MONTH_DAYS = 30;
 const SPECIES_SCAN_LIMIT = 120;
 const FUNNY_SCAN_LIMIT = 40;
 
 export type PetShowPhotoCategory = "cute" | "funny";
 
-/** SQL reference — weekly Top 5 (uses denormalized like_count + partial index). */
+/** Unused legacy view/SQL reference — actual weekly window is ranking.ts + getKstWeekStartUtc/EndUtc. */
 export const PET_SHOW_RANKING_WEEKLY_SQL = `
 select
   id,
@@ -62,9 +62,9 @@ export function sortRankingRows(rows: PetShowRankingRow[]): PetShowRankingRow[] 
     .map((row, index) => ({ ...row, rank_position: index + 1 }));
 }
 
-function periodStartDate(period: Extract<RankingPeriod, "week" | "month">): Date {
+function monthPeriodStartDate(): Date {
   const start = new Date();
-  start.setDate(start.getDate() - (period === "month" ? MONTH_DAYS : WEEK_DAYS));
+  start.setDate(start.getDate() - MONTH_DAYS);
   return start;
 }
 
@@ -83,6 +83,7 @@ function buildPhotoShowRankingQuery(
   options: {
     photoCategory: PetShowPhotoCategory;
     period?: Extract<RankingPeriod, "week" | "month">;
+    weeksAgo?: number;
     limit: number;
   },
 ) {
@@ -103,8 +104,13 @@ function buildPhotoShowRankingQuery(
     query = query.or("category.eq.cute,category.is.null");
   }
 
-  if (options.period) {
-    query = query.gte("created_at", periodStartDate(options.period).toISOString());
+  if (options.period === "week") {
+    const weeksAgo = options.weeksAgo ?? 0;
+    query = query
+      .gte("created_at", getKstWeekStartUtc(new Date(), weeksAgo).toISOString())
+      .lt("created_at", getKstWeekEndUtc(new Date(), weeksAgo).toISOString());
+  } else if (options.period === "month") {
+    query = query.gte("created_at", monthPeriodStartDate().toISOString());
   }
 
   return query;
@@ -145,10 +151,25 @@ export interface PetShowSpeciesRankings {
   other: PetShowRankingRow[];
 }
 
+export interface PetShowRankingFallbackFlags {
+  dog: boolean;
+  cat: boolean;
+  reptile: boolean;
+  funny: boolean;
+}
+
+export const EMPTY_RANKING_FALLBACK_FLAGS: PetShowRankingFallbackFlags = {
+  dog: false,
+  cat: false,
+  reptile: false,
+  funny: false,
+};
+
 export interface PetShowRankingsBundle {
   rows: PetShowSpeciesRankings;
   funny: PetShowRankingRow[];
   source: "supabase" | "mock";
+  lastWeekFallback: PetShowRankingFallbackFlags;
 }
 
 export function getPetShowSpeciesRankingRows(
@@ -197,6 +218,76 @@ function groupFunnyPosts(posts: RankingPostRow[]): PetShowRankingRow[] {
   return sortRankingRows(rows);
 }
 
+async function fetchRankingsForWindow(
+  supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>,
+  period: Extract<RankingPeriod, "week" | "month">,
+  weeksAgo = 0,
+): Promise<{ grouped: PetShowSpeciesRankings; funny: PetShowRankingRow[] }> {
+  const [cuteResult, funnyResult] = await Promise.all([
+    buildPhotoShowRankingQuery(supabase, {
+      photoCategory: "cute",
+      period,
+      weeksAgo,
+      limit: SPECIES_SCAN_LIMIT,
+    }),
+    buildPhotoShowRankingQuery(supabase, {
+      photoCategory: "funny",
+      period,
+      weeksAgo,
+      limit: FUNNY_SCAN_LIMIT,
+    }),
+  ]);
+
+  if (cuteResult.error || funnyResult.error) {
+    throw cuteResult.error ?? funnyResult.error;
+  }
+
+  const cuteRows = (cuteResult.data ?? []) as unknown as RankingPostRow[];
+  const funnyRows = (funnyResult.data ?? []) as unknown as RankingPostRow[];
+  const speciesByPetId = await loadSpeciesByPetId(supabase, [...cuteRows, ...funnyRows]);
+
+  return {
+    grouped: groupPostsBySpecies(cuteRows, speciesByPetId),
+    funny: groupFunnyPosts(funnyRows),
+  };
+}
+
+function applyWeeklyLastWeekFallback(
+  current: { grouped: PetShowSpeciesRankings; funny: PetShowRankingRow[] },
+  previous: { grouped: PetShowSpeciesRankings; funny: PetShowRankingRow[] },
+): { rows: PetShowSpeciesRankings; funny: PetShowRankingRow[]; lastWeekFallback: PetShowRankingFallbackFlags } {
+  const lastWeekFallback: PetShowRankingFallbackFlags = { ...EMPTY_RANKING_FALLBACK_FLAGS };
+  const rows: PetShowSpeciesRankings = { ...current.grouped };
+  let funny = current.funny;
+
+  if (rows.dog.length === 0 && previous.grouped.dog.length > 0) {
+    rows.dog = previous.grouped.dog;
+    lastWeekFallback.dog = true;
+  }
+  if (rows.cat.length === 0 && previous.grouped.cat.length > 0) {
+    rows.cat = previous.grouped.cat;
+    lastWeekFallback.cat = true;
+  }
+
+  const currentReptile = mergeReptileChannelRankingRows(rows.reptile, rows.other);
+  const previousReptile = mergeReptileChannelRankingRows(
+    previous.grouped.reptile,
+    previous.grouped.other,
+  );
+  if (currentReptile.length === 0 && previousReptile.length > 0) {
+    rows.reptile = previous.grouped.reptile;
+    rows.other = previous.grouped.other;
+    lastWeekFallback.reptile = true;
+  }
+
+  if (funny.length === 0 && previous.funny.length > 0) {
+    funny = previous.funny;
+    lastWeekFallback.funny = true;
+  }
+
+  return { rows, funny, lastWeekFallback };
+}
+
 export async function fetchPetShowSpeciesRankings(
   period: Extract<RankingPeriod, "week" | "month"> = "week",
 ): Promise<PetShowRankingsBundle> {
@@ -204,39 +295,46 @@ export async function fetchPetShowSpeciesRankings(
 
   if (!supabase) {
     const mock = getMockSpeciesRankings();
-    return { rows: mock, funny: getMockFunnyRanking(), source: "mock" };
+    return {
+      rows: mock,
+      funny: getMockFunnyRanking(),
+      source: "mock",
+      lastWeekFallback: EMPTY_RANKING_FALLBACK_FLAGS,
+    };
   }
 
-  const [cuteResult, funnyResult] = await Promise.all([
-    buildPhotoShowRankingQuery(supabase, {
-      photoCategory: "cute",
-      period,
-      limit: SPECIES_SCAN_LIMIT,
-    }),
-    buildPhotoShowRankingQuery(supabase, {
-      photoCategory: "funny",
-      period,
-      limit: FUNNY_SCAN_LIMIT,
-    }),
-  ]);
+  try {
+    const current = await fetchRankingsForWindow(supabase, period, 0);
 
-  if (cuteResult.error || funnyResult.error) {
+    if (period === "week") {
+      const needsFallback =
+        current.grouped.dog.length === 0 ||
+        current.grouped.cat.length === 0 ||
+        mergeReptileChannelRankingRows(current.grouped.reptile, current.grouped.other).length === 0 ||
+        current.funny.length === 0;
+
+      if (needsFallback) {
+        const previous = await fetchRankingsForWindow(supabase, period, 1);
+        const { rows, funny, lastWeekFallback } = applyWeeklyLastWeekFallback(current, previous);
+        return { rows, funny, source: "supabase", lastWeekFallback };
+      }
+    }
+
+    return {
+      rows: current.grouped,
+      funny: current.funny,
+      source: "supabase",
+      lastWeekFallback: EMPTY_RANKING_FALLBACK_FLAGS,
+    };
+  } catch {
     const mock = getMockSpeciesRankings();
-    return { rows: mock, funny: getMockFunnyRanking(), source: "mock" };
+    return {
+      rows: mock,
+      funny: getMockFunnyRanking(),
+      source: "mock",
+      lastWeekFallback: EMPTY_RANKING_FALLBACK_FLAGS,
+    };
   }
-
-  const cuteRows = (cuteResult.data ?? []) as unknown as RankingPostRow[];
-  const funnyRows = (funnyResult.data ?? []) as unknown as RankingPostRow[];
-
-  if (cuteRows.length === 0 && funnyRows.length === 0) {
-    return { rows: { dog: [], cat: [], reptile: [], other: [] }, funny: [], source: "supabase" };
-  }
-
-  const speciesByPetId = await loadSpeciesByPetId(supabase, [...cuteRows, ...funnyRows]);
-  const grouped = groupPostsBySpecies(cuteRows, speciesByPetId);
-  const funny = groupFunnyPosts(funnyRows);
-
-  return { rows: grouped, funny, source: "supabase" };
 }
 
 export function fetchWeeklyPetShowSpeciesRankings() {

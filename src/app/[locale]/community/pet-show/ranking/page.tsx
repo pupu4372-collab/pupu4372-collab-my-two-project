@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
 import { fetchPetShowSpeciesRankings } from "@/lib/community/ranking";
 import type { RankingPeriod } from "@/lib/supabase/types";
+import { getTranslations } from "next-intl/server";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -21,21 +22,14 @@ export default async function PetShowRankingPage({ params, searchParams }: PageP
   const isKo = locale !== "en";
   const period = getRankingPeriod(query?.period);
   const isMonthly = period === "month";
+  const tPetShow = await getTranslations("petshow");
   const ranking = await fetchPetShowSpeciesRankings(period);
 
   return (
     <PetShowShell
       theme="community"
       title={isMonthly ? (isKo ? "우리아이 자랑 월간 랭킹" : "Pet Show Monthly Ranking") : isKo ? "우리아이 자랑 주간 랭킹" : "Pet Show Weekly Ranking"}
-      subtitle={
-        isMonthly
-          ? isKo
-            ? "최근 30일간 좋아요 순위예요."
-            : "Ranked by likes from the last 30 days."
-          : isKo
-            ? "최근 7일간 좋아요 순위예요."
-            : "Ranked by likes from the last 7 days."
-      }
+      subtitle={isMonthly ? (isKo ? "최근 30일간 좋아요 순위예요." : "Ranked by likes from the last 30 days.") : tPetShow("rankingDescWeek")}
     >
       <div className="mb-3 inline-flex rounded-full border border-white/35 bg-white/95 p-1.5 shadow-sm">
         <Link
@@ -62,6 +56,7 @@ export default async function PetShowRankingPage({ params, searchParams }: PageP
         funnyRows={ranking.funny}
         period={period}
         source={ranking.source}
+        lastWeekFallback={ranking.lastWeekFallback}
       />
     </PetShowShell>
   );

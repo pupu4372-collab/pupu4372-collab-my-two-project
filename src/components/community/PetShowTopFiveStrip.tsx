@@ -77,10 +77,14 @@ export function PetShowTopFiveStrip({
   rows,
   isKo,
   emptyText,
+  isLastWeekFallback = false,
+  lastWeekLabel,
 }: {
   rows: PetShowRankingRow[];
   isKo: boolean;
   emptyText: string;
+  isLastWeekFallback?: boolean;
+  lastWeekLabel?: string;
 }) {
   const tSpecies = useTranslations("petSpecies");
   const speciesLabels = {
@@ -107,6 +111,11 @@ export function PetShowTopFiveStrip({
 
   return (
     <div className="-mx-5 mt-6 touch-pan-x overscroll-x-contain md:mx-0">
+      {isLastWeekFallback && lastWeekLabel ? (
+        <p className="mb-3 inline-flex rounded-full bg-[#ffd7ff]/55 px-3 py-1 text-xs font-extrabold text-primary">
+          {lastWeekLabel}
+        </p>
+      ) : null}
       <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 pt-1 pr-10 hide-scrollbar scroll-pr-10 md:px-0 md:pr-12 md:scroll-pr-12">
         {sorted.map((row, index) => (
           <RankingStripCard key={row.id} row={row} rank={index + 1} isKo={isKo} labels={speciesLabels} />

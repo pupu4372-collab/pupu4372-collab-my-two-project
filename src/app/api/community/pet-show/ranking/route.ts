@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   }
 
   if (searchParams.get("group") === "species") {
-    const { rows, funny, source } = await fetchWeeklyPetShowSpeciesRankings();
+    const { rows, funny, source, lastWeekFallback } = await fetchWeeklyPetShowSpeciesRankings();
     return NextResponse.json({
       period: "week",
       group: "species",
@@ -22,6 +22,7 @@ export async function GET(request: Request) {
       limit: 5,
       rows,
       funny,
+      lastWeekFallback,
     });
   }
 
