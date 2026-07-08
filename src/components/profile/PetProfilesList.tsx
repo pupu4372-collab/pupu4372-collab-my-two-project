@@ -1,8 +1,11 @@
 "use client";
 
 import { EmptyStatePanel, getEmptyStatePreset } from "@/components/ui/EmptyStatePanel";
+import { PetPhotoUploadField } from "@/components/pet/PetPhotoUploadField";
+import { petAvatarImageProps } from "@/lib/pets/pet-avatar";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
+import { uploadPetFortunePhotoClient } from "@/lib/pets/photo-upload-client";
 import { compressImageForUpload } from "@/lib/images/upload-compression";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
@@ -28,6 +31,8 @@ interface PetRow {
   birth_time_unknown: boolean;
   birth_timezone: string;
   profile_image_url: string | null;
+  photo_url: string | null;
+  photo_consent_secondary_use: boolean;
   personality_tags: string[];
   created_at: string;
   latestSaju: SajuReading | null;
@@ -141,6 +146,10 @@ export function PetProfilesList({
   const [loading, setLoading] = useState(false);
   const [savingPetId, setSavingPetId] = useState<string | null>(null);
   const [uploadingPetId, setUploadingPetId] = useState<string | null>(null);
+  const [uploadingFortunePhotoId, setUploadingFortunePhotoId] = useState<string | null>(null);
+  const [fortunePhotoFiles, setFortunePhotoFiles] = useState<Record<string, File | null>>({});
+  const [fortunePhotoConsents, setFortunePhotoConsents] = useState<Record<string, boolean>>({});
+  const [fortunePhotoErrors, setFortunePhotoErrors] = useState<Record<string, string | null>>({});
   const [deletingPetId, setDeletingPetId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -160,6 +169,11 @@ export function PetProfilesList({
         const nextPets = (data.pets ?? []) as PetRow[];
         setPets(nextPets);
         setDrafts(Object.fromEntries(nextPets.map((pet) => [pet.id, draftFromPet(pet)])));
+        setFortunePhotoConsents(
+          Object.fromEntries(
+            nextPets.map((pet) => [pet.id, Boolean(pet.photo_consent_secondary_use)])
+          )
+        );
       } catch {
         setError(isKo ? "네트워크 오류" : "Network error");
       } finally {
@@ -304,6 +318,61 @@ export function PetProfilesList({
     } finally {
       setUploadingPetId(null);
     }
+  }
+
+  async function uploadFortunePhoto(
+    petId: string,
+    file: File,
+    photoConsentSecondaryUse: boolean
+  ) {
+    if (!accessToken) return;
+
+    setUploadingFortunePhotoId(petId);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const { photoUrl } = await uploadPetFortunePhotoClient(
+        accessToken,
+        petId,
+        file,
+        photoConsentSecondaryUse
+      );
+      setPets((prev) =>
+        prev.map((item) =>
+          item.id === petId
+            ? { ...item, photo_url: photoUrl, photo_consent_secondary_use: photoConsentSecondaryUse }
+            : item
+        )
+      );
+      setFortunePhotoFiles((prev) => ({ ...prev, [petId]: null }));
+      setMessage(
+        isKo ? "운세 카드용 사진이 등록됐어요." : "Daily fortune card photo saved."
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : isKo
+            ? "사진 업로드에 실패했어요."
+            : "Could not upload photo."
+      );
+    } finally {
+      setUploadingFortunePhotoId(null);
+    }
+  }
+
+  async function handleFortunePhotoChange(
+    petId: string,
+    file: File | null,
+    fileError: string | null,
+    consent: boolean
+  ) {
+    setFortunePhotoFiles((prev) => ({ ...prev, [petId]: file }));
+    setFortunePhotoErrors((prev) => ({ ...prev, [petId]: fileError }));
+    setFortunePhotoConsents((prev) => ({ ...prev, [petId]: consent }));
+    if (!file || fileError) return;
+    await uploadFortunePhoto(petId, file, consent);
   }
 
   async function deletePet(pet: PetRow) {
@@ -483,19 +552,21 @@ export function PetProfilesList({
                         : "h-14 w-14 rounded-2xl bg-lavender/30 text-2xl"
                   }`}
                 >
-                  {(editable ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url) ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={supabaseImageTransformUrl((editable ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url) as string, {
-                        width: isCompactView ? 64 : 112,
-                        height: isCompactView ? 64 : 112,
-                      })}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span aria-hidden>{speciesEmoji(pet.species)}</span>
-                  )}
+                  {(() => {
+                    const avatar = petAvatarImageProps(
+                      {
+                        photo_url: pet.photo_url,
+                        profileImageUrl: editable ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url,
+                      },
+                      isCompactView ? 64 : 112
+                    );
+                    return avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={avatar.src} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <span aria-hidden>{speciesEmoji(pet.species)}</span>
+                    );
+                  })()}
                   {editable && (
                     <>
                       <input
@@ -679,6 +750,29 @@ export function PetProfilesList({
                       ))}
                     </select>
                   </label>
+
+                  <div className="sm:col-span-2">
+                    <PetPhotoUploadField
+                      locale={isKo ? "ko" : "en"}
+                      petName={drafts[pet.id].name}
+                      disabled={savingPetId === pet.id || uploadingFortunePhotoId === pet.id}
+                      file={fortunePhotoFiles[pet.id] ?? null}
+                      consent={fortunePhotoConsents[pet.id] ?? false}
+                      fileError={fortunePhotoErrors[pet.id] ?? null}
+                      currentPhotoUrl={pet.photo_url}
+                      onFileChange={(file, fileError) => {
+                        const consent = fortunePhotoConsents[pet.id] ?? false;
+                        void handleFortunePhotoChange(pet.id, file, fileError, consent);
+                      }}
+                      onConsentChange={(consent) => {
+                        setFortunePhotoConsents((prev) => ({ ...prev, [pet.id]: consent }));
+                        const pending = fortunePhotoFiles[pet.id];
+                        if (pending && !fortunePhotoErrors[pet.id]) {
+                          void uploadFortunePhoto(pet.id, pending, consent);
+                        }
+                      }}
+                    />
+                  </div>
 
                   <button
                     type="button"

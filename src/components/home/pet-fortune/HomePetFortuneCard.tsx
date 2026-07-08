@@ -75,7 +75,7 @@ export function HomePetFortuneCard({ fortuneData, careReminders, onSelectPet, on
 
     return (
       <div className="space-y-3">
-        <PetFortuneSajuGuide />
+        <PetFortuneSajuGuide sajuPetId={fortuneData.petId} />
         <div className="pet-fortune-guest-shell relative min-w-0 space-y-5">
           <PetFortuneQuickAddForm onAdded={onPetAdded} />
         <PetCareReminderBanner

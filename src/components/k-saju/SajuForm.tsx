@@ -1,23 +1,19 @@
 "use client";
 
-import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { PetMbtiAccordion } from "@/components/k-saju/PetMbtiAccordion";
 import { SajuResult } from "@/components/k-saju/SajuResult";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
+import { PetBasicInfoFields } from "@/components/pet/PetBasicInfoFields";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
-import {
-  BIRTH_TIME_OPTIONS,
-  getBirthTimeOptionLabel,
-} from "@/lib/saju/birth-time-options";
+import { fetchPetProfileForSaju, petProfileToSajuFormState } from "@/lib/pets/load-pet-for-saju";
 import { Link, useRouter } from "@/i18n/navigation";
-import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import type { Gender, Locale, SajuBasicResponse, Species } from "@/lib/saju/types";
 import type { MbtiAnswerMap } from "@/lib/pet/calc-mbti";
 import { calcMbti, isMbtiComplete } from "@/lib/pet/calc-mbti";
 import { getQuestionsBySpecies } from "@/lib/pet/mbti-questions";
 import { getMbtiTypeData } from "@/lib/pet/mbti-types";
 import { useLocale } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   clearSajuResultSession,
   isBackForwardNavigation,
@@ -150,9 +146,11 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SajuBasicResponse | null>(null);
+  const [prefillPhotoUrl, setPrefillPhotoUrl] = useState<string | null>(null);
+  const [prefillPetId, setPrefillPetId] = useState<string | null>(null);
+  const autoSubmitPendingRef = useRef(false);
 
   const t = UI[locale];
-  const birthTimeUnknown = birthTime === "unknown";
   const mbtiQuestions = useMemo(
     () => getQuestionsBySpecies(species, locale),
     [species, locale]
@@ -164,11 +162,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const labelClass = embedded
     ? "block text-xs font-medium text-plum/80"
     : FIELD_LABEL_CLASS;
-
-  const timezoneOptions = useMemo(() => {
-    const set = new Set<string>([...COMMON_TIMEZONES, timezone]);
-    return Array.from(set);
-  }, [timezone]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -204,7 +197,138 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     }
   }, [router]);
 
-  const petId = result?.petId ?? null;
+  const handleApiSubmit = useCallback(async () => {
+    setError(null);
+    clearSajuResultSession();
+    setLoading(true);
+
+    const mbtiResult = calcMbti(mbtiAnswers, mbtiQuestions);
+    const mbtiComplete = isMbtiComplete(mbtiAnswers, mbtiQuestions);
+    const birthTimeUnknownNow = birthTime === "unknown";
+
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+      const res = await fetch("/api/saju/basic", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          petName,
+          species,
+          petGender,
+          birthDate,
+          calendarType: "solar",
+          birthTime: birthTimeUnknownNow ? null : birthTime,
+          birthTimeUnknown: birthTimeUnknownNow,
+          timezone,
+          locale,
+          privacyConsent: consent,
+          ...(mbtiComplete
+            ? { mbtiType: mbtiResult.type, mbtiScores: mbtiResult.scores }
+            : {}),
+        }),
+      });
+
+      const raw = await res.text();
+      let data: { error?: string } = {};
+      if (raw) {
+        try {
+          data = JSON.parse(raw) as { error?: string };
+        } catch {
+          setError(res.status >= 500 ? t.serverError : t.networkError);
+          return;
+        }
+      }
+      if (!res.ok) {
+        setError(data.error ?? t.networkError);
+        return;
+      }
+      setResult(data as SajuBasicResponse);
+      setStep("result");
+      saveSajuResultSession({
+        result: data as SajuBasicResponse,
+        petName,
+        species,
+        petGender,
+        birthDate,
+        birthTime,
+        timezone,
+        locale,
+        mbtiAnswers,
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      setError(t.networkError);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    accessToken,
+    birthDate,
+    birthTime,
+    consent,
+    locale,
+    mbtiAnswers,
+    mbtiQuestions,
+    petGender,
+    petName,
+    species,
+    t.networkError,
+    t.serverError,
+    timezone,
+  ]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !accessToken || step !== "form") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const petIdParam = params.get("petId")?.trim();
+    if (!petIdParam) return;
+
+    let cancelled = false;
+
+    void (async () => {
+      const pet = await fetchPetProfileForSaju(accessToken, petIdParam);
+      if (cancelled || !pet) return;
+
+      const next = petProfileToSajuFormState(pet);
+      setPrefillPetId(pet.id);
+      setPetName(next.petName);
+      setSpecies(next.species);
+      setPetGender(next.petGender);
+      setBirthDate(next.birthDate);
+      setBirthTime(next.birthTime);
+      setTimezone(next.timezone);
+      setPrefillPhotoUrl(next.photoUrl);
+      setConsent(true);
+      autoSubmitPendingRef.current = true;
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken, step]);
+
+  useEffect(() => {
+    if (!autoSubmitPendingRef.current || step !== "form" || !consent || !birthDate) return;
+    if (configured && !sessionReady) return;
+
+    autoSubmitPendingRef.current = false;
+    void handleApiSubmit();
+  }, [
+    birthDate,
+    configured,
+    consent,
+    handleApiSubmit,
+    sessionReady,
+    step,
+  ]);
+
+  const petId = result?.petId ?? prefillPetId;
 
   const mbtiCompleteForLink = isMbtiComplete(mbtiAnswers, mbtiQuestions);
   const mbtiTypeForLink = mbtiCompleteForLink
@@ -242,75 +366,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     }
 
     void handleApiSubmit();
-  }
-
-  async function handleApiSubmit() {
-    setError(null);
-    clearSajuResultSession();
-    setLoading(true);
-
-    const mbtiResult = calcMbti(mbtiAnswers, mbtiQuestions);
-    const mbtiComplete = isMbtiComplete(mbtiAnswers, mbtiQuestions);
-
-    try {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
-
-      const res = await fetch("/api/saju/basic", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          petName,
-          species,
-          petGender,
-          birthDate,
-          calendarType: "solar",
-          birthTime: birthTimeUnknown ? null : birthTime,
-          birthTimeUnknown,
-          timezone,
-          locale,
-          privacyConsent: consent,
-          ...(mbtiComplete
-            ? { mbtiType: mbtiResult.type, mbtiScores: mbtiResult.scores }
-            : {}),
-        }),
-      });
-
-      const raw = await res.text();
-      let data: { error?: string } = {};
-      if (raw) {
-        try {
-          data = JSON.parse(raw) as { error?: string };
-        } catch {
-          setError(res.status >= 500 ? t.serverError : t.networkError);
-          return;
-        }
-      }
-      if (!res.ok) {
-        setError(data.error ?? t.networkError);
-        return;
-      }
-      setResult(data as SajuBasicResponse);
-      setStep("result");
-      saveSajuResultSession({
-        result: data as SajuBasicResponse,
-        petName,
-        species,
-        petGender,
-        birthDate,
-        birthTime,
-        timezone,
-        locale,
-        mbtiAnswers,
-      });
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch {
-      setError(t.networkError);
-    } finally {
-      setLoading(false);
-    }
   }
 
   const mbtiResult = useMemo(
@@ -468,137 +523,31 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
                   ))}
                 </div>
               </fieldset>
-
-              <fieldset>
-                <legend className="sr-only">{t.petGender}</legend>
-                <div className="flex gap-3">
-                  {(["male", "female"] as const).map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => setPetGender(item)}
-                      className={
-                        petGender === item
-                          ? "h-12 flex-1 rounded-full bg-primary text-sm font-extrabold text-white shadow-sm"
-                          : "h-12 flex-1 rounded-full bg-surface-container-low text-sm font-extrabold text-on-surface-variant transition hover:bg-lavender/50"
-                      }
-                      aria-pressed={petGender === item}
-                    >
-                      {item === "male" ? "♂ " : "♀ "}
-                      {item === "male" ? t.petMale : t.petFemale}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
             </div>
           </section>
         )}
 
-        <section
-          className={
-            embedded ? "space-y-3" : "rounded-[2rem] bg-white p-6 shadow-sm"
-          }
-        >
-          {!embedded && (
-            <h3 className="mb-6 text-2xl font-extrabold text-primary">
-              {locale === "ko" ? "언제 태어났나요?" : "When were they born?"}
-            </h3>
-          )}
-          <BirthDateSelect
-            value={birthDate}
-            onChange={setBirthDate}
-            label={t.birthDate}
-            locale={locale}
-            className={labelClass}
-            selectClassName={
-              embedded
-                ? inputClass
-                : "w-full rounded-2xl border-0 bg-surface-container-low px-3 py-3 text-center text-sm font-bold text-primary focus:ring-4 focus:ring-primary/10"
-            }
-          />
+        <PetBasicInfoFields
+          locale={locale}
+          variant={embedded ? "stitch-embedded" : "stitch"}
+          showGender={!embedded}
+          petGender={petGender}
+          onPetGenderChange={setPetGender}
+          birthDate={birthDate}
+          onBirthDateChange={setBirthDate}
+          birthTime={birthTime}
+          onBirthTimeChange={setBirthTime}
+          timezone={timezone}
+          onTimezoneChange={setTimezone}
+        />
 
-          <div className={embedded ? "space-y-3" : "mt-6 space-y-4"}>
-            <div className="grid grid-cols-2 rounded-full bg-surface-container-low p-1">
-              <button
-                type="button"
-                onClick={() =>
-                  setBirthTime(birthTime === "unknown" ? "11:30" : birthTime)
-                }
-                className={
-                  !birthTimeUnknown
-                    ? "rounded-full bg-white py-3 text-xs font-extrabold text-primary shadow-sm"
-                    : "rounded-full py-3 text-xs font-extrabold text-on-surface-variant"
-                }
-              >
-                {locale === "ko" ? "출생 시간을 알아요" : "I know the time"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setBirthTime("unknown")}
-                className={
-                  birthTimeUnknown
-                    ? "rounded-full bg-white py-3 text-xs font-extrabold text-primary shadow-sm"
-                    : "rounded-full py-3 text-xs font-extrabold text-on-surface-variant"
-                }
-              >
-                {locale === "ko" ? "몰라요" : "Unknown"}
-              </button>
-            </div>
-
-            {birthTimeUnknown ? (
-              <p className="rounded-2xl bg-surface-container-low px-4 py-3 text-sm leading-6 text-on-surface-variant">
-                {locale === "ko"
-                  ? "시간을 몰라도 연·월·일 기준으로 기본 사주를 볼 수 있어요."
-                  : "You can still read the basic K-Saju from the date alone."}
-              </p>
-            ) : (
-              <label className={labelClass}>
-                {t.birthTime}
-                <select
-                  value={birthTime}
-                  onChange={(e) => setBirthTime(e.target.value)}
-                  className={inputClass}
-                >
-                  {BIRTH_TIME_OPTIONS.filter(
-                    (option) => option.value !== "unknown"
-                  ).map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {getBirthTimeOptionLabel(option, locale)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-          </div>
-        </section>
-
-        <section
-          className={
-            embedded ? "space-y-3" : "rounded-[2rem] bg-white p-6 shadow-sm"
-          }
-        >
-          <label className={labelClass}>
-            {t.timezone}
-            <select
-              value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
-              className={inputClass}
-            >
-              {timezoneOptions.map((tz) => (
-                <option key={tz} value={tz}>
-                  {tz}
-                </option>
-              ))}
-            </select>
-          </label>
-          {!embedded && (
-            <p className="mt-2 text-xs leading-5 text-outline">
-              {locale === "ko"
-                ? "태어난 지역 기준 시간으로 계산해요."
-                : "Calculated with the timezone of the birth region."}
-            </p>
-          )}
-        </section>
+        {prefillPhotoUrl ? (
+          <p className="rounded-2xl border border-channel-saju/20 bg-channel-saju/5 px-4 py-3 text-sm font-semibold text-channel-saju">
+            {locale === "ko"
+              ? "홈에서 등록한 사진이 연결돼 있어요. 다시 올릴 필요 없어요."
+              : "The photo from home is already linked — no need to upload again."}
+          </p>
+        ) : null}
 
         <div
           className={embedded ? "" : "rounded-[2rem] bg-white p-6 shadow-sm"}

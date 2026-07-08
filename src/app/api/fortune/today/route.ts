@@ -48,7 +48,7 @@ export async function GET(request: Request) {
   const { data: pets, error: petsError } = await supabase
     .from("pets")
     .select(
-      "id, name, species, birth_date, birth_time, birth_time_unknown, birth_timezone, profile_image_url"
+      "id, name, species, birth_date, birth_time, birth_time_unknown, birth_timezone, profile_image_url, photo_url"
     )
     .eq("owner_id", userId)
     .order("created_at", { ascending: false });
@@ -71,6 +71,7 @@ export async function GET(request: Request) {
     birth_time_unknown: boolean;
     birth_timezone: string;
     profile_image_url: string | null;
+    photo_url: string | null;
   };
 
   const petList = (pets as Array<Omit<PetRow, "species"> & { species: string }>).filter(
@@ -97,6 +98,7 @@ export async function GET(request: Request) {
     birthTimeUnknown: pet.birth_time_unknown,
     birthTimezone: pet.birth_timezone,
     profileImageUrl: pet.profile_image_url,
+    photoUrl: pet.photo_url,
   }));
 
   const selectedProfile = profiles.find((pet) => pet.id === selected.id)!;

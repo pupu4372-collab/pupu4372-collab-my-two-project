@@ -43,6 +43,9 @@ export interface Pet {
   birth_time_unknown: boolean;
   birth_timezone: string;
   profile_image_url: string | null;
+  photo_url: string | null;
+  photo_consent_secondary_use: boolean;
+  photo_uploaded_at: string | null;
   personality_tags: string[];
   created_at: string;
   updated_at: string;
@@ -56,6 +59,9 @@ export type PetInsert = Pick<
   breed?: string | null;
   gender?: string | null;
   profile_image_url?: string | null;
+  photo_url?: string | null;
+  photo_consent_secondary_use?: boolean;
+  photo_uploaded_at?: string | null;
   personality_tags?: string[];
 };
 
@@ -396,7 +402,7 @@ export interface Database {
   public: {
     Tables: {
       profiles: TableDef<Profile, Partial<Profile>>;
-      pets: TableDef<Pet, PetInsert>;
+      pets: TableDef<Pet, PetInsert, Partial<Pet>>;
       pet_care_events: TableDef<PetCareEvent, PetCareEventInsert>;
       saju_results: TableDef<SajuResultRow, SajuResultInsert>;
       community_posts: TableDef<CommunityPost, Partial<CommunityPost>>;

@@ -4,6 +4,12 @@ import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { PetFortuneInstagramShareButton } from "@/components/home/pet-fortune/PetFortuneInstagramShareButton";
 import { PetFortunePetSelector } from "@/components/home/pet-fortune/PetFortunePetSelector";
 import type { PetDailyFortune, PetFortunePetMeta } from "@/lib/saju/pet-daily-fortune";
+import {
+  fortuneStatScoreBand,
+  type FortuneStatCategory,
+} from "@/lib/saju/pet-fortune-score-bands";
+import { withJosa } from "@/lib/i18n/korean-josa";
+import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
 export type PetFortuneDashboardMode = "demo" | "live" | "registered";
@@ -24,12 +30,8 @@ function findCategory(fortune: PetDailyFortune, labelKo: string, labelEn: string
   return fortune.categories.find((c) => c.label === labelKo || c.label === labelEn);
 }
 
-function scoreBand(score: number, isKo: boolean): string {
-  if (score >= 90) return isKo ? "최고 활력" : "Peak vitality";
-  if (score >= 80) return isKo ? "넘치는 활기" : "Overflowing vigor";
-  if (score >= 70) return isKo ? "넘치는 행복" : "Overflowing joy";
-  if (score >= 60) return isKo ? "균형 잡힌 행운" : "Balanced luck";
-  return isKo ? "차분한 하루" : "A calm day";
+function scoreBand(score: number, category: FortuneStatCategory, isKo: boolean): string {
+  return fortuneStatScoreBand(score, category, isKo);
 }
 
 function harmonyScore(fortune: PetDailyFortune): number {
@@ -43,12 +45,14 @@ function StatBar({
   badge,
   score,
   color,
+  category,
   isKo,
 }: {
   label: string;
   badge: string;
   score: number;
   color: string;
+  category: FortuneStatCategory;
   isKo: boolean;
 }) {
   return (
@@ -67,7 +71,7 @@ function StatBar({
       <div className="pet-fortune-progress-bg">
         <div className="pet-fortune-progress-fill" style={{ width: `${score}%`, backgroundColor: color }} />
       </div>
-      <p className="mt-1.5 text-xs font-semibold text-stone-600">{scoreBand(score, isKo)}</p>
+      <p className="mt-1.5 text-xs font-semibold text-stone-600">{scoreBand(score, category, isKo)}</p>
     </div>
   );
 }
@@ -95,13 +99,20 @@ export function PetFortuneInsightsDashboard({
   const tipBody = fortune.tips.map((tip) => tip.text).join(" ");
 
   const statItems = [
-    health ? { cat: health, badge: t("badgeHealth") } : null,
-    activity ? { cat: activity, badge: t("badgeVitality") } : null,
-    appetite ? { cat: appetite, badge: t("badgeJoy") } : null,
-    sleep ? { cat: sleep, badge: t("badgeLuck") } : null,
-  ].filter((item): item is { cat: NonNullable<typeof health>; badge: string } => item !== null);
+    health ? { cat: health, badge: t("badgeHealth"), category: "health" as const } : null,
+    activity ? { cat: activity, badge: t("badgeVitality"), category: "activity" as const } : null,
+    appetite ? { cat: appetite, badge: t("badgeJoy"), category: "appetite" as const } : null,
+    sleep ? { cat: sleep, badge: t("badgeLuck"), category: "sleep" as const } : null,
+  ].filter(
+    (item): item is {
+      cat: NonNullable<typeof health>;
+      badge: string;
+      category: FortuneStatCategory;
+    } => item !== null
+  );
 
   const showLoginCta = !suppressGuestChrome && (mode === "demo" || mode === "live");
+  const showPhotoNudge = (mode === "registered" || mode === "live") && !pet.photoUrl;
   const showPetSelector = mode === "registered" && pets && pets.length > 0 && onSelectPet && selectedPetId;
 
   return (
@@ -159,13 +170,14 @@ export function PetFortuneInsightsDashboard({
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {statItems.map(({ cat, badge }) => (
+          {statItems.map(({ cat, badge, category }) => (
             <StatBar
               key={cat.label}
               label={cat.label}
               badge={badge}
               score={cat.score}
               color={cat.color}
+              category={category}
               isKo={isKo}
             />
           ))}
@@ -234,6 +246,26 @@ export function PetFortuneInsightsDashboard({
             {t("loginCta")}
           </AuthRequiredLink>
         </footer>
+      ) : null}
+
+      {showPhotoNudge ? (
+        <p className="text-center text-sm leading-relaxed text-stone-700">
+          {isKo ? (
+            <>
+              사진을 등록하면 매일 카드에 {withJosa(pet.name, "이/가")} 담겨요.{" "}
+              <Link href="/profile" className="font-bold text-channel-saju underline underline-offset-2">
+                펫 프로필에서 등록하기
+              </Link>
+            </>
+          ) : (
+            <>
+              Add a photo and {pet.name} appears on daily fortune cards.{" "}
+              <Link href="/profile" className="font-bold text-channel-saju underline underline-offset-2">
+                Register in pet profile
+              </Link>
+            </>
+          )}
+        </p>
       ) : null}
 
       <PetFortuneInstagramShareButton pet={pet} fortune={fortune} />

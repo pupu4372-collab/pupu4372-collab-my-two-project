@@ -6,6 +6,7 @@ import { PetCareCalendar } from "@/components/profile/PetCareCalendar";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
+import { petAvatarImageProps } from "@/lib/pets/pet-avatar";
 import type { CommunityPost } from "@/lib/supabase/types";
 import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
@@ -29,6 +30,7 @@ interface PetRow {
   birth_time_unknown: boolean;
   birth_timezone: string;
   profile_image_url: string | null;
+  photo_url: string | null;
   personality_tags: string[];
   created_at: string;
   latestSaju: SajuReading | null;
@@ -176,12 +178,15 @@ export function PetDetailPage({ petId }: PetDetailPageProps) {
         <div className="relative mb-6 h-40 w-40 md:h-56 md:w-56">
           <div className="absolute inset-0 animate-pulse rounded-full bg-white/10" aria-hidden />
           <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-4 border-white/85 bg-[#f4f1ea]/90 text-6xl shadow-[0_12px_40px_rgba(0,0,0,0.22)]">
-            {pet.profile_image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={supabaseImageTransformUrl(pet.profile_image_url, { width: 448, height: 448 })} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <span aria-hidden>{speciesEmoji(pet.species)}</span>
-            )}
+            {(() => {
+              const avatar = petAvatarImageProps(pet, 448);
+              return avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatar.src} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span aria-hidden>{speciesEmoji(pet.species)}</span>
+              );
+            })()}
           </div>
           <span className="absolute bottom-2 right-2 rounded-full border border-[#b22222]/25 bg-[#fcf9f2]/95 px-3 py-1 text-xs font-bold text-[#222222] shadow-sm">
             {pet.latestSaju ? typeLabels[pet.latestSaju.saju_type] : isKo ? "새 사주 대기" : "Ready"}

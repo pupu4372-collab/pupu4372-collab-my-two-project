@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 type Locale = "ko" | "en";
 
@@ -13,6 +13,7 @@ interface BirthDateSelectProps {
   selectClassName?: string;
   minYear?: number;
   maxYear?: number;
+  layout?: "default" | "pet-fortune-compact";
 }
 
 const COPY = {
@@ -49,6 +50,16 @@ function formatDatePart(year: string, month: string, day: string) {
   return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 }
 
+function SelectChevron() {
+  return (
+    <span className="pet-fortune-select-chevron" aria-hidden>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
+}
+
 export function BirthDateSelect({
   value,
   onChange,
@@ -58,6 +69,7 @@ export function BirthDateSelect({
   selectClassName = "pastel-input",
   minYear = 1900,
   maxYear = new Date().getFullYear(),
+  layout = "default",
 }: BirthDateSelectProps) {
   const t = COPY[locale];
   const [draft, setDraft] = useState(splitDate(value));
@@ -96,50 +108,85 @@ export function BirthDateSelect({
     if (completeDate) onChange(completeDate);
   }
 
-  return (
-    <div className={className}>
-      <span>{label}</span>
-      <div className="mt-1 grid grid-cols-3 gap-2">
+  const isFortuneCompact = layout === "pet-fortune-compact";
+  const selectClass = isFortuneCompact
+    ? "pet-fortune-input-field pet-fortune-select text-center"
+    : selectClassName;
+
+  function renderSelect(select: ReactNode) {
+    if (!isFortuneCompact) return select;
+
+    return (
+      <label className="pet-fortune-date-cell">
+        <div className="pet-fortune-input pet-fortune-input--date pet-fortune-input--compact">
+          {select}
+          <SelectChevron />
+        </div>
+      </label>
+    );
+  }
+
+  const grid = (
+    <div className={isFortuneCompact ? "grid grid-cols-3 gap-2" : "mt-1 grid grid-cols-3 gap-2"}>
+      {renderSelect(
         <select
           value={year}
           onChange={(e) => update({ year: e.target.value })}
-          className={selectClassName}
+          className={selectClass}
           required
+          aria-label={t.year}
         >
-          <option value="">{t.year}</option>
+          <option value="">{isFortuneCompact ? (locale === "ko" ? "연도" : "Year") : t.year}</option>
           {years.map((y) => (
             <option key={y} value={y}>
               {y}
             </option>
           ))}
         </select>
+      )}
+      {renderSelect(
         <select
           value={month}
           onChange={(e) => update({ month: e.target.value })}
-          className={selectClassName}
+          className={selectClass}
           required
+          aria-label={t.month}
         >
-          <option value="">{t.month}</option>
+          <option value="">{isFortuneCompact ? (locale === "ko" ? "월" : "Month") : t.month}</option>
           {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((m) => (
             <option key={m} value={m}>
               {locale === "ko" ? `${Number(m)}${t.monthSuffix}` : m}
             </option>
           ))}
         </select>
+      )}
+      {renderSelect(
         <select
           value={day}
           onChange={(e) => update({ day: e.target.value })}
-          className={selectClassName}
+          className={selectClass}
           required
+          aria-label={t.day}
         >
-          <option value="">{t.day}</option>
+          <option value="">{isFortuneCompact ? (locale === "ko" ? "일" : "Day") : t.day}</option>
           {days.map((d) => (
             <option key={d} value={d}>
               {locale === "ko" ? `${Number(d)}${t.daySuffix}` : d}
             </option>
           ))}
         </select>
-      </div>
+      )}
+    </div>
+  );
+
+  if (isFortuneCompact) {
+    return grid;
+  }
+
+  return (
+    <div className={className}>
+      <span>{label}</span>
+      {grid}
     </div>
   );
 }

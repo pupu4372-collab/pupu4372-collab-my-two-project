@@ -51,6 +51,8 @@ export interface PetFortunePetMeta {
   icon: string;
   dayBranchSign: string;
   profileImageUrl: string | null;
+  photoUrl: string | null;
+  dominantElement: ElementKey;
 }
 
 export interface PetDailyFortune {
@@ -86,6 +88,7 @@ export interface PetProfileForFortune {
   birthTimeUnknown: boolean;
   birthTimezone: string;
   profileImageUrl?: string | null;
+  photoUrl?: string | null;
 }
 
 const CATEGORY_COLORS = {
@@ -511,6 +514,8 @@ export function buildPetFortunePetMeta(
     icon: speciesMeta.icon,
     dayBranchSign: formatBranchSign(saju.pillars.day.branchHanja, locale),
     profileImageUrl: pet.profileImageUrl ?? null,
+    photoUrl: pet.photoUrl ?? null,
+    dominantElement: saju.dominantElement,
   };
 }
 

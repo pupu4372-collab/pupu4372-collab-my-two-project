@@ -41,7 +41,7 @@ export async function GET(request: Request) {
 
   const { data: pets, error: petsError } = await supabase
     .from("pets")
-    .select("id, name, species, breed, gender, birth_date, birth_time, birth_time_unknown, birth_timezone, profile_image_url, personality_tags, created_at")
+    .select("id, name, species, breed, gender, birth_date, birth_time, birth_time_unknown, birth_timezone, profile_image_url, photo_url, photo_consent_secondary_use, personality_tags, created_at")
     .eq("owner_id", ownerId)
     .order("created_at", { ascending: false });
 
@@ -60,6 +60,8 @@ export async function GET(request: Request) {
     birth_time_unknown: boolean;
     birth_timezone: string;
     profile_image_url: string | null;
+    photo_url: string | null;
+    photo_consent_secondary_use: boolean;
     personality_tags: string[];
     created_at: string;
   };
@@ -182,7 +184,7 @@ export async function PATCH(request: Request) {
     } as never)
     .eq("id", id)
     .eq("owner_id", ownerId)
-    .select("id, name, species, breed, gender, birth_date, birth_time, birth_time_unknown, birth_timezone, profile_image_url, personality_tags, created_at")
+    .select("id, name, species, breed, gender, birth_date, birth_time, birth_time_unknown, birth_timezone, profile_image_url, photo_url, photo_consent_secondary_use, personality_tags, created_at")
     .single();
 
   if (error) {

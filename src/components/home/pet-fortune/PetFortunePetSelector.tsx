@@ -1,6 +1,6 @@
 "use client";
 
-import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
+import { petAvatarImageProps } from "@/lib/pets/pet-avatar";
 import type { PetFortunePetMeta } from "@/lib/saju/pet-daily-fortune";
 
 type Props = {
@@ -20,6 +20,7 @@ export function PetFortunePetSelector({ pets, selectedPetId, onSelectPet }: Prop
     <div className="flex flex-wrap items-center justify-center gap-2.5">
       {pets.map((pet) => {
         const active = pet.id === selectedPetId;
+        const avatar = petAvatarImageProps(pet, 56);
         return (
           <button
             key={pet.id}
@@ -27,11 +28,11 @@ export function PetFortunePetSelector({ pets, selectedPetId, onSelectPet }: Prop
             onClick={() => onSelectPet(pet.id)}
             className={chipClass(active)}
           >
-            {pet.profileImageUrl ? (
+            {avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={supabaseImageTransformUrl(pet.profileImageUrl, { width: 56, height: 56 })}
-                alt=""
+                src={avatar.src}
+                alt={avatar.alt}
                 className="h-9 w-9 rounded-full object-cover ring-2 ring-white/40"
               />
             ) : (
