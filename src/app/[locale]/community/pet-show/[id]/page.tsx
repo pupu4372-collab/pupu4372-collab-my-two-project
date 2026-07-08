@@ -29,13 +29,17 @@ export default async function PetShowDetailPage({ params }: PetShowDetailPagePro
       <PetShowDetailBack />
       <CommunityDetailSurface>
         <article className="space-y-5">
-          <div className="flex aspect-video items-center justify-center overflow-hidden rounded-[1.75rem] bg-channel-community/10">
+          <div className="mx-auto flex aspect-[4/5] w-full max-w-[560px] items-center justify-center overflow-hidden rounded-[1.75rem] bg-channel-community/10">
             {post.image_urls?.[0] ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={supabaseImageTransformUrl(post.image_urls[0], { width: 1280, height: 720 })}
+                src={supabaseImageTransformUrl(post.image_urls[0], {
+                  width: 1120,
+                  height: 1400,
+                  resize: "contain",
+                })}
                 alt=""
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             ) : (
               <span className="text-5xl" aria-hidden>

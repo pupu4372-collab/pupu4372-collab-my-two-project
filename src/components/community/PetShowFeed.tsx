@@ -98,12 +98,12 @@ export function PetShowFeed({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community">Snapzone</p>
-            <h2 className="mt-2 text-2xl font-extrabold text-primary">
+            <h2 className="mt-2 text-2xl font-extrabold text-white">
               📷 {isKo ? "최신 게시글" : "Latest posts"}
             </h2>
           </div>
           {source === "mock" && (
-            <span className="text-xs text-plum/50">{t("snapzoneDemo")}</span>
+            <span className="text-xs text-white/55">{t("snapzoneDemo")}</span>
           )}
         </div>
       )}
@@ -130,7 +130,7 @@ export function PetShowFeed({
         </ul>
       )}
 
-      <div ref={sentinelRef} className="h-8 text-center text-xs text-plum/45">
+      <div ref={sentinelRef} className="h-8 text-center text-xs text-white/55">
         {loading ? (isKo ? "불러오는 중…" : "Loading…") : nextCursor ? "" : isKo ? "마지막 스냅" : "End of Snapzone"}
       </div>
     </section>

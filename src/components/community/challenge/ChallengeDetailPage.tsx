@@ -234,26 +234,28 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
                   placeholder={isKo ? "오늘의 미션 인증 메모 (선택)" : "Optional note about your mission"}
                   className="pastel-input w-full resize-none px-4 py-3 text-sm"
                 />
+                <p className="rounded-2xl bg-[#ffd7ff]/40 px-4 py-3 text-sm font-semibold leading-6 text-primary">
+                  {isKo
+                    ? "반려동물 종류(강아지·고양이 등)를 선택해 주세요. 웃긴/실패 사진은 아래에서 웃김을 선택하세요."
+                    : "Choose your pet species. For funny or fail shots, select Funny below."}
+                </p>
                 <div>
                   <p className="text-sm font-extrabold text-primary">{isKo ? "사진 분류" : "Photo tone"}</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {([
-                      ["cute", isKo ? "귀여움" : "Cute", "🥰"],
-                      ["funny", isKo ? "웃김" : "Funny", "😂"],
-                    ] as const).map(([value, label, emoji]) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => setPhotoCategory(value)}
-                        className={
-                          photoCategory === value
-                            ? "rounded-full bg-channel-community px-4 py-2 text-sm font-extrabold text-white"
-                            : "rounded-full border border-white/40 bg-white/80 px-4 py-2 text-sm font-extrabold text-plum/70"
-                        }
-                      >
-                        {emoji} {label}
-                      </button>
-                    ))}
+                  <p className="mt-1 text-xs text-plum/55">
+                    {isKo ? "일반 사진은 그대로 올리면 됩니다." : "Regular photos can be posted as-is."}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPhotoCategory((prev) => (prev === "funny" ? "cute" : "funny"))}
+                      className={
+                        photoCategory === "funny"
+                          ? "rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-sm"
+                          : "rounded-full border border-primary/15 bg-white px-6 py-3 text-sm font-extrabold text-primary transition hover:bg-sand/50"
+                      }
+                    >
+                      😂 {isKo ? "웃김" : "Funny"}
+                    </button>
                   </div>
                 </div>
                 <div className="space-y-3">

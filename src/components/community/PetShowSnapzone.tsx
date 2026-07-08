@@ -28,8 +28,8 @@ export function PetShowSnapzone() {
           <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-community">
             {t("snapzoneEyebrow")}
           </p>
-          <h2 className="mt-2 text-2xl font-extrabold text-primary">📷 {t("snapzoneGridTitle")}</h2>
-          <p className="mt-1 text-sm text-plum/70">{t("snapzoneSubtitle")}</p>
+          <h2 className="mt-2 text-2xl font-extrabold text-white">📷 {t("snapzoneGridTitle")}</h2>
+          <p className="mt-1 text-sm text-white/75">{t("snapzoneSubtitle")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <AuthRequiredLink

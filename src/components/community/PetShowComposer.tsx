@@ -204,14 +204,14 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
       </p>
       <p className="mt-3 rounded-2xl bg-[#ffd7ff]/40 px-4 py-3 text-sm font-semibold leading-6 text-primary">
         {isKo
-          ? "귀여움 / 웃김 중 하나를 고른 뒤 종류(강아지·고양이 등)도 함께 선택해 주세요."
-          : "Pick Cute or Funny, then choose your pet species too."}
+          ? "반려동물 종류(강아지·고양이 등)를 선택해 주세요. 웃긴/실패 사진은 아래에서 웃김을 선택하세요."
+          : "Choose your pet species. For funny or fail shots, select Funny below."}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-8">
         <section>
           <label className="text-sm font-extrabold text-primary">{isKo ? "사진 업로드" : "Photo upload"}</label>
-          <div className="relative mt-4">
+          <div className="relative mx-auto mt-4 w-full max-w-[260px]">
             <button
               type="button"
               onClick={() => {
@@ -221,16 +221,16 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
                 }
                 fileRef.current?.click();
               }}
-              className="group flex aspect-[4/5] w-full items-center justify-center overflow-hidden rounded-[2rem] border-2 border-dashed border-outline/25 bg-white text-center transition hover:bg-sand/40"
+              className="group flex aspect-[4/5] w-full items-center justify-center overflow-hidden rounded-[1.5rem] border-2 border-dashed border-outline/25 bg-white text-center transition hover:bg-sand/40"
             >
               {preview ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={preview} alt="" className="h-full w-full object-cover" />
               ) : (
-                <span className="flex flex-col items-center px-6">
-                  <span className="flex h-20 w-20 items-center justify-center rounded-full bg-lavender text-4xl transition group-hover:scale-110">📷</span>
-                  <span className="mt-4 text-lg font-extrabold text-primary">{isKo ? "사진 선택하기" : "Choose a photo"}</span>
-                  <span className="mt-2 text-sm text-plum/50">
+                <span className="flex flex-col items-center px-4">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-lavender text-2xl transition group-hover:scale-110">📷</span>
+                  <span className="mt-3 text-sm font-extrabold text-primary">{isKo ? "사진 선택하기" : "Choose a photo"}</span>
+                  <span className="mt-1.5 text-xs text-plum/50">
                     {isKo ? "권장 비율: 4:5 (세로), 최대 10MB" : "Recommended: 4:5 portrait, max 10MB"}
                   </span>
                 </span>
@@ -240,7 +240,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
               <button
                 type="button"
                 onClick={clearPreview}
-                className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/55 text-lg font-bold text-white shadow-sm backdrop-blur-sm transition hover:bg-black/70"
+                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-base font-bold text-white shadow-sm backdrop-blur-sm transition hover:bg-black/70"
                 aria-label={isKo ? "선택한 사진 취소" : "Remove selected photo"}
               >
                 ✕
@@ -276,24 +276,21 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
 
         <section>
           <p className="text-sm font-extrabold text-primary">{isKo ? "사진 분류" : "Photo tone"}</p>
+          <p className="mt-1 text-xs text-plum/55">
+            {isKo ? "일반 사진은 그대로 올리면 됩니다." : "Regular photos can be posted as-is."}
+          </p>
           <div className="mt-3 flex flex-wrap gap-3">
-            {([
-              ["cute", isKo ? "귀여움" : "Cute", "🥰"],
-              ["funny", isKo ? "웃김" : "Funny", "😂"],
-            ] as const).map(([value, label, emoji]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setPhotoCategory(value)}
-                className={
-                  photoCategory === value
-                    ? "rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-sm"
-                    : "rounded-full border border-primary/15 bg-white px-6 py-3 text-sm font-extrabold text-primary transition hover:bg-sand/50"
-                }
-              >
-                {emoji} {label}
-              </button>
-            ))}
+            <button
+              type="button"
+              onClick={() => setPhotoCategory((prev) => (prev === "funny" ? "cute" : "funny"))}
+              className={
+                photoCategory === "funny"
+                  ? "rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-white shadow-sm"
+                  : "rounded-full border border-primary/15 bg-white px-6 py-3 text-sm font-extrabold text-primary transition hover:bg-sand/50"
+              }
+            >
+              😂 {isKo ? "웃김" : "Funny"}
+            </button>
           </div>
         </section>
 
