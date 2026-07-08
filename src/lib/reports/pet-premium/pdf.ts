@@ -1,13 +1,26 @@
 import pdfMake from "pdfmake";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
-import { elementAccentColor, ELEMENT_TRACK_COLOR } from "@/lib/reports/human-premium/element-display";
+import { ELEMENT_TRACK_COLOR } from "@/lib/reports/human-premium/element-display";
 import { ensurePdfFontsAsync, PDF_FONT_FAMILY } from "@/lib/reports/human-premium/pdf-fonts";
+import { elementBarHex, elementSoftHex, PET_PREMIUM_SECTION_THEME } from "@/lib/saju/element-colors";
 import type { ElementRelation } from "@/lib/saju/compatibility/elements-cycle";
 import type { PetPremiumPdfPayload } from "./types";
+import {
+  bondScoreGauge,
+  chapterBanner,
+  compatibilityDetailCards,
+  coverBackgroundShapes,
+  coverTopAccentBar,
+  elementHighlightBox,
+  elementPill,
+  mbtiAxisBarColor,
+  pillWithBody,
+  PET_PREMIUM_LABEL_THEME,
+  subheadingPill,
+} from "./pdf-layout";
 
 const JIG_HANJI = "#F4F1EA";
 const JIG_INK = "#222222";
-const JIG_SEAL = "#B22222";
 const JIG_MUTED = "#747878";
 
 function pdfSafeText(value: string): string {
@@ -21,15 +34,6 @@ function pdfSafeText(value: string): string {
 
 function paragraph(text: string, style: string = "body"): Content {
   return { text: pdfSafeText(text), style, margin: [0, 0, 0, 8] };
-}
-
-function sectionTitle(text: string, pageBreak = false): Content {
-  return {
-    text: pdfSafeText(text),
-    style: "chapterTitle",
-    ...(pageBreak ? { pageBreak: "before" as const } : {}),
-    margin: [0, pageBreak ? 0 : 12, 0, 6],
-  };
 }
 
 function elementBar(percent: number, color: string, maxWidth = 200): Content {
@@ -47,11 +51,10 @@ function mbtiAxisBar(
   leftLabel: string,
   rightLabel: string,
   leftPct: number,
-  rightPct: number,
-  isKo: boolean
+  rightPct: number
 ): Content {
   const leftDominant = leftPct >= rightPct;
-  const barColor = leftDominant ? "#7C3AED" : "#A78BFA";
+  const barColor = mbtiAxisBarColor(leftDominant);
   return {
     stack: [
       {
@@ -87,29 +90,31 @@ function formatKstIssuedDate(dateKst: string, isKo: boolean): string {
   });
 }
 
-function bondScoreColor(score: number): string {
-  if (score >= 90) return "#B8860B";
-  if (score >= 82) return "#3B82F6";
-  if (score >= 64) return "#22C55E";
-  return "#7C3AED";
-}
-
 function relationTint(relation: ElementRelation): string {
-  if (relation.includes("nourishes")) return "#E8F5E9";
-  if (relation.includes("controls")) return "#FFF8E1";
-  return "#F3E8FF";
+  if (relation.includes("nourishes")) return elementSoftHex("wood");
+  if (relation.includes("controls")) return elementSoftHex("earth");
+  return elementSoftHex("metal");
 }
 
 function buildCover(payload: PetPremiumPdfPayload): Content[] {
   const isKo = payload.locale === "ko";
+  const accent = elementBarHex(payload.dominantElement);
+  const soft = elementSoftHex(payload.dominantElement);
   const title = isKo
     ? `${payload.petName} 프리미엄 케어 가이드`
     : `${payload.petName} Premium Care Guide`;
   const issued = formatKstIssuedDate(payload.issuedDateKst, isKo);
 
   return [
-    { text: "K-Saju Pet", style: "coverBrand", margin: [0, 40, 0, 8] },
-    { text: pdfSafeText(title), style: "reportTypeTitle", margin: [0, 0, 0, 16] },
+    coverBackgroundShapes(),
+    coverTopAccentBar(accent),
+    { text: "K-Saju Pet", style: "coverBrand", color: accent, margin: [0, 8, 0, 6] },
+    { text: pdfSafeText(title), style: "reportTypeTitle", margin: [0, 0, 0, 20] },
+    elementPill(
+      isKo ? `대표 오행 · ${payload.dominantElementLabel}` : `Dominant · ${payload.dominantElementLabel}`,
+      payload.dominantElement,
+      [0, 0, 0, 16]
+    ),
     {
       columns: [
         {
@@ -124,28 +129,27 @@ function buildCover(payload: PetPremiumPdfPayload): Content[] {
         {
           width: "*",
           stack: [
-            { text: isKo ? "대표 오행" : "Dominant element", style: "labelCaps" },
-            {
-              text: pdfSafeText(payload.dominantElementLabel),
-              style: "body",
-              color: elementAccentColor(payload.dominantElement),
-              margin: [0, 2, 0, 10],
-            },
             { text: isKo ? "발급일 (KST)" : "Issued (KST)", style: "labelCaps" },
-            { text: pdfSafeText(issued), style: "body", margin: [0, 2, 0, 0] },
+            { text: pdfSafeText(issued), style: "body", margin: [0, 2, 0, 10] },
+            { text: isKo ? "포함 섹션" : "Sections", style: "labelCaps" },
+            {
+              text: isKo ? "MBTI · 궁합 · 별자리" : "MBTI · Bond · Zodiac",
+              style: "body",
+              color: accent,
+              margin: [0, 2, 0, 0],
+            },
           ],
         },
       ],
-      margin: [0, 0, 0, 24],
+      margin: [0, 0, 0, 20],
     },
     {
       text: isKo
         ? "상세 MBTI · 집사 궁합 · 별자리 케어를 한 권에 담았어요."
         : "Detailed MBTI, pet–butler bond, and zodiac care in one guide.",
       style: "coverMotto",
-      margin: [0, 16, 0, 0],
+      margin: [0, 8, 0, 0],
     },
-    { text: "", pageBreak: "after" },
   ];
 }
 
@@ -154,7 +158,7 @@ function buildMbtiSection(payload: PetPremiumPdfPayload): Content[] {
   const mbti = payload.mbti;
   if (!mbti) {
     return [
-      sectionTitle(isKo ? "1. 상세 MBTI" : "1. Detailed MBTI", true),
+      chapterBanner("mbti", 1, isKo, true),
       paragraph(
         isKo
           ? "MBTI 설문을 완료하면 이 섹션이 채워집니다."
@@ -186,28 +190,28 @@ function buildMbtiSection(payload: PetPremiumPdfPayload): Content[] {
         JP: ["J Judging", "P Perceiving"],
       };
 
+  const label = PET_PREMIUM_LABEL_THEME;
+
   const blocks: Content[] = [
-    sectionTitle(isKo ? "1. 상세 MBTI" : "1. Detailed MBTI", true),
-    {
-      text: pdfSafeText(`${mbti.mbtiType} · ${isKo ? "4축 성향" : "Four-axis tendency"}`),
-      style: "sectionSubtitle",
-      margin: [0, 0, 0, 8],
-    },
-    mbtiAxisBar(axisLabels.EI[0], axisLabels.EI[1], p.EI.E, p.EI.I, isKo),
-    mbtiAxisBar(axisLabels.SN[0], axisLabels.SN[1], p.SN.S, p.SN.N, isKo),
-    mbtiAxisBar(axisLabels.TF[0], axisLabels.TF[1], p.TF.T, p.TF.F, isKo),
-    mbtiAxisBar(axisLabels.JP[0], axisLabels.JP[1], p.JP.J, p.JP.P, isKo),
-    { text: "", margin: [0, 0, 0, 8] },
+    chapterBanner("mbti", 1, isKo, true),
+    subheadingPill(`${mbti.mbtiType} · ${isKo ? "4축 성향" : "Four-axis tendency"}`, label.accent, label.soft),
+    mbtiAxisBar(axisLabels.EI[0], axisLabels.EI[1], p.EI.E, p.EI.I),
+    mbtiAxisBar(axisLabels.SN[0], axisLabels.SN[1], p.SN.S, p.SN.N),
+    mbtiAxisBar(axisLabels.TF[0], axisLabels.TF[1], p.TF.T, p.TF.F),
+    mbtiAxisBar(axisLabels.JP[0], axisLabels.JP[1], p.JP.J, p.JP.P),
   ];
 
   for (const section of sections) {
     const body = mbti[section.key];
     if (typeof body !== "string") continue;
-    blocks.push({
-      text: pdfSafeText(isKo ? section.titleKo : section.titleEn),
-      style: "sectionTitle",
-    });
-    blocks.push(paragraph(body));
+    blocks.push(
+      pillWithBody(
+        isKo ? section.titleKo : section.titleEn,
+        pdfSafeText(body),
+        label.accent,
+        label.soft
+      )
+    );
   }
 
   return blocks;
@@ -215,10 +219,11 @@ function buildMbtiSection(payload: PetPremiumPdfPayload): Content[] {
 
 function buildCompatibilitySection(payload: PetPremiumPdfPayload): Content[] {
   const isKo = payload.locale === "ko";
+  const theme = PET_PREMIUM_SECTION_THEME.compatibility;
   const c = payload.compatibility;
   if (!c) {
     return [
-      sectionTitle(isKo ? "2. 집사 궁합" : "2. Pet–butler bond", true),
+      chapterBanner("compatibility", 2, isKo, false),
       paragraph(
         isKo
           ? "집사 생년월일을 입력하면 궁합 섹션이 포함됩니다."
@@ -227,68 +232,56 @@ function buildCompatibilitySection(payload: PetPremiumPdfPayload): Content[] {
     ];
   }
 
-  const scoreColor = bondScoreColor(c.bondScore);
+  const label = PET_PREMIUM_LABEL_THEME;
+  const petEl = c.petElement;
   const blocks: Content[] = [
-    sectionTitle(isKo ? "2. 집사 궁합" : "2. Pet–butler bond", true),
+    chapterBanner("compatibility", 2, isKo, false),
     {
       columns: [
-        {
-          width: 80,
-          stack: [
-            {
-              text: pdfSafeText(`${c.bondScore}%`),
-              fontSize: 28,
-              bold: true,
-              color: scoreColor,
-            },
-            {
-              text: pdfSafeText(c.bondLabel),
-              style: "sectionSubtitle",
-              color: scoreColor,
-            },
-          ],
-        },
+        bondScoreGauge(c.bondScore, pdfSafeText(c.bondLabel)),
         {
           width: "*",
           stack: [
-            paragraph(c.headline),
-            paragraph(c.story),
+            pillWithBody(pdfSafeText(c.headline), pdfSafeText(c.story), label.accent, label.soft),
           ],
         },
       ],
-      margin: [0, 0, 0, 12],
+      columnGap: 16,
+      margin: [0, 0, 0, 14],
     },
   ];
 
   if (c.details?.length) {
     blocks.push({
       text: isKo ? "상세 궁합 해석" : "Detailed bond reading",
-      style: "sectionTitle",
+      style: "sectionHeading",
     });
-    for (const detail of c.details) {
-      blocks.push({
-        text: pdfSafeText(detail.title),
-        style: "sectionSubtitle",
-      });
-      blocks.push(paragraph(detail.body));
-    }
+    blocks.push(compatibilityDetailCards(c.details, petEl, c.ownerElement, theme.accent));
   }
 
   blocks.push({
     text: isKo ? "오행 관계" : "Element relation",
-    style: "sectionTitle",
+    style: "sectionHeading",
   });
-  blocks.push({
-    text: pdfSafeText(c.relationDescription ?? c.story),
-    style: "body",
-    fillColor: relationTint(c.relation),
-    margin: [0, 0, 0, 10],
-  });
+  blocks.push(
+    elementHighlightBox(pdfSafeText(c.relationDescription ?? c.story), petEl)
+  );
+
+  if (c.petElementNote) {
+    blocks.push(
+      pillWithBody(
+        isKo ? "펫 오행 포인트" : "Pet element note",
+        pdfSafeText(c.petElementNote),
+        elementBarHex(petEl),
+        elementSoftHex(petEl)
+      )
+    );
+  }
 
   if (c.careTips?.length) {
     blocks.push({
       text: isKo ? "케어 팁" : "Care tips",
-      style: "sectionTitle",
+      style: "sectionHeading",
     });
     blocks.push({
       ul: c.careTips.map((tip) => pdfSafeText(tip)),
@@ -305,25 +298,32 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
   const z = payload.zodiac;
   if (!z) {
     return [
-      sectionTitle(isKo ? "3. 별자리 케어" : "3. Zodiac care", true),
+      chapterBanner("zodiac", 3, isKo, false),
       paragraph(isKo ? "별자리 데이터를 불러올 수 없습니다." : "Zodiac data unavailable."),
     ];
   }
 
+  const label = PET_PREMIUM_LABEL_THEME;
+  const el = z.elementAffinity;
   const blocks: Content[] = [
-    sectionTitle(isKo ? "3. 별자리 케어" : "3. Zodiac care", true),
-    paragraph(z.personality.headline),
-    paragraph(z.personality.story),
+    chapterBanner("zodiac", 3, isKo, false),
+    pillWithBody(pdfSafeText(z.personality.headline), pdfSafeText(z.personality.story), label.accent, label.soft),
+    elementPill(
+      isKo ? `오행 바이브 · ${z.elementLabel.hangul}(${z.elementLabel.hanja})` : `Element · ${z.elementLabel.meaning}`,
+      el,
+      [0, 4, 0, 12]
+    ),
   ];
 
   if (z.personality.details?.length) {
     blocks.push({
       text: isKo ? "상세 해석" : "Detailed reading",
-      style: "sectionTitle",
+      style: "sectionHeading",
     });
     for (const detail of z.personality.details) {
-      blocks.push({ text: pdfSafeText(detail.title), style: "sectionSubtitle" });
-      blocks.push(paragraph(detail.body));
+      blocks.push(
+        pillWithBody(pdfSafeText(detail.title), pdfSafeText(detail.body), label.accent, label.soft)
+      );
     }
   }
 
@@ -331,9 +331,9 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
     text: isKo
       ? `오늘의 운세 (발급일 기준 · ${payload.issuedDateKst})`
       : `Today's fortune (as of issue date · ${payload.issuedDateKst})`,
-    style: "sectionTitle",
+    style: "sectionHeading",
   });
-  blocks.push(paragraph(z.daily.today));
+  blocks.push(elementHighlightBox(pdfSafeText(z.daily.today), el));
   blocks.push(
     paragraph(
       isKo
@@ -348,7 +348,7 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
 
 function buildDocumentDefinition(payload: PetPremiumPdfPayload): TDocumentDefinitions {
   const isKo = payload.locale === "ko";
-  const footerLabel = isKo ? "K-Saju Pet Premium Care Guide" : "K-Saju Pet Premium Care Guide";
+  const footerLabel = "K-Saju Pet Premium Care Guide";
 
   const content: Content[] = [
     ...buildCover(payload),
@@ -370,7 +370,7 @@ function buildDocumentDefinition(payload: PetPremiumPdfPayload): TDocumentDefini
       subject: pdfSafeText(payload.petName),
     },
     pageSize: "A4",
-    pageMargins: [56, 56, 56, 56],
+    pageMargins: [56, 56, 56, 68],
     defaultStyle: {
       font: PDF_FONT_FAMILY,
       fontSize: 10.5,
@@ -383,9 +383,7 @@ function buildDocumentDefinition(payload: PetPremiumPdfPayload): TDocumentDefini
       coverMotto: { fontSize: 11, color: JIG_MUTED, lineHeight: 1.5 },
       labelCaps: { fontSize: 8, bold: true, color: JIG_MUTED },
       personName: { fontSize: 14, bold: true, color: JIG_INK },
-      chapterTitle: { fontSize: 15, bold: true, color: JIG_INK },
-      sectionTitle: { fontSize: 12, bold: true, color: JIG_INK, margin: [0, 8, 0, 4] },
-      sectionSubtitle: { fontSize: 10.5, color: JIG_SEAL },
+      sectionHeading: { fontSize: 13, bold: true, color: JIG_INK, margin: [0, 10, 0, 4] },
       body: { fontSize: 10.5, color: JIG_INK },
       axisLabel: { fontSize: 9.5, color: JIG_MUTED },
       axisLabelBold: { fontSize: 9.5, bold: true, color: JIG_INK },
@@ -407,16 +405,31 @@ function buildDocumentDefinition(payload: PetPremiumPdfPayload): TDocumentDefini
     },
     footer(currentPage) {
       return {
-        margin: [56, 0, 56, 28],
+        margin: [56, 12, 56, 32],
         columns: [
-          { text: footerLabel, alignment: "left", fontSize: 8, color: JIG_MUTED },
+          {
+            text: footerLabel,
+            alignment: "left",
+            fontSize: 8,
+            color: JIG_MUTED,
+            width: "*",
+          },
+          {
+            text: "·",
+            alignment: "center",
+            fontSize: 8,
+            color: JIG_MUTED,
+            width: 16,
+          },
           {
             text: String(currentPage),
             alignment: "right",
             fontSize: 8,
             color: JIG_MUTED,
+            width: 28,
           },
         ],
+        columnGap: 8,
       };
     },
     content,

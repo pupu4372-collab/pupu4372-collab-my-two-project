@@ -178,31 +178,34 @@ const SIGN_DEPTH: Record<
   },
 };
 
-const ELEMENT_DEPTH: Record<
-  ElementKey,
-  { ko: string; en: string }
-> = {
+const ELEMENT_DEPTH_BODY: Record<ElementKey, { ko: string; en: string }> = {
   wood: {
-    ko: "Tree 기운은 성장과 호기심을 더합니다. 새로운 루틴을 배울 때 칭찬을 충분히 주면 스스로 뻗어나가는 힘이 좋아져요.",
-    en: "Tree energy adds growth and curiosity. With generous praise during new routines, this pet gains confidence to stretch outward.",
+    ko: "성장과 호기심을 더합니다. 새로운 루틴을 배울 때 칭찬을 충분히 주면 스스로 뻗어나가는 힘이 좋아져요.",
+    en: "energy adds growth and curiosity. With generous praise during new routines, this pet gains confidence to stretch outward.",
   },
   fire: {
-    ko: "Fire 기운은 표현력과 활기를 키웁니다. 즐거움이 빠르게 올라오는 만큼 놀이 후 진정 루틴을 함께 넣어주면 균형이 좋아요.",
-    en: "Fire energy boosts expression and liveliness. Because joy rises quickly, a calm-down routine after play keeps the balance kind.",
+    ko: "표현력과 활기를 키웁니다. 즐거움이 빠르게 올라오는 만큼 놀이 후 진정 루틴을 함께 넣어주면 균형이 좋아요.",
+    en: "energy boosts expression and liveliness. Because joy rises quickly, a calm-down routine after play keeps the balance kind.",
   },
   earth: {
-    ko: "Earth 기운은 안정감과 신뢰를 중시합니다. 반복되는 시간표와 익숙한 공간이 마음을 편하게 만들고 애착을 단단하게 해줘요.",
-    en: "Earth energy values stability and trust. Repeated schedules and familiar spaces settle the heart and strengthen attachment.",
+    ko: "안정감과 신뢰를 중시합니다. 반복되는 시간표와 익숙한 공간이 마음을 편하게 만들고 애착을 단단하게 해줘요.",
+    en: "energy values stability and trust. Repeated schedules and familiar spaces settle the heart and strengthen attachment.",
   },
   metal: {
-    ko: "Metal 기운은 관찰력과 선명한 기준을 더합니다. 규칙이 명확할수록 편안해하고, 장난감이나 간식 취향도 뚜렷하게 드러납니다.",
-    en: "Metal energy adds observation and clear standards. The clearer the rules, the calmer the response, and preferences show strongly.",
+    ko: "관찰력과 선명한 기준을 더합니다. 규칙이 명확할수록 편안해하고, 장난감이나 간식 취향도 뚜렷하게 드러납니다.",
+    en: "energy adds observation and clear standards. The clearer the rules, the calmer the response, and preferences show strongly.",
   },
   water: {
-    ko: "Water 기운은 감정의 흐름과 직감을 깊게 합니다. 조용한 교감, 부드러운 목소리, 충분한 휴식이 컨디션을 크게 좌우해요.",
-    en: "Water energy deepens emotional flow and intuition. Quiet bonding, a soft voice, and enough rest strongly shape the day's condition.",
+    ko: "감정의 흐름과 직감을 깊게 합니다. 조용한 교감, 부드러운 목소리, 충분한 휴식이 컨디션을 크게 좌우해요.",
+    en: "energy deepens emotional flow and intuition. Quiet bonding, a soft voice, and enough rest strongly shape the day's condition.",
   },
 };
+
+function elementDepthText(element: ElementKey, locale: Locale): string {
+  const label = dominantElementLabel(element, locale);
+  const body = ELEMENT_DEPTH_BODY[element][locale];
+  return locale === "ko" ? `${label} 기운은 ${body}` : `${label} ${body}`;
+}
 
 const PERSONALITY_KO: Record<
   ZodiacSignKey,
@@ -320,7 +323,7 @@ export function buildZodiacPersonality(
   const speciesLabel = locale === "ko" ? SPECIES_KO[species] : SPECIES_EN[species];
   const base = PERSONALITY_KO[sign](petName, speciesLabel, elementAffinity, locale);
   const depth = SIGN_DEPTH[sign][locale];
-  const elementDepth = ELEMENT_DEPTH[elementAffinity][locale];
+  const elementDepth = elementDepthText(elementAffinity, locale);
   const signLabel = ZODIAC_LABEL[sign][locale === "ko" ? "ko" : "en"];
   const elLabel = dominantElementLabel(elementAffinity, locale);
   const headline =
