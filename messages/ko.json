@@ -254,6 +254,8 @@
       "previewHint": "아래는 고정 샘플 결과예요. 위 폼을 제출하면 같은 자리에서 내 아이 결과로 바뀝니다.",
       "addPet": "펫 추가",
       "quickAddSubmit": "펫 추가하기",
+      "emptyPetPrompt": "첫 펫을 등록하고 오늘 운세를 확인해보세요.",
+      "emptyPetCta": "펫 등록하기",
       "quickAddGuideLine1": "펫 성향 분석과 MBTI 맞춤 케어 가이드는",
       "quickAddGuideLine2Before": "상단에 ",
       "quickAddGuideLine2After": "를 클릭해 주세요.",

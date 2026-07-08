@@ -254,6 +254,8 @@
       "previewHint": "Below is a fixed sample. Submit the form above to replace it with your pet's result in the same spot.",
       "addPet": "Add pet",
       "quickAddSubmit": "Add pet",
+      "emptyPetPrompt": "Add your first pet to see today's fortune.",
+      "emptyPetCta": "Register a pet",
       "quickAddGuideLine1": "For pet personality and MBTI-based care guides,",
       "quickAddGuideLine2Before": "tap ",
       "quickAddGuideLine2After": " at the top.",
