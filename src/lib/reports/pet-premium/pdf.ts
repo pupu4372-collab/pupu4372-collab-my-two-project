@@ -312,7 +312,7 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
 
   const blocks: Content[] = [
     sectionTitle(isKo ? "3. 별자리 케어" : "3. Zodiac care", true),
-    paragraph(`${z.sign.displayName} · ${z.personality.headline}`),
+    paragraph(z.personality.headline),
     paragraph(z.personality.story),
   ];
 

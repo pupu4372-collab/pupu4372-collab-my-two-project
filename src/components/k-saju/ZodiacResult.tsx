@@ -2,9 +2,7 @@
 
 import { AdSlot } from "@/components/ads/AdSlot";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
-import { PetPremiumPdfSaveRow } from "@/components/k-saju/PetPremiumPdfSaveRow";
 import { ZodiacCompatInstaShareRow } from "@/components/k-saju/ZodiacCompatInstaShareRow";
-import type { PetPremiumPdfRequest } from "@/lib/reports/pet-premium/types";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
@@ -15,9 +13,7 @@ interface ZodiacResultProps {
   result: ZodiacFortuneResponse;
   isGuest?: boolean;
   onBack?: () => void;
-  shareMode?: "insta" | "pdf" | "none";
-  pdfContext?: PetPremiumPdfRequest;
-  accessToken?: string | null;
+  shareMode?: "insta" | "none";
 }
 
 const LABELS = {
@@ -73,8 +69,6 @@ export function ZodiacResult({
   isGuest,
   onBack,
   shareMode = "insta",
-  pdfContext,
-  accessToken,
 }: ZodiacResultProps) {
   const t = LABELS[result.locale];
   const el = ELEMENT_META[result.elementAffinity];
@@ -223,9 +217,7 @@ export function ZodiacResult({
         </dl>
       </GlassCard>
 
-      {shareMode === "pdf" && pdfContext ? (
-        <PetPremiumPdfSaveRow locale={result.locale} context={pdfContext} accessToken={accessToken} />
-      ) : shareMode === "insta" ? (
+      {shareMode === "insta" ? (
         <ZodiacCompatInstaShareRow kind="zodiac" result={result} />
       ) : null}
 

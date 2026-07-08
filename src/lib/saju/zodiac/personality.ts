@@ -1,4 +1,5 @@
 import { ELEMENT_META } from "../elements";
+import { dominantElementLabel } from "../pet-lucky-scores";
 import type { ElementKey, Locale, Species } from "../types";
 import type { ZodiacSignKey } from "./signs";
 
@@ -18,10 +19,7 @@ const ZODIAC_LABEL: Record<ZodiacSignKey, { ko: string; en: string }> = {
 };
 
 function fmtEl(el: ElementKey, locale: Locale): string {
-  const m = ELEMENT_META[el];
-  return locale === "ko"
-    ? `${m.meaning}(${m.hangul}, ${m.hanja})`
-    : `${m.meaning} (${m.hanja})`;
+  return dominantElementLabel(el, locale);
 }
 
 const SPECIES_KO: Record<Species, string> = { dog: "강아지", cat: "고양이", reptile: "렙타일", other: "그외친구" };
@@ -323,22 +321,29 @@ export function buildZodiacPersonality(
   const base = PERSONALITY_KO[sign](petName, speciesLabel, elementAffinity, locale);
   const depth = SIGN_DEPTH[sign][locale];
   const elementDepth = ELEMENT_DEPTH[elementAffinity][locale];
+  const signLabel = ZODIAC_LABEL[sign][locale === "ko" ? "ko" : "en"];
+  const elLabel = dominantElementLabel(elementAffinity, locale);
+  const headline =
+    locale === "ko"
+      ? `${signLabel} - ${petName} - ${signLabel} × ${elLabel}`
+      : `${petName} · ${signLabel} × ${elLabel}`;
 
   return {
     ...base,
+    headline,
     details:
       locale === "ko"
         ? [
             { title: "성향 해석", body: depth.temperament },
             { title: "집사와의 교감", body: depth.bond },
             { title: "케어 리듬", body: depth.care },
-            { title: `${fmtEl(elementAffinity, locale)} 오행 포인트`, body: elementDepth },
+            { title: `${elLabel} 오행 포인트`, body: elementDepth },
           ]
         : [
             { title: "Personality reading", body: depth.temperament },
             { title: "Bond with parent", body: depth.bond },
             { title: "Care rhythm", body: depth.care },
-            { title: `${fmtEl(elementAffinity, locale)} element note`, body: elementDepth },
+            { title: `${elLabel} element note`, body: elementDepth },
           ],
   };
 }

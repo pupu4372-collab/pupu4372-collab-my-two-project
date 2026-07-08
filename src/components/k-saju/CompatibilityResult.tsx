@@ -4,13 +4,11 @@ import { AdSlot } from "@/components/ads/AdSlot";
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { BondScoreRing } from "@/components/k-saju/BondScoreRing";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
-import { PetPremiumPdfSaveRow } from "@/components/k-saju/PetPremiumPdfSaveRow";
 import { ZodiacCompatInstaShareRow } from "@/components/k-saju/ZodiacCompatInstaShareRow";
-import type { PetPremiumPdfRequest } from "@/lib/reports/pet-premium/types";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import type { ElementRelation } from "@/lib/saju/compatibility/elements-cycle";
-import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
+import { ELEMENT_ACCENT, SAJU_RESULT_DETAIL_GRID_CLASS } from "@/components/k-saju/result-styles";
 import type { ElementKey } from "@/lib/saju/types";
 
 const RELATION_LABEL: Record<
@@ -115,14 +113,10 @@ export function CompatibilityResult({
   result,
   isGuest,
   shareMode = "insta",
-  pdfContext,
-  accessToken,
 }: {
   result: CompatibilityResponse;
   isGuest?: boolean;
-  shareMode?: "insta" | "pdf" | "none";
-  pdfContext?: PetPremiumPdfRequest;
-  accessToken?: string | null;
+  shareMode?: "insta" | "none";
 }) {
   const t = LABELS[result.locale];
   const rel = RELATION_LABEL[result.relation][result.locale];
@@ -156,7 +150,7 @@ export function CompatibilityResult({
 
       <GlassCard variant="solid">
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/45">{t.details}</p>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <div className={SAJU_RESULT_DETAIL_GRID_CLASS}>
           {result.details.map((detail, index) => (
             <section
               key={detail.title}
@@ -223,9 +217,7 @@ export function CompatibilityResult({
         </ul>
       </GlassCard>
 
-      {shareMode === "pdf" && pdfContext ? (
-        <PetPremiumPdfSaveRow locale={result.locale} context={pdfContext} accessToken={accessToken} />
-      ) : shareMode === "insta" ? (
+      {shareMode === "insta" ? (
         <ZodiacCompatInstaShareRow kind="compatibility" result={result} />
       ) : null}
 

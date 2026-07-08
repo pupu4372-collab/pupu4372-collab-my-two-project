@@ -1,4 +1,5 @@
 import { PremiumHub } from "@/components/k-saju/PremiumHub";
+import { SAJU_RESULT_DESKTOP_WIDTH_CLASS } from "@/components/k-saju/result-styles";
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { getTranslations } from "next-intl/server";
 
@@ -12,7 +13,7 @@ export default async function PremiumHubPage() {
       subtitle={t("premiumHubSubtitle")}
       narrowHero
     >
-      <div className="mx-auto w-full max-w-xl md:max-w-2xl">
+      <div className={SAJU_RESULT_DESKTOP_WIDTH_CLASS}>
         <PremiumHub />
       </div>
     </ChannelShell>

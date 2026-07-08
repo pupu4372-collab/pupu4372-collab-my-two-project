@@ -1,4 +1,5 @@
-import { ELEMENT_META } from "../elements";
+import { withJosa } from "@/lib/i18n/korean-josa";
+import { dominantElementLabel } from "../pet-lucky-scores";
 import type { ElementKey, Gender, Locale, Species } from "../types";
 import type { ElementRelation } from "./elements-cycle";
 
@@ -43,7 +44,7 @@ const RELATION_COPY: Record<
     ko: {
       title: (pet, owner) => `${pet} × ${owner} — 같은 오행, 같은 파장`,
       story: (pet, owner, pEl, oEl, sp) =>
-        `${pet}와 ${owner} 집사님은 ${pEl} 기운으로 맞춰진 팀이에요. ${sp} ${pet}의 리듬을 집사님이 직관적으로 이해하고, 말 없이도 쿠션 자리와 휴식 타이밍을 맞춰요.`,
+        `${withJosa(pet, "과/와")} ${owner} 집사님은 ${pEl} 기운으로 맞춰진 팀이에요. ${sp} ${pet}의 리듬을 집사님이 직관적으로 이해하고, 말 없이도 쿠션 자리와 휴식 타이밍을 맞춰요.`,
       tips: [
         "루틴을 함께 지키면 유대가 더 깊어져요",
         "같은 기운은 과열할 수 있으니 가끔은 새 산책로로 리프레시",
@@ -65,7 +66,7 @@ const RELATION_COPY: Record<
   },
   owner_nourishes_pet: {
     ko: {
-      title: (pet, owner) => `${pet} × ${owner} — 집사가 ${pet}를 키우는 상생`,
+      title: (pet, owner) => `${pet} × ${owner} — 집사가 ${withJosa(pet, "을/를")} 키우는 상생`,
       story: (pet, owner, pEl, oEl, sp) =>
         `집사님의 ${oEl} 기운이 ${sp} ${pet}의 ${pEl}로 스며들어요. 밥·산책·안심이 ${pet}에게 가장 큰 사랑 언어.`,
       tips: [
@@ -89,7 +90,7 @@ const RELATION_COPY: Record<
   },
   pet_nourishes_owner: {
     ko: {
-      title: (pet, owner) => `${pet} × ${owner} — ${pet}가 집사를 채우는 상생`,
+      title: (pet, owner) => `${pet} × ${owner} — ${withJosa(pet, "이/가")} 집사를 채우는 상생`,
       story: (pet, owner, pEl, oEl, sp) =>
         `${sp} ${pet}의 ${pEl} 기운이 집사님 ${oEl} 마음을 환하게. 퇴근 후 ${pet} 한 마리가 하루를 치유해요.`,
       tips: [
@@ -137,9 +138,9 @@ const RELATION_COPY: Record<
   },
   pet_controls_owner: {
     ko: {
-      title: (pet, owner) => `${pet} × ${owner} — ${pet}가 기승하는 귀여운 극`,
+      title: (pet, owner) => `${pet} × ${owner} — ${withJosa(pet, "이/가")} 기승하는 귀여운 극`,
       story: (pet, owner, pEl, oEl, sp) =>
-        `${pet} ${pEl} 기운이 집사님 ${oEl}을 살짝 압도. ${sp}가 집안 분위기를 이끌지만, 경계만 부드럽게 세우면 최고의 파트너.`,
+        `${pet} ${pEl} 기운이 집사님 ${oEl}을 살짝 압도. ${withJosa(sp, "이/가")} 집안 분위기를 이끌지만, 경계만 부드럽게 세우면 최고의 파트너.`,
       tips: [
         "일관된 규칙 2~3개만 유지",
         "간식은 칭찬 후에만",
@@ -186,10 +187,7 @@ const RELATION_COPY: Record<
 };
 
 function fmtEl(el: ElementKey, locale: Locale): string {
-  const m = ELEMENT_META[el];
-  return locale === "ko"
-    ? `${m.meaning}(${m.hangul}, ${m.hanja})`
-    : `${m.meaning} (${m.hanja})`;
+  return dominantElementLabel(el, locale);
 }
 
 function genderLabel(gender: Gender, target: "pet" | "owner", locale: Locale): string {
@@ -241,7 +239,7 @@ function genderDetail(
   const owner = genderLabel(ownerGender, "owner", locale);
 
   if (locale === "ko") {
-    return `${petName}는 ${pet} ${species}로, ${ownerName} 집사님은 ${owner}의 생활 리듬을 가지고 있어요. 성별 자체가 궁합 점수를 정하지는 않지만, 호칭·스킨십 강도·놀이 템포를 맞출 때 중요한 관찰 포인트가 됩니다.`;
+    return `${withJosa(petName, "은/는")} ${pet} ${species}로, ${ownerName} 집사님은 ${owner}의 생활 리듬을 가지고 있어요. 성별 자체가 궁합 점수를 정하지는 않지만, 호칭·스킨십 강도·놀이 템포를 맞출 때 중요한 관찰 포인트가 됩니다.`;
   }
 
   return `${petName} is a ${pet} ${species}, and ${ownerName} brings a ${owner} daily rhythm. Gender does not decide the score, but it helps tune names, touch intensity, and play tempo with more care.`;

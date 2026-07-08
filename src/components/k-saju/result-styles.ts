@@ -1,5 +1,10 @@
 import type { ElementKey } from "@/lib/saju/types";
 
+/** Result surfaces: mobile keeps max-w-xl; md+ widens for multi-column cards (~896px). */
+export const SAJU_RESULT_DESKTOP_WIDTH_CLASS = "mx-auto w-full max-w-xl md:max-w-4xl";
+
+export const SAJU_RESULT_DETAIL_GRID_CLASS = "mt-4 grid grid-cols-1 gap-3 md:grid-cols-3";
+
 export const ELEMENT_ACCENT: Record<
   ElementKey,
   { pill: string; ring: string; bar: string; cardBorder: string; card: string; title: string }

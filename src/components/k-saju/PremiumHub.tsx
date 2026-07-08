@@ -33,11 +33,14 @@ import {
 } from "@/lib/pet/mbti-inference";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
-import type { PetPremiumPdfRequest } from "@/lib/reports/pet-premium/types";
+import {
+  EMPTY_PET_PREMIUM_SECTION_COMPLETION,
+  type PetPremiumSectionCompletion,
+} from "@/lib/reports/pet-premium/section-completion";
 import { computeBasicSaju } from "@/lib/saju/engine";
 import type { BirthCalendarType, Gender, Locale, Species } from "@/lib/saju/types";
 import { useLocale } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type ButlerSession = {
   ownerName: string;
@@ -218,6 +221,39 @@ export function PremiumHub() {
   const [premiumBlocked, setPremiumBlocked] = useState(false);
   const [premiumReturnTo, setPremiumReturnTo] = useState<PetPremiumReturnTo>("mbti");
   const [sajuResultId, setSajuResultId] = useState<string | null>(null);
+  const [storedCompletion, setStoredCompletion] = useState<PetPremiumSectionCompletion>(
+    EMPTY_PET_PREMIUM_SECTION_COMPLETION
+  );
+
+  const refreshStoredCompletion = useCallback(
+    async (targetPetId: string) => {
+      if (!accessToken) return;
+      try {
+        const res = await fetch(
+          `/api/saju/premium/sections?petId=${encodeURIComponent(targetPetId)}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        if (!res.ok) return;
+        const data = (await res.json()) as { completion?: PetPremiumSectionCompletion };
+        if (data.completion) setStoredCompletion(data.completion);
+      } catch {
+        // keep previous completion snapshot
+      }
+    },
+    [accessToken]
+  );
+
+  const syncPetIdAndRefreshCompletion = useCallback(
+    (nextPetId: string | null | undefined) => {
+      if (nextPetId) {
+        setPet((current) => (current ? { ...current, petId: nextPetId } : current));
+        void refreshStoredCompletion(nextPetId);
+        return;
+      }
+      if (pet?.petId) void refreshStoredCompletion(pet.petId);
+    },
+    [pet?.petId, refreshStoredCompletion]
+  );
 
   const unlockCheckEnabled = configured && ready && !isAnonymous;
   const { unlocked, loading: unlockLoading } = usePetPremiumUnlock(
@@ -234,6 +270,11 @@ export function PremiumHub() {
 
   const mbtiSurveyComplete = isPetMbtiComplete(mbtiAnswers);
 
+  useEffect(() => {
+    if (!configured || !ready || isAnonymous || !pet?.petId || !accessToken) return;
+    void refreshStoredCompletion(pet.petId);
+  }, [configured, ready, isAnonymous, pet?.petId, accessToken, refreshStoredCompletion]);
+
   const dominantElement = useMemo(() => {
     if (!pet) return undefined;
     return computeBasicSaju({
@@ -249,31 +290,6 @@ export function PremiumHub() {
       privacyConsent: true,
     }).dominantElement;
   }, [pet]);
-
-  const pdfContext = useMemo((): PetPremiumPdfRequest | null => {
-    if (!pet) return null;
-    return {
-      petName: pet.petName,
-      species: pet.species,
-      petGender: pet.petGender,
-      birthDate: pet.petBirthDate,
-      calendarType: "solar",
-      birthTime: pet.petBirthTime,
-      birthTimeUnknown: pet.petBirthTimeUnknown,
-      timezone: pet.timezone,
-      locale: pet.locale,
-      petId: pet.petId,
-      mbtiType: mbtiType ?? undefined,
-      mbtiAnswers: mbtiSurveyComplete ? mbtiAnswers : undefined,
-      ownerName: butler?.ownerName,
-      ownerGender: butler?.ownerGender,
-      ownerBirthDate: butler?.ownerBirthDate,
-      ownerCalendarType: butler?.ownerCalendarType,
-      ownerBirthTime: butler?.ownerBirthTime,
-      ownerBirthTimeUnknown: butler?.ownerBirthTimeUnknown,
-      privacyConsent: butler?.privacyConsent,
-    };
-  }, [pet, butler, mbtiType, mbtiAnswers, mbtiSurveyComplete]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -392,6 +408,7 @@ export function PremiumHub() {
             return;
           }
           setCompatibilityResult(data as CompatibilityResponse);
+          syncPetIdAndRefreshCompletion((data as CompatibilityResponse).petId);
         } catch {
           setMenuError(UI[petCtx.locale].networkError);
         } finally {
@@ -440,6 +457,7 @@ export function PremiumHub() {
             return;
           }
           setZodiacResult(data as ZodiacFortuneResponse);
+          syncPetIdAndRefreshCompletion((data as ZodiacFortuneResponse).petId);
         } catch {
           setMenuError(UI[petCtx.locale].networkError);
         } finally {
@@ -501,6 +519,7 @@ export function PremiumHub() {
           return;
         }
         setMbtiInsight(data as PetMbtiPremiumInsight);
+        syncPetIdAndRefreshCompletion((data as { petId?: string | null }).petId);
       } catch {
         setMenuError(UI[petCtx.locale].networkError);
       } finally {
@@ -653,6 +672,7 @@ export function PremiumHub() {
         return;
       }
       setZodiacResult(data as ZodiacFortuneResponse);
+      syncPetIdAndRefreshCompletion((data as ZodiacFortuneResponse).petId);
     } catch {
       setMenuError(t.networkError);
     } finally {
@@ -717,6 +737,7 @@ export function PremiumHub() {
         return;
       }
       setCompatibilityResult(data as CompatibilityResponse);
+      syncPetIdAndRefreshCompletion((data as CompatibilityResponse).petId);
     } catch {
       setMenuError(t.networkError);
     } finally {
@@ -921,6 +942,14 @@ export function PremiumHub() {
                 {t.btnCompatibility}
               </button>
             </div>
+            {pet.petId ? (
+              <PetPremiumPdfSaveRow
+                locale={locale}
+                petId={pet.petId}
+                accessToken={accessToken}
+                completion={storedCompletion}
+              />
+            ) : null}
           </>
         ) : (
           <>
@@ -957,31 +986,13 @@ export function PremiumHub() {
                   locale={locale}
                   dominantElement={dominantElement}
                 />
-                {pdfContext ? (
-                  <PetPremiumPdfSaveRow
-                    locale={locale}
-                    context={pdfContext}
-                    accessToken={accessToken}
-                  />
-                ) : null}
               </div>
             )}
             {activeView === "zodiac" && zodiacResult && !menuLoading && (
-              <ZodiacResult
-                result={zodiacResult}
-                shareMode="pdf"
-                pdfContext={pdfContext ?? undefined}
-                accessToken={accessToken}
-              />
+              <ZodiacResult result={zodiacResult} />
             )}
             {activeView === "compatibility" && compatibilityResult && !menuLoading && (
-              <CompatibilityResult
-                result={compatibilityResult}
-                isGuest={false}
-                shareMode="pdf"
-                pdfContext={pdfContext ?? undefined}
-                accessToken={accessToken}
-              />
+              <CompatibilityResult result={compatibilityResult} isGuest={false} />
             )}
           </>
         )}
