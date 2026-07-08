@@ -247,7 +247,7 @@ export function bondScoreGauge(score: number, bondLabel: string): Content {
         margin: [0, 0, 0, 0],
       },
     ],
-  };
+  } as Content;
 }
 
 export function coverTopAccentBar(accent: string): Content {
