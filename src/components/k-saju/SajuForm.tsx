@@ -400,6 +400,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
           result={result}
           variant={embedded ? "pastel" : "default"}
           mbtiType={restoredMbtiResult?.type}
+          birthTimeSelect={birthTime}
         />
       </div>
     );

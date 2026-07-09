@@ -1,4 +1,4 @@
-export const PET_PREMIUM_SECTION_COUNT = 3;
+export const PET_PREMIUM_SECTION_COUNT = 2;
 
 export type PetPremiumSectionCompletion = {
   mbtiDone: boolean;
@@ -17,14 +17,13 @@ export const EMPTY_PET_PREMIUM_SECTION_COMPLETION: PetPremiumSectionCompletion =
 };
 
 export function getPetPremiumSectionCompletionFromFlags(flags: {
-  mbtiDone: boolean;
   zodiacDone: boolean;
   compatibilityDone: boolean;
 }): PetPremiumSectionCompletion {
-  const completedCount = [flags.mbtiDone, flags.zodiacDone, flags.compatibilityDone].filter(Boolean).length;
+  const completedCount = [flags.zodiacDone, flags.compatibilityDone].filter(Boolean).length;
 
   return {
-    mbtiDone: flags.mbtiDone,
+    mbtiDone: false,
     zodiacDone: flags.zodiacDone,
     compatibilityDone: flags.compatibilityDone,
     completedCount,

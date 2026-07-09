@@ -13,7 +13,7 @@ import type { Locale } from "@/lib/saju/types";
 const UI = {
   ko: {
     title: "프리미엄 패키지",
-    subtitle: "상세 MBTI · 별자리 · 집사 궁합까지 — 우리 아이 맞춤 케어 가이드 한 번에",
+    subtitle: "집사 궁합 · 별자리 케어 — 우리 아이 맞춤 케어 가이드 한 번에",
     notice: "결제 후 바로 이용할 수 있어요",
     price: "₩4,500",
     priceNote: "1회 결제 · 해당 펫 영구 잠금 해제",
@@ -23,7 +23,7 @@ const UI = {
   },
   en: {
     title: "Premium package",
-    subtitle: "Detailed MBTI, zodiac, and pet–butler bond care guides in one",
+    subtitle: "Pet–butler bond and zodiac care guides in one unlock",
     notice: "Available right after payment",
     price: "₩4,500",
     priceNote: "One-time payment · Permanent unlock for this pet",

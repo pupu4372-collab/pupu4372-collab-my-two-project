@@ -8,6 +8,7 @@ import {
   PET_PREMIUM_PACKAGE_CODE,
   type PetProductCode,
 } from "@/lib/payments/pet-product-catalog";
+import { isPetUnlockDevBypassActive } from "@/lib/payments/pet-unlock-dev-bypass";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -20,13 +21,13 @@ export type PetPremiumLlmGateError = {
   error: string;
 };
 
-/** Production/preview: require Supabase + login + premium unlock. Dev: bypass gate. */
+/** Production/preview: require Supabase + login + premium unlock. Dev: bypass unless disabled. */
 export async function checkPetPremiumLlmGate(
   request: Request,
   petId?: string | null,
   allowedProductCodes: readonly PetProductCode[] = PET_PACKAGE_UNLOCK_CODES
 ): Promise<PetPremiumLlmGateError | null> {
-  if (process.env.NODE_ENV !== "production") {
+  if (isPetUnlockDevBypassActive()) {
     return null;
   }
 
@@ -54,7 +55,7 @@ export async function checkPetPremiumLlmGate(
   return null;
 }
 
-/** MBTI premium API gate — pet_mbti_v1 OR pet_premium_v1. */
+/** MBTI premium API gate — pet_mbti_v1 only. */
 export function checkPetMbtiLlmGate(request: Request, petId?: string | null) {
   return checkPetPremiumLlmGate(request, petId, PET_MBTI_UNLOCK_CODES);
 }

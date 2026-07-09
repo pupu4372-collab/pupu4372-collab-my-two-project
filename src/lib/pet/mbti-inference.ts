@@ -432,7 +432,7 @@ export type PetMbtiAxisPercents = {
   JP: { J: number; P: number };
 };
 
-/** Four-axis percent split from 15-question survey scores. */
+/** Four-axis percent split from behavior-check survey scores. */
 export function computePetMbtiAxisPercents(scores: PetMbtiScores): PetMbtiAxisPercents {
   const pct = (a: number, b: number) => {
     const total = a + b;

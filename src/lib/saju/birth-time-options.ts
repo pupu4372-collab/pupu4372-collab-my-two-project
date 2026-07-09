@@ -47,3 +47,51 @@ export function parseBirthTimeSelect(value: string): {
   }
   return { birthTime: value, birthTimeUnknown: false };
 }
+
+/** Map DB/API time (HH:MM or HH:MM:SS) to birth-time dropdown value. */
+export function birthTimeToSelectValue(
+  birthTime: string | null | undefined,
+  birthTimeUnknown: boolean
+): string {
+  if (birthTimeUnknown || !birthTime) return "unknown";
+  const hhmm = birthTime.trim().slice(0, 5);
+  if (BIRTH_TIME_OPTIONS.some((option) => option.value === hhmm)) return hhmm;
+  return "unknown";
+}
+
+/** Map stored kstJiji slot back to birth-time dropdown value. */
+const JIJI_ROMANIZED_TO_SELECT: Record<string, string> = {
+  Ja: "23:30",
+  Chuk: "01:30",
+  In: "03:30",
+  Myo: "05:30",
+  Jin: "07:30",
+  Sa: "09:30",
+  O: "11:30",
+  Mi: "13:30",
+  Sin: "15:30",
+  Yu: "17:30",
+  Sul: "19:30",
+  Hae: "21:30",
+};
+
+export function kstJijiToBirthTimeSelectValue(
+  jiji: { romanized: string } | null | undefined
+): string {
+  if (!jiji) return "unknown";
+  return JIJI_ROMANIZED_TO_SELECT[jiji.romanized] ?? "unknown";
+}
+
+export function formatBirthTimeSummary(
+  birthTime: string | null,
+  birthTimeUnknown: boolean,
+  locale: "ko" | "en"
+): string {
+  if (birthTimeUnknown || !birthTime) {
+    return locale === "ko" ? "시간 모름" : "Unknown";
+  }
+  const selectValue = birthTimeToSelectValue(birthTime, false);
+  const option = BIRTH_TIME_OPTIONS.find((entry) => entry.value === selectValue);
+  if (!option) return birthTime.slice(0, 5);
+  return getBirthTimeOptionLabel(option, locale);
+}

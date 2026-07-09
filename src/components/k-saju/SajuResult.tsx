@@ -20,6 +20,7 @@ import { buildPetLuckyScores, dominantElementLabel } from "@/lib/saju/pet-lucky-
 import { buildPetSajuMappingFromBasicResponse } from "@/lib/saju/pet-saju-mapping-from-result";
 import type { Locale, SajuBasicResponse } from "@/lib/saju/types";
 import { formatUtcForDisplay } from "@/lib/saju/timezone";
+import { kstJijiToBirthTimeSelectValue } from "@/lib/saju/birth-time-options";
 import { clearSajuResultSession } from "@/lib/saju/saju-result-session";
 import { useEffect, useMemo, useState } from "react";
 
@@ -29,6 +30,8 @@ interface SajuResultProps {
   /** Vault/archive: render only stored snapshot fields — no mapping recompute. */
   snapshot?: boolean;
   mbtiType?: string | null;
+  /** Birth-time dropdown value from the live form session (e.g. "11:30" | "unknown"). */
+  birthTimeSelect?: string;
 }
 
 const LABELS = {
@@ -118,7 +121,7 @@ function traitCards(traits: string[], locale: Locale) {
   }));
 }
 
-export function SajuResult({ result, snapshot = false, mbtiType }: SajuResultProps) {
+export function SajuResult({ result, snapshot = false, mbtiType, birthTimeSelect }: SajuResultProps) {
   const t = LABELS[result.locale];
   const isKo = result.locale === "ko";
   const meta = ELEMENT_META[result.dominantElement];
@@ -154,12 +157,15 @@ export function SajuResult({ result, snapshot = false, mbtiType }: SajuResultPro
     birthTimeUnknown: result.birthTimeUnknown,
     kstJiji: result.kstJiji,
   });
+  const resolvedBirthTimeSelect =
+    birthTimeSelect ??
+    (result.birthTimeUnknown ? "unknown" : kstJijiToBirthTimeSelectValue(result.kstJiji));
   const continuationBase = {
     petName: result.petName,
     species: result.species,
     petGender: result.petGender ?? "female",
     birthDate: result.birthDate,
-    birthTime: "unknown",
+    birthTime: resolvedBirthTimeSelect,
     timezone: result.timezone,
     locale: result.locale,
     petId: result.petId,
@@ -468,8 +474,9 @@ export function SajuResult({ result, snapshot = false, mbtiType }: SajuResultPro
               species: result.species,
               petGender: result.petGender ?? "female",
               birthDate: result.birthDate,
-              birthTime: "unknown",
+              birthTime: resolvedBirthTimeSelect,
               timezone: result.timezone,
+              sajuResultId: result.sajuResultId,
             }}
           />
         </aside>

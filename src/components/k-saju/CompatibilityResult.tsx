@@ -8,8 +8,9 @@ import { ZodiacCompatInstaShareRow } from "@/components/k-saju/ZodiacCompatInsta
 import { GlassCard } from "@/components/layout/StitchLayout";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import type { ElementRelation } from "@/lib/saju/compatibility/elements-cycle";
-import { ELEMENT_ACCENT, SAJU_RESULT_DETAIL_GRID_CLASS } from "@/components/k-saju/result-styles";
+import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import type { ElementKey } from "@/lib/saju/types";
+import type { ReactNode } from "react";
 
 const RELATION_LABEL: Record<
   CompatibilityResponse["relation"],
@@ -36,6 +37,8 @@ const LABELS = {
     femalePet: "암",
     maleOwner: "남성",
     femaleOwner: "여성",
+    petRole: "펫",
+    ownerRole: "집사",
     dayPillar: "일주(日柱)",
     details: "상세 궁합 해석",
     tips: "케어 팁",
@@ -54,11 +57,70 @@ const LABELS = {
     maleOwner: "Male",
     femaleOwner: "Female",
     dayPillar: "Day pillar",
+    petRole: "Pet",
+    ownerRole: "Butler",
     details: "Detailed bond reading",
     tips: "Care tips",
     tipsIntro: "Practical tips you can try starting today.",
   },
 };
+
+function formatDominantElement(
+  label: CompatibilityResponse["petElementLabel"],
+  locale: CompatibilityResponse["locale"]
+): string {
+  if (locale === "en") {
+    return `${label.hanja} ${label.meaning}`;
+  }
+  return `${label.hanja} ${label.meaning}·${label.hangul}`;
+}
+
+function BondProfileMiniCard({
+  roleLabel,
+  name,
+  elementLabel,
+  genderLabel,
+  genderValue,
+  dayPillarLabel,
+  dayPillar,
+  elementKey,
+  locale,
+  className = "",
+}: {
+  roleLabel: string;
+  name: string;
+  elementLabel: CompatibilityResponse["petElementLabel"];
+  genderLabel: string;
+  genderValue: string;
+  dayPillarLabel: string;
+  dayPillar: string;
+  elementKey: ElementKey;
+  locale: CompatibilityResponse["locale"];
+  className?: string;
+}) {
+  const accent = ELEMENT_ACCENT[elementKey];
+  return (
+    <div
+      className={`rounded-2xl border bg-white/90 px-4 py-3 text-left shadow-sm ${accent.cardBorder} border-l-4 ${className}`}
+    >
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-plum/50">{roleLabel}</p>
+      <p className="mt-1 truncate text-base font-extrabold text-primary">{name}</p>
+      <p className={`mt-2 text-sm font-semibold ${accent.title}`}>
+        {formatDominantElement(elementLabel, locale)}
+      </p>
+      <dl className="mt-2 space-y-0.5 text-xs text-on-surface-variant">
+        <div className="flex justify-between gap-2">
+          <dt>{genderLabel}</dt>
+          <dd className="font-semibold text-primary">{genderValue}</dd>
+        </div>
+        <div className="flex justify-between gap-2">
+          <dt>{dayPillarLabel}</dt>
+          <dd className="font-semibold text-primary">{dayPillar}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
 
 function ElementCard({
   title,
@@ -101,12 +163,28 @@ function ElementCard({
 
 function relationCardClass(relation: ElementRelation): string {
   if (relation.includes("nourishes")) {
-    return "border-mok-green/40 bg-gradient-to-br from-mint/35 via-white to-mint/15";
+    return "border-mok-green/40 bg-mint/35";
   }
   if (relation.includes("controls")) {
-    return "border-to-yellow/45 bg-gradient-to-br from-amber-50 via-white to-gold/20";
+    return "border-to-yellow/45 bg-sand/60";
   }
-  return "border-channel-saju/25 bg-gradient-to-br from-sand/70 via-white to-lavender/30";
+  return "border-channel-saju/25 bg-lavender/30";
+}
+
+function renderNumberedDetailBody(body: string): ReactNode {
+  const parts = body.split(/(?=[①②③④⑤])/).map((part) => part.trim()).filter(Boolean);
+  if (parts.length <= 1) {
+    return <p className="mt-3 text-base leading-relaxed text-primary/90">{body}</p>;
+  }
+  return (
+    <div className="mt-3 space-y-4">
+      {parts.map((part) => (
+        <p key={part.slice(0, 12)} className="text-base leading-relaxed text-primary/90">
+          {part}
+        </p>
+      ))}
+    </div>
+  );
 }
 
 export function CompatibilityResult({
@@ -139,29 +217,58 @@ export function CompatibilityResult({
         <p className="mt-2 text-4xl" aria-hidden>
           {result.bondEmoji}
         </p>
-        <div className="mt-4 flex justify-center">
-          <BondScoreRing score={result.bondScore} bondLabel={result.bondLabel} />
+
+        <div className="mt-4 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-4">
+          <div className="mb-4 flex justify-center md:col-start-2 md:row-start-1 md:mb-0">
+            <BondScoreRing score={result.bondScore} bondLabel={result.bondLabel} />
+          </div>
+          <div className="grid grid-cols-2 gap-3 md:contents">
+            <BondProfileMiniCard
+              className="md:col-start-1 md:row-start-1"
+              roleLabel={t.petRole}
+              name={result.petName}
+              elementLabel={result.petElementLabel}
+              genderLabel={t.petGender}
+              genderValue={result.petGender === "male" ? t.malePet : t.femalePet}
+              dayPillarLabel={t.dayPillar}
+              dayPillar={result.petDayPillar}
+              elementKey={result.petElement}
+              locale={result.locale}
+            />
+            <BondProfileMiniCard
+              className="md:col-start-3 md:row-start-1"
+              roleLabel={t.ownerRole}
+              name={result.ownerName}
+              elementLabel={result.ownerElementLabel}
+              genderLabel={t.ownerGender}
+              genderValue={result.ownerGender === "male" ? t.maleOwner : t.femaleOwner}
+              dayPillarLabel={t.dayPillar}
+              dayPillar={result.ownerDayPillar}
+              elementKey={result.ownerElement}
+              locale={result.locale}
+            />
+          </div>
         </div>
-        <p className="mt-3 text-sm font-medium text-plum/60">{t.score}</p>
-        <p className="mt-1 text-xl font-extrabold text-primary">{result.bondLabel}</p>
+
+        <p className="mt-4 text-sm font-medium text-plum/60">{t.score}</p>
         <h2 className="mt-4 text-lg font-bold text-plum">{result.headline}</h2>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-plum/80">{result.story}</p>
+        <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-primary/90">{result.story}</p>
       </GlassCard>
 
       <GlassCard variant="solid">
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/45">{t.details}</p>
-        <div className={SAJU_RESULT_DETAIL_GRID_CLASS}>
+        <div className="mt-4 grid grid-cols-1 gap-4">
           {result.details.map((detail, index) => (
             <section
               key={detail.title}
-              className={`rounded-xl border bg-sand/45 px-4 py-3 border-l-4 ${
+              className={`rounded-xl border bg-sand/45 px-5 py-4 border-l-4 ${
                 index % 2 === 0
                   ? `${ELEMENT_ACCENT[result.petElement].cardBorder}`
                   : `${ELEMENT_ACCENT[result.ownerElement].cardBorder}`
               }`}
             >
-              <h3 className="text-sm font-bold text-primary">{detail.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-plum/75">{detail.body}</p>
+              <h3 className="text-base font-bold text-primary">{detail.title}</h3>
+              {renderNumberedDetailBody(detail.body)}
             </section>
           ))}
         </div>
@@ -198,17 +305,19 @@ export function CompatibilityResult({
       >
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary/80">{t.relation}</p>
         <p className="mt-2 text-2xl font-extrabold text-primary">{rel}</p>
-        <p className="mx-auto mt-4 max-w-xl text-sm font-semibold leading-relaxed text-ink">{relationBody}</p>
+        <p className="mx-auto mt-4 max-w-xl text-base font-semibold leading-relaxed text-primary/90">
+          {relationBody}
+        </p>
       </GlassCard>
 
       <GlassCard variant="solid">
         <h3 className="font-extrabold text-primary">{t.tips}</h3>
-        <p className="mt-1 text-sm text-on-surface-variant">{t.tipsIntro}</p>
-        <ul className="mt-4 space-y-3">
+        <p className="mt-1 text-base text-on-surface-variant">{t.tipsIntro}</p>
+        <ul className="mt-4 space-y-4">
           {result.careTips.map((tip, index) => (
             <li
               key={tip}
-              className="rounded-xl border border-mint/35 bg-white px-4 py-3 text-sm leading-relaxed text-ink"
+              className="rounded-xl border border-mint/35 bg-white px-5 py-4 text-base leading-relaxed text-primary/90"
             >
               <span className="mr-2 font-extrabold text-channel-saju">{index + 1}.</span>
               {tip}

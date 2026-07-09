@@ -100,7 +100,7 @@ export function PetMbtiChecklist() {
         </section>
       ) : (
         <p className="text-center text-sm text-plum/70">
-          {isKo ? "15문항을 모두 선택하면 결과가 나옵니다." : "Answer all 15 questions to see results."}
+          {isKo ? "행동 진단을 완료하면 결과가 나옵니다." : "Complete the behavior check to see results."}
         </p>
       )}
 

@@ -1,10 +1,12 @@
 "use client";
 
 import { GlassCard } from "@/components/layout/StitchLayout";
+import { usePetPremiumUnlock } from "@/hooks/usePetPremiumUnlock";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
 import { Link } from "@/i18n/navigation";
 import {
+  buildMbtiStandalonePaymentHref,
   buildPetPremiumPaymentHref,
   type PetPremiumReturnTo,
 } from "@/lib/payments/pet-premium-unlock-client";
@@ -18,7 +20,7 @@ function hrefOrLoginGate(target: string, isGuest: boolean) {
 const UI = {
   ko: {
     packageTitle: "프리미엄 패키지",
-    packageSubtitle: "상세 MBTI · 별자리 · 집사 궁합까지 — 우리 아이 맞춤 케어 가이드 한 번에",
+    packageSubtitle: "집사 궁합 · 별자리 케어 — 우리 아이 맞춤 케어 가이드 한 번에",
     price: "₩4,500",
     priceNote: "1회 결제 · 해당 펫 영구 잠금 해제",
     payCta: "₩4,500 결제하기",
@@ -26,16 +28,18 @@ const UI = {
     included: "포함",
     viewBadge: "보기",
     viewCta: "보기",
-    mbtiCta: "상세 MBTI",
-    mbtiBody: "15문항 성향 분석과 사주×MBTI 맞춤 케어 팁을 확인해 보세요.",
     zodiacCta: "별자리 케어",
     zodiacBody: "별자리 성향에 맞는 오늘의 케어 행동을 이어서 볼 수 있어요.",
     bondCta: "집사 궁합",
     bondBody: "우리가 서로 맞춰가는 케어 방법을 알려드려요.",
+    mbtiStandaloneTitle: "상세 MBTI · ₩1,900",
+    mbtiStandaloneBody: "행동 진단으로 우리 아이 성향 유형과 맞춤 케어 팁",
+    mbtiViewResult: "결과 보기",
+    mbtiDiagnose: "진단하기",
   },
   en: {
     packageTitle: "Premium package",
-    packageSubtitle: "Detailed MBTI, zodiac, and pet–butler bond care guides in one",
+    packageSubtitle: "Pet–butler bond and zodiac care — personalized guides for your pet in one unlock",
     price: "₩4,500",
     priceNote: "One-time payment · Permanent unlock for this pet",
     payCta: "Pay ₩4,500",
@@ -43,12 +47,14 @@ const UI = {
     included: "Included",
     viewBadge: "View",
     viewCta: "View",
-    mbtiCta: "Detailed MBTI",
-    mbtiBody: "15-question temperament plus saju×MBTI personalized care tips.",
     zodiacCta: "Zodiac care",
     zodiacBody: "See today's care actions matched to your pet's zodiac traits.",
     bondCta: "Pet & butler bond",
     bondBody: "Learn how you and your pet can care for each other better.",
+    mbtiStandaloneTitle: "Detailed MBTI · $2.00",
+    mbtiStandaloneBody: "Discover your pet's type and tailored care tips with a behavior check",
+    mbtiViewResult: "View result",
+    mbtiDiagnose: "Start diagnosis",
   },
 } as const;
 
@@ -66,6 +72,7 @@ interface SajuPremiumPackagePanelProps {
     birthDate: string;
     birthTime?: string;
     timezone?: string;
+    sajuResultId?: string | null;
   };
 }
 
@@ -79,22 +86,29 @@ export function SajuPremiumPackagePanel({
   continuation,
 }: SajuPremiumPackagePanelProps) {
   const t = UI[locale];
-  const { ready, configured, isAnonymous } = useSupabaseSession();
+  const { ready, configured, isAnonymous, accessToken } = useSupabaseSession();
   const isGuest = configured && ready && isAnonymous;
+  const mbtiUnlockEnabled = configured && ready && !isAnonymous && Boolean(petId);
+  const { unlocked: mbtiUnlocked, loading: mbtiUnlockLoading } = usePetPremiumUnlock(
+    petId,
+    accessToken,
+    mbtiUnlockEnabled,
+    "mbti"
+  );
 
   const sections = [
     {
-      key: "mbti",
-      returnTo: "mbti" as PetPremiumReturnTo,
-      href: `${premiumHubHref}&view=mbti`,
-      badgeClass: "bg-plum",
-      titleClass: "text-plum",
-      gradient: "from-lavender/80 via-white to-petal/40",
-      borderClass: "border-plum/25",
-      blurClass: "bg-plum/20",
-      buttonClass: "bg-plum hover:brightness-110",
-      title: t.mbtiCta,
-      body: t.mbtiBody,
+      key: "compatibility",
+      returnTo: "compatibility" as PetPremiumReturnTo,
+      href: `${premiumHubHref}&view=compatibility`,
+      badgeClass: "bg-hwa-red",
+      titleClass: "text-[#8b3a3a]",
+      gradient: "from-petal via-white to-element-fire",
+      borderClass: "border-hwa-red/35",
+      blurClass: "bg-hwa-red/20",
+      buttonClass: "bg-[#6f4b8b] hover:bg-[#5f3f78]",
+      title: t.bondCta,
+      body: t.bondBody,
     },
     {
       key: "zodiac",
@@ -109,30 +123,35 @@ export function SajuPremiumPackagePanel({
       title: t.zodiacCta,
       body: t.zodiacBody,
     },
-    {
-      key: "compatibility",
-      returnTo: "compatibility" as PetPremiumReturnTo,
-      href: `${premiumHubHref}&view=compatibility`,
-      badgeClass: "bg-hwa-red",
-      titleClass: "text-[#8b3a3a]",
-      gradient: "from-petal via-white to-element-fire",
-      borderClass: "border-hwa-red/35",
-      blurClass: "bg-hwa-red/20",
-      buttonClass: "bg-[#6f4b8b] hover:bg-[#5f3f78]",
-      title: t.bondCta,
-      body: t.bondBody,
-    },
   ] as const;
 
   const payBase = {
     ...continuation,
     locale,
     petId,
+    sajuResultId: continuation.sajuResultId ?? undefined,
   };
+
+  const mbtiPaymentHref = buildMbtiStandalonePaymentHref(payBase);
+  const mbtiResultHref = `/saju/mbti?${new URLSearchParams({
+    petName: continuation.petName,
+    species: continuation.species,
+    birthDate: continuation.birthDate,
+    locale,
+    ...(continuation.petGender ? { petGender: continuation.petGender } : {}),
+    ...(continuation.birthTime ? { birthTime: continuation.birthTime } : {}),
+    ...(continuation.timezone ? { timezone: continuation.timezone } : {}),
+    ...(petId ? { petId } : {}),
+    ...(continuation.sajuResultId ? { sajuResultId: continuation.sajuResultId } : {}),
+  }).toString()}`;
+  const mbtiCtaHref = mbtiUnlocked
+    ? mbtiResultHref
+    : hrefOrLoginGate(mbtiPaymentHref, isGuest);
+  const mbtiCtaLabel = mbtiUnlocked ? t.mbtiViewResult : t.mbtiDiagnose;
 
   return (
     <GlassCard className="overflow-hidden border-2 border-channel-saju/40 !bg-white p-0 shadow-xl shadow-channel-saju/10">
-      <div className="border-b border-channel-saju/15 bg-gradient-to-br from-lavender/70 via-white to-mint/50 p-6 text-center">
+      <div className="border-b border-channel-saju/15 bg-lavender/40 p-6 text-center">
         <p className="text-xs font-bold uppercase tracking-widest text-channel-saju/70">
           {t.packageTitle}
         </p>
@@ -166,11 +185,8 @@ export function SajuPremiumPackagePanel({
           return (
             <div
               key={section.key}
-              className={`relative overflow-hidden border-t ${section.borderClass} bg-gradient-to-br ${section.gradient} p-6 text-center first:border-t-0`}
+              className={`relative overflow-hidden border-t ${section.borderClass} bg-white p-6 text-center first:border-t-0`}
             >
-              <div
-                className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full ${section.blurClass} blur-3xl`}
-              />
               {unlockLoading ? (
                 <div className="relative mx-auto mb-2 h-5 w-12 animate-pulse rounded-full bg-sand/70" />
               ) : (
@@ -197,6 +213,21 @@ export function SajuPremiumPackagePanel({
             </div>
           );
         })}
+      </div>
+
+      <div className="border-t border-channel-saju/15 bg-sand/30 p-6 text-center">
+        <p className="text-sm font-extrabold text-primary">{t.mbtiStandaloneTitle}</p>
+        <p className="mt-2 text-sm leading-relaxed text-plum/85">{t.mbtiStandaloneBody}</p>
+        {mbtiUnlockEnabled && mbtiUnlockLoading ? (
+          <div className="mx-auto mt-5 h-12 w-full max-w-xs animate-pulse rounded-full bg-sand/70" />
+        ) : (
+          <Link
+            href={mbtiCtaHref}
+            className="mt-5 inline-flex w-full justify-center rounded-full border-2 border-plum/25 bg-white px-4 py-3.5 text-sm font-bold text-plum shadow-sm transition hover:bg-petal/30"
+          >
+            {mbtiCtaLabel}
+          </Link>
+        )}
       </div>
     </GlassCard>
   );

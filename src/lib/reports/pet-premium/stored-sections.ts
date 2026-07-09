@@ -251,7 +251,6 @@ export async function loadPetPremiumStoredSections(
       : "ko");
 
   const completion = getPetPremiumSectionCompletionFromFlags({
-    mbtiDone: Boolean(mbti),
     zodiacDone: Boolean(zodiac),
     compatibilityDone: Boolean(compatibility),
   });
@@ -264,7 +263,7 @@ export async function loadPetPremiumStoredSections(
   return {
     pet,
     locale,
-    dominantElement: resolveDominantElement(latest.mbti, pet),
+    dominantElement: resolveDominantElement(latest.zodiac ?? latest.compatibility, pet),
     mbti,
     zodiac,
     compatibility,
@@ -277,8 +276,8 @@ export function buildPetPremiumPdfPayloadFromStored(
   stored: StoredPremiumSections,
   localeOverride?: Locale
 ): PetPremiumPdfPayload | null {
-  const { pet, mbti, zodiac, compatibility, dominantElement } = stored;
-  if (!mbti || !zodiac || !compatibility) return null;
+  const { pet, zodiac, compatibility, dominantElement } = stored;
+  if (!zodiac || !compatibility) return null;
 
   const locale: Locale =
     localeOverride === "en" ? "en" : localeOverride === "ko" ? "ko" : stored.locale;
@@ -295,7 +294,7 @@ export function buildPetPremiumPdfPayloadFromStored(
     speciesLabel: SPECIES_LABEL[species][isKo ? "ko" : "en"],
     dominantElement,
     dominantElementLabel: formatDominantElementLabel(dominantElement, locale),
-    mbti,
+    mbti: null,
     compatibility,
     zodiac,
   };

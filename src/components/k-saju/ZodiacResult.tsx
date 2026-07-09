@@ -55,6 +55,13 @@ const LABELS = {
   },
 };
 
+const ZODIAC_DETAIL_SURFACES = [
+  "rounded-xl border border-lavender/40 bg-lavender/30 px-4 py-4",
+  "rounded-xl border border-mint/40 bg-mint/30 px-4 py-4",
+  "rounded-xl border border-petal/40 bg-petal/30 px-4 py-4",
+  "rounded-xl border border-channel-saju/30 bg-lavender/20 px-4 py-4",
+] as const;
+
 function LuckStars({ score }: { score: number }) {
   return (
     <span className="text-channel-saju" aria-label={`${score} / 5`}>
@@ -162,10 +169,10 @@ export function ZodiacResult({
       <GlassCard className="border-l-4 border-channel-saju/40">
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-plum/45">{t.deepReading}</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {result.personality.details.map((detail) => (
+          {result.personality.details.map((detail, index) => (
             <section
               key={detail.title}
-              className="rounded-xl border border-outline-variant/25 bg-cream/60 px-4 py-3"
+              className={ZODIAC_DETAIL_SURFACES[index % ZODIAC_DETAIL_SURFACES.length]}
             >
               <h4 className="text-sm font-bold text-primary">{detail.title}</h4>
               <p className="mt-1.5 text-sm leading-relaxed text-plum/75">{detail.body}</p>

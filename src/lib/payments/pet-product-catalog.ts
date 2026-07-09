@@ -15,7 +15,7 @@ export const PET_PRODUCT_AMOUNT_KRW: Record<PetProductCode, number> = {
 };
 
 export const PET_PACKAGE_UNLOCK_CODES = [PET_PREMIUM_PACKAGE_CODE] as const;
-export const PET_MBTI_UNLOCK_CODES = [PET_MBTI_STANDALONE_CODE, PET_PREMIUM_PACKAGE_CODE] as const;
+export const PET_MBTI_UNLOCK_CODES = [PET_MBTI_STANDALONE_CODE] as const;
 
 export type PetUnlockScope = "package" | "mbti";
 
@@ -40,7 +40,7 @@ export function formatPetProductPrice(code: PetProductCode, locale: "ko" | "en")
 }
 
 export const PET_PRODUCT_ORDER_NAME: Record<PetProductCode, string> = {
-  [PET_PREMIUM_PACKAGE_CODE]: "펫 프리미엄 패키지 (MBTI + 별자리 + 궁합)",
+  [PET_PREMIUM_PACKAGE_CODE]: "펫 프리미엄 패키지 (궁합 + 별자리)",
   [PET_MBTI_STANDALONE_CODE]: "펫 MBTI 상세 진단",
 };
 

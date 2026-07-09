@@ -370,7 +370,7 @@ export function MbtiStandaloneFlow() {
 
       {showStored && storedReport ? (
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} flex flex-wrap items-center justify-between gap-3 p-4`}>
             <Link
               href={`/reports/${storedReport.reportId}`}
               className="text-sm font-semibold text-channel-saju underline-offset-2 hover:underline"
@@ -380,16 +380,16 @@ export function MbtiStandaloneFlow() {
             <button
               type="button"
               onClick={handleRetake}
-              className="rounded-full border border-channel-saju/30 px-4 py-2 text-sm font-bold text-channel-saju"
+              className="rounded-full border border-channel-saju/30 bg-white px-4 py-2 text-sm font-bold text-channel-saju"
             >
               {t.retake}
             </button>
           </div>
-          <article className="rounded-[2rem] border border-channel-saju/25 bg-channel-saju/5 p-5 text-center">
+          <article className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-5 text-center`}>
             <p className="text-lg font-extrabold text-primary">
               {t.typeTitle(petName, storedReport.mbtiType)}
             </p>
-            <p className="mt-1 text-sm font-semibold text-plum">
+            <p className="mt-1 text-sm font-semibold text-plum/90">
               {locale === "ko" ? storedReport.mbtiResult.titleKo : storedReport.mbtiResult.titleEn}
             </p>
           </article>
@@ -407,9 +407,9 @@ export function MbtiStandaloneFlow() {
 
       {!showStored && mbtiType && mbtiResult && mbtiInsight ? (
         <div className="space-y-4">
-          <article className="rounded-[2rem] border border-channel-saju/25 bg-channel-saju/5 p-5 text-center">
+          <article className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-5 text-center`}>
             <p className="text-lg font-extrabold text-primary">{t.typeTitle(petName, mbtiType)}</p>
-            <p className="mt-1 text-sm font-semibold text-plum">
+            <p className="mt-1 text-sm font-semibold text-plum/90">
               {locale === "ko" ? mbtiResult.titleKo : mbtiResult.titleEn}
             </p>
           </article>
@@ -417,7 +417,7 @@ export function MbtiStandaloneFlow() {
           <button
             type="button"
             onClick={handleRetake}
-            className="w-full rounded-full border border-channel-saju/30 py-3 text-sm font-bold text-channel-saju"
+            className={`${COMMUNITY_SOLID_SURFACE_CLASS} w-full py-3 text-sm font-bold text-channel-saju`}
           >
             {t.retake}
           </button>

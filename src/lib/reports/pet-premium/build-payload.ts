@@ -1,16 +1,9 @@
-import {
-  buildPetMbtiResult,
-  buildPetMbtiResultFromType,
-  isPetMbtiComplete,
-  scoresFromAnswers,
-} from "@/lib/pet/mbti-inference";
 import { computeCompatibility } from "@/lib/saju/compatibility/engine";
 import { computePetSajuBundle } from "@/lib/saju/engine";
 import { dominantElementLabel as formatDominantElementLabel } from "@/lib/saju/pet-lucky-scores";
 import {
   enrichCompatibilityWithPremiumLlm,
   enrichZodiacWithPremiumLlm,
-  generatePetMbtiPremiumInsight,
 } from "@/lib/saju/llm/pet-premium/orchestrator";
 import { getTodayKstDateString } from "@/lib/saju/zodiac/fortunes";
 import { computeZodiacFortune } from "@/lib/saju/zodiac/engine";
@@ -23,15 +16,6 @@ const SPECIES_LABEL: Record<Species, { ko: string; en: string }> = {
   reptile: { ko: "렙타일", en: "Reptile" },
   other: { ko: "기타", en: "Other" },
 };
-
-function parseMbtiAnswers(raw: Record<string, string> | undefined): Record<string, string> | null {
-  if (!raw || typeof raw !== "object") return null;
-  const answers: Record<string, string> = {};
-  for (const [key, value] of Object.entries(raw)) {
-    if (typeof value === "string" && value.trim()) answers[key] = value.trim();
-  }
-  return isPetMbtiComplete(answers) ? answers : null;
-}
 
 export async function buildPetPremiumPdfPayload(
   input: PetPremiumPdfRequest
@@ -60,32 +44,6 @@ export async function buildPetPremiumPdfPayload(
   const dominantElement = mapping.dominantElement as import("@/lib/saju/types").ElementKey;
   const dominantElementLabelStr = formatDominantElementLabel(dominantElement, locale);
   const speciesLabel = SPECIES_LABEL[input.species][isKo ? "ko" : "en"];
-
-  let mbti: PetPremiumPdfPayload["mbti"] = null;
-  const mbtiType = String(input.mbtiType ?? "")
-    .trim()
-    .toUpperCase();
-  if (/^[EI][SN][TF][JP]$/.test(mbtiType)) {
-    const mbtiAnswers = parseMbtiAnswers(input.mbtiAnswers);
-    const mbtiResult = mbtiAnswers
-      ? buildPetMbtiResult(scoresFromAnswers(mbtiAnswers))
-      : buildPetMbtiResultFromType(mbtiType);
-    if (mbtiResult && mbtiResult.type === mbtiType) {
-      mbti = await generatePetMbtiPremiumInsight({
-        petName,
-        species: input.species,
-        petGender: input.petGender,
-        birthDate: input.birthDate,
-        birthTime,
-        birthTimeUnknown,
-        timezone,
-        locale,
-        mbti: mbtiResult,
-        petId: input.petId ?? null,
-        mbtiAnswers: mbtiAnswers ?? undefined,
-      });
-    }
-  }
 
   let compatibility: PetPremiumPdfPayload["compatibility"] = null;
   if (
@@ -149,7 +107,7 @@ export async function buildPetPremiumPdfPayload(
     speciesLabel,
     dominantElement,
     dominantElementLabel: dominantElementLabelStr,
-    mbti,
+    mbti: null,
     compatibility,
     zodiac,
   };

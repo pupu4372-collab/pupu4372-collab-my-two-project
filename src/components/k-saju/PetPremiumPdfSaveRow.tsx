@@ -1,31 +1,32 @@
 "use client";
 
 import type { PetPremiumSectionCompletion } from "@/lib/reports/pet-premium/section-completion";
+import { PET_PREMIUM_SECTION_COUNT } from "@/lib/reports/pet-premium/section-completion";
 import type { Locale } from "@/lib/saju/types";
 import { useState } from "react";
 
 const COPY = {
   ko: {
-    intro: "세 가지 프리미엄 케어 가이드를 한 권의 PDF로 저장해 보세요.",
-    introReady: "세 가지 케어 가이드를 한 권의 PDF로 저장할 수 있어요.",
+    intro: "궁합·별자리 프리미엄 케어 가이드를 한 권의 PDF로 저장해 보세요.",
+    introReady: "궁합·별자리 케어 가이드를 한 권의 PDF로 저장할 수 있어요.",
     progress: (done: number, total: number) =>
       `${done}/${total} 완료 — 모두 완료하면 저장할 수 있어요`,
     button: "PDF로 저장하기",
     loading: "PDF 만드는 중…",
     fail: "PDF 저장에 실패했어요. 잠시 후 다시 시도해 주세요.",
     premiumRequired: "프리미엄 결제가 필요해요.",
-    sectionsIncomplete: "세 가지 항목을 모두 완료한 뒤 저장해 주세요.",
+    sectionsIncomplete: "궁합·별자리 항목을 모두 완료한 뒤 저장해 주세요.",
   },
   en: {
-    intro: "Save all three premium care guides as one PDF.",
-    introReady: "All three care guides are ready to save as one PDF.",
+    intro: "Save bond and zodiac premium care guides as one PDF.",
+    introReady: "Bond and zodiac care guides are ready to save as one PDF.",
     progress: (done: number, total: number) =>
       `${done}/${total} complete — finish all sections to save`,
     button: "Save as PDF",
     loading: "Creating PDF…",
     fail: "Could not save the PDF. Please try again.",
     premiumRequired: "Premium unlock required.",
-    sectionsIncomplete: "Complete all three sections before saving.",
+    sectionsIncomplete: "Complete bond and zodiac sections before saving.",
   },
 } as const;
 
@@ -106,7 +107,7 @@ export function PetPremiumPdfSaveRow({ locale, petId, accessToken, completion }:
       </p>
       {!allComplete ? (
         <p className="mt-2 text-center text-xs font-semibold text-plum/75">
-          {t.progress(completion.completedCount, 3)}
+          {t.progress(completion.completedCount, PET_PREMIUM_SECTION_COUNT)}
         </p>
       ) : null}
       <div className="mt-4">

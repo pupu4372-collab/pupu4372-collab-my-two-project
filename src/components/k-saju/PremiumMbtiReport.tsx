@@ -37,10 +37,10 @@ const AXIS_LABELS = {
 } as const;
 
 const AXIS_COLORS = {
-  EI: { left: "bg-channel-saju", right: "bg-plum/50" },
-  SN: { left: "bg-su-blue", right: "bg-mint/80" },
+  EI: { left: "bg-channel-saju", right: "bg-lavender" },
+  SN: { left: "bg-su-blue", right: "bg-mint" },
   TF: { left: "bg-geum-silver", right: "bg-petal" },
-  JP: { left: "bg-to-yellow", right: "bg-hwa-red/70" },
+  JP: { left: "bg-to-yellow", right: "bg-hwa-red/80" },
 } as const;
 
 function splitBodyWithBoldLast(text: string) {

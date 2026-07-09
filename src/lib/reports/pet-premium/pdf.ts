@@ -13,7 +13,6 @@ import {
   coverTopAccentBar,
   elementHighlightBox,
   elementPill,
-  mbtiAxisBarColor,
   pillWithBody,
   PET_PREMIUM_LABEL_THEME,
   subheadingPill,
@@ -44,38 +43,6 @@ function elementBar(percent: number, color: string, maxWidth = 200): Content {
       { type: "rect", x: 0, y: 0, w: (maxWidth * clamped) / 100, h: 10, color },
     ],
     margin: [0, 2, 0, 6],
-  };
-}
-
-function mbtiAxisBar(
-  leftLabel: string,
-  rightLabel: string,
-  leftPct: number,
-  rightPct: number
-): Content {
-  const leftDominant = leftPct >= rightPct;
-  const barColor = mbtiAxisBarColor(leftDominant);
-  return {
-    stack: [
-      {
-        columns: [
-          {
-            text: pdfSafeText(`${leftLabel} ${leftPct}%`),
-            width: "*",
-            style: leftDominant ? "axisLabelBold" : "axisLabel",
-          },
-          {
-            text: pdfSafeText(`${rightLabel} ${rightPct}%`),
-            width: "*",
-            alignment: "right",
-            style: !leftDominant ? "axisLabelBold" : "axisLabel",
-          },
-        ],
-        margin: [0, 0, 0, 2],
-      },
-      elementBar(leftDominant ? leftPct : rightPct, barColor, 220),
-    ],
-    margin: [0, 0, 0, 8],
   };
 }
 
@@ -133,7 +100,7 @@ function buildCover(payload: PetPremiumPdfPayload): Content[] {
             { text: pdfSafeText(issued), style: "body", margin: [0, 2, 0, 10] },
             { text: isKo ? "포함 섹션" : "Sections", style: "labelCaps" },
             {
-              text: isKo ? "MBTI · 궁합 · 별자리" : "MBTI · Bond · Zodiac",
+              text: isKo ? "궁합 · 별자리" : "Bond · Zodiac",
               style: "body",
               color: accent,
               margin: [0, 2, 0, 0],
@@ -145,76 +112,12 @@ function buildCover(payload: PetPremiumPdfPayload): Content[] {
     },
     {
       text: isKo
-        ? "상세 MBTI · 집사 궁합 · 별자리 케어를 한 권에 담았어요."
-        : "Detailed MBTI, pet–butler bond, and zodiac care in one guide.",
+        ? "집사 궁합 · 별자리 케어를 한 권에 담았어요."
+        : "Pet–butler bond and zodiac care in one guide.",
       style: "coverMotto",
       margin: [0, 8, 0, 0],
     },
   ];
-}
-
-function buildMbtiSection(payload: PetPremiumPdfPayload): Content[] {
-  const isKo = payload.locale === "ko";
-  const mbti = payload.mbti;
-  if (!mbti) {
-    return [
-      chapterBanner("mbti", 1, isKo, true),
-      paragraph(
-        isKo
-          ? "MBTI 설문을 완료하면 이 섹션이 채워집니다."
-          : "Complete the MBTI survey to fill this section."
-      ),
-    ];
-  }
-
-  const sections: { key: keyof typeof mbti; titleKo: string; titleEn: string }[] = [
-    { key: "personalityBlend", titleKo: "성격 융합", titleEn: "Personality blend" },
-    { key: "sajuCombo", titleKo: "사주 × MBTI", titleEn: "Chart × MBTI" },
-    { key: "butlerFit", titleKo: "집사와의 궁합", titleEn: "Bond with butler" },
-    { key: "health", titleKo: "건강·스트레스", titleEn: "Health & stress" },
-    { key: "dailyCare", titleKo: "일상 케어", titleEn: "Daily care" },
-  ];
-
-  const p = mbti.axisPercents;
-  const axisLabels = isKo
-    ? {
-        EI: ["E 외향", "I 내향"],
-        SN: ["S 감각", "N 직관"],
-        TF: ["T 사고", "F 감정"],
-        JP: ["J 판단", "P 인식"],
-      }
-    : {
-        EI: ["E Extraversion", "I Introversion"],
-        SN: ["S Sensing", "N Intuition"],
-        TF: ["T Thinking", "F Feeling"],
-        JP: ["J Judging", "P Perceiving"],
-      };
-
-  const label = PET_PREMIUM_LABEL_THEME;
-
-  const blocks: Content[] = [
-    chapterBanner("mbti", 1, isKo, true),
-    subheadingPill(`${mbti.mbtiType} · ${isKo ? "4축 성향" : "Four-axis tendency"}`, label.accent, label.soft),
-    mbtiAxisBar(axisLabels.EI[0], axisLabels.EI[1], p.EI.E, p.EI.I),
-    mbtiAxisBar(axisLabels.SN[0], axisLabels.SN[1], p.SN.S, p.SN.N),
-    mbtiAxisBar(axisLabels.TF[0], axisLabels.TF[1], p.TF.T, p.TF.F),
-    mbtiAxisBar(axisLabels.JP[0], axisLabels.JP[1], p.JP.J, p.JP.P),
-  ];
-
-  for (const section of sections) {
-    const body = mbti[section.key];
-    if (typeof body !== "string") continue;
-    blocks.push(
-      pillWithBody(
-        isKo ? section.titleKo : section.titleEn,
-        pdfSafeText(body),
-        label.accent,
-        label.soft
-      )
-    );
-  }
-
-  return blocks;
 }
 
 function buildCompatibilitySection(payload: PetPremiumPdfPayload): Content[] {
@@ -223,7 +126,7 @@ function buildCompatibilitySection(payload: PetPremiumPdfPayload): Content[] {
   const c = payload.compatibility;
   if (!c) {
     return [
-      chapterBanner("compatibility", 2, isKo, false),
+      chapterBanner("compatibility", 1, isKo, true),
       paragraph(
         isKo
           ? "집사 생년월일을 입력하면 궁합 섹션이 포함됩니다."
@@ -235,7 +138,7 @@ function buildCompatibilitySection(payload: PetPremiumPdfPayload): Content[] {
   const label = PET_PREMIUM_LABEL_THEME;
   const petEl = c.petElement;
   const blocks: Content[] = [
-    chapterBanner("compatibility", 2, isKo, false),
+    chapterBanner("compatibility", 1, isKo, true),
     {
       columns: [
         bondScoreGauge(c.bondScore, pdfSafeText(c.bondLabel)),
@@ -298,7 +201,7 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
   const z = payload.zodiac;
   if (!z) {
     return [
-      chapterBanner("zodiac", 3, isKo, false),
+      chapterBanner("zodiac", 2, isKo, false),
       paragraph(isKo ? "별자리 데이터를 불러올 수 없습니다." : "Zodiac data unavailable."),
     ];
   }
@@ -306,7 +209,7 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
   const label = PET_PREMIUM_LABEL_THEME;
   const el = z.elementAffinity;
   const blocks: Content[] = [
-    chapterBanner("zodiac", 3, isKo, false),
+    chapterBanner("zodiac", 2, isKo, false),
     pillWithBody(pdfSafeText(z.personality.headline), pdfSafeText(z.personality.story), label.accent, label.soft),
     elementPill(
       isKo ? `오행 바이브 · ${z.elementLabel.hangul}(${z.elementLabel.hanja})` : `Element · ${z.elementLabel.meaning}`,
@@ -352,7 +255,6 @@ function buildDocumentDefinition(payload: PetPremiumPdfPayload): TDocumentDefini
 
   const content: Content[] = [
     ...buildCover(payload),
-    ...buildMbtiSection(payload),
     ...buildCompatibilitySection(payload),
     ...buildZodiacSection(payload),
     paragraph(

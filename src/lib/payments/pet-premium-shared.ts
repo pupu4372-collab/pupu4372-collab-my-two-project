@@ -10,8 +10,8 @@ export const PET_PREMIUM_PRODUCT_LABELS = {
 } as const;
 
 export const PET_PREMIUM_INCLUDES = {
-  ko: ["상세 MBTI 케어", "별자리 케어 가이드", "펫·집사 궁합 케어"],
-  en: ["Detailed MBTI care", "Zodiac care guide", "Pet & butler bond care"],
+  ko: ["집사 궁합 케어", "별자리 케어 가이드"],
+  en: ["Pet & butler bond care", "Zodiac care guide"],
 } as const;
 
 export type PetPremiumPaymentRecord = {

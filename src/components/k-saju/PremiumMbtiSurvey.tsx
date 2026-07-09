@@ -1,5 +1,6 @@
 "use client";
 
+import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { PET_MBTI_QUESTIONS } from "@/lib/pet/mbti-inference";
 
 interface PremiumMbtiSurveyProps {
@@ -14,14 +15,16 @@ export function PremiumMbtiSurvey({ locale, answers, onSelect }: PremiumMbtiSurv
 
   return (
     <div className="space-y-4">
-      <p className="text-sm leading-relaxed text-on-surface-variant">
-        {isKo
-          ? "15문항을 모두 선택하면 맞춤 MBTI 케어 가이드를 볼 수 있어요."
-          : "Answer all 15 questions to unlock your personalized MBTI care guide."}
-      </p>
-      <p className="text-xs font-semibold text-channel-saju">
-        {isKo ? `${answered} / ${PET_MBTI_QUESTIONS.length} 완료` : `${answered} / ${PET_MBTI_QUESTIONS.length} done`}
-      </p>
+      <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-5`}>
+        <p className="text-sm leading-relaxed text-plum/90">
+          {isKo
+            ? "행동 진단을 완료하면 맞춤 MBTI 케어 가이드를 볼 수 있어요."
+            : "Complete the behavior check to unlock your personalized MBTI care guide."}
+        </p>
+        <p className="mt-2 text-xs font-semibold text-channel-saju">
+          {isKo ? `${answered} / ${PET_MBTI_QUESTIONS.length} 완료` : `${answered} / ${PET_MBTI_QUESTIONS.length} done`}
+        </p>
+      </div>
       {PET_MBTI_QUESTIONS.map((question, index) => (
         <article
           key={question.id}
