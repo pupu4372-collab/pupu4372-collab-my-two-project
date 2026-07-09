@@ -1,7 +1,6 @@
 "use client";
 
 import type { PetDailyFortune, PetFortunePetMeta } from "@/lib/saju/pet-daily-fortune";
-import { ELEMENT_META, ELEMENT_ORDER } from "@/lib/saju/elements";
 import { elementBarHex } from "@/lib/saju/element-colors";
 import {
   buildPhotoInstaCardContent,
@@ -17,6 +16,10 @@ type Props = {
   onPhotoReady?: () => void;
 };
 
+function findFortuneCategory(fortune: PetDailyFortune, labelKo: string, labelEn: string) {
+  return fortune.categories.find((c) => c.label === labelKo || c.label === labelEn);
+}
+
 export const DailyFortuneInstaCardWithPhoto = forwardRef<HTMLDivElement, Props>(
   function DailyFortuneInstaCardWithPhoto({ pet, fortune, isKo, photoUrl, onPhotoReady }, ref) {
     const content = useMemo(
@@ -26,18 +29,27 @@ export const DailyFortuneInstaCardWithPhoto = forwardRef<HTMLDivElement, Props>(
     const accent = elementBarHex(pet.dominantElement);
     const [displaySrc, setDisplaySrc] = useState<string | null>(null);
 
-    const elementBars = useMemo(() => {
-      const byKey = new Map((pet.elements ?? []).map((el) => [el.key, el.percent]));
-      return ELEMENT_ORDER.map((key) => {
-        const meta = ELEMENT_META[key];
-        return {
-          key,
-          label: isKo ? `${meta.hangul}(${meta.hanja})` : `${meta.romanized}(${meta.hanja})`,
-          percent: byKey.get(key) ?? 0,
-          color: elementBarHex(key),
-        };
-      });
-    }, [isKo, pet.elements]);
+    const statBars = useMemo(() => {
+      const health = findFortuneCategory(fortune, "건강운", "Health");
+      const activity = findFortuneCategory(fortune, "활동운", "Activity");
+      const appetite = findFortuneCategory(fortune, "식욕운", "Appetite");
+      const sleep = findFortuneCategory(fortune, "수면운", "Sleep");
+
+      return [
+        health
+          ? { key: "health", label: isKo ? "건강" : "Health", score: health.score, color: health.color }
+          : null,
+        activity
+          ? { key: "activity", label: isKo ? "활력" : "Vitality", score: activity.score, color: activity.color }
+          : null,
+        appetite
+          ? { key: "appetite", label: isKo ? "기쁨" : "Joy", score: appetite.score, color: appetite.color }
+          : null,
+        sleep
+          ? { key: "sleep", label: isKo ? "행운" : "Luck", score: sleep.score, color: sleep.color }
+          : null,
+      ].filter((item): item is NonNullable<typeof item> => item !== null);
+    }, [fortune, isKo]);
 
     useEffect(() => {
       let cancelled = false;
@@ -84,16 +96,16 @@ export const DailyFortuneInstaCardWithPhoto = forwardRef<HTMLDivElement, Props>(
             </div>
 
             <div className="daily-fortune-insta-card--photo__elements">
-              {elementBars.map((el) => (
-                <div key={el.key} className="daily-fortune-insta-card--photo__element-row">
+              {statBars.map((stat) => (
+                <div key={stat.key} className="daily-fortune-insta-card--photo__element-row">
                   <div className="daily-fortune-insta-card--photo__element-head">
-                    <span className="daily-fortune-insta-card--photo__element-label">{el.label}</span>
-                    <span className="daily-fortune-insta-card--photo__element-pct">{el.percent}%</span>
+                    <span className="daily-fortune-insta-card--photo__element-label">{stat.label}</span>
+                    <span className="daily-fortune-insta-card--photo__element-pct">{stat.score}%</span>
                   </div>
                   <div className="daily-fortune-insta-card--photo__element-track">
                     <div
                       className="daily-fortune-insta-card--photo__element-fill"
-                      style={{ width: `${Math.max(4, el.percent)}%`, backgroundColor: el.color }}
+                      style={{ width: `${Math.max(4, stat.score)}%`, backgroundColor: stat.color }}
                     />
                   </div>
                 </div>
