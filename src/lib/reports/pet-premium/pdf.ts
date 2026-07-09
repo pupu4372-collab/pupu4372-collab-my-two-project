@@ -1,26 +1,27 @@
 import pdfMake from "pdfmake";
 import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
-import { ELEMENT_TRACK_COLOR } from "@/lib/reports/human-premium/element-display";
 import { ensurePdfFontsAsync, PDF_FONT_FAMILY } from "@/lib/reports/human-premium/pdf-fonts";
-import { elementBarHex, elementSoftHex, PET_PREMIUM_SECTION_THEME } from "@/lib/saju/element-colors";
-import type { ElementRelation } from "@/lib/saju/compatibility/elements-cycle";
 import type { PetPremiumPdfPayload } from "./types";
 import {
   bondScoreGauge,
+  careTipCards,
   chapterBanner,
   compatibilityDetailCards,
   coverBackgroundShapes,
   coverTopAccentBar,
   elementHighlightBox,
   elementPill,
-  pillWithBody,
+  PAGE_HEIGHT,
+  PAGE_MARGIN_X,
+  PDF_INK,
+  PDF_MUTED,
+  PDF_PAGE_BG,
+  PDF_PRIMARY,
   PET_PREMIUM_LABEL_THEME,
-  subheadingPill,
+  PET_PREMIUM_SECTION_THEME,
+  pillWithBody,
+  zodiacDetailCards,
 } from "./pdf-layout";
-
-const JIG_HANJI = "#F4F1EA";
-const JIG_INK = "#222222";
-const JIG_MUTED = "#747878";
 
 function pdfSafeText(value: string): string {
   return value
@@ -32,18 +33,7 @@ function pdfSafeText(value: string): string {
 }
 
 function paragraph(text: string, style: string = "body"): Content {
-  return { text: pdfSafeText(text), style, margin: [0, 0, 0, 8] };
-}
-
-function elementBar(percent: number, color: string, maxWidth = 200): Content {
-  const clamped = Math.max(0, Math.min(100, percent));
-  return {
-    canvas: [
-      { type: "rect", x: 0, y: 0, w: maxWidth, h: 10, color: ELEMENT_TRACK_COLOR },
-      { type: "rect", x: 0, y: 0, w: (maxWidth * clamped) / 100, h: 10, color },
-    ],
-    margin: [0, 2, 0, 6],
-  };
+  return { text: pdfSafeText(text), style, margin: [0, 0, 0, 10] };
 }
 
 function formatKstIssuedDate(dateKst: string, isKo: boolean): string {
@@ -57,16 +47,8 @@ function formatKstIssuedDate(dateKst: string, isKo: boolean): string {
   });
 }
 
-function relationTint(relation: ElementRelation): string {
-  if (relation.includes("nourishes")) return elementSoftHex("wood");
-  if (relation.includes("controls")) return elementSoftHex("earth");
-  return elementSoftHex("metal");
-}
-
 function buildCover(payload: PetPremiumPdfPayload): Content[] {
   const isKo = payload.locale === "ko";
-  const accent = elementBarHex(payload.dominantElement);
-  const soft = elementSoftHex(payload.dominantElement);
   const title = isKo
     ? `${payload.petName} 프리미엄 케어 가이드`
     : `${payload.petName} Premium Care Guide`;
@@ -74,48 +56,60 @@ function buildCover(payload: PetPremiumPdfPayload): Content[] {
 
   return [
     coverBackgroundShapes(),
-    coverTopAccentBar(accent),
-    { text: "K-Saju Pet", style: "coverBrand", color: accent, margin: [0, 8, 0, 6] },
-    { text: pdfSafeText(title), style: "reportTypeTitle", margin: [0, 0, 0, 20] },
-    elementPill(
-      isKo ? `대표 오행 · ${payload.dominantElementLabel}` : `Dominant · ${payload.dominantElementLabel}`,
-      payload.dominantElement,
-      [0, 0, 0, 16]
-    ),
     {
+      margin: [0, 96, 0, 0],
+      stack: [
+        coverTopAccentBar(PDF_PRIMARY),
+        { text: "K-Saju Pet", style: "coverBrand", alignment: "center", margin: [0, 28, 0, 10] },
+        { text: pdfSafeText(title), style: "reportTypeTitle", alignment: "center", margin: [0, 0, 0, 28] },
+        {
+          columns: [
+            {
+              width: "*",
+              stack: [
+                { text: isKo ? "이름" : "Name", style: "labelCaps", alignment: "center" },
+                { text: pdfSafeText(payload.petName), style: "personName", alignment: "center", margin: [0, 4, 0, 16] },
+                { text: isKo ? "종" : "Species", style: "labelCaps", alignment: "center" },
+                { text: pdfSafeText(payload.speciesLabel), style: "body", alignment: "center", margin: [0, 4, 0, 0] },
+              ],
+            },
+          ],
+          margin: [0, 0, 0, 20],
+        },
+        {
+          text: isKo
+            ? "집사 궁합 · 별자리 케어를 한 권에 담았어요."
+            : "Pet–butler bond and zodiac care in one guide.",
+          style: "coverMotto",
+          alignment: "center",
+          margin: [0, 12, 0, 0],
+        },
+      ],
+    },
+    {
+      absolutePosition: { x: PAGE_MARGIN_X, y: PAGE_HEIGHT - 108 },
       columns: [
         {
           width: "*",
           stack: [
-            { text: isKo ? "이름" : "Name", style: "labelCaps" },
-            { text: pdfSafeText(payload.petName), style: "personName", margin: [0, 2, 0, 10] },
-            { text: isKo ? "종" : "Species", style: "labelCaps" },
-            { text: pdfSafeText(payload.speciesLabel), style: "body", margin: [0, 2, 0, 10] },
+            { text: isKo ? "발급일 (KST)" : "Issued (KST)", style: "labelCaps" },
+            { text: pdfSafeText(issued), style: "body", margin: [0, 4, 0, 0] },
           ],
         },
         {
-          width: "*",
+          width: "auto",
           stack: [
-            { text: isKo ? "발급일 (KST)" : "Issued (KST)", style: "labelCaps" },
-            { text: pdfSafeText(issued), style: "body", margin: [0, 2, 0, 10] },
-            { text: isKo ? "포함 섹션" : "Sections", style: "labelCaps" },
-            {
-              text: isKo ? "궁합 · 별자리" : "Bond · Zodiac",
-              style: "body",
-              color: accent,
-              margin: [0, 2, 0, 0],
-            },
+            elementPill(
+              isKo
+                ? `대표 오행 · ${payload.dominantElementLabel}`
+                : `Dominant · ${payload.dominantElementLabel}`,
+              payload.dominantElement,
+              [0, 0, 0, 0]
+            ),
           ],
         },
       ],
-      margin: [0, 0, 0, 20],
-    },
-    {
-      text: isKo
-        ? "집사 궁합 · 별자리 케어를 한 권에 담았어요."
-        : "Pet–butler bond and zodiac care in one guide.",
-      style: "coverMotto",
-      margin: [0, 8, 0, 0],
+      columnGap: 16,
     },
   ];
 }
@@ -140,6 +134,7 @@ function buildCompatibilitySection(payload: PetPremiumPdfPayload): Content[] {
   const blocks: Content[] = [
     chapterBanner("compatibility", 1, isKo, true),
     {
+      unbreakable: true,
       columns: [
         bondScoreGauge(c.bondScore, pdfSafeText(c.bondLabel)),
         {
@@ -149,8 +144,8 @@ function buildCompatibilitySection(payload: PetPremiumPdfPayload): Content[] {
           ],
         },
       ],
-      columnGap: 16,
-      margin: [0, 0, 0, 14],
+      columnGap: 18,
+      margin: [0, 0, 0, 24],
     },
   ];
 
@@ -166,17 +161,15 @@ function buildCompatibilitySection(payload: PetPremiumPdfPayload): Content[] {
     text: isKo ? "오행 관계" : "Element relation",
     style: "sectionHeading",
   });
-  blocks.push(
-    elementHighlightBox(pdfSafeText(c.relationDescription ?? c.story), petEl)
-  );
+  blocks.push(elementHighlightBox(pdfSafeText(c.relationDescription ?? c.story), 0));
 
   if (c.petElementNote) {
     blocks.push(
       pillWithBody(
         isKo ? "펫 오행 포인트" : "Pet element note",
         pdfSafeText(c.petElementNote),
-        elementBarHex(petEl),
-        elementSoftHex(petEl)
+        PDF_PRIMARY,
+        "#E1F5F0"
       )
     );
   }
@@ -186,11 +179,7 @@ function buildCompatibilitySection(payload: PetPremiumPdfPayload): Content[] {
       text: isKo ? "케어 팁" : "Care tips",
       style: "sectionHeading",
     });
-    blocks.push({
-      ul: c.careTips.map((tip) => pdfSafeText(tip)),
-      style: "body",
-      margin: [8, 0, 0, 10],
-    });
+    blocks.push(careTipCards(c.careTips.map((tip) => pdfSafeText(tip))));
   }
 
   return blocks;
@@ -214,7 +203,7 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
     elementPill(
       isKo ? `오행 바이브 · ${z.elementLabel.hangul}(${z.elementLabel.hanja})` : `Element · ${z.elementLabel.meaning}`,
       el,
-      [0, 4, 0, 12]
+      [0, 8, 0, 16]
     ),
   ];
 
@@ -223,11 +212,10 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
       text: isKo ? "상세 해석" : "Detailed reading",
       style: "sectionHeading",
     });
-    for (const detail of z.personality.details) {
-      blocks.push(
-        pillWithBody(pdfSafeText(detail.title), pdfSafeText(detail.body), label.accent, label.soft)
-      );
-    }
+    blocks.push(zodiacDetailCards(z.personality.details.map((detail) => ({
+      title: pdfSafeText(detail.title),
+      body: pdfSafeText(detail.body),
+    }))));
   }
 
   blocks.push({
@@ -236,15 +224,27 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
       : `Today's fortune (as of issue date · ${payload.issuedDateKst})`,
     style: "sectionHeading",
   });
-  blocks.push(elementHighlightBox(pdfSafeText(z.daily.today), el));
+  blocks.push(elementHighlightBox(pdfSafeText(z.daily.today), 1));
   blocks.push(
-    paragraph(
+    elementHighlightBox(
       isKo
-        ? `럭키 간식: ${z.daily.luckySnack} · 주의: ${z.daily.caution}`
-        : `Lucky snack: ${z.daily.luckySnack} · Caution: ${z.daily.caution}`
+        ? `럭키 간식: ${z.daily.luckySnack}`
+        : `Lucky snack: ${z.daily.luckySnack}`,
+      2
     )
   );
-  blocks.push(paragraph(isKo ? `집사 팁: ${z.daily.ownerTip}` : `Butler tip: ${z.daily.ownerTip}`));
+  blocks.push(
+    elementHighlightBox(
+      isKo ? `주의: ${z.daily.caution}` : `Caution: ${z.daily.caution}`,
+      3
+    )
+  );
+  blocks.push(
+    elementHighlightBox(
+      isKo ? `집사 팁: ${z.daily.ownerTip}` : `Butler tip: ${z.daily.ownerTip}`,
+      0
+    )
+  );
 
   return blocks;
 }
@@ -272,24 +272,25 @@ function buildDocumentDefinition(payload: PetPremiumPdfPayload): TDocumentDefini
       subject: pdfSafeText(payload.petName),
     },
     pageSize: "A4",
-    pageMargins: [56, 56, 56, 68],
+    pageMargins: [PAGE_MARGIN_X, PAGE_MARGIN_X, PAGE_MARGIN_X, 60],
     defaultStyle: {
       font: PDF_FONT_FAMILY,
       fontSize: 10.5,
-      color: JIG_INK,
-      lineHeight: 1.45,
+      color: PDF_INK,
+      lineHeight: 1.5,
     },
     styles: {
-      coverBrand: { fontSize: 20, bold: true, color: JIG_INK },
-      reportTypeTitle: { fontSize: 22, bold: true, color: JIG_INK },
-      coverMotto: { fontSize: 11, color: JIG_MUTED, lineHeight: 1.5 },
-      labelCaps: { fontSize: 8, bold: true, color: JIG_MUTED },
-      personName: { fontSize: 14, bold: true, color: JIG_INK },
-      sectionHeading: { fontSize: 13, bold: true, color: JIG_INK, margin: [0, 10, 0, 4] },
-      body: { fontSize: 10.5, color: JIG_INK },
-      axisLabel: { fontSize: 9.5, color: JIG_MUTED },
-      axisLabelBold: { fontSize: 9.5, bold: true, color: JIG_INK },
-      disclaimer: { fontSize: 9.5, color: JIG_MUTED, alignment: "center" },
+      coverBrand: { fontSize: 18, bold: true, color: PDF_PRIMARY },
+      reportTypeTitle: { fontSize: 22, bold: true, color: PDF_INK },
+      coverMotto: { fontSize: 11, color: PDF_MUTED, lineHeight: 1.5 },
+      labelCaps: { fontSize: 8, bold: true, color: PDF_MUTED },
+      personName: { fontSize: 15, bold: true, color: PDF_INK },
+      sectionTitle: { fontSize: 16, bold: true, color: PDF_INK },
+      sectionHeading: { fontSize: 13, bold: true, color: PDF_PRIMARY, margin: [0, 8, 0, 8] },
+      cardTitle: { fontSize: 11.5, bold: true, color: PDF_INK },
+      cardBody: { fontSize: 10.5, color: PDF_INK, lineHeight: 1.5 },
+      body: { fontSize: 10.5, color: PDF_INK, lineHeight: 1.5 },
+      disclaimer: { fontSize: 9.5, color: PDF_MUTED, alignment: "center", lineHeight: 1.5 },
     },
     background(_currentPage, pageSize) {
       return {
@@ -300,34 +301,34 @@ function buildDocumentDefinition(payload: PetPremiumPdfPayload): TDocumentDefini
             y: 0,
             w: pageSize.width,
             h: pageSize.height,
-            color: JIG_HANJI,
+            color: PDF_PAGE_BG,
           },
         ],
       };
     },
     footer(currentPage) {
       return {
-        margin: [56, 12, 56, 32],
+        margin: [PAGE_MARGIN_X, 12, PAGE_MARGIN_X, 28],
         columns: [
           {
             text: footerLabel,
             alignment: "left",
             fontSize: 8,
-            color: JIG_MUTED,
+            color: PDF_MUTED,
             width: "*",
           },
           {
             text: "·",
             alignment: "center",
             fontSize: 8,
-            color: JIG_MUTED,
+            color: PDF_MUTED,
             width: 16,
           },
           {
             text: String(currentPage),
             alignment: "right",
             fontSize: 8,
-            color: JIG_MUTED,
+            color: PDF_MUTED,
             width: 28,
           },
         ],

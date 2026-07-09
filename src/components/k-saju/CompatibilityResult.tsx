@@ -4,7 +4,6 @@ import { AdSlot } from "@/components/ads/AdSlot";
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { BondScoreRing } from "@/components/k-saju/BondScoreRing";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
-import { ZodiacCompatInstaShareRow } from "@/components/k-saju/ZodiacCompatInstaShareRow";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import type { ElementRelation } from "@/lib/saju/compatibility/elements-cycle";
@@ -190,11 +189,9 @@ function renderNumberedDetailBody(body: string): ReactNode {
 export function CompatibilityResult({
   result,
   isGuest,
-  shareMode = "insta",
 }: {
   result: CompatibilityResponse;
   isGuest?: boolean;
-  shareMode?: "insta" | "none";
 }) {
   const t = LABELS[result.locale];
   const rel = RELATION_LABEL[result.relation][result.locale];
@@ -325,10 +322,6 @@ export function CompatibilityResult({
           ))}
         </ul>
       </GlassCard>
-
-      {shareMode === "insta" ? (
-        <ZodiacCompatInstaShareRow kind="compatibility" result={result} />
-      ) : null}
 
       <AdSlot />
     </div>

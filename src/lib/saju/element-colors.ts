@@ -39,23 +39,23 @@ export function elementTextHex(key: ElementKey): string {
   return ELEMENT_TEXT_HEX[key];
 }
 
-/** Pet premium hub section accents (MBTI / compatibility / zodiac). */
+/** Pet premium hub section accents — unified purple identity (web channel-saju / primary). */
 export const PET_PREMIUM_SECTION_THEME = {
   mbti: {
     accent: "#8B5CF6",
-    soft: "#EDE9FE",
+    soft: "#E6E1F9",
     labelKo: "상세 MBTI",
     labelEn: "Detailed MBTI",
   },
   compatibility: {
-    accent: "#EF4444",
-    soft: "#FCEAE7",
+    accent: "#6F4B8B",
+    soft: "#E6E1F9",
     labelKo: "집사 궁합",
     labelEn: "Pet–butler bond",
   },
   zodiac: {
-    accent: "#3E6B8A",
-    soft: "#E6EFF6",
+    accent: "#5C3D6E",
+    soft: "#E1F5F0",
     labelKo: "별자리 케어",
     labelEn: "Zodiac care",
   },

@@ -9,15 +9,44 @@ import {
 } from "@/lib/saju/element-colors";
 import type { ElementKey } from "@/lib/saju/types";
 
-const PAGE_CONTENT_WIDTH = 483;
+const PAGE_CONTENT_WIDTH = 499;
 
-/** Mint label pills — aligned with cover lower band (`element-*` wood). */
+/** Web-aligned PDF palette */
+export const PDF_INK = "#3D2A4A";
+export const PDF_MUTED = "#4B444D";
+export const PDF_PRIMARY = "#442656";
+export const PDF_ACCENT = "#8B5CF6";
+export const PDF_PAGE_BG = "#FDFBF7";
+
+export const PDF_PASTEL_SURFACES = [
+  { fill: "#E6E1F9", border: "#C4B8F0" },
+  { fill: "#E1F5F0", border: "#A8DDD2" },
+  { fill: "#FCE1F1", border: "#F5B8DA" },
+  { fill: "#C8E8F8", border: "#9DD4EF" },
+] as const;
+
 export const PET_PREMIUM_LABEL_THEME = {
-  accent: elementBarHex("wood"),
-  soft: elementSoftHex("wood"),
+  accent: PDF_PRIMARY,
+  soft: "#E6E1F9",
 } as const;
 
-export function elementPill(label: string, element: ElementKey, margin: [number, number, number, number] = [0, 0, 0, 8]): Content {
+export function formatNumberedDetailBody(body: string, bodyStyle = "cardBody"): Content[] {
+  const parts = body.split(/(?=[①②③④⑤])/).map((part) => part.trim()).filter(Boolean);
+  if (parts.length <= 1) {
+    return [{ text: body, style: bodyStyle, margin: [0, 8, 0, 0] }];
+  }
+  return parts.map((part, index) => ({
+    text: part,
+    style: bodyStyle,
+    margin: [0, index === 0 ? 8 : 0, 0, 10] as [number, number, number, number],
+  }));
+}
+
+export function elementPill(
+  label: string,
+  element: ElementKey,
+  margin: [number, number, number, number] = [0, 0, 0, 8]
+): Content {
   return {
     table: {
       widths: ["auto"],
@@ -29,7 +58,7 @@ export function elementPill(label: string, element: ElementKey, margin: [number,
             fillColor: elementSoftHex(element),
             bold: true,
             fontSize: 10.5,
-            margin: [12, 6, 12, 6],
+            margin: [14, 8, 14, 8],
           },
         ],
       ],
@@ -55,8 +84,8 @@ export function subheadingPill(
             color: accent,
             fillColor: soft,
             bold: true,
-            fontSize: 10.5,
-            margin: [12, 7, 12, 7],
+            fontSize: 11,
+            margin: [14, 9, 14, 9],
           },
         ],
       ],
@@ -72,66 +101,84 @@ export function pillWithBody(
   body: string,
   accent: string,
   soft: string,
-  bodyStyle: string = "body"
+  bodyStyle: string = "cardBody"
 ): Content {
   return {
     unbreakable: true,
     stack: [
-      subheadingPill(title, accent, soft, [0, 0, 0, 2]),
-      { text: body, style: bodyStyle, margin: [0, 0, 0, 8] },
+      subheadingPill(title, accent, soft, [0, 0, 0, 0]),
+      {
+        table: {
+          widths: ["*"],
+          body: [
+            [
+              {
+                stack: formatNumberedDetailBody(body, bodyStyle),
+                fillColor: soft,
+                margin: [16, 4, 16, 14],
+              },
+            ],
+          ],
+        },
+        layout: "noBorders",
+      },
     ],
-    margin: [0, 6, 0, 0],
+    margin: [0, 8, 0, 0],
   };
 }
 
-export function compatibilityDetailCards(
-  details: { title: string; body: string }[],
-  petElement: ElementKey,
-  ownerElement: ElementKey,
-  accent: string
-): Content {
-  const card = (title: string, body: string, borderColor: string, fillColor: string): Content => ({
+function pastelDetailCard(title: string, body: string, surface: (typeof PDF_PASTEL_SURFACES)[number]): Content {
+  return {
     unbreakable: true,
     table: {
-      widths: [4, "*"],
+      widths: ["*"],
       body: [
         [
-          { text: "", fillColor: borderColor },
           {
             stack: [
-              { text: title, bold: true, fontSize: 9.5, color: accent },
-              { text: body, fontSize: 9, lineHeight: 1.4, margin: [0, 4, 0, 0] },
+              { text: title, style: "cardTitle", color: PDF_PRIMARY },
+              ...formatNumberedDetailBody(body),
             ],
-            fillColor,
-            margin: [8, 8, 8, 8],
+            fillColor: surface.fill,
+            margin: [18, 16, 18, 16],
           },
         ],
       ],
     },
     layout: {
-      hLineWidth: () => 0,
-      vLineWidth: () => 0,
+      hLineWidth: () => 1,
+      vLineWidth: () => 1,
+      hLineColor: () => surface.border,
+      vLineColor: () => surface.border,
       paddingLeft: () => 0,
       paddingRight: () => 0,
       paddingTop: () => 0,
       paddingBottom: () => 0,
     },
-  });
+    margin: [0, 0, 0, 14],
+  };
+}
 
+export function compatibilityDetailCards(
+  details: { title: string; body: string }[],
+  _petElement: ElementKey,
+  _ownerElement: ElementKey,
+  _accent: string
+): Content {
   return {
-    columns: details.slice(0, 3).map((detail, index) => ({
-      width: "*",
-      stack: [
-        card(
-          detail.title,
-          detail.body,
-          elementBarHex(index % 2 === 0 ? petElement : ownerElement),
-          elementSoftHex(index % 2 === 0 ? petElement : ownerElement)
-        ),
-      ],
-    })),
-    columnGap: 8,
-    margin: [0, 0, 0, 10],
+    stack: details.slice(0, 3).map((detail, index) =>
+      pastelDetailCard(detail.title, detail.body, PDF_PASTEL_SURFACES[index % PDF_PASTEL_SURFACES.length]!)
+    ),
+    margin: [0, 4, 0, 8],
+  };
+}
+
+export function zodiacDetailCards(details: { title: string; body: string }[]): Content {
+  return {
+    stack: details.map((detail, index) =>
+      pastelDetailCard(detail.title, detail.body, PDF_PASTEL_SURFACES[index % PDF_PASTEL_SURFACES.length]!)
+    ),
+    margin: [0, 4, 0, 8],
   };
 }
 
@@ -145,35 +192,35 @@ export function chapterBanner(
   const title = isKo ? theme.labelKo : theme.labelEn;
 
   return {
+    unbreakable: true,
     stack: [
       {
-        canvas: [{ type: "rect", x: 0, y: 0, w: PAGE_CONTENT_WIDTH, h: 5, color: theme.accent }],
-        margin: [0, 0, 0, 10],
+        canvas: [{ type: "rect", x: 0, y: 0, w: PAGE_CONTENT_WIDTH, h: 4, color: theme.accent }],
+        margin: [0, 0, 0, 12],
       },
       {
         columns: [
           {
-            width: 56,
+            width: 52,
             text: String(sectionNumber),
-            fontSize: 40,
+            fontSize: 36,
             bold: true,
             color: theme.accent,
-            margin: [0, 4, 0, 0],
+            margin: [0, 2, 0, 0],
           },
           {
             width: "*",
             stack: [
               {
                 text: title,
-                fontSize: 18,
-                bold: true,
+                style: "sectionTitle",
                 color: theme.accent,
-                margin: [0, 10, 0, 2],
+                margin: [0, 4, 0, 2],
               },
               {
                 text: isKo ? `${sectionNumber}장` : `Section ${sectionNumber}`,
                 fontSize: 9,
-                color: theme.accent,
+                color: PDF_MUTED,
               },
             ],
           },
@@ -181,11 +228,11 @@ export function chapterBanner(
       },
       {
         canvas: [{ type: "rect", x: 0, y: 0, w: PAGE_CONTENT_WIDTH, h: 1, color: theme.soft }],
-        margin: [0, 10, 0, 0],
+        margin: [0, 12, 0, 0],
       },
     ],
     pageBreak: pageBreak ? "before" : undefined,
-    margin: pageBreak ? [0, 0, 0, 12] : [0, 20, 0, 12],
+    margin: pageBreak ? [0, 0, 0, 24] : [0, 24, 0, 24],
   };
 }
 
@@ -214,15 +261,18 @@ export function bondScoreGauge(score: number, bondLabel: string): Content {
   const cy = 44;
   const sweep = (360 * clamped) / 100;
   const gradient = bondScoreRingGradient(clamped);
+  const ringFrom = clamped >= 90 ? gradient.from : PDF_PRIMARY;
+  const ringTo = clamped >= 90 ? gradient.to : PDF_ACCENT;
   const progressPath = ringArcPath(cx, cy, radius, sweep);
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="88" height="88" viewBox="0 0 88 88">
-  <circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="#EFEAE0" stroke-width="7"/>
-  <path d="${progressPath}" fill="none" stroke="${gradient.from}" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="#E6E1F9" stroke-width="7"/>
+  <path d="${progressPath}" fill="none" stroke="${ringTo}" stroke-width="9" stroke-linecap="round"/>
 </svg>`;
 
   return {
     width: 104,
+    unbreakable: true,
     stack: [
       {
         stack: [
@@ -232,7 +282,7 @@ export function bondScoreGauge(score: number, bondLabel: string): Content {
             alignment: "center",
             fontSize: 20,
             bold: true,
-            color: gradient.from,
+            color: ringFrom,
             relativePosition: { x: 0, y: -52 },
           },
         ],
@@ -243,7 +293,7 @@ export function bondScoreGauge(score: number, bondLabel: string): Content {
         alignment: "center",
         fontSize: 8.5,
         bold: true,
-        color: gradient.to,
+        color: PDF_MUTED,
         margin: [0, 0, 0, 0],
       },
     ],
@@ -252,65 +302,95 @@ export function bondScoreGauge(score: number, bondLabel: string): Content {
 
 export function coverTopAccentBar(accent: string): Content {
   return {
-    canvas: [{ type: "rect", x: 0, y: 0, w: PAGE_CONTENT_WIDTH, h: 6, color: accent }],
-    margin: [0, 0, 0, 20],
+    canvas: [{ type: "rect", x: 0, y: 0, w: PAGE_CONTENT_WIDTH, h: 4, color: accent }],
+    margin: [0, 0, 0, 0],
   };
 }
 
-/** A4 page size with default pet-premium margins (56pt). */
-const PAGE_WIDTH = 595;
-const PAGE_HEIGHT = 842;
-
-/** Cover lower band — soft mint wash (목/wood palette), not pet dominant element. */
-const COVER_BAND_WASH = "#E5F4EC";
-const COVER_BAND_LINE = "#B8DFC8";
+/** A4 page size with default pet-premium margins (48pt). */
+export const PAGE_WIDTH = 595;
+export const PAGE_HEIGHT = 842;
+const PAGE_MARGIN_X = 48;
 
 export function coverBackgroundShapes(): Content {
-  const bandTop = PAGE_HEIGHT - 248;
-  const bandHeight = 248;
   return {
     absolutePosition: { x: 0, y: 0 },
     canvas: [
-      { type: "rect", x: 0, y: bandTop, w: PAGE_WIDTH, h: bandHeight, color: COVER_BAND_WASH },
-      {
-        type: "line",
-        x1: 56,
-        y1: bandTop,
-        x2: PAGE_WIDTH - 56,
-        y2: bandTop,
-        lineWidth: 1,
-        lineColor: COVER_BAND_LINE,
-      },
+      { type: "rect", x: 0, y: 0, w: PAGE_WIDTH, h: PAGE_HEIGHT, color: PDF_PAGE_BG },
+      { type: "rect", x: 0, y: 0, w: PAGE_WIDTH, h: 220, color: "#E6E1F9" },
+      { type: "rect", x: 0, y: 180, w: PAGE_WIDTH, h: 80, color: PDF_PAGE_BG },
     ],
   };
 }
 
-export function elementHighlightBox(text: string, element: ElementKey): Content {
+export function elementHighlightBox(text: string, surfaceIndex = 0): Content {
+  const surface = PDF_PASTEL_SURFACES[surfaceIndex % PDF_PASTEL_SURFACES.length]!;
   return {
+    unbreakable: true,
     table: {
       widths: ["*"],
       body: [
         [
           {
             text,
-            color: elementTextHex(element),
-            fillColor: elementSoftHex(element),
+            color: PDF_INK,
+            fillColor: surface.fill,
             fontSize: 10.5,
-            lineHeight: 1.45,
-            margin: [14, 12, 14, 12],
+            lineHeight: 1.5,
+            margin: [18, 16, 18, 16],
           },
         ],
       ],
     },
     layout: {
-      hLineWidth: () => 0,
-      vLineWidth: () => 0,
+      hLineWidth: () => 1,
+      vLineWidth: () => 1,
+      hLineColor: () => surface.border,
+      vLineColor: () => surface.border,
       paddingLeft: () => 0,
       paddingRight: () => 0,
       paddingTop: () => 0,
       paddingBottom: () => 0,
     },
-    margin: [0, 0, 0, 10],
+    margin: [0, 0, 0, 14],
+  };
+}
+
+export function careTipCards(tips: string[]): Content {
+  return {
+    stack: tips.map((tip, index) => {
+      const surface = PDF_PASTEL_SURFACES[index % PDF_PASTEL_SURFACES.length]!;
+      return {
+        unbreakable: true,
+        table: {
+          widths: ["*"],
+          body: [
+            [
+              {
+                text: tip,
+                color: PDF_INK,
+                fillColor: surface.fill,
+                fontSize: 10.5,
+                lineHeight: 1.5,
+                margin: [18, 14, 18, 14],
+              },
+            ],
+          ],
+        },
+        layout: {
+          hLineWidth: () => 1,
+          vLineWidth: () => 1,
+          hLineColor: () => surface.border,
+          vLineColor: () => surface.border,
+          paddingLeft: () => 0,
+          paddingRight: () => 0,
+          paddingTop: () => 0,
+          paddingBottom: () => 0,
+        },
+        margin: [0, 0, 0, 10],
+      } satisfies Content;
+    }),
+    margin: [0, 4, 0, 8],
   };
 }
 
@@ -318,4 +398,4 @@ export function mbtiAxisBarColor(leftDominant: boolean): string {
   return leftDominant ? PET_PREMIUM_SECTION_THEME.mbti.accent : "#A78BFA";
 }
 
-export { elementBarHex, PET_PREMIUM_SECTION_THEME };
+export { elementBarHex, PET_PREMIUM_SECTION_THEME, PAGE_MARGIN_X };

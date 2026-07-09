@@ -2,7 +2,6 @@
 
 import { AdSlot } from "@/components/ads/AdSlot";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
-import { ZodiacCompatInstaShareRow } from "@/components/k-saju/ZodiacCompatInstaShareRow";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
@@ -13,7 +12,6 @@ interface ZodiacResultProps {
   result: ZodiacFortuneResponse;
   isGuest?: boolean;
   onBack?: () => void;
-  shareMode?: "insta" | "none";
 }
 
 const LABELS = {
@@ -75,7 +73,6 @@ export function ZodiacResult({
   result,
   isGuest,
   onBack,
-  shareMode = "insta",
 }: ZodiacResultProps) {
   const t = LABELS[result.locale];
   const el = ELEMENT_META[result.elementAffinity];
@@ -107,7 +104,7 @@ export function ZodiacResult({
           {t.eyebrow}
         </p>
         <p className="relative mt-4 text-5xl" aria-hidden>
-          {result.sign.emoji}
+          {result.sign.symbol}
         </p>
         <h2 className="relative mt-3 text-2xl font-extrabold md:text-3xl">{result.petName}</h2>
         <p className="relative mt-1 text-lg font-semibold text-primary-fixed-dim">
@@ -123,7 +120,7 @@ export function ZodiacResult({
           <div
             className={`mx-auto flex h-36 w-36 shrink-0 items-center justify-center rounded-[2rem] text-6xl ring-4 ring-white/80 ${accent.ring}`}
           >
-            <span aria-hidden>{result.sign.emoji}</span>
+            <span aria-hidden>{result.sign.symbol}</span>
           </div>
           <div className="min-w-0 flex-1">
             <div className="mb-3 flex items-center gap-2">
@@ -223,10 +220,6 @@ export function ZodiacResult({
           </div>
         </dl>
       </GlassCard>
-
-      {shareMode === "insta" ? (
-        <ZodiacCompatInstaShareRow kind="zodiac" result={result} />
-      ) : null}
 
       <AdSlot />
 
