@@ -3,6 +3,7 @@ import { computePetSajuBundle } from "@/lib/saju/engine";
 import { generateGeminiNarrative } from "@/lib/saju/gemini-narrative";
 import { applyPetInterpretationToBasicResponse } from "@/lib/saju/llm/apply-pet-to-basic";
 import { interpretSaju, isSajuInterpretLlmEnabled } from "@/lib/saju/llm/interpret";
+import { enrichBasicResultDisplayFields } from "@/lib/saju/enrich-basic-result-display";
 import { finalizePetHeadline } from "@/lib/saju/pet-headline";
 import { validatePetName } from "@/lib/saju/moderation";
 import { persistSajuResult } from "@/lib/saju/persist";
@@ -177,6 +178,7 @@ export async function POST(request: Request) {
     }
 
     finalizePetHeadline(result, mapping);
+    enrichBasicResultDisplayFields(result, mapping);
 
     let persisted = false;
     let petId: string | null = null;

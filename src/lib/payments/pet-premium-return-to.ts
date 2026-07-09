@@ -1,6 +1,7 @@
 export type PetPremiumReturnTo =
   | "basic"
   | "mbti"
+  | "mbti_standalone"
   | "zodiac"
   | "compatibility"
   | "zodiac-page"
@@ -9,6 +10,7 @@ export type PetPremiumReturnTo =
 const ALLOWED_RETURN_TO = new Set<PetPremiumReturnTo>([
   "basic",
   "mbti",
+  "mbti_standalone",
   "zodiac",
   "compatibility",
   "zodiac-page",

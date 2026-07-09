@@ -1,4 +1,13 @@
-import { hasPetPremiumUnlock } from "@/lib/payments/portone/entitlement";
+import {
+  hasAnyPetProductUnlock,
+  hasPetPremiumUnlock,
+} from "@/lib/payments/portone/entitlement";
+import {
+  PET_MBTI_UNLOCK_CODES,
+  PET_PACKAGE_UNLOCK_CODES,
+  type PetProductCode,
+  type PetUnlockScope,
+} from "@/lib/payments/pet-product-catalog";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -12,6 +21,10 @@ export const dynamic = "force-dynamic";
 const NO_STORE_HEADERS = {
   "Cache-Control": "no-store, max-age=0",
 };
+
+function resolveUnlockScope(value: string | null): PetUnlockScope {
+  return value === "mbti" ? "mbti" : "package";
+}
 
 export async function GET(request: Request) {
   if (process.env.NODE_ENV !== "production") {
@@ -35,6 +48,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const petId = searchParams.get("petId");
+  const scope = resolveUnlockScope(searchParams.get("scope"));
 
   const token = getBearerToken(request);
   const userClient = token ? createUserSupabaseClient(token) : null;
@@ -45,12 +59,13 @@ export async function GET(request: Request) {
     );
   }
 
-  const unlocked = await hasPetPremiumUnlock(
-    userClient,
-    userId,
-    "pet_premium_v1",
-    petId || null
-  );
+  const productCodes: readonly PetProductCode[] =
+    scope === "mbti" ? PET_MBTI_UNLOCK_CODES : PET_PACKAGE_UNLOCK_CODES;
 
-  return NextResponse.json({ unlocked }, { headers: NO_STORE_HEADERS });
+  const unlocked =
+    scope === "mbti"
+      ? await hasAnyPetProductUnlock(userClient, userId, productCodes, petId || null)
+      : await hasPetPremiumUnlock(userClient, userId, PET_PACKAGE_UNLOCK_CODES[0], petId || null);
+
+  return NextResponse.json({ unlocked, scope }, { headers: NO_STORE_HEADERS });
 }

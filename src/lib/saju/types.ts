@@ -73,6 +73,12 @@ export interface SajuBasicResponse {
   headline: string;
   story: string;
   traits: string[];
+  /** Snapshot: 사주가 말하는 우리 아이 section (stored in vault). */
+  sajuNarrative?: string | null;
+  /** Snapshot: 케어 포인트 card copy (stored in vault). */
+  carePointText?: string | null;
+  /** Snapshot: four-pillar summary line with day pillar bold (stored in vault). */
+  pillarsSummaryLine?: string | null;
   narrativeSource?: "template" | "gemini" | "claude" | "openai";
   narrativeError?: string | null;
   /** Set when saved to Supabase (requires auth session). */

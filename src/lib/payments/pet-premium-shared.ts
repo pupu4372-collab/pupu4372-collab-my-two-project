@@ -1,9 +1,11 @@
 export const PET_PREMIUM_PRODUCT_LABELS = {
   ko: {
     pet_premium_v1: "펫 프리미엄 패키지",
+    pet_mbti_v1: "펫 MBTI 상세 진단",
   },
   en: {
     pet_premium_v1: "Pet Premium Package",
+    pet_mbti_v1: "Pet MBTI Detailed Report",
   },
 } as const;
 

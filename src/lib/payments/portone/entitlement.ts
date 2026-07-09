@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { PetProductCode } from "@/lib/payments/pet-product-catalog";
 
 /**
  * user_id + product_code 기준으로 unlock 여부 확인.
@@ -16,6 +17,32 @@ export async function hasPetPremiumUnlock(
     .select("id")
     .eq("user_id", userId)
     .eq("product_code", productCode)
+    .not("payment_id", "is", null)
+    .limit(1);
+
+  if (petId) {
+    query = query.eq("pet_id", petId);
+  }
+
+  const { data, error } = await query;
+  if (error) return false;
+  return (data?.length ?? 0) > 0;
+}
+
+/** True if any listed product_code unlock exists for user (+ optional pet). */
+export async function hasAnyPetProductUnlock(
+  supabase: SupabaseClient,
+  userId: string,
+  productCodes: readonly PetProductCode[],
+  petId?: string | null
+): Promise<boolean> {
+  if (productCodes.length === 0) return false;
+
+  let query = supabase
+    .from("pet_premium_unlocks")
+    .select("id")
+    .eq("user_id", userId)
+    .in("product_code", [...productCodes])
     .not("payment_id", "is", null)
     .limit(1);
 

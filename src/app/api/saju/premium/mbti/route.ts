@@ -5,7 +5,7 @@ import {
   isPetMbtiComplete,
   scoresFromAnswers,
 } from "@/lib/pet/mbti-inference";
-import { checkPetPremiumLlmGate } from "@/lib/payments/pet-premium-llm-gate";
+import { checkPetMbtiLlmGate } from "@/lib/payments/pet-premium-llm-gate";
 import { generatePetMbtiPremiumInsight } from "@/lib/saju/llm/pet-premium/orchestrator";
 import { validatePetName } from "@/lib/saju/moderation";
 import { persistMbtiPremiumResult } from "@/lib/saju/persist-mbti";
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       ? body.petGender
       : undefined;
 
-  const gateError = await checkPetPremiumLlmGate(
+  const gateError = await checkPetMbtiLlmGate(
     request,
     body.petId ? String(body.petId) : null
   );

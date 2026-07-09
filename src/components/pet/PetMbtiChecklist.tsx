@@ -5,11 +5,11 @@ import {
   buildPetMbtiPremiumInsight,
   buildPetMbtiResult,
   isPetMbtiComplete,
-  PET_MBTI_PREMIUM_PRICE,
   PET_MBTI_QUESTIONS,
   scoresFromAnswers,
   type PetMbtiResult,
 } from "@/lib/pet/mbti-inference";
+import { PET_PRODUCT_AMOUNT_KRW, PET_MBTI_STANDALONE_CODE } from "@/lib/payments/pet-product-catalog";
 import { formatKrw } from "@/lib/reports/human-premium/pricing";
 import { useLocale } from "next-intl";
 import { useMemo, useState } from "react";
@@ -111,7 +111,7 @@ export function PetMbtiChecklist() {
               {isKo ? "심층 리포트 (유료)" : "Deep report (paid)"}
             </h3>
             <span className="font-bold text-channel-dog">
-              {formatKrw(PET_MBTI_PREMIUM_PRICE)}
+              {formatKrw(PET_PRODUCT_AMOUNT_KRW[PET_MBTI_STANDALONE_CODE])}
             </span>
           </div>
 

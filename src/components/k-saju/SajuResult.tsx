@@ -5,16 +5,20 @@ import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
 import { SajuPremiumPackagePanel } from "@/components/k-saju/SajuPremiumPackagePanel";
 import { usePetPremiumUnlock } from "@/hooks/usePetPremiumUnlock";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { SajuCopyHtml, SajuNarrativeBody } from "@/components/k-saju/SajuCopyHtml";
 import { BasicSajuInstaShareRow } from "@/components/k-saju/BasicSajuInstaShareRow";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
 import { buildPetPremiumPaymentHref } from "@/lib/payments/pet-premium-unlock-client";
 import { formatPetBirthDisplayLabel } from "@/lib/saju/pet-birth-display";
-import { branchHangulLabel, charToElement, ELEMENT_META, stemHangulLabel } from "@/lib/saju/elements";
-import { formatJijiDisplay } from "@/lib/saju/jiji-hours";
+import { ELEMENT_META } from "@/lib/saju/elements";
+import { buildCarePointText } from "@/lib/saju/care-point-copy";
+import { buildPillarsSummaryLine } from "@/lib/saju/pillars-summary-line";
+import { buildSajuNarrative } from "@/lib/saju/saju-narrative";
 import { buildPetLuckyScores, dominantElementLabel } from "@/lib/saju/pet-lucky-scores";
-import type { Locale, PillarDisplay, SajuBasicResponse } from "@/lib/saju/types";
+import { buildPetSajuMappingFromBasicResponse } from "@/lib/saju/pet-saju-mapping-from-result";
+import type { Locale, SajuBasicResponse } from "@/lib/saju/types";
 import { formatUtcForDisplay } from "@/lib/saju/timezone";
 import { clearSajuResultSession } from "@/lib/saju/saju-result-session";
 import { useEffect, useMemo, useState } from "react";
@@ -22,6 +26,8 @@ import { useEffect, useMemo, useState } from "react";
 interface SajuResultProps {
   result: SajuBasicResponse;
   variant?: "default" | "pastel";
+  /** Vault/archive: render only stored snapshot fields — no mapping recompute. */
+  snapshot?: boolean;
   mbtiType?: string | null;
 }
 
@@ -36,6 +42,8 @@ const LABELS = {
     wealthLuck: "Treat Luck",
     healthLuck: "Condition Luck",
     personality: "Personality",
+    sajuNarrative: "What your pet's saju says",
+    carePoint: "Care point",
     detailedTraits: "Trait highlights",
     pillars: "Four Pillars",
     hour: "Hour",
@@ -70,6 +78,8 @@ const LABELS = {
     wealthLuck: "간식운",
     healthLuck: "컨디션운",
     personality: "성격 분석",
+    sajuNarrative: "사주가 말하는 우리 아이",
+    carePoint: "케어 포인트",
     detailedTraits: "상세 특징",
     pillars: "사주팔자",
     hour: "시주",
@@ -96,48 +106,6 @@ const LABELS = {
   },
 } as const;
 
-function PillarCell({
-  pillar,
-  emphasize,
-  locale,
-}: {
-  pillar: PillarDisplay;
-  emphasize?: boolean;
-  locale: Locale;
-}) {
-  const stemEl = charToElement(pillar.stemHanja);
-  const branchEl = charToElement(pillar.branchHanja);
-  const stemAccent = stemEl ? ELEMENT_ACCENT[stemEl] : null;
-  const branchAccent = branchEl ? ELEMENT_ACCENT[branchEl] : null;
-
-  return (
-    <div className="space-y-3">
-      <div
-        className={`rounded-2xl border px-2 py-5 shadow-sm ${
-          emphasize && stemAccent
-            ? `${stemAccent.ring} border-transparent`
-            : "border-outline-variant/30 bg-cream"
-        }`}
-      >
-        <div className="text-2xl font-bold text-primary">{pillar.stemHanja}</div>
-        <div className="mt-1 text-xs text-on-surface-variant">
-          {locale === "ko" ? stemHangulLabel(pillar.stemHanja) : pillar.stemLabel}
-        </div>
-      </div>
-      <div
-        className={`rounded-2xl border px-2 py-5 ${
-          branchAccent ? `${branchAccent.pill} border-transparent` : "border-outline-variant/30 bg-cream"
-        }`}
-      >
-        <div className={`text-2xl font-bold ${branchAccent ? "" : "text-primary"}`}>{pillar.branchHanja}</div>
-        <div className="mt-1 text-xs opacity-80">
-          {locale === "ko" ? branchHangulLabel(pillar.branchHanja) : pillar.branchLabel}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function traitCards(traits: string[], locale: Locale) {
   const icons = ["🛡️", "🧠", "📚", "💗"];
   return traits.slice(0, 4).map((trait, index) => ({
@@ -150,7 +118,7 @@ function traitCards(traits: string[], locale: Locale) {
   }));
 }
 
-export function SajuResult({ result, mbtiType }: SajuResultProps) {
+export function SajuResult({ result, snapshot = false, mbtiType }: SajuResultProps) {
   const t = LABELS[result.locale];
   const isKo = result.locale === "ko";
   const meta = ELEMENT_META[result.dominantElement];
@@ -216,7 +184,31 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
   });
   const premiumHubHref = `/saju/premium?${continuationQuery}`;
 
-  const detailTraits = traitCards(result.traits, result.locale);
+  // TODO: 배포 후 제거 가능(구 sessionStorage 세션 소멸 후) — 라이브 경로 매핑 폴백
+  const petMapping = useMemo(
+    () => (snapshot ? null : buildPetSajuMappingFromBasicResponse(result)),
+    [result, snapshot]
+  );
+  const sajuNarrativeText = useMemo(() => {
+    if (snapshot) return result.sajuNarrative ?? null;
+    if (result.sajuNarrative) return result.sajuNarrative;
+    return petMapping ? buildSajuNarrative(result, petMapping) : null;
+  }, [result, petMapping, snapshot]);
+  const carePointText = useMemo(() => {
+    if (snapshot) return result.carePointText ?? null;
+    if (result.carePointText) return result.carePointText;
+    return petMapping ? buildCarePointText(petMapping, result.locale) : null;
+  }, [result, petMapping, snapshot]);
+  const personalityTraits = useMemo(
+    () => result.traits.map((trait) => trait.trim()).filter(Boolean).slice(0, 5),
+    [result.traits]
+  );
+  const pillarsSummaryLine = useMemo(() => {
+    if (snapshot) return result.pillarsSummaryLine ?? null;
+    if (result.pillarsSummaryLine) return result.pillarsSummaryLine;
+    return buildPillarsSummaryLine(result);
+  }, [result, snapshot]);
+  const detailTraits = traitCards(personalityTraits, result.locale);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setBarsReady(true));
@@ -369,9 +361,22 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
             </div>
           </GlassCard>
 
+          {sajuNarrativeText ? (
+            <GlassCard className={`border-l-8 p-6 md:p-8 ${accent.cardBorder}`}>
+              <h3 className="text-lg font-bold text-primary">{t.sajuNarrative}</h3>
+              <SajuNarrativeBody html={sajuNarrativeText} />
+            </GlassCard>
+          ) : null}
+
           <GlassCard className={`border-l-8 p-6 md:p-8 ${accent.cardBorder}`}>
             <h3 className="text-lg font-bold text-primary">{t.personality}</h3>
             <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-primary/90">{result.story}</p>
+            {carePointText ? (
+              <div className="mt-6 rounded-xl border border-mok-green/25 bg-mint/20 p-4">
+                <h4 className="text-sm font-bold text-primary">{t.carePoint}</h4>
+                <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{carePointText}</p>
+              </div>
+            ) : null}
             {detailTraits.length > 0 && (
               <div className="mt-8 border-t border-outline-variant/30 pt-6">
                 <h4 className="mb-4 text-base font-bold text-secondary">{t.detailedTraits}</h4>
@@ -392,7 +397,7 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
               </div>
             )}
             <div className="mt-6 flex flex-wrap gap-2">
-              {result.traits.map((trait) => (
+              {personalityTraits.map((trait) => (
                 <span
                   key={trait}
                   className="rounded-lg border border-outline-variant/30 bg-cream px-3 py-1 text-sm text-primary"
@@ -405,47 +410,32 @@ export function SajuResult({ result, mbtiType }: SajuResultProps) {
 
           <GlassCard className="p-6 md:p-8">
             <h3 className="mb-6 text-lg font-bold text-primary">{t.pillars}</h3>
-            <div className="grid grid-cols-2 gap-4 text-center sm:grid-cols-4">
-              {result.pillars.hour ? (
-                <div>
-                  <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-on-surface-variant">{t.hour}</p>
-                  <PillarCell pillar={result.pillars.hour} locale={result.locale} />
-                </div>
+            <div className="rounded-2xl border-2 border-mok-green/40 bg-mint/20 px-4 py-4 text-sm">
+              {pillarsSummaryLine ? (
+                <SajuCopyHtml
+                  html={pillarsSummaryLine}
+                  className="text-base font-semibold leading-relaxed text-primary break-words [&_strong]:font-extrabold [&_strong]:text-primary"
+                />
               ) : null}
-              <div>
-                <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-on-surface-variant">{t.day}</p>
-                <PillarCell pillar={result.pillars.day} emphasize locale={result.locale} />
-              </div>
-              <div>
-                <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-on-surface-variant">{t.month}</p>
-                <PillarCell pillar={result.pillars.month} locale={result.locale} />
-              </div>
-              <div>
-                <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-on-surface-variant">{t.year}</p>
-                <PillarCell pillar={result.pillars.year} locale={result.locale} />
-              </div>
-            </div>
-            {!result.pillars.hour && (
-              <p className="mt-4 text-center text-xs text-plum/50">
-                {t.hour}: {t.unknown}
+              {result.kstJiji ? (
+                <>
+                  <p className="mt-3 text-sm font-semibold text-primary">
+                    {isKo ? result.kstJiji.siNameKo : result.kstJiji.siNameEn} · {result.kstJiji.kstRange} ·{" "}
+                    {ELEMENT_META[result.kstJiji.element].hangul}({ELEMENT_META[result.kstJiji.element].hanja})
+                  </p>
+                  <p className="mt-2 text-xs text-plum/75">
+                    {t.kstAt}: {result.kstJiji.kstTime} (KST) · {t.kstWindow}: {result.kstJiji.kstRange}
+                  </p>
+                </>
+              ) : (
+                <p className="mt-3 text-xs text-plum/65">
+                  {t.hour}: {t.unknown}
+                </p>
+              )}
+              <p className="mt-3 text-xs text-plum/65">
+                {t.stored}: {formatUtcForDisplay(result.birthUtc, result.timezone)} ({result.timezone})
               </p>
-            )}
-            {result.kstJiji && (
-              <div className="mt-6 rounded-2xl border-2 border-mok-green/40 bg-gradient-to-br from-element-wood via-mint/40 to-white px-4 py-4 text-sm">
-                <p className="text-xs font-bold uppercase tracking-wide text-mok-green">{t.kstHour}</p>
-                <p className="mt-1 text-base font-bold text-primary">{formatJijiDisplay(result.kstJiji, result.locale)}</p>
-                <p className="mt-1 text-xs text-plum/75">
-                  {t.kstAt}: {result.kstJiji.kstTime} (KST) · {t.kstWindow}: {result.kstJiji.kstRange}
-                </p>
-                <p className="mt-1 text-xs font-semibold text-mok-green">
-                  {ELEMENT_META[result.kstJiji.element].hanja}{" "}
-                  {ELEMENT_META[result.kstJiji.element].meaning} · {ELEMENT_META[result.kstJiji.element].hangul}
-                </p>
-              </div>
-            )}
-            <p className="mt-4 text-center text-xs text-plum/65">
-              {t.stored}: {formatUtcForDisplay(result.birthUtc, result.timezone)} ({result.timezone})
-            </p>
+            </div>
           </GlassCard>
 
           <GlassCard className="border-2 border-mok-green/35 !bg-gradient-to-br !from-white !to-element-wood p-5 md:p-6">

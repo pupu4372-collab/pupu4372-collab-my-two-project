@@ -82,6 +82,9 @@ function baseSajuResult(report: ReportDetailRow): SajuBasicResponse {
     headline: report.title ?? (locale === "ko" ? "저장된 사주 리포트" : "Saved saju report"),
     story: report.summary ?? "",
     traits: asStringArray(payload.traits),
+    sajuNarrative: asString(payload.sajuNarrative) || null,
+    carePointText: asString(payload.carePointText) || null,
+    pillarsSummaryLine: asString(payload.pillarsSummaryLine) || null,
     narrativeSource: asString(payload.narrativeSource, "template") as SajuBasicResponse["narrativeSource"],
     narrativeError: asString(payload.narrativeError) || null,
     persisted: true,
@@ -221,7 +224,7 @@ function ReportRenderer({ report }: { report: ReportDetailRow }) {
     return <PremiumReportView report={premiumResult(report)} petName={report.pet?.name ?? "반려동물"} />;
   }
 
-  return <SajuResult result={baseSajuResult(report)} />;
+  return <SajuResult result={baseSajuResult(report)} snapshot />;
 }
 
 export function ReportDetailPage({ reportId }: { reportId: string }) {

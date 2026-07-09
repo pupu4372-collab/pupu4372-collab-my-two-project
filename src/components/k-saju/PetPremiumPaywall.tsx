@@ -3,6 +3,7 @@
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { Link } from "@/i18n/navigation";
 import {
+  buildMbtiStandalonePaymentHref,
   buildPetPremiumPaymentHref,
   type PetPremiumContinuation,
   type PetPremiumReturnTo,
@@ -41,7 +42,10 @@ type Props = {
 
 export function PetPremiumPaywall({ locale, continuation, returnTo, loginRequired }: Props) {
   const t = UI[locale];
-  const paymentHref = buildPetPremiumPaymentHref({ ...continuation, returnTo });
+  const paymentHref =
+    returnTo === "mbti_standalone"
+      ? buildMbtiStandalonePaymentHref(continuation)
+      : buildPetPremiumPaymentHref({ ...continuation, returnTo });
 
   if (loginRequired) {
     return (

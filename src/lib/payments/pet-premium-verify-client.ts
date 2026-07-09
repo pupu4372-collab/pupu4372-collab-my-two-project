@@ -1,13 +1,16 @@
+import type { PetProductCode } from "@/lib/payments/pet-product-catalog";
+
 export type PetPremiumVerifyResult =
   | { ok: true }
   | { ok: false; status: number; error: string };
 
 export async function verifyPetPremiumPayment(input: {
   paymentId: string;
+  productCode: PetProductCode;
   petId: string | null;
   accessToken: string | null;
 }): Promise<PetPremiumVerifyResult> {
-  const { paymentId, petId, accessToken } = input;
+  const { paymentId, productCode, petId, accessToken } = input;
 
   try {
     const res = await fetch("/api/payment/verify", {
@@ -18,7 +21,7 @@ export async function verifyPetPremiumPayment(input: {
       },
       body: JSON.stringify({
         payment_id: paymentId,
-        product_code: "pet_premium_v1",
+        product_code: productCode,
         pet_id: petId,
       }),
     });
@@ -28,7 +31,7 @@ export async function verifyPetPremiumPayment(input: {
     if (!res.ok) {
       const error = data.error ?? "verify_failed";
       console.error(
-        `[PET_PREMIUM_VERIFY_FAILED] paymentId=${paymentId} status=${res.status} error=${error}`
+        `[PET_PREMIUM_VERIFY_FAILED] paymentId=${paymentId} product_code=${productCode} status=${res.status} error=${error}`
       );
       return { ok: false, status: res.status, error };
     }
@@ -37,7 +40,7 @@ export async function verifyPetPremiumPayment(input: {
   } catch (err) {
     const message = err instanceof Error ? err.message : "network_error";
     console.error(
-      `[PET_PREMIUM_VERIFY_FAILED] paymentId=${paymentId} status=0 error=${message}`
+      `[PET_PREMIUM_VERIFY_FAILED] paymentId=${paymentId} product_code=${productCode} status=0 error=${message}`
     );
     return { ok: false, status: 0, error: message };
   }

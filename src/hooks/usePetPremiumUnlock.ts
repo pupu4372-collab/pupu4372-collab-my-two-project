@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { PetUnlockScope } from "@/lib/payments/pet-product-catalog";
 
 export type PetPremiumUnlockStatus =
   | "idle"
@@ -19,10 +20,14 @@ function shouldPollAfterPayment(): boolean {
 
 async function fetchUnlockStatus(
   petId: string | null | undefined,
-  accessToken: string
+  accessToken: string,
+  scope: PetUnlockScope
 ): Promise<{ unlocked?: boolean; reason?: string }> {
-  const qs = petId ? `?petId=${encodeURIComponent(petId)}` : "";
-  const res = await fetch(`/api/payments/pet-premium/unlock${qs}`, {
+  const qs = new URLSearchParams();
+  if (petId) qs.set("petId", petId);
+  if (scope === "mbti") qs.set("scope", "mbti");
+  const query = qs.toString();
+  const res = await fetch(`/api/payments/pet-premium/unlock${query ? `?${query}` : ""}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",
   });
@@ -32,7 +37,8 @@ async function fetchUnlockStatus(
 export function usePetPremiumUnlock(
   petId: string | null | undefined,
   accessToken: string | null,
-  enabled: boolean
+  enabled: boolean,
+  scope: PetUnlockScope = "package"
 ) {
   const [status, setStatus] = useState<PetPremiumUnlockStatus>("idle");
 
@@ -58,7 +64,7 @@ export function usePetPremiumUnlock(
         if (cancelled) return;
 
         try {
-          const data = await fetchUnlockStatus(petId, accessToken);
+          const data = await fetchUnlockStatus(petId, accessToken, scope);
           if (cancelled) return;
 
           if (data.unlocked === true) {
@@ -84,7 +90,7 @@ export function usePetPremiumUnlock(
     return () => {
       cancelled = true;
     };
-  }, [petId, accessToken, enabled]);
+  }, [petId, accessToken, enabled, scope]);
 
   return {
     status,

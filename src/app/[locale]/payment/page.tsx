@@ -17,20 +17,23 @@ import {
   stripPortOneRedirectParams,
 } from "@/lib/payments/portone-redirect-return";
 import { normalizePetPremiumReturnTo } from "@/lib/payments/pet-premium-return-to";
+import {
+  formatPetProductPrice,
+  PET_MBTI_STANDALONE_CODE,
+  PET_PREMIUM_PACKAGE_CODE,
+  PET_PRODUCT_AMOUNT_KRW,
+  PET_PRODUCT_ORDER_NAME,
+  PET_PRODUCT_PAYMENT_ID_PREFIX,
+  type PetProductCode,
+} from "@/lib/payments/pet-product-catalog";
+import { resolveProductFromQuery } from "@/lib/payments/pet-premium-unlock-client";
 import { verifyPetPremiumPayment } from "@/lib/payments/pet-premium-verify-client";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const UI = {
+const SHARED_UI = {
   ko: {
-    title: "프리미엄 잠금 해제",
-    subtitle: "상세 MBTI · 별자리 · 집사 궁합까지 — 우리 아이 맞춤 케어 가이드를 한 번에 받아보세요.",
-    product: "펫 프리미엄 패키지",
-    includes: ["🧠 상세 MBTI 케어", "🔭 별자리 케어 가이드", "💞 펫·집사 궁합 케어"],
-    price: "₩4,500",
-    priceNote: "1회 결제 · 해당 펫 영구 잠금 해제",
-    cta: "₩4,500 결제하기",
     processing: "결제 처리 중...",
     successMsg: "결제 완료! 이동 중...",
     errorMsg: "결제에 실패했어요. 다시 시도해 주세요.",
@@ -39,15 +42,9 @@ const UI = {
     verifyRetryCta: "다시 확인하기",
     verifyRetryNote: "결제가 이미 완료된 경우 요금이 중복 청구되지 않습니다.",
     cancel: "취소",
+    priceNote: "1회 결제 · 해당 펫 영구 잠금 해제",
   },
   en: {
-    title: "Unlock Premium",
-    subtitle: "Detailed MBTI, zodiac, and pet–butler bond—personalized care guides for your pet, all in one unlock.",
-    product: "Pet Premium Package",
-    includes: ["🧠 Detailed MBTI care", "🔭 Zodiac care guide", "💞 Pet & butler bond care"],
-    price: "₩4,500",
-    priceNote: "One-time payment · Permanent unlock for this pet",
-    cta: "Pay ₩4,500",
     processing: "Processing...",
     successMsg: "Payment complete! Redirecting...",
     errorMsg: "Payment failed. Please try again.",
@@ -56,8 +53,52 @@ const UI = {
     verifyRetryCta: "Check again",
     verifyRetryNote: "If payment already went through, you will not be charged again.",
     cancel: "Cancel",
+    priceNote: "One-time payment · Permanent unlock for this pet",
   },
 } as const;
+
+const PRODUCT_UI: Record<
+  PetProductCode,
+  Record<"ko" | "en", { title: string; subtitle: string; product: string; includes: string[]; cta: string }>
+> = {
+  [PET_PREMIUM_PACKAGE_CODE]: {
+    ko: {
+      title: "프리미엄 잠금 해제",
+      subtitle: "상세 MBTI · 별자리 · 집사 궁합까지 — 우리 아이 맞춤 케어 가이드를 한 번에 받아보세요.",
+      product: "펫 프리미엄 패키지",
+      includes: ["🧠 상세 MBTI 케어", "🔭 별자리 케어 가이드", "💞 펫·집사 궁합 케어"],
+      cta: "₩4,500 결제하기",
+    },
+    en: {
+      title: "Unlock Premium",
+      subtitle: "Detailed MBTI, zodiac, and pet–butler bond—personalized care guides for your pet, all in one unlock.",
+      product: "Pet Premium Package",
+      includes: ["🧠 Detailed MBTI care", "🔭 Zodiac care guide", "💞 Pet & butler bond care"],
+      cta: "Pay ₩4,500",
+    },
+  },
+  [PET_MBTI_STANDALONE_CODE]: {
+    ko: {
+      title: "MBTI 상세 진단",
+      subtitle: "15문항 행동 진단으로 우리 아이 성향 유형과 사주×MBTI 맞춤 케어 팁을 확인해 보세요.",
+      product: "펫 MBTI 상세 진단",
+      includes: ["🧠 15문항 행동 진단", "📊 4축 성향 분석", "💡 사주×MBTI 맞춤 케어"],
+      cta: "₩1,900 결제하기",
+    },
+    en: {
+      title: "Detailed MBTI",
+      subtitle: "A 15-question behavior check with saju×MBTI personalized care tips.",
+      product: "Pet MBTI Detailed Report",
+      includes: ["🧠 15-question behavior check", "📊 Four-axis analysis", "💡 Saju×MBTI care tips"],
+      cta: "Pay $2.00",
+    },
+  },
+};
+
+/** Display amounts only — actual charge verification uses server PRODUCT_AMOUNT (see verify route). */
+function productDisplayPrice(code: PetProductCode, locale: "ko" | "en"): string {
+  return formatPetProductPrice(code, locale);
+}
 
 type PaymentUiStatus =
   | "idle"
@@ -104,7 +145,14 @@ function PaymentContent() {
   const loginRedirected = useRef(false);
 
   const locale = (params.get("locale") ?? "ko") as "ko" | "en";
-  const t = UI[locale];
+  const productCode = useMemo(
+    () => resolveProductFromQuery(params.get("product")),
+    [params]
+  );
+  const productCopy = PRODUCT_UI[productCode][locale];
+  const shared = SHARED_UI[locale];
+  const displayPrice = productDisplayPrice(productCode, locale);
+  const chargeAmount = PET_PRODUCT_AMOUNT_KRW[productCode];
 
   const normalizedReturnTo = useMemo(
     () => normalizePetPremiumReturnTo(params.get("returnTo")),
@@ -153,8 +201,9 @@ function PaymentContent() {
     savePetPremiumCheckout({
       continuationQuery,
       returnTo: normalizedReturnTo,
+      productCode,
     });
-  }, [continuationQuery, normalizedReturnTo]);
+  }, [continuationQuery, normalizedReturnTo, productCode]);
 
   useEffect(() => {
     if (document.querySelector('script[src*="cdn.portone.io"]')) {
@@ -194,12 +243,13 @@ function PaymentContent() {
   );
 
   const runVerify = useCallback(
-    async (paymentId: string) => {
+    async (paymentId: string, verifyProductCode: PetProductCode = productCode) => {
       setStatus("processing");
       setReturnNotice(null);
 
       const result = await verifyPetPremiumPayment({
         paymentId,
+        productCode: verifyProductCode,
         petId: params.get("petId"),
         accessToken,
       });
@@ -213,7 +263,7 @@ function PaymentContent() {
       setStatus("verify_failed");
       replaceWithCleanCheckoutUrl();
     },
-    [accessToken, completeVerifiedPayment, params, replaceWithCleanCheckoutUrl]
+    [accessToken, completeVerifiedPayment, params, productCode, replaceWithCleanCheckoutUrl]
   );
 
   useEffect(() => {
@@ -233,13 +283,16 @@ function PaymentContent() {
 
     if (redirect.kind === "success_pending_verify") {
       redirectHandled.current = true;
-      void runVerify(redirect.paymentId);
+      const stored = readPetPremiumCheckout();
+      const verifyProduct = stored?.productCode ?? productCode;
+      void runVerify(redirect.paymentId, verifyProduct);
     }
-  }, [accessToken, locale, params, replaceWithCleanCheckoutUrl, runVerify]);
+  }, [accessToken, locale, params, productCode, replaceWithCleanCheckoutUrl, runVerify]);
 
   async function handleRetryVerify() {
     if (!verifyFailedPaymentId) return;
-    await runVerify(verifyFailedPaymentId);
+    const stored = readPetPremiumCheckout();
+    await runVerify(verifyFailedPaymentId, stored?.productCode ?? productCode);
   }
 
   async function handlePay() {
@@ -249,7 +302,7 @@ function PaymentContent() {
     setReturnNotice(null);
     setVerifyFailedPaymentId(null);
 
-    const checkout = await assertPetPremiumCheckoutAllowed(accessToken);
+    const checkout = await assertPetPremiumCheckoutAllowed(accessToken, productCode);
     if (!checkout.ok) {
       if (checkout.status === 401) {
         const qs = params.toString();
@@ -274,11 +327,12 @@ function PaymentContent() {
       return;
     }
 
-    const paymentId = `pet_premium_v1_${Date.now()}`;
+    const paymentId = `${PET_PRODUCT_PAYMENT_ID_PREFIX[productCode]}_${Date.now()}`;
     savePendingPetPremiumPaymentId(paymentId);
     savePetPremiumCheckout({
       continuationQuery,
       returnTo: normalizedReturnTo,
+      productCode,
     });
 
     const redirectUrl = buildPortOneRedirectUrl();
@@ -287,8 +341,8 @@ function PaymentContent() {
       const response = await PortOne.requestPayment({
         storeId: process.env.NEXT_PUBLIC_PORTONE_SHOP_ID ?? "",
         paymentId,
-        orderName: "펫 프리미엄 패키지 (MBTI + 별자리 + 궁합)",
-        totalAmount: 4500,
+        orderName: PET_PRODUCT_ORDER_NAME[productCode],
+        totalAmount: chargeAmount,
         currency: "KRW",
         channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
         payMethod: "CARD",
@@ -312,6 +366,7 @@ function PaymentContent() {
 
       const result = await verifyPetPremiumPayment({
         paymentId,
+        productCode,
         petId: params.get("petId"),
         accessToken,
       });
@@ -340,13 +395,13 @@ function PaymentContent() {
     <div className="mx-auto max-w-md space-y-6 px-4 py-12">
       <div className="rounded-[2rem] bg-white p-8 shadow-sm">
         <p className="text-xs font-bold uppercase tracking-widest text-primary/60">
-          {t.title}
+          {productCopy.title}
         </p>
-        <h1 className="mt-2 text-2xl font-extrabold text-primary">{t.product}</h1>
-        <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{t.subtitle}</p>
+        <h1 className="mt-2 text-2xl font-extrabold text-primary">{productCopy.product}</h1>
+        <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{productCopy.subtitle}</p>
 
         <ul className="mt-6 space-y-2">
-          {t.includes.map((item) => (
+          {productCopy.includes.map((item) => (
             <li key={item} className="flex items-center gap-2 text-sm font-semibold text-primary">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs">✓</span>
               {item}
@@ -355,8 +410,8 @@ function PaymentContent() {
         </ul>
 
         <div className="mt-8 rounded-2xl bg-surface-container-low px-6 py-4 text-center">
-          <p className="text-3xl font-extrabold text-primary">{t.price}</p>
-          <p className="mt-1 text-xs text-on-surface-variant">{t.priceNote}</p>
+          <p className="text-3xl font-extrabold text-primary">{displayPrice}</p>
+          <p className="mt-1 text-xs text-on-surface-variant">{shared.priceNote}</p>
         </div>
 
         {returnNotice && status === "idle" && (
@@ -367,27 +422,27 @@ function PaymentContent() {
 
         {(status === "error" || status === "sdk_error") && (
           <p className="mt-4 rounded-2xl bg-petal/40 px-4 py-2.5 text-sm text-plum" role="alert">
-            {status === "sdk_error" ? t.sdkError : t.errorMsg}
+            {status === "sdk_error" ? shared.sdkError : shared.errorMsg}
           </p>
         )}
 
         {status === "verify_failed" && (
           <div className="mt-4 space-y-3 rounded-2xl bg-petal/40 px-4 py-3 text-sm text-plum" role="alert">
-            <p>{t.verifyFailedMsg}</p>
-            <p className="text-xs text-plum/80">{t.verifyRetryNote}</p>
+            <p>{shared.verifyFailedMsg}</p>
+            <p className="text-xs text-plum/80">{shared.verifyRetryNote}</p>
             <button
               type="button"
               onClick={() => void handleRetryVerify()}
               className="w-full rounded-full bg-[#6f4b8b] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#5f3f78]"
             >
-              {t.verifyRetryCta}
+              {shared.verifyRetryCta}
             </button>
           </div>
         )}
 
         {status === "success" && (
           <p className="mt-4 rounded-2xl bg-mint/40 px-4 py-2.5 text-sm text-primary" role="status">
-            {t.successMsg}
+            {shared.successMsg}
           </p>
         )}
 
@@ -396,7 +451,7 @@ function PaymentContent() {
           disabled={payDisabled}
           className="mt-6 w-full rounded-full bg-[#6f4b8b] px-8 py-4 text-base font-extrabold text-white shadow-xl shadow-[#6f4b8b]/25 transition hover:bg-[#5f3f78] active:scale-[0.98] disabled:opacity-60"
         >
-          {status === "processing" ? t.processing : t.cta}
+          {status === "processing" ? shared.processing : productCopy.cta}
         </button>
 
         <button
@@ -404,7 +459,7 @@ function PaymentContent() {
           onClick={handleCancel}
           className="mt-3 w-full rounded-full py-3 text-sm text-on-surface-variant transition hover:text-primary"
         >
-          {t.cancel}
+          {shared.cancel}
         </button>
       </div>
     </div>

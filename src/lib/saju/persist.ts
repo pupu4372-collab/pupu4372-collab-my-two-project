@@ -65,6 +65,9 @@ export async function persistSajuResult(
     summary: result.story,
     storytelling_payload: {
       traits: result.traits,
+      sajuNarrative: result.sajuNarrative ?? null,
+      carePointText: result.carePointText ?? null,
+      pillarsSummaryLine: result.pillarsSummaryLine ?? null,
       kstJiji: result.kstJiji,
       headline: result.headline,
       story: result.story,

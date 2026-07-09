@@ -1,3 +1,7 @@
+import {
+  isAllowedPetProductCode,
+  PET_PREMIUM_PACKAGE_CODE,
+} from "@/lib/payments/pet-product-catalog";
 import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
 
@@ -12,12 +16,14 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as { product_code?: string };
   } catch {
-    // empty body is fine for pet_premium_v1 default
+    // empty body defaults to pet_premium_v1
   }
 
-  if (body.product_code && body.product_code !== "pet_premium_v1") {
+  if (body.product_code && !isAllowedPetProductCode(body.product_code)) {
     return NextResponse.json({ error: "unknown product" }, { status: 400 });
   }
 
-  return NextResponse.json({ ok: true });
+  const productCode = body.product_code ?? PET_PREMIUM_PACKAGE_CODE;
+
+  return NextResponse.json({ ok: true, product_code: productCode });
 }

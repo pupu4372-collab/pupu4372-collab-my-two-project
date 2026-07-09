@@ -55,8 +55,6 @@ export interface PetMbtiResult {
   summaryEn: string;
 }
 
-export const PET_MBTI_PREMIUM_PRICE = 3900;
-
 export const PET_MBTI_QUESTIONS: PetMbtiQuestion[] = [
   {
     id: "q1",

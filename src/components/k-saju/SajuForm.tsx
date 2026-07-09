@@ -1,10 +1,11 @@
 "use client";
 
-import { PetMbtiAccordion } from "@/components/k-saju/PetMbtiAccordion";
+import { MbtiLockTeaserCard } from "@/components/k-saju/MbtiLockTeaserCard";
 import { SajuResult } from "@/components/k-saju/SajuResult";
+import { usePetPremiumUnlock } from "@/hooks/usePetPremiumUnlock";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { PetBasicInfoFields } from "@/components/pet/PetBasicInfoFields";
-import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { fetchPetProfileForSaju, petProfileToSajuFormState } from "@/lib/pets/load-pet-for-saju";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { Gender, Locale, SajuBasicResponse, Species } from "@/lib/saju/types";
@@ -202,8 +203,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     clearSajuResultSession();
     setLoading(true);
 
-    const mbtiResult = calcMbti(mbtiAnswers, mbtiQuestions);
-    const mbtiComplete = isMbtiComplete(mbtiAnswers, mbtiQuestions);
     const birthTimeUnknownNow = birthTime === "unknown";
 
     try {
@@ -226,9 +225,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
           timezone,
           locale,
           privacyConsent: consent,
-          ...(mbtiComplete
-            ? { mbtiType: mbtiResult.type, mbtiScores: mbtiResult.scores }
-            : {}),
         }),
       });
 
@@ -257,7 +253,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
         birthTime,
         timezone,
         locale,
-        mbtiAnswers,
+        ...(Object.keys(mbtiAnswers).length > 0 ? { mbtiAnswers } : {}),
       });
 
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -273,7 +269,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     consent,
     locale,
     mbtiAnswers,
-    mbtiQuestions,
     petGender,
     petName,
     species,
@@ -329,28 +324,23 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   ]);
 
   const petId = result?.petId ?? prefillPetId;
+  const mbtiUnlockCheckEnabled = configured && sessionReady && !isAnonymous && Boolean(petId);
+  const { unlocked: mbtiUnlocked, loading: mbtiUnlockLoading } = usePetPremiumUnlock(
+    petId,
+    accessToken,
+    mbtiUnlockCheckEnabled,
+    "mbti"
+  );
+  const isGuest = configured && sessionReady && isAnonymous;
 
-  const mbtiCompleteForLink = isMbtiComplete(mbtiAnswers, mbtiQuestions);
-  const mbtiTypeForLink = mbtiCompleteForLink
-    ? calcMbti(mbtiAnswers, mbtiQuestions).type
+  const restoredMbtiComplete = isMbtiComplete(mbtiAnswers, mbtiQuestions);
+  const restoredMbtiResult = useMemo(
+    () => (restoredMbtiComplete ? calcMbti(mbtiAnswers, mbtiQuestions) : null),
+    [mbtiAnswers, mbtiQuestions, restoredMbtiComplete]
+  );
+  const restoredMbtiTypeData = restoredMbtiResult
+    ? getMbtiTypeData(restoredMbtiResult.type)
     : null;
-
-  const continuationQuery = new URLSearchParams({
-    petName,
-    species,
-    petGender,
-    birthDate,
-    birthTime,
-    timezone,
-    locale,
-    ...(petId ? { petId } : {}),
-    ...(mbtiTypeForLink ? { mbtiType: mbtiTypeForLink } : {}),
-  }).toString();
-  const premiumPaymentHref = `/payment?product=pet_premium_v1&${continuationQuery}`;
-
-  function handleMbtiAnswer(questionId: string, value: 0 | 1) {
-    setMbtiAnswers((prev) => ({ ...prev, [questionId]: value }));
-  }
 
   function handleFormNext(e: React.FormEvent) {
     e.preventDefault();
@@ -368,36 +358,48 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     void handleApiSubmit();
   }
 
-  const mbtiResult = useMemo(
-    () => calcMbti(mbtiAnswers, mbtiQuestions),
-    [mbtiAnswers, mbtiQuestions]
-  );
-  const mbtiTypeData = getMbtiTypeData(mbtiResult.type);
-
   if (step === "result" && result) {
     return (
       <div className="space-y-8 pb-40 md:pb-20">
-        {mbtiTypeData && isMbtiComplete(mbtiAnswers, mbtiQuestions) && (
+        {restoredMbtiTypeData && restoredMbtiResult ? (
           <section className="rounded-[2rem] bg-white p-6 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-outline">
               {t.mbtiResultDesc}
             </p>
             <h3 className="mt-2 text-2xl font-extrabold text-primary">
-              {t.mbtiResultTitle(petName, mbtiTypeData.titleKo)}
+              {t.mbtiResultTitle(petName, restoredMbtiTypeData.titleKo)}
             </h3>
             <p className="mt-1 text-sm leading-6 text-on-surface-variant">
-              {mbtiTypeData.descKo}
+              {restoredMbtiTypeData.descKo}
             </p>
             <span className="mt-4 inline-flex rounded-full bg-channel-saju/20 px-4 py-1.5 text-xl font-bold tracking-wide text-channel-saju">
-              {mbtiResult.type}
+              {restoredMbtiResult.type}
             </span>
           </section>
+        ) : (
+          <MbtiLockTeaserCard
+            petName={petName}
+            locale={locale}
+            isGuest={isGuest}
+            mbtiUnlocked={mbtiUnlocked}
+            mbtiUnlockLoading={mbtiUnlockCheckEnabled && mbtiUnlockLoading}
+            continuation={{
+              petName,
+              species,
+              petGender,
+              birthDate,
+              birthTime,
+              timezone,
+              petId: petId ?? undefined,
+              sajuResultId: result.sajuResultId ?? undefined,
+            }}
+          />
         )}
 
         <SajuResult
           result={result}
           variant={embedded ? "pastel" : "default"}
-          mbtiType={isMbtiComplete(mbtiAnswers, mbtiQuestions) ? mbtiResult.type : undefined}
+          mbtiType={restoredMbtiResult?.type}
         />
       </div>
     );
@@ -502,10 +504,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
                     <button
                       key={item.value}
                       type="button"
-                      onClick={() => {
-                        setSpecies(item.value);
-                        setMbtiAnswers({});
-                      }}
+                      onClick={() => setSpecies(item.value)}
                       className={
                         species === item.value
                           ? "flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-primary bg-primary/10 text-primary shadow-sm"
@@ -559,14 +558,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
             variant={embedded ? "pastelCompact" : "plain"}
           />
         </div>
-
-        <PetMbtiAccordion
-          species={species}
-          questions={mbtiQuestions}
-          answers={mbtiAnswers}
-          onAnswer={handleMbtiAnswer}
-          locale={locale}
-        />
 
         {error && (
           <p className={FORM_ERROR_CLASS} role="alert">

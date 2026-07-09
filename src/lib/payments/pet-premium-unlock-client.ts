@@ -2,6 +2,12 @@ import {
   normalizePetPremiumReturnTo,
   type PetPremiumReturnTo,
 } from "@/lib/payments/pet-premium-return-to";
+import {
+  normalizePetProductCode,
+  PET_MBTI_STANDALONE_CODE,
+  PET_PREMIUM_PACKAGE_CODE,
+  type PetProductCode,
+} from "@/lib/payments/pet-product-catalog";
 import { readSajuResultSession } from "@/lib/saju/saju-result-session";
 import type { Locale } from "@/lib/saju/types";
 
@@ -19,11 +25,13 @@ export type PetPremiumContinuation = {
   sajuResultId?: string | null;
   mbtiType?: string;
   returnTo?: PetPremiumReturnTo;
+  product?: PetProductCode;
 };
 
 export function buildPetPremiumPaymentHref(input: PetPremiumContinuation): string {
+  const product = input.product ?? PET_PREMIUM_PACKAGE_CODE;
   const params = new URLSearchParams({
-    product: "pet_premium_v1",
+    product,
     petName: input.petName,
     species: input.species,
     birthDate: input.birthDate,
@@ -40,6 +48,16 @@ export function buildPetPremiumPaymentHref(input: PetPremiumContinuation): strin
   return `/payment?${params.toString()}`;
 }
 
+export function buildMbtiStandalonePaymentHref(
+  input: Omit<PetPremiumContinuation, "product" | "returnTo">
+): string {
+  return buildPetPremiumPaymentHref({
+    ...input,
+    product: PET_MBTI_STANDALONE_CODE,
+    returnTo: "mbti_standalone",
+  });
+}
+
 export function buildPetPremiumSuccessHref(
   continuationQuery: string,
   returnTo: string | null | undefined
@@ -47,6 +65,10 @@ export function buildPetPremiumSuccessHref(
   const safeReturnTo = normalizePetPremiumReturnTo(returnTo);
   const withPoll = new URLSearchParams(continuationQuery);
   withPoll.set("premiumUnlockPoll", "1");
+
+  if (safeReturnTo === "mbti_standalone") {
+    return `/saju/mbti?${withPoll.toString()}`;
+  }
 
   if (safeReturnTo === "zodiac-page") {
     return `/saju/zodiac?${withPoll.toString()}`;
@@ -70,9 +92,9 @@ export function buildPetPremiumCancelHref(
   const params = new URLSearchParams(continuationQuery);
   const sajuResultId = params.get("sajuResultId");
 
-  if (safeReturnTo === "basic") {
+  if (safeReturnTo === "basic" || safeReturnTo === "mbti_standalone") {
     if (sajuResultId) return `/reports/${sajuResultId}`;
-    // Guests cannot reach /payment by policy; defensive fallback only.
+    if (readSajuResultSession()) return "/saju?restore=1";
     return "/saju?restore=1";
   }
 
@@ -93,4 +115,8 @@ export function buildPetPremiumCancelHref(
     return `/saju/premium?${params.toString()}`;
   }
   return "/saju";
+}
+
+export function resolveProductFromQuery(productParam: string | null): PetProductCode {
+  return normalizePetProductCode(productParam);
 }

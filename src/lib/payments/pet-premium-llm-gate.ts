@@ -1,4 +1,13 @@
-import { hasPetPremiumUnlock } from "@/lib/payments/portone/entitlement";
+import {
+  hasAnyPetProductUnlock,
+  hasPetPremiumUnlock,
+} from "@/lib/payments/portone/entitlement";
+import {
+  PET_MBTI_UNLOCK_CODES,
+  PET_PACKAGE_UNLOCK_CODES,
+  PET_PREMIUM_PACKAGE_CODE,
+  type PetProductCode,
+} from "@/lib/payments/pet-product-catalog";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -14,7 +23,8 @@ export type PetPremiumLlmGateError = {
 /** Production/preview: require Supabase + login + premium unlock. Dev: bypass gate. */
 export async function checkPetPremiumLlmGate(
   request: Request,
-  petId?: string | null
+  petId?: string | null,
+  allowedProductCodes: readonly PetProductCode[] = PET_PACKAGE_UNLOCK_CODES
 ): Promise<PetPremiumLlmGateError | null> {
   if (process.env.NODE_ENV !== "production") {
     return null;
@@ -32,16 +42,19 @@ export async function checkPetPremiumLlmGate(
     return { status: 401, error: "login_required" };
   }
 
-  const unlocked = await hasPetPremiumUnlock(
-    userClient,
-    userId,
-    "pet_premium_v1",
-    petId ?? null
-  );
+  const unlocked =
+    allowedProductCodes.length === 1 && allowedProductCodes[0] === PET_PREMIUM_PACKAGE_CODE
+      ? await hasPetPremiumUnlock(userClient, userId, PET_PREMIUM_PACKAGE_CODE, petId ?? null)
+      : await hasAnyPetProductUnlock(userClient, userId, allowedProductCodes, petId ?? null);
 
   if (!unlocked) {
     return { status: 403, error: "premium_required" };
   }
 
   return null;
+}
+
+/** MBTI premium API gate — pet_mbti_v1 OR pet_premium_v1. */
+export function checkPetMbtiLlmGate(request: Request, petId?: string | null) {
+  return checkPetPremiumLlmGate(request, petId, PET_MBTI_UNLOCK_CODES);
 }

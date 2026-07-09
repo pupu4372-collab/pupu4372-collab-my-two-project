@@ -19,7 +19,6 @@ export function applyPetInterpretationToBasicResponse(
   result.traits = [
     mapping.dayMasterArchetype.keyword,
     ...mapping.dominantTraits.personality,
-    ...mapping.weakTraits.healthFocus.slice(0, 1),
   ]
     .map((trait) => trait.trim())
     .filter(Boolean)
