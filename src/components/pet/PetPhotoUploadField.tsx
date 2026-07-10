@@ -9,7 +9,7 @@ const UI = {
   ko: {
     label: "펫 사진 (선택)",
     hint: (name: string) =>
-      `사진을 등록하면 매일 카드에 ${withJosa(name, "이/가")} 담겨요`,
+      `사진을 등록하면 인스타공유 카드에 ${withJosa(name, "이/가")} 담겨요`,
     pick: "사진 선택",
     change: "다른 사진 선택",
     remove: "사진 제거",
@@ -19,7 +19,7 @@ const UI = {
   },
   en: {
     label: "Pet photo (optional)",
-    hint: (name: string) => `Add a photo and ${name} appears on daily fortune cards`,
+    hint: (name: string) => `Add a photo and ${name} appears on Instagram share cards`,
     pick: "Choose photo",
     change: "Choose another",
     remove: "Remove photo",

@@ -202,25 +202,20 @@ export function CatChannelHome({
         </div>
       </section>
 
-      <section className="overflow-visible">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-2xl font-extrabold text-white md:text-3xl">
-              {isKo ? "사주 맞춤 케어" : "K-Saju tailored care"}
-            </h2>
-            <p className="mt-1 text-sm text-white/75">
-              {isKo ? "오행(五行)으로 분석하는 반려묘의 성향과 돌봄법" : "Care cues from the five elements"}
-            </p>
-          </div>
-          <Link href="/saju" className="flex items-center gap-1 text-sm font-extrabold text-[#ffd7ff]">
-            {isKo ? "전체보기" : "View all"} <span aria-hidden>→</span>
-          </Link>
+      <section>
+        <div className="mb-6">
+          <h2 className="text-2xl font-extrabold text-white md:text-3xl">
+            {isKo ? "사주 맞춤 케어" : "K-Saju tailored care"}
+          </h2>
+          <p className="mt-1 text-sm text-white/75">
+            {isKo ? "오행(五行)으로 분석하는 반려묘의 성향과 돌봄법" : "Care cues from the five elements"}
+          </p>
         </div>
-        <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-4 pr-8 hide-scrollbar sm:-mx-6 sm:px-6 sm:pr-10">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {SAJU_CARE.map((card) => (
             <div
               key={card.element}
-              className={`flex min-w-[280px] snap-start scroll-ml-4 flex-col rounded-[2rem] border p-8 shadow-sm md:min-w-[320px] ${
+              className={`flex flex-col rounded-[2rem] border p-8 shadow-sm ${
                 card.highlight
                   ? "border-channel-cat/30 bg-cream"
                   : "border-white/20 bg-cream"
@@ -336,11 +331,11 @@ export function CatChannelHome({
                   href={`/cat/guide/${article.id}`}
                   className="rounded-[1.5rem] border border-white/20 bg-cream p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
                 >
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-channel-cat">
+                  <span className="text-xs font-extrabold uppercase tracking-wider text-ink">
                     {article.category}
                   </span>
                   <h3 className="mt-2 line-clamp-2 font-extrabold text-ink">{article.title}</h3>
-                  <p className="mt-2 text-xs font-bold text-channel-cat">
+                  <p className="mt-2 text-xs font-bold text-ink">
                     {isKo ? "가이드 읽기" : "Read guide"} →
                   </p>
                 </Link>

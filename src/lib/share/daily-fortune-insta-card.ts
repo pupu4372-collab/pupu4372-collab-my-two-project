@@ -116,9 +116,15 @@ export function buildInstaSectionBodies(
         innate: "Innate Personality:",
         tip: "Owner Advice:",
       };
-  const todayState = truncateInstaBody(`${labels.mood} ${moodBody} ${labels.daily} ${dailyBody}`);
-  const nature = truncateInstaBody(`${labels.innate} ${fortune.innatePersonality}`);
-  const tipBody = truncateInstaBody(`${labels.tip} ${fortune.tips.map((tip) => tip.text).join(" ")}`);
+  const todayState = truncateInstaBody(
+    `${labels.mood} ${moodBody} ${labels.daily} ${dailyBody}`,
+    280
+  );
+  const nature = truncateInstaBody(`${labels.innate} ${fortune.innatePersonality}`, 180);
+  const tipBody = truncateInstaBody(
+    `${labels.tip} ${fortune.tips.map((tip) => tip.text).join(" ")}`,
+    240
+  );
 
   return { todayState, nature, tipBody };
 }
@@ -173,9 +179,9 @@ export function buildPhotoInstaCardContent(
       : `${petInstaEmoji(pet.species)} ${pet.name}'s care today`,
     harmony: harmonyScore(fortune),
     todayStateTitle: isKo ? "오늘의 아이 상태" : "Today's mood",
-    todayStateBody: truncateInstaBody(sections.todayState, 140),
+    todayStateBody: sections.todayState,
     tipTitle: isKo ? "집사를 위한 팁" : "Tip for butler",
-    tipBody: truncateInstaBody(sections.tipBody, 140),
+    tipBody: sections.tipBody,
   };
 }
 

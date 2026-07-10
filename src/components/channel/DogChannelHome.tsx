@@ -119,9 +119,9 @@ export function DogChannelHome({
         <img
           src={`${IMAGE_BASE}/dog-01.jpg`}
           alt=""
-          className="h-full w-full object-cover transition duration-1000 group-hover:scale-105"
+          className="h-full w-full object-cover brightness-[1.14] contrast-[1.1] saturate-[1.08] transition duration-1000 group-hover:scale-105"
         />
-        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent p-8 text-white md:p-16">
+        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/50 via-black/15 to-transparent p-8 text-white md:p-16">
           <span className="inline-flex w-fit rounded-full bg-channel-dog px-4 py-1 text-xs font-extrabold uppercase tracking-wider">
             {isKo ? "건강" : "Wellness"}
           </span>

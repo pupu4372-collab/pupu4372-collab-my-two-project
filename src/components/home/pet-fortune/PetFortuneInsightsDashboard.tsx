@@ -252,14 +252,14 @@ export function PetFortuneInsightsDashboard({
         <p className="text-center text-sm leading-relaxed text-stone-700">
           {isKo ? (
             <>
-              사진을 등록하면 매일 카드에 {withJosa(pet.name, "이/가")} 담겨요.{" "}
+              사진을 등록하면 인스타공유 카드에 {withJosa(pet.name, "이/가")} 담겨요.{" "}
               <Link href="/profile" className="font-bold text-channel-saju underline underline-offset-2">
                 펫 프로필에서 등록하기
               </Link>
             </>
           ) : (
             <>
-              Add a photo and {pet.name} appears on daily fortune cards.{" "}
+              Add a photo and {pet.name} appears on Instagram share cards.{" "}
               <Link href="/profile" className="font-bold text-channel-saju underline underline-offset-2">
                 Register in pet profile
               </Link>
