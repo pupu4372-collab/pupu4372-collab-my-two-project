@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { buildHumanPremiumReportUrl } from "./email";
 import { resolveHumanPremiumEmail } from "./email-policy";
 import { humanPremiumWebExpiresAt } from "./retention";
-import { REPORT_TYPE_ORDER, getCheckoutCurrency, sumCartAmount } from "./pricing";
+import { getCheckoutCurrency, isFullReportCart, resolveCartAmount } from "./pricing";
 import {
   completeHumanPremiumPayment,
   parseHumanPremiumReportInput,
@@ -19,11 +19,24 @@ import type {
   HumanPremiumBirthBasis,
   HumanPremiumCartGeneratedItem,
   HumanPremiumCartMeta,
+  HumanPremiumPaymentProvider,
   HumanPremiumReportInput,
   HumanPremiumReportRow,
   ReportType,
 } from "./types";
 import { normalizeReportTypeKey } from "./types";
+
+const PAID_CART_STATUSES = new Set([
+  "paid",
+  "ready",
+  "email_sent",
+  "email_failed",
+  "generating",
+]);
+
+function isFulfilledCartRow(row: HumanPremiumReportRow): boolean {
+  return PAID_CART_STATUSES.has(row.status);
+}
 
 export function parseCartReportTypes(value: unknown): ReportType[] {
   if (!Array.isArray(value)) return [];
@@ -57,6 +70,10 @@ function getCartMeta(row: HumanPremiumReportRow): HumanPremiumCartMeta | null {
   return normalizeCartMeta(cart);
 }
 
+export function isHumanPremiumCartOrderRow(row: HumanPremiumReportRow): boolean {
+  return Boolean(getCartMeta(row));
+}
+
 function rowMatchesBirthProfile(
   row: HumanPremiumReportRow,
   input: HumanPremiumReportInput
@@ -79,6 +96,7 @@ async function getPurchasedReportTypesForInput(
   const rows = await listHumanPremiumCartOrderRows({ userId, email, limit: 50 });
   const types = new Set<ReportType>();
   for (const row of rows) {
+    if (!isFulfilledCartRow(row)) continue;
     if (!rowMatchesBirthProfile(row, input)) continue;
     const cart = getCartMeta(row);
     if (!cart) continue;
@@ -87,10 +105,16 @@ async function getPurchasedReportTypesForInput(
   return types;
 }
 
-export async function createPaidCartOrder(
+async function buildCartOrderDraft(
   body: Record<string, unknown>,
-  userId?: string | null
-): Promise<{ orderId: string; cartRow: HumanPremiumReportRow; amount: number }> {
+  userId: string | null | undefined,
+  options: {
+    status: "paid" | "payment_pending";
+    paymentProvider: HumanPremiumPaymentProvider | null;
+    pgProvider?: string | null;
+    captureId?: string | null;
+  }
+): Promise<{ orderId: string; cartRow: HumanPremiumReportRow; amount: number; items: ReportType[] }> {
   const items = parseCartReportTypes(body.cartItems);
   if (!items.length) throw new Error("cartItems required.");
 
@@ -102,7 +126,7 @@ export async function createPaidCartOrder(
     throw new Error("cart_items_already_purchased");
   }
 
-  const amount = sumCartAmount(items, input.locale);
+  const amount = resolveCartAmount(items, input.locale);
   const currency = getCheckoutCurrency(input.locale);
   const orderId = `hp_cart_${randomBytes(10).toString("hex")}`;
 
@@ -125,8 +149,9 @@ export async function createPaidCartOrder(
   const cartRow = await createHumanPremiumReportDraft(
     { ...input, reportType: items[0] },
     {
-      status: "paid",
-      paymentProvider: "demo",
+      status: options.status,
+      paymentProvider: options.paymentProvider,
+      pgProvider: options.pgProvider ?? null,
       paymentOrderId: orderId,
       checkoutSessionId: `cart:${orderId}`,
       amountPaid: amount,
@@ -137,10 +162,85 @@ export async function createPaidCartOrder(
 
   const updated = await updateHumanPremiumReport(cartRow.id, {
     birth_basis: birthBasis,
+    ...(options.captureId ? { payment_capture_id: options.captureId } : {}),
+  });
+
+  return { orderId, cartRow: updated, amount, items };
+}
+
+/** Demo / bypass: create an already-paid cart parent order. */
+export async function createPaidCartOrder(
+  body: Record<string, unknown>,
+  userId?: string | null
+): Promise<{ orderId: string; cartRow: HumanPremiumReportRow; amount: number }> {
+  const { orderId, cartRow, amount } = await buildCartOrderDraft(body, userId, {
+    status: "paid",
+    paymentProvider: "demo",
+    captureId: undefined,
+  });
+
+  const updated = await updateHumanPremiumReport(cartRow.id, {
     payment_capture_id: `demo-cart-${cartRow.id}`,
   });
 
   return { orderId, cartRow: updated, amount };
+}
+
+/** PortOne: create payment_pending cart parent; amount from resolveCartAmount only. */
+export async function createPendingCartOrder(
+  body: Record<string, unknown>,
+  userId?: string | null
+): Promise<{ orderId: string; cartRow: HumanPremiumReportRow; amount: number; items: ReportType[] }> {
+  return buildCartOrderDraft(body, userId, {
+    status: "payment_pending",
+    paymentProvider: "card_pg",
+    pgProvider: "portone",
+  });
+}
+
+export function cartOrderDisplayName(
+  items: ReportType[],
+  locale: "ko" | "en" = "ko"
+): string {
+  if (isFullReportCart(items)) {
+    return locale === "ko" ? "K-Saju 올인원 번들" : "K-Saju all-in-one bundle";
+  }
+  return locale === "ko" ? "K-Saju 리포트 장바구니" : "K-Saju report cart";
+}
+
+/** Mark pending cart paid after PortOne verify/webhook. Idempotent. */
+export async function fulfillPaidCartOrder(options: {
+  orderId: string;
+  captureId: string;
+  provider?: HumanPremiumPaymentProvider;
+}): Promise<{ orderId: string; cartRow: HumanPremiumReportRow; amount: number }> {
+  const cartRow = await getHumanPremiumReportByPaymentOrderId(options.orderId);
+  if (!cartRow) throw new Error("Cart order not found.");
+  if (!getCartMeta(cartRow)) throw new Error("Invalid cart order.");
+
+  if (isFulfilledCartRow(cartRow)) {
+    return {
+      orderId: options.orderId,
+      cartRow,
+      amount: Number(cartRow.amount_paid ?? cartRow.amount_original ?? 0),
+    };
+  }
+
+  if (cartRow.status !== "payment_pending") {
+    throw new Error(`Cart order status is ${cartRow.status}, cannot fulfill.`);
+  }
+
+  const updated = await updateHumanPremiumReport(cartRow.id, {
+    status: "paid",
+    payment_provider: options.provider ?? cartRow.payment_provider ?? "card_pg",
+    payment_capture_id: options.captureId,
+  });
+
+  return {
+    orderId: options.orderId,
+    cartRow: updated,
+    amount: Number(updated.amount_paid ?? updated.amount_original ?? 0),
+  };
 }
 
 export async function generateCartReportItem(options: {
@@ -151,6 +251,9 @@ export async function generateCartReportItem(options: {
 }): Promise<{ reportId: string; webUrl: string; reportType: ReportType }> {
   const cartRow = await getHumanPremiumReportByPaymentOrderId(options.orderId);
   if (!cartRow) throw new Error("Cart order not found.");
+  if (!isFulfilledCartRow(cartRow)) {
+    throw new Error("Cart order is not paid.");
+  }
 
   const cart = getCartMeta(cartRow);
   if (!cart) throw new Error("Invalid cart order.");
@@ -367,6 +470,7 @@ export async function listHumanPremiumVaultOrders(options: {
 }) {
   const rows = await listHumanPremiumCartOrderRows(options);
   const orders = rows
+    .filter((row) => isFulfilledCartRow(row))
     .map((row) => {
       const snapshot = cartOrderSnapshot(row);
       if (!snapshot) return null;

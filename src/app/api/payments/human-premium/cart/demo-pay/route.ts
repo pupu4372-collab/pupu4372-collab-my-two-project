@@ -1,19 +1,27 @@
 import {
   isHumanPremiumDemoBackendReady,
-  isHumanPremiumDemoCheckoutEnabled,
+  isHumanPremiumDemoCheckoutAllowed,
 } from "@/lib/payments/human-premium-demo";
 import { createPaidCartOrder, pregenerateAllCartReports } from "@/lib/reports/human-premium/cart";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { getUserIdFromRequest } from "@/lib/supabase/auth-server";
-import { NextResponse } from "next/server";
-import { after } from "next/server";
+import { after, NextResponse } from "next/server";
 
+/**
+ * Dev-only cart pay. Production always 403 (see isHumanPremiumDemoCheckoutAllowed).
+ */
 export async function POST(request: Request) {
-  if (!isHumanPremiumDemoCheckoutEnabled()) {
-    return NextResponse.json({ error: "Demo checkout is disabled." }, { status: 403 });
+  if (!isHumanPremiumDemoCheckoutAllowed()) {
+    return NextResponse.json(
+      { error: "Demo checkout is disabled.", code: "demo_forbidden" },
+      { status: 403 }
+    );
   }
   if (!isHumanPremiumDemoBackendReady()) {
-    return NextResponse.json({ error: "Supabase is not configured.", code: "supabase_missing" }, { status: 503 });
+    return NextResponse.json(
+      { error: "Supabase is not configured.", code: "supabase_missing" },
+      { status: 503 }
+    );
   }
 
   let body: Record<string, unknown>;

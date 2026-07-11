@@ -1,5 +1,6 @@
 "use client";
 
+import { CartPayConfirmModal } from "@/components/human-premium/CartPayConfirmModal";
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { Link } from "@/i18n/navigation";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
@@ -19,9 +20,9 @@ import { humanPremiumRetentionNotice } from "@/lib/reports/human-premium/retenti
 import { parseBirthTimeSelect } from "@/lib/saju/birth-time-options";
 import {
   formatPrice,
+  getCartPricingSummary,
   getReportPrice,
   REPORT_CARD_THEMES,
-  sumCartAmount,
 } from "@/lib/reports/human-premium/pricing";
 import {
   REPORT_TYPE_LABELS,
@@ -31,6 +32,15 @@ import {
 import { useLocale } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+type PaymentConfig = {
+  portone: boolean;
+  paypalLink: boolean;
+  demoAllowed: boolean;
+  demoReady: boolean;
+};
+
+type CartPaymentMethod = "portone" | "demo" | "unsupported";
 
 function snapshotToUrls(
   generated: Partial<Record<ReportType, { webToken: string }>>,
@@ -43,6 +53,25 @@ function snapshotToUrls(
     }
   }
   return urls;
+}
+
+/**
+ * Cart payment-method resolution.
+ * - KO + PortOne → portone
+ * - KO + no PortOne + demo allowed → demo (dev only)
+ * - EN → unsupported (PayPal not in this scope)
+ *
+ * TODO(EN launch): add `paypal_link` here using original shop pattern from commit d350855^
+ * (HumanPremiumShop prepareCheckout("paypal_link") + success page). Extend without rewriting KO.
+ */
+function resolveCartPaymentMethod(
+  locale: string,
+  config: PaymentConfig | null
+): CartPaymentMethod {
+  if (locale === "en") return "unsupported";
+  if (config?.portone) return "portone";
+  if (config?.demoAllowed && config.demoReady) return "demo";
+  return "unsupported";
 }
 
 export function HumanPremiumCartClient() {
@@ -58,11 +87,18 @@ export function HumanPremiumCartClient() {
   const [cart, setCart] = useState<HumanPremiumCartState>({ items: [], orderId: null, paid: false });
   const [profileReady, setProfileReady] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [generatingType, setGeneratingType] = useState<ReportType | null>(null);
   const [generated, setGenerated] = useState<Partial<Record<ReportType, string>>>({});
   const [error, setError] = useState<string | null>(null);
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
+  const [portoneReady, setPortoneReady] = useState(false);
 
-  const total = useMemo(() => sumCartAmount(cart.items, priceLocale), [cart.items, priceLocale]);
+  const cartPricing = useMemo(
+    () => getCartPricingSummary(cart.items, priceLocale),
+    [cart.items, priceLocale]
+  );
+  const paymentMethod = resolveCartPaymentMethod(routeLocale, paymentConfig);
   const orderIdFromUrl = searchParams.get("orderId");
 
   const refreshCart = useCallback(() => {
@@ -91,6 +127,32 @@ export function HumanPremiumCartClient() {
   useEffect(() => {
     refreshCart();
   }, [refreshCart, storageUserId]);
+
+  useEffect(() => {
+    void fetch("/api/payments/human-premium/config")
+      .then((res) => res.json())
+      .then((data: PaymentConfig) => setPaymentConfig(data))
+      .catch(() =>
+        setPaymentConfig({
+          portone: false,
+          paypalLink: false,
+          demoAllowed: false,
+          demoReady: false,
+        })
+      );
+  }, []);
+
+  useEffect(() => {
+    if (document.querySelector('script[src*="cdn.portone.io"]')) {
+      setPortoneReady(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://cdn.portone.io/v2/browser-sdk.js";
+    script.async = true;
+    script.onload = () => setPortoneReady(true);
+    document.head.appendChild(script);
+  }, []);
 
   useEffect(() => {
     if (!orderIdFromUrl) return;
@@ -137,7 +199,17 @@ export function HumanPremiumCartClient() {
     };
   }
 
-  async function handlePay() {
+  function markPaidLocally(orderId: string) {
+    const next = markHumanPremiumCartPaid(
+      storageUserId,
+      orderId,
+      loadHumanPremiumProfile(storageUserId)
+    );
+    setCart(next);
+    setConfirmOpen(false);
+  }
+
+  function openPayConfirm() {
     setError(null);
     if (!profileReady) {
       setError(isKo ? "먼저 사주 정보를 입력해 주세요." : "Enter your birth details first.");
@@ -147,26 +219,114 @@ export function HumanPremiumCartClient() {
       setError(isKo ? "장바구니가 비어 있어요." : "Your cart is empty.");
       return;
     }
+    if (paymentMethod === "unsupported") {
+      setError(
+        isKo
+          ? "결제 수단을 준비 중이에요. 잠시 후 다시 시도해 주세요."
+          : // TODO(EN launch): replace with PayPal cart checkout (d350855^ shop pattern)
+            "English cart checkout is not available yet. Please use the Korean (KO) checkout for now."
+      );
+      return;
+    }
+    setConfirmOpen(true);
+  }
 
+  async function handleDemoPay() {
+    const res = await fetch("/api/payments/human-premium/cart/demo-pay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildCheckoutBody()),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Payment failed");
+    markPaidLocally(String(data.orderId));
+  }
+
+  async function handlePortOnePay() {
+    const checkoutRes = await fetch("/api/payments/human-premium/cart/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...buildCheckoutBody(),
+        paymentMethod: "portone",
+      }),
+    });
+    const checkout = (await checkoutRes.json()) as Record<string, unknown>;
+    if (!checkoutRes.ok) {
+      throw new Error(String(checkout.error ?? "Checkout failed"));
+    }
+
+    const paymentId = String(checkout.paymentId ?? "");
+    const amount = Number(checkout.amount);
+    if (!paymentId || !Number.isFinite(amount)) {
+      throw new Error(isKo ? "결제 준비에 실패했어요." : "Checkout failed.");
+    }
+
+    const PortOne = (
+      window as unknown as {
+        PortOne?: { requestPayment: (args: unknown) => Promise<{ code?: string }> };
+      }
+    ).PortOne;
+    if (!PortOne || !portoneReady || !process.env.NEXT_PUBLIC_PORTONE_SHOP_ID) {
+      throw new Error(isKo ? "결제 모듈을 불러오지 못했어요." : "Payment module unavailable.");
+    }
+
+    const payResult = await PortOne.requestPayment({
+      storeId: process.env.NEXT_PUBLIC_PORTONE_SHOP_ID,
+      paymentId,
+      orderName: String(checkout.orderName ?? "K-Saju"),
+      totalAmount: amount,
+      currency: String(checkout.currency ?? "KRW"),
+      channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
+      payMethod: "CARD",
+    });
+
+    if (payResult?.code !== undefined) {
+      throw new Error(isKo ? "결제가 취소되었어요." : "Payment cancelled.");
+    }
+
+    const verifyRes = await fetch("/api/payments/human-premium/cart/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentId,
+        locale: routeLocale,
+        paymentMethod: "portone",
+      }),
+    });
+    const verifyData = (await verifyRes.json()) as { error?: string; orderId?: string };
+    if (!verifyRes.ok) {
+      throw new Error(verifyData.error ?? "Payment verify failed");
+    }
+
+    markPaidLocally(String(verifyData.orderId ?? paymentId));
+  }
+
+  async function handleConfirmPay() {
+    setError(null);
     setPaying(true);
     try {
-      const res = await fetch("/api/payments/human-premium/cart/demo-pay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildCheckoutBody()),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Payment failed");
-
-      const next = markHumanPremiumCartPaid(
-        storageUserId,
-        String(data.orderId),
-        loadHumanPremiumProfile(storageUserId)
-      );
-      setCart(next);
+      // Explicit payment-method fork — add EN paypal_link case here later.
+      switch (paymentMethod) {
+        case "portone":
+          await handlePortOnePay();
+          break;
+        case "demo":
+          await handleDemoPay();
+          break;
+        case "unsupported":
+        default:
+          throw new Error(
+            isKo
+              ? "결제 수단을 준비 중이에요."
+              : // TODO(EN launch): PayPal cart (d350855^)
+                "English cart checkout is not available yet."
+          );
+      }
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Payment failed";
       setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
+      // Cancel / failure: keep cart unpaid; leave confirm open so user can retry or cancel.
     } finally {
       setPaying(false);
     }
@@ -326,9 +486,24 @@ export function HumanPremiumCartClient() {
           )}
 
           {cart.items.length > 0 ? (
-            <p className="border-t border-plum/10 pt-3 text-right text-lg font-bold text-ink">
-              {isKo ? "합계" : "Total"} {formatPrice(total, priceLocale)}
-            </p>
+            <div className="space-y-1 border-t border-plum/10 pt-3 text-right">
+              {cartPricing.isAllInOneBundle ? (
+                <>
+                  <p className="text-xs font-semibold text-channel-saju">
+                    {isKo ? "올인원 번들 적용" : "All-in-one bundle applied"}
+                  </p>
+                  <p className="text-xs text-plum/55 line-through">
+                    {formatPrice(cartPricing.listTotal, priceLocale)}
+                  </p>
+                  <p className="text-xs text-plum/70">
+                    {isKo ? "할인" : "Savings"} −{formatPrice(cartPricing.savings, priceLocale)}
+                  </p>
+                </>
+              ) : null}
+              <p className="text-lg font-bold text-ink">
+                {isKo ? "합계" : "Total"} {formatPrice(cartPricing.amount, priceLocale)}
+              </p>
+            </div>
           ) : null}
         </section>
 
@@ -338,21 +513,33 @@ export function HumanPremiumCartClient() {
           </p>
         ) : null}
 
+        <CartPayConfirmModal
+          open={confirmOpen}
+          isKo={isKo}
+          items={cart.items}
+          typeLabels={typeLabels}
+          amount={cartPricing.amount}
+          listTotal={cartPricing.listTotal}
+          savings={cartPricing.savings}
+          isAllInOneBundle={cartPricing.isAllInOneBundle}
+          paying={paying}
+          onConfirm={() => void handleConfirmPay()}
+          onCancel={() => {
+            if (!paying) setConfirmOpen(false);
+          }}
+        />
+
         <div className="flex flex-wrap justify-center gap-3">
           {!cart.paid && cart.items.length > 0 ? (
             <button
               type="button"
               disabled={paying || !profileReady}
-              onClick={() => void handlePay()}
+              onClick={openPayConfirm}
               className="rounded-full bg-channel-saju px-6 py-3 font-bold text-white disabled:opacity-50"
             >
-              {paying
-                ? isKo
-                  ? "결제 처리 중…"
-                  : "Processing…"
-                : isKo
-                  ? `결제하기 ${formatPrice(total, priceLocale)}`
-                  : `Pay ${formatPrice(total, priceLocale)}`}
+              {isKo
+                ? `결제하기 ${formatPrice(cartPricing.amount, priceLocale)}`
+                : `Pay ${formatPrice(cartPricing.amount, priceLocale)}`}
             </button>
           ) : null}
           {cart.paid ? (

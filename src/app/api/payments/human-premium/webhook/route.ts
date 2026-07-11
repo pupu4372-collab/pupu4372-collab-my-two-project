@@ -4,11 +4,16 @@ import {
   verifyPortOneAmount,
 } from "@/lib/payments/portone/server";
 import { isPortOneConfigured } from "@/lib/payments/portone/config";
+import {
+  fulfillPaidCartOrder,
+  isHumanPremiumCartOrderRow,
+  pregenerateAllCartReports,
+} from "@/lib/reports/human-premium/cart";
 import { completeHumanPremiumPayment } from "@/lib/reports/human-premium/service";
 import {
   getHumanPremiumReportByPaymentOrderId,
 } from "@/lib/reports/human-premium/storage";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 
 interface PortOneWebhookBody {
   type?: string;
@@ -48,13 +53,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Report not found." }, { status: 404 });
   }
 
-  if (row.status === "ready" || row.status === "email_sent" || row.report_payload) {
-    return NextResponse.json({ ok: true, duplicate: true });
-  }
-
   const expectedAmount = Number(row.amount_paid) || Number(row.amount_original);
   if (!verifyPortOneAmount(payment, expectedAmount)) {
     return NextResponse.json({ error: "Amount mismatch." }, { status: 400 });
+  }
+
+  // Multi-report cart parent (hp_cart_*) — fulfill shell only, then pregenerate children.
+  if (isHumanPremiumCartOrderRow(row)) {
+    try {
+      const { orderId } = await fulfillPaidCartOrder({
+        orderId: paymentId,
+        captureId: body.tx_id ?? payment.id,
+        provider: "card_pg",
+      });
+      after(() => {
+        void pregenerateAllCartReports({ orderId, userId: row.user_id, request }).catch(
+          () => undefined
+        );
+      });
+      return NextResponse.json({ ok: true, cart: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Cart fulfillment failed.";
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
+  }
+
+  if (row.status === "ready" || row.status === "email_sent" || row.report_payload) {
+    return NextResponse.json({ ok: true, duplicate: true });
   }
 
   try {

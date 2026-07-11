@@ -36,8 +36,7 @@ const UI = {
     emailUnavailable: "결제 시 이메일을 입력하면 여기서 다시 발송할 수 있어요",
     disclaimer:
       "사주란 2,000년전부터 내려오는 통계학에 가까운 학문입니다.\n맹신하기보단 삶의 지침서나 이정표 정도로 삼으시길 바랍니다.",
-    backToVault: "리포트 보관함으로",
-    vaultButton: "리포트 보관함",
+    backToList: "← 리포트 목록으로",
     copyright: "본 리포트는 지관재(知觀齋)의 고유 자산이며 무단 복제를 금합니다.",
     brand: "知觀齋",
     sectionTitles: {
@@ -68,8 +67,7 @@ const UI = {
     emailFailed: "Email failed",
     emailUnavailable: "Add your email at checkout to resend from here",
     disclaimer: "Enjoy fortunes lightly — for fun only.",
-    backToVault: "Back to report vault",
-    vaultButton: "Report vault",
+    backToList: "← Back to report list",
     copyright: "This report is proprietary to Jigwanjae (知觀齋).",
     brand: "Jigwanjae",
     sectionTitles: {
@@ -143,10 +141,27 @@ function ReportToc({
   );
 }
 
+function BackToReportListLink({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="no-print inline-flex text-sm font-semibold text-[var(--jig-ink)]/80 underline-offset-2 transition hover:text-[var(--jig-seal)] hover:underline"
+    >
+      {label}
+    </Link>
+  );
+}
+
 export function HumanPremiumReportView({
   report,
   webToken,
-  backHref,
+  backHref = "/premium/human/vault",
 }: HumanPremiumReportViewProps) {
   const isKo = report.locale === "ko";
   const t = UI[report.locale];
@@ -208,22 +223,9 @@ export function HumanPremiumReportView({
       <AppTopNav active="saju" />
       <main className="flex-1 px-3 py-4 pb-32 sm:px-4 sm:py-6">
         <div className="human-premium-paper-sheet mx-auto w-full max-w-3xl px-4 py-6 sm:px-8 sm:py-10">
-          {backHref ? (
-            <div className="no-print mb-6">
-              <Link
-                href={backHref}
-                title={t.backToVault}
-                className="inline-flex h-[4.5rem] w-[4.5rem] flex-col items-center justify-center gap-1 rounded-xl border-2 border-[var(--jig-seal)]/25 bg-white/90 text-center shadow-[0_4px_18px_rgba(34,34,34,0.12)] transition hover:border-[var(--jig-seal)]/45 hover:bg-white"
-              >
-                <span className="text-lg leading-none" aria-hidden>
-                  📁
-                </span>
-                <span className="human-premium-serif px-1 text-[9px] font-bold leading-tight text-[var(--jig-ink)]">
-                  {t.vaultButton}
-                </span>
-              </Link>
-            </div>
-          ) : null}
+          <div className="mb-6">
+            <BackToReportListLink href={backHref} label={t.backToList} />
+          </div>
 
           <ReportToc items={toc} t={t} />
 
@@ -264,9 +266,13 @@ export function HumanPremiumReportView({
               <p className="text-center text-xs text-[var(--jig-muted)]">{t.copyright}</p>
             </section>
 
-            <p className="whitespace-pre-line pb-4 text-center text-sm leading-relaxed text-[var(--jig-muted)]">
+            <p className="whitespace-pre-line pb-2 text-center text-sm leading-relaxed text-[var(--jig-muted)]">
               {t.disclaimer}
             </p>
+
+            <div className="border-t border-[var(--jig-seal)]/15 pt-6 pb-4 text-center">
+              <BackToReportListLink href={backHref} label={t.backToList} />
+            </div>
           </div>
         </div>
       </main>

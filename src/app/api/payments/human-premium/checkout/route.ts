@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { isHumanPremiumDemoCheckoutEnabled } from "@/lib/payments/human-premium-demo";
+import { isHumanPremiumDemoCheckoutAllowed } from "@/lib/payments/human-premium-demo";
 import {
   isPayPalLinkConfigured,
   resolvePayPalPaymentLink,
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
         link: paypalLink,
         paymentReference: paymentId,
       },
-      demoAllowed: isHumanPremiumDemoCheckoutEnabled(),
+      demoAllowed: isHumanPremiumDemoCheckoutAllowed(),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Checkout failed.";

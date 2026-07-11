@@ -1,4 +1,7 @@
-import { isHumanPremiumDemoBackendReady, isHumanPremiumDemoCheckoutEnabled } from "@/lib/payments/human-premium-demo";
+import {
+  isHumanPremiumDemoBackendReady,
+  isHumanPremiumDemoCheckoutAllowed,
+} from "@/lib/payments/human-premium-demo";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { buildHumanPremiumReportUrl } from "@/lib/reports/human-premium/email";
 import {
@@ -24,7 +27,7 @@ function parseBundle(value: unknown): HumanPremiumBundleKind | null {
 }
 
 export async function POST(request: Request) {
-  if (!isHumanPremiumDemoCheckoutEnabled()) {
+  if (!isHumanPremiumDemoCheckoutAllowed()) {
     return NextResponse.json(
       { error: formatHumanPremiumError("Demo checkout is disabled.", "ko") },
       { status: 403 }

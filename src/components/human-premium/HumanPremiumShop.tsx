@@ -22,13 +22,13 @@ import {
   formatPrice,
   getBundlePricing,
   getBundleSavings,
+  getCartPricingSummary,
   getReportPrice,
   REPORT_CARD_THEMES,
   REPORT_TYPE_ORDER,
   REPORT_TYPE_SUBTITLES_EN,
   REPORT_TYPE_SUBTITLES_KO,
   sumPaidReportPricing,
-  sumCartAmount,
 } from "@/lib/reports/human-premium/pricing";
 import {
   REPORT_TYPE_LABELS,
@@ -55,7 +55,10 @@ export function HumanPremiumShop() {
   const bundlePricing = getBundlePricing(priceLocale);
   const subtitles = isKo ? REPORT_TYPE_SUBTITLES_KO : REPORT_TYPE_SUBTITLES_EN;
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
-  const cartTotal = useMemo(() => sumCartAmount(cart.items, priceLocale), [cart.items, priceLocale]);
+  const cartPricing = useMemo(
+    () => getCartPricingSummary(cart.items, priceLocale),
+    [cart.items, priceLocale]
+  );
   const purchasedSet = useMemo(() => new Set(purchasedTypes), [purchasedTypes]);
   const bundleAddableCount = useMemo(
     () => REPORT_TYPE_ORDER.filter((type) => !purchasedSet.has(type) && !cart.items.includes(type)).length,
@@ -216,9 +219,19 @@ export function HumanPremiumShop() {
             <h3 className="text-lg font-bold text-ink">{isKo ? "장바구니" : "Cart"}</h3>
             <p className="mt-1 text-sm text-plum/70">
               {isKo
-                ? `${cart.items.length}개 · 합계 ${formatPrice(cartTotal, priceLocale)}`
-                : `${cart.items.length} item(s) · ${formatPrice(cartTotal, priceLocale)}`}
+                ? `${cart.items.length}개 · 합계 ${formatPrice(cartPricing.amount, priceLocale)}`
+                : `${cart.items.length} item(s) · ${formatPrice(cartPricing.amount, priceLocale)}`}
             </p>
+            {cartPricing.isAllInOneBundle ? (
+              <p className="mt-1 text-xs font-semibold text-channel-saju">
+                {isKo
+                  ? `올인원 번들 적용 · ${formatPrice(cartPricing.savings, priceLocale)} 절약`
+                  : `All-in-one bundle · save ${formatPrice(cartPricing.savings, priceLocale)}`}
+                <span className="ml-1 font-normal text-plum/55 line-through">
+                  {formatPrice(cartPricing.listTotal, priceLocale)}
+                </span>
+              </p>
+            ) : null}
           </header>
 
           {cart.items.length === 0 ? (
@@ -264,7 +277,9 @@ export function HumanPremiumShop() {
                 href="/premium/human/cart"
                 className="rounded-full bg-channel-saju px-6 py-3 text-sm font-bold text-white"
               >
-                {isKo ? `결제하기 ${formatPrice(cartTotal, priceLocale)}` : `Checkout ${formatPrice(cartTotal, priceLocale)}`}
+                {isKo
+                  ? `결제하기 ${formatPrice(cartPricing.amount, priceLocale)}`
+                  : `Checkout ${formatPrice(cartPricing.amount, priceLocale)}`}
               </Link>
             </div>
           ) : null}

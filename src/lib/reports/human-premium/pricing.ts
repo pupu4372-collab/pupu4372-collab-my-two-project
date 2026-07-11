@@ -201,6 +201,37 @@ export function getBundleSavings(locale: PricingLocale = "ko"): number {
   return sumPaidReportPricing(locale) - getBundlePricing(locale).all;
 }
 
+/**
+ * True when the cart contains every paid shop SKU in REPORT_TYPE_ORDER.
+ * Path into the cart (bundle CTA vs singles) does not matter.
+ */
+export function isFullReportCart(items: ReportType[]): boolean {
+  const unique = new Set(items);
+  return REPORT_TYPE_ORDER.every((type) => unique.has(type));
+}
+
+/** Cart checkout amount: all-in-one bundle price when full, else list-price sum. */
+export function resolveCartAmount(items: ReportType[], locale: PricingLocale = "ko"): number {
+  if (isFullReportCart(items)) return getBundlePricing(locale).all;
+  return sumCartAmount(items, locale);
+}
+
+export function getCartPricingSummary(
+  items: ReportType[],
+  locale: PricingLocale = "ko"
+): {
+  listTotal: number;
+  amount: number;
+  savings: number;
+  isAllInOneBundle: boolean;
+} {
+  const listTotal = sumCartAmount(items, locale);
+  const isAllInOneBundle = isFullReportCart(items);
+  const amount = isAllInOneBundle ? getBundlePricing(locale).all : listTotal;
+  const savings = isAllInOneBundle ? Math.max(0, listTotal - amount) : 0;
+  return { listTotal, amount, savings, isAllInOneBundle };
+}
+
 export function resolveCheckoutAmount(
   options: {
     reportType?: ReportType;
@@ -210,7 +241,7 @@ export function resolveCheckoutAmount(
   },
   locale: PricingLocale = "ko"
 ): number {
-  if (options.cartItems?.length) return sumCartAmount(options.cartItems, locale);
+  if (options.cartItems?.length) return resolveCartAmount(options.cartItems, locale);
   const bundles = getBundlePricing(locale);
   const pricing = getReportPricing(locale);
   if (options.bundle) return bundles[options.bundle];
@@ -222,5 +253,5 @@ export function resolveCheckoutAmount(
 export function sumCartAmount(items: ReportType[], locale: PricingLocale = "ko"): number {
   const pricing = getReportPricing(locale);
   const unique = [...new Set(items)];
-  return unique.reduce((sum, type) => sum + pricing[type], 0);
+  return unique.reduce((sum, type) => sum + (pricing[type] ?? 0), 0);
 }
