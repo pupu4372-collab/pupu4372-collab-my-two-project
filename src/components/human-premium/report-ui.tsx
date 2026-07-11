@@ -86,13 +86,13 @@ export function SectionHeading({
 
 export function ScoreBar({
   score,
-  color = "var(--jig-seal)",
+  color = "#3E3A36",
 }: {
   score: number;
   color?: string;
 }) {
   return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-[#f1eee7]">
+    <div className="h-2 w-full overflow-hidden rounded-full bg-[#E8E2D6]">
       <div
         className="human-premium-chart-bar h-full rounded-full transition-all"
         style={{ width: `${score}%`, backgroundColor: color }}

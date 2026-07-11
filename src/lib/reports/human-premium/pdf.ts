@@ -6,14 +6,13 @@ import type {
   HumanPremiumReportSection,
 } from "./types";
 import {
-  ELEMENT_TRACK_COLOR,
-  elementAccentColor,
   formatElementDisplayLabel,
   parseElementRows,
 } from "./element-display";
 import { loadJigwanjaeCoverLogoDataUrl } from "./pdf-assets";
 import { buildPdfCoverBlocks } from "./pdf-cover";
 import { buildOrderedPdfBodySections } from "./pdf-sections";
+import { pdfElementAccentColor, PDF_SCORE_TRACK } from "./pdf-visuals";
 import { filterZiweiCoverBullets } from "@/lib/saju/llm/slot-output-sanitize";
 
 const JIG_HANJI = "#F4F1EA";
@@ -88,7 +87,7 @@ function elementBar(percent: number, color: string, maxWidth = 200): Content {
   const clamped = Math.max(0, Math.min(100, percent));
   return {
     canvas: [
-      { type: "rect", x: 0, y: 0, w: maxWidth, h: 10, color: ELEMENT_TRACK_COLOR },
+      { type: "rect", x: 0, y: 0, w: maxWidth, h: 10, color: PDF_SCORE_TRACK },
       { type: "rect", x: 0, y: 0, w: (maxWidth * clamped) / 100, h: 10, color },
     ],
     margin: [0, 2, 0, 6],
@@ -109,7 +108,7 @@ function elementSummaryBlocks(
 
   const rows: Content[] = elements.map((item) => {
     const label = formatElementDisplayLabel(item, isKo);
-    const barColor = elementAccentColor(item.key);
+    const barColor = pdfElementAccentColor(item.key);
     return {
       columns: [
         {
@@ -204,7 +203,7 @@ function buildDocumentDefinition(
     },
     styles: {
       coverBrand: { fontSize: 22, bold: true, color: JIG_INK },
-      coverSubtitle: { fontSize: 14, color: JIG_SEAL },
+      coverSubtitle: { fontSize: 14, color: JIG_INK },
       reportTypeTitle: { fontSize: 24, bold: true, color: JIG_INK },
       coverMotto: { fontSize: 11, color: JIG_INK, lineHeight: 1.5 },
       coverMaxim: { fontSize: 9, color: JIG_MUTED },

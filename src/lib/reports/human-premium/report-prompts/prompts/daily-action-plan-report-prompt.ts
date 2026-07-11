@@ -188,7 +188,8 @@ ${HANGUL_ONLY_RULE}
 
 {{narrative}}
 
-prophecy.short: **행운 키워드 카드** — 색·방향·시간·숫자·다짐(10~15자), 오행·지지 근거(한글 표현만)
+prophecy.short: 반드시 아래 고정값을 그대로 (창작 금지):
+{{luckyKeywordsShort}}
 prophecy.full: 잠겨진 천명 — ★ 아래 규칙 모두 필수
   - 현재 연도는 {{currentYear}}년임. 언급하는 모든 미래 시점은 반드시
     {{currentYear}}년 이후여야 하며, 생년·대운 시작연도 등 과거 시점을

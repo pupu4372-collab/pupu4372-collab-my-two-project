@@ -1,4 +1,5 @@
 import type { HumanPremiumFactsBlock } from "@/lib/reports/human-premium/facts";
+import type { LuckyKeywords } from "@/lib/reports/human-premium/lucky-keywords";
 import type { HumanPremiumDeliveryMode, ReportType } from "@/lib/reports/human-premium/types";
 import type { HumanPremiumPromptProductKey } from "@/lib/reports/human-premium/report-prompts/products";
 import type { HumanSajuMapping } from "@/lib/saju/human-trait-mapping";
@@ -22,4 +23,6 @@ export interface PremiumPromptContext {
   gender?: "male" | "female" | null;
   /** Issue year for prophecy slot (e.g. future-year anchors) */
   currentYear?: number;
+  /** Deterministic lucky keywords (color/direction/time/numbers). */
+  luckyKeywords?: LuckyKeywords;
 }

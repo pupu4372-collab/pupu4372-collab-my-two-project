@@ -63,6 +63,8 @@ export interface HumanPremiumDaewoonFact {
     startAgeNote: string;
     cycles: Array<{
       ageRange: string;
+      startAge: number;
+      endAge: number;
       pillar: string;
       stemTenGod: string;
       branchTenGod: string;
@@ -223,6 +225,8 @@ export function buildHumanPremiumFacts(
           locale === "ko"
             ? `${cycle.startAge}~${cycle.endAge}세`
             : `Age ${cycle.startAge}-${cycle.endAge}`,
+        startAge: cycle.startAge,
+        endAge: cycle.endAge,
         pillar: pillarLine(cycle.pillar),
         stemTenGod: cycle.stemTenGod,
         branchTenGod: cycle.branchTenGod,

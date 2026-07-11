@@ -15,13 +15,16 @@ export function RisksSection({
   isKo: boolean;
 }) {
   const items = report.structured?.risks ?? [];
+  const subtitle = isKo
+    ? `${items.length}가지 + 대비책`
+    : `${items.length} risks + countermeasures`;
 
   return (
     <section id="section-risk" className="scroll-mt-24 space-y-6">
       <SectionHeading
         id="section-risk-heading"
         title={isKo ? "예측 리스크" : "Forecast risks"}
-        subtitle={isKo ? "4가지 + 대비책" : "Four risks + countermeasures"}
+        subtitle={subtitle}
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {items.map((item, index) => (

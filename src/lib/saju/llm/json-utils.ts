@@ -10,6 +10,16 @@ export function extractJsonObject(text: string): string {
   return trimmed;
 }
 
+/** Best-effort repair for common LLM JSON mistakes (trailing commas). */
+export function repairLooseJson(text: string): string {
+  return extractJsonObject(text).replace(/,\s*([}\]])/g, "$1");
+}
+
 export function parseJsonObject(text: string): unknown {
-  return JSON.parse(extractJsonObject(text)) as unknown;
+  const extracted = extractJsonObject(text);
+  try {
+    return JSON.parse(extracted) as unknown;
+  } catch {
+    return JSON.parse(repairLooseJson(text)) as unknown;
+  }
 }

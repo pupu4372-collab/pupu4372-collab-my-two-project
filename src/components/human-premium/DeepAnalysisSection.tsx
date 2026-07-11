@@ -34,8 +34,8 @@ export function DeepAnalysisSection({
       : "Narrative · domain scores"
     : sections.length
       ? isKo
-        ? "서사 · 핵심 섹션"
-        : "Narrative · key sections"
+        ? "서사"
+        : "Narrative"
       : yearCards.length
         ? isKo
           ? "서사 · 연도별 카드"
@@ -81,9 +81,9 @@ export function DeepAnalysisSection({
                     <span className="font-normal text-[var(--jig-muted)]">/10</span>
                   </p>
                 </div>
-                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#f1eee7]">
+                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#E8E2D6]">
                   <div
-                    className="h-full rounded-full bg-[var(--jig-seal)]"
+                    className="h-full rounded-full bg-[#3E3A36]"
                     style={{ width: `${Math.max(0, Math.min(100, item.score * 10))}%` }}
                   />
                 </div>
@@ -95,23 +95,18 @@ export function DeepAnalysisSection({
       ) : null}
 
       {sections.length ? (
-        <div className="space-y-4">
-          <p className="human-premium-label-caps text-[var(--jig-seal)]">
-            {isKo ? "핵심 섹션" : "Key sections"}
-          </p>
-          <div className="grid grid-cols-1 gap-4">
-            {sections.map((item) => (
-              <article
-                key={item.title}
-                className="human-premium-paper rounded-lg border border-[var(--jig-ink)]/8 p-5"
-              >
-                <h3 className="human-premium-serif text-lg font-semibold text-[var(--jig-ink)]">
-                  {item.title}
-                </h3>
-                <BodyText body={item.body} className="mt-3 text-sm" />
-              </article>
-            ))}
-          </div>
+        <div className="grid grid-cols-1 gap-4">
+          {sections.map((item) => (
+            <article
+              key={item.title}
+              className="human-premium-paper rounded-lg border border-[var(--jig-ink)]/8 p-5"
+            >
+              <h3 className="human-premium-serif text-lg font-semibold text-[var(--jig-ink)]">
+                {item.title}
+              </h3>
+              <BodyText body={item.body} className="mt-3 text-sm" />
+            </article>
+          ))}
         </div>
       ) : null}
 
@@ -133,9 +128,9 @@ export function DeepAnalysisSection({
                     <span className="font-normal text-[var(--jig-muted)]">/100</span>
                   </p>
                 </div>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#f1eee7]">
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#E8E2D6]">
                   <div
-                    className="h-full rounded-full bg-[var(--jig-seal)]"
+                    className="h-full rounded-full bg-[#3E3A36]"
                     style={{ width: `${Math.max(0, Math.min(100, item.score))}%` }}
                   />
                 </div>

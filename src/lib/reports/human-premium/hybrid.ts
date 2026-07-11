@@ -11,6 +11,8 @@ import {
 import { computeHumanSajuMappingFromPremiumBirth } from "@/lib/saju/ksaju-adapter";
 import { resolveSolarBirthDate } from "./birth-basis";
 import { buildHumanPremiumFacts } from "./facts";
+import { kstDateParts } from "./issue-calendar";
+import { buildLuckyKeywords } from "./lucky-keywords";
 import { FORTUNE_MONTHS } from "./luck-narratives";
 import { buildHumanPremiumReport } from "./generator";
 import type {
@@ -70,6 +72,14 @@ export async function buildHumanPremiumReportHybrid(
     locale: input.locale,
   });
 
+  const { year: currentYear } = kstDateParts();
+  const luckyKeywords = buildLuckyKeywords(saju, input.locale);
+  console.info("[LUCKY_KEYWORDS_INJECT]", {
+    reportType: payload.reportType,
+    shortCard: luckyKeywords.shortCard,
+    yongsinKey: luckyKeywords.yongsinKey,
+  });
+
   const ctx: PremiumLlmContext = {
     mapping,
     saju,
@@ -84,6 +94,8 @@ export async function buildHumanPremiumReportHybrid(
     birthTime: input.birthTime,
     birthTimeUnknown: input.birthTimeUnknown,
     gender: input.gender ?? payload.birthBasis.gender ?? null,
+    currentYear,
+    luckyKeywords,
   };
 
   const llmMeta: HumanPremiumLlmMeta = {

@@ -18,8 +18,13 @@ function collectHanjaChars(text: string): string[] {
   return [...new Set(matches)];
 }
 
+/** Hangul already paired with stem/branch/element hanja — do not unwrap to 목(목). */
+const PRESERVED_HANGUL_HANJA_PAREN_RE =
+  /[가-힣]\([木火土金水甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥]\)/g;
+
 /**
  * Replace known stem/branch/element hanja with hangul labels.
+ * Preserves already-correct `한글(漢字)` pairs (e.g. 목(木), 병(丙)).
  * Unmapped hanja are kept as-is; callers log via sanitizeLlmSlotText().
  */
 export function replaceKnownHanjaWithHangul(text: string): {
@@ -32,16 +37,27 @@ export function replaceKnownHanjaWithHangul(text: string): {
     return { text, detected: "", unmapped: "" };
   }
 
+  const preserved: string[] = [];
+  const masked = text.replace(PRESERVED_HANGUL_HANJA_PAREN_RE, (match) => {
+    const token = `\u0000H${preserved.length}\u0000`;
+    preserved.push(match);
+    return token;
+  });
+
   const unmappedSet = new Set<string>();
-  const replaced = text.replace(CJK_HANJA_RE, (char) => {
+  const replaced = masked.replace(CJK_HANJA_RE, (char) => {
     const hangul = hanjaCharToHangul(char);
     if (hangul) return hangul;
     unmappedSet.add(char);
     return char;
   });
 
+  const restored = replaced.replace(/\u0000H(\d+)\u0000/g, (_, index: string) => {
+    return preserved[Number(index)] ?? "";
+  });
+
   return {
-    text: replaced,
+    text: restored,
     detected: detectedChars.join(""),
     unmapped: [...unmappedSet].join(""),
   };

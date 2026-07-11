@@ -387,11 +387,6 @@ function depthBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[
   }
 
   if (sections.length) {
-    blocks.push({
-      text: pdfSafeText(isKo ? "핵심 섹션" : "Key sections"),
-      style: "sectionTitle",
-      margin: [0, 8, 0, 8],
-    });
     for (const item of sections) {
       blocks.push(
         pdfBorderedCard(
@@ -519,7 +514,23 @@ export function buildPdfSectionBlocks(
   if (!meta) return null;
 
   const { section } = meta;
-  const blocks = chapterHeading(section.title, section.subtitle);
+  const countAwareSubtitle =
+    sectionId === "section-opportunity"
+      ? (() => {
+          const n = report.structured?.opportunities?.length ?? 0;
+          return isKo
+            ? `${n}가지 + 잡는 법`
+            : `${n} openings + how to catch them`;
+        })()
+      : sectionId === "section-risk"
+        ? (() => {
+            const n = report.structured?.risks?.length ?? 0;
+            return isKo
+              ? `${n}가지 + 대비책`
+              : `${n} risks + countermeasures`;
+          })()
+        : section.subtitle;
+  const blocks = chapterHeading(section.title, countAwareSubtitle);
 
   switch (sectionId) {
     case "section-metrics":

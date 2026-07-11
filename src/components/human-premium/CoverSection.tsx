@@ -152,7 +152,7 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
                 <p className="human-premium-serif font-semibold text-[var(--jig-ink)]">
                   {item.meaning}
                 </p>
-                <div className="mt-4 h-2 w-full bg-[#f1eee7]">
+                <div className="mt-4 h-2 w-full bg-[#E8E2D6]">
                   <div
                     className="human-premium-chart-bar h-full rounded-full"
                     style={{ width: `${pct}%`, backgroundColor: color }}

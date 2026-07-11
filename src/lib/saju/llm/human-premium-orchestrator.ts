@@ -3,6 +3,8 @@ import type {
   HumanPremiumLlmSectionMeta,
   HumanPremiumReportStructured,
   ReportCohortInsight,
+  ReportOpportunity,
+  ReportRisk,
   ReportScore,
   ReportType,
 } from "@/lib/reports/human-premium/types";
@@ -33,6 +35,7 @@ import {
 import type { PremiumPromptContext } from "./prompts/premium-context";
 import { resolvePromptProduct, reportSpecificInputCacheFacet } from "@/lib/reports/human-premium/report-prompts";
 import {
+  coerceLlmRawText,
   parseCohortInsight,
   parseDeepAnalysisResult,
   parseDecisionMoments,
@@ -42,10 +45,12 @@ import {
   parseRisks,
   parseRoadmap,
   parseSajuStructure,
+  salvageOpportunitiesFromTruncated,
+  salvageRisksFromTruncated,
 } from "./human-interpretation-parse";
 import { llmDebugLog } from "./debug-log";
 import {
-  callClaudeJsonParsed,
+  callClaudeJson,
   isClaudeEnabled,
 } from "./providers/claude-provider";
 import {
@@ -53,6 +58,7 @@ import {
   isOpenAiEnabled,
 } from "./providers/openai-provider";
 import type { HumanInterpretationJson, LlmPromptPair } from "./types";
+import { parseJsonObject } from "./json-utils";
 
 export type PremiumLlmProvider = "claude" | "openai" | "gemini";
 
@@ -118,10 +124,29 @@ async function callProviderJson(
   provider: PremiumLlmProvider,
   prompts: LlmPromptPair,
   maxTokens: number
-): Promise<unknown> {
-  if (provider === "claude") return callClaudeJsonParsed(prompts, maxTokens);
-  if (provider === "openai") return callOpenAiJsonParsed(prompts, maxTokens);
-  return callGeminiJsonParsed(prompts, maxTokens);
+): Promise<{ data: unknown; stopReason: string | null }> {
+  if (provider === "claude") {
+    const { text, stopReason } = await callClaudeJson(prompts, maxTokens);
+    try {
+      return { data: parseJsonObject(text), stopReason };
+    } catch (error) {
+      console.error("[CLAUDE_JSON_PARSE_FAIL]", {
+        stopReason,
+        message: error instanceof Error ? error.message : String(error),
+        rawHead: text.slice(0, 300),
+        rawTail: text.slice(-300),
+      });
+      // Keep raw for orchestrator parse_null logging / retry — do not drop to call_null.
+      return {
+        data: { __json_parse_failed: true, raw: text },
+        stopReason,
+      };
+    }
+  }
+  if (provider === "openai") {
+    return { data: await callOpenAiJsonParsed(prompts, maxTokens), stopReason: null };
+  }
+  return { data: await callGeminiJsonParsed(prompts, maxTokens), stopReason: null };
 }
 
 function providerOrder(): PremiumLlmProvider[] {
@@ -154,9 +179,19 @@ async function callPremiumJsonCached(options: {
   prompts: LlmPromptPair;
   maxTokens: number;
   narrative?: string;
-}): Promise<{ data: unknown; provider: PremiumLlmProvider } | null> {
+}): Promise<{
+  data: unknown;
+  provider: PremiumLlmProvider;
+  stopReason: string | null;
+} | null> {
   const providers = providerOrder();
   if (!providers.length) return null;
+
+  let lastParseFailed: {
+    data: unknown;
+    provider: PremiumLlmProvider;
+    stopReason: string | null;
+  } | null = null;
 
   for (const provider of providers) {
     const model =
@@ -181,7 +216,11 @@ async function callPremiumJsonCached(options: {
         provider,
         model,
       });
-      return { data: cached.data, provider: cached.provider as PremiumLlmProvider };
+      return {
+        data: cached.data,
+        provider: cached.provider as PremiumLlmProvider,
+        stopReason: null,
+      };
     }
 
     llmDebugLog("[LLM_CACHE_MISS]", {
@@ -194,23 +233,37 @@ async function callPremiumJsonCached(options: {
     if (inFlight) {
       const result = await inFlight;
       if (result) {
-        return { data: result.data, provider: result.provider as PremiumLlmProvider };
+        return {
+          data: result.data,
+          provider: result.provider as PremiumLlmProvider,
+          stopReason: null,
+        };
       }
       continue;
     }
 
     const promise = (async () => {
       try {
-        const data = await callProviderJson(provider, options.prompts, options.maxTokens);
-        const result = { data, provider };
-        await setCachedPremiumCallResult(
-          cacheKey,
-          options.ctx.locale,
+        const { data, stopReason } = await callProviderJson(
           provider,
-          model,
-          result
+          options.prompts,
+          options.maxTokens
         );
-        return result;
+        const parseFailed =
+          Boolean(data) &&
+          typeof data === "object" &&
+          !Array.isArray(data) &&
+          "__json_parse_failed" in (data as Record<string, unknown>);
+        if (!parseFailed) {
+          await setCachedPremiumCallResult(
+            cacheKey,
+            options.ctx.locale,
+            provider,
+            model,
+            { data, provider }
+          );
+        }
+        return { data, provider, stopReason };
       } catch (error) {
         console.error("[LLM_PROVIDER_ERROR]", {
           callKind: options.callKind,
@@ -224,12 +277,36 @@ async function callPremiumJsonCached(options: {
       clearPremiumCallInFlight(cacheKey);
     });
 
-    setPremiumCallInFlight(cacheKey, promise);
+    setPremiumCallInFlight(
+      cacheKey,
+      promise.then((result) =>
+        result ? { data: result.data, provider: result.provider } : null
+      )
+    );
     const result = await promise;
-    if (result) return result;
+    if (result) {
+      const parseFailed =
+        Boolean(result.data) &&
+        typeof result.data === "object" &&
+        !Array.isArray(result.data) &&
+        "__json_parse_failed" in (result.data as Record<string, unknown>);
+      if (parseFailed) {
+        lastParseFailed = {
+          data: result.data,
+          provider: result.provider as PremiumLlmProvider,
+          stopReason: result.stopReason ?? null,
+        };
+        continue;
+      }
+      return {
+        data: result.data,
+        provider: result.provider as PremiumLlmProvider,
+        stopReason: result.stopReason ?? null,
+      };
+    }
   }
 
-  return null;
+  return lastParseFailed;
 }
 
 async function generateSajuStructure(ctx: PremiumLlmContext) {
@@ -278,49 +355,357 @@ async function generateDeepAnalysis(ctx: PremiumLlmContext, narrative: string) {
   return { value: parseDeepAnalysisResult(result.data), provider: result.provider };
 }
 
+const OPPORTUNITIES_JSON_CORRECTION = `
+
+★ JSON 교정 (재시도):
+JSON만 출력. 마크다운 코드펜스·백틱 금지.
+각 항목에 title / body / tip 필수.
+opportunities 정확히 5개.
+스키마: { "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }`;
+
+const RISKS_JSON_CORRECTION = `
+
+★ JSON 교정 (재시도):
+JSON만 출력. 마크다운 코드펜스·백틱 금지.
+각 항목에 title / body / countermeasure 필수.
+risks 정확히 4개.
+스키마: { "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }`;
+
+const ROADMAP_JSON_CORRECTION = `
+
+★ JSON 교정 (재시도):
+JSON만 출력. 마크다운 코드펜스·백틱 금지.
+roadmap / decisionMoments 배열을 채울 것.
+스키마: { "roadmap": [{ "period", "label", "body" }], "decisionMoments": [{ "situation", "script" }] }`;
+
+function appendUserCorrection(prompts: LlmPromptPair, correction: string): LlmPromptPair {
+  return {
+    system: prompts.system,
+    user: `${prompts.user}${correction}`,
+  };
+}
+
+function rawResponseSnippets(data: unknown): { head: string; tail: string } {
+  let payload: unknown = data;
+  if (
+    payload &&
+    typeof payload === "object" &&
+    !Array.isArray(payload) &&
+    "__json_parse_failed" in (payload as Record<string, unknown>)
+  ) {
+    payload = (payload as { raw?: unknown }).raw ?? payload;
+  }
+  const text =
+    typeof payload === "string"
+      ? payload
+      : payload == null
+        ? ""
+        : JSON.stringify(payload);
+  if (!text) return { head: "", tail: "" };
+  return {
+    head: text.slice(0, 300),
+    tail: text.length > 300 ? text.slice(-300) : text.slice(0, 300),
+  };
+}
+
+function logSlotParseOrCallFailure(options: {
+  reportType: ReportType;
+  slot: "opportunities" | "risks" | "roadmap";
+  failStage: "call_null" | "parse_null";
+  stopReason: string | null;
+  raw: unknown;
+  retried?: boolean;
+}): void {
+  const snippets = rawResponseSnippets(options.raw);
+  console.error("[LLM_SLOT_FAIL]", {
+    reportType: options.reportType,
+    slot: options.slot,
+    failStage: options.failStage,
+    stop_reason: options.stopReason,
+    retried: options.retried ?? false,
+    rawHead: snippets.head,
+    rawTail: snippets.tail,
+  });
+}
+
+function logFallbackUsed(reportType: ReportType, slot: string): void {
+  console.warn(`[fallback-used] type=${reportType} slot=${slot}`);
+}
+
+const OPP_RISK_MAX_TOKENS = 5000;
+
+function resolveOpportunitiesPayload(
+  data: unknown,
+  reportType: ReportType,
+  stopReason: string | null
+): ReportOpportunity[] | null {
+  const parsed = parseOpportunities(data);
+  if (parsed?.length) return parsed;
+
+  const rawText = coerceLlmRawText(data);
+  if (!rawText) return null;
+  const salvaged = salvageOpportunitiesFromTruncated(rawText);
+  if (salvaged?.length) {
+    console.error("[LLM_SLOT_TRUNCATED_SALVAGE]", {
+      reportType,
+      slot: "opportunities",
+      count: salvaged.length,
+      stop_reason: stopReason,
+    });
+    return salvaged;
+  }
+  return null;
+}
+
+function resolveRisksPayload(
+  data: unknown,
+  reportType: ReportType,
+  stopReason: string | null
+): ReportRisk[] | null {
+  const parsed = parseRisks(data);
+  if (parsed?.length) return parsed;
+
+  const rawText = coerceLlmRawText(data);
+  if (!rawText) return null;
+  const salvaged = salvageRisksFromTruncated(rawText);
+  if (salvaged?.length) {
+    console.error("[LLM_SLOT_TRUNCATED_SALVAGE]", {
+      reportType,
+      slot: "risks",
+      count: salvaged.length,
+      stop_reason: stopReason,
+    });
+    return salvaged;
+  }
+  return null;
+}
+
 async function generateOpportunities(ctx: PremiumLlmContext, narrative: string) {
-  const result = await callPremiumJsonCached({
+  const basePrompts = buildOpportunitiesPrompts(ctx, narrative);
+  const first = await callPremiumJsonCached({
     callKind: "opportunities",
     ctx,
-    prompts: buildOpportunitiesPrompts(ctx, narrative),
-    maxTokens: 1500,
+    prompts: basePrompts,
+    maxTokens: OPP_RISK_MAX_TOKENS,
     narrative,
   });
-  if (!result) return { value: null, provider: null };
-  return { value: parseOpportunities(result.data), provider: result.provider };
+
+  if (first) {
+    const resolved = resolveOpportunitiesPayload(
+      first.data,
+      ctx.reportType,
+      first.stopReason
+    );
+    if (resolved?.length) {
+      return { value: resolved, provider: first.provider };
+    }
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "opportunities",
+      failStage: "parse_null",
+      stopReason: first.stopReason,
+      raw: first.data,
+    });
+  } else {
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "opportunities",
+      failStage: "call_null",
+      stopReason: null,
+      raw: null,
+    });
+  }
+
+  const retry = await callPremiumJsonCached({
+    callKind: "opportunities-retry",
+    ctx,
+    prompts: appendUserCorrection(basePrompts, OPPORTUNITIES_JSON_CORRECTION),
+    maxTokens: OPP_RISK_MAX_TOKENS,
+    narrative,
+  });
+  if (retry) {
+    const resolved = resolveOpportunitiesPayload(
+      retry.data,
+      ctx.reportType,
+      retry.stopReason
+    );
+    if (resolved?.length) {
+      console.error("[LLM_SLOT_RETRY_OK]", {
+        reportType: ctx.reportType,
+        slot: "opportunities",
+        provider: retry.provider,
+      });
+      return { value: resolved, provider: retry.provider };
+    }
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "opportunities",
+      failStage: "parse_null",
+      stopReason: retry.stopReason,
+      raw: retry.data,
+      retried: true,
+    });
+  } else {
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "opportunities",
+      failStage: "call_null",
+      stopReason: null,
+      raw: null,
+      retried: true,
+    });
+  }
+
+  return { value: null, provider: null };
 }
 
 async function generateRisks(ctx: PremiumLlmContext, narrative: string) {
-  const result = await callPremiumJsonCached({
+  const basePrompts = buildRisksPrompts(ctx, narrative);
+  const first = await callPremiumJsonCached({
     callKind: "risks",
     ctx,
-    prompts: buildRisksPrompts(ctx, narrative),
-    maxTokens: 1500,
+    prompts: basePrompts,
+    maxTokens: OPP_RISK_MAX_TOKENS,
     narrative,
   });
-  if (!result) return { value: null, provider: null };
-  return { value: parseRisks(result.data), provider: result.provider };
+
+  if (first) {
+    const resolved = resolveRisksPayload(first.data, ctx.reportType, first.stopReason);
+    if (resolved?.length) {
+      return { value: resolved, provider: first.provider };
+    }
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "risks",
+      failStage: "parse_null",
+      stopReason: first.stopReason,
+      raw: first.data,
+    });
+  } else {
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "risks",
+      failStage: "call_null",
+      stopReason: null,
+      raw: null,
+    });
+  }
+
+  const retry = await callPremiumJsonCached({
+    callKind: "risks-retry",
+    ctx,
+    prompts: appendUserCorrection(basePrompts, RISKS_JSON_CORRECTION),
+    maxTokens: OPP_RISK_MAX_TOKENS,
+    narrative,
+  });
+  if (retry) {
+    const resolved = resolveRisksPayload(retry.data, ctx.reportType, retry.stopReason);
+    if (resolved?.length) {
+      console.error("[LLM_SLOT_RETRY_OK]", {
+        reportType: ctx.reportType,
+        slot: "risks",
+        provider: retry.provider,
+      });
+      return { value: resolved, provider: retry.provider };
+    }
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "risks",
+      failStage: "parse_null",
+      stopReason: retry.stopReason,
+      raw: retry.data,
+      retried: true,
+    });
+  } else {
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "risks",
+      failStage: "call_null",
+      stopReason: null,
+      raw: null,
+      retried: true,
+    });
+  }
+
+  return { value: null, provider: null };
 }
 
 async function generateRoadmap(ctx: PremiumLlmContext, narrative: string) {
-  const result = await callPremiumJsonCached({
+  const basePrompts = buildRoadmapPrompts(ctx, narrative);
+  const first = await callPremiumJsonCached({
     callKind: "roadmap",
     ctx,
-    prompts: buildRoadmapPrompts(ctx, narrative),
+    prompts: basePrompts,
     maxTokens: 3200,
     narrative,
   });
-  if (!result) return { roadmap: null, decisionMoments: null, provider: null };
-  return {
-    roadmap: parseRoadmap(result.data),
-    decisionMoments: parseDecisionMoments(result.data),
-    provider: result.provider,
-  };
+
+  if (first) {
+    const roadmap = parseRoadmap(first.data);
+    const decisionMoments = parseDecisionMoments(first.data);
+    if (roadmap?.length) {
+      return { roadmap, decisionMoments, provider: first.provider };
+    }
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "roadmap",
+      failStage: "parse_null",
+      stopReason: first.stopReason,
+      raw: first.data,
+    });
+  } else {
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "roadmap",
+      failStage: "call_null",
+      stopReason: null,
+      raw: null,
+    });
+  }
+
+  const retry = await callPremiumJsonCached({
+    callKind: "roadmap-retry",
+    ctx,
+    prompts: appendUserCorrection(basePrompts, ROADMAP_JSON_CORRECTION),
+    maxTokens: 3400,
+    narrative,
+  });
+  if (retry) {
+    const roadmap = parseRoadmap(retry.data);
+    const decisionMoments = parseDecisionMoments(retry.data);
+    if (roadmap?.length) {
+      console.error("[LLM_SLOT_RETRY_OK]", {
+        reportType: ctx.reportType,
+        slot: "roadmap",
+        provider: retry.provider,
+      });
+      return { roadmap, decisionMoments, provider: retry.provider };
+    }
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "roadmap",
+      failStage: "parse_null",
+      stopReason: retry.stopReason,
+      raw: retry.data,
+      retried: true,
+    });
+  } else {
+    logSlotParseOrCallFailure({
+      reportType: ctx.reportType,
+      slot: "roadmap",
+      failStage: "call_null",
+      stopReason: null,
+      raw: null,
+      retried: true,
+    });
+  }
+
+  return { roadmap: null, decisionMoments: null, provider: null };
 }
 
 async function generateProphecyBundle(ctx: PremiumLlmContext, narrative: string) {
   llmDebugLog("[LLM_SLOT_START]", { slot: "prophecy", reportType: ctx.reportType });
-  const currentYear = new Date().getFullYear();
+  const currentYear = ctx.currentYear ?? new Date().getFullYear();
   const ctxWithYear = { ...ctx, currentYear };
   const result = await callPremiumJsonCached({
     callKind: "prophecy",
@@ -339,7 +724,10 @@ async function generateProphecyBundle(ctx: PremiumLlmContext, narrative: string)
     };
   }
 
-  const prophecy = parseProphecy(result.data, ctx.reportType);
+  let prophecy = parseProphecy(result.data, ctx.reportType);
+  if (prophecy && ctx.luckyKeywords?.shortCard) {
+    prophecy = { ...prophecy, short: ctx.luckyKeywords.shortCard };
+  }
   let cohortInsight = parseCohortInsight(result.data);
   let cohortInsightProvider: PremiumLlmProvider | null = cohortInsight?.body
     ? result.provider
@@ -511,6 +899,7 @@ export async function buildHumanPremiumStructuredWithLlm(
     interpretation.opportunities = oppResult.value;
     mark("section-opportunity", oppResult.provider, true);
   } else {
+    logFallbackUsed(ctx.reportType, "opportunities");
     mark("section-opportunity", null, false, "llm_failed");
   }
 
@@ -519,6 +908,7 @@ export async function buildHumanPremiumStructuredWithLlm(
     interpretation.risks = riskResult.value;
     mark("section-risk", riskResult.provider, true);
   } else {
+    logFallbackUsed(ctx.reportType, "risks");
     mark("section-risk", null, false, "llm_failed");
   }
 
@@ -527,6 +917,7 @@ export async function buildHumanPremiumStructuredWithLlm(
     interpretation.roadmap = roadmapResult.roadmap;
     mark("section-roadmap", roadmapResult.provider, true);
   } else {
+    logFallbackUsed(ctx.reportType, "roadmap");
     mark("section-roadmap", null, false, "llm_failed");
   }
   if (roadmapResult.decisionMoments?.length) {

@@ -1,16 +1,20 @@
 import { computeElementPercents } from "@/lib/saju/elements";
 import type { ElementKey } from "@/lib/saju/types";
 
-/** Shared 오행 accent colors — web cards and PDF bars use the same palette. */
+/** Shared 오행 accent colors — web cards and PDF bars. */
 export const OBANG_COLORS: Record<string, string> = {
-  wood: "#3E5C76",
-  fire: "#9A3B3B",
-  earth: "#D4A373",
-  metal: "#BDBDBD",
-  water: "#3D3D3D",
+  wood: "#5B7F5B",
+  fire: "#C4674A",
+  earth: "#B08D57",
+  metal: "#8C8C88",
+  water: "#3D4A5C",
 };
 
-export const ELEMENT_TRACK_COLOR = "#EFEAE0";
+/** Score / domain gauge fill (charcoal — not seal red). */
+export const SCORE_BAR_FILL = "#3E3A36";
+/** Score / element gauge track. */
+export const SCORE_BAR_TRACK = "#E8E2D6";
+export const ELEMENT_TRACK_COLOR = SCORE_BAR_TRACK;
 export const OBANG_COLOR_FALLBACK = "#888888";
 
 export interface ElementDisplayRow {

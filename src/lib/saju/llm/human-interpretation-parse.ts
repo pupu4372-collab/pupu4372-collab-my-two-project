@@ -32,6 +32,50 @@ function parsedSlotString(slot: string, value: unknown): string | null {
   return sanitizeLlmSlotText(slot, raw);
 }
 
+/** Read first matching string field (aliases / case-insensitive). */
+function pickAliasedString(
+  slot: string,
+  obj: Record<string, unknown>,
+  aliases: string[]
+): string | null {
+  const normalized = new Map<string, unknown>();
+  for (const [key, value] of Object.entries(obj)) {
+    normalized.set(key.toLowerCase().replace(/[\s_\-]/g, ""), value);
+  }
+  for (const alias of aliases) {
+    const key = alias.toLowerCase().replace(/[\s_\-]/g, "");
+    if (normalized.has(key)) {
+      const parsed = parsedSlotString(slot, normalized.get(key));
+      if (parsed) return parsed;
+    }
+  }
+  return null;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
+}
+
+function pickArrayField(
+  value: unknown,
+  aliases: string[]
+): unknown[] | null {
+  if (Array.isArray(value)) return value;
+  const obj = asRecord(value);
+  if (!obj) return null;
+  const normalized = new Map<string, unknown>();
+  for (const [key, entry] of Object.entries(obj)) {
+    normalized.set(key.toLowerCase().replace(/[\s_\-]/g, ""), entry);
+  }
+  for (const alias of aliases) {
+    const key = alias.toLowerCase().replace(/[\s_\-]/g, "");
+    const hit = normalized.get(key);
+    if (Array.isArray(hit)) return hit;
+  }
+  return null;
+}
+
 export function parseSajuStructure(value: unknown): string | null {
   if (typeof value === "string") return parsedSlotString("saju-structure", value);
   if (!value || typeof value !== "object") return null;
@@ -182,10 +226,18 @@ export function parseLifeCycles(value: unknown): ReportLifeCycle[] | null {
         "deep-analysis.cycles.period",
         o.period ?? o.ageRange ?? o.range ?? o.label
       );
-      const title = parsedSlotString(
+      const titleRaw = parsedSlotString(
         "deep-analysis.cycles.title",
         o.title ?? o.name ?? o.era ?? o.alias
       );
+      // System marks the current cycle; strip LLM marker tokens from titles.
+      const title = titleRaw
+        ? titleRaw
+            .replace(/\s*[(\[]\s*현재\s*[)\]]\s*/g, " ")
+            .replace(/(?:^|\s)현재(?:\s|$)/g, " ")
+            .replace(/\s+/g, " ")
+            .trim()
+        : null;
       const body = parsedSlotString(
         "deep-analysis.cycles.body",
         o.body ?? o.analysis ?? o.description ?? o.desc
@@ -289,49 +341,180 @@ export function parseMasterNarrativeResult(value: unknown): MasterNarrativeParse
 }
 
 export function parseOpportunities(value: unknown): ReportOpportunity[] | null {
-  if (!value || typeof value !== "object") return null;
-  const raw =
-    (value as { opportunities?: unknown }).opportunities ??
-    (Array.isArray(value) ? value : null);
-  if (!Array.isArray(raw)) return null;
+  const raw = pickArrayField(value, [
+    "opportunities",
+    "opportunity",
+    "items",
+    "기회",
+  ]);
+  if (!raw) return null;
 
-  const items = raw
-    .map((item) => {
-      if (!item || typeof item !== "object") return null;
-      const o = item as Partial<ReportOpportunity>;
-      const title = parsedSlotString("opportunities.title", o.title);
-      const body = parsedSlotString("opportunities.body", o.body);
-      const tipRaw = parsedSlotString("opportunities.tip", o.tip);
-      const tip = tipRaw ? normalizeOpportunityTip(tipRaw) : null;
-      if (!title || !body || !tip) return null;
-      return { title, body, tip };
-    })
-    .filter((item): item is ReportOpportunity => item != null);
+  const items: ReportOpportunity[] = [];
+  for (const item of raw) {
+    const o = asRecord(item);
+    if (!o) continue;
+    const title = pickAliasedString("opportunities.title", o, [
+      "title",
+      "name",
+      "label",
+      "제목",
+    ]);
+    const body = pickAliasedString("opportunities.body", o, [
+      "body",
+      "content",
+      "description",
+      "desc",
+      "본문",
+      "내용",
+    ]);
+    const tipRaw = pickAliasedString("opportunities.tip", o, [
+      "tip",
+      "잡는법",
+      "howto",
+      "how",
+      "howTo",
+      "action",
+      "tipText",
+      "조언",
+    ]);
+    const tip = tipRaw ? normalizeOpportunityTip(tipRaw) : null;
+    if (!title || !body || !tip) continue;
+    items.push({ title, body, tip });
+    if (items.length >= 5) break;
+  }
 
-  return items.length >= 3 ? items.slice(0, 5) : null;
+  return items.length >= 3 ? items : null;
 }
 
 export function parseRisks(value: unknown): ReportRisk[] | null {
+  const raw = pickArrayField(value, ["risks", "risk", "items", "리스크", "위험"]);
+  if (!raw) return null;
+
+  const items: ReportRisk[] = [];
+  for (const item of raw) {
+    const o = asRecord(item);
+    if (!o) continue;
+    const title = pickAliasedString("risks.title", o, [
+      "title",
+      "name",
+      "label",
+      "제목",
+    ]);
+    const body = pickAliasedString("risks.body", o, [
+      "body",
+      "content",
+      "description",
+      "desc",
+      "본문",
+      "내용",
+    ]);
+    const counterRaw = pickAliasedString("risks.countermeasure", o, [
+      "countermeasure",
+      "대비책",
+      "action",
+      "caution",
+      "fix",
+      "remedy",
+      "solution",
+      "대응",
+    ]);
+    const countermeasure = counterRaw
+      ? normalizeRiskCountermeasure(counterRaw)
+      : null;
+    if (!title || !body || !countermeasure) continue;
+    items.push({ title, body, countermeasure });
+    if (items.length >= 4) break;
+  }
+
+  return items.length >= 2 ? items : null;
+}
+
+/**
+ * Walk a (possibly truncated) JSON string and collect brace-balanced objects
+ * that look like opportunity/risk items (have title/body fields).
+ */
+export function extractCompleteItemObjects(
+  rawText: string
+): Record<string, unknown>[] {
+  const objects: Record<string, unknown>[] = [];
+  let i = 0;
+  while (i < rawText.length) {
+    const start = rawText.indexOf("{", i);
+    if (start < 0) break;
+
+    let depth = 0;
+    let inString = false;
+    let escape = false;
+    let end = -1;
+    for (let j = start; j < rawText.length; j++) {
+      const ch = rawText[j];
+      if (inString) {
+        if (escape) {
+          escape = false;
+          continue;
+        }
+        if (ch === "\\") {
+          escape = true;
+          continue;
+        }
+        if (ch === '"') inString = false;
+        continue;
+      }
+      if (ch === '"') {
+        inString = true;
+        continue;
+      }
+      if (ch === "{") depth += 1;
+      else if (ch === "}") {
+        depth -= 1;
+        if (depth === 0) {
+          end = j;
+          break;
+        }
+      }
+    }
+    if (end < 0) {
+      // Truncated object — skip this '{' and keep scanning for complete siblings.
+      i = start + 1;
+      continue;
+    }
+
+    const slice = rawText.slice(start, end + 1);
+    try {
+      const parsed = JSON.parse(slice) as unknown;
+      const record = asRecord(parsed);
+      if (record && ("title" in record || "제목" in record)) {
+        objects.push(record);
+      }
+    } catch {
+      // skip malformed slice
+    }
+    i = end + 1;
+  }
+  return objects;
+}
+
+/** Unwrap `{ __json_parse_failed, raw }` or stringify object payloads. */
+export function coerceLlmRawText(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) return value;
   if (!value || typeof value !== "object") return null;
-  const raw = (value as { risks?: unknown }).risks ?? (Array.isArray(value) ? value : null);
-  if (!Array.isArray(raw)) return null;
+  const rec = value as Record<string, unknown>;
+  if (typeof rec.raw === "string" && rec.raw.trim()) return rec.raw;
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return null;
+  }
+}
 
-  const items = raw
-    .map((item) => {
-      if (!item || typeof item !== "object") return null;
-      const o = item as Partial<ReportRisk>;
-      const title = parsedSlotString("risks.title", o.title);
-      const body = parsedSlotString("risks.body", o.body);
-      const counterRaw = parsedSlotString("risks.countermeasure", o.countermeasure);
-      const countermeasure = counterRaw
-        ? normalizeRiskCountermeasure(counterRaw)
-        : null;
-      if (!title || !body || !countermeasure) return null;
-      return { title, body, countermeasure };
-    })
-    .filter((item): item is ReportRisk => item != null);
+export function salvageOpportunitiesFromTruncated(
+  rawText: string
+): ReportOpportunity[] | null {
+  return parseOpportunities({ opportunities: extractCompleteItemObjects(rawText) });
+}
 
-  return items.length >= 2 ? items.slice(0, 4) : null;
+export function salvageRisksFromTruncated(rawText: string): ReportRisk[] | null {
+  return parseRisks({ risks: extractCompleteItemObjects(rawText) });
 }
 
 export function parseRoadmap(value: unknown): ReportRoadmapItem[] | null {

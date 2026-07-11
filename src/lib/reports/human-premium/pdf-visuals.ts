@@ -1,12 +1,22 @@
 import type { Content } from "pdfmake/interfaces";
+import {
+  OBANG_COLORS,
+  SCORE_BAR_FILL,
+  SCORE_BAR_TRACK,
+} from "./element-display";
 
 export const PDF_JIG_HANJI = "#F4F1EA";
 export const PDF_JIG_SEAL = "#B22222";
 export const PDF_JIG_MUTED = "#747878";
 export const PDF_JIG_OBANG_RED = "#9A3B3B";
-export const PDF_SCORE_TRACK = "#F1EEE7";
+/** Score / domain gauges — charcoal fill (not seal red). */
+export const PDF_SCORE_FILL = SCORE_BAR_FILL;
+export const PDF_SCORE_TRACK = SCORE_BAR_TRACK;
 export const PDF_PAPER_FILL = "#FAF8F4";
 export const PDF_PAPER_BORDER = "#E0DDD4";
+
+/** Same muted 오방색 as web OBANG_COLORS. */
+export const PDF_OBANG_COLORS = OBANG_COLORS;
 
 export const PDF_OPPORTUNITY_FILL = "#E5F3E8";
 export const PDF_OPPORTUNITY_BORDER = "#B8E6C0";
@@ -19,6 +29,10 @@ export const PDF_RISK_TIP_FILL = "#FFF1F2";
 
 function clampPercent(value: number): number {
   return Math.max(0, Math.min(100, value));
+}
+
+export function pdfElementAccentColor(key: string): string {
+  return PDF_OBANG_COLORS[key] ?? "#888888";
 }
 
 export function pdfProgressBar(
@@ -53,7 +67,7 @@ export function pdfProgressBar(
 }
 
 export function pdfScoreBar(score: number, maxWidth = 220): Content {
-  return pdfProgressBar(score, PDF_JIG_SEAL, maxWidth);
+  return pdfProgressBar(score, PDF_SCORE_FILL, maxWidth, 8, PDF_SCORE_TRACK);
 }
 
 export function pdfBorderedCard(

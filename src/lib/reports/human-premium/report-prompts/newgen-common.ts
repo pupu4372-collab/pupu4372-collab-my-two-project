@@ -14,6 +14,13 @@ export const OUTPUT_FORMAT_RULES = `★ 출력 형식 공통:
   - tip·countermeasure·script 문자열 안에 UI 라벨("잡는 법:", "대비책:")을 넣지 말 것
   - decisionMoments.script는 따옴표 없이 대사 본문만 (렌더러가 감쌈)`;
 
+/** Force machine-parseable JSON for S5/S6 (and retry correction). */
+export const JSON_OUTPUT_FORCE_RULE = `★ JSON 출력 강제:
+  - JSON만 출력. 마크다운 코드펜스(\`\`\`)·백틱 금지
+  - 각 항목에 title / body / tip(또는 countermeasure) 필수
+  - opportunities는 정확히 5개, risks는 정확히 4개
+  - 문자열 값 안에 큰따옴표(")를 넣지 말 것 (JSON 깨짐 방지)`;
+
 export const ELEMENT_DEFICIENCY_RULE = `★ 오행 정합성:
   pillarBlock의 "오행 분포(%)"와 "결핍 오행(최저 %)"를 반드시 따른다.
   결핍·부족을 말할 때는 가장 낮은 %의 오행만 지목한다.`;

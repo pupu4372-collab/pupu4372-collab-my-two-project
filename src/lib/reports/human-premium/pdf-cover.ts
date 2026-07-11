@@ -63,9 +63,10 @@ export function buildPdfCoverBlocks(
   const blocks: Content[] = [];
 
   if (options?.logoDataUrl) {
+    // Shrink-only fit: keep aspect ratio; prefer sharper native resolution.
     blocks.push({
       image: options.logoDataUrl,
-      width: 180,
+      fit: [400, 130],
       alignment: "center",
       margin: [0, 0, 0, 12],
     });

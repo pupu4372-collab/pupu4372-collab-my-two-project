@@ -5,6 +5,14 @@ import {
   splitGanZhi,
 } from "@/lib/saju/ksaju-engine";
 import type { PremiumPromptContext } from "@/lib/saju/llm/prompts/premium-context";
+import {
+  buildDecadeIssueCalendar,
+  buildLifetimeIssueCalendar,
+  buildMonthlyIssueCalendar,
+  buildYearlyIssueCalendar,
+  kstDateParts,
+} from "../issue-calendar";
+import { buildLuckyKeywords } from "../lucky-keywords";
 import type { HumanPremiumPromptProductKey } from "./products";
 import { resolvePromptProduct } from "./registry";
 
@@ -18,6 +26,8 @@ export interface ReportSpecificInputVars {
   daewoon_list: string;
   current_age: string;
   reportSpecificBlock: string;
+  luckyKeywordsShort: string;
+  luckyKeywordsBlock: string;
 }
 
 const EMPTY_VARS: ReportSpecificInputVars = {
@@ -30,14 +40,20 @@ const EMPTY_VARS: ReportSpecificInputVars = {
   daewoon_list: "",
   current_age: "",
   reportSpecificBlock: "",
+  luckyKeywordsShort: "",
+  luckyKeywordsBlock: "",
 };
 
-function kstDateParts(date = new Date()): { year: number; month: number; day: number } {
-  const kst = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+function withLuckyKeywords(
+  ctx: PremiumPromptContext,
+  base: ReportSpecificInputVars
+): ReportSpecificInputVars {
+  const lucky = ctx.luckyKeywords ?? buildLuckyKeywords(ctx.saju, ctx.locale);
   return {
-    year: kst.getFullYear(),
-    month: kst.getMonth() + 1,
-    day: kst.getDate(),
+    ...base,
+    luckyKeywordsShort: lucky.shortCard,
+    luckyKeywordsBlock: lucky.promptBlock,
+    reportSpecificBlock: `${base.reportSpecificBlock}${lucky.promptBlock}`,
   };
 }
 
@@ -72,12 +88,12 @@ function formatTodayInputs(ctx: PremiumPromptContext): ReportSpecificInputVars {
           `- Today's day pillar: ${ganzi} (${dateKst} KST)`,
         ].join("\n");
 
-  return {
+  return withLuckyKeywords(ctx, {
     ...EMPTY_VARS,
     today_stem: stem,
     today_branch: branch,
     reportSpecificBlock: block,
-  };
+  });
 }
 
 function formatMonthlyInputs(ctx: PremiumPromptContext): ReportSpecificInputVars {
@@ -86,6 +102,7 @@ function formatMonthlyInputs(ctx: PremiumPromptContext): ReportSpecificInputVars
   const { stem, branch } = splitGanZhi(ganzi);
   const targetMonth =
     ctx.locale === "ko" ? `${year}년 ${month}월` : `${year}-${String(month).padStart(2, "0")}`;
+  const issue = buildMonthlyIssueCalendar(ctx.locale);
 
   const block =
     ctx.locale === "ko"
@@ -95,6 +112,7 @@ function formatMonthlyInputs(ctx: PremiumPromptContext): ReportSpecificInputVars
           `- month_stem: ${stem}`,
           `- month_branch: ${branch}`,
           `- 월간지(月運): ${ganzi}`,
+          issue.promptBlockExtra,
         ].join("\n")
       : [
           "\n【Report-specific inputs】",
@@ -102,19 +120,29 @@ function formatMonthlyInputs(ctx: PremiumPromptContext): ReportSpecificInputVars
           `- month_stem: ${stem}`,
           `- month_branch: ${branch}`,
           `- Monthly luck pillar: ${ganzi}`,
+          issue.promptBlockExtra,
         ].join("\n");
 
-  return {
+  return withLuckyKeywords(ctx, {
     ...EMPTY_VARS,
     target_month: targetMonth,
     month_stem: stem,
     month_branch: branch,
     reportSpecificBlock: block,
-  };
+  });
+}
+
+function formatYearlyInputs(ctx: PremiumPromptContext): ReportSpecificInputVars {
+  const cal = buildYearlyIssueCalendar(ctx.locale);
+  return withLuckyKeywords(ctx, {
+    ...EMPTY_VARS,
+    reportSpecificBlock: cal.promptBlock,
+  });
 }
 
 function formatDecadeInputs(ctx: PremiumPromptContext): ReportSpecificInputVars {
   const startYear = kstDateParts().year;
+  const decadeCal = buildDecadeIssueCalendar(ctx.locale);
   const lines = Array.from({ length: 10 }, (_, index) => {
     const year = startYear + index;
     const ganzi = getSeunYearGanZhi(year);
@@ -124,25 +152,34 @@ function formatDecadeInputs(ctx: PremiumPromptContext): ReportSpecificInputVars 
 
   const block =
     ctx.locale === "ko"
-      ? ["\n【리포트 특수 입력】", `- decade_sewun_list:`, ...lines.map((line) => `  ${line}`)].join(
-          "\n"
-        )
+      ? [
+          "\n【리포트 특수 입력】",
+          `- decade_sewun_list:`,
+          ...lines.map((line) => `  ${line}`),
+          decadeCal.promptBlockExtra,
+        ].join("\n")
       : [
           "\n【Report-specific inputs】",
           `- decade_sewun_list:`,
           ...lines.map((line) => `  ${line}`),
+          decadeCal.promptBlockExtra,
         ].join("\n");
 
-  return {
+  return withLuckyKeywords(ctx, {
     ...EMPTY_VARS,
     decade_sewun_list,
     reportSpecificBlock: block,
-  };
+  });
 }
 
 function formatLifetimeInputs(ctx: PremiumPromptContext): ReportSpecificInputVars {
-  const current_age = String(computeCurrentAge(ctx.solarBirthDate));
+  const currentAge = computeCurrentAge(ctx.solarBirthDate);
+  const current_age = String(currentAge);
   const { daewoon } = ctx.facts;
+
+  // Prefer gender-resolved single candidate; else first listed.
+  const primary = daewoon.candidates[0];
+  const cycles = primary?.cycles ?? [];
 
   const lines: string[] = [];
   for (const candidate of daewoon.candidates) {
@@ -165,6 +202,12 @@ function formatLifetimeInputs(ctx: PremiumPromptContext): ReportSpecificInputVar
   }
 
   const daewoon_list = lines.join("\n");
+  const tenseCal = buildLifetimeIssueCalendar({
+    locale: ctx.locale,
+    solarBirthDate: ctx.solarBirthDate,
+    currentAge,
+    cycles,
+  });
 
   const block =
     ctx.locale === "ko"
@@ -173,20 +216,26 @@ function formatLifetimeInputs(ctx: PremiumPromptContext): ReportSpecificInputVar
           `- current_age: ${current_age}`,
           `- daewoon_list:`,
           ...lines.map((line) => `  ${line}`),
+          tenseCal.promptBlock,
         ].join("\n")
       : [
           "\n【Report-specific inputs】",
           `- current_age: ${current_age}`,
           `- daewoon_list:`,
           ...lines.map((line) => `  ${line}`),
+          tenseCal.promptBlock,
         ].join("\n");
 
-  return {
+  return withLuckyKeywords(ctx, {
     ...EMPTY_VARS,
     current_age,
     daewoon_list,
     reportSpecificBlock: block,
-  };
+  });
+}
+
+function formatDefaultWithLucky(ctx: PremiumPromptContext): ReportSpecificInputVars {
+  return withLuckyKeywords(ctx, { ...EMPTY_VARS, reportSpecificBlock: "" });
 }
 
 export function buildReportSpecificInputs(
@@ -200,16 +249,18 @@ export function buildReportSpecificInputs(
       return formatTodayInputs(ctx);
     case "monthly":
       return formatMonthlyInputs(ctx);
+    case "yearly":
+      return formatYearlyInputs(ctx);
     case "decade":
       return formatDecadeInputs(ctx);
     case "lifetime":
       return formatLifetimeInputs(ctx);
     default:
-      return { ...EMPTY_VARS };
+      return formatDefaultWithLucky(ctx);
   }
 }
 
-/** Cache key facet for time-sensitive report inputs (daily/monthly/decade). */
+/** Cache key facet for time-sensitive report inputs. */
 export function reportSpecificInputCacheFacet(ctx: PremiumPromptContext): string | null {
   const { reportSpecificBlock } = buildReportSpecificInputs(ctx);
   return reportSpecificBlock || null;

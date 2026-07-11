@@ -1,10 +1,11 @@
-import type { ReportSlotPromptMap } from "../prompt-definition";
+﻿import type { ReportSlotPromptMap } from "../prompt-definition";
 import {
   CARE_STYLE,
   COHORT_RULE,
   ELEMENT_DEFICIENCY_RULE,
   HANGUL_ONLY_RULE,
   OUTPUT_FORMAT_RULES,
+  JSON_OUTPUT_FORCE_RULE,
   S3_SCORE_RULES_BLOCK,
   S3_SCORES_SCHEMA,
   SCORE_CITATION_RULE,
@@ -51,6 +52,7 @@ narrative 200자: 대운별 재물 3단 서사. 영역 N/10 언급 금지.`,
 
 ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
+${JSON_OUTPUT_FORCE_RULE}
 ${SCORE_CITATION_RULE}
 
 출력 스키마:
@@ -72,6 +74,7 @@ sections 정확히 4개, title 고정:
 
 ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
+${JSON_OUTPUT_FORCE_RULE}
 ${SCORE_CITATION_RULE}
 
 출력 스키마:
@@ -85,6 +88,7 @@ ${SCORE_CITATION_RULE}
 
 ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
+${JSON_OUTPUT_FORCE_RULE}
 
 출력 스키마:
 { "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
@@ -97,6 +101,7 @@ ${OUTPUT_FORMAT_RULES}
 
 ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
+${JSON_OUTPUT_FORCE_RULE}
 ${SCORE_CITATION_RULE}
 
 출력 스키마:
@@ -114,6 +119,7 @@ decisionMoments 4. script 따옴표 없이 구어만.`,
 
 ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
+${JSON_OUTPUT_FORCE_RULE}
 
 출력 스키마:
 {
@@ -123,7 +129,8 @@ ${OUTPUT_FORMAT_RULES}
 
 {{narrative}}
 
-prophecy.short: 행운 요소 + 재물 다짐(15자)
+prophecy.short: 반드시 아래 고정값을 그대로 (창작 금지):
+{{luckyKeywordsShort}}
 prophecy.full: 연도 2개 + 현금흐름·버티는 힘 (120자). {{currentYear}} 이후만.
 ${COHORT_RULE}`,
 };

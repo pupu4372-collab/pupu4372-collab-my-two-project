@@ -21,11 +21,11 @@ export function RoadmapSection({
   const subtitle =
     reportType === "daily"
       ? isKo
-        ? "오늘 시간대별 루틴 · 결정의 순간 4"
-        : "Today's time bands · four decision moments"
+        ? "오늘 시간대별 루틴 · 결정의 순간"
+        : "Today's time bands · decision moments"
       : isKo
-        ? "대운별 전략 · 결정의 순간 4"
-        : "Cycle strategy · four decision moments";
+        ? "대운별 전략 · 결정의 순간"
+        : "Cycle strategy · decision moments";
 
   return (
     <section id="section-roadmap" className="scroll-mt-24 space-y-6">

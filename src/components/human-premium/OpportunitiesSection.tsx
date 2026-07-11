@@ -15,13 +15,16 @@ export function OpportunitiesSection({
   isKo: boolean;
 }) {
   const items = report.structured?.opportunities ?? [];
+  const subtitle = isKo
+    ? `${items.length}가지 + 잡는 법`
+    : `${items.length} openings + how to catch them`;
 
   return (
     <section id="section-opportunity" className="scroll-mt-24 space-y-6">
       <SectionHeading
         id="section-opportunity-heading"
         title={isKo ? "포착할 기회" : "Opportunities to catch"}
-        subtitle={isKo ? "5가지 + 잡는 법" : "Five openings + how to catch them"}
+        subtitle={subtitle}
       />
       <div className="grid grid-cols-1 gap-4">
         {items.map((item, index) => (

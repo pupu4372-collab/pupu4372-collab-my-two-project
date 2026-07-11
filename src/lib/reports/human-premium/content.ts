@@ -175,8 +175,14 @@ function chapter(
   };
 }
 
+/** Compact seun/pillar label: 丙午(병오) — no nested 병(丙) wrapping. */
 function pillarText(pillar: PillarDisplay): string {
-  return `${pillar.pillar}(${pillar.stemLabel}·${pillar.branchLabel})`;
+  const stemHangul = pillar.stemLabel.replace(/\([^)]*\)/g, "").trim();
+  const branchHangul = pillar.branchLabel.replace(/\([^)]*\)/g, "").trim();
+  if (stemHangul && branchHangul) {
+    return `${pillar.pillar}(${stemHangul}${branchHangul})`;
+  }
+  return pillar.pillar;
 }
 
 function clampScore(value: number): number {
@@ -346,7 +352,7 @@ function buildTemplateOpportunities(
   if (locale === "ko") {
     return [
       {
-        title: `${year}년 세운(${seunLabel})과 맞는 창`,
+        title: `${year}년 세운 ${seunLabel}과 맞는 창`,
         body: `${focus}에 맞춰 작은 확신을 쌓을 때입니다. 한 번에 크게 베팅하기보다 반복 가능한 루틴이 운을 살립니다.`,
         tip: "이번 주 안에 15분짜리 '확인 루틴' 하나를 고정하세요.",
       },
@@ -375,7 +381,7 @@ function buildTemplateOpportunities(
 
   return [
     {
-      title: `${year} seun window (${seunLabel})`,
+      title: `${year} seun window ${seunLabel}`,
       body: `Align with ${focus}. Repeatable routines beat one oversized bet.`,
       tip: "Lock one 15-minute weekly check-in ritual.",
     },
@@ -1074,11 +1080,11 @@ Dominant element: ${elLabel(saju.dominantElement, locale)}. Read the chart as a 
       subtitle:
         reportType === "daily"
           ? locale === "ko"
-            ? "오늘 시간대별 루틴 · 결정의 순간 4"
-            : "Today's time bands · four decision moments"
+            ? "오늘 시간대별 루틴 · 결정의 순간"
+            : "Today's time bands · decision moments"
           : locale === "ko"
-            ? "대운별 전략 · 결정의 순간 4"
-            : "Cycle strategy · four decision moments",
+            ? "대운별 전략 · 결정의 순간"
+            : "Cycle strategy · decision moments",
       body: formatRoadmapBody(
         structured.roadmap,
         structured.decisionMoments,
