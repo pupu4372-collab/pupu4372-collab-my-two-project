@@ -33,20 +33,20 @@ const baseInput = {
 
 function flattenText(report: Awaited<ReturnType<typeof buildHumanPremiumReportHybrid>>): string {
   const parts: string[] = [];
-  for (const chapter of report.chapters ?? []) {
+  for (const chapter of report.saju.chapters ?? []) {
     for (const section of chapter.sections ?? []) {
       parts.push(section.title ?? "", section.subtitle ?? "", section.body ?? "");
     }
   }
   const s = report.structured;
-  if (!s) return parts.join("\n");
-  parts.push(s.sajuStructure ?? "", s.deepIntro ?? "", s.prophecy?.short ?? "", s.prophecy?.full ?? "");
+  parts.push(s.prophecy?.short ?? "", s.prophecy?.full ?? "");
   for (const d of s.domainScores ?? []) parts.push(d.domain, d.analysis);
   for (const o of s.opportunities ?? []) parts.push(o.title, o.body, o.tip);
   for (const r of s.risks ?? []) parts.push(r.title, r.body, r.countermeasure);
   for (const m of s.roadmap ?? []) parts.push(m.period, m.label, m.body);
   for (const dm of s.decisionMoments ?? []) parts.push(dm.situation, dm.script);
   for (const sec of s.deepSections ?? []) parts.push(sec.title, sec.body);
+  for (const cycle of s.lifeCycles ?? []) parts.push(cycle.period, cycle.title, cycle.body);
   return parts.join("\n");
 }
 
