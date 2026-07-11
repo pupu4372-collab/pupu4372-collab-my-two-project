@@ -14,6 +14,7 @@ import {
 import { loadJigwanjaeCoverLogoDataUrl } from "./pdf-assets";
 import { buildPdfCoverBlocks } from "./pdf-cover";
 import { buildOrderedPdfBodySections } from "./pdf-sections";
+import { filterZiweiCoverBullets } from "@/lib/saju/llm/slot-output-sanitize";
 
 const JIG_HANJI = "#F4F1EA";
 const JIG_INK = "#222222";
@@ -56,11 +57,17 @@ function sectionBlocks(
   }
 
   if (section.bullets?.length) {
-    blocks.push({
-      ul: section.bullets.map((item) => pdfSafeText(item)),
-      style: "body",
-      margin: [8, 0, 0, 10],
-    });
+    const bullets =
+      section.id === "section-cover"
+        ? filterZiweiCoverBullets(section.bullets)
+        : section.bullets;
+    if (bullets.length) {
+      blocks.push({
+        ul: bullets.map((item) => pdfSafeText(item)),
+        style: "body",
+        margin: [8, 0, 0, 10],
+      });
+    }
   }
 
   return blocks;

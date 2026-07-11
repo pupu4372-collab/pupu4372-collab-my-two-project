@@ -5,7 +5,6 @@ import {
   stripCohortBodyPrefix,
 } from "./cohort-insight-labels";
 import {
-  lockedDestinyTitle,
   prophecyMantra,
 } from "./prophecy-labels";
 import {
@@ -36,6 +35,12 @@ import type {
   HumanPremiumSectionId,
 } from "./types";
 import { DEFAULT_REPORT_TYPE, HUMAN_PREMIUM_SECTION_IDS } from "./types";
+import {
+  normalizeDecisionScriptQuotes,
+  normalizeOpportunityTip,
+  normalizeRiskCountermeasure,
+  sanitizeLlmSlotText,
+} from "@/lib/saju/llm/slot-output-sanitize";
 
 function pdfSafeText(value: string): string {
   return value
@@ -47,7 +52,8 @@ function pdfSafeText(value: string): string {
 }
 
 function paragraph(text: string, style: string = "body"): Content {
-  return { text: pdfSafeText(text), style, margin: [0, 0, 0, 8] };
+  const cleaned = sanitizeLlmSlotText("pdf:body", text);
+  return { text: pdfSafeText(cleaned), style, margin: [0, 0, 0, 8] };
 }
 
 function chapterHeading(title: string, subtitle?: string): Content[] {
@@ -133,10 +139,16 @@ function opportunitiesBlocks(report: HumanPremiumReportPayload, isKo: boolean): 
           margin: [0, 0, 0, 4],
         },
         paragraph(item.body),
-        pdfInsetTip(catchLabel, pdfSafeText(item.tip), {
-          fillColor: PDF_OPPORTUNITY_TIP_FILL,
-          labelColor: PDF_OPPORTUNITY_ACCENT,
-        }),
+        pdfInsetTip(
+          catchLabel,
+          pdfSafeText(
+            normalizeOpportunityTip(sanitizeLlmSlotText("pdf:opportunity.tip", item.tip))
+          ),
+          {
+            fillColor: PDF_OPPORTUNITY_TIP_FILL,
+            labelColor: PDF_OPPORTUNITY_ACCENT,
+          }
+        ),
       ],
       { fillColor: PDF_OPPORTUNITY_FILL, borderColor: PDF_OPPORTUNITY_BORDER }
     )
@@ -158,10 +170,18 @@ function risksBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[
           margin: [0, 0, 0, 4],
         },
         paragraph(item.body),
-        pdfInsetTip(counterLabel, pdfSafeText(item.countermeasure), {
-          fillColor: PDF_RISK_TIP_FILL,
-          labelColor: PDF_JIG_OBANG_RED,
-        }),
+        pdfInsetTip(
+          counterLabel,
+          pdfSafeText(
+            normalizeRiskCountermeasure(
+              sanitizeLlmSlotText("pdf:risk.countermeasure", item.countermeasure)
+            )
+          ),
+          {
+            fillColor: PDF_RISK_TIP_FILL,
+            labelColor: PDF_JIG_OBANG_RED,
+          }
+        ),
       ],
       { fillColor: PDF_RISK_FILL, borderColor: PDF_RISK_BORDER }
     )
@@ -215,7 +235,11 @@ function roadmapBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conten
               margin: [0, 0, 0, 6],
             },
             {
-              text: pdfSafeText(`"${item.script}"`),
+              text: pdfSafeText(
+                `"${normalizeDecisionScriptQuotes(
+                  sanitizeLlmSlotText("pdf:decision.script", item.script)
+                )}"`
+              ),
               style: "decisionQuote",
               margin: [0, 0, 0, 0],
             },
@@ -232,14 +256,37 @@ function roadmapBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conten
 function prophecyBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[] {
   const prophecy = report.structured?.prophecy;
   const cohort = report.structured?.cohortInsight;
-  const sealed = prophecy?.full ?? prophecy?.short ?? "";
+  const sealed = sanitizeLlmSlotText(
+    "pdf:prophecy",
+    prophecy?.full ?? prophecy?.short ?? ""
+  );
+  const keywordCard = sanitizeLlmSlotText(
+    "pdf:prophecy.short",
+    prophecy?.short ?? ""
+  );
+  const showKeywordCard =
+    Boolean(keywordCard) &&
+    Boolean(prophecy?.full) &&
+    keywordCard !== sanitizeLlmSlotText("pdf:prophecy.full", prophecy?.full ?? "");
   const locale = isKo ? "ko" : "en";
-  const destinyTitle = lockedDestinyTitle(isKo);
 
-  const blocks: Content[] = [
+  const blocks: Content[] = [];
+
+  if (showKeywordCard) {
+    blocks.push(
+      pdfBorderedCard(
+        [
+          labelCaps(isKo ? "행운 키워드" : "Lucky keywords"),
+          paragraph(keywordCard),
+        ],
+        { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
+      )
+    );
+  }
+
+  blocks.push(
     pdfBorderedCard(
       [
-        labelCaps(destinyTitle),
         {
           text: pdfSafeText(sealed),
           style: "prophecySealed",
@@ -269,8 +316,8 @@ function prophecyBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conte
         },
       ],
       { fillColor: "#2A2433", borderColor: "#3D3548" }
-    ),
-  ];
+    )
+  );
 
   if (cohort?.body?.trim()) {
     blocks.push(
@@ -278,6 +325,170 @@ function prophecyBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conte
         [
           labelCaps(isKo ? COHORT_INSIGHT_TITLE_KO : COHORT_INSIGHT_TITLE_EN),
           paragraph(stripCohortBodyPrefix(cohort.body, locale)),
+        ],
+        { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
+      )
+    );
+  }
+
+  return blocks;
+}
+
+function depthBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[] {
+  const body = sectionBodyText(report, "section-depth");
+  const domains = report.structured?.domainScores ?? [];
+  const luckyDates = report.structured?.luckyDates ?? [];
+  const sections = report.structured?.deepSections ?? [];
+  const yearCards = report.structured?.yearCards ?? [];
+  const lifeCycles = report.structured?.lifeCycles ?? [];
+  const blocks: Content[] = [];
+
+  if (body.trim()) {
+    blocks.push(paragraph(body));
+  }
+
+  if (domains.length) {
+    blocks.push({
+      text: pdfSafeText(isKo ? "영역별 분석" : "Domain analysis"),
+      style: "sectionTitle",
+      margin: [0, 8, 0, 8],
+    });
+    for (const item of domains) {
+      blocks.push(
+        pdfBorderedCard(
+          [
+            {
+              columns: [
+                {
+                  text: pdfSafeText(item.domain),
+                  width: "*",
+                  style: "sectionTitle",
+                  margin: [0, 0, 0, 0],
+                },
+                {
+                  text: [
+                    { text: String(item.score), bold: true, fontSize: 14, color: PDF_JIG_SEAL },
+                    { text: "/10", fontSize: 10, color: PDF_JIG_MUTED },
+                  ],
+                  width: 40,
+                  alignment: "right",
+                },
+              ],
+              columnGap: 8,
+              margin: [0, 0, 0, 4],
+            },
+            pdfScoreBar(item.score * 10),
+            paragraph(item.analysis),
+          ],
+          { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
+        )
+      );
+    }
+  }
+
+  if (sections.length) {
+    blocks.push({
+      text: pdfSafeText(isKo ? "핵심 섹션" : "Key sections"),
+      style: "sectionTitle",
+      margin: [0, 8, 0, 8],
+    });
+    for (const item of sections) {
+      blocks.push(
+        pdfBorderedCard(
+          [
+            {
+              text: pdfSafeText(item.title),
+              style: "sectionTitle",
+              margin: [0, 0, 0, 4],
+            },
+            paragraph(item.body),
+          ],
+          { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
+        )
+      );
+    }
+  }
+
+  if (yearCards.length) {
+    blocks.push({
+      text: pdfSafeText(isKo ? "연도별 카드" : "Year cards"),
+      style: "sectionTitle",
+      margin: [0, 8, 0, 8],
+    });
+    for (const item of yearCards) {
+      blocks.push(
+        pdfBorderedCard(
+          [
+            {
+              columns: [
+                {
+                  text: pdfSafeText(item.year),
+                  width: "*",
+                  style: "sectionTitle",
+                  margin: [0, 0, 0, 0],
+                },
+                {
+                  text: [
+                    { text: String(item.score), bold: true, fontSize: 12, color: PDF_JIG_SEAL },
+                    { text: "/100", fontSize: 9, color: PDF_JIG_MUTED },
+                  ],
+                  width: 48,
+                  alignment: "right",
+                },
+              ],
+              margin: [0, 0, 0, 4],
+            },
+            pdfScoreBar(item.score),
+            paragraph(item.summary),
+          ],
+          { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
+        )
+      );
+    }
+  }
+
+  if (lifeCycles.length) {
+    blocks.push({
+      text: pdfSafeText(isKo ? "대운 사이클" : "Major-luck cycles"),
+      style: "sectionTitle",
+      margin: [0, 8, 0, 8],
+    });
+    for (const item of lifeCycles) {
+      blocks.push(
+        pdfBorderedCard(
+          [
+            labelCaps(item.period),
+            {
+              text: pdfSafeText(item.title),
+              style: "sectionTitle",
+              margin: [0, 0, 0, 4],
+            },
+            paragraph(item.body),
+          ],
+          { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
+        )
+      );
+    }
+  }
+
+  if (luckyDates.length) {
+    const luckyLabel =
+      report.reportType === "yearly"
+        ? isKo
+          ? "황금의 달"
+          : "Golden months"
+        : isKo
+          ? "행운의 날짜"
+          : "Lucky dates";
+    blocks.push(
+      pdfBorderedCard(
+        [
+          labelCaps(luckyLabel),
+          {
+            text: pdfSafeText(luckyDates.join("  ·  ")),
+            style: "body",
+            margin: [0, 0, 0, 0],
+          },
         ],
         { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
       )
@@ -313,6 +524,9 @@ export function buildPdfSectionBlocks(
   switch (sectionId) {
     case "section-metrics":
       blocks.push(...metricsBlocks(report, isKo));
+      break;
+    case "section-depth":
+      blocks.push(...depthBlocks(report, isKo));
       break;
     case "section-opportunity":
       blocks.push(...opportunitiesBlocks(report, isKo));

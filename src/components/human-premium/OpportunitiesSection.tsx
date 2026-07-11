@@ -1,6 +1,10 @@
 "use client";
 
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
+import {
+  normalizeOpportunityTip,
+  sanitizeLlmSlotText,
+} from "@/lib/saju/llm/slot-output-sanitize";
 import { BodyText, SectionHeading } from "./report-ui";
 
 export function OpportunitiesSection({
@@ -47,7 +51,9 @@ export function OpportunitiesSection({
                 {isKo ? "잡는 법" : "How to catch"}
               </span>
               {" · "}
-              {item.tip}
+              {normalizeOpportunityTip(
+                sanitizeLlmSlotText("display:opportunity.tip", item.tip)
+              )}
             </p>
           </article>
         ))}

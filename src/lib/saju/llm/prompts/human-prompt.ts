@@ -100,6 +100,29 @@ function pillarBlock(ctx: PremiumPromptContext): string {
     )
     .join("\n");
 
+  const ratio = mapping.elementRatio;
+  const total = Math.max(1, ratio.total);
+  const elementOrder = [
+    ["wood", "목"],
+    ["fire", "화"],
+    ["earth", "토"],
+    ["metal", "금"],
+    ["water", "수"],
+  ] as const;
+  const elementPctLines = elementOrder
+    .map(([key, hangul]) => {
+      const count = ratio[key];
+      const pct = Math.round((count / total) * 100);
+      return locale === "ko"
+        ? `${hangul} ${pct}%(${count})`
+        : `${key} ${pct}%(${count})`;
+    })
+    .join(", ");
+  const weakCount = ratio[mapping.weakElement];
+  const weakPct = Math.round((weakCount / total) * 100);
+  const dominantCount = ratio[mapping.dominantElement];
+  const dominantPct = Math.round((dominantCount / total) * 100);
+
   if (locale === "ko") {
     return [
       `- 일주 별명: ${ctx.dayPillarLabel}`,
@@ -109,6 +132,9 @@ function pillarBlock(ctx: PremiumPromptContext): string {
       `- ${hourLine}`,
       `- 일간: ${mapping.dayMaster} (${mapping.dayMasterElement}, ${mapping.dayMasterYinYang})`,
       `- 주도/결핍 오행: ${dominantEl} / ${weakEl}`,
+      `- 오행 분포(%): ${elementPctLines}`,
+      `- 주도 오행(최고 %): ${dominantEl} ${dominantPct}%`,
+      `- 결핍 오행(최저 %): ${weakEl} ${weakPct}% — 결핍 서술은 이 오행만 지목`,
       `- 균형 점수: ${mapping.balanceScore}/100`,
       `- 십신:\n${tenGodLines}`,
       `- 신살: ${mapping.specialSalSummary.join(", ") || "특이 신살 없음"}`,
@@ -125,6 +151,9 @@ function pillarBlock(ctx: PremiumPromptContext): string {
     `- ${hourLine}`,
     `- Day master: ${mapping.dayMaster} (${mapping.dayMasterElement}, ${mapping.dayMasterYinYang})`,
     `- Dominant/weak: ${dominantEl} / ${weakEl}`,
+    `- Element distribution (%): ${elementPctLines}`,
+    `- Dominant (highest %): ${dominantEl} ${dominantPct}%`,
+    `- Deficient (lowest %): ${weakEl} ${weakPct}% — deficiency prose must name only this element`,
     `- Balance: ${mapping.balanceScore}/100`,
     `- Ten gods:\n${tenGodLines}`,
     `- Special sal: ${mapping.specialSalSummary.join(", ") || "none"}`,

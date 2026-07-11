@@ -1,101 +1,103 @@
-import { REPORT_PROMPT_SCORE_RULES } from "../base-prompt";
 import type { ReportSlotPromptMap } from "../prompt-definition";
+import {
+  CARE_STYLE,
+  COHORT_RULE,
+  ELEMENT_DEFICIENCY_RULE,
+  HANGUL_ONLY_RULE,
+  OUTPUT_FORMAT_RULES,
+  S3_SCORE_RULES_BLOCK,
+  S3_SCORES_SCHEMA,
+  SCORE_CITATION_RULE,
+} from "../newgen-common";
 
-/** No.02 · 자산과 재테크 (wealth) — S4 전용: 재물 3단 흐름 + 자산 유형별 전략 + 대운별 로드맵 */
-export const FOCUS_KO = "자산흐름과 재테크 설계 · 자산과 재테크";
-export const FOCUS_EN = "Asset flow and wealth design · Assets & Wealth";
+/** No.02 · 자산과 재테크 (wealth) */
+export const FOCUS_KO =
+  "자산과 재테크 — 자산 흐름과 재테크를 대운 단위로 설계한다. 수치·규칙이 있는 실행 조언으로.";
+export const FOCUS_EN =
+  "Assets & Wealth — design asset flow and wealth strategy across major-luck cycles with rule-based actions.";
 
 export const SLOTS: ReportSlotPromptMap = {
-  "saju-structure": `■ S2 사주 구조 해석 · 재물 맥락
+  "saju-structure": `■ S2 사주 구조 해석 · 재물
+
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
+${ELEMENT_DEFICIENCY_RULE}
 
 출력 스키마:
 { "sajuStructure": "string" }
 
-총 600자 이내. sajuStructure 한 필드에 모두 담기.
+총 600자. 자연 문단만. 우세/결핍(최저 %만)·재물 강약·현재→다음 대운.
+${CARE_STYLE}`,
 
-[오행_우세]: 강한 오행과 재물 벌기 방식 (50자)
-[오행_결핍]: 부족 오행과 재물 리스크 (50자)
-[오행_해설]: 재물 관점 오행 조합 + 핵심 운영 원칙 (100자, "초기 분석은 깊게, 실행은 규칙대로" 류)
+  "master-narrative": `■ S3 핵심 운세 지표 + narrative · 재물
 
-${REPORT_PROMPT_SCORE_RULES}
-※ 정재·편재 관점 서술 시 상대적으로 높게 (72~90) 권장
-
-[십신_비견겁재]: 자력 재물 vs 관계에서 새는 돈 (60자)
-[십신_식신상관]: 재물 창출 (말·기획·전략) (60자)
-[십신_정재편재]: 자산 축적 성향 안정 vs 투기 (60자)
-[십신_정관편관]: 조직 급여 vs 사업 수입 (60자)
-[십신_정인편인]: 정보·공부가 돈 되는 구조 (60자)
-
-[명리_진단]: 일간 재물 구조 → 현재 대운 흐름 → 다음 대운 전환 (200자, {{dayPillarLabel}}으로 시작)
-  ※ "정보와 전략으로 벌고, 토(土) 자산으로 지킨다" 류 핵심 원칙 포함`,
-
-  "master-narrative": `■ S3 핵심 운세 지표 + deep_narrative · 재물·자산
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
+${ELEMENT_DEFICIENCY_RULE}
+${SCORE_CITATION_RULE}
 
 출력 스키마:
-{ "narrative": "string" }
+${S3_SCORES_SCHEMA}
 
-총 680자 이내.
+${S3_SCORE_RULES_BLOCK}
 
-[지표 6개] 재물 맥락, 각 점수/100 + 설명 40자:
-- 현재운세강도: 현재 대운 재물 확장 에너지
-- 시기적합도: 공격적 확장 vs 방어적 수성 (82~90 권장, "지금이 피크" 긴장감)
-- 기회포착력: 투자·정보 수집 (수·금 강하면 높게)
-- 위기회피력: 과도한 베팅·분산 (60~70, 손절·규칙 강조)
-- 관계운: 관계 속 돈, "관계와 돈의 분리"
-- 재물흐름: 수입·자산 전체 흐름 (상대적으로 높게)
+scores description 각 40자, 재물 맥락:
+현재운세강도 / 시기적합도(확장 vs 수성) / 기회포착력(투자·정보) /
+위기회피력(50~72, 과도 베팅) / 관계운(관계 속 돈) / 재물흐름
 
-[심층서사]: 어린 시절~대운별 재물 3단 서사 (200자)
-  ※ 일간에 맞는 3단 구조 (예: 수→금→토), 중년 이후 재물 강화 패턴`,
+narrative 200자: 대운별 재물 3단 서사. 영역 N/10 언급 금지.`,
 
-  "deep-analysis": `■ S4 심층 분석 · 자산과 재테크 전용 (이 리포트 핵심)
+  "deep-analysis": `■ S4 심층 분석 · 자산과 재테크
+
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
+${SCORE_CITATION_RULE}
 
 출력 스키마:
-{ "deepAnalysis": "string" }
+{
+  "intro": "string",
+  "sections": [{ "title": "string", "body": "string" }]
+}
 
 {{narrative}}
 
-총 900자 이내. deepAnalysis 한 필드에 아래 4항목 순서대로 포함.
+intro: 재물 서두만 (80~100자).
+sections 정확히 4개, title 고정:
+1) "재물 3단 구조" — 정보→전략→자산화 공식 (80자)
+2) "자산 유형별 전략" — 부동산·금융·부업·연금, 비중·기간 (200자)
+3) "대운별 재물 로드맵" — 현재~그다음 대운 (250자)
+4) "재물 경보 원칙" — 규칙 3가지, 수치 포함 (100자)`,
 
-[재물_3단_구조]: 우세 오행→중간 전략→자산화 공식 + 명리 근거 (80자)
-  예: "수(水) 정보력 → 금(金) 전략 → 토(土) 자산화"
+  opportunities: `■ S5 포착할 기회 5가지 · 재물
 
-[자산_유형별_전략]: 4유형별 권고 (200자)
-  - 부동산·실물자산 (정재/토)
-  - 금융자산 (상관/수)
-  - 부업·사업 수입 (식신상관)
-  - 연금·안전자산 (정재·노후 현금흐름)
-  ※ 비중(%), 유형, 기간 명시
-
-[대운별_재물_로드맵]: 현재~다음~그다음 대운 타임라인 (250자)
-  - 현재 대운 전·후반 각 전략·행동 2가지
-  - 다음 대운 초반: 현금흐름 시스템 / 후반: 위험자산 축소
-  - 그다음 대운: 수성·상속·증여
-  - 평생 관통: 정보 기반 재정 운영 원칙
-
-[재물_경보_원칙]: 반드시 지킬 규칙 3가지 (100자, ①②③, 수치 포함)`,
-
-  opportunities: `■ S5 포착할 기회 5가지 · 재물·투자
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
+${SCORE_CITATION_RULE}
 
 출력 스키마:
 { "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }
 
 {{narrative}}
 
-정확히 5개. 본업수입 / 부동산·실물 / 부업·컨설팅 / 투자 시스템 / 노후 현금흐름 각 1개.
-title 4~12자, body에 대운·나이·근거 (90자), tip은 "잡는 법:" + 2~3단계 (110자).
-비중(%), 목표 배수, 기간(년) 수치 필수.`,
+정확히 5개. tip에 "잡는 법:" 금지.`,
 
-  risks: `■ S6 예측 리스크 4가지 + 대비책 · 재물
+  risks: `■ S6 예측 리스크 4가지 · 재물
+
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
 
 출력 스키마:
 { "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
 
 {{narrative}}
 
-정확히 4개. 지인·가족 공동투자·보증 / 단기매매·과분산 / 과로·건강 / 은퇴 후 성급 창업 권장.
-대비책에 수치 필수 ("자산 10~15% 이내", "종목 15개 이하" 등).`,
+정확히 4개. countermeasure에 "대비책:" 금지. 수치 포함 권장.`,
 
-  roadmap: `■ S7 시간 로드맵 + 결정 스크립트 · 대운 단위
+  roadmap: `■ S7 시간 로드맵 · 대운 단위
+
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
+${SCORE_CITATION_RULE}
 
 출력 스키마:
 {
@@ -105,24 +107,13 @@ title 4~12자, body에 대운·나이·근거 (90자), tip은 "잡는 법:" + 2~
 
 {{narrative}}
 
-roadmap 6항목 (각 80자 내외):
-- 현재 대운 전반: 수입 극대화·핵심 자산
-- 현재 대운 후반: 구조 재편·부채 관리
-- 다음 대운 초반: 현금흐름 시스템
-- 다음 대운 후반: 위험자산 축소·안정 확대
-- 이후 대운: 수성·상속·증여
-- 평생 관통: 정보 기반 재정 원칙
-
-decisionMoments 4항목 (script 큰따옴표, 80자):
-- 지인·가족 공동투자 제안 / 급등·급락 흔들림 / 창업 제안 / 큰돈 유입·소비 욕구
-※ 비율·규칙은 이 사주 재성 구조에 맞게 (재성 강하면 저축 비중 높게)
-
-결정프레임 Q1~Q3는 roadmap 마지막 body에 포함:
-- 전체 자산 몇 %?
-- 3년 뒤 편안 vs 바쁨?
-- 데이터·전문가·원칙 정렬?`,
+roadmap 5~6항목: 현재 대운 전·후반 / 다음 대운 초·후반 / 이후 대운
+decisionMoments 4. script 따옴표 없이 구어만.`,
 
   prophecy: `■ S8 잠겨진 천명 · 재물
+
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
 
 출력 스키마:
 {
@@ -132,7 +123,7 @@ decisionMoments 4항목 (script 큰따옴표, 80자):
 
 {{narrative}}
 
-prophecy.short: 행운색·방향·시간·숫자 + 재물 다짐(15자) 요약
-prophecy.full: 재물·자산 미래 예언, 연도 범위 2개, 현금흐름·"일하지 않아도 버티는 힘" (120자)
-cohortInsight.body: 동일 일간·재성 코호트 통계 — 성공 자산 유형 vs 실패 행동 대비 (120자)`,
+prophecy.short: 행운 요소 + 재물 다짐(15자)
+prophecy.full: 연도 2개 + 현금흐름·버티는 힘 (120자). {{currentYear}} 이후만.
+${COHORT_RULE}`,
 };

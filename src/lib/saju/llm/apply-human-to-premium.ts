@@ -47,6 +47,11 @@ function mergeStructured(
     decisionMoments: interpretation.decisionMoments ?? base.decisionMoments,
     prophecy: interpretation.prophecy ?? base.prophecy,
     cohortInsight: interpretation.cohortInsight ?? base.cohortInsight,
+    domainScores: interpretation.domainScores ?? base.domainScores,
+    luckyDates: interpretation.luckyDates ?? base.luckyDates,
+    deepSections: interpretation.deepSections ?? base.deepSections,
+    yearCards: interpretation.yearCards ?? base.yearCards,
+    lifeCycles: interpretation.lifeCycles ?? base.lifeCycles,
   };
 }
 

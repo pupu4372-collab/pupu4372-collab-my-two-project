@@ -2,6 +2,10 @@
 
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import { DEFAULT_REPORT_TYPE } from "@/lib/reports/human-premium/types";
+import {
+  normalizeDecisionScriptQuotes,
+  sanitizeLlmSlotText,
+} from "@/lib/saju/llm/slot-output-sanitize";
 import { BodyText, SectionHeading } from "./report-ui";
 
 export function RoadmapSection({
@@ -52,7 +56,11 @@ export function RoadmapSection({
           >
             <p className="text-sm font-semibold text-[var(--jig-seal)]">{item.situation}</p>
             <p className="mt-3 human-premium-serif text-base leading-relaxed text-[var(--jig-ink)]">
-              &ldquo;{item.script}&rdquo;
+              &ldquo;
+              {normalizeDecisionScriptQuotes(
+                sanitizeLlmSlotText("display:decision.script", item.script)
+              )}
+              &rdquo;
             </p>
           </article>
         ))}

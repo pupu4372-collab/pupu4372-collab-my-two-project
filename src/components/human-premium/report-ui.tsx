@@ -1,3 +1,5 @@
+import { sanitizeLlmSlotText } from "@/lib/saju/llm/slot-output-sanitize";
+
 const BODY_PARAGRAPH_MAX = 140;
 
 function splitReadableParagraphs(body: string): string[] {
@@ -36,7 +38,8 @@ export function BodyText({
   body: string;
   className?: string;
 }) {
-  const paragraphs = splitReadableParagraphs(body);
+  const cleaned = sanitizeLlmSlotText("display:body", body);
+  const paragraphs = splitReadableParagraphs(cleaned);
 
   return (
     <div className={`space-y-5 text-base leading-[1.9] text-[var(--jig-ink)]/90 ${className}`}>

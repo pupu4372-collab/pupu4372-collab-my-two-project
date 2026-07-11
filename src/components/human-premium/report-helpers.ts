@@ -12,6 +12,7 @@ import {
 } from "@/lib/reports/human-premium/element-display";
 import type { PillarDisplay } from "@/lib/saju/types";
 import { charToElement } from "@/lib/saju/elements";
+import { sanitizeLlmSlotText } from "@/lib/saju/llm/slot-output-sanitize";
 
 export { OBANG_COLORS } from "@/lib/reports/human-premium/element-display";
 
@@ -50,7 +51,9 @@ export function findSectionBody(
 ): string {
   for (const chapter of report.saju.chapters) {
     const section = chapter.sections.find((item) => item.id === sectionId);
-    if (section?.body.trim()) return section.body;
+    if (section?.body.trim()) {
+      return sanitizeLlmSlotText(`display:${sectionId}`, section.body);
+    }
   }
   return "";
 }

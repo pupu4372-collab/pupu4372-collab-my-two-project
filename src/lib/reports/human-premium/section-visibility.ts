@@ -1,5 +1,6 @@
 import type { HumanPremiumReportPayload, HumanPremiumSectionId } from "./types";
 import { HUMAN_PREMIUM_SECTION_IDS } from "./types";
+import { sanitizeLlmSlotText } from "@/lib/saju/llm/slot-output-sanitize";
 
 export function findChapterSection(
   report: HumanPremiumReportPayload,
@@ -19,7 +20,9 @@ export function sectionBodyText(
   sectionId: string
 ): string {
   const meta = findChapterSection(report, sectionId);
-  return meta?.section.body.trim() ?? "";
+  const raw = meta?.section.body.trim() ?? "";
+  if (!raw) return "";
+  return sanitizeLlmSlotText(`display:${sectionId}`, raw);
 }
 
 /** Sections omitted on web and PDF (e.g. daily reports with no deep-analysis LLM body). */
@@ -28,7 +31,16 @@ export function isHumanPremiumSectionVisible(
   sectionId: HumanPremiumSectionId
 ): boolean {
   if (sectionId === "section-depth") {
-    return sectionBodyText(report, sectionId).length > 0;
+    const hasBody = sectionBodyText(report, sectionId).length > 0;
+    const s = report.structured;
+    return Boolean(
+      hasBody ||
+        s?.domainScores?.length ||
+        s?.luckyDates?.length ||
+        s?.deepSections?.length ||
+        s?.yearCards?.length ||
+        s?.lifeCycles?.length
+    );
   }
   return true;
 }

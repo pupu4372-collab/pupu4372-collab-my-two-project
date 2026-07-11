@@ -34,7 +34,7 @@ import type { PremiumPromptContext } from "./prompts/premium-context";
 import { resolvePromptProduct, reportSpecificInputCacheFacet } from "@/lib/reports/human-premium/report-prompts";
 import {
   parseCohortInsight,
-  parseDeepAnalysis,
+  parseDeepAnalysisResult,
   parseDecisionMoments,
   parseMasterNarrativeResult,
   parseOpportunities,
@@ -248,7 +248,7 @@ async function generateMasterNarrative(ctx: PremiumLlmContext) {
     callKind: "master-narrative",
     ctx,
     prompts: buildMasterNarrativePrompts(ctx),
-    maxTokens: 2000,
+    maxTokens: 2800,
   });
   if (!result) return { narrative: null, scores: null, provider: null };
   const parsed = parseMasterNarrativeResult(result.data);
@@ -261,15 +261,21 @@ async function generateMasterNarrative(ctx: PremiumLlmContext) {
 }
 
 async function generateDeepAnalysis(ctx: PremiumLlmContext, narrative: string) {
+  const deepMaxTokens =
+    ctx.reportType === "lifetime"
+      ? 4500
+      : ctx.reportType === "decade"
+        ? 4000
+        : 2400;
   const result = await callPremiumJsonCached({
     callKind: "deep-analysis",
     ctx,
     prompts: buildDeepAnalysisPrompts(ctx, narrative),
-    maxTokens: 2000,
+    maxTokens: deepMaxTokens,
     narrative,
   });
   if (!result) return { value: null, provider: null };
-  return { value: parseDeepAnalysis(result.data), provider: result.provider };
+  return { value: parseDeepAnalysisResult(result.data), provider: result.provider };
 }
 
 async function generateOpportunities(ctx: PremiumLlmContext, narrative: string) {
@@ -436,6 +442,13 @@ export async function buildHumanPremiumStructuredWithLlm(
     interpretation.scores = narrativeResult.scores;
     mark("section-metrics", narrativeResult.provider, true);
   } else {
+    console.error("[SCORES_TEMPLATE_FALLBACK]", {
+      reportType: ctx.reportType,
+      reason: narrativeResult.narrative
+        ? "scores_parse_failed_or_missing"
+        : "master_narrative_failed",
+      provider: narrativeResult.provider,
+    });
     interpretation.scores = structured.scores;
     meta["section-metrics"] = { source: "template" };
   }
@@ -445,8 +458,43 @@ export async function buildHumanPremiumStructuredWithLlm(
   } else {
     const deepAnalysisResult = await generateDeepAnalysis(ctx, narrative);
     if (deepAnalysisResult.value) {
-      interpretation.deepAnalysis = deepAnalysisResult.value;
-      mark("section-depth", deepAnalysisResult.provider, true);
+      const parsed = deepAnalysisResult.value;
+      if (parsed.intro) {
+        interpretation.deepAnalysis = parsed.intro;
+      }
+      if (parsed.domains?.length) {
+        structured.domainScores = parsed.domains;
+        interpretation.domainScores = parsed.domains;
+      }
+      if (parsed.luckyDates?.length) {
+        structured.luckyDates = parsed.luckyDates;
+        interpretation.luckyDates = parsed.luckyDates;
+      }
+      if (parsed.sections?.length) {
+        structured.deepSections = parsed.sections;
+        interpretation.deepSections = parsed.sections;
+      }
+      if (parsed.yearCards?.length) {
+        structured.yearCards = parsed.yearCards;
+        interpretation.yearCards = parsed.yearCards;
+      }
+      if (parsed.cycles?.length) {
+        structured.lifeCycles = parsed.cycles;
+        interpretation.lifeCycles = parsed.cycles;
+      }
+      const ok = Boolean(
+        parsed.intro ||
+          parsed.domains?.length ||
+          parsed.sections?.length ||
+          parsed.yearCards?.length ||
+          parsed.cycles?.length
+      );
+      mark(
+        "section-depth",
+        deepAnalysisResult.provider,
+        ok,
+        ok ? undefined : "llm_failed"
+      );
     } else {
       mark("section-depth", null, false, "llm_failed");
     }

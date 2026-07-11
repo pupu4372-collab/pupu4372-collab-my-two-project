@@ -1,6 +1,10 @@
 "use client";
 
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
+import {
+  normalizeRiskCountermeasure,
+  sanitizeLlmSlotText,
+} from "@/lib/saju/llm/slot-output-sanitize";
 import { BodyText, SectionHeading } from "./report-ui";
 
 export function RisksSection({
@@ -51,7 +55,9 @@ export function RisksSection({
                 {isKo ? "대비책" : "Countermeasure"}
               </span>
               {" · "}
-              {item.countermeasure}
+              {normalizeRiskCountermeasure(
+                sanitizeLlmSlotText("display:risk.countermeasure", item.countermeasure)
+              )}
             </p>
           </article>
         ))}

@@ -33,6 +33,10 @@ import {
   COHORT_INSIGHT_TITLE_KO,
   stripCohortBodyPrefix,
 } from "./cohort-insight-labels";
+import { normalizeDecisionScriptQuotes } from "@/lib/saju/llm/slot-output-sanitize";
+
+/** When true, embed ziwei section titles into cover bullets (legacy / future ziwei product). */
+const EMBED_ZIWEI_IN_SAJU_COVER = false;
 
 const SCORE_LABELS_KO = [
   "재물운",
@@ -51,6 +55,68 @@ const SCORE_LABELS_EN = [
   "Relationships",
   "Overall",
 ] as const;
+
+/** Daily compact labels (No.06) — match daily-action-plan-report-prompt. */
+const DAILY_SCORE_LABELS_KO = [
+  "현재운세강도",
+  "시기적합도",
+  "기회포착력",
+  "위기회피력",
+  "관계운",
+  "재물흐름",
+] as const;
+
+const DAILY_SCORE_LABELS_EN = [
+  "Current fortune strength",
+  "Timing fit",
+  "Opportunity catch",
+  "Crisis avoidance",
+  "Relationship luck",
+  "Wealth flow",
+] as const;
+
+/** Monthly spaced labels (No.09) — match monthly-life-architecture-report-prompt. */
+const MONTHLY_SCORE_LABELS_KO = [
+  "현재 운세 강도",
+  "시기 적합도",
+  "기회 포착력",
+  "위기 회피력",
+  "관계 운",
+  "재물 흐름",
+] as const;
+
+const MONTHLY_SCORE_LABELS_EN = [
+  "Current fortune strength",
+  "Timing fit",
+  "Opportunity catch",
+  "Crisis avoidance",
+  "Relationship luck",
+  "Wealth flow",
+] as const;
+
+function scoreLabelsForReportType(
+  reportType: ReportType | undefined,
+  locale: Locale
+): readonly string[] {
+  // Compact 6 labels (daily set) for all new-gen products except monthly (spaced).
+  if (reportType === "monthly") {
+    return locale === "ko" ? MONTHLY_SCORE_LABELS_KO : MONTHLY_SCORE_LABELS_EN;
+  }
+  if (
+    reportType === "daily" ||
+    reportType === "career" ||
+    reportType === "wealth" ||
+    reportType === "mental" ||
+    reportType === "business" ||
+    reportType === "love" ||
+    reportType === "yearly" ||
+    reportType === "decade" ||
+    reportType === "lifetime"
+  ) {
+    return locale === "ko" ? DAILY_SCORE_LABELS_KO : DAILY_SCORE_LABELS_EN;
+  }
+  return locale === "ko" ? SCORE_LABELS_KO : SCORE_LABELS_EN;
+}
 
 const MIN_SCORE = 40;
 const MAX_SCORE = 95;
@@ -196,12 +262,16 @@ function scoreSeed(saju: SajuBasicResponse, index: number): number {
   return clampScore(58 + balance * 22 + offsets[index]);
 }
 
-function buildTemplateScores(saju: SajuBasicResponse, locale: Locale): ReportScore[] {
-  const labels = locale === "ko" ? SCORE_LABELS_KO : SCORE_LABELS_EN;
+function buildTemplateScores(
+  saju: SajuBasicResponse,
+  locale: Locale,
+  reportType?: ReportType
+): ReportScore[] {
+  const labels = scoreLabelsForReportType(reportType, locale);
   const nickname = dayPillarNickname(saju, locale);
   const dominant = elLabel(saju.dominantElement, locale);
 
-  const descriptionsKo = [
+  const descriptionsKoLegacy = [
     `${nickname}의 재물 흐름은 ${dominant} 기운과 맞물려 있습니다. 무리한 확장보다 누적형 선택이 점수를 올립니다.`,
     `직업·성과 영역은 월주와 일주의 리듬이 핵심입니다. 지금은 속도보다 방향 정렬이 유리합니다.`,
     `애정운은 표현의 온도가 관건입니다. 상대의 속도를 존중하면 관계 점수가 안정됩니다.`,
@@ -210,7 +280,7 @@ function buildTemplateScores(saju: SajuBasicResponse, locale: Locale): ReportSco
     `종합운은 현재 대운 구간에서 '준비된 선택'이 기회로 보이는 흐름입니다. 지금이 정렬의 시기입니다.`,
   ];
 
-  const descriptionsEn = [
+  const descriptionsEnLegacy = [
     `${nickname} wealth rhythm aligns with ${dominant}. Steady stacking beats oversized bets.`,
     `Career lanes follow month and day pillars. Align direction before chasing speed.`,
     `Love scores rise when expression stays warm and paced with your partner.`,
@@ -219,12 +289,47 @@ function buildTemplateScores(saju: SajuBasicResponse, locale: Locale): ReportSco
     `Overall luck favors prepared choices in the current major cycle. Now is alignment season.`,
   ];
 
-  const descriptions = locale === "ko" ? descriptionsKo : descriptionsEn;
+  const descriptionsKoMetric = [
+    `지금 흐름의 강도는 ${dominant} 기운과 맞물려 있습니다. 무리한 확장보다 정렬된 선택이 점수를 올립니다.`,
+    `행동·정리·대기 중 어디에 둘지 고르는 감각이 핵심입니다. 속도보다 타이밍이 유리합니다.`,
+    `기회가 스칠 때 붙잡는 힘이 점수입니다. 작은 제안·연락을 놓치지 마세요.`,
+    `리스크를 미리 줄이는 습관이 점수입니다. 원칙을 먼저 세우면 흔들림이 줄어듭니다.`,
+    `관계의 온도는 표현의 리듬이 관건입니다. 상대 속도를 존중하면 안정됩니다.`,
+    `재물 흐름은 누적형 선택이 유리합니다. 충동보다 기준이 점수를 올립니다.`,
+  ];
+
+  const descriptionsEnMetric = [
+    `Current strength tracks with ${dominant}. Aligned choices beat oversized bets.`,
+    `Timing fit is about act, tidy, or wait. Pace beats haste.`,
+    `Opportunity catch rises when small offers and messages are not missed.`,
+    `Crisis avoidance improves when rules come before impulse.`,
+    `Relationship luck follows warm, paced expression.`,
+    `Wealth flow favors stacking habits over impulse spends.`,
+  ];
+
+  const useMetricCopy =
+    reportType === "daily" ||
+    reportType === "monthly" ||
+    reportType === "career" ||
+    reportType === "wealth" ||
+    reportType === "mental" ||
+    reportType === "business" ||
+    reportType === "love" ||
+    reportType === "yearly" ||
+    reportType === "decade" ||
+    reportType === "lifetime";
+  const descriptions = useMetricCopy
+    ? locale === "ko"
+      ? descriptionsKoMetric
+      : descriptionsEnMetric
+    : locale === "ko"
+      ? descriptionsKoLegacy
+      : descriptionsEnLegacy;
 
   return labels.map((label, index) => ({
     label,
     score: scoreSeed(saju, index),
-    description: descriptions[index],
+    description: descriptions[index] ?? descriptions[0],
   }));
 }
 
@@ -657,7 +762,7 @@ export function buildHumanPremiumStructured(
       : buildTemplateRoadmap(saju, locale);
 
   return {
-    scores: buildTemplateScores(saju, locale),
+    scores: buildTemplateScores(saju, locale, reportType),
     opportunities: buildTemplateOpportunities(saju, locale, reportType),
     risks: buildTemplateRisks(saju, locale),
     roadmap,
@@ -710,7 +815,9 @@ export function formatRoadmapBody(
   const phases = roadmap
     .map((item) => `· ${item.period} · ${item.label}\n${item.body}`)
     .join("\n\n");
-  const decisions = moments.map((m) => `${m.situation}\n"${m.script}"`).join("\n\n");
+  const decisions = moments
+    .map((m) => `${m.situation}\n"${normalizeDecisionScriptQuotes(m.script)}"`)
+    .join("\n\n");
   return [header, phases, decisions].join("\n\n");
 }
 
@@ -877,7 +984,7 @@ export function buildSajuChapters(
   const includeHour = !saju.birthTimeUnknown && hour;
 
   const ziweiSections =
-    options?.ziweiChart != null
+    EMBED_ZIWEI_IN_SAJU_COVER && options?.ziweiChart != null
       ? buildZiweiSections(
           options.ziweiChart,
           name,

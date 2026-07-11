@@ -1,12 +1,16 @@
 import type {
   ReportCohortInsight,
   ReportDecisionMoment,
+  ReportDeepSection,
+  ReportDomainScore,
+  ReportLifeCycle,
   ReportOpportunity,
   ReportProphecy,
   ReportRisk,
   ReportRoadmapItem,
   ReportScore,
   ReportType,
+  ReportYearCard,
 } from "@/lib/reports/human-premium/types";
 import type { HumanSajuMapping } from "@/lib/saju/human-trait-mapping";
 import type { PetSajuMapping } from "@/lib/saju/pet-trait-mapping";
@@ -33,7 +37,13 @@ export interface HumanInterpretationJson {
   sajuStructure: string;
   scores: ReportScore[];
   masterNarrative?: string;
+  /** S4 intro prose (or legacy flat body when structured fields absent). */
   deepAnalysis: string;
+  domainScores?: ReportDomainScore[];
+  luckyDates?: string[];
+  deepSections?: ReportDeepSection[];
+  yearCards?: ReportYearCard[];
+  lifeCycles?: ReportLifeCycle[];
   opportunities: ReportOpportunity[];
   risks: ReportRisk[];
   roadmap: ReportRoadmapItem[];

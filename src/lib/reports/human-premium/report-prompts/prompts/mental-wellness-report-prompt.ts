@@ -1,102 +1,103 @@
-import { REPORT_PROMPT_SCORE_RULES } from "../base-prompt";
 import type { ReportSlotPromptMap } from "../prompt-definition";
+import {
+  CARE_STYLE,
+  COHORT_RULE,
+  ELEMENT_DEFICIENCY_RULE,
+  HANGUL_ONLY_RULE,
+  OUTPUT_FORMAT_RULES,
+  S3_SCORE_RULES_BLOCK,
+  S3_SCORES_SCHEMA,
+  SCORE_CITATION_RULE,
+} from "../newgen-common";
 
-/** No.03 · 멘탈디톡스 (mental) — S4: 내면 심리·스트레스·감정관리·갈등해소 / S7: 연수 6단계 */
-export const FOCUS_KO = "심리·건강·에너지·회복력 · 멘탈디톡스";
-export const FOCUS_EN = "Mind, health, energy, resilience · Mental Detox";
+/** No.03 · 멘탈디톡스 (mental) */
+export const FOCUS_KO =
+  "멘탈디톡스 — 심리·건강·에너지·회복력을 일상 루틴으로 설계한다. 오늘~이번 주 실행 가능한 케어 행동으로.";
+export const FOCUS_EN =
+  "Mental Detox — design mind, health, energy, and resilience as daily care routines you can act on this week.";
 
 export const SLOTS: ReportSlotPromptMap = {
-  "saju-structure": `■ S2 사주 구조 해석 · 심리·멘탈 맥락
+  "saju-structure": `■ S2 사주 구조 해석 · 심리·멘탈
+
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
+${ELEMENT_DEFICIENCY_RULE}
 
 출력 스키마:
 { "sajuStructure": "string" }
 
-총 600자 이내. sajuStructure 한 필드에 모두 담기.
-※ 병리 진단 금지 — 명리 기반 성향·경향만. "~경향이 있으며 ~로 다룰 수 있습니다" 표현
+총 600자. 자연 문단만. 우세/결핍(최저 %만)·감정·회복 패턴.
+${CARE_STYLE}`,
 
-[오행_우세]: 강한 오행과 내면 심리 특성 (50자)
-[오행_결핍]: 부족 오행과 취약점 — "다만 ~을 의식하면" 재프레이밍 (50자)
-[오행_해설]: 우세-결핍 내면 구조, 감정 처리·스트레스·회복 + 현재 대운 영향 (100자)
+  "master-narrative": `■ S3 핵심 운세 지표 + narrative · 심리
 
-${REPORT_PROMPT_SCORE_RULES}
-※ 정인·편인 심리·직관·내면 탐구 관점 강조
-
-[십신_비견겁재]: 자아·경쟁·비교 심리 (60자)
-[십신_식신상관]: 표현·창의·감정 방출 (60자)
-[십신_정재편재]: 안정 욕구·통제감 (60자)
-[십신_정관편관]: 규율·압박 vs 반항 (60자)
-[십신_정인편인]: 직관·공감·내면 깊이 (60자)
-
-[명리_진단]: 일간 내면 구조 → 현재 대운 심리 → 다음 대운 감정 변화 (200자, {{dayPillarLabel}}으로 시작)
-  ※ 말의 톤·감정 표현이 대인관계 핵심`,
-
-  "master-narrative": `■ S3 핵심 운세 지표 + deep_narrative · 심리·멘탈
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
+${ELEMENT_DEFICIENCY_RULE}
+${SCORE_CITATION_RULE}
 
 출력 스키마:
-{ "narrative": "string" }
+${S3_SCORES_SCHEMA}
 
-총 680자 이내.
+${S3_SCORE_RULES_BLOCK}
 
-[지표 6개] 심리·멘탈 맥락, 각 점수/100 + 설명 40자:
-- 현재운세강도: 감정·심리 에너지
-- 시기적합도: 내면 탐구·자기 재정의 적합도
-- 기회포착력: 감정 인식·직관·공감
-- 위기회피력: 감정 조절·번아웃 회피 (55~72, 의식적 관리 필요)
-- 관계운: 공감·소통·정서적 연결
-- 재물흐름: 심리 안정이 물질 흐름에 미치는 간접 영향
+scores description 각 40자, 심리 맥락:
+현재운세강도(감정 에너지) / 시기적합도(내면 탐구) / 기회포착력(직관·공감) /
+위기회피력(50~72, 번아웃) / 관계운(정서 연결) / 재물흐름(심리→물질 간접)
 
-[심층서사]: 초년~청년~현재 대운 심리 발달 + 다음 대운 안정화 방향 (200자)
-  ※ "내면 [오행] 기운이 가장 강하게 발현되는 시기" 패턴`,
+narrative 200자. 영역 N/10 언급 금지.`,
 
-  "deep-analysis": `■ S4 심층 분석 · 멘탈디톡스 전용 (이 리포트 핵심)
+  "deep-analysis": `■ S4 심층 분석 · 멘탈디톡스
+
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
+${SCORE_CITATION_RULE}
 
 출력 스키마:
-{ "deepAnalysis": "string" }
+{
+  "intro": "string",
+  "sections": [{ "title": "string", "body": "string" }]
+}
 
 {{narrative}}
 
-총 1,000자 이내. deepAnalysis 한 필드에 아래 4항목 순서대로 포함.
+intro: 심리 서두만 (80~100자).
+sections 정확히 4개, title 고정:
+1) "내면 심리 유형" — 유형명·강점·편안한 환경 (120자)
+2) "스트레스 패턴" — 유발·신호·회복 (200자)
+3) "감정 관리법" — 즉각/일상/위기 다짐(따옴표 없이)·회복 속도 (200자)
+4) "대인관계 갈등 해소" — 패턴·해소 3단계 (200자)`,
 
-[내면_심리_유형]: 유형 이름(4~8자) + 강점 2~3 + 편안한 환경 + 시적 마무리 (120자)
+  opportunities: `■ S5 포착할 기회 5가지 · 멘탈
 
-[스트레스_패턴]: 유발 상황 2~3 + 신체·행동·감정 신호 + 회복 연결 (200자)
-
-[감정_관리법]: 즉각 처방 / 일상 루틴 / 위기 자기다짐(큰따옴표) / 회복 속도 특성 (200자)
-
-[대인관계_갈등_해소]: 관계 패턴 + 갈등 유형 2 + 해소 3단계 + 맞는·주의 관계 유형 (200자)`,
-
-  opportunities: `■ S5 포착할 기회 5가지 · 커리어+멘탈 혼합
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
+${SCORE_CITATION_RULE}
 
 출력 스키마:
 { "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }
 
 {{narrative}}
 
-정확히 5개 (PDF 기준):
-1. 경험 기반 컨설팅·자문 확대
-2. 2막 커리어: 전문성+네트워크 전환
-3. 글쓰기·기록 브랜드 구축
-4. 심리·멘탈 역량 자산화(조정자·멘토)
-5. 재무 구조 재정비·안정 자산
+정확히 5개. tip에 "잡는 법:" 금지.`,
 
-title 4~10자, body 대운·나이 시기 (90자), tip "잡는 법:" 오행·십신 활동명 (110자).`,
+  risks: `■ S6 예측 리스크 4가지 · 멘탈
 
-  risks: `■ S6 예측 리스크 4가지 + 대비책 · 심리·멘탈
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
 
 출력 스키마:
 { "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
 
 {{narrative}}
 
-정확히 4개 (PDF 기준):
-1. 말·표현 갈등·오해 → "내가 얻고 싶은 결과" + "내일 아침 답장"
-2. 생각 과잉·무기력 → 몸으로 흘려보내기, 주 3회 유산소
-3. 자기비판·후회 → "오늘 잘한 것 3가지" + 연간 성취 리스트
-4. 거리감·고립 → "3명만 깊게" + 분기 1회 진솔한 대화
+정확히 4개. countermeasure에 "대비책:" 금지. 심리·신체 양면 행동.`,
 
-대비책: 심리·신체 양면 행동 포함.`,
+  roadmap: `■ S7 시간 로드맵 · 연수 6단계
 
-  roadmap: `■ S7 시간 로드맵 + 결정 스크립트 · 연수 6단계
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
+${SCORE_CITATION_RULE}
 
 출력 스키마:
 {
@@ -106,24 +107,12 @@ title 4~10자, body 대운·나이 시기 (90자), tip "잡는 법:" 오행·십
 
 {{narrative}}
 
-roadmap 6항목 (각 80자 내외, PDF 기준):
-- 현재~2년: 표현과 정리
-- 3~5년 후: 역할 재정의
-- 6~10년 후: 구조화와 자산화
-- 11~15년 후: 조정자·멘토
-- 16~20년 후: 정리와 선택
-- 20년 이후: 전달과 유산 (60자)
+roadmap 6항목 (연수·회복 단계). decisionMoments 4. script 따옴표 없이 구어만.`,
 
-decisionMoments 4항목 (script 큰따옴표, 80자):
-- 협상 망설임 / 감정 상해 즉각 반박 / 무기력·무의욕 / 결정 전 불안
-※ 상황3: 수기운 "시작만 하면 흐름" / 상황4: 3가지 시나리오 종이
+  prophecy: `■ S8 잠겨진 천명 · 심리
 
-결정프레임 Q1~Q3는 roadmap 마지막 body:
-- 가치 vs 순간 감정?
-- 3년 뒤 상태?
-- 혼자 vs 함께할 때 더 빛나는가?`,
-
-  prophecy: `■ S8 잠겨진 천명 · 심리·멘탈
+${HANGUL_ONLY_RULE}
+${OUTPUT_FORMAT_RULES}
 
 출력 스키마:
 {
@@ -133,7 +122,7 @@ decisionMoments 4항목 (script 큰따옴표, 80자):
 
 {{narrative}}
 
-prophecy.short: 심리 안정 색·방향·시간·숫자 + 다짐(15자)
-prophecy.full: 대운 파장·감정 관리 조건·미래 연도 2개·내면 성숙 (120자)
-cohortInsight.body: 동일 구조 코호트 — 전환점·루틴 성공 vs 삭임 실패 대비 (120자)`,
+prophecy.short: 안정 색·방향·시간·숫자 + 다짐(15자)
+prophecy.full: 대운 파장·감정 관리·미래 연도 2개 (120자). {{currentYear}} 이후만.
+${COHORT_RULE}`,
 };

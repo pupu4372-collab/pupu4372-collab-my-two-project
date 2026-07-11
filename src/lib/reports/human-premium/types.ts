@@ -125,6 +125,35 @@ export interface ReportCohortInsight {
   body: string;
 }
 
+/** S4 domain scores (e.g. monthly/yearly areas out of 10). */
+export interface ReportDomainScore {
+  domain: string;
+  /** Integer 1–10 (out of 10). */
+  score: number;
+  analysis: string;
+}
+
+/** S4 thematic sections (career/wealth/mental/business/love) — title + body, no gauge. */
+export interface ReportDeepSection {
+  title: string;
+  body: string;
+}
+
+/** S4 decade year cards. */
+export interface ReportYearCard {
+  year: string;
+  /** Typically 40–100. */
+  score: number;
+  summary: string;
+}
+
+/** S4 lifetime major-luck cycles. */
+export interface ReportLifeCycle {
+  period: string;
+  title: string;
+  body: string;
+}
+
 export interface HumanPremiumReportStructured {
   scores: ReportScore[];
   opportunities: ReportOpportunity[];
@@ -133,6 +162,16 @@ export interface HumanPremiumReportStructured {
   decisionMoments: ReportDecisionMoment[];
   prophecy: ReportProphecy;
   cohortInsight: ReportCohortInsight;
+  /** Optional S4 structured domains (monthly / yearly quarters). */
+  domainScores?: ReportDomainScore[];
+  /** Optional lucky dates/months from S4 (monthly dates, yearly months). */
+  luckyDates?: string[];
+  /** Optional thematic S4 sections (C-group products). */
+  deepSections?: ReportDeepSection[];
+  /** Optional decade year cards. */
+  yearCards?: ReportYearCard[];
+  /** Optional lifetime daewoon cycles. */
+  lifeCycles?: ReportLifeCycle[];
 }
 
 export type HumanPremiumReportStatus =

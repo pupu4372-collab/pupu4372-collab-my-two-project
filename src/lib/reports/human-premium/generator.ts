@@ -1,7 +1,4 @@
 import { computeBasicSaju } from "@/lib/saju/engine";
-import {
-  computeZiweiChartFromPremiumBirth,
-} from "@/lib/saju/ksaju-adapter";
 import { resolveHumanBirthBasis, resolveSolarBirthDate } from "./birth-basis";
 import {
   buildHumanSummary,
@@ -11,7 +8,6 @@ import {
   resolveReportType,
   sumChapterPages,
 } from "./content";
-import { buildZiweiChartSummary } from "./ziwei-narratives";
 import type {
   HumanPremiumReportInput,
   HumanPremiumReportPayload,
@@ -35,18 +31,11 @@ export function buildHumanPremiumReport(
     privacyConsent: input.privacyConsent,
   });
 
-  const ziweiChart = computeZiweiChartFromPremiumBirth({
-    birthDate: solarBirthDate,
-    birthTime: input.birthTime,
-    birthTimeUnknown: input.birthTimeUnknown,
-    gender: input.gender ?? birthBasis.gender ?? null,
-  });
-
+  // Saju (四柱/三柱) reports: skip ziwei chart compute and section/bullet embed.
   const summary = buildHumanSummary(input.personName, saju, input.locale);
   const reportType = resolveReportType(input.reportType);
   const structured = buildHumanPremiumStructured(saju, input.locale, reportType);
   const sajuChapters = buildSajuChapters(saju, input.locale, {
-    ziweiChart,
     birthTimeUnknown: input.birthTimeUnknown,
     reportType,
   });
@@ -83,7 +72,6 @@ export function buildHumanPremiumReport(
       dominantElement: saju.dominantElement,
       pillars: saju.pillars as unknown as Record<string, unknown>,
       elements: saju.elements as unknown as Record<string, unknown>[],
-      ziwei: buildZiweiChartSummary(ziweiChart) as unknown as Record<string, unknown>,
       chapters: sajuChapters,
       sectionCount: sajuSectionCount,
       estimatedPages: sajuEstimatedPages,
