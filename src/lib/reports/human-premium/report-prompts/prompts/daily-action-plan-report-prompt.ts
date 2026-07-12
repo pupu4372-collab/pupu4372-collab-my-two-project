@@ -3,9 +3,9 @@ import type { ReportSlotPromptMap } from "../prompt-definition";
 
 /** No.06 · 데일리 럭키 루틴 (daily) — S4 의도적 공백 / S7: 5시간대+대운 */
 export const FOCUS_KO =
-  "하루 × 행운 — 모든 시간 언급은 반드시 오늘 하루 또는 늦어도 이번 주 이내로 제한한다. 나이·연대·인생 전체 단위의 서술은 금지하며, 모든 조언은 오늘 당장 실행 가능한 구체적 행동이어야 한다.";
+  "하루 × 행운 — 모든 시간 언급은 반드시 오늘 하루 또는 늦어도 이번 주 이내로 제한한다. 나이·연대·인생 전체 단위의 서술은 금지하며, 모든 조언은 오늘 당장 실행 가능한 구체적 행동이어야 한다. (예외: prophecy.full 잠겨진 천명만 올해·내년 계절 단위 2시점 허용)";
 export const FOCUS_EN =
-  "Day × Luck — every time reference must stay within today or, at the widest, this week. No age-based or lifetime-scale framing. Every piece of advice must be a concrete action executable today.";
+  "Day × Luck — every time reference must stay within today or, at the widest, this week. No age-based or lifetime-scale framing. Every piece of advice must be a concrete action executable today. (Exception: prophecy.full may use two year/season moments — this year and next year only.)";
 
 const HANGUL_ONLY_RULE = `★ 한자 표기 예외 — 이 섹션은 base 규칙의 "한자 병기"를 따르지 않는다.
   십신·오행·간지를 언급할 때 한자(漢字)를 절대 쓰지 말고 한글로만
@@ -196,8 +196,10 @@ prophecy.full: 잠겨진 천명 — ★ 아래 규칙 모두 필수
     미래 예언으로 착각해서 쓰지 말 것
   - ★ 시점은 반드시 "구체적인 두 시점"으로 분리해서 쓸 것.
     하나의 범위(예: "2027년~2031년")로 뭉뚱그리는 것 금지.
-    형식: "[시점1: {{currentYear}}년 내 특정 계절/월]... 그리고
-    [시점2: {{currentYear}}+1년 내 특정 계절/월]..."
+    형식: "[시점1: 올해 내 특정 계절/월]... 그리고
+    [시점2: 내년 내 특정 계절/월]..."
+    ★ 시점 표기는 "올해"/"내년" + 계절·월만 쓰고, "2026년"·"2027년" 식
+      연도 숫자는 쓰지 말 것 (내부 기준 연도는 {{currentYear}}).
   - ★ 각 시점마다 "무슨 일이 일어나는지" 구체적인 사건 유형을 반드시 명시할 것.
     아래 카테고리 중 최소 1개 이상을 골라 사용:
     (제안·연락, 문서·계약, 사람과의 만남, 작은 수입·기회, 이사·이직 관련 소식)
@@ -214,12 +216,12 @@ prophecy.full: 잠겨진 천명 — ★ 아래 규칙 모두 필수
     prophecy.full 본문에서 "서쪽·금 기운 방향에서 오는 기회", "이 일주의 다음 장면"
     같은 사주 전문용어·간지 표기를 문장에 그대로 노출하지 말 것. 대신 그것이
     현실에서 어떤 형태로 나타날지(제안·연락·문서·사람과의 만남 등)를
-    구어체로, 마치 친구에게 오늘/이번 주를 조언해주듯 서술할 것.
+    구어체로, 마치 친구에게 조언해주듯 서술할 것.
     나쁜 예: "2027년~2031년 사이, 서쪽·금 기운 방향에서 오는 기회가
     이 일주의 다음 장면을 바꾸는 계기가 됩니다."
-    좋은 예: "이번 주 안에, 예전에 정리해둔 서류나 미뤄뒀던 일 하나가
+    좋은 예: "올해 가을 무렵, 예전에 정리해둔 서류나 미뤄뒀던 일 하나가
     갑자기 연락이나 제안으로 이어질 수 있어요. 그러니 지금 정리해둔
-    거 괜히 지우지 말고 잘 챙겨두세요. 그리고 다음 달쯤엔, 가볍게
+    거 괜히 지우지 말고 잘 챙겨두세요. 그리고 내년 봄쯤엔, 가볍게
     나눈 대화 하나가 생각보다 큰 흐름으로 이어질 수 있으니 사람
     만나는 자리 피하지 마세요."
     ★ en 출력 시: prophecy.full을 자연스러운 영어 조언체로 작성할 것.
