@@ -4,8 +4,10 @@ import {
   COHORT_RULE,
   ELEMENT_DEFICIENCY_RULE,
   HANGUL_ONLY_RULE,
+  NUMERIC_RANGE_RULE,
   OUTPUT_FORMAT_RULES,
   JSON_OUTPUT_FORCE_RULE,
+  ROADMAP_DAEWOON_RULE,
   S3_SCORE_RULES_BLOCK,
   S3_SCORES_SCHEMA,
   SCORE_CITATION_RULE,
@@ -77,6 +79,7 @@ ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
 ${JSON_OUTPUT_FORCE_RULE}
 ${SCORE_CITATION_RULE}
+${NUMERIC_RANGE_RULE}
 
 출력 스키마:
 { "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }
@@ -90,6 +93,7 @@ ${SCORE_CITATION_RULE}
 ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
 ${JSON_OUTPUT_FORCE_RULE}
+${NUMERIC_RANGE_RULE}
 
 출력 스키마:
 { "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
@@ -104,6 +108,8 @@ ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
 ${JSON_OUTPUT_FORCE_RULE}
 ${SCORE_CITATION_RULE}
+${NUMERIC_RANGE_RULE}
+${ROADMAP_DAEWOON_RULE}
 
 출력 스키마:
 {
@@ -113,11 +119,7 @@ ${SCORE_CITATION_RULE}
 
 {{narrative}}
 
-roadmap: 5~6항목
-  - 과거 대운: 10년 요약
-  - ★현재 대운 + 다음 대운: 전반·후반(5년) 세분화
-  - 이후: 10년 요약
-  입력 ★현재 대운만 현재로 지칭.
+roadmap: 5~7항목 (과거 요약 1 + 현재·다음 세분 + 이후 요약).
 decisionMoments 4. script 따옴표 없이 구어만.`,
 
   prophecy: `■ S8 잠겨진 천명 · 비즈니스

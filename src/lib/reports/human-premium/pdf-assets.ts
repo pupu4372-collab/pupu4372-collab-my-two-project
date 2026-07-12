@@ -1,22 +1,22 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-/** Landscape calligraphy PNG (知觀齋 + seal) — real PNG, ~900px wide. */
+/** Square calligraphy cover logo (知觀齋 + seal) — `jigwanjae-cover-logo`. */
 const JIGWANJAE_COVER_LOGO_PATH = path.join(
   process.cwd(),
   "public",
   "stitch",
   "jigwanjae",
-  "jigwanjae-cover-logo-wide.png"
+  "jigwanjae-cover-logo.png"
 );
 
-/** Legacy square asset (often JPEG bytes misnamed .png). */
+/** Legacy landscape asset (kept as fallback only). */
 const JIGWANJAE_COVER_LOGO_FALLBACK_PATH = path.join(
   process.cwd(),
   "public",
   "stitch",
   "jigwanjae",
-  "jigwanjae-cover-logo.png"
+  "jigwanjae-cover-logo-wide.png"
 );
 
 let coverLogoDataUrl: string | null | undefined;

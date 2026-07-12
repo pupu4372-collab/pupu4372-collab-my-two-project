@@ -264,12 +264,121 @@ function humanElementStory(
   };
 }
 
-function scoreSeed(saju: SajuBasicResponse, index: number): number {
-  const dominant = saju.elements.find((e) => e.key === saju.dominantElement)?.count ?? 1;
+/** FNV-1a style deterministic hash — no Math.random. */
+function hashSeed(...parts: Array<string | number>): number {
+  let h = 2166136261;
+  const text = parts.join("|");
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/** Deterministic offset in [-4, +4] from chart + topic + metric index. */
+function topicMetricOffset(seed: number, index: number): number {
+  const x = (seed + Math.imul(index + 1, 2654435761)) >>> 0;
+  return (x % 9) - 4;
+}
+
+/**
+ * Topic bias for compact 6-metric labels:
+ * [현재운세강도, 시기적합도, 기회포착력, 위기회피력, 관계운, 재물흐름]
+ */
+function topicBiasOffsets(reportType: ReportType | undefined): number[] {
+  switch (reportType) {
+    case "wealth":
+      return [0, -1, 4, -3, -2, 5];
+    case "business":
+      return [1, 1, 3, -2, 5, 0];
+    case "love":
+      return [0, 1, 1, -2, 5, -2];
+    case "career":
+      return [2, 3, 4, -2, 1, 0];
+    case "mental":
+      return [1, 3, 0, 3, 1, -2];
+    case "yearly":
+      return [2, 4, 2, -2, 1, 1];
+    case "decade":
+      return [3, 1, 2, -2, 1, 2];
+    case "lifetime":
+      return [4, 1, 1, -2, 2, 1];
+    case "daily":
+      return [2, 4, 2, -2, 1, 1];
+    case "monthly":
+      return [1, 4, 2, -2, 1, 1];
+    default:
+      return [0, 0, 0, 0, 0, 0];
+  }
+}
+
+function sajuBalance(saju: SajuBasicResponse): number {
+  const dominant =
+    saju.elements.find((e) => e.key === saju.dominantElement)?.count ?? 1;
   const total = saju.elements.reduce((sum, e) => sum + e.count, 0) || 1;
-  const balance = dominant / total;
-  const offsets = [4, 2, -1, 0, 3, 1];
-  return clampScore(58 + balance * 22 + offsets[index]);
+  return dominant / total;
+}
+
+function chartFingerprint(saju: SajuBasicResponse): string {
+  const pillars = saju.pillars;
+  return [
+    pillars.year.pillar,
+    pillars.month.pillar,
+    pillars.day.pillar,
+    pillars.hour?.pillar ?? "none",
+    saju.dominantElement,
+  ].join("/");
+}
+
+function isCrisisAvoidanceLabel(label: string): boolean {
+  return (
+    label === "위기회피력" ||
+    label.toLowerCase().includes("crisis") ||
+    label.includes("회피")
+  );
+}
+
+function enforceScoreRules(
+  scores: number[],
+  labels: readonly string[]
+): number[] {
+  const next = scores.map((s, i) => {
+    if (isCrisisAvoidanceLabel(labels[i] ?? "")) {
+      return Math.max(50, Math.min(72, s));
+    }
+    return Math.max(50, Math.min(90, s));
+  });
+
+  const nonCrisisIdx = next
+    .map((_, i) => i)
+    .filter((i) => !isCrisisAvoidanceLabel(labels[i] ?? ""));
+  const maxNonCrisis = Math.max(...nonCrisisIdx.map((i) => next[i]), 0);
+  if (maxNonCrisis < 80 && nonCrisisIdx.length > 0) {
+    const boostTarget = nonCrisisIdx.reduce((best, i) =>
+      next[i] >= next[best] ? i : best
+    );
+    next[boostTarget] = 80 + (next[boostTarget] % 5);
+  }
+
+  return next.map((s) => clampScore(s));
+}
+
+function scoreSeed(
+  saju: SajuBasicResponse,
+  index: number,
+  reportType?: ReportType
+): number {
+  const balance = sajuBalance(saju);
+  const baseOffsets = [4, 2, -1, 0, 3, 1];
+  const base = 58 + balance * 22 + (baseOffsets[index] ?? 0);
+  const seed = hashSeed(
+    chartFingerprint(saju),
+    reportType ?? "default",
+    index
+  );
+  const topicBias = topicBiasOffsets(reportType)[index] ?? 0;
+  const jitter = topicMetricOffset(seed, index);
+  return clampScore(base + topicBias + jitter);
 }
 
 function buildTemplateScores(
@@ -328,7 +437,7 @@ function buildTemplateScores(
     reportType === "yearly" ||
     reportType === "decade" ||
     reportType === "lifetime";
-  const descriptions = useMetricCopy
+  const baseDescriptions = useMetricCopy
     ? locale === "ko"
       ? descriptionsKoMetric
       : descriptionsEnMetric
@@ -336,11 +445,38 @@ function buildTemplateScores(
       ? descriptionsKoLegacy
       : descriptionsEnLegacy;
 
-  return labels.map((label, index) => ({
-    label,
-    score: scoreSeed(saju, index),
-    description: descriptions[index] ?? descriptions[0],
-  }));
+  const rawScores = labels.map((_, index) =>
+    scoreSeed(saju, index, reportType)
+  );
+  const scores = enforceScoreRules(rawScores, labels);
+
+  const order = scores
+    .map((score, index) => ({ score, index }))
+    .sort((a, b) => b.score - a.score || a.index - b.index);
+  const rankByIndex = new Map<number, number>();
+  order.forEach((row, rank) => rankByIndex.set(row.index, rank));
+
+  return labels.map((label, index) => {
+    const rank = rankByIndex.get(index) ?? index;
+    const base = baseDescriptions[index] ?? baseDescriptions[0];
+    const rankNote =
+      locale === "ko"
+        ? rank === 0
+          ? " 이 리포트 주제에서 가장 두드러진 축입니다."
+          : rank === labels.length - 1
+            ? " 상대적으로 보완이 필요한 축입니다."
+            : ""
+        : rank === 0
+          ? " This is the strongest axis for this report topic."
+          : rank === labels.length - 1
+            ? " This axis needs relatively more support."
+            : "";
+    return {
+      label,
+      score: scores[index],
+      description: `${base}${rankNote}`,
+    };
+  });
 }
 
 function buildTemplateOpportunities(

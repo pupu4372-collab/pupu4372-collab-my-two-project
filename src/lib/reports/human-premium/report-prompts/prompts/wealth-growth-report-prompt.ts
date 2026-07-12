@@ -4,8 +4,10 @@ import {
   COHORT_RULE,
   ELEMENT_DEFICIENCY_RULE,
   HANGUL_ONLY_RULE,
+  NUMERIC_RANGE_RULE,
   OUTPUT_FORMAT_RULES,
   JSON_OUTPUT_FORCE_RULE,
+  ROADMAP_DAEWOON_RULE,
   S3_SCORE_RULES_BLOCK,
   S3_SCORES_SCHEMA,
   SCORE_CITATION_RULE,
@@ -54,6 +56,7 @@ ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
 ${JSON_OUTPUT_FORCE_RULE}
 ${SCORE_CITATION_RULE}
+${NUMERIC_RANGE_RULE}
 
 출력 스키마:
 {
@@ -66,9 +69,9 @@ ${SCORE_CITATION_RULE}
 intro: 재물 서두만 (80~100자).
 sections 정확히 4개, title 고정:
 1) "재물 3단 구조" — 정보→전략→자산화 공식 (80자)
-2) "자산 유형별 전략" — 부동산·금융·부업·연금, 비중·기간 (200자)
+2) "자산 유형별 전략" — 부동산·금융·부업·연금, 비중·기간은 범위형 (200자)
 3) "대운별 재물 로드맵" — 현재~그다음 대운 (250자)
-4) "재물 경보 원칙" — 규칙 3가지, 수치 포함 (100자)`,
+4) "재물 경보 원칙" — 규칙 3가지, 수치는 범위형 (100자)`,
 
   opportunities: `■ S5 포착할 기회 5가지 · 재물
 
@@ -76,6 +79,7 @@ ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
 ${JSON_OUTPUT_FORCE_RULE}
 ${SCORE_CITATION_RULE}
+${NUMERIC_RANGE_RULE}
 
 출력 스키마:
 { "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }
@@ -89,13 +93,14 @@ ${SCORE_CITATION_RULE}
 ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
 ${JSON_OUTPUT_FORCE_RULE}
+${NUMERIC_RANGE_RULE}
 
 출력 스키마:
 { "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
 
 {{narrative}}
 
-정확히 4개. countermeasure에 "대비책:" 금지. 수치 포함 권장.`,
+정확히 4개. countermeasure에 "대비책:" 금지. 비중·기간은 범위형.`,
 
   roadmap: `■ S7 시간 로드맵 · 대운 단위
 
@@ -103,6 +108,8 @@ ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
 ${JSON_OUTPUT_FORCE_RULE}
 ${SCORE_CITATION_RULE}
+${NUMERIC_RANGE_RULE}
+${ROADMAP_DAEWOON_RULE}
 
 출력 스키마:
 {
@@ -112,11 +119,7 @@ ${SCORE_CITATION_RULE}
 
 {{narrative}}
 
-roadmap 5~6항목:
-  - 과거 대운(입력에서 (과거) 표시): 10년 통짜 요약만
-  - ★현재 대운 + 다음 대운: 각 5년 단위(전반/후반)로 세분화
-  - 그 이후 대운: 10년 통짜 요약
-  입력의 ★현재 대운 연도·나이만 '현재'로 쓸 것.
+roadmap 5~7항목 (과거 요약 1 + 현재·다음 세분 + 이후 요약).
 decisionMoments 4. script 따옴표 없이 구어만.`,
 
   prophecy: `■ S8 잠겨진 천명 · 재물

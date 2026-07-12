@@ -1,7 +1,19 @@
 import type { Content, TableCell } from "pdfmake/interfaces";
-import { branchHangulLabel, stemHangulLabel } from "@/lib/saju/elements";
+import { branchHangulLabel, charToElement, stemHangulLabel } from "@/lib/saju/elements";
+import {
+  BRANCH_META,
+  formatTenGodLabel,
+  STEM_META,
+} from "@/lib/saju/sipseong";
 import type { PillarDisplay } from "@/lib/saju/types";
-import { PDF_JIG_MUTED, PDF_JIG_SEAL, PDF_PAPER_BORDER, PDF_PAPER_FILL } from "./pdf-visuals";
+import { obangPaleHex } from "./element-display";
+import {
+  PDF_JIG_HANJI,
+  PDF_JIG_MUTED,
+  PDF_JIG_SEAL,
+  PDF_PAPER_BORDER,
+  PDF_PAPER_FILL,
+} from "./pdf-visuals";
 
 export interface PdfMansePillars {
   year: PillarDisplay;
@@ -9,6 +21,24 @@ export interface PdfMansePillars {
   day: PillarDisplay;
   hour: PillarDisplay | null;
 }
+
+const STEM_ORDER = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+const BRANCH_ORDER = [
+  "子",
+  "丑",
+  "寅",
+  "卯",
+  "辰",
+  "巳",
+  "午",
+  "未",
+  "申",
+  "酉",
+  "戌",
+  "亥",
+];
+
+const PDF_INK = "#3E3A36";
 
 function pdfSafeText(value: string): string {
   return value
@@ -19,90 +49,397 @@ function pdfSafeText(value: string): string {
     .replace(/[–—]/g, "-");
 }
 
-function pillarCell(pillar: PillarDisplay, isKo: boolean, emphasis = false): TableCell {
-  const stemHanja = pillar.stemHanja || pillar.stem || pillar.pillar.charAt(0);
-  const branchHanja = pillar.branchHanja || pillar.branch || pillar.pillar.charAt(1);
-  const detail = isKo
-    ? `${stemHangulLabel(stemHanja)} · ${branchHangulLabel(branchHanja)}`
-    : `${pillar.stemLabel} · ${pillar.branchLabel}`;
+function mixHex(accent: string, mixPct: number, base: string): string {
+  const parse = (hex: string) => {
+    const h = hex.replace("#", "");
+    return [
+      Number.parseInt(h.slice(0, 2), 16),
+      Number.parseInt(h.slice(2, 4), 16),
+      Number.parseInt(h.slice(4, 6), 16),
+    ] as const;
+  };
+  const [ar, ag, ab] = parse(accent);
+  const [br, bg, bb] = parse(base);
+  const t = Math.max(0, Math.min(100, mixPct)) / 100;
+  const mix = (a: number, b: number) => Math.round(a * t + b * (1 - t));
+  const toHex = (n: number) => n.toString(16).padStart(2, "0");
+  return `#${toHex(mix(ar, br))}${toHex(mix(ag, bg))}${toHex(mix(ab, bb))}`;
+}
 
+/** Same 공망 pair as web ManseTable.emptyBranchesForDay. */
+export function emptyBranchesForDay(dayPillar: PillarDisplay): string[] {
+  const stem = dayPillar.stemHanja || dayPillar.stem || dayPillar.pillar.charAt(0);
+  const branch =
+    dayPillar.branchHanja || dayPillar.branch || dayPillar.pillar.charAt(1);
+  const stemIndex = STEM_ORDER.indexOf(stem);
+  const branchIndex = BRANCH_ORDER.indexOf(branch);
+  if (stemIndex < 0 || branchIndex < 0) return [];
+
+  const cycleStartBranchIndex =
+    (branchIndex - stemIndex + BRANCH_ORDER.length) % BRANCH_ORDER.length;
+  return [
+    BRANCH_ORDER[(cycleStartBranchIndex + 10) % BRANCH_ORDER.length],
+    BRANCH_ORDER[(cycleStartBranchIndex + 11) % BRANCH_ORDER.length],
+  ];
+}
+
+function pillarCellBg(hanja: string, emphasis?: boolean): string {
+  const element = charToElement(hanja);
+  if (!element) {
+    return emphasis ? mixHex(PDF_JIG_SEAL, 6, PDF_JIG_HANJI) : "#FFFFFF";
+  }
+  const pale = obangPaleHex(element, emphasis ? 16 : 12, PDF_JIG_HANJI);
+  return emphasis ? mixHex(PDF_JIG_SEAL, 7, pale) : pale;
+}
+
+function fortuneFill(emphasis: boolean | undefined, colIndex: number): string {
+  if (emphasis) return mixHex(PDF_JIG_SEAL, 8, PDF_JIG_HANJI);
+  if (colIndex % 2 === 0) return mixHex(PDF_INK, 4, PDF_JIG_HANJI);
+  return mixHex(PDF_INK, 2, "#FFFFFF");
+}
+
+function tenGodFill(emphasis: boolean | undefined, colIndex: number): string {
+  if (emphasis) return mixHex(PDF_JIG_SEAL, 6, PDF_JIG_HANJI);
+  if (colIndex % 2 === 0) return mixHex(PDF_INK, 3, "#FFFFFF");
+  return mixHex(PDF_INK, 2, PDF_JIG_HANJI);
+}
+
+function rowHeaderCell(label: string): TableCell {
   return {
-    stack: [
-      {
-        text: pdfSafeText(pillar.pillar),
-        alignment: "center",
-        bold: true,
-        fontSize: 15,
-        color: emphasis ? "#222222" : PDF_JIG_MUTED,
-        margin: [0, 0, 0, 2],
-      },
-      {
-        text: pdfSafeText(detail),
-        alignment: "center",
-        fontSize: 8.5,
-        color: PDF_JIG_MUTED,
-      },
-    ],
-    fillColor: emphasis ? "#F5EBEB" : "#FFFFFF",
-    margin: [6, 8, 6, 8],
+    text: pdfSafeText(label),
+    alignment: "left",
+    fontSize: 8,
+    bold: true,
+    color: PDF_INK,
+    margin: [2, 6, 4, 6],
+    border: [false, false, false, false],
   };
 }
 
-/** Compact 3–4 column pillar table aligned with web ManseTable column order. */
+type ManseCol = {
+  key: keyof PdfMansePillars;
+  label: string;
+  fortune: string;
+  hint: string;
+  relation: string;
+  emphasis?: boolean;
+};
+
+/** Full-spec 만세력 table matching web ManseTable (rows + 공망/십성). */
 export function buildPdfManseTable(
   pillars: PdfMansePillars,
   hasHour: boolean,
   isKo: boolean
 ): Content {
-  const cols: Array<{
-    key: keyof PdfMansePillars;
-    label: string;
-    emphasis?: boolean;
-  }> = [
+  const locale = isKo ? "ko" : "en";
+  const dayStem =
+    pillars.day.stemHanja || pillars.day.stem || pillars.day.pillar.charAt(0);
+  const emptyBranches = emptyBranchesForDay(pillars.day);
+  const emptyBranchText =
+    emptyBranches.length > 0
+      ? `${emptyBranches.join("")} ${isKo ? "공망" : "void"}`
+      : "-";
+
+  const cols: ManseCol[] = [
     ...(hasHour && pillars.hour
-      ? [{ key: "hour" as const, label: isKo ? "생시" : "Hour" }]
+      ? [
+          {
+            key: "hour" as const,
+            label: isKo ? "생시" : "Hour",
+            fortune: isKo ? "말년운" : "Late life",
+            hint: isKo ? "자녀운, 결실" : "Legacy, results",
+            relation: isKo ? "자녀" : "Legacy",
+          },
+        ]
       : []),
-    { key: "day", label: isKo ? "생일" : "Day", emphasis: true },
-    { key: "month", label: isKo ? "생월" : "Month" },
-    { key: "year", label: isKo ? "생년" : "Year" },
+    {
+      key: "day",
+      label: isKo ? "생일" : "Day",
+      fortune: isKo ? "중년운" : "Midlife",
+      hint: isKo ? "정체성, 자아" : "Identity, self",
+      relation: isKo ? "본인" : "Self",
+      emphasis: true,
+    },
+    {
+      key: "month",
+      label: isKo ? "생월" : "Month",
+      fortune: isKo ? "청년운" : "Youth",
+      hint: isKo ? "부모, 사회상" : "Parents, society",
+      relation: isKo ? "사회" : "Society",
+    },
+    {
+      key: "year",
+      label: isKo ? "생년" : "Year",
+      fortune: isKo ? "초년운" : "Early life",
+      hint: isKo ? "조상, 시대상" : "Ancestry, era",
+      relation: isKo ? "조상" : "Ancestry",
+    },
   ];
 
-  const headerRow = cols.map(
-    (col): TableCell => ({
-      text: pdfSafeText(col.label),
-      alignment: "center",
-      style: "labelCaps",
-      fillColor: PDF_PAPER_FILL,
-      margin: [4, 6, 4, 4],
-    })
-  );
+  const resolvePillar = (key: ManseCol["key"]): PillarDisplay | null => {
+    if (key === "hour") return pillars.hour;
+    return pillars[key];
+  };
 
-  const pillarRow = cols.map((col): TableCell => {
-    const pillar =
-      col.key === "hour" ? pillars.hour : pillars[col.key as "day" | "month" | "year"];
-    if (!pillar) {
-      return { text: "-", alignment: "center" };
-    }
-    return pillarCell(pillar, isKo, col.emphasis);
-  });
+  const labelRow: TableCell[] = [
+    { text: "", border: [false, false, false, false] },
+    ...cols.map(
+      (col): TableCell => ({
+        text: pdfSafeText(col.label),
+        alignment: "center",
+        bold: true,
+        fontSize: 9,
+        color: PDF_INK,
+        fillColor: PDF_PAPER_FILL,
+        margin: [2, 5, 2, 4],
+      })
+    ),
+  ];
+
+  const fortuneRow: TableCell[] = [
+    { text: "", border: [false, false, false, false] },
+    ...cols.map(
+      (col, colIndex): TableCell => ({
+        stack: [
+          {
+            text: pdfSafeText(col.fortune),
+            alignment: "center",
+            bold: true,
+            fontSize: 10,
+            color: PDF_INK,
+            margin: [0, 0, 0, 2],
+          },
+          {
+            text: pdfSafeText(col.hint),
+            alignment: "center",
+            fontSize: 7,
+            color: PDF_JIG_MUTED,
+          },
+        ],
+        fillColor: fortuneFill(col.emphasis, colIndex),
+        margin: [3, 6, 3, 6],
+      })
+    ),
+  ];
+
+  const stemRow: TableCell[] = [
+    rowHeaderCell(isKo ? "천간" : "Stem"),
+    ...cols.map((col): TableCell => {
+      const pillar = resolvePillar(col.key);
+      if (!pillar) {
+        return { text: "-", alignment: "center" };
+      }
+      const stemHanja =
+        pillar.stemHanja || pillar.stem || pillar.pillar.charAt(0);
+      const hangul = isKo
+        ? stemHangulLabel(stemHanja)
+        : pillar.stemLabel;
+      return {
+        stack: [
+          {
+            columns: [
+              {
+                width: "*",
+                text: "",
+              },
+              {
+                width: "auto",
+                text: pdfSafeText(stemHanja),
+                fontSize: 18,
+                bold: true,
+                color: col.emphasis ? PDF_INK : PDF_JIG_MUTED,
+                margin: [0, 0, 3, 0],
+              },
+              {
+                width: "auto",
+                text: pdfSafeText(hangul),
+                fontSize: 8,
+                bold: true,
+                color: PDF_INK,
+                margin: [0, 8, 0, 0],
+              },
+              {
+                width: "*",
+                text: "",
+              },
+            ],
+            columnGap: 0,
+          },
+          {
+            text: pdfSafeText(col.relation),
+            alignment: "right",
+            fontSize: 6.5,
+            bold: true,
+            color: PDF_JIG_MUTED,
+            margin: [0, 4, 2, 0],
+          },
+        ],
+        fillColor: pillarCellBg(stemHanja, col.emphasis),
+        margin: [2, 6, 2, 4],
+      };
+    }),
+  ];
+
+  const stemTenGodRow: TableCell[] = [
+    rowHeaderCell(isKo ? "십성" : "Ten god"),
+    ...cols.map((col, colIndex): TableCell => {
+      const pillar = resolvePillar(col.key);
+      if (!pillar) {
+        return { text: "-", alignment: "center" };
+      }
+      const stemHanja =
+        pillar.stemHanja || pillar.stem || pillar.pillar.charAt(0);
+      return {
+        text: pdfSafeText(
+          formatTenGodLabel(dayStem, STEM_META[stemHanja], locale)
+        ),
+        alignment: "center",
+        fontSize: 8.5,
+        color: PDF_INK,
+        fillColor: tenGodFill(col.emphasis, colIndex),
+        margin: [2, 5, 2, 5],
+      };
+    }),
+  ];
+
+  const branchRow: TableCell[] = [
+    rowHeaderCell(isKo ? "지지" : "Branch"),
+    ...cols.map((col): TableCell => {
+      const pillar = resolvePillar(col.key);
+      if (!pillar) {
+        return { text: "-", alignment: "center" };
+      }
+      const branchHanja =
+        pillar.branchHanja || pillar.branch || pillar.pillar.charAt(1);
+      const hangul = isKo
+        ? branchHangulLabel(branchHanja)
+        : pillar.branchLabel;
+      const branchRelation = col.emphasis
+        ? isKo
+          ? "배우자"
+          : "Partner"
+        : col.relation;
+      return {
+        stack: [
+          {
+            columns: [
+              { width: "*", text: "" },
+              {
+                width: "auto",
+                text: pdfSafeText(branchHanja),
+                fontSize: 18,
+                bold: true,
+                color: PDF_INK,
+                margin: [0, 0, 3, 0],
+              },
+              {
+                width: "auto",
+                text: pdfSafeText(hangul),
+                fontSize: 8,
+                bold: true,
+                color: PDF_INK,
+                margin: [0, 8, 0, 0],
+              },
+              { width: "*", text: "" },
+            ],
+            columnGap: 0,
+          },
+          {
+            text: pdfSafeText(branchRelation),
+            alignment: "right",
+            fontSize: 6.5,
+            bold: true,
+            color: PDF_JIG_MUTED,
+            margin: [0, 4, 2, 0],
+          },
+        ],
+        fillColor: pillarCellBg(branchHanja, col.emphasis),
+        margin: [2, 6, 2, 4],
+      };
+    }),
+  ];
+
+  const branchTenGodRow: TableCell[] = [
+    rowHeaderCell(isKo ? "십성" : "Ten god"),
+    ...cols.map((col, colIndex): TableCell => {
+      const pillar = resolvePillar(col.key);
+      if (!pillar) {
+        return { text: "-", alignment: "center" };
+      }
+      const branchHanja =
+        pillar.branchHanja || pillar.branch || pillar.pillar.charAt(1);
+      return {
+        text: pdfSafeText(
+          formatTenGodLabel(dayStem, BRANCH_META[branchHanja], locale)
+        ),
+        alignment: "center",
+        fontSize: 8.5,
+        color: PDF_INK,
+        fillColor: tenGodFill(col.emphasis, colIndex),
+        margin: [2, 5, 2, 5],
+      };
+    }),
+  ];
+
+  const voidRow: TableCell[] = [
+    rowHeaderCell(isKo ? "공망" : "Void"),
+    ...cols.map((col): TableCell => {
+      const pillar = resolvePillar(col.key);
+      if (!pillar) {
+        return { text: "-", alignment: "center" };
+      }
+      const branch =
+        pillar.branchHanja || pillar.branch || pillar.pillar.charAt(1);
+      const isVoid = emptyBranches.includes(branch);
+      return {
+        text: pdfSafeText(
+          isVoid ? (isKo ? "공망 해당" : "Void hit") : emptyBranchText
+        ),
+        alignment: "center",
+        fontSize: 7.5,
+        bold: isVoid,
+        color: isVoid ? PDF_JIG_HANJI : PDF_JIG_MUTED,
+        fillColor: isVoid ? PDF_INK : mixHex(PDF_INK, 3, PDF_JIG_HANJI),
+        margin: [2, 5, 2, 5],
+      };
+    }),
+  ];
 
   const manseTitle = isKo ? "사주 만세력 (四柱)" : "Four pillars (Manse)";
+  const colCount = cols.length;
 
   return {
+    unbreakable: true,
+    pageBreak: "before",
     stack: [
       {
         text: pdfSafeText(manseTitle),
         style: "sectionTitle",
-        margin: [0, 14, 0, 8],
+        margin: [0, 0, 0, 10],
       },
       {
         table: {
-          widths: cols.map(() => "*"),
-          body: [headerRow, pillarRow],
+          widths: [32, ...Array.from({ length: colCount }, () => "*")],
+          body: [
+            labelRow,
+            fortuneRow,
+            stemRow,
+            stemTenGodRow,
+            branchRow,
+            branchTenGodRow,
+            voidRow,
+          ],
+          dontBreakRows: true,
         },
         layout: {
-          hLineWidth: () => 1,
-          vLineWidth: () => 1,
+          hLineWidth: (i, node) => (i === 0 || i === node.table.body.length ? 1 : 0.6),
+          vLineWidth: (i, node) => {
+            const widthCount = node.table.widths?.length ?? 0;
+            if (i === 0) return 0;
+            if (i === 1) return 1;
+            if (i === widthCount) return 1;
+            return 0.6;
+          },
           hLineColor: () => PDF_PAPER_BORDER,
           vLineColor: () => PDF_PAPER_BORDER,
           paddingLeft: () => 0,
@@ -110,7 +447,6 @@ export function buildPdfManseTable(
           paddingTop: () => 0,
           paddingBottom: () => 0,
         },
-        fillColor: PDF_PAPER_FILL,
       },
       {
         text: pdfSafeText(
@@ -120,7 +456,7 @@ export function buildPdfManseTable(
         ),
         style: "bodyMuted",
         alignment: "center",
-        margin: [0, 6, 0, 0],
+        margin: [0, 8, 0, 0],
         color: PDF_JIG_SEAL,
       },
     ],

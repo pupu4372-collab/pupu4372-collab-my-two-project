@@ -63,12 +63,12 @@ export function buildPdfCoverBlocks(
   const blocks: Content[] = [];
 
   if (options?.logoDataUrl) {
-    // Shrink-only fit (~75% of prior box) so calligraphy + seal keep breathing room.
+    // Square cover logo — fit keeps aspect, box sized for calligraphy + seal.
     blocks.push({
       image: options.logoDataUrl,
-      fit: [300, 98],
+      fit: [168, 168],
       alignment: "center",
-      margin: [0, 16, 0, 16],
+      margin: [0, 12, 0, 12],
     });
   } else {
     blocks.push({

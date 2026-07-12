@@ -218,7 +218,7 @@ function buildDocumentDefinition(
   const content: Content[] = buildPdfCoverBlocks(report, { logoDataUrl });
 
   // Cover bullets (분석 모드 / traits) are cover metadata — not a TOC.
-  // Manse table lives on the cover via buildPdfCoverBlocks (human-only; not pet-shared).
+  // Full-spec manse table follows cover on its own page (pageBreak + unbreakable).
   content.push(...tableOfContentsBlocks(report, isKo));
   content.push(...elementSummaryBlocks(report, isKo, { pageBreak: true }));
   content.push(...buildOrderedPdfBodySections(report, isKo));

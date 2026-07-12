@@ -4,8 +4,10 @@ import {
   COHORT_RULE,
   ELEMENT_DEFICIENCY_RULE,
   HANGUL_ONLY_RULE,
+  NUMERIC_RANGE_RULE,
   OUTPUT_FORMAT_RULES,
   JSON_OUTPUT_FORCE_RULE,
+  ROADMAP_DAEWOON_RULE,
   S3_SCORE_RULES_BLOCK,
   S3_SCORES_SCHEMA,
   SCORE_CITATION_RULE,
@@ -107,6 +109,8 @@ ${HANGUL_ONLY_RULE}
 ${OUTPUT_FORMAT_RULES}
 ${JSON_OUTPUT_FORCE_RULE}
 ${SCORE_CITATION_RULE}
+${NUMERIC_RANGE_RULE}
+${ROADMAP_DAEWOON_RULE}
 
 출력 스키마:
 {
@@ -116,10 +120,7 @@ ${SCORE_CITATION_RULE}
 
 {{narrative}}
 
-roadmap 6항목:
-  - ★현재 대운과 다음 대운을 5년 단위로 상세히
-  - 이미 끝난 과거·먼 미래는 10년 요약
-  입력의 ★현재 대운 구간만 '현재'로 쓸 것.
+roadmap 6~7항목 (과거 요약 1 + 현재·다음 5년 세분 + 이후).
 decisionMoments 4: 협상 망설임 / 비효율 지적 / 이직·전환 / 투자·동업
 script는 따옴표 없이 구어 대사만.`,
 
