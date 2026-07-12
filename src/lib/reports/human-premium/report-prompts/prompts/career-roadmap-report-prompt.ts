@@ -7,6 +7,7 @@ import {
   NUMERIC_RANGE_RULE,
   OUTPUT_FORMAT_RULES,
   JSON_OUTPUT_FORCE_RULE,
+  PROPHECY_TWO_MOMENTS_RULE,
   ROADMAP_DAEWOON_RULE,
   S3_SCORE_RULES_BLOCK,
   S3_SCORES_SCHEMA,
@@ -140,6 +141,7 @@ ${JSON_OUTPUT_FORCE_RULE}
 
 prophecy.short: 반드시 아래 고정값을 그대로 (창작 금지):
 {{luckyKeywordsShort}}
-prophecy.full: 커리어 2막·지식 자산·미래 연도 2개 (120자). {{currentYear}} 이후만.
+prophecy.full: 커리어 2막·지식 자산, 서로 다른 미래 시점 2개 분리 (120자).
+${PROPHECY_TWO_MOMENTS_RULE}
 ${COHORT_RULE}`,
 };

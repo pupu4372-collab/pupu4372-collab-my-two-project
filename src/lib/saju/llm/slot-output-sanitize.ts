@@ -64,13 +64,15 @@ export function replaceKnownHanjaWithHangul(text: string): {
 }
 
 /**
- * Strip internal outline labels like `[오행_우세]:` / `[명리_진단]`.
+ * Strip internal outline labels like `[오행_우세]:` / `[명리_진단]` / `【마스터 내러티브】`.
  * Keeps paragraph breaks when a label sat on its own line.
  */
 export function stripInternalBracketLabels(text: string): string {
   return text
     .replace(/^[ \t]*\[[^\]]+\]\s*:?[ \t]*/gm, "")
     .replace(/[ \t]*\[[^\]]+\]\s*:?[ \t]*/g, " ")
+    .replace(/^[ \t]*【[^】]+】\s*/gm, "")
+    .replace(/[ \t]*【[^】]+】\s*/g, " ")
     .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();

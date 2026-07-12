@@ -51,7 +51,11 @@ ${REPORT_PROMPT_CARE_ORIENTED}
   지금 쓰려는 내용이 대명제의 시간 범위 안에 있는지 스스로 점검할 것.
 - ★ 행운 키워드(색·방향·시간대·숫자): 입력의 【고정 행운 키워드】 값을
   그대로 사용할 것. prophecy.short는 {{luckyKeywordsShort}}와 一字一句
-  동일해야 하며 창작·변형 금지.`;
+  동일해야 하며 창작·변형 금지.
+- ★ 잠겨진 천명(prophecy.full): 반드시 서로 다른 두 개의 미래 시점
+  (구체적 연도 또는 나이)을 제시하고, 각 시점에서 일어나는 장면을 분리해
+  서술할 것. 단일 시점만 서술하는 것은 허용되지 않음. 시점은 리포트 발행
+  이후만 사용.`;
 
 /** User message prefix: chart facts (all slots). */
 export const REPORT_PROMPT_USER_INPUT = `【입력 데이터】

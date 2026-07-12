@@ -343,7 +343,9 @@ async function generateDeepAnalysis(ctx: PremiumLlmContext, narrative: string) {
       ? 4500
       : ctx.reportType === "decade"
         ? 4000
-        : 2400;
+        : ctx.reportType === "career"
+          ? 3600
+          : 2400;
   const result = await callPremiumJsonCached({
     callKind: "deep-analysis",
     ctx,
@@ -351,8 +353,16 @@ async function generateDeepAnalysis(ctx: PremiumLlmContext, narrative: string) {
     maxTokens: deepMaxTokens,
     narrative,
   });
-  if (!result) return { value: null, provider: null };
-  return { value: parseDeepAnalysisResult(result.data), provider: result.provider };
+  if (!result) {
+    return { value: null, provider: null, stopReason: null, raw: null as unknown };
+  }
+  const parsed = parseDeepAnalysisResult(result.data);
+  return {
+    value: parsed,
+    provider: result.provider,
+    stopReason: result.stopReason ?? null,
+    raw: result.data,
+  };
 }
 
 const OPPORTUNITIES_JSON_CORRECTION = `
@@ -417,22 +427,92 @@ function logSlotParseOrCallFailure(options: {
   retried?: boolean;
 }): void {
   const snippets = rawResponseSnippets(options.raw);
+  const rawText =
+    typeof options.raw === "string"
+      ? options.raw
+      : options.raw == null
+        ? ""
+        : JSON.stringify(options.raw);
   console.error("[LLM_SLOT_FAIL]", {
     reportType: options.reportType,
     slot: options.slot,
     failStage: options.failStage,
     stop_reason: options.stopReason,
     retried: options.retried ?? false,
+    responseChars: rawText.length,
     rawHead: snippets.head,
     rawTail: snippets.tail,
   });
+}
+
+/** Unified grep tags: [OPP_FALLBACK] | [RISK_FALLBACK] | [ROADMAP_FALLBACK] | [DEEP_ANALYSIS_FALLBACK] */
+function logParallelSlotFallback(options: {
+  reportType: ReportType;
+  slot: "opportunities" | "risks" | "roadmap";
+  failStage: "call_null" | "parse_null";
+  stopReason: string | null;
+  provider: PremiumLlmProvider | null;
+  raw: unknown;
+}): void {
+  const tag =
+    options.slot === "opportunities"
+      ? "[OPP_FALLBACK]"
+      : options.slot === "risks"
+        ? "[RISK_FALLBACK]"
+        : "[ROADMAP_FALLBACK]";
+  const snippets = rawResponseSnippets(options.raw);
+  const rawText =
+    typeof options.raw === "string"
+      ? options.raw
+      : options.raw == null
+        ? ""
+        : JSON.stringify(options.raw);
+  console.error(tag, {
+    reportType: options.reportType,
+    slot: options.slot,
+    failStage: options.failStage,
+    stop_reason: options.stopReason,
+    provider: options.provider,
+    responseChars: rawText.length,
+    rawHead: snippets.head,
+    rawTail: snippets.tail,
+  });
+  logFallbackUsed(options.reportType, options.slot);
+}
+
+function logDeepAnalysisFailure(options: {
+  reportType: ReportType;
+  failStage: "call_null" | "parse_null" | "empty_payload";
+  stopReason: string | null;
+  provider: PremiumLlmProvider | null;
+  raw: unknown;
+}): void {
+  const snippets = rawResponseSnippets(options.raw);
+  const rawText =
+    typeof options.raw === "string"
+      ? options.raw
+      : options.raw == null
+        ? ""
+        : JSON.stringify(options.raw);
+  console.error("[DEEP_ANALYSIS_FALLBACK]", {
+    reportType: options.reportType,
+    failStage: options.failStage,
+    stop_reason: options.stopReason,
+    provider: options.provider,
+    responseChars: rawText.length,
+    rawHead: snippets.head,
+    rawTail: snippets.tail,
+  });
+  logFallbackUsed(options.reportType, "deep-analysis");
 }
 
 function logFallbackUsed(reportType: ReportType, slot: string): void {
   console.warn(`[fallback-used] type=${reportType} slot=${slot}`);
 }
 
-const OPP_RISK_MAX_TOKENS = 5000;
+const OPP_RISK_MAX_TOKENS = 7500;
+const ROADMAP_MAX_TOKENS = 5000;
+const ROADMAP_RETRY_MAX_TOKENS = 5200;
 
 function resolveOpportunitiesPayload(
   data: unknown,
@@ -545,6 +625,14 @@ async function generateOpportunities(ctx: PremiumLlmContext, narrative: string) 
       raw: retry.data,
       retried: true,
     });
+    logParallelSlotFallback({
+      reportType: ctx.reportType,
+      slot: "opportunities",
+      failStage: "parse_null",
+      stopReason: retry.stopReason,
+      provider: retry.provider,
+      raw: retry.data,
+    });
   } else {
     logSlotParseOrCallFailure({
       reportType: ctx.reportType,
@@ -553,6 +641,14 @@ async function generateOpportunities(ctx: PremiumLlmContext, narrative: string) 
       stopReason: null,
       raw: null,
       retried: true,
+    });
+    logParallelSlotFallback({
+      reportType: ctx.reportType,
+      slot: "opportunities",
+      failStage: "call_null",
+      stopReason: null,
+      provider: null,
+      raw: null,
     });
   }
 
@@ -616,6 +712,14 @@ async function generateRisks(ctx: PremiumLlmContext, narrative: string) {
       raw: retry.data,
       retried: true,
     });
+    logParallelSlotFallback({
+      reportType: ctx.reportType,
+      slot: "risks",
+      failStage: "parse_null",
+      stopReason: retry.stopReason,
+      provider: retry.provider,
+      raw: retry.data,
+    });
   } else {
     logSlotParseOrCallFailure({
       reportType: ctx.reportType,
@@ -624,6 +728,14 @@ async function generateRisks(ctx: PremiumLlmContext, narrative: string) {
       stopReason: null,
       raw: null,
       retried: true,
+    });
+    logParallelSlotFallback({
+      reportType: ctx.reportType,
+      slot: "risks",
+      failStage: "call_null",
+      stopReason: null,
+      provider: null,
+      raw: null,
     });
   }
 
@@ -636,7 +748,7 @@ async function generateRoadmap(ctx: PremiumLlmContext, narrative: string) {
     callKind: "roadmap",
     ctx,
     prompts: basePrompts,
-    maxTokens: 3200,
+    maxTokens: ROADMAP_MAX_TOKENS,
     narrative,
   });
 
@@ -667,7 +779,7 @@ async function generateRoadmap(ctx: PremiumLlmContext, narrative: string) {
     callKind: "roadmap-retry",
     ctx,
     prompts: appendUserCorrection(basePrompts, ROADMAP_JSON_CORRECTION),
-    maxTokens: 3400,
+    maxTokens: ROADMAP_RETRY_MAX_TOKENS,
     narrative,
   });
   if (retry) {
@@ -689,6 +801,14 @@ async function generateRoadmap(ctx: PremiumLlmContext, narrative: string) {
       raw: retry.data,
       retried: true,
     });
+    logParallelSlotFallback({
+      reportType: ctx.reportType,
+      slot: "roadmap",
+      failStage: "parse_null",
+      stopReason: retry.stopReason,
+      provider: retry.provider,
+      raw: retry.data,
+    });
   } else {
     logSlotParseOrCallFailure({
       reportType: ctx.reportType,
@@ -697,6 +817,14 @@ async function generateRoadmap(ctx: PremiumLlmContext, narrative: string) {
       stopReason: null,
       raw: null,
       retried: true,
+    });
+    logParallelSlotFallback({
+      reportType: ctx.reportType,
+      slot: "roadmap",
+      failStage: "call_null",
+      stopReason: null,
+      provider: null,
+      raw: null,
     });
   }
 
@@ -877,6 +1005,15 @@ export async function buildHumanPremiumStructuredWithLlm(
           parsed.yearCards?.length ||
           parsed.cycles?.length
       );
+      if (!ok) {
+        logDeepAnalysisFailure({
+          reportType: ctx.reportType,
+          failStage: "empty_payload",
+          stopReason: deepAnalysisResult.stopReason,
+          provider: deepAnalysisResult.provider,
+          raw: deepAnalysisResult.raw,
+        });
+      }
       mark(
         "section-depth",
         deepAnalysisResult.provider,
@@ -884,6 +1021,13 @@ export async function buildHumanPremiumStructuredWithLlm(
         ok ? undefined : "llm_failed"
       );
     } else {
+      logDeepAnalysisFailure({
+        reportType: ctx.reportType,
+        failStage: deepAnalysisResult.provider ? "parse_null" : "call_null",
+        stopReason: deepAnalysisResult.stopReason,
+        provider: deepAnalysisResult.provider,
+        raw: deepAnalysisResult.raw,
+      });
       mark("section-depth", null, false, "llm_failed");
     }
   }
@@ -899,7 +1043,6 @@ export async function buildHumanPremiumStructuredWithLlm(
     interpretation.opportunities = oppResult.value;
     mark("section-opportunity", oppResult.provider, true);
   } else {
-    logFallbackUsed(ctx.reportType, "opportunities");
     mark("section-opportunity", null, false, "llm_failed");
   }
 
@@ -908,7 +1051,6 @@ export async function buildHumanPremiumStructuredWithLlm(
     interpretation.risks = riskResult.value;
     mark("section-risk", riskResult.provider, true);
   } else {
-    logFallbackUsed(ctx.reportType, "risks");
     mark("section-risk", null, false, "llm_failed");
   }
 
@@ -917,7 +1059,6 @@ export async function buildHumanPremiumStructuredWithLlm(
     interpretation.roadmap = roadmapResult.roadmap;
     mark("section-roadmap", roadmapResult.provider, true);
   } else {
-    logFallbackUsed(ctx.reportType, "roadmap");
     mark("section-roadmap", null, false, "llm_failed");
   }
   if (roadmapResult.decisionMoments?.length) {

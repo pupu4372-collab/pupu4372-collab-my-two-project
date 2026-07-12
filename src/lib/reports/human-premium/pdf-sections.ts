@@ -94,36 +94,50 @@ function metricsBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conten
 
   const blocks: Content[] = [paragraph(header)];
 
-  for (const item of scores) {
-    blocks.push(
-      pdfBorderedCard(
-        [
-          {
-            columns: [
-              {
-                text: pdfSafeText(item.label),
-                width: "*",
-                style: "sectionTitle",
-                margin: [0, 0, 0, 0],
-              },
-              {
-                text: [
-                  { text: String(item.score), bold: true, fontSize: 16, color: PDF_JIG_SEAL },
-                  { text: "/100", fontSize: 10, color: PDF_JIG_MUTED },
-                ],
-                width: 52,
-                alignment: "right",
-              },
-            ],
-            columnGap: 8,
-            margin: [0, 0, 0, 2],
-          },
-          pdfScoreBar(item.score),
-          paragraph(item.description),
-        ],
-        { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
-      )
+  const cardFor = (item: (typeof scores)[number]): Content =>
+    pdfBorderedCard(
+      [
+        {
+          columns: [
+            {
+              text: pdfSafeText(item.label),
+              width: "*",
+              style: "sectionTitle",
+              margin: [0, 0, 0, 0],
+            },
+            {
+              text: [
+                { text: String(item.score), bold: true, fontSize: 16, color: PDF_JIG_SEAL },
+                { text: "/100", fontSize: 10, color: PDF_JIG_MUTED },
+              ],
+              width: 52,
+              alignment: "right",
+            },
+          ],
+          columnGap: 8,
+          margin: [0, 0, 0, 2],
+        },
+        pdfScoreBar(item.score),
+        paragraph(item.description),
+      ],
+      { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
     );
+
+  // Keep 3+3 (or 4+2) groups unbreakable so we never orphan a single card (5+1).
+  const mid = Math.ceil(scores.length / 2) || 0;
+  if (scores.length > 0) {
+    blocks.push({
+      unbreakable: true,
+      stack: scores.slice(0, mid).map(cardFor),
+      margin: [0, 0, 0, 4],
+    });
+  }
+  if (scores.length > mid) {
+    blocks.push({
+      unbreakable: true,
+      stack: scores.slice(mid).map(cardFor),
+      margin: [0, 0, 0, 0],
+    });
   }
 
   return blocks;

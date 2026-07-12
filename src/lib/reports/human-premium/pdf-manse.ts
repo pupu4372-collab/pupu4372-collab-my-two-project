@@ -135,10 +135,6 @@ export function buildPdfManseTable(
   const dayStem =
     pillars.day.stemHanja || pillars.day.stem || pillars.day.pillar.charAt(0);
   const emptyBranches = emptyBranchesForDay(pillars.day);
-  const emptyBranchText =
-    emptyBranches.length > 0
-      ? `${emptyBranches.join("")} ${isKo ? "공망" : "void"}`
-      : "-";
 
   const cols: ManseCol[] = [
     ...(hasHour && pillars.hour
@@ -381,32 +377,34 @@ export function buildPdfManseTable(
     }),
   ];
 
-  const voidRow: TableCell[] = [
-    rowHeaderCell(isKo ? "공망" : "Void"),
-    ...cols.map((col): TableCell => {
-      const pillar = resolvePillar(col.key);
-      if (!pillar) {
-        return { text: "-", alignment: "center" };
-      }
-      const branch =
-        pillar.branchHanja || pillar.branch || pillar.pillar.charAt(1);
-      const isVoid = emptyBranches.includes(branch);
-      return {
-        text: pdfSafeText(
-          isVoid ? (isKo ? "공망 해당" : "Void hit") : emptyBranchText
-        ),
-        alignment: "center",
-        fontSize: 7.5,
-        bold: isVoid,
-        color: isVoid ? PDF_JIG_HANJI : PDF_JIG_MUTED,
-        fillColor: isVoid ? PDF_INK : mixHex(PDF_INK, 3, PDF_JIG_HANJI),
-        margin: [2, 5, 2, 5],
-      };
-    }),
-  ];
-
   const manseTitle = isKo ? "사주 만세력 (四柱)" : "Four pillars (Manse)";
   const colCount = cols.length;
+
+  const voidLabel =
+    emptyBranches.length > 0
+      ? emptyBranches.join("")
+      : "-";
+  const voidRow: TableCell[] = [
+    rowHeaderCell(isKo ? "공망" : "Void"),
+    {
+      text: pdfSafeText(
+        voidLabel === "-"
+          ? "-"
+          : isKo
+            ? `${voidLabel} 공망`
+            : `${voidLabel} void`
+      ),
+      colSpan: colCount,
+      alignment: "center",
+      fontSize: 8,
+      color: PDF_JIG_MUTED,
+      fillColor: mixHex(PDF_INK, 3, PDF_JIG_HANJI),
+      margin: [2, 5, 2, 5],
+    },
+    ...Array.from({ length: Math.max(0, colCount - 1) }, () => ({
+      text: "",
+    })),
+  ];
 
   return {
     unbreakable: true,

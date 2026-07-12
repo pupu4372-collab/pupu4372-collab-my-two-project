@@ -96,3 +96,9 @@ export const NUMERIC_RANGE_RULE = `★ 수치 일관성:
 
 export const CARE_STYLE = `★ 문체 — 케어 지향: 설명 → 실행 가능 행동으로 문단 마무리.
   십신·명리 전문용어를 본문에 그대로 노출하지 말고 풀어서 쓸 것.`;
+
+/** Shared prophecy.full two-moment rule (all topics). */
+export const PROPHECY_TWO_MOMENTS_RULE = `★ prophecy.full 2시점 필수:
+  - 서로 다른 미래 시점 2개(구체 연도 또는 나이) + 각 장면을 분리 서술
+  - 단일 시점·"OO세 이후" 한 덩어리만 쓰는 것 금지
+  - 시점은 {{currentYear}} 이후만`;

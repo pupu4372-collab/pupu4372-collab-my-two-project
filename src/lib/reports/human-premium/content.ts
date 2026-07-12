@@ -1,4 +1,4 @@
-import { ELEMENT_META } from "@/lib/saju/elements";
+import { ELEMENT_META, charToElement } from "@/lib/saju/elements";
 import {
   computeManAge,
   pickCurrentAndUpcomingCycles,
@@ -19,6 +19,7 @@ import type {
   HumanPremiumReportStructured,
   ReportCohortInsight,
   ReportDecisionMoment,
+  ReportDeepSection,
   ReportOpportunity,
   ReportProphecy,
   ReportRisk,
@@ -38,6 +39,7 @@ import {
   stripCohortBodyPrefix,
 } from "./cohort-insight-labels";
 import { normalizeDecisionScriptQuotes } from "@/lib/saju/llm/slot-output-sanitize";
+import { sanitizeLlmSlotText } from "@/lib/saju/llm/slot-output-sanitize";
 
 /** When true, embed ziwei section titles into cover bullets (legacy / future ziwei product). */
 const EMBED_ZIWEI_IN_SAJU_COVER = false;
@@ -224,7 +226,7 @@ function humanElementStory(
     const stories: Record<ElementKey, string> = {
       wood: `${name}님의 핵심 기운은 ${elementName}입니다. 성장, 확장, 새로운 시작의 흐름이 평생 테마로 이어집니다.`,
       fire: `${name}님의 핵심 기운은 ${elementName}입니다. 열정, 표현, 영향력이 삶의 중심축이 됩니다.`,
-      earth: `${name}님의 핵심 기운은 ${elementName}입니다. 안정, 루틴, 책임감이 인생의 기반이 됩니다.`,
+      earth: `${name}님의 핵심 기운은 ${elementName}입니다. 안정, 신뢰, 중심을 지키는 힘이 인생의 기반이 됩니다.`,
       metal: `${name}님의 핵심 기운은 ${elementName}입니다. 정리, 기준, 결단력이 평생 자산이 됩니다.`,
       water: `${name}님의 핵심 기운은 ${elementName}입니다. 직관, 공감, 유연함이 삶의 윤활유 역할을 합니다.`,
     };
@@ -486,34 +488,32 @@ function buildTemplateOpportunities(
 ): ReportOpportunity[] {
   const focus = reportFocus(reportType, locale);
   const year = new Date().getFullYear();
-  const seun = computeSeunPillar(year);
-  const seunLabel = pillarText(seun);
 
   if (locale === "ko") {
     return [
       {
-        title: `${year}년 세운 ${seunLabel}과 맞는 창`,
-        body: `${focus}에 맞춰 작은 확신을 쌓을 때입니다. 한 번에 크게 베팅하기보다 반복 가능한 루틴이 운을 살립니다.`,
-        tip: "이번 주 안에 15분짜리 '확인 루틴' 하나를 고정하세요.",
+        title: `${year}년 흐름에 맞는 창`,
+        body: `${focus}에 맞춰 작은 확신을 쌓을 때입니다. 한 번에 크게 베팅하기보다 반복 가능한 루틴이 흐름을 살립니다.`,
+        tip: "이번 주 안에 15분짜리 확인 루틴 하나를 고정하세요.",
       },
       {
-        title: "강한 오행을 살리는 협업",
+        title: "강한 기운을 살리는 협업",
         body: `${elLabel(saju.dominantElement, locale)} 기운이 드러나는 역할에 서면 성과가 빨리 보입니다.`,
         tip: "맡고 싶은 일을 한 문장으로 정리해 먼저 제안하세요.",
       },
       {
         title: "관계의 온도 조절",
         body: "상대의 속도를 읽고 한 박자 늦게 반응하면 갈등이 줄고 신뢰가 쌓입니다.",
-        tip: "중요한 대화 전에 '지금 괜찮은 타이밍인지' 한 번만 확인하세요.",
+        tip: "중요한 대화 전에 지금 괜찮은 타이밍인지 한 번만 확인하세요.",
       },
       {
         title: "학습·정비의 계절",
-        body: "무거운 운일수록 공부와 정리가 다음 도약의 연료가 됩니다.",
+        body: "무거운 구간일수록 공부와 정리가 다음 도약의 연료가 됩니다.",
         tip: "주 1회, 쌓인 일을 30분만 정리하는 습관을 만드세요.",
       },
       {
-        title: "지금 대운에서 열리는 문",
-        body: "현재 흐름은 '기반 다지기 → 작은 성과 → 확장' 순서가 안전합니다.",
+        title: "지금 구간에서 열리는 문",
+        body: "현재 흐름은 기반 다지기 → 작은 성과 → 확장 순서가 안전합니다.",
         tip: "다음 달까지 유지할 최소 루틴 2가지만 고르세요.",
       },
     ];
@@ -521,12 +521,12 @@ function buildTemplateOpportunities(
 
   return [
     {
-      title: `${year} seun window ${seunLabel}`,
+      title: `${year} timing window`,
       body: `Align with ${focus}. Repeatable routines beat one oversized bet.`,
       tip: "Lock one 15-minute weekly check-in ritual.",
     },
     {
-      title: "Collaboration that uses your dominant element",
+      title: "Collaboration that uses your strong tone",
       body: `Roles that express ${elLabel(saju.dominantElement, locale)} lift results faster.`,
       tip: "Pitch one role you want in a single clear sentence.",
     },
@@ -537,11 +537,11 @@ function buildTemplateOpportunities(
     },
     {
       title: "Season for study and repair",
-      body: "Heavier cycles reward learning and decluttering as fuel for the next leap.",
+      body: "Heavier stretches reward learning and decluttering as fuel for the next leap.",
       tip: "Spend 30 minutes weekly clearing one backlog pile.",
     },
     {
-      title: "Door opening in the current major cycle",
+      title: "Door opening in the current stretch",
       body: "Safe order: foundation → small win → expansion.",
       tip: "Pick only two minimum routines to hold through next month.",
     },
@@ -920,6 +920,7 @@ export function buildHumanPremiumStructured(
     decisionMoments,
     prophecy: buildTemplateProphecy(saju, locale, reportType),
     cohortInsight: buildTemplateCohortInsight(saju, locale, reportType),
+    deepSections: buildTemplateDeepSections(saju, locale, reportType),
   };
 }
 
@@ -979,11 +980,8 @@ export function formatProphecyBody(
   locale: Locale
 ): string {
   const sealed = prophecy.full ?? prophecy.short;
-  const sealedLabel = locale === "ko" ? "잠겨진 천명" : "Locked destiny";
-  const cohortLabel =
-    locale === "ko" ? COHORT_INSIGHT_TITLE_KO : COHORT_INSIGHT_TITLE_EN;
   const cohortBody = stripCohortBodyPrefix(cohort.body, locale);
-  return [`【${sealedLabel}】`, sealed, `【${cohortLabel}】`, cohortBody].join("\n\n");
+  return [sealed, cohortBody].filter((part) => part.trim()).join("\n\n");
 }
 
 export function formatStructuredSectionBodies(
@@ -995,10 +993,18 @@ export function formatStructuredSectionBodies(
     deepAnalysis?: string;
   } = {}
 ): Partial<Record<string, string>> {
-  return {
+  const depthFromSections =
+    !bodies.deepAnalysis?.trim() && structured.deepSections?.length
+      ? structured.deepSections
+          .map((s) => `${s.title}\n${s.body}`)
+          .join("\n\n")
+      : undefined;
+  const depthBody = bodies.deepAnalysis?.trim() || depthFromSections;
+
+  const raw: Partial<Record<string, string>> = {
     "section-structure": bodies.sajuStructure,
     "section-metrics": formatScoresBody(structured.scores, locale),
-    "section-depth": bodies.deepAnalysis,
+    "section-depth": depthBody,
     "section-opportunity": formatOpportunitiesBody(structured.opportunities),
     "section-risk": formatRisksBody(structured.risks),
     "section-roadmap": formatRoadmapBody(
@@ -1014,6 +1020,13 @@ export function formatStructuredSectionBodies(
       locale
     ),
   };
+
+  const cleaned: Partial<Record<string, string>> = {};
+  for (const [sectionId, text] of Object.entries(raw)) {
+    if (!text?.trim()) continue;
+    cleaned[sectionId] = sanitizeLlmSlotText(`assemble:${sectionId}`, text);
+  }
+  return cleaned;
 }
 
 function buildStructureBody(
@@ -1041,11 +1054,9 @@ function buildStructureBody(
   if (locale === "ko") {
     return `${nickname}의 사주 구조는 ${focus}를 읽는 열쇠입니다.
 
-【명리 진단】
-일간 ${saju.pillars.day.stemLabel} · 주도 오행 ${elLabel(saju.dominantElement, locale)}
+일간 ${saju.pillars.day.stemLabel} · 일간 오행 ${elLabel(dayMasterElement(saju), locale)} (분포 최다 오행 ${elLabel(saju.dominantElement, locale)})
 ${saju.birthTimeUnknown ? "시주 미상 — 삼주(년·월·일) 중심으로 해석합니다." : `시주 ${pillarText(saju.pillars.hour!)} 포함 사주(四柱) 해석입니다.`}
 
-【십신 연결】
 ${slots || "십성 데이터를 표준 축으로 정리했습니다."}
 
 단점은 결핍이 아니라 '조건부 강점'으로 읽습니다. 기운이 강하면 과잉 주의, 약하면 보완 루틴이 답입니다.`;
@@ -1053,14 +1064,46 @@ ${slots || "십성 데이터를 표준 축으로 정리했습니다."}
 
   return `${nickname} chart structure keys into ${focus}.
 
-【Frame】
-Day master ${saju.pillars.day.stemLabel} (${saju.pillars.day.stemHanja}) · dominant ${elLabel(saju.dominantElement, locale)}
+Day master ${saju.pillars.day.stemLabel} (${saju.pillars.day.stemHanja}) · day-master element ${elLabel(dayMasterElement(saju), locale)} (chart-dominant ${elLabel(saju.dominantElement, locale)})
 ${saju.birthTimeUnknown ? "Hour unknown — three-pillar reading (year, month, day)." : `Four pillars including hour ${pillarText(saju.pillars.hour!)}.`}
 
-【Ten Gods】
 ${slots || "Ten-God axes are organized on standard pillars."}
 
 Apparent weaknesses are conditional strengths—balance excess with pacing and deficits with routines.`;
+}
+
+function buildTemplateDeepSections(
+  saju: SajuBasicResponse,
+  locale: Locale,
+  reportType: ReportType
+): ReportDeepSection[] {
+  const focus = reportFocus(reportType, locale);
+  const dayEl = elLabel(dayMasterElement(saju), locale);
+  const nickname = dayPillarNickname(saju, locale);
+
+  if (locale === "ko") {
+    return [
+      {
+        title: "지금의 축",
+        body: `${nickname}의 일간 기운(${dayEl})을 ${focus} 관점에서 읽으면, 속도보다 역할·기준을 먼저 정렬하는 편이 안정적입니다. 작은 루틴이 다음 구간의 기반이 됩니다.`,
+      },
+      {
+        title: "다음 구간 준비",
+        body: `지금 구간에서는 확장보다 정리·연습·관계의 질이 우선입니다. ${focus}에서 당장 실행 가능한 한 가지를 정해 2주간 반복하면, 다음 전환이 덜 흔들립니다.`,
+      },
+    ];
+  }
+
+  return [
+    {
+      title: "Present axis",
+      body: `Reading ${nickname}'s day-master tone (${dayEl}) through ${focus}, align role and standards before speed. Small routines seed the next stretch.`,
+    },
+    {
+      title: "Prep the next stretch",
+      body: `Favor clarity, practice, and bond quality over forced expansion. Pick one executable move in ${focus} and repeat it for two weeks so the next pivot stays steadier.`,
+    },
+  ];
 }
 
 function buildDepthBody(
@@ -1068,44 +1111,33 @@ function buildDepthBody(
   name: string,
   locale: Locale,
   reportType: ReportType,
-  summaryStory: string
+  _summaryStory: string
 ): string {
-  const daewoon = computeDaewoonCandidates({
-    birthUtc: saju.birthUtc,
-    yearStem: saju.pillars.year.stemHanja,
-    monthPillar: saju.pillars.month,
-    dayStem: saju.pillars.day.stemHanja,
-    locale,
-    gender: null,
-  });
   const focus = reportFocus(reportType, locale);
-  const cycleLine = daewoon[0]?.cycles[0]
-    ? locale === "ko"
-      ? `첫 대운 후보는 약 ${daewoon[0].startAge}세에 ${pillarText(daewoon[0].cycles[0].pillar)}로 시작합니다.`
-      : `First major cycle candidate starts around age ${daewoon[0].startAge} at ${pillarText(daewoon[0].cycles[0].pillar)}.`
-    : "";
+  const dayEl = elLabel(dayMasterElement(saju), locale);
+  const nickname = dayPillarNickname(saju, locale);
 
   if (locale === "ko") {
-    return `【마스터 내러티브 · ${REPORT_TYPE_LABELS[reportType]}】
+    return `${name}님의 ${REPORT_TYPE_LABELS[reportType]} 심층 요약입니다.
 
-${name}님, ${summaryStory}
+${nickname}의 일간 기운은 ${dayEl}입니다. ${focus} 관점에서는 '정렬 후 확장'이 유리합니다. 좋은 흐름은 준비된 선택에 기회처럼 보이고, 무거운 흐름은 루틴을 손보는 계절로 읽습니다.
 
-${focus}의 관점에서 보면 지금은 '정렬 후 확장'이 유리합니다. 좋은 운은 준비된 사람에게 기회처럼 보이고, 무거운 운은 루틴을 손보는 계절입니다.
-
-${cycleLine}
-
-현재 대운은 막힘이 아니라 방향을 다듬는 시간입니다. 지금이 기회인 이유는, 작은 선택의 누적이 다음 대운의 크기를 결정하기 때문입니다.`;
+지금 구간은 막힘이 아니라 방향을 다듬는 시간입니다. 작은 선택의 누적이 다음 구간의 크기를 결정합니다.`;
   }
 
-  return `【Master narrative · ${REPORT_TYPE_LABELS_EN[reportType]}】
+  return `${name}'s ${REPORT_TYPE_LABELS_EN[reportType]} depth summary.
 
-${name}, ${summaryStory}
+${nickname} day-master tone is ${dayEl}. Through ${focus}, alignment before expansion works best. Favorable stretches look like opportunity to the prepared; heavier stretches ask for routine repair.
 
-Through ${focus}, alignment before expansion works best. Good cycles look like opportunity to the prepared; heavy cycles ask for routine repair.
+This phase refines direction—not blockage. Small choices now size the next stretch.`;
+}
 
-${cycleLine}
-
-The current major phase is for refining direction—not blockage. Small choices now size the next cycle.`;
+function dayMasterElement(saju: SajuBasicResponse): ElementKey {
+  return (
+    charToElement(saju.pillars.day.stemHanja) ??
+    charToElement(saju.pillars.day.stem) ??
+    saju.dominantElement
+  );
 }
 
 export function buildHumanSummary(
@@ -1113,7 +1145,7 @@ export function buildHumanSummary(
   saju: SajuBasicResponse,
   locale: Locale
 ) {
-  return humanElementStory(name, saju.dominantElement, locale);
+  return humanElementStory(name, dayMasterElement(saju), locale);
 }
 
 export function buildSajuChapters(
@@ -1127,12 +1159,13 @@ export function buildSajuChapters(
 ): HumanPremiumReportChapter[] {
   const name = saju.petName;
   const reportType = resolveReportType(options?.reportType);
-  const summary = humanElementStory(name, saju.dominantElement, locale);
+  const summary = humanElementStory(name, dayMasterElement(saju), locale);
   const structured = buildHumanPremiumStructured(saju, locale, reportType);
   const typeLabel = reportTypeLabel(reportType, locale);
   const nickname = dayPillarNickname(saju, locale);
   const hour = saju.pillars.hour;
   const includeHour = !saju.birthTimeUnknown && hour;
+  const dayElementLabel = elLabel(dayMasterElement(saju), locale);
 
   const ziweiSections =
     EMBED_ZIWEI_IN_SAJU_COVER && options?.ziweiChart != null
@@ -1151,7 +1184,7 @@ export function buildSajuChapters(
 
 ${summary.story}
 
-핵심 오행은 ${elLabel(saju.dominantElement, locale)}입니다. 사주는 단정이 아니라 삶의 지도로 읽어 주세요.`;
+핵심 오행은 ${dayElementLabel}입니다. 사주는 단정이 아니라 삶의 지도로 읽어 주세요.`;
 
   const coverBodyEn = `${name}'s ${typeLabel} report.
 
@@ -1159,7 +1192,7 @@ Pillars: Year ${pillarText(saju.pillars.year)}, Month ${pillarText(saju.pillars.
 
 ${summary.story}
 
-Dominant element: ${elLabel(saju.dominantElement, locale)}. Read the chart as a map, not a verdict.`;
+Day-master element: ${dayElementLabel}. Read the chart as a map, not a verdict.`;
 
   const sections: Array<{ id: string; kind: HumanPremiumReportSection["kind"]; title: string; subtitle?: string; body: string; bullets?: string[]; pageEstimate?: number }> = [
     {
@@ -1198,7 +1231,7 @@ Dominant element: ${elLabel(saju.dominantElement, locale)}. Read the chart as a 
       id: "section-depth",
       kind: "depth",
       title: locale === "ko" ? "심층 분석" : "Deep analysis",
-      subtitle: locale === "ko" ? "마스터 내러티브 · 대운 스토리" : "Master narrative · major cycles",
+      subtitle: locale === "ko" ? "서사 · 핵심 축" : "Narrative · core axes",
       body: reportType === "daily" ? "" : buildDepthBody(saju, name, locale, reportType, summary.story),
       pageEstimate: 4,
     },

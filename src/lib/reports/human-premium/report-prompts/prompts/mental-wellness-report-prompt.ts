@@ -6,6 +6,7 @@ import {
   HANGUL_ONLY_RULE,
   OUTPUT_FORMAT_RULES,
   JSON_OUTPUT_FORCE_RULE,
+  PROPHECY_TWO_MOMENTS_RULE,
   S3_SCORE_RULES_BLOCK,
   S3_SCORES_SCHEMA,
   SCORE_CITATION_RULE,
@@ -130,6 +131,7 @@ ${JSON_OUTPUT_FORCE_RULE}
 
 prophecy.short: 반드시 아래 고정값을 그대로 (창작 금지):
 {{luckyKeywordsShort}}
-prophecy.full: 대운 파장·감정 관리·미래 연도 2개 (120자). {{currentYear}} 이후만.
+prophecy.full: 대운 파장·감정 관리, 서로 다른 미래 시점 2개 분리 (120자).
+${PROPHECY_TWO_MOMENTS_RULE}
 ${COHORT_RULE}`,
 };

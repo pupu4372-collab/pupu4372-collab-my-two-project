@@ -256,27 +256,15 @@ export function ManseTable({
               );
             })}
 
-            {cols.map((col) => {
-              const pillar = pillars[col.key];
-              if (!pillar) return null;
-              const branch = pillar.branchHanja || pillar.branch || pillar.pillar.charAt(1);
-              const isVoid = emptyBranches.includes(branch);
-              return (
-                <div
-                  key={`${col.key}-void`}
-                  className={`border-r border-[var(--jig-ink)]/10 px-3 py-2 text-sm font-medium last:border-r-0 ${
-                    isVoid ? "text-[var(--jig-hanji)]" : "text-[var(--jig-muted)]"
-                  }`}
-                  style={{
-                    backgroundColor: isVoid
-                      ? "var(--jig-ink)"
-                      : "color-mix(in srgb, var(--jig-ink) 3%, var(--jig-hanji))",
-                  }}
-                >
-                  {isVoid ? (isKo ? "공망 해당" : "Void hit") : emptyBranchText}
-                </div>
-              );
-            })}
+            <div
+              className="border-t-0 px-3 py-2 text-sm font-medium text-[var(--jig-muted)]"
+              style={{
+                gridColumn: `1 / -1`,
+                backgroundColor: "color-mix(in srgb, var(--jig-ink) 3%, var(--jig-hanji))",
+              }}
+            >
+              {emptyBranchText}
+            </div>
           </div>
         </div>
       </div>
