@@ -993,13 +993,10 @@ export function formatStructuredSectionBodies(
     deepAnalysis?: string;
   } = {}
 ): Partial<Record<string, string>> {
-  const depthFromSections =
-    !bodies.deepAnalysis?.trim() && structured.deepSections?.length
-      ? structured.deepSections
-          .map((s) => `${s.title}\n${s.body}`)
-          .join("\n\n")
-      : undefined;
-  const depthBody = bodies.deepAnalysis?.trim() || depthFromSections;
+  // Do not flatten deepSections into section-depth body — PDF/web already
+  // render deepSections as cards. Flattening caused duplicate plain+card copy
+  // when deepAnalysis was empty (daily template fallback).
+  const depthBody = bodies.deepAnalysis?.trim() || undefined;
 
   const raw: Partial<Record<string, string>> = {
     "section-structure": bodies.sajuStructure,
