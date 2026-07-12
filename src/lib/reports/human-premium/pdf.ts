@@ -3,22 +3,53 @@ import type { Content, TDocumentDefinitions } from "pdfmake/interfaces";
 import { ensurePdfFontsAsync, PDF_FONT_FAMILY } from "./pdf-fonts";
 import type {
   HumanPremiumReportPayload,
-  HumanPremiumReportSection,
 } from "./types";
 import {
   formatElementDisplayLabel,
+  obangPaleHex,
   parseElementRows,
 } from "./element-display";
 import { loadJigwanjaeCoverLogoDataUrl } from "./pdf-assets";
 import { buildPdfCoverBlocks } from "./pdf-cover";
 import { buildOrderedPdfBodySections } from "./pdf-sections";
-import { pdfElementAccentColor, PDF_SCORE_TRACK } from "./pdf-visuals";
-import { filterZiweiCoverBullets } from "@/lib/saju/llm/slot-output-sanitize";
+import {
+  pdfBorderedCard,
+  pdfElementAccentColor,
+  pdfProgressBar,
+  PDF_SCORE_TRACK,
+} from "./pdf-visuals";
+import {
+  HUMAN_PREMIUM_SECTION_IDS,
+  type HumanPremiumSectionId,
+} from "./types";
+import { isHumanPremiumSectionVisible } from "./section-visibility";
 
 const JIG_HANJI = "#F4F1EA";
 const JIG_INK = "#222222";
 const JIG_SEAL = "#B22222";
 const JIG_MUTED = "#747878";
+
+const TOC_TITLES_KO: Record<HumanPremiumSectionId, string> = {
+  "section-cover": "표지 & 사주",
+  "section-structure": "사주 구조 해석",
+  "section-metrics": "핵심 운세 지표",
+  "section-depth": "심층 분석",
+  "section-opportunity": "포착할 기회",
+  "section-risk": "예측 리스크",
+  "section-roadmap": "시간 로드맵",
+  "section-prophecy": "잠겨진 천명",
+};
+
+const TOC_TITLES_EN: Record<HumanPremiumSectionId, string> = {
+  "section-cover": "Cover & pillars",
+  "section-structure": "Chart structure",
+  "section-metrics": "Key indicators",
+  "section-depth": "Deep analysis",
+  "section-opportunity": "Opportunities",
+  "section-risk": "Risks",
+  "section-roadmap": "Roadmap",
+  "section-prophecy": "Locked destiny",
+};
 
 function pdfSafeText(value: string): string {
   return value
@@ -33,129 +64,145 @@ function paragraph(text: string, style: string = "body"): Content {
   return { text: pdfSafeText(text), style, margin: [0, 0, 0, 8] };
 }
 
-function sectionBlocks(
-  section: HumanPremiumReportSection,
-  options?: { hideTitle?: boolean; hideBody?: boolean }
-): Content[] {
-  const blocks: Content[] = [];
-
-  if (!options?.hideTitle) {
-    blocks.push({ text: pdfSafeText(section.title), style: "sectionTitle" });
-  }
-
-  if (section.subtitle) {
-    blocks.push({
-      text: pdfSafeText(section.subtitle),
-      style: "sectionSubtitle",
-      margin: [0, 0, 0, 6],
-    });
-  }
-
-  if (!options?.hideBody) {
-    blocks.push(paragraph(section.body));
-  }
-
-  if (section.bullets?.length) {
-    const bullets =
-      section.id === "section-cover"
-        ? filterZiweiCoverBullets(section.bullets)
-        : section.bullets;
-    if (bullets.length) {
-      blocks.push({
-        ul: bullets.map((item) => pdfSafeText(item)),
-        style: "body",
-        margin: [8, 0, 0, 10],
-      });
-    }
-  }
-
-  return blocks;
+function elementBar(percent: number, color: string, maxWidth = 160): Content {
+  return pdfProgressBar(percent, color, maxWidth, 8, PDF_SCORE_TRACK);
 }
 
-function findCoverSection(
-  report: HumanPremiumReportPayload
-): HumanPremiumReportSection | undefined {
-  for (const chapter of report.saju.chapters) {
-    for (const section of chapter.sections) {
-      if (section.id === "section-cover") return section;
-    }
-  }
-  return undefined;
-}
-
-function elementBar(percent: number, color: string, maxWidth = 200): Content {
-  const clamped = Math.max(0, Math.min(100, percent));
-  return {
-    canvas: [
-      { type: "rect", x: 0, y: 0, w: maxWidth, h: 10, color: PDF_SCORE_TRACK },
-      { type: "rect", x: 0, y: 0, w: (maxWidth * clamped) / 100, h: 10, color },
-    ],
-    margin: [0, 2, 0, 6],
-  };
-}
-
+/** Web-parity 5-element cards (pale fill + accent gauge). */
 function elementSummaryBlocks(
   report: HumanPremiumReportPayload,
   isKo: boolean,
   options?: { pageBreak?: boolean }
 ): Content[] {
   const elements = parseElementRows(report.saju.elements);
+  if (!elements.length) return [];
 
   const title = isKo ? "오행 에너지 균형" : "Element Balance";
   const subtitle = isKo
     ? "오행 분포의 구조적 분석"
     : "Structural analysis of five-element distribution";
 
-  const rows: Content[] = elements.map((item) => {
-    const label = formatElementDisplayLabel(item, isKo);
+  const dominant = elements.reduce(
+    (best, item) => (item.count > best.count ? item : best),
+    elements[0]
+  );
+
+  const cards: Content[] = elements.map((item) => {
     const barColor = pdfElementAccentColor(item.key);
-    return {
-      columns: [
+    const isDominant = dominant?.key === item.key;
+    const label = formatElementDisplayLabel(item, isKo);
+    return pdfBorderedCard(
+      [
         {
-          text: pdfSafeText(label),
-          width: 80,
-          style: "elementLabel",
-          color: barColor,
+          columns: [
+            {
+              text: pdfSafeText(label),
+              width: "*",
+              style: "labelCaps",
+              color: barColor,
+              margin: [0, 0, 0, 0],
+            },
+            {
+              text: `${item.percent}%`,
+              width: 40,
+              alignment: "right",
+              style: "elementPercent",
+            },
+          ],
+          margin: [0, 0, 0, 4],
         },
         {
-          stack: [elementBar(item.percent, barColor)],
-          width: 220,
+          text: pdfSafeText(item.meaning),
+          style: "sectionTitle",
+          margin: [0, 0, 0, 6],
         },
-        {
-          text: `${item.percent}%`,
-          width: 40,
-          alignment: "right",
-          style: "elementPercent",
-        },
+        elementBar(item.percent, barColor, 180),
       ],
-      columnGap: 8,
-      margin: [0, 4, 0, 4],
-    };
+      {
+        fillColor: obangPaleHex(item.key, isDominant ? 18 : 14),
+        borderColor: isDominant ? barColor : "#E0DDD4",
+        margin: [0, 0, 0, 8],
+        unbreakable: true,
+      }
+    );
   });
 
-  const dominant = elements.reduce((best, item) =>
-    item.count > best.count ? item : best
-  , elements[0]);
-
-  const dominantLabel = dominant
-    ? formatElementDisplayLabel(dominant, isKo)
-    : "-";
-
-  const titleBlock: Content = options?.pageBreak === false
-    ? { text: title, style: "chapterTitle", margin: [0, 16, 0, 4] }
-    : { text: title, style: "chapterTitle", pageBreak: "before" };
+  // 2 + 2 + 1 layout via consecutive cards (pdfmake-friendly)
+  const titleBlock: Content =
+    options?.pageBreak === false
+      ? { text: title, style: "chapterTitle", margin: [0, 8, 0, 4] }
+      : { text: title, style: "chapterTitle", pageBreak: "before" };
 
   return [
     titleBlock,
     { text: subtitle, style: "chapterSubtitle", margin: [0, 0, 0, 10] },
-    paragraph(
-      isKo
-        ? `주된 기운은 ${dominantLabel}입니다. 아래는 사주팔자 기준 오행 분포입니다.`
-        : `Dominant element: ${dominantLabel}. Distribution from the four pillars:`,
-      "body"
-    ),
+    ...cards,
+    { text: "", margin: [0, 0, 0, 8] },
+  ];
+}
+
+/**
+ * TOC page matching web ReportToc (2×4 numbered titles).
+ * Cover bullets (traits / 분석 모드) are intentionally NOT used here —
+ * those are cover metadata, not a shared pet-template fallback.
+ */
+function tableOfContentsBlocks(
+  report: HumanPremiumReportPayload,
+  isKo: boolean
+): Content[] {
+  const titles = isKo ? TOC_TITLES_KO : TOC_TITLES_EN;
+  const items = HUMAN_PREMIUM_SECTION_IDS.filter((id) =>
+    id === "section-cover" ? true : isHumanPremiumSectionVisible(report, id)
+  ).map((id, index) => ({
+    num: index + 1,
+    title: titles[id],
+  }));
+
+  const rows: Content[] = [];
+  for (let r = 0; r < 2; r += 1) {
+    const slice = items.slice(r * 4, r * 4 + 4);
+    if (!slice.length) break;
+    rows.push({
+      columns: slice.map((item) => ({
+        width: "*",
+        stack: [
+          {
+            text: String(item.num),
+            alignment: "center",
+            bold: true,
+            fontSize: 14,
+            color: JIG_SEAL,
+            margin: [0, 0, 0, 4],
+          },
+          {
+            text: pdfSafeText(item.title),
+            alignment: "center",
+            fontSize: 9,
+            color: JIG_INK,
+          },
+        ],
+      })),
+      columnGap: 8,
+      margin: [0, 0, 0, 18],
+    });
+  }
+
+  return [
+    {
+      text: isKo ? "목차" : "Contents",
+      style: "chapterTitle",
+      pageBreak: "before",
+      alignment: "center",
+      margin: [0, 24, 0, 8],
+    },
+    {
+      text: isKo ? "CONTENTS" : "CONTENTS",
+      style: "labelCaps",
+      alignment: "center",
+      color: JIG_SEAL,
+      margin: [0, 0, 0, 24],
+    },
     ...rows,
-    { text: "", margin: [0, 0, 0, 12] },
   ];
 }
 
@@ -170,12 +217,10 @@ function buildDocumentDefinition(
 
   const content: Content[] = buildPdfCoverBlocks(report, { logoDataUrl });
 
-  const coverSection = findCoverSection(report);
-  if (coverSection) {
-    content.push(...sectionBlocks(coverSection, { hideTitle: true, hideBody: true }));
-  }
-
-  content.push(...elementSummaryBlocks(report, isKo, { pageBreak: false }));
+  // Cover bullets (분석 모드 / traits) are cover metadata — not a TOC.
+  // Manse table lives on the cover via buildPdfCoverBlocks (human-only; not pet-shared).
+  content.push(...tableOfContentsBlocks(report, isKo));
+  content.push(...elementSummaryBlocks(report, isKo, { pageBreak: true }));
   content.push(...buildOrderedPdfBodySections(report, isKo));
 
   content.push(

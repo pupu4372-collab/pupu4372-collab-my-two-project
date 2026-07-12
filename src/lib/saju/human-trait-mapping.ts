@@ -8,6 +8,7 @@
 import type { SajuResult, PillarInfo } from "./ksaju-engine/saju";
 import type { FiveElement, Stem } from "./ksaju-engine/core-tables";
 import { STEM_META } from "./ksaju-engine/core-tables";
+import { pickCurrentAndUpcomingDaewoon } from "./daewoon-current";
 import { extractElementsFromSaju } from "./extract-elements";
 import {
   calcBalanceScore,
@@ -127,8 +128,11 @@ export function mapToHumanInterpretation(
     }))
     .filter((_, i) => i !== 2);
 
-  const daewoonUpcoming = saju.daewoon.list.slice(0, 3).map(d => ({
-    index: d.index, ganzi: d.ganzi, startAge: d.startAge, startYear: d.startYear,
+  const daewoonUpcoming = pickCurrentAndUpcomingDaewoon(saju.daewoon.list).map((d) => ({
+    index: d.index,
+    ganzi: d.ganzi,
+    startAge: d.startAge,
+    startYear: d.startYear,
   }));
 
   return {

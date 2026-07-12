@@ -15,15 +15,7 @@ const noto = Noto_Sans_KR({
 export const metadata: Metadata = {
   title: "K-Saju Pet — 사주로 알아보는 우리 아이 맞춤 케어",
   description: "생일만 입력하면 우리 아이 타고난 성향과 오늘의 맞춤 케어 팁을 알려드려요.",
-  icons: {
-    icon: [
-      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
-      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-    ],
-    shortcut: "/favicon.ico",
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
-  },
+  // Icons: App Router file convention (app/favicon.ico, app/icon.png, app/apple-icon.png)
   manifest: "/site.webmanifest",
 };
 

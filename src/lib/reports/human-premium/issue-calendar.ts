@@ -319,6 +319,7 @@ export function buildLifetimeIssueCalendar(options: {
           `- 이후 대운:`,
           futureLabel,
           "- ★ 시제·대운 전환 연도는 위 목록만 기준 (LLM 자체 계산 금지)",
+          "- ★ 상세도: 현재 대운 + 바로 다음 대운만 5년(전반/후반) 세분. 지나간 대운·먼 이후는 10년 통짜 요약.",
         ].join("\n")
       : [
           "\n【Report-specific · lifetime tense】",
@@ -333,6 +334,7 @@ export function buildLifetimeIssueCalendar(options: {
           `- Future cycles:`,
           futureLabel,
           "- ★ Use only these lists for tense and transition years (do not recompute).",
+          "- ★ Detail: split only current + next into 5-year halves; past and far-future stay 10-year summaries.",
         ].join("\n");
 
   return {

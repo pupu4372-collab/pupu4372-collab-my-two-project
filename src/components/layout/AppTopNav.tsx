@@ -6,6 +6,7 @@ import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { signOut } from "@/lib/supabase/auth-client";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import { useState } from "react";
 
 type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "community";
@@ -94,10 +95,15 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-white/45 bg-cream/80 shadow-sm backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 w-full max-w-7xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 md:px-8 lg:px-10">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/75 text-xl shadow-sm" aria-hidden>
-            🐾
-          </span>
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/stitch/brand/symbol-master-transparent.png"
+            alt="K-Saju Pet"
+            width={28}
+            height={28}
+            className="h-7 w-7"
+            priority
+          />
           <span className="text-xl font-extrabold tracking-tight text-primary md:text-2xl">{nav("brand")}</span>
         </Link>
 

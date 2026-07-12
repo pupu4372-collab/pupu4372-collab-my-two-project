@@ -176,6 +176,7 @@ function formatLifetimeInputs(ctx: PremiumPromptContext): ReportSpecificInputVar
   const currentAge = computeCurrentAge(ctx.solarBirthDate);
   const current_age = String(currentAge);
   const { daewoon } = ctx.facts;
+  const birthYear = Number(ctx.solarBirthDate.slice(0, 4));
 
   // Prefer gender-resolved single candidate; else first listed.
   const primary = daewoon.candidates[0];
@@ -193,10 +194,29 @@ function formatLifetimeInputs(ctx: PremiumPromptContext): ReportSpecificInputVar
       );
     }
     for (const cycle of candidate.cycles) {
+      const phase =
+        cycle.endAge < currentAge
+          ? "past"
+          : cycle.startAge <= currentAge && currentAge <= cycle.endAge
+            ? "current"
+            : "future";
+      const yearSpan = `${birthYear + cycle.startAge}~${birthYear + cycle.endAge}`;
+      const mark =
+        phase === "current"
+          ? ctx.locale === "ko"
+            ? " ★현재 대운"
+            : " ★CURRENT"
+          : phase === "past"
+            ? ctx.locale === "ko"
+              ? " (과거)"
+              : " (past)"
+            : ctx.locale === "ko"
+              ? " (이후)"
+              : " (future)";
       lines.push(
         ctx.locale === "ko"
-          ? `  ${cycle.ageRange}: ${cycle.pillar} | 천간 ${cycle.stemTenGod}, 지지 ${cycle.branchTenGod}`
-          : `  ${cycle.ageRange}: ${cycle.pillar} | stem ${cycle.stemTenGod}, branch ${cycle.branchTenGod}`
+          ? `  ${cycle.ageRange} · ${yearSpan}년${mark}: ${cycle.pillar} | 천간 ${cycle.stemTenGod}, 지지 ${cycle.branchTenGod}`
+          : `  ${cycle.ageRange} · ${yearSpan}${mark}: ${cycle.pillar} | stem ${cycle.stemTenGod}, branch ${cycle.branchTenGod}`
       );
     }
   }

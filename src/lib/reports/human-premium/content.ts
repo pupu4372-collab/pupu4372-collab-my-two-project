@@ -1,5 +1,9 @@
 import { ELEMENT_META } from "@/lib/saju/elements";
 import {
+  computeManAge,
+  pickCurrentAndUpcomingCycles,
+} from "@/lib/saju/daewoon-current";
+import {
   computeDaewoonCandidates,
   computeSeunNatalInteractions,
   computeSeunPillar,
@@ -598,28 +602,33 @@ function buildTemplateRoadmap(
   });
 
   const primary = daewoon[0];
-  const cycles = primary?.cycles.slice(0, 4) ?? [];
+  const currentAge = computeManAge(saju.birthDate);
+  const cycles = pickCurrentAndUpcomingCycles(
+    primary?.cycles ?? [],
+    currentAge,
+    4
+  );
 
   const roadmap: ReportRoadmapItem[] = cycles.map((cycle, index) => {
     const period =
       locale === "ko"
         ? `${cycle.startAge}~${cycle.endAge}세`
         : `Age ${cycle.startAge}–${cycle.endAge}`;
-    const labelsKo = ["기반 다지기", "성장 가속", "성과 수확", "정리와 전환"];
-    const labelsEn = ["Foundation", "Acceleration", "Harvest", "Pivot & refine"];
+    const labelsKo = ["현재 대운", "다음 대운", "그다음 대운", "이후 전환"];
+    const labelsEn = ["Current cycle", "Next cycle", "Following cycle", "Later pivot"];
     const bodiesKo = [
-      "공부·자격·루틴에 투자하면 이후 대운의 밑거름이 됩니다.",
-      "네트워크와 역할 확장이 빨라지는 구간입니다. 과로만 주의하세요.",
-      "그동안 쌓은 것을 성과로 바꾸기 좋습니다. 욕심은 절반만.",
+      "지금 진행 중인 대운입니다. 네트워크와 역할 확장이 열려 있으니 과로만 주의하세요.",
+      "다음 대운을 위해 자격·루틴·관계를 준비하면 전환이 부드러워집니다.",
+      "그동안 쌓은 것을 성과로 바꾸기 좋은 구간이 다가옵니다. 욕심은 절반만.",
       "정리·이동·전환을 검토할 시기입니다. 무리한 확장은 피하세요.",
     ];
     const bodiesEn = [
-      "Invest in study, credentials, and routines—they feed later cycles.",
-      "Network and role expansion speed up; watch burnout.",
-      "Convert accumulated work into results; take half the greed.",
-      "Review pivots, moves, and decluttering; avoid forced expansion.",
+      "This is the active major cycle—network and role expansion open; watch burnout.",
+      "Prep credentials, routines, and bonds for the next cycle.",
+      "A harvest window approaches; take half the greed.",
+      "Review pivots and decluttering; avoid forced expansion.",
     ];
-  return {
+    return {
       period,
       label: locale === "ko" ? labelsKo[index] ?? "전환" : labelsEn[index] ?? "Shift",
       body:

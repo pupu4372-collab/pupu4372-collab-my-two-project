@@ -114,7 +114,7 @@ ${SCORE_CITATION_RULE}
 
 {{narrative}}
 
-roadmap 6: 현재 대운 / 다음 대운 초·후반 / 이후 대운 / 주간·연간 루틴 등.
+roadmap 6: ★현재·다음 대운만 5년 세분, 과거·먼 미래는 10년 요약. 입력 ★현재 대운만 현재로.
 decisionMoments 4 (배우자·가족). script 따옴표 없이 구어만.`,
 
   prophecy: `■ S8 잠겨진 천명 · 연애·결혼

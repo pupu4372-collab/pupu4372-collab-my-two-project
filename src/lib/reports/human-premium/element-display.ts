@@ -10,12 +10,33 @@ export const OBANG_COLORS: Record<string, string> = {
   water: "#3D4A5C",
 };
 
-/** Score / domain gauge fill (charcoal — not seal red). */
+/** Score / domain gauge fill (charcoal — not seal red). PDF overrides to green. */
 export const SCORE_BAR_FILL = "#3E3A36";
+/** PDF core-metric gauges — green family. */
+export const PDF_SCORE_BAR_FILL = "#5B7F5B";
 /** Score / element gauge track. */
 export const SCORE_BAR_TRACK = "#E8E2D6";
 export const ELEMENT_TRACK_COLOR = SCORE_BAR_TRACK;
 export const OBANG_COLOR_FALLBACK = "#888888";
+
+/** Mix accent into hanji (#F4F1EA) for PDF card fills (no CSS color-mix). */
+export function obangPaleHex(key: string, mixPct = 14, base = "#F4F1EA"): string {
+  const accent = OBANG_COLORS[key] ?? OBANG_COLOR_FALLBACK;
+  const parse = (hex: string) => {
+    const h = hex.replace("#", "");
+    return [
+      Number.parseInt(h.slice(0, 2), 16),
+      Number.parseInt(h.slice(2, 4), 16),
+      Number.parseInt(h.slice(4, 6), 16),
+    ] as const;
+  };
+  const [ar, ag, ab] = parse(accent);
+  const [br, bg, bb] = parse(base);
+  const t = Math.max(0, Math.min(100, mixPct)) / 100;
+  const mix = (a: number, b: number) => Math.round(a * t + b * (1 - t));
+  const toHex = (n: number) => n.toString(16).padStart(2, "0");
+  return `#${toHex(mix(ar, br))}${toHex(mix(ag, bg))}${toHex(mix(ab, bb))}`;
+}
 
 export interface ElementDisplayRow {
   key: string;

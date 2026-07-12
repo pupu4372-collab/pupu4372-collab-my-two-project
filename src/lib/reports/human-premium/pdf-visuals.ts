@@ -1,7 +1,7 @@
 import type { Content } from "pdfmake/interfaces";
 import {
   OBANG_COLORS,
-  SCORE_BAR_FILL,
+  PDF_SCORE_BAR_FILL,
   SCORE_BAR_TRACK,
 } from "./element-display";
 
@@ -9,8 +9,8 @@ export const PDF_JIG_HANJI = "#F4F1EA";
 export const PDF_JIG_SEAL = "#B22222";
 export const PDF_JIG_MUTED = "#747878";
 export const PDF_JIG_OBANG_RED = "#9A3B3B";
-/** Score / domain gauges — charcoal fill (not seal red). */
-export const PDF_SCORE_FILL = SCORE_BAR_FILL;
+/** Core metric gauges — green (PDF). */
+export const PDF_SCORE_FILL = PDF_SCORE_BAR_FILL;
 export const PDF_SCORE_TRACK = SCORE_BAR_TRACK;
 export const PDF_PAPER_FILL = "#FAF8F4";
 export const PDF_PAPER_BORDER = "#E0DDD4";
@@ -26,6 +26,12 @@ export const PDF_OPPORTUNITY_ACCENT = "#22C55E";
 export const PDF_RISK_FILL = "#F9EFF3";
 export const PDF_RISK_BORDER = "#E8C4CC";
 export const PDF_RISK_TIP_FILL = "#FFF1F2";
+
+/** Sealed prophecy card — gold field + dark ink. */
+export const PDF_PROPHECY_FILL = "#E8C97A";
+export const PDF_PROPHECY_BORDER = "#C9A85A";
+export const PDF_PROPHECY_INK = "#222222";
+export const PDF_PROPHECY_MUTED = "#3D2A4A";
 
 function clampPercent(value: number): number {
   return Math.max(0, Math.min(100, value));
@@ -76,9 +82,12 @@ export function pdfBorderedCard(
     fillColor: string;
     borderColor: string;
     margin?: [number, number, number, number];
+    /** Keep title+body together across page breaks. */
+    unbreakable?: boolean;
   }
 ): Content {
   return {
+    unbreakable: options.unbreakable !== false,
     table: {
       widths: ["*"],
       body: [[{ stack: content, margin: [12, 10, 12, 10] }]],
@@ -107,6 +116,7 @@ export function pdfInsetTip(
   }
 ): Content {
   return {
+    unbreakable: true,
     table: {
       widths: ["*"],
       body: [
@@ -144,6 +154,7 @@ export function pdfInsetTip(
 /** Dot marker + content — matches web roadmap timeline rhythm. */
 export function pdfTimelineItem(content: Content[]): Content {
   return {
+    unbreakable: true,
     columns: [
       {
         width: 14,

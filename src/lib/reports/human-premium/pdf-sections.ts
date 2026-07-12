@@ -21,6 +21,10 @@ import {
   PDF_OPPORTUNITY_TIP_FILL,
   PDF_PAPER_BORDER,
   PDF_PAPER_FILL,
+  PDF_PROPHECY_BORDER,
+  PDF_PROPHECY_FILL,
+  PDF_PROPHECY_INK,
+  PDF_PROPHECY_MUTED,
   PDF_RISK_FILL,
   PDF_RISK_BORDER,
   PDF_RISK_TIP_FILL,
@@ -290,7 +294,7 @@ function prophecyBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conte
         {
           text: pdfSafeText(sealed),
           style: "prophecySealed",
-          color: "#D4A373",
+          color: PDF_PROPHECY_INK,
           margin: [0, 0, 0, 10],
         },
         {
@@ -302,7 +306,7 @@ function prophecyBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conte
               x2: 420,
               y2: 0,
               lineWidth: 0.5,
-              lineColor: "rgba(255,255,255,0.12)",
+              lineColor: PDF_PROPHECY_BORDER,
             },
           ],
           margin: [0, 4, 0, 8],
@@ -310,12 +314,16 @@ function prophecyBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conte
         {
           text: pdfSafeText(prophecyMantra(isKo)),
           style: "prophecyMantra",
-          color: "#E8DFD0",
+          color: PDF_PROPHECY_MUTED,
           alignment: "center",
           margin: [0, 0, 0, 0],
         },
       ],
-      { fillColor: "#2A2433", borderColor: "#3D3548" }
+      {
+        fillColor: PDF_PROPHECY_FILL,
+        borderColor: PDF_PROPHECY_BORDER,
+        unbreakable: true,
+      }
     )
   );
 

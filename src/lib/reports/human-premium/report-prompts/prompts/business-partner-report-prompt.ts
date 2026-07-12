@@ -113,7 +113,11 @@ ${SCORE_CITATION_RULE}
 
 {{narrative}}
 
-roadmap: 현재 대운 전반·말기 / 다음 대운 초·후반 등 5~6항목.
+roadmap: 5~6항목
+  - 과거 대운: 10년 요약
+  - ★현재 대운 + 다음 대운: 전반·후반(5년) 세분화
+  - 이후: 10년 요약
+  입력 ★현재 대운만 현재로 지칭.
 decisionMoments 4. script 따옴표 없이 구어만.`,
 
   prophecy: `■ S8 잠겨진 천명 · 비즈니스

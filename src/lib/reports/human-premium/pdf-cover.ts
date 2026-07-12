@@ -63,12 +63,12 @@ export function buildPdfCoverBlocks(
   const blocks: Content[] = [];
 
   if (options?.logoDataUrl) {
-    // Shrink-only fit: keep aspect ratio; prefer sharper native resolution.
+    // Shrink-only fit (~75% of prior box) so calligraphy + seal keep breathing room.
     blocks.push({
       image: options.logoDataUrl,
-      fit: [400, 130],
+      fit: [300, 98],
       alignment: "center",
-      margin: [0, 0, 0, 12],
+      margin: [0, 16, 0, 16],
     });
   } else {
     blocks.push({

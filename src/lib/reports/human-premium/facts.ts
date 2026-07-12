@@ -1,5 +1,10 @@
 import { charToElement, ELEMENT_META } from "@/lib/saju/elements";
 import {
+  buildDaewoonRoadmapDetailBlock,
+  computeManAge,
+  phaseForDaewoonCycle,
+} from "@/lib/saju/daewoon-current";
+import {
   computeDaewoonCandidates,
   computeMonthLuckPillar,
   computeSeunNatalInteractions,
@@ -97,6 +102,9 @@ export interface HumanPremiumFactsBlock {
   seun: HumanPremiumSeunFact;
   monthlyLuck: HumanPremiumMonthlyLuckFact[];
   unavailable: string[];
+  /** Man age at issue (KST), when solar birth date was provided. */
+  currentAge: number | null;
+  birthYear: number | null;
 }
 
 export interface BuildHumanPremiumFactsOptions {
@@ -106,6 +114,8 @@ export interface BuildHumanPremiumFactsOptions {
   /** @deprecated use fortuneMonths */
   summerMonths?: number[];
   gender?: DaewoonGender | null;
+  /** YYYY-MM-DD solar — used for current-daewoon index. */
+  solarBirthDate?: string;
 }
 
 function pillarLine(pillar: PillarDisplay): string {
@@ -246,6 +256,10 @@ export function buildHumanPremiumFacts(
   const unavailableKo = ["전체 신살 목록", "정밀 대운 세운 교차 판단"];
   const unavailableEn = ["Full spirit-star catalog", "Detailed daewoon-seun cross analysis"];
 
+  const solarBirthDate = options.solarBirthDate?.trim() || null;
+  const birthYear = solarBirthDate ? Number(solarBirthDate.slice(0, 4)) : null;
+  const currentAge = solarBirthDate ? computeManAge(solarBirthDate) : null;
+
   return {
     userName: personName.trim(),
     locale,
@@ -276,6 +290,8 @@ export function buildHumanPremiumFacts(
     },
     monthlyLuck,
     unavailable: locale === "ko" ? unavailableKo : unavailableEn,
+    currentAge,
+    birthYear,
   };
 }
 
@@ -319,15 +335,56 @@ export function formatFactsBlockForPrompt(facts: HumanPremiumFactsBlock): string
     "",
     isKo ? "[대운]" : "[Major luck cycles]",
     `${isKo ? "대운 산정 메모" : "Daewoon note"}: ${facts.daewoon.note}`,
-    ...facts.daewoon.candidates.flatMap((candidate) => [
-      `- ${candidate.directionLabel}: ${isKo ? "시작" : "starts"} ${candidate.startAge}${isKo ? "세" : ""} (${candidate.startAgeNote})`,
-      ...candidate.cycles
-        .slice(0, 6)
-        .map(
-          (cycle) =>
-            `  · ${cycle.ageRange}: ${cycle.pillar} | ${isKo ? "천간" : "Stem"} ${cycle.stemTenGod}, ${isKo ? "지지" : "Branch"} ${cycle.branchTenGod}`
-        ),
-    ]),
+    facts.currentAge != null
+      ? isKo
+        ? `현재 나이(만): ${facts.currentAge}세`
+        : `Current age: ${facts.currentAge}`
+      : null,
+    ...facts.daewoon.candidates.flatMap((candidate) => {
+      const cycles = candidate.cycles;
+      return [
+        `- ${candidate.directionLabel}: ${isKo ? "시작" : "starts"} ${candidate.startAge}${isKo ? "세" : ""} (${candidate.startAgeNote})`,
+        ...cycles.slice(0, 8).map((cycle) => {
+          const phase =
+            facts.currentAge != null
+              ? phaseForDaewoonCycle(cycle, facts.currentAge)
+              : null;
+          const yearSpan =
+            facts.birthYear != null
+              ? ` · ${facts.birthYear + cycle.startAge}~${facts.birthYear + cycle.endAge}${isKo ? "년" : ""}`
+              : "";
+          const mark =
+            phase === "current"
+              ? isKo
+                ? " ★현재 대운"
+                : " ★CURRENT"
+              : phase === "past"
+                ? isKo
+                  ? " (과거)"
+                  : " (past)"
+                : phase === "future"
+                  ? isKo
+                    ? " (이후)"
+                    : " (future)"
+                  : "";
+          return `  · ${cycle.ageRange}${yearSpan}${mark}: ${cycle.pillar} | ${isKo ? "천간" : "Stem"} ${cycle.stemTenGod}, ${isKo ? "지지" : "Branch"} ${cycle.branchTenGod}`;
+        }),
+      ];
+    }),
+    facts.currentAge != null &&
+    facts.birthYear != null &&
+    facts.daewoon.candidates[0]
+      ? buildDaewoonRoadmapDetailBlock({
+          locale: facts.locale === "ko" ? "ko" : "en",
+          currentAge: facts.currentAge,
+          birthYear: facts.birthYear,
+          cycles: facts.daewoon.candidates[0].cycles.map((c) => ({
+            startAge: c.startAge,
+            endAge: c.endAge,
+            pillar: c.pillar,
+          })),
+        })
+      : null,
     "",
     isKo ? "[대표 신살]" : "[Representative spirit stars]",
     ...facts.shinsal.map((row) => {
@@ -359,7 +416,7 @@ export function formatFactsBlockForPrompt(facts: HumanPremiumFactsBlock): string
       ? `[미제공 데이터 — 언급·추정 금지] ${facts.unavailable.join(", ")}`
       : `[Not provided — do not mention or infer] ${facts.unavailable.join(", ")}`,
   ];
-  return lines.join("\n");
+  return lines.filter((line): line is string => line != null && line !== "").join("\n");
 }
 
 export function getMonthlyLuckFact(

@@ -134,6 +134,7 @@ ${SCORE_CITATION_RULE}
 {{narrative}}
 
 roadmap: 현재 대운 포함 향후 3~4개 (과거 제외). 현재는 "지금 당장" 관점.
+★ 현재·다음 대운만 5년 단위로 쪼개고, 먼 구간은 10년 요약. 입력 ★현재 대운만 현재로.
 decisionMoments 4 (평생 태도). script 따옴표 없이 구어·다짐체.
 ${LIFETIME_TENSE_RULES}`,
 

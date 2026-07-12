@@ -61,6 +61,7 @@ export async function buildHumanPremiumReportHybrid(
       fortuneYear: new Date().getFullYear(),
       fortuneMonths: FORTUNE_MONTHS,
       gender: input.gender ?? payload.birthBasis.gender ?? null,
+      solarBirthDate,
     }
   );
 
