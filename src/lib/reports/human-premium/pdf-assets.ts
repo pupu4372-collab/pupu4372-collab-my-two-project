@@ -33,6 +33,14 @@ function mimeFromBuffer(buffer: Buffer): string {
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8) {
     return "image/jpeg";
   }
+  console.error(
+    "[JIGWANJAE_COVER_LOGO_MIME_FALLBACK]",
+    "unrecognized image magic bytes; falling back to image/png",
+    {
+      head: buffer.subarray(0, 4).toString("hex"),
+      bytes: buffer.length,
+    }
+  );
   return "image/png";
 }
 
