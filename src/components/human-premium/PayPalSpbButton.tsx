@@ -30,6 +30,8 @@ function buildSpbRequest(input: {
   storeId: string;
   channelKey: string;
 }): Record<string, unknown> {
+  // totalAmount must already be PortOne units from cart/checkout (`totalAmount`:
+  // KRW = won, USD = cents). Do not multiply again here.
   return {
     uiType: "PAYPAL_SPB",
     storeId: input.storeId,

@@ -230,6 +230,8 @@ export function HumanPremiumCartClient() {
             return;
           }
           const paymentId = String(checkout.paymentId ?? "");
+          // Prefer checkout.totalAmount (PortOne units: USD cents). Do not use `amount`
+          // (catalog whole dollars) for SPB.
           const totalAmount = Number(checkout.totalAmount ?? checkout.amount);
           const currency = String(checkout.currency ?? "USD");
           const orderName = String(checkout.orderName ?? "K-Saju");
@@ -668,7 +670,7 @@ export function HumanPremiumCartClient() {
           }}
         />
 
-        <div className="flex flex-wrap justify-center gap-3">
+        <div className="flex w-full flex-col items-center gap-3">
           {!cart.paid && visibleItems.length > 0 && paymentMethod === "portone_paypal_spb" ? (
             <div className="w-full max-w-sm space-y-2">
               {spbPreparing || !portoneReady || !spbDraft ? (
