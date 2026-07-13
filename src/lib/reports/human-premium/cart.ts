@@ -120,13 +120,36 @@ async function buildCartOrderDraft(
 
   const input = parseHumanPremiumReportInput(body, userId);
   const { email, deliverEmail } = resolveHumanPremiumEmail(body.email);
-  const purchased = await getPurchasedReportTypesForInput(input, userId, email);
-  const duplicates = items.filter((item) => purchased.has(item));
-  if (duplicates.length) {
-    throw new Error("cart_items_already_purchased");
+
+  let effectiveItems = items;
+  if (userId) {
+    const orders = await listHumanPremiumVaultOrders({ userId });
+    const purchased = new Set<ReportType>();
+    for (const order of orders) {
+      for (const item of order.items) purchased.add(item);
+    }
+    const excluded = items.filter((item) => purchased.has(item));
+    effectiveItems = items.filter((item) => !purchased.has(item));
+    if (!effectiveItems.length) {
+      throw new Error("cart_items_already_purchased");
+    }
+    if (excluded.length) {
+      console.error("[HUMAN_CART_PURCHASED_EXCLUDED]", {
+        userId,
+        excluded,
+        remaining: effectiveItems,
+      });
+    }
+  } else {
+    // TODO: email-based purchased exclusion for guests / anonymous sessions
+    const purchased = await getPurchasedReportTypesForInput(input, userId, email);
+    const duplicates = items.filter((item) => purchased.has(item));
+    if (duplicates.length) {
+      throw new Error("cart_items_already_purchased");
+    }
   }
 
-  const amount = resolveCartAmount(items, input.locale);
+  const amount = resolveCartAmount(effectiveItems, input.locale);
   const currency = getCheckoutCurrency(input.locale);
   const orderId = `hp_cart_${randomBytes(10).toString("hex")}`;
 
@@ -140,14 +163,14 @@ async function buildCartOrderDraft(
     gender: input.gender ?? null,
     cart: {
       cartOrder: true,
-      items,
+      items: effectiveItems,
       generated: {},
       deliverEmail,
     },
   };
 
   const cartRow = await createHumanPremiumReportDraft(
-    { ...input, reportType: items[0] },
+    { ...input, reportType: effectiveItems[0] },
     {
       status: options.status,
       paymentProvider: options.paymentProvider,
@@ -165,7 +188,7 @@ async function buildCartOrderDraft(
     ...(options.captureId ? { payment_capture_id: options.captureId } : {}),
   });
 
-  return { orderId, cartRow: updated, amount, items };
+  return { orderId, cartRow: updated, amount, items: effectiveItems };
 }
 
 /** Demo / bypass: create an already-paid cart parent order. */
