@@ -32,9 +32,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "paymentId required." }, { status: 400 });
   }
 
-  // EN cart live pay is out of scope; verify stays PortOne-only for now.
+  // paypal_link remains unsupported on cart verify; PortOne (ko/en) is allowed.
   // TODO(EN launch): add paypal_link verify branch (d350855^ shop success polling).
-  if (locale === "en" || body.paymentMethod === "paypal_link") {
+  if (body.paymentMethod === "paypal_link") {
     return NextResponse.json(
       { error: "en_cart_checkout_unsupported", paymentMethod: "unsupported" },
       { status: 501 }
@@ -50,6 +50,18 @@ export async function POST(request: Request) {
     const payment = await fetchPortOnePayment(paymentId);
     if (!payment || !isPortOnePaymentPaid(payment)) {
       return NextResponse.json({ error: "not_paid" }, { status: 400 });
+    }
+
+    const rowCurrency = String(row.currency ?? "").trim().toUpperCase();
+    const paymentCurrency = String(payment.currency ?? "").trim().toUpperCase();
+    if (rowCurrency && paymentCurrency && rowCurrency !== paymentCurrency) {
+      console.error("[HUMAN_CART_CURRENCY_MISMATCH]", {
+        paymentId,
+        rowCurrency,
+        paymentCurrency,
+        locale,
+      });
+      return NextResponse.json({ error: "currency_mismatch" }, { status: 400 });
     }
 
     const expectedAmount = Number(row.amount_paid) || Number(row.amount_original);

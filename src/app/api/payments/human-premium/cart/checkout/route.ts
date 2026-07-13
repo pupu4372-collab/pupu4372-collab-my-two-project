@@ -10,11 +10,9 @@ import { NextResponse } from "next/server";
 
 /**
  * Cart checkout payment-method branch:
- * - KO → PortOne (this route)
- * - EN → not supported yet
- *   TODO(EN launch): port original shop PayPal pattern from commit d350855^
- *   (HumanPremiumShop prepareCheckout("paypal_link") + PAYPAL_LINK_* env).
- *   Add a `paymentMethod: "paypal_link"` branch here without rewriting KO PortOne.
+ * - KO / EN → PortOne (this route; EN uses USD draft via getCheckoutCurrency)
+ * - paypal_link → not supported on cart yet
+ *   TODO(EN launch): paypal_link branch using d350855^ shop pattern if needed
  */
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
@@ -25,18 +23,6 @@ export async function POST(request: Request) {
   }
 
   const locale = body.locale === "en" ? "en" : "ko";
-
-  // Payment-method fork — extend here for EN PayPal later; do not collapse into PortOne.
-  if (locale === "en") {
-    return NextResponse.json(
-      {
-        error: "en_cart_checkout_unsupported",
-        paymentMethod: "unsupported",
-        // TODO(EN launch): implement paypal_link using d350855^ shop pattern
-      },
-      { status: 501 }
-    );
-  }
 
   const paymentMethod = body.paymentMethod === "paypal_link" ? "paypal_link" : "portone";
   if (paymentMethod !== "portone") {
@@ -70,6 +56,7 @@ export async function POST(request: Request) {
       paymentId: orderId,
       storeId,
       amount,
+      totalAmount: amount,
       currency,
       orderName: cartOrderDisplayName(items, locale),
       portone: {
