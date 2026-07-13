@@ -11,6 +11,12 @@ import {
   COHORT_INSIGHT_TITLE_KO,
   stripCohortBodyPrefix,
 } from "@/lib/reports/human-premium/cohort-insight-labels";
+import {
+  PROPHECY_BORDER,
+  PROPHECY_FILL,
+  PROPHECY_INK,
+  PROPHECY_MUTED,
+} from "@/lib/reports/human-premium/prophecy-colors";
 import { sanitizeLlmSlotText } from "@/lib/saju/llm/slot-output-sanitize";
 import { BodyText, SectionHeading } from "./report-ui";
 
@@ -62,11 +68,23 @@ export function ProphecySection({
           </p>
         </article>
       ) : null}
-      <article className="rounded-2xl bg-[#2a2433] p-8 text-[#f4f1ea] shadow-inner sm:p-10">
-        <p className="human-premium-serif text-lg italic leading-[2] text-[#f8f4ec]">
+      <article
+        className="rounded-2xl border p-8 shadow-inner sm:p-10"
+        style={{
+          backgroundColor: PROPHECY_FILL,
+          borderColor: PROPHECY_BORDER,
+        }}
+      >
+        <p
+          className="human-premium-serif text-lg italic leading-[2]"
+          style={{ color: PROPHECY_INK }}
+        >
           {sealed}
         </p>
-        <p className="mt-8 border-t border-white/10 pt-6 text-center human-premium-serif text-base italic text-[#e8dfd0]">
+        <p
+          className="mt-8 border-t pt-6 text-center human-premium-serif text-base italic"
+          style={{ borderColor: PROPHECY_BORDER, color: PROPHECY_MUTED }}
+        >
           {mantra}
         </p>
       </article>

@@ -4,6 +4,12 @@ import {
   PDF_SCORE_BAR_FILL,
   SCORE_BAR_TRACK,
 } from "./element-display";
+import {
+  PROPHECY_BORDER,
+  PROPHECY_FILL,
+  PROPHECY_INK,
+  PROPHECY_MUTED,
+} from "./prophecy-colors";
 
 export const PDF_JIG_HANJI = "#F4F1EA";
 export const PDF_JIG_SEAL = "#B22222";
@@ -27,11 +33,11 @@ export const PDF_RISK_FILL = "#F9EFF3";
 export const PDF_RISK_BORDER = "#E8C4CC";
 export const PDF_RISK_TIP_FILL = "#FFF1F2";
 
-/** Sealed prophecy card — gold field + dark ink. */
-export const PDF_PROPHECY_FILL = "#E8C97A";
-export const PDF_PROPHECY_BORDER = "#C9A85A";
-export const PDF_PROPHECY_INK = "#222222";
-export const PDF_PROPHECY_MUTED = "#3D2A4A";
+/** Sealed prophecy card — gold field + dark ink (shared with web). */
+export const PDF_PROPHECY_FILL = PROPHECY_FILL;
+export const PDF_PROPHECY_BORDER = PROPHECY_BORDER;
+export const PDF_PROPHECY_INK = PROPHECY_INK;
+export const PDF_PROPHECY_MUTED = PROPHECY_MUTED;
 
 function clampPercent(value: number): number {
   return Math.max(0, Math.min(100, value));
