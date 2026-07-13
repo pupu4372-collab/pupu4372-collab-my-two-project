@@ -3,6 +3,7 @@
 import { CartPayConfirmModal } from "@/components/human-premium/CartPayConfirmModal";
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { Link } from "@/i18n/navigation";
+import { useHumanPremiumPurchases } from "@/hooks/useHumanPremiumPurchases";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import {
@@ -81,8 +82,14 @@ export function HumanPremiumCartClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
-  const { userId, isAnonymous } = useSupabaseSession();
+  const { userId, isAnonymous, accessToken } = useSupabaseSession();
   const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
+  const purchaseProfile = loadHumanPremiumProfile(storageUserId);
+  const { purchasedTypes, loading: purchasesLoading, refresh: refreshPurchases } =
+    useHumanPremiumPurchases({
+      storageUserId,
+      profile: purchaseProfile,
+    });
 
   const [cart, setCart] = useState<HumanPremiumCartState>({ items: [], orderId: null, paid: false });
   const [profileReady, setProfileReady] = useState(false);
@@ -94,9 +101,17 @@ export function HumanPremiumCartClient() {
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
   const [portoneReady, setPortoneReady] = useState(false);
 
+  // cart.paid is only for the post-checkout UI in this tab (sessionStorage).
+  // Purchase truth / badges / cart exclusion use server GET /api/premium/human/purchases.
+  const visibleItems = useMemo(() => {
+    if (purchasesLoading || cart.paid) return cart.items;
+    const purchased = new Set(purchasedTypes);
+    return cart.items.filter((type) => !purchased.has(type));
+  }, [purchasesLoading, cart.paid, cart.items, purchasedTypes]);
+
   const cartPricing = useMemo(
-    () => getCartPricingSummary(cart.items, priceLocale),
-    [cart.items, priceLocale]
+    () => getCartPricingSummary(visibleItems, priceLocale),
+    [visibleItems, priceLocale]
   );
   const paymentMethod = resolveCartPaymentMethod(routeLocale, paymentConfig);
   const orderIdFromUrl = searchParams.get("orderId");
@@ -105,6 +120,17 @@ export function HumanPremiumCartClient() {
     setCart(loadHumanPremiumCart(storageUserId));
     setProfileReady(profileHasBirthData(loadHumanPremiumProfile(storageUserId)));
   }, [storageUserId]);
+
+  useEffect(() => {
+    if (purchasesLoading || cart.paid) return;
+    const purchased = new Set(purchasedTypes);
+    const stale = cart.items.filter((type) => purchased.has(type));
+    if (!stale.length) return;
+    for (const type of stale) {
+      removeFromHumanPremiumCart(storageUserId, type);
+    }
+    setCart(loadHumanPremiumCart(storageUserId));
+  }, [purchasesLoading, purchasedTypes, cart.items, cart.paid, storageUserId]);
 
   const loadOrderSnapshot = useCallback(
     async (orderId: string) => {
@@ -177,6 +203,12 @@ export function HumanPremiumCartClient() {
     return () => window.clearInterval(poll);
   }, [cart.orderId, cart.paid, loadOrderSnapshot, routeLocale]);
 
+  function authHeaders(extra?: Record<string, string>): Record<string, string> {
+    const headers: Record<string, string> = { ...extra };
+    if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+    return headers;
+  }
+
   function buildCheckoutBody() {
     const profile = loadHumanPremiumProfile(storageUserId);
     const birthTimeUnknown = profile.birthTimeSelect === "unknown";
@@ -195,7 +227,7 @@ export function HumanPremiumCartClient() {
       gender: profile.gender || undefined,
       privacyConsent: profile.privacyConsent,
       locale: routeLocale,
-      cartItems: cart.items,
+      cartItems: visibleItems,
     };
   }
 
@@ -207,6 +239,7 @@ export function HumanPremiumCartClient() {
     );
     setCart(next);
     setConfirmOpen(false);
+    refreshPurchases();
   }
 
   function openPayConfirm() {
@@ -215,7 +248,7 @@ export function HumanPremiumCartClient() {
       setError(isKo ? "먼저 사주 정보를 입력해 주세요." : "Enter your birth details first.");
       return;
     }
-    if (!cart.items.length) {
+    if (!visibleItems.length) {
       setError(isKo ? "장바구니가 비어 있어요." : "Your cart is empty.");
       return;
     }
@@ -234,7 +267,7 @@ export function HumanPremiumCartClient() {
   async function handleDemoPay() {
     const res = await fetch("/api/payments/human-premium/cart/demo-pay", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(buildCheckoutBody()),
     });
     const data = await res.json();
@@ -245,7 +278,7 @@ export function HumanPremiumCartClient() {
   async function handlePortOnePay() {
     const checkoutRes = await fetch("/api/payments/human-premium/cart/checkout", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         ...buildCheckoutBody(),
         paymentMethod: "portone",
@@ -287,7 +320,7 @@ export function HumanPremiumCartClient() {
 
     const verifyRes = await fetch("/api/payments/human-premium/cart/verify", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         paymentId,
         locale: routeLocale,
@@ -415,7 +448,7 @@ export function HumanPremiumCartClient() {
         ) : null}
 
         <section className="pastel-card space-y-3 p-5">
-          {cart.items.length === 0 ? (
+          {visibleItems.length === 0 ? (
             <p className="text-center text-sm text-plum/80">
               {isKo ? "담은 리포트가 없어요." : "No reports in cart."}{" "}
               <Link href="/premium/human/vault" className="font-semibold text-channel-saju underline">
@@ -423,7 +456,7 @@ export function HumanPremiumCartClient() {
               </Link>
             </p>
           ) : (
-            cart.items.map((reportType) => {
+            visibleItems.map((reportType) => {
               const theme = REPORT_CARD_THEMES[reportType];
               const ready = Boolean(generated[reportType]);
               return (
@@ -485,7 +518,7 @@ export function HumanPremiumCartClient() {
             })
           )}
 
-          {cart.items.length > 0 ? (
+          {visibleItems.length > 0 ? (
             <div className="space-y-1 border-t border-plum/10 pt-3 text-right">
               {cartPricing.isAllInOneBundle ? (
                 <>
@@ -516,7 +549,7 @@ export function HumanPremiumCartClient() {
         <CartPayConfirmModal
           open={confirmOpen}
           isKo={isKo}
-          items={cart.items}
+          items={visibleItems}
           typeLabels={typeLabels}
           amount={cartPricing.amount}
           listTotal={cartPricing.listTotal}
@@ -530,7 +563,7 @@ export function HumanPremiumCartClient() {
         />
 
         <div className="flex flex-wrap justify-center gap-3">
-          {!cart.paid && cart.items.length > 0 ? (
+          {!cart.paid && visibleItems.length > 0 ? (
             <button
               type="button"
               disabled={paying || !profileReady}
