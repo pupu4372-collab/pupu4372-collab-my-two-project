@@ -20,9 +20,43 @@ export type HumanPremiumCartState = {
 
 export const GUEST_STORAGE_USER_ID = "guest";
 
-const PROFILE_KEY = (userId: string) => `human_premium_profile:${userId}`;
-const CART_KEY = (userId: string) => `human_premium_cart:${userId}`;
-const PAID_ORDERS_KEY = (userId: string) => `human_premium_paid_orders:${userId}`;
+const PROFILE_KEY = "human_premium_profile";
+const CART_KEY = "human_premium_cart";
+const PAID_ORDERS_KEY = "human_premium_paid_orders";
+
+const LEGACY_KEY_PREFIXES = [
+  "human_premium_profile:",
+  "human_premium_cart:",
+  "human_premium_paid_orders:",
+] as const;
+
+let legacyCleanupDone = false;
+
+function removePrefixedKeys(storage: Storage, prefixes: readonly string[]) {
+  const toRemove: string[] = [];
+  for (let i = 0; i < storage.length; i += 1) {
+    const key = storage.key(i);
+    if (!key) continue;
+    if (prefixes.some((prefix) => key.startsWith(prefix))) {
+      toRemove.push(key);
+    }
+  }
+  for (const key of toRemove) {
+    storage.removeItem(key);
+  }
+}
+
+/** Drop pre-unified namespaced keys once per page load. No migration. */
+function ensureLegacyStorageCleanup() {
+  if (typeof window === "undefined" || legacyCleanupDone) return;
+  legacyCleanupDone = true;
+  try {
+    removePrefixedKeys(sessionStorage, LEGACY_KEY_PREFIXES);
+    removePrefixedKeys(localStorage, LEGACY_KEY_PREFIXES);
+  } catch {
+    // ignore quota / private-mode errors
+  }
+}
 
 export function resolveHumanPremiumStorageUserId(
   userId: string | null,
@@ -111,12 +145,21 @@ function writeLocalJson(key: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function loadHumanPremiumProfile(userId: string): HumanPremiumProfile {
-  return normalizeHumanPremiumProfile(readJson(PROFILE_KEY(userId), DEFAULT_PROFILE));
+export function loadHumanPremiumProfile(
+  /** @deprecated key is now fixed */ userId: string
+): HumanPremiumProfile {
+  void userId;
+  ensureLegacyStorageCleanup();
+  return normalizeHumanPremiumProfile(readJson(PROFILE_KEY, DEFAULT_PROFILE));
 }
 
-export function saveHumanPremiumProfile(userId: string, profile: HumanPremiumProfile) {
-  writeJson(PROFILE_KEY(userId), profile);
+export function saveHumanPremiumProfile(
+  /** @deprecated key is now fixed */ userId: string,
+  profile: HumanPremiumProfile
+) {
+  void userId;
+  ensureLegacyStorageCleanup();
+  writeJson(PROFILE_KEY, profile);
 }
 
 function normalizeCartItems(items: ReportType[]): ReportType[] {
@@ -129,18 +172,29 @@ function normalizeCartItems(items: ReportType[]): ReportType[] {
   return next;
 }
 
-export function loadHumanPremiumCart(userId: string): HumanPremiumCartState {
-  const cart = readJson(CART_KEY(userId), DEFAULT_CART);
+export function loadHumanPremiumCart(
+  /** @deprecated key is now fixed */ userId: string
+): HumanPremiumCartState {
+  void userId;
+  ensureLegacyStorageCleanup();
+  const cart = readJson(CART_KEY, DEFAULT_CART);
   cart.items = normalizeCartItems(cart.items);
   return cart;
 }
 
-export function saveHumanPremiumCart(userId: string, cart: HumanPremiumCartState) {
-  writeJson(CART_KEY(userId), cart);
+export function saveHumanPremiumCart(
+  /** @deprecated key is now fixed */ userId: string,
+  cart: HumanPremiumCartState
+) {
+  void userId;
+  ensureLegacyStorageCleanup();
+  writeJson(CART_KEY, cart);
 }
 
 /** Clears the active checkout cart so a new purchase can start. Paid orders stay in the vault list. */
-export function resetHumanPremiumCart(userId: string): HumanPremiumCartState {
+export function resetHumanPremiumCart(
+  /** @deprecated key is now fixed */ userId: string
+): HumanPremiumCartState {
   saveHumanPremiumCart(userId, DEFAULT_CART);
   return { ...DEFAULT_CART };
 }
@@ -151,7 +205,7 @@ function ensureWritableCart(cart: HumanPremiumCartState): HumanPremiumCartState 
 }
 
 export function addToHumanPremiumCart(
-  userId: string,
+  /** @deprecated key is now fixed */ userId: string,
   reportType: ReportType,
   profile?: HumanPremiumProfile
 ): HumanPremiumCartState {
@@ -168,7 +222,7 @@ export function addToHumanPremiumCart(
 }
 
 export function removeFromHumanPremiumCart(
-  userId: string,
+  /** @deprecated key is now fixed */ userId: string,
   reportType: ReportType
 ): HumanPremiumCartState {
   const cart = loadHumanPremiumCart(userId);
@@ -178,7 +232,7 @@ export function removeFromHumanPremiumCart(
 }
 
 export function addManyToHumanPremiumCart(
-  userId: string,
+  /** @deprecated key is now fixed */ userId: string,
   reportTypes: ReportType[],
   profile?: HumanPremiumProfile
 ): HumanPremiumCartState {
@@ -195,7 +249,7 @@ export function addManyToHumanPremiumCart(
 }
 
 export function markHumanPremiumCartPaid(
-  userId: string,
+  /** @deprecated key is now fixed */ userId: string,
   orderId: string,
   profile?: HumanPremiumProfile
 ): HumanPremiumCartState {
@@ -215,18 +269,27 @@ export function markHumanPremiumCartPaid(
   return cart;
 }
 
-export function getPaidHumanPremiumOrderIds(userId: string): string[] {
+export function getPaidHumanPremiumOrderIds(
+  /** @deprecated key is now fixed */ userId: string
+): string[] {
   return loadPaidHumanPremiumOrders(userId).map((order) => order.orderId);
 }
 
-export function loadPaidHumanPremiumOrders(userId: string): SavedHumanPremiumOrder[] {
-  return readLocalJson<SavedHumanPremiumOrder[]>(PAID_ORDERS_KEY(userId), []);
+export function loadPaidHumanPremiumOrders(
+  /** @deprecated key is now fixed */ userId: string
+): SavedHumanPremiumOrder[] {
+  void userId;
+  ensureLegacyStorageCleanup();
+  return readLocalJson<SavedHumanPremiumOrder[]>(PAID_ORDERS_KEY, []);
 }
 
-export function savePaidHumanPremiumOrder(userId: string, order: SavedHumanPremiumOrder) {
+export function savePaidHumanPremiumOrder(
+  /** @deprecated key is now fixed */ userId: string,
+  order: SavedHumanPremiumOrder
+) {
   const existing = loadPaidHumanPremiumOrders(userId);
   if (existing.some((entry) => entry.orderId === order.orderId)) return;
-  writeLocalJson(PAID_ORDERS_KEY(userId), [order, ...existing].slice(0, 30));
+  writeLocalJson(PAID_ORDERS_KEY, [order, ...existing].slice(0, 30));
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("human-premium-paid"));
   }
@@ -242,7 +305,7 @@ function orderMatchesProfile(order: SavedHumanPremiumOrder, profile: HumanPremiu
 }
 
 export function getPurchasedReportTypes(
-  userId: string,
+  /** @deprecated key is now fixed */ userId: string,
   profile?: HumanPremiumProfile
 ): ReportType[] {
   const resolvedProfile = profile ?? loadHumanPremiumProfile(userId);
@@ -255,7 +318,7 @@ export function getPurchasedReportTypes(
 }
 
 export function isHumanPremiumReportPurchased(
-  userId: string,
+  /** @deprecated key is now fixed */ userId: string,
   reportType: ReportType,
   profile?: HumanPremiumProfile
 ): boolean {
@@ -263,7 +326,7 @@ export function isHumanPremiumReportPurchased(
 }
 
 export function syncPaidOrdersFromVault(
-  userId: string,
+  /** @deprecated key is now fixed */ userId: string,
   orders: Array<{
     orderId: string;
     items: ReportType[];

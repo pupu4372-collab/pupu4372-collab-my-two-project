@@ -2,12 +2,12 @@
 
 import { DayPillarPreview } from "@/components/human-premium/DayPillarPreview";
 import { Link } from "@/i18n/navigation";
+import { useHumanPremiumPurchases } from "@/hooks/useHumanPremiumPurchases";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import {
   addManyToHumanPremiumCart,
   addToHumanPremiumCart,
   getPaidHumanPremiumOrderIds,
-  getPurchasedReportTypes,
   loadHumanPremiumCart,
   loadHumanPremiumProfile,
   removeFromHumanPremiumCart,
@@ -49,7 +49,10 @@ export function HumanPremiumShop() {
   const [profile, setProfile] = useState<HumanPremiumProfile>(() => loadHumanPremiumProfile(storageUserId));
   const [cart, setCart] = useState<HumanPremiumCartState>({ items: [], orderId: null, paid: false });
   const [cartFlash, setCartFlash] = useState(false);
-  const [purchasedTypes, setPurchasedTypes] = useState<ReportType[]>([]);
+  const { purchasedTypes, loading: purchasesLoading } = useHumanPremiumPurchases({
+    storageUserId,
+    profile,
+  });
 
   const savings = getBundleSavings(priceLocale);
   const bundlePricing = getBundlePricing(priceLocale);
@@ -74,12 +77,20 @@ export function HumanPremiumShop() {
     } else {
       setCart(stored);
     }
-    setPurchasedTypes(getPurchasedReportTypes(storageUserId, nextProfile));
   }, [storageUserId]);
 
   useEffect(() => {
-    setPurchasedTypes(getPurchasedReportTypes(storageUserId, profile));
+    if (purchasesLoading || cart.paid) return;
+    const purchased = new Set(purchasedTypes);
+    const stale = cart.items.filter((type) => purchased.has(type));
+    if (!stale.length) return;
+    for (const type of stale) {
+      removeFromHumanPremiumCart(storageUserId, type);
+    }
+    setCart(loadHumanPremiumCart(storageUserId));
+  }, [purchasesLoading, purchasedTypes, cart.items, cart.paid, storageUserId]);
 
+  useEffect(() => {
     async function syncPurchasedFromVault() {
       try {
         const orderIds = getPaidHumanPremiumOrderIds(storageUserId);
@@ -92,7 +103,6 @@ export function HumanPremiumShop() {
         if (!res.ok) return;
 
         syncPaidOrdersFromVault(storageUserId, data.orders ?? []);
-        setPurchasedTypes(getPurchasedReportTypes(storageUserId, profile));
       } catch {
         // ignore vault sync errors; local paid orders still apply
       }
