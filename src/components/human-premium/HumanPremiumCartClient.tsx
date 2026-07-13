@@ -1,6 +1,7 @@
 "use client";
 
 import { CartPayConfirmModal } from "@/components/human-premium/CartPayConfirmModal";
+import { PayPalSpbButton } from "@/components/human-premium/PayPalSpbButton";
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { Link } from "@/i18n/navigation";
 import { useHumanPremiumPurchases } from "@/hooks/useHumanPremiumPurchases";
@@ -41,7 +42,14 @@ type PaymentConfig = {
   demoReady: boolean;
 };
 
-type CartPaymentMethod = "portone" | "demo" | "unsupported";
+type CartPaymentMethod = "portone" | "portone_paypal_spb" | "demo" | "unsupported";
+
+type SpbCheckoutDraft = {
+  paymentId: string;
+  orderName: string;
+  totalAmount: number;
+  currency: string;
+};
 
 function snapshotToUrls(
   generated: Partial<Record<ReportType, { webToken: string }>>,
@@ -58,18 +66,18 @@ function snapshotToUrls(
 
 /**
  * Cart payment-method resolution.
- * - KO + PortOne → portone
+ * - KO + PortOne → portone (modal + requestPayment CARD)
  * - KO + no PortOne + demo allowed → demo (dev only)
- * - EN → unsupported (PayPal not in this scope)
- *
- * TODO(EN launch): add `paypal_link` here using original shop pattern from commit d350855^
- * (HumanPremiumShop prepareCheckout("paypal_link") + success page). Extend without rewriting KO.
+ * - EN + PortOne → portone_paypal_spb (PayPal SPB button)
  */
 function resolveCartPaymentMethod(
   locale: string,
   config: PaymentConfig | null
 ): CartPaymentMethod {
-  if (locale === "en") return "unsupported";
+  if (locale === "en") {
+    if (config?.portone) return "portone_paypal_spb";
+    return "unsupported";
+  }
   if (config?.portone) return "portone";
   if (config?.demoAllowed && config.demoReady) return "demo";
   return "unsupported";
@@ -100,6 +108,8 @@ export function HumanPremiumCartClient() {
   const [error, setError] = useState<string | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
   const [portoneReady, setPortoneReady] = useState(false);
+  const [spbDraft, setSpbDraft] = useState<SpbCheckoutDraft | null>(null);
+  const [spbPreparing, setSpbPreparing] = useState(false);
 
   // cart.paid is only for the post-checkout UI in this tab (sessionStorage).
   // Purchase truth / badges / cart exclusion use server GET /api/premium/human/purchases.
@@ -184,6 +194,76 @@ export function HumanPremiumCartClient() {
     if (!orderIdFromUrl) return;
     void loadOrderSnapshot(orderIdFromUrl).catch(() => undefined);
   }, [orderIdFromUrl, loadOrderSnapshot]);
+
+  const visibleItemsKey = visibleItems.join(",");
+
+  // EN SPB: create a fresh pending draft whenever cart contents change (no pending-row reuse API).
+  useEffect(() => {
+    if (paymentMethod !== "portone_paypal_spb") {
+      setSpbDraft(null);
+      setSpbPreparing(false);
+      return;
+    }
+    if (cart.paid || !profileReady || purchasesLoading || visibleItems.length === 0) {
+      setSpbDraft(null);
+      setSpbPreparing(false);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      setSpbPreparing(true);
+      void (async () => {
+        try {
+          const checkoutRes = await fetch("/api/payments/human-premium/cart/checkout", {
+            method: "POST",
+            headers: authHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify({
+              ...buildCheckoutBody(),
+              paymentMethod: "portone",
+            }),
+          });
+          const checkout = (await checkoutRes.json()) as Record<string, unknown>;
+          if (cancelled) return;
+          if (!checkoutRes.ok) {
+            setError(String(checkout.error ?? "Checkout failed"));
+            return;
+          }
+          const paymentId = String(checkout.paymentId ?? "");
+          const totalAmount = Number(checkout.totalAmount ?? checkout.amount);
+          const currency = String(checkout.currency ?? "USD");
+          const orderName = String(checkout.orderName ?? "K-Saju");
+          if (!paymentId || !Number.isFinite(totalAmount)) {
+            setError("Checkout failed.");
+            return;
+          }
+          setError(null);
+          setSpbDraft({ paymentId, orderName, totalAmount, currency });
+        } catch (err) {
+          if (cancelled) return;
+          setError(err instanceof Error ? err.message : "Checkout failed.");
+        } finally {
+          if (!cancelled) setSpbPreparing(false);
+        }
+      })();
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+    // buildCheckoutBody / authHeaders close over latest state; key drives re-run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional cart-driven refresh
+  }, [
+    paymentMethod,
+    cart.paid,
+    profileReady,
+    purchasesLoading,
+    visibleItemsKey,
+    accessToken,
+    storageUserId,
+    routeLocale,
+  ]);
 
   useEffect(() => {
     if (!cart.paid || !cart.orderId) return;
@@ -333,6 +413,32 @@ export function HumanPremiumCartClient() {
     }
 
     markPaidLocally(String(verifyData.orderId ?? paymentId));
+  }
+
+  async function handleSpbSuccess(paymentId: string) {
+    setError(null);
+    setPaying(true);
+    try {
+      const verifyRes = await fetch("/api/payments/human-premium/cart/verify", {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          paymentId,
+          locale: routeLocale,
+          paymentMethod: "portone",
+        }),
+      });
+      const verifyData = (await verifyRes.json()) as { error?: string; orderId?: string };
+      if (!verifyRes.ok) {
+        throw new Error(verifyData.error ?? "Payment verify failed");
+      }
+      markPaidLocally(String(verifyData.orderId ?? paymentId));
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : "Payment failed";
+      setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
+    } finally {
+      setPaying(false);
+    }
   }
 
   async function handleConfirmPay() {
@@ -563,7 +669,27 @@ export function HumanPremiumCartClient() {
         />
 
         <div className="flex flex-wrap justify-center gap-3">
-          {!cart.paid && visibleItems.length > 0 ? (
+          {!cart.paid && visibleItems.length > 0 && paymentMethod === "portone_paypal_spb" ? (
+            <div className="w-full max-w-sm space-y-2">
+              {spbPreparing || !portoneReady || !spbDraft ? (
+                <p className="text-center text-sm text-white/75">
+                  {paying ? "Processing…" : "Preparing PayPal…"}
+                </p>
+              ) : (
+                <PayPalSpbButton
+                  paymentId={spbDraft.paymentId}
+                  orderName={spbDraft.orderName}
+                  totalAmount={spbDraft.totalAmount}
+                  currency={spbDraft.currency}
+                  onSuccess={(paymentId) => void handleSpbSuccess(paymentId)}
+                  onError={(message) => {
+                    setError(formatHumanPremiumError(message, "en"));
+                  }}
+                />
+              )}
+            </div>
+          ) : null}
+          {!cart.paid && visibleItems.length > 0 && paymentMethod !== "portone_paypal_spb" ? (
             <button
               type="button"
               disabled={paying || !profileReady}
