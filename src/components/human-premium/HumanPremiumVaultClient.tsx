@@ -40,7 +40,7 @@ export function HumanPremiumVaultClient() {
   const routeLocale = useLocale();
   const isKo = routeLocale === "ko";
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
-  const { userId, isAnonymous } = useSupabaseSession();
+  const { userId, isAnonymous, accessToken } = useSupabaseSession();
   const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
 
   const [orders, setOrders] = useState<VaultOrder[]>([]);
@@ -59,7 +59,14 @@ export function HumanPremiumVaultClient() {
       if (orderIds.length) params.set("orderIds", orderIds.join(","));
       if (profile.email.trim()) params.set("email", profile.email.trim());
 
-      const res = await fetch(`/api/payments/human-premium/vault?${params.toString()}`);
+      const headers: Record<string, string> = {};
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+      // Always fetch: registered users rely on Bearer → server userId lookup
+      // even when localStorage orderIds is empty.
+      const res = await fetch(`/api/payments/human-premium/vault?${params.toString()}`, {
+        headers,
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Vault load failed");
       setOrders((data.orders ?? []) as VaultOrder[]);
@@ -70,7 +77,7 @@ export function HumanPremiumVaultClient() {
     } finally {
       setLoading(false);
     }
-  }, [routeLocale, storageUserId]);
+  }, [routeLocale, storageUserId, accessToken]);
 
   async function handleGenerate(orderId: string, reportType: ReportType) {
     const key = `${orderId}:${reportType}`;
