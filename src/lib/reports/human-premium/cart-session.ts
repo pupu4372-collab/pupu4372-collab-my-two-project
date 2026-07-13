@@ -18,7 +18,7 @@ export type HumanPremiumCartState = {
   paid: boolean;
 };
 
-export const GUEST_STORAGE_USER_ID = "guest";
+const GUEST_STORAGE_USER_ID = "guest";
 
 const PROFILE_KEY = "human_premium_profile";
 const CART_KEY = "human_premium_cart";
@@ -65,7 +65,7 @@ export function resolveHumanPremiumStorageUserId(
   return userId && !isAnonymous ? userId : GUEST_STORAGE_USER_ID;
 }
 
-export type SavedHumanPremiumOrder = {
+type SavedHumanPremiumOrder = {
   orderId: string;
   paidAt: string;
   items: ReportType[];
@@ -96,7 +96,7 @@ function normalizeCalendarType(value: unknown): HumanPremiumProfile["calendarTyp
   return "solar";
 }
 
-export function normalizeHumanPremiumProfile(
+function normalizeHumanPremiumProfile(
   profile: Partial<HumanPremiumProfile> & Record<string, unknown>
 ): HumanPremiumProfile {
   const calendarRaw =
@@ -275,7 +275,7 @@ export function getPaidHumanPremiumOrderIds(
   return loadPaidHumanPremiumOrders(userId).map((order) => order.orderId);
 }
 
-export function loadPaidHumanPremiumOrders(
+function loadPaidHumanPremiumOrders(
   /** @deprecated key is now fixed */ userId: string
 ): SavedHumanPremiumOrder[] {
   void userId;
@@ -283,7 +283,7 @@ export function loadPaidHumanPremiumOrders(
   return readLocalJson<SavedHumanPremiumOrder[]>(PAID_ORDERS_KEY, []);
 }
 
-export function savePaidHumanPremiumOrder(
+function savePaidHumanPremiumOrder(
   /** @deprecated key is now fixed */ userId: string,
   order: SavedHumanPremiumOrder
 ) {
@@ -317,7 +317,7 @@ export function getPurchasedReportTypes(
   return [...types];
 }
 
-export function isHumanPremiumReportPurchased(
+function isHumanPremiumReportPurchased(
   /** @deprecated key is now fixed */ userId: string,
   reportType: ReportType,
   profile?: HumanPremiumProfile
