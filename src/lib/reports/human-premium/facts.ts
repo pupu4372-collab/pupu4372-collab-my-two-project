@@ -2,7 +2,9 @@ import { charToElement, ELEMENT_META } from "@/lib/saju/elements";
 import {
   buildDaewoonRoadmapDetailBlock,
   computeManAge,
-  phaseForDaewoonCycle,
+  daewoonRoadmapRoleMark,
+  findCurrentDaewoonIndex,
+  roadmapRoleAtIndex,
 } from "@/lib/saju/daewoon-current";
 import {
   computeDaewoonCandidates,
@@ -342,31 +344,24 @@ export function formatFactsBlockForPrompt(facts: HumanPremiumFactsBlock): string
       : null,
     ...facts.daewoon.candidates.flatMap((candidate) => {
       const cycles = candidate.cycles;
+      const currentIdx =
+        facts.currentAge != null
+          ? findCurrentDaewoonIndex(cycles, facts.currentAge)
+          : -1;
       return [
         `- ${candidate.directionLabel}: ${isKo ? "시작" : "starts"} ${candidate.startAge}${isKo ? "세" : ""} (${candidate.startAgeNote})`,
-        ...cycles.slice(0, 8).map((cycle) => {
-          const phase =
+        ...cycles.slice(0, 8).map((cycle, cycleIndex) => {
+          const role =
             facts.currentAge != null
-              ? phaseForDaewoonCycle(cycle, facts.currentAge)
+              ? roadmapRoleAtIndex(cycleIndex, currentIdx)
               : null;
           const yearSpan =
             facts.birthYear != null
               ? ` · ${facts.birthYear + cycle.startAge}~${facts.birthYear + cycle.endAge}${isKo ? "년" : ""}`
               : "";
-          const mark =
-            phase === "current"
-              ? isKo
-                ? " ★현재 대운"
-                : " ★CURRENT"
-              : phase === "past"
-                ? isKo
-                  ? " (과거)"
-                  : " (past)"
-                : phase === "future"
-                  ? isKo
-                    ? " (이후)"
-                    : " (future)"
-                  : "";
+          const mark = role
+            ? daewoonRoadmapRoleMark(role, isKo ? "ko" : "en")
+            : "";
           return `  · ${cycle.ageRange}${yearSpan}${mark}: ${cycle.pillar} | ${isKo ? "천간" : "Stem"} ${cycle.stemTenGod}, ${isKo ? "지지" : "Branch"} ${cycle.branchTenGod}`;
         }),
       ];

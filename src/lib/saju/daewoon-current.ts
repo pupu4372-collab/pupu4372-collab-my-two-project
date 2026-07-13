@@ -12,6 +12,9 @@ function kstNow(): { year: number; month: number; day: number } {
 
 export type DaewoonPhase = "past" | "current" | "future";
 
+/** Roadmap detail roles — next is only the cycle immediately after current. */
+export type DaewoonRoadmapRole = "past" | "current" | "next" | "later";
+
 export interface DaewoonAgeSpan {
   startAge: number;
   endAge: number;
@@ -77,6 +80,69 @@ export function phaseForDaewoonCycle(
   return "future";
 }
 
+/**
+ * Roadmap role for cycle at `cycleIndex` given the current-cycle index
+ * from {@link findCurrentDaewoonIndex} (or -1 if none).
+ * next = currentIndex + 1 only; later futures stay "later".
+ */
+export function roadmapRoleAtIndex(
+  cycleIndex: number,
+  currentIndex: number
+): DaewoonRoadmapRole {
+  if (currentIndex < 0) {
+    if (cycleIndex === 0) return "current";
+    if (cycleIndex === 1) return "next";
+    return cycleIndex < 0 ? "past" : "later";
+  }
+  if (cycleIndex < currentIndex) return "past";
+  if (cycleIndex === currentIndex) return "current";
+  if (cycleIndex === currentIndex + 1) return "next";
+  return "later";
+}
+
+/** Prompt mark for daewoon_list / facts block lines. */
+export function daewoonRoadmapRoleMark(
+  role: DaewoonRoadmapRole,
+  locale: "ko" | "en"
+): string {
+  if (locale === "ko") {
+    switch (role) {
+      case "current":
+        return " ★현재 대운";
+      case "next":
+        return " ★다음 대운(5년 세분)";
+      case "past":
+        return " (과거)";
+      default:
+        return " (먼 이후·10년 요약)";
+    }
+  }
+  switch (role) {
+    case "current":
+      return " ★CURRENT";
+    case "next":
+      return " ★NEXT (5y split)";
+    case "past":
+      return " (past)";
+    default:
+      return " (far future · 10y summary)";
+  }
+}
+
+/** Calendar year halves for a 10-year-style age span (전반 / 후반). */
+export function daewoonFiveYearHalves(
+  birthYear: number,
+  cycle: { startAge: number; endAge: number }
+): { first: { startYear: number; endYear: number }; second: { startYear: number; endYear: number } } {
+  const startYear = birthYear + cycle.startAge;
+  const endYear = birthYear + cycle.endAge;
+  const mid = startYear + Math.floor((endYear - startYear) / 2);
+  return {
+    first: { startYear, endYear: mid },
+    second: { startYear: mid + 1, endYear },
+  };
+}
+
 /** Slice current + following cycles (default 3) from a ksaju-engine daewoon list. */
 export function pickCurrentAndUpcomingDaewoon(
   list: DaewoonItem[],
@@ -126,6 +192,24 @@ export function buildDaewoonRoadmapDetailBlock(options: {
   const idx = findCurrentDaewoonIndex(cycles, currentAge);
   const lines: string[] = [];
 
+  const halfLine = (
+    labelKo: string,
+    labelEn: string,
+    cycle: { startAge: number; endAge: number; pillar?: string }
+  ) => {
+    const { first, second } = daewoonFiveYearHalves(birthYear, cycle);
+    if (locale === "ko") {
+      return [
+        `- ${labelKo}: ${cycle.startAge}~${cycle.endAge}세 (${birthYear + cycle.startAge}~${birthYear + cycle.endAge}년)${cycle.pillar ? ` · ${cycle.pillar}` : ""}`,
+        `  → 5년 세분 필수: "${first.startYear}~${first.endYear}년 (${labelKo} 전반)" / "${second.startYear}~${second.endYear}년 (${labelKo} 후반)"`,
+      ];
+    }
+    return [
+      `- ${labelEn}: ages ${cycle.startAge}–${cycle.endAge} (${birthYear + cycle.startAge}–${birthYear + cycle.endAge})`,
+      `  → Must split: "${first.startYear}–${first.endYear} (${labelEn} first half)" / "${second.startYear}–${second.endYear} (${labelEn} second half)"`,
+    ];
+  };
+
   if (locale === "ko") {
     lines.push("\n【대운 상세도 규칙 · 코드 산출】");
     lines.push(`- 현재 나이(만): ${currentAge}세`);
@@ -134,16 +218,17 @@ export function buildDaewoonRoadmapDetailBlock(options: {
     } else {
       const cur = cycles[idx];
       const next = cycles[idx + 1];
-      lines.push(
-        `- 현재 대운: ${cur.startAge}~${cur.endAge}세 (${birthYear + cur.startAge}~${birthYear + cur.endAge}년)${cur.pillar ? ` · ${cur.pillar}` : ""}`
-      );
+      lines.push(...halfLine("현재 대운", "Current cycle", cur));
       if (next) {
-        lines.push(
-          `- 다음 대운: ${next.startAge}~${next.endAge}세 (${birthYear + next.startAge}~${birthYear + next.endAge}년)${next.pillar ? ` · ${next.pillar}` : ""}`
-        );
+        lines.push(...halfLine("다음 대운", "Next cycle", next));
+      } else {
+        lines.push("- 다음 대운: (없음 — 5년 세분 대상 없음)");
       }
       lines.push(
-        "- ★ 세분화: 현재 대운 + 다음 대운만 5년 단위(전반/후반). 이미 끝난 과거 대운·그 이후 먼 대운은 10년 통짜 요약."
+        "- ★ 세분화: ★현재 대운 + ★다음 대운(현재 직후 1개)만 위 5년 전반/후반 period로 각각 별도 블록. 과거·먼 이후는 10년 통짜 1블록."
+      );
+      lines.push(
+        "- ★ '다음 대운'은 위 다음 구간만. 그 이후 대운을 5년 세분하거나 다음으로 부르지 말 것."
       );
       lines.push(
         "- ★ '현재 대운'은 위 구간만 지칭. 배열 앞쪽·첫 블록을 현재로 쓰지 말 것."
@@ -157,16 +242,17 @@ export function buildDaewoonRoadmapDetailBlock(options: {
     } else {
       const cur = cycles[idx];
       const next = cycles[idx + 1];
-      lines.push(
-        `- Current cycle: ages ${cur.startAge}–${cur.endAge} (${birthYear + cur.startAge}–${birthYear + cur.endAge})`
-      );
+      lines.push(...halfLine("현재 대운", "Current cycle", cur));
       if (next) {
-        lines.push(
-          `- Next cycle: ages ${next.startAge}–${next.endAge} (${birthYear + next.startAge}–${birthYear + next.endAge})`
-        );
+        lines.push(...halfLine("다음 대운", "Next cycle", next));
+      } else {
+        lines.push("- Next cycle: (none — no 5-year split target)");
       }
       lines.push(
-        "- ★ Split only current + next into 5-year halves. Fully past and far-future cycles stay 10-year summaries."
+        "- ★ Split only current + next (immediate successor) into the 5-year half periods above. Past and far-future stay one 10-year block each."
+      );
+      lines.push(
+        "- ★ Do not call later cycles \"next\" or split them into 5-year halves."
       );
       lines.push(
         "- ★ Do not treat the first array block as current."

@@ -6,6 +6,11 @@ import {
 } from "@/lib/saju/ksaju-engine";
 import type { PremiumPromptContext } from "@/lib/saju/llm/prompts/premium-context";
 import {
+  daewoonRoadmapRoleMark,
+  findCurrentDaewoonIndex,
+  roadmapRoleAtIndex,
+} from "@/lib/saju/daewoon-current";
+import {
   buildDecadeIssueCalendar,
   buildLifetimeIssueCalendar,
   buildMonthlyIssueCalendar,
@@ -193,26 +198,12 @@ function formatLifetimeInputs(ctx: PremiumPromptContext): ReportSpecificInputVar
         `- ${candidate.directionLabel} (from age ${candidate.startAge} · ${candidate.startAgeNote})`
       );
     }
-    for (const cycle of candidate.cycles) {
-      const phase =
-        cycle.endAge < currentAge
-          ? "past"
-          : cycle.startAge <= currentAge && currentAge <= cycle.endAge
-            ? "current"
-            : "future";
+    const currentIdx = findCurrentDaewoonIndex(candidate.cycles, currentAge);
+    for (let i = 0; i < candidate.cycles.length; i += 1) {
+      const cycle = candidate.cycles[i];
+      const role = roadmapRoleAtIndex(i, currentIdx);
       const yearSpan = `${birthYear + cycle.startAge}~${birthYear + cycle.endAge}`;
-      const mark =
-        phase === "current"
-          ? ctx.locale === "ko"
-            ? " ★현재 대운"
-            : " ★CURRENT"
-          : phase === "past"
-            ? ctx.locale === "ko"
-              ? " (과거)"
-              : " (past)"
-            : ctx.locale === "ko"
-              ? " (이후)"
-              : " (future)";
+      const mark = daewoonRoadmapRoleMark(role, ctx.locale === "ko" ? "ko" : "en");
       lines.push(
         ctx.locale === "ko"
           ? `  ${cycle.ageRange} · ${yearSpan}년${mark}: ${cycle.pillar} | 천간 ${cycle.stemTenGod}, 지지 ${cycle.branchTenGod}`

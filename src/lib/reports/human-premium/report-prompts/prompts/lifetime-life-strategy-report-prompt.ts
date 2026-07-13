@@ -137,7 +137,8 @@ ${ROADMAP_DAEWOON_RULE}
 
 {{narrative}}
 
-roadmap: 과거 요약 1 + 현재·다음(5년 세분) + 이후 요약. 현재는 "지금 당장" 관점.
+roadmap: 과거 요약 1 + ★현재·★다음(각 5년 전반/후반 2블록) + 먼 이후 10년 요약.
+  다음 대운을 10년 통짜 1블록으로 쓰지 말 것. 현재는 "지금 당장" 관점.
 decisionMoments 4 (평생 태도). script 따옴표 없이 구어·다짐체.
 ${LIFETIME_TENSE_RULES}`,
 

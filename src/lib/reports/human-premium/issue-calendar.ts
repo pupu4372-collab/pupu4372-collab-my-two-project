@@ -297,9 +297,16 @@ export function buildLifetimeIssueCalendar(options: {
     : options.locale === "ko"
       ? "  (해당 없음)"
       : "  (none)";
-  const futureLabel =
-    classified.futureCycles.length > 0
-      ? classified.futureCycles.map((r) => `  ${formatRow(r)}`).join("\n")
+  const nextCycle = classified.futureCycles[0] ?? null;
+  const laterCycles = classified.futureCycles.slice(1);
+  const nextLabel = nextCycle
+    ? `  ${formatRow(nextCycle)}`
+    : options.locale === "ko"
+      ? "  (없음)"
+      : "  (none)";
+  const laterLabel =
+    laterCycles.length > 0
+      ? laterCycles.map((r) => `  ${formatRow(r)}`).join("\n")
       : options.locale === "ko"
         ? "  (없음)"
         : "  (none)";
@@ -316,8 +323,10 @@ export function buildLifetimeIssueCalendar(options: {
           pastLabel,
           `- 현재 대운:`,
           currentLabel,
-          `- 이후 대운:`,
-          futureLabel,
+          `- 다음 대운(바로 다음 1개 · 5년 세분 대상):`,
+          nextLabel,
+          `- 먼 이후 대운(10년 요약):`,
+          laterLabel,
           "- ★ 시제·대운 전환 연도는 위 목록만 기준 (LLM 자체 계산 금지)",
           "- ★ 상세도: 현재 대운 + 바로 다음 대운만 5년(전반/후반) 세분. 지나간 대운·먼 이후는 10년 통짜 요약.",
         ].join("\n")
@@ -331,8 +340,10 @@ export function buildLifetimeIssueCalendar(options: {
           pastLabel,
           `- Current cycle:`,
           currentLabel,
-          `- Future cycles:`,
-          futureLabel,
+          `- Next cycle (immediate · 5-year split):`,
+          nextLabel,
+          `- Far-future cycles (10-year summary):`,
+          laterLabel,
           "- ★ Use only these lists for tense and transition years (do not recompute).",
           "- ★ Detail: split only current + next into 5-year halves; past and far-future stay 10-year summaries.",
         ].join("\n");
