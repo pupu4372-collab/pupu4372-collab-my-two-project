@@ -85,10 +85,11 @@ export function HumanPremiumCartClient() {
   const { userId, isAnonymous, accessToken } = useSupabaseSession();
   const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
   const purchaseProfile = loadHumanPremiumProfile(storageUserId);
-  const { purchasedTypes, loading: purchasesLoading } = useHumanPremiumPurchases({
-    storageUserId,
-    profile: purchaseProfile,
-  });
+  const { purchasedTypes, loading: purchasesLoading, refresh: refreshPurchases } =
+    useHumanPremiumPurchases({
+      storageUserId,
+      profile: purchaseProfile,
+    });
 
   const [cart, setCart] = useState<HumanPremiumCartState>({ items: [], orderId: null, paid: false });
   const [profileReady, setProfileReady] = useState(false);
@@ -100,6 +101,8 @@ export function HumanPremiumCartClient() {
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
   const [portoneReady, setPortoneReady] = useState(false);
 
+  // cart.paid is only for the post-checkout UI in this tab (sessionStorage).
+  // Purchase truth / badges / cart exclusion use server GET /api/premium/human/purchases.
   const visibleItems = useMemo(() => {
     if (purchasesLoading || cart.paid) return cart.items;
     const purchased = new Set(purchasedTypes);
@@ -236,6 +239,7 @@ export function HumanPremiumCartClient() {
     );
     setCart(next);
     setConfirmOpen(false);
+    refreshPurchases();
   }
 
   function openPayConfirm() {
