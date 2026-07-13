@@ -35,7 +35,7 @@ function readUser(session: Session | null) {
   return {
     userId: user.id,
     email: user.email ?? null,
-    isAnonymous: user.is_anonymous ?? false,
+    isAnonymous: user.is_anonymous !== false,
     provider,
   };
 }
