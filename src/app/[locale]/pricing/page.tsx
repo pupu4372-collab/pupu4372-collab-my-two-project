@@ -31,11 +31,12 @@ const PET_PRODUCT_ORDER: PetProductCode[] = [
   PET_PREMIUM_PACKAGE_CODE,
 ];
 
-const BUNDLE_ORDER: HumanPremiumBundleKind[] = ["all", "themepack", "timepack"];
+/** Shop-purchasable bundles only (`themepack` / `timepack` exist in pricing.ts but are not sold in UI). */
+const PURCHASABLE_BUNDLES: readonly HumanPremiumBundleKind[] = ["all"];
 
 function bundleLabel(kind: HumanPremiumBundleKind, isKo: boolean): string {
   if (kind === "all") {
-    return isKo ? "K-Saju 올인원 번들" : "K-Saju all-in-one bundle";
+    return isKo ? "올인원 번들" : "All-in-one bundle";
   }
   return kind;
 }
@@ -106,7 +107,7 @@ export default async function PricingPage({ params }: PricingPageProps) {
               {isKo ? "번들" : "Bundles"}
             </h3>
             <ul className="divide-y divide-plum/10">
-              {BUNDLE_ORDER.map((kind) => (
+              {PURCHASABLE_BUNDLES.map((kind) => (
                 <li
                   key={kind}
                   className="flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
