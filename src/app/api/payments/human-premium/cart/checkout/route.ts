@@ -5,7 +5,7 @@ import {
 } from "@/lib/reports/human-premium/cart";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { getCheckoutCurrency } from "@/lib/reports/human-premium/pricing";
-import { getUserIdFromRequest } from "@/lib/supabase/auth-server";
+import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
 
 /**
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const userId = await getUserIdFromRequest(request);
+    const userId = await getRegisteredUserIdFromRequest(request);
     const { orderId, amount, items } = await createPendingCartOrder(body, userId);
     const currency = getCheckoutCurrency(locale);
     const storeId = getPortOneShopId();
