@@ -16,8 +16,10 @@ import {
   resetHumanPremiumCart,
   resolveHumanPremiumStorageUserId,
   saveHumanPremiumCart,
+  saveHumanPremiumProfile,
   type HumanPremiumCartState,
 } from "@/lib/reports/human-premium/cart-session";
+import { isDeliverableHumanPremiumEmail } from "@/lib/reports/human-premium/email-policy";
 import { humanPremiumRetentionNotice } from "@/lib/reports/human-premium/retention";
 import { parseBirthTimeSelect } from "@/lib/saju/birth-time-options";
 import {
@@ -101,6 +103,9 @@ export function HumanPremiumCartClient() {
 
   const [cart, setCart] = useState<HumanPremiumCartState>({ items: [], orderId: null, paid: false });
   const [profileReady, setProfileReady] = useState(false);
+  /** EN SPB: deliverable email required before checkout draft / PayPal button. */
+  const [emailReady, setEmailReady] = useState(false);
+  const [cartEmail, setCartEmail] = useState("");
   const [paying, setPaying] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [generatingType, setGeneratingType] = useState<ReportType | null>(null);
@@ -127,8 +132,11 @@ export function HumanPremiumCartClient() {
   const orderIdFromUrl = searchParams.get("orderId");
 
   const refreshCart = useCallback(() => {
+    const profile = loadHumanPremiumProfile(storageUserId);
     setCart(loadHumanPremiumCart(storageUserId));
-    setProfileReady(profileHasBirthData(loadHumanPremiumProfile(storageUserId)));
+    setProfileReady(profileHasBirthData(profile));
+    setCartEmail(profile.email);
+    setEmailReady(isDeliverableHumanPremiumEmail(profile.email));
   }, [storageUserId]);
 
   useEffect(() => {
@@ -204,7 +212,8 @@ export function HumanPremiumCartClient() {
       setSpbPreparing(false);
       return;
     }
-    if (cart.paid || !profileReady || purchasesLoading || visibleItems.length === 0) {
+    // Gate: do not call checkout without a deliverable email (avoids noemail pending rows).
+    if (cart.paid || !profileReady || !emailReady || purchasesLoading || visibleItems.length === 0) {
       setSpbDraft(null);
       setSpbPreparing(false);
       return;
@@ -260,6 +269,7 @@ export function HumanPremiumCartClient() {
     paymentMethod,
     cart.paid,
     profileReady,
+    emailReady,
     purchasesLoading,
     visibleItemsKey,
     accessToken,
@@ -311,6 +321,15 @@ export function HumanPremiumCartClient() {
       locale: routeLocale,
       cartItems: visibleItems,
     };
+  }
+
+  function saveCartEmail(nextEmail: string) {
+    const profile = loadHumanPremiumProfile(storageUserId);
+    const email = nextEmail.trim();
+    saveHumanPremiumProfile(storageUserId, { ...profile, email });
+    setCartEmail(email);
+    setEmailReady(isDeliverableHumanPremiumEmail(email));
+    if (isDeliverableHumanPremiumEmail(email)) setError(null);
   }
 
   function markPaidLocally(orderId: string) {
@@ -673,7 +692,22 @@ export function HumanPremiumCartClient() {
         <div className="flex w-full flex-col items-center gap-3">
           {!cart.paid && visibleItems.length > 0 && paymentMethod === "portone_paypal_spb" ? (
             <div className="w-full max-w-sm space-y-2">
-              {spbPreparing || !portoneReady || !spbDraft ? (
+              {!emailReady ? (
+                <div className="space-y-2 rounded-2xl border border-white/20 bg-white/10 p-4">
+                  <p className="text-center text-sm text-white/90">
+                    Enter your email to receive your report
+                  </p>
+                  <input
+                    type="email"
+                    value={cartEmail}
+                    onChange={(e) => saveCartEmail(e.target.value)}
+                    placeholder="you@email.com"
+                    autoComplete="email"
+                    className="pastel-input w-full px-4 py-3 text-sm text-ink"
+                    aria-label="Email for report delivery"
+                  />
+                </div>
+              ) : spbPreparing || !portoneReady || !spbDraft ? (
                 <p className="text-center text-sm text-white/75">
                   {paying ? "Processing…" : "Preparing PayPal…"}
                 </p>

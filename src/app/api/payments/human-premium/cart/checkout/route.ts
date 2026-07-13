@@ -4,6 +4,7 @@ import {
   createPendingCartOrder,
 } from "@/lib/reports/human-premium/cart";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
+import { resolveHumanPremiumEmail } from "@/lib/reports/human-premium/email-policy";
 import { getCheckoutCurrency } from "@/lib/reports/human-premium/pricing";
 import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
@@ -55,6 +56,14 @@ export async function POST(request: Request) {
       { error: "PortOne is not configured.", paymentMethod: "portone", configured: false },
       { status: 503 }
     );
+  }
+
+  // EN guest checkout: refuse placeholder (noemail) emails before drafting a pending row.
+  if (locale === "en") {
+    const { deliverEmail } = resolveHumanPremiumEmail(body.email);
+    if (!deliverEmail) {
+      return NextResponse.json({ error: "email_required_for_en" }, { status: 400 });
+    }
   }
 
   try {
