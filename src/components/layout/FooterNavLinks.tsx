@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { getPaidHumanPremiumOrderIds, resolveHumanPremiumStorageUserId } from "@/lib/reports/human-premium/cart-session";
+import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 
 type FooterNavLinksProps = {
@@ -22,9 +23,11 @@ export function FooterNavLinks({
   paymentsLabel,
   hasServerPayments,
 }: FooterNavLinksProps) {
+  const locale = useLocale();
   const { userId, isAnonymous } = useSupabaseSession();
   const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
   const [showPayments, setShowPayments] = useState(hasServerPayments);
+  const pricingLabel = locale === "en" ? "Pricing" : "이용요금";
 
   useEffect(() => {
     const sync = () => {
@@ -44,6 +47,7 @@ export function FooterNavLinks({
     { href: "/terms" as const, label: termsLabel },
     { href: "/privacy" as const, label: privacyLabel },
     { href: "/support" as const, label: supportLabel },
+    { href: "/pricing" as const, label: pricingLabel },
     ...(showPayments ? [{ href: "/payments" as const, label: paymentsLabel }] : []),
   ];
 

@@ -34,7 +34,7 @@ export function isAllowedPetProductCode(value: string): value is PetProductCode 
 
 export function formatPetProductPrice(code: PetProductCode, locale: "ko" | "en"): string {
   if (locale === "en" && code === PET_MBTI_STANDALONE_CODE) return "$2.00";
-  if (locale === "en" && code === PET_PREMIUM_PACKAGE_CODE) return "₩4,500";
+  if (locale === "en" && code === PET_PREMIUM_PACKAGE_CODE) return "$4.00";
   const amount = PET_PRODUCT_AMOUNT_KRW[code];
   return locale === "ko" ? `₩${amount.toLocaleString("ko-KR")}` : `₩${amount.toLocaleString("en-US")}`;
 }
