@@ -145,7 +145,10 @@ export default async function PricingPage({ params }: PricingPageProps) {
                     {blurb ? <p className="text-sm text-plum/80">{blurb}</p> : null}
                   </div>
                   <p className="shrink-0 font-semibold text-ink">
-                    {formatPetProductPrice(code, isKo ? "ko" : "en")}
+                    {(() => {
+                      const price = formatPetProductPrice(code, isKo ? "ko" : "en");
+                      return !isKo && price.startsWith("₩") ? `${price} KRW` : price;
+                    })()}
                   </p>
                 </li>
               );
@@ -167,17 +170,23 @@ export default async function PricingPage({ params }: PricingPageProps) {
               <>
                 디지털 콘텐츠 특성상 리포트 열람 후에는 단순 변심 환불이 제한될 수 있습니다. 자세한
                 내용은{" "}
-                <Link href="/terms" className="font-medium text-ink underline hover:text-plum">
-                  이용약관
+                <Link
+                  href="/refund-policy"
+                  className="font-medium text-ink underline hover:text-plum"
+                >
+                  환불 정책
                 </Link>
-                의 환불 정책을 확인해 주세요.
+                을 확인해 주세요.
               </>
             ) : (
               <>
                 Because this is digital content, refunds may be limited after a report has been
-                viewed. See the refund policy in our{" "}
-                <Link href="/terms" className="font-medium text-ink underline hover:text-plum">
-                  Terms of Service
+                viewed. See our{" "}
+                <Link
+                  href="/refund-policy"
+                  className="font-medium text-ink underline hover:text-plum"
+                >
+                  Refund Policy
                 </Link>
                 .
               </>

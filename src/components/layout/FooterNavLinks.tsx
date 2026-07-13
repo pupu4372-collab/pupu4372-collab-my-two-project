@@ -28,6 +28,7 @@ export function FooterNavLinks({
   const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
   const [showPayments, setShowPayments] = useState(hasServerPayments);
   const pricingLabel = locale === "en" ? "Pricing" : "이용요금";
+  const refundLabel = locale === "en" ? "Refund Policy" : "환불 정책";
 
   useEffect(() => {
     const sync = () => {
@@ -48,6 +49,7 @@ export function FooterNavLinks({
     { href: "/privacy" as const, label: privacyLabel },
     { href: "/support" as const, label: supportLabel },
     { href: "/pricing" as const, label: pricingLabel },
+    { href: "/refund-policy" as const, label: refundLabel },
     ...(showPayments ? [{ href: "/payments" as const, label: paymentsLabel }] : []),
   ];
 
