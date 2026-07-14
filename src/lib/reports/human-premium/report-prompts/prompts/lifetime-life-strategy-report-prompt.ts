@@ -1,5 +1,9 @@
 ﻿import type { ReportSlotPromptMap } from "../prompt-definition";
 import {
+  ENGLISH_ONLY_RULE,
+  REPORT_PROMPT_SCORE_RULES_EN,
+} from "../base-prompt";
+import {
   CARE_STYLE,
   COHORT_RULE,
   ELEMENT_DEFICIENCY_RULE,
@@ -12,6 +16,7 @@ import {
   S3_SCORES_SCHEMA,
   SCORE_CITATION_RULE,
 } from "../newgen-common";
+import { S3_SCORES_SCHEMA_EN } from "./annual-report-prompt";
 
 /** No.12 · 인생의 마스터플랜 (lifetime) */
 export const FOCUS_KO =
@@ -163,4 +168,212 @@ prophecy.full: 순서대로 — 만트라 / 인생 3대 질문 / 천명 선언("
   ★ 연도는 입력의 나이→연도 환산만 사용. {{currentYear}} 이전 연도 금지.
 ${LIFETIME_TENSE_RULES}
 ${COHORT_RULE}`,
+};
+
+/* —— EN path. KO SLOTS above must stay byte-stable. —— */
+
+const OUTPUT_FORMAT_RULES_EN = `★ Shared output format:
+  - Do not put internal "[Label]:" / "[Label]" markers in prose — natural sentences and JSON fields only
+  - No markdown (**bold**, # headers, backticks)
+  - tip / countermeasure / script strings must not embed UI labels ("How to catch:", "Countermeasure:")
+  - decisionMoments.script = spoken lines only, without wrapping quotes (the renderer adds them)`;
+
+const JSON_OUTPUT_FORCE_RULE_EN = `★ Force machine-parseable JSON:
+  - JSON only. No markdown fences (\`\`\`) or stray backticks
+  - Each item needs title / body / tip (or countermeasure)
+  - opportunities: exactly 5; risks: exactly 4
+  - Do not put raw double-quotes (") inside string values (breaks JSON)`;
+
+const ELEMENT_DEFICIENCY_RULE_EN = `★ Element consistency:
+  Follow pillarBlock element distribution (%) and the lowest-% deficient element.
+  When naming a shortage, point only at the lowest-% element.`;
+
+const SCORE_CITATION_RULE_EN = `★ Score citation consistency:
+  Later sections that cite S3 scores must reuse the exact label strings and numbers from scores[].
+  Do not invent alternate labels or numbers.`;
+
+const CARE_STYLE_EN = `★ Voice — care-oriented: end paragraphs with actionable next steps.
+  Explain chart jargon in plain English; do not dump bare ten-god jargon into the body.`;
+
+const S3_SCORE_RULES_BLOCK_EN = `${REPORT_PROMPT_SCORE_RULES_EN}
+- Score range: integers 50–90. Crisis avoidance only 50–72.
+- Average of the other five indicators 72–82.
+- Do not put domain scores (N points, N/10, quarter scores) in narrative — those belong in S4.
+- scores.label must be exactly the six English names above (spelling and spaces).
+- ★ Topic differentiation: reflect this lifetime topic in the score mix. Keep strongest ≥80, Crisis avoidance 50–72, average 72–82, but vary the mix. Avoid all-even endings or repeated number sets.
+- ★ description must match score rank: highest = most prominent/strong; lower = relatively needs support.`;
+
+const COHORT_RULE_EN = `cohortInsight.body: two lines of chart-cohort insight (~120 chars)
+  - Subject: "People with [trait/structure]…"
+  - ★ No fake survey percentages ("appears in ~%", "reaches about N%")
+  - Tendency language only ("tend to…", "often…", "relatively higher/lower")
+  - Folklore "seven out of ten" is OK; integer percent lists are not
+  - No self-reference to buyers/readers of this product`;
+
+const NUMERIC_RANGE_RULE_EN = `★ Numeric consistency:
+  - Prefer ranges (e.g. about 10–20%) over single-point percentages or spans
+  - Future daewoon allocation advice must use ranges
+  - Do not invent hard numbers that contradict earlier narrative or deep analysis`;
+
+const ROADMAP_DAEWOON_RULE_EN = `★ period (block header) = only the sub-years that block's body covers:
+  - Correct: "2030–2034 (next major-luck first half)", "2035–2039 (next major-luck second half)"
+  - Forbidden: one 10-year period ("2030–2039") with body alone split into halves
+  - Forbidden: duplicate period strings across different blocks
+  - label: short sub-span name (first/second half · path so far, etc.)
+
+★ Past summary (path so far):
+  - If there is past before the current major luck, compress it into 1 leading roadmap block (do not split individual past daewoon)
+  - Retrospective voice only ("those years shaped…"). No action commands
+  - period e.g. "past–before current major luck" or a real past year cluster
+  - Young charts (current is first/early second daewoon) may omit this block
+
+★ Detail level:
+  - ★Current major luck + ★next major luck only — each split into two 5-year blocks (first half / second half)
+  - "Next major luck" = the single cycle immediately after current (input's ★next major-luck mark / engine span)
+  - Later distant / past cycles stay as one 10-year block (do not 5-year-split like next)
+  - Forbidden: writing the next cycle as one 10-year block like "2033–2042 (next major luck)"`;
+
+const LIFETIME_TENSE_RULES_EN = `★ Tense / daewoon rules (use only 【Report-specific input · lifetime tense】 — do not self-compute)
+- Past major-luck cycles: retrospective ("that era felt like…"). Absolute ban on action commands in tips/countermeasures.
+- Current major luck: present tense + allowed "do this now" actions.
+- Later major luck: future tense. Present-tense prep ("prepare now for that era") is allowed.
+- Opportunity tips, risk countermeasures, and direct roadmap commands only for the current cycle (or now-prep).
+- Transition ages/years: use only ages and year conversions printed in the input (e.g. age 54 → birth year + 54).
+- prophecy.full sealed scenes: future years only; prefer converted years at later daewoon turn ages.`;
+
+export const SLOTS_EN: ReportSlotPromptMap = {
+  "saju-structure": `■ S2 Chart structure · lifetime
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+
+★ Tone: grounded and philosophical. Reference the full major-luck list in pillarBlock.
+
+Output schema:
+{ "sajuStructure": "string" }
+
+About 600 characters. Natural paragraphs only. Dominant/deficient (lowest % only) · first half vs second half of life.
+${CARE_STYLE_EN}`,
+
+  "master-narrative": `■ S3 Core fortune indicators + narrative · lifetime
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+${S3_SCORES_SCHEMA_EN}
+
+${S3_SCORE_RULES_BLOCK_EN}
+
+scores description ~40 chars each, lifetime + current major-luck context.
+narrative 250–300 chars: {{dayPillarLabel}} once + life curve + where you are now.
+Do not dump the full daewoon list or domain scores into narrative.
+${LIFETIME_TENSE_RULES_EN}`,
+
+  "deep-analysis": `■ S4 Lifetime map by major luck · Life Master Plan
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{
+  "intro": "string",
+  "cycles": [
+    { "period": "string", "title": "string", "body": "string" }
+  ],
+  "sections": [
+    { "title": "Turning points", "body": "string" }
+  ]
+}
+
+{{narrative}}
+
+intro: whole-life overview only (120–150 chars, {{dayPillarLabel}}). Do not dump cycles here.
+cycles: every major-luck span from pillarBlock, none missing.
+  period: age span (e.g. "28–37"). title: era nickname 8–12 chars.
+  ★ Do not put "current" / "(current)" in title — the system marks current separately.
+  body: energy · life task · key move (~150 chars).
+  ★ Past cycle body = retrospective only (no commands) / current = present + now actions /
+    later = future (+ now-prep allowed).
+sections: exactly 1 — title "Turning points", body with 3 turns (age + basis) ~60 chars each combined.
+${LIFETIME_TENSE_RULES_EN}`,
+
+  opportunities: `■ S5 Five opportunities · lifetime
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{ "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }
+
+{{narrative}}
+
+Exactly 5. Lifetime view + why they unlock in the current major luck. Do not prefix tip with "How to catch:".
+tips = executable in the current major luck only.
+${LIFETIME_TENSE_RULES_EN}`,
+
+  risks: `■ S6 Four predicted risks · lifetime
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{ "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
+
+{{narrative}}
+
+Exactly 4. Do not prefix countermeasure with "Countermeasure:". Lifetime habits you can start now.
+${LIFETIME_TENSE_RULES_EN}`,
+
+  roadmap: `■ S7 Time roadmap · 3–4 major-luck blocks
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+${NUMERIC_RANGE_RULE_EN}
+${ROADMAP_DAEWOON_RULE_EN}
+
+Output schema:
+{
+  "roadmap": [{ "period": "string", "label": "string", "body": "string" }],
+  "decisionMoments": [{ "situation": "string", "script": "string" }]
+}
+
+{{narrative}}
+
+roadmap: past summary 1 + ★current + ★next (each as two 5-year half blocks) + farther 10-year summary.
+  Do not write next major luck as one 10-year block. Current = "right now" lens.
+decisionMoments: 4 (lifetime stance). script = spoken / vow voice without wrapping quotes.
+${LIFETIME_TENSE_RULES_EN}`,
+
+  prophecy: `■ S8 Sealed prophecy · lifetime
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{
+  "prophecy": { "short": "string", "full": "string" },
+  "cohortInsight": { "body": "string" }
+}
+
+{{narrative}}
+
+prophecy.short: must equal the fixed value below (no rewrite):
+{{luckyKeywordsShort}}
+prophecy.full: in order — mantra / three life questions / destiny declaration ("I, {{dayPillarLabel}}, …") /
+  sealed destiny (two converted years at later daewoon turns + scenes). Total 600–700 chars.
+  ★ Years only from input age→year conversion. No years before {{currentYear}}.
+${LIFETIME_TENSE_RULES_EN}
+${COHORT_RULE_EN}`,
 };
