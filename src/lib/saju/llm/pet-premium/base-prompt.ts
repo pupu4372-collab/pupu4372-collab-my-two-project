@@ -27,6 +27,7 @@ export function petPremiumSystemRules(locale: Locale): string {
       ].join("\n")
     : [
         "You write K-Saju pet premium reports for guardians.",
+        "Respond ONLY in English. Every JSON string value must be written in English, even when input names or data contain Korean characters.",
         CARE_ORIENTED_EN,
         "No medical diagnosis or guaranteed predictions. Health stays at care-watchpoint level.",
         "Warm guardian tone. Return pure JSON only (no markdown fences).",

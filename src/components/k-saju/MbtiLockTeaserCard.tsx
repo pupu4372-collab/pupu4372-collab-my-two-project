@@ -17,12 +17,14 @@ const UI = {
   ko: {
     title: (name: string) => `${name}의 성향 유형은?`,
     subtitle: "행동 진단으로 우리 아이 성향 유형과 맞춤 케어 팁을 확인해 보세요",
+    languageNote: "결과 리포트는 현재 언어(한국어)로 생성됩니다.",
     cta: "상세 MBTI 보러가기",
     viewResult: "MBTI 결과 보기",
   },
   en: {
     title: (name: string) => `What is ${name}'s personality type?`,
     subtitle: "Discover your pet's type and tailored care tips with a behavior check.",
+    languageNote: "Your report will be generated in the current language (English).",
     cta: "View detailed MBTI",
     viewResult: "View MBTI result",
   },
@@ -71,6 +73,7 @@ export function MbtiLockTeaserCard({
         <div className="min-w-0 flex-1">
           <h3 className="text-xl font-extrabold text-primary">{t.title(petName)}</h3>
           <p className="mt-2 text-sm leading-6 text-on-surface-variant">{t.subtitle}</p>
+          <p className="mt-2 text-xs leading-5 text-on-surface-variant">{t.languageNote}</p>
           {mbtiUnlockLoading ? (
             <div className="mt-4 h-10 w-40 animate-pulse rounded-full bg-sand/70" />
           ) : (

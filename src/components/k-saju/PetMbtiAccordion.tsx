@@ -17,6 +17,7 @@ const UI = {
   ko: {
     title: "MBTI테스트(선택)",
     hint: "설문을 작성하시면 MBTI유형을 알려드립니다.",
+    languageNote: "결과 리포트는 현재 언어(한국어)로 생성됩니다.",
     complete: "✓ 완료",
     axis: {
       EI: "에너지",
@@ -28,6 +29,7 @@ const UI = {
   en: {
     title: "MBTI test (optional)",
     hint: "Complete the survey to see your pet's MBTI type.",
+    languageNote: "Your report will be generated in the current language (English).",
     complete: "✓ Done",
     axis: {
       EI: "Energy",
@@ -126,6 +128,7 @@ export function PetMbtiAccordion({
       {!complete && (
         <div className="border-t border-surface-container px-6 py-3">
           <p className="text-xs leading-5 text-on-surface-variant">{t.hint}</p>
+          <p className="mt-1.5 text-xs leading-5 text-on-surface-variant">{t.languageNote}</p>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-container">
             <div
               className="h-full rounded-full bg-primary/50 transition-all duration-300"

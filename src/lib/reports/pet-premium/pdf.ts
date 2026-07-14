@@ -201,7 +201,9 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
     chapterBanner("zodiac", 2, isKo, false),
     pillWithBody(pdfSafeText(z.personality.headline), pdfSafeText(z.personality.story), label.accent, label.soft),
     elementPill(
-      isKo ? `오행 바이브 · ${z.elementLabel.hangul}(${z.elementLabel.hanja})` : `Element · ${z.elementLabel.meaning}`,
+      isKo
+        ? `오행 바이브 · ${z.elementLabel.hangul}(${z.elementLabel.hanja})`
+        : `Element · ${z.elementLabel.meaning}`,
       el,
       [0, 8, 0, 16]
     ),

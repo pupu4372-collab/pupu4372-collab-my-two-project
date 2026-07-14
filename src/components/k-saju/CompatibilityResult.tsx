@@ -1,6 +1,5 @@
 "use client";
 
-import { AdSlot } from "@/components/ads/AdSlot";
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { BondScoreRing } from "@/components/k-saju/BondScoreRing";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
@@ -69,7 +68,7 @@ function formatDominantElement(
   locale: CompatibilityResponse["locale"]
 ): string {
   if (locale === "en") {
-    return `${label.hanja} ${label.meaning}`;
+    return label.meaning;
   }
   return `${label.hanja} ${label.meaning}·${label.hangul}`;
 }
@@ -131,6 +130,7 @@ function ElementCard({
   genderValue,
   elementKey,
   note,
+  locale,
 }: {
   title: string;
   name: string;
@@ -141,13 +141,16 @@ function ElementCard({
   genderValue: string;
   elementKey: ElementKey;
   note?: string;
+  locale: CompatibilityResponse["locale"];
 }) {
   return (
     <div className={`element-compatibility-card element-compatibility-card--${elementKey}`}>
       <p className="element-compatibility-card__label">{title}</p>
       <p className="element-compatibility-card__name">{name}</p>
       <p className="element-compatibility-card__element">
-        {elementLabel.hanja} {elementLabel.meaning} · {elementLabel.hangul}
+        {locale === "ko"
+          ? `${elementLabel.hanja} ${elementLabel.meaning} · ${elementLabel.hangul}`
+          : elementLabel.meaning}
       </p>
       <p className="element-compatibility-card__meta">
         {genderLabel}: {genderValue}
@@ -282,6 +285,7 @@ export function CompatibilityResult({
           genderValue={result.petGender === "male" ? t.malePet : t.femalePet}
           elementKey={result.petElement}
           note={result.petElementNote || undefined}
+          locale={result.locale}
         />
         <ElementCard
           title={t.ownerEl}
@@ -293,6 +297,7 @@ export function CompatibilityResult({
           genderValue={result.ownerGender === "male" ? t.maleOwner : t.femaleOwner}
           elementKey={result.ownerElement}
           note={result.ownerElementNote || undefined}
+          locale={result.locale}
         />
       </div>
 
@@ -322,8 +327,6 @@ export function CompatibilityResult({
           ))}
         </ul>
       </GlassCard>
-
-      <AdSlot />
     </div>
   );
 }

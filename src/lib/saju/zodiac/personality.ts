@@ -326,10 +326,7 @@ export function buildZodiacPersonality(
   const elementDepth = elementDepthText(elementAffinity, locale);
   const signLabel = ZODIAC_LABEL[sign][locale === "ko" ? "ko" : "en"];
   const elLabel = dominantElementLabel(elementAffinity, locale);
-  const headline =
-    locale === "ko"
-      ? `${signLabel} - ${petName} - ${signLabel} × ${elLabel}`
-      : `${petName} · ${signLabel} × ${elLabel}`;
+  const headline = `${petName} · ${signLabel} × ${elLabel}`;
 
   return {
     ...base,

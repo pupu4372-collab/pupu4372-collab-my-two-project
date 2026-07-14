@@ -1,11 +1,10 @@
 "use client";
 
-import { AdSlot } from "@/components/ads/AdSlot";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
-import { ELEMENT_META } from "@/lib/saju/elements";
+import { ELEMENT_META, formatElementLabelForLocale } from "@/lib/saju/elements";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
 
 interface ZodiacResultProps {
@@ -157,7 +156,9 @@ export function ZodiacResult({
           <div className={`rounded-2xl border px-4 py-4 ${accent.pill}`}>
             <p className="text-xs font-extrabold uppercase tracking-[0.12em] opacity-80">{t.element}</p>
             <p className="mt-2 text-lg font-bold">
-              {el.hanja} {el.meaning} · {el.hangul}
+              {result.locale === "ko"
+                ? `${el.hanja} ${el.meaning} · ${el.hangul}`
+                : formatElementLabelForLocale(result.elementAffinity, "en")}
             </p>
           </div>
         </div>
@@ -220,8 +221,6 @@ export function ZodiacResult({
           </div>
         </dl>
       </GlassCard>
-
-      <AdSlot />
 
       <GlassCard>
         <h3 className="font-extrabold text-primary">{t.nextTitle}</h3>

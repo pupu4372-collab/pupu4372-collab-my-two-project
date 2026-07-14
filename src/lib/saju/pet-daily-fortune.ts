@@ -4,6 +4,7 @@ import {
   charToElement,
   ELEMENT_META,
   formatBranchSign,
+  formatElementLabelForLocale,
 } from "@/lib/saju/elements";
 import {
   getElementRelation,
@@ -477,7 +478,7 @@ export function buildCommonPetDailyFortune(
   const isKo = locale === "ko";
   const seed = hashSeed(dateKst, "common");
   const item = COMMON_FORTUNES[seed % COMMON_FORTUNES.length];
-  const todayPillar = computeKstDayPillar(dateKst);
+  const todayPillar = computeKstDayPillar(dateKst, locale);
   const todayBranch = formatBranchSign(todayPillar.branchHanja, locale);
 
   return {
@@ -538,7 +539,7 @@ export function buildPetDailyFortune(
     privacyConsent: true,
   });
 
-  const todayPillar = computeKstDayPillar(dateKst);
+  const todayPillar = computeKstDayPillar(dateKst, locale);
   const todayElement = charToElement(todayPillar.branchHanja) ?? "earth";
   const petElement = saju.dominantElement;
   const relation = getElementRelation(petElement, todayElement);
@@ -573,7 +574,7 @@ export function buildPetDailyFortune(
     const dayBase = scoreFromRelation(
       getElementRelation(
         petElement,
-        charToElement(computeKstDayPillar(dayDate).branchHanja) ?? "earth"
+        charToElement(computeKstDayPillar(dayDate, locale).branchHanja) ?? "earth"
       )
     );
     const stars = overallFromBase(dayBase, daySeed);
@@ -591,10 +592,9 @@ export function buildPetDailyFortune(
     title: OVERALL_TITLES[locale][overall - 1],
     subtitle: OVERALL_SUBS[locale][overall - 1],
     dayBranchSign: formatBranchSign(saju.pillars.day.branchHanja, locale),
-    elementLabel:
-      locale === "ko"
-        ? `${elementMeta.hangul}(${elementMeta.hanja}) 기운`
-        : `${elementMeta.romanized} (${elementMeta.meaning}) energy`,
+    elementLabel: isKo
+      ? `${elementMeta.hangul}(${elementMeta.hanja}) 기운`
+      : `${formatElementLabelForLocale(petElement, locale)} energy`,
     innatePersonality: firstNarrativeStoryParagraph(saju.story),
     categories,
     messages: [

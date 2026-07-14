@@ -225,7 +225,7 @@ export function MbtiStandaloneFlow() {
   }, [mbtiAnswers, mbtiSurveyComplete, mbtiType]);
 
   useEffect(() => {
-    if (!unlocked || !hasPetContext || !mbtiType || !mbtiResult || mbtiInsight || insightLoading || retakeMode) {
+    if (!unlocked || !hasPetContext || !mbtiType || !mbtiResult || mbtiInsight || insightLoading) {
       return;
     }
     if (storedReport && !retakeMode) return;

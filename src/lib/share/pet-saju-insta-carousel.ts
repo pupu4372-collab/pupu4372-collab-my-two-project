@@ -1,4 +1,4 @@
-import { ELEMENT_META, ELEMENT_ORDER } from "@/lib/saju/elements";
+import { ELEMENT_META, ELEMENT_ORDER, formatElementLabelForLocale } from "@/lib/saju/elements";
 import { buildPetLuckyScores, dominantElementLabel } from "@/lib/saju/pet-lucky-scores";
 import type { ElementDisplay, ElementKey, Locale, SajuBasicResponse, Species } from "@/lib/saju/types";
 import { getMbtiTypeData } from "@/lib/pet/mbti-types";
@@ -161,7 +161,7 @@ function drawFooter(ctx: CanvasRenderingContext2D, slideIndex: number) {
 function elementLabel(el: ElementDisplay, isKo: boolean) {
   return isKo
     ? `${el.romanized.toUpperCase()} (${el.hanja}) ${el.hangul}`
-    : `${el.romanized.toUpperCase()} (${el.hanja}) ${el.meaning}`;
+    : formatElementLabelForLocale(el.key, "en");
 }
 
 function drawElementRow(

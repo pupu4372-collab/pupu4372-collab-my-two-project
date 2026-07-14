@@ -60,6 +60,7 @@ export function buildPetZodiacPremiumPrompts(options: {
         part === "personality"
           ? ["", "Section titles:", ...fortune.personality.details.map((d) => `- ${d.title}`)].join("\n")
           : "",
+        "Output language: English.",
       ].join("\n");
 
   return { system, user };

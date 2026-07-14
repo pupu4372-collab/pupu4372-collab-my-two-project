@@ -224,6 +224,11 @@ export function SajuPremiumPackagePanel({
       <div className="border-t border-channel-saju/15 bg-sand/30 p-6 text-center">
         <p className="text-sm font-extrabold text-primary">{t.mbtiStandaloneTitle(mbtiPrice)}</p>
         <p className="mt-2 text-sm leading-relaxed text-plum/85">{t.mbtiStandaloneBody}</p>
+        <p className="mt-2 text-xs leading-5 text-on-surface-variant">
+          {locale === "ko"
+            ? "결과 리포트는 현재 언어(한국어)로 생성됩니다."
+            : "Your report will be generated in the current language (English)."}
+        </p>
         {mbtiUnlockEnabled && mbtiUnlockLoading ? (
           <div className="mx-auto mt-5 h-12 w-full max-w-xs animate-pulse rounded-full bg-sand/70" />
         ) : (

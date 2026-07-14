@@ -37,7 +37,7 @@ export const ELEMENT_META: Record<
   ElementKey,
   { hanja: string; hangul: string; romanized: string; meaning: string }
 > = {
-  wood: { hanja: "木", hangul: "목", romanized: "Mok", meaning: "Tree" },
+  wood: { hanja: "木", hangul: "목", romanized: "Mok", meaning: "Wood" },
   fire: { hanja: "火", hangul: "화", romanized: "Hwa", meaning: "Fire" },
   earth: { hanja: "土", hangul: "토", romanized: "To", meaning: "Earth" },
   metal: { hanja: "金", hangul: "금", romanized: "Geum", meaning: "Metal" },
@@ -46,6 +46,12 @@ export const ELEMENT_META: Record<
 
 export const ELEMENT_ORDER: ElementKey[] = ["wood", "fire", "earth", "metal", "water"];
 
+/** EN: meaning only (Wood/Fire/…). KO: hangul(hanja). Four Pillars chart hanja UI is separate. */
+export function formatElementLabelForLocale(element: ElementKey, locale: Locale): string {
+  const meta = ELEMENT_META[element];
+  if (locale === "en") return meta.meaning;
+  return `${meta.hangul}(${meta.hanja})`;
+}
 const STEM_LABEL: Record<string, { hangul: string; romanized: string }> = {
   甲: { hangul: "갑", romanized: "Gap" },
   乙: { hangul: "을", romanized: "Eul" },

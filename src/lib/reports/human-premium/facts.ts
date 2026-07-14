@@ -1,4 +1,4 @@
-import { charToElement, ELEMENT_META } from "@/lib/saju/elements";
+import { charToElement, formatElementLabelForLocale } from "@/lib/saju/elements";
 import {
   buildDaewoonRoadmapDetailBlock,
   computeManAge,
@@ -131,9 +131,7 @@ function stemEumyang(stem: string, locale: Locale): string {
 }
 
 function elementLabel(key: ElementKey, locale: Locale): string {
-  const meta = ELEMENT_META[key];
-  if (locale === "ko") return `${meta.hangul}(${meta.hanja})`;
-  return `${meta.meaning} (${meta.hanja})`;
+  return formatElementLabelForLocale(key, locale);
 }
 
 function pickStrongWeak(

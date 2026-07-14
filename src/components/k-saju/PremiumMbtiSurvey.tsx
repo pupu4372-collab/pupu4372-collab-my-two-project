@@ -21,6 +21,11 @@ export function PremiumMbtiSurvey({ locale, answers, onSelect }: PremiumMbtiSurv
             ? "행동 진단을 완료하면 맞춤 MBTI 케어 가이드를 볼 수 있어요."
             : "Complete the behavior check to unlock your personalized MBTI care guide."}
         </p>
+        <p className="mt-2 text-xs leading-5 text-on-surface-variant">
+          {isKo
+            ? "결과 리포트는 현재 언어(한국어)로 생성됩니다."
+            : "Your report will be generated in the current language (English)."}
+        </p>
         <p className="mt-2 text-xs font-semibold text-channel-saju">
           {isKo ? `${answered} / ${PET_MBTI_QUESTIONS.length} 완료` : `${answered} / ${PET_MBTI_QUESTIONS.length} done`}
         </p>

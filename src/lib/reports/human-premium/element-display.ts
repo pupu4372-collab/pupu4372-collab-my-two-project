@@ -87,10 +87,10 @@ export function elementAccentColor(key: string): string {
   return OBANG_COLORS[key] ?? OBANG_COLOR_FALLBACK;
 }
 
-/** Match CoverSection labels: KO hangul, EN meaning (not romanized). */
+/** Match CoverSection labels: KO hangul, EN meaning only (no hanja/romanized). */
 export function formatElementDisplayLabel(
   item: Pick<ElementDisplayRow, "hangul" | "hanja" | "meaning">,
   isKo: boolean
 ): string {
-  return isKo ? `${item.hangul} (${item.hanja})` : `${item.meaning} (${item.hanja})`;
+  return isKo ? `${item.hangul} (${item.hanja})` : item.meaning;
 }

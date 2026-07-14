@@ -1,6 +1,6 @@
 "use client";
 
-import { ELEMENT_META } from "@/lib/saju/elements";
+import { ELEMENT_META, formatElementLabelForLocale } from "@/lib/saju/elements";
 import type { PremiumReport } from "@/lib/saju/premium-report";
 
 interface CharacterCardProps {
@@ -23,11 +23,17 @@ export function CharacterCard({ report, petName }: CharacterCardProps) {
       <p className="text-center text-sm text-plum/70">{petName}</p>
 
       <div className="my-5 flex justify-center gap-2 text-3xl" aria-hidden>
-        <span>{el.hanja}</span>
-        <span className="text-plum/40">·</span>
-        <span className="text-lg font-semibold text-channel-saju">
-          {el.meaning}
-        </span>
+        {isKo ? (
+          <>
+            <span>{el.hanja}</span>
+            <span className="text-plum/40">·</span>
+            <span className="text-lg font-semibold text-channel-saju">{el.hangul}</span>
+          </>
+        ) : (
+          <span className="text-lg font-semibold text-channel-saju">
+            {formatElementLabelForLocale(report.basic.dominantElement, "en")}
+          </span>
+        )}
       </div>
 
       <p className="text-center text-sm leading-relaxed text-plum/80">

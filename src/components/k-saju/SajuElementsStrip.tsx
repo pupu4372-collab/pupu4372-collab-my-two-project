@@ -1,4 +1,4 @@
-import { ELEMENT_META, ELEMENT_ORDER } from "@/lib/saju/elements";
+import { ELEMENT_META, ELEMENT_ORDER, formatElementLabelForLocale } from "@/lib/saju/elements";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 
 const ELEMENT_BLURB = {
@@ -24,6 +24,7 @@ interface SajuElementsStripProps {
 
 export function SajuElementsStrip({ isKo }: SajuElementsStripProps) {
   const blurbs = ELEMENT_BLURB[isKo ? "ko" : "en"];
+  const locale = isKo ? "ko" : "en";
 
   return (
     <section className="space-y-6">
@@ -46,10 +47,10 @@ export function SajuElementsStrip({ isKo }: SajuElementsStripProps) {
               <div
                 className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white ${accent.bar}`}
               >
-                {meta.hanja}
+                {isKo ? meta.hanja : meta.meaning.charAt(0)}
               </div>
               <h3 className="text-sm font-bold">
-                {isKo ? `${meta.hangul}(${meta.hanja})` : `${meta.meaning} (${meta.hanja})`}
+                {formatElementLabelForLocale(key, locale)}
               </h3>
               <p className="mt-2 text-xs leading-relaxed opacity-80">{blurbs[key]}</p>
             </div>

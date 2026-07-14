@@ -16,13 +16,16 @@ import {
   PET_PREMIUM_PACKAGE_CODE,
 } from "@/lib/payments/pet-product-catalog";
 import { formatPetBirthDisplayLabel } from "@/lib/saju/pet-birth-display";
-import { ELEMENT_META } from "@/lib/saju/elements";
+import { ELEMENT_META, formatElementLabelForLocale } from "@/lib/saju/elements";
 import { buildCarePointText } from "@/lib/saju/care-point-copy";
 import { buildPillarsSummaryLine } from "@/lib/saju/pillars-summary-line";
 import { buildSajuNarrative } from "@/lib/saju/saju-narrative";
+import { speciesToAnimalGroup } from "@/lib/saju/ksaju-adapter";
+import { personalityTraitBody } from "@/lib/saju/personality-trait-copy";
 import { buildPetLuckyScores, dominantElementLabel } from "@/lib/saju/pet-lucky-scores";
+import type { PetSajuMapping } from "@/lib/saju/pet-trait-mapping";
 import { buildPetSajuMappingFromBasicResponse } from "@/lib/saju/pet-saju-mapping-from-result";
-import type { Locale, SajuBasicResponse } from "@/lib/saju/types";
+import type { ElementKey, Locale, SajuBasicResponse, Species } from "@/lib/saju/types";
 import { formatUtcForDisplay } from "@/lib/saju/timezone";
 import { kstJijiToBirthTimeSelectValue } from "@/lib/saju/birth-time-options";
 import { clearSajuResultSession } from "@/lib/saju/saju-result-session";
@@ -49,7 +52,7 @@ const LABELS = {
     wealthLuck: "Treat Luck",
     healthLuck: "Condition Luck",
     personality: "Personality",
-    sajuNarrative: "What your pet's saju says",
+    sajuNarrative: "What your pet's saju reveals",
     carePoint: "Care point",
     detailedTraits: "Trait highlights",
     pillars: "Four Pillars",
@@ -113,16 +116,46 @@ const LABELS = {
   },
 } as const;
 
-function traitCards(traits: string[], locale: Locale) {
+function fallbackTraitBody(trait: string, locale: Locale) {
+  return locale === "ko"
+    ? `${trait} 기운이 일상에서 자주 드러나는 편이에요.`
+    : `The "${trait}" vibe shows up often in daily life.`;
+}
+
+function traitCards(
+  traits: string[],
+  locale: Locale,
+  options: {
+    species: Species;
+    dominantElement: ElementKey;
+    mapping: PetSajuMapping | null;
+  }
+) {
   const icons = ["🛡️", "🧠", "📚", "💗"];
-  return traits.slice(0, 4).map((trait, index) => ({
-    icon: icons[index] ?? "✨",
-    title: trait,
-    body:
-      locale === "ko"
-        ? `${trait} 기운이 일상에서 자주 드러나는 편이에요.`
-        : `The "${trait}" vibe shows up often in daily life.`,
-  }));
+  const group = options.mapping?.animalGroup ?? speciesToAnimalGroup(options.species);
+  const dominantElement = options.mapping?.dominantElement ?? options.dominantElement;
+  const dayMasterKeyword = options.mapping?.dayMasterArchetype.keyword?.trim() ?? "";
+  const dayMasterDescription = options.mapping?.dayMasterArchetype.description?.trim() ?? "";
+
+  return traits.slice(0, 4).map((trait, index) => {
+    const matchesKeyword = Boolean(dayMasterKeyword) && trait === dayMasterKeyword;
+    const isDayMasterKeyword = matchesKeyword && index === 0;
+
+    let body: string;
+    if (isDayMasterKeyword && dayMasterDescription) {
+      body = dayMasterDescription;
+    } else {
+      body =
+        personalityTraitBody(group, dominantElement, trait, locale) ??
+        fallbackTraitBody(trait, locale);
+    }
+
+    return {
+      icon: icons[index] ?? "✨",
+      title: trait,
+      body,
+    };
+  });
 }
 
 export function SajuResult({ result, snapshot = false, mbtiType, birthTimeSelect }: SajuResultProps) {
@@ -199,6 +232,11 @@ export function SajuResult({ result, snapshot = false, mbtiType, birthTimeSelect
     () => (snapshot ? null : buildPetSajuMappingFromBasicResponse(result)),
     [result, snapshot]
   );
+  /** Card bodies only — may rebuild on vault snapshot; never overwrites stored narrative fields. */
+  const traitCardMapping = useMemo(
+    () => petMapping ?? buildPetSajuMappingFromBasicResponse(result),
+    [petMapping, result]
+  );
   const sajuNarrativeText = useMemo(() => {
     if (snapshot) return result.sajuNarrative ?? null;
     if (result.sajuNarrative) return result.sajuNarrative;
@@ -218,7 +256,11 @@ export function SajuResult({ result, snapshot = false, mbtiType, birthTimeSelect
     if (result.pillarsSummaryLine) return result.pillarsSummaryLine;
     return buildPillarsSummaryLine(result);
   }, [result, snapshot]);
-  const detailTraits = traitCards(personalityTraits, result.locale);
+  const detailTraits = traitCards(personalityTraits, result.locale, {
+    species: result.species,
+    dominantElement: result.dominantElement,
+    mapping: traitCardMapping,
+  });
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setBarsReady(true));
@@ -279,7 +321,9 @@ export function SajuResult({ result, snapshot = false, mbtiType, birthTimeSelect
                     <div key={el.key}>
                       <div className="mb-2 flex items-end justify-between gap-3">
                         <span className={`rounded-full px-3 py-1 text-xs font-bold ${elAccent.pill}`}>
-                          {el.romanized.toUpperCase()} ({el.hanja}) {isKo ? el.hangul : el.meaning}
+                          {isKo
+                            ? `${el.romanized.toUpperCase()} (${el.hanja}) ${el.hangul}`
+                            : formatElementLabelForLocale(el.key, "en")}
                         </span>
                         <span className="text-sm font-bold text-primary">{percent}%</span>
                       </div>
@@ -304,7 +348,9 @@ export function SajuResult({ result, snapshot = false, mbtiType, birthTimeSelect
                       <div key={el.key}>
                         <div className="mb-2 flex items-end justify-between gap-3">
                           <span className={`rounded-full px-3 py-1 text-xs font-bold ${elAccent.pill}`}>
-                            {el.romanized.toUpperCase()} ({el.hanja}) {isKo ? el.hangul : el.meaning}
+                            {isKo
+                              ? `${el.romanized.toUpperCase()} (${el.hanja}) ${el.hangul}`
+                              : formatElementLabelForLocale(el.key, "en")}
                           </span>
                           <span className="text-xs font-bold text-primary">{percent}%</span>
                         </div>
@@ -431,7 +477,7 @@ export function SajuResult({ result, snapshot = false, mbtiType, birthTimeSelect
                 <>
                   <p className="mt-3 text-sm font-semibold text-primary">
                     {isKo ? result.kstJiji.siNameKo : result.kstJiji.siNameEn} · {result.kstJiji.kstRange} ·{" "}
-                    {ELEMENT_META[result.kstJiji.element].hangul}({ELEMENT_META[result.kstJiji.element].hanja})
+                    {formatElementLabelForLocale(result.kstJiji.element, isKo ? "ko" : "en")}
                   </p>
                   <p className="mt-2 text-xs text-plum/75">
                     {t.kstAt}: {result.kstJiji.kstTime} (KST) · {t.kstWindow}: {result.kstJiji.kstRange}
@@ -505,7 +551,7 @@ export function SajuResult({ result, snapshot = false, mbtiType, birthTimeSelect
               {t.another}
             </Link>
           </div>
-          <AdSlot />
+          {!unlocked ? <AdSlot /> : null}
         </div>
       </div>
     </div>

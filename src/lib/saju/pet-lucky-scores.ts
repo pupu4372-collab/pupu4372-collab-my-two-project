@@ -1,4 +1,4 @@
-import { ELEMENT_META } from "./elements";
+import { formatElementLabelForLocale } from "./elements";
 import type { ElementKey, Locale } from "./types";
 
 function hash(input: string) {
@@ -39,8 +39,5 @@ export function buildPetLuckyScores(
 }
 
 export function dominantElementLabel(element: ElementKey, locale: Locale) {
-  const meta = ELEMENT_META[element];
-  return locale === "ko"
-    ? `${meta.hangul}(${meta.hanja})`
-    : `${meta.meaning} (${meta.hanja})`;
+  return formatElementLabelForLocale(element, locale);
 }

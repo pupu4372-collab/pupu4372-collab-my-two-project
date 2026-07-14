@@ -1,4 +1,9 @@
-import { ELEMENT_META, charToElement, formatStemBranchLabels } from "@/lib/saju/elements";
+import {
+  ELEMENT_META,
+  charToElement,
+  formatElementLabelForLocale,
+  formatStemBranchLabels,
+} from "@/lib/saju/elements";
 import {
   computeManAge,
   pickCurrentAndUpcomingCycles,
@@ -154,10 +159,7 @@ const REPORT_FOCUS_EN: Record<ReportType, string> = {
 };
 
 function elLabel(el: ElementKey, locale: Locale): string {
-  const meta = ELEMENT_META[el];
-  return locale === "ko"
-    ? `${meta.hangul}(${meta.hanja})`
-    : `${meta.meaning} (${meta.hanja})`;
+  return formatElementLabelForLocale(el, locale);
 }
 
 function section(

@@ -122,8 +122,10 @@ export function computePetSajuBundle(input: SajuBasicRequest): {
   };
 }
 
-/** KST calendar date (YYYY-MM-DD) → that day's 日柱 pillar (noon KST). */
-export function computeKstDayPillar(dateKst: string): PillarDisplay {
+/** KST calendar date (YYYY-MM-DD) → that day's 日柱 pillar (noon KST).
+ * 라벨 필드(stemLabel/branchLabel)는 locale을 따름.
+ * 값 필드(pillar/branchHanja 등)는 locale 무관. */
+export function computeKstDayPillar(dateKst: string, locale: Locale = "ko"): PillarDisplay {
   const saju = computeKsajuFromRequest({
     petName: "",
     species: "dog",
@@ -131,8 +133,8 @@ export function computeKstDayPillar(dateKst: string): PillarDisplay {
     birthTime: "12:00",
     birthTimeUnknown: false,
     timezone: "Asia/Seoul",
-    locale: "ko" as Locale,
+    locale,
     privacyConsent: true,
   });
-  return pillarFromKsaju(saju.pillars[2], "ko");
+  return pillarFromKsaju(saju.pillars[2], locale);
 }

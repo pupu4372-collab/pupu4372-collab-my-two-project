@@ -16,7 +16,12 @@ import {
   formatIssuedDate,
   obangPaleBg,
 } from "./report-helpers";
-import { branchHangulLabel, stemHangulLabel } from "@/lib/saju/elements";
+import {
+  branchHangulLabel,
+  formatElementLabelForLocale,
+  stemHangulLabel,
+} from "@/lib/saju/elements";
+import type { ElementKey } from "@/lib/saju/types";
 import { BodyText, ReportTypeTitle } from "./report-ui";
 
 interface CoverSectionProps {
@@ -145,7 +150,9 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
               >
                 <div className="mb-3 flex items-start justify-between">
                   <span className="human-premium-label-caps" style={{ color }}>
-                    {isKo ? `${item.hangul} (${item.hanja})` : `${item.meaning} (${item.hanja})`}
+                    {isKo
+                      ? `${item.hangul} (${item.hanja})`
+                      : formatElementLabelForLocale(item.key as ElementKey, "en")}
                   </span>
                   <span className="text-lg font-semibold tabular-nums">{pct}%</span>
                 </div>
