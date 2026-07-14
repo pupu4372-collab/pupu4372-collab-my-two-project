@@ -151,6 +151,8 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const [prefillPhotoUrl, setPrefillPhotoUrl] = useState<string | null>(null);
   const [prefillPetId, setPrefillPetId] = useState<string | null>(null);
   const autoSubmitPendingRef = useRef(false);
+  const skipSoloPetRedirectRef = useRef(false);
+  const soloPetRedirectAttemptedRef = useRef(false);
 
   const t = UI[locale];
   const mbtiQuestions = useMemo(
@@ -171,6 +173,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     const params = new URLSearchParams(window.location.search);
     if (params.get("new") === "1") {
       clearSajuResultSession();
+      skipSoloPetRedirectRef.current = true;
       router.replace("/saju");
       return;
     }
@@ -200,6 +203,49 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
       router.replace("/saju");
     }
   }, [router, routeLocale]);
+
+  /** When the owner has exactly one pet, land on ?petId= to reuse prefill + auto-submit. */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!sessionReady || !accessToken) return;
+    if (step !== "form") return;
+    if (skipSoloPetRedirectRef.current) return;
+    if (soloPetRedirectAttemptedRef.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("petId")?.trim()) return;
+    if (params.get("restore") === "1") return;
+    if (params.get("new") === "1") return;
+    if (isBackForwardNavigation() && readSajuResultSession()) return;
+
+    soloPetRedirectAttemptedRef.current = true;
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const res = await fetch("/api/profile/pets", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!res.ok || cancelled) return;
+
+        const data = (await res.json()) as { pets?: Array<{ id: string }> };
+        const pets = data.pets ?? [];
+        if (cancelled || pets.length !== 1) return;
+        if (skipSoloPetRedirectRef.current) return;
+
+        const latest = new URLSearchParams(window.location.search);
+        if (latest.get("petId")?.trim()) return;
+
+        router.replace(`/saju?petId=${encodeURIComponent(pets[0].id)}`);
+      } catch {
+        // keep empty form
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionReady, accessToken, step, router]);
 
   const handleApiSubmit = useCallback(async () => {
     setError(null);
