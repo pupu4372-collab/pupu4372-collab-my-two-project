@@ -39,6 +39,17 @@ export async function POST(request: Request) {
 
   const locale = body.locale === "en" ? "en" : "ko";
 
+  // EN live cart checkout gated by feature flag (Vercel unset = OFF).
+  if (locale === "en" && process.env.NEXT_PUBLIC_ENABLE_EN_CHECKOUT !== "true") {
+    return NextResponse.json(
+      {
+        error: "en_cart_checkout_unsupported",
+        paymentMethod: "unsupported",
+      },
+      { status: 501 }
+    );
+  }
+
   const paymentMethod = body.paymentMethod === "paypal_link" ? "paypal_link" : "portone";
   if (paymentMethod !== "portone") {
     return NextResponse.json(

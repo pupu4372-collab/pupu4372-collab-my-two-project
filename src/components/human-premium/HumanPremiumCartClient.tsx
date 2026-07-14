@@ -66,17 +66,24 @@ function snapshotToUrls(
   return urls;
 }
 
+/** EN cart live checkout (SPB). Absent / not "true" = OFF (준비 중). */
+function isEnCheckoutEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_ENABLE_EN_CHECKOUT === "true";
+}
+
 /**
  * Cart payment-method resolution.
  * - KO + PortOne → portone (modal + requestPayment CARD)
  * - KO + no PortOne + demo allowed → demo (dev only)
- * - EN + PortOne → portone_paypal_spb (PayPal SPB button)
+ * - EN + flag ON + PortOne → portone_paypal_spb (PayPal SPB button)
+ * - EN + flag OFF → unsupported (P2 “not available yet” copy)
  */
 function resolveCartPaymentMethod(
   locale: string,
   config: PaymentConfig | null
 ): CartPaymentMethod {
   if (locale === "en") {
+    if (!isEnCheckoutEnabled()) return "unsupported";
     if (config?.portone) return "portone_paypal_spb";
     return "unsupported";
   }

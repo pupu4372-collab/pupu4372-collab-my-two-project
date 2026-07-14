@@ -32,9 +32,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "paymentId required." }, { status: 400 });
   }
 
-  // paypal_link remains unsupported on cart verify; PortOne (ko/en) is allowed.
+  // EN live verify only when feature flag ON; paypal_link still unsupported.
   // TODO(EN launch): add paypal_link verify branch (d350855^ shop success polling).
-  if (body.paymentMethod === "paypal_link") {
+  if (
+    (locale === "en" && process.env.NEXT_PUBLIC_ENABLE_EN_CHECKOUT !== "true") ||
+    body.paymentMethod === "paypal_link"
+  ) {
     return NextResponse.json(
       { error: "en_cart_checkout_unsupported", paymentMethod: "unsupported" },
       { status: 501 }
