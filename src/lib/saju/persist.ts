@@ -1,7 +1,7 @@
 import type { ElementKey, SajuBasicRequest, SajuBasicResponse } from "./types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, SajuResultInsert } from "@/lib/supabase/types";
-import { findOrCreatePet } from "./persist-pet";
+import { assertGuestCanCreatePet, findOrCreatePet } from "./persist-pet";
 
 type DbClient = SupabaseClient<Database>;
 
@@ -17,6 +17,8 @@ export interface PersistSajuInput {
   request: SajuBasicRequest;
   result: SajuBasicResponse;
   ownerId: string;
+  /** When true, block creating a second pet for this owner. */
+  isAnonymousOwner?: boolean;
 }
 
 export interface PersistSajuOutput {
@@ -28,7 +30,16 @@ export async function persistSajuResult(
   supabase: DbClient,
   input: PersistSajuInput
 ): Promise<PersistSajuOutput> {
-  const { request, result, ownerId } = input;
+  const { request, result, ownerId, isAnonymousOwner } = input;
+
+  if (isAnonymousOwner) {
+    await assertGuestCanCreatePet(supabase, {
+      ownerId,
+      name: request.petName,
+      species: request.species,
+      birthDate: request.birthDate,
+    });
+  }
 
   const petId = await findOrCreatePet(supabase, {
     ownerId,

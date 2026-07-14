@@ -13,6 +13,7 @@ import { enrichBasicResultDisplayFields } from "@/lib/saju/enrich-basic-result-d
 import { finalizePetHeadline } from "@/lib/saju/pet-headline";
 import { validatePetName } from "@/lib/saju/moderation";
 import { persistSajuResult } from "@/lib/saju/persist";
+import { GuestPetLimitError } from "@/lib/saju/persist-pet";
 import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
 import { normalizeBirthCalendarType } from "@/lib/saju/resolve-birth-date";
 import {
@@ -346,11 +347,29 @@ export async function POST(request: Request) {
             request: sajuRequest,
             result,
             ownerId,
+            isAnonymousOwner: !registeredUserId,
           });
           persisted = true;
           petId = saved.petId;
           sajuResultId = saved.sajuResultId;
         } catch (err) {
+          if (err instanceof GuestPetLimitError) {
+            const limitMessage =
+              sajuRequest.locale === "en"
+                ? "Guests can register one pet. Sign up to add and manage more."
+                : "게스트는 1마리까지 등록할 수 있어요. 회원가입하면 여러 아이를 등록하고 관리할 수 있어요.";
+            return jsonResponse(
+              {
+                error: limitMessage,
+                code: "guest_pet_limit",
+                persisted: false,
+                petId: null,
+                sajuResultId: null,
+              },
+              { status: 403 },
+              guestCookie
+            );
+          }
           persistError =
             err instanceof Error ? err.message : "Could not save to database.";
         }

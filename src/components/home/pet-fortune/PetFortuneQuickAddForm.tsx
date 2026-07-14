@@ -62,7 +62,8 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
   const locale = useLocale() as Locale;
   const isKo = locale === "ko";
   const t = useTranslations("home.guestFortune");
-  const { accessToken } = useSupabaseSession();
+  const { ready, accessToken } = useSupabaseSession();
+  const sessionReady = ready && Boolean(accessToken);
   const [petName, setPetName] = useState("");
   const [species, setSpecies] = useState<Species | "">("");
   const [petGender, setPetGender] = useState<Gender>("female");
@@ -114,10 +115,18 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data.code === "guest_pet_limit") {
+          setError(t("guestPetLimit"));
+          return;
+        }
         setError(typeof data.error === "string" ? data.error : isKo ? "등록에 실패했어요." : "Could not add pet.");
         return;
       }
       if (!data.petId) {
+        if (data.code === "guest_pet_limit") {
+          setError(t("guestPetLimit"));
+          return;
+        }
         setError(
           typeof data.persistError === "string" && data.persistError
             ? data.persistError
@@ -230,7 +239,7 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
         <PetPhotoUploadField
           locale={locale}
           petName={petName}
-          disabled={loading}
+          disabled={loading || !sessionReady}
           file={photoFile}
           consent={photoConsent}
           fileError={photoFileError}
@@ -242,7 +251,13 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
           onConsentChange={setPhotoConsent}
         />
 
-        <button type="submit" className="pet-fortune-quick-add-btn" disabled={loading || !accessToken}>
+        {!sessionReady ? (
+          <p className="text-center text-xs font-semibold text-stone-500" role="status">
+            {t("sessionPreparing")}
+          </p>
+        ) : null}
+
+        <button type="submit" className="pet-fortune-quick-add-btn" disabled={loading || !sessionReady}>
           {loading ? t("loading") : t("quickAddSubmit")}
         </button>
       </form>

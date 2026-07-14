@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { PetFortuneInstagramShareButton } from "@/components/home/pet-fortune/PetFortuneInstagramShareButton";
 import { PetFortunePetSelector } from "@/components/home/pet-fortune/PetFortunePetSelector";
 import type { PetDailyFortune, PetFortunePetMeta } from "@/lib/saju/pet-daily-fortune";
@@ -12,18 +11,12 @@ import { withJosa } from "@/lib/i18n/korean-josa";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
-export type PetFortuneDashboardMode = "demo" | "live" | "registered";
-
 type Props = {
   pet: PetFortunePetMeta;
   fortune: PetDailyFortune;
-  mode: PetFortuneDashboardMode;
   pets?: PetFortunePetMeta[];
   selectedPetId?: string;
   onSelectPet?: (petId: string) => void;
-  onResetPreview?: () => void;
-  /** Hide sample badge and login CTA when the viewer is already signed in. */
-  suppressGuestChrome?: boolean;
 };
 
 function findCategory(fortune: PetDailyFortune, labelKo: string, labelEn: string) {
@@ -79,12 +72,9 @@ function StatBar({
 export function PetFortuneInsightsDashboard({
   pet,
   fortune,
-  mode,
   pets,
   selectedPetId,
   onSelectPet,
-  onResetPreview,
-  suppressGuestChrome = false,
 }: Props) {
   const t = useTranslations("home.guestFortune");
   const locale = useLocale();
@@ -111,25 +101,18 @@ export function PetFortuneInsightsDashboard({
     } => item !== null
   );
 
-  const showLoginCta = !suppressGuestChrome && (mode === "demo" || mode === "live");
-  const showPhotoNudge = (mode === "registered" || mode === "live") && !pet.photoUrl;
-  const showPetSelector = mode === "registered" && pets && pets.length > 0 && onSelectPet && selectedPetId;
+  const showPhotoNudge = !pet.photoUrl;
+  const showPetSelector = Boolean(pets && pets.length > 0 && onSelectPet && selectedPetId);
 
   return (
     <div className="pet-fortune-dashboard relative z-10 space-y-6">
-      {mode === "demo" && !suppressGuestChrome ? (
-        <div className="flex justify-center">
-          <span className="pet-fortune-sample-badge">{t("sampleBadge")}</span>
-        </div>
-      ) : null}
-
       <div className="text-center">
         <p className="text-xs font-semibold text-stone-600">{fortune.dateLabel}</p>
         <p className="mt-1 text-base font-bold text-stone-900">
           {pet.name} · {pet.speciesLabel}
         </p>
 
-        {showPetSelector ? (
+        {showPetSelector && pets && selectedPetId && onSelectPet ? (
           <div className="mt-4">
             <PetFortunePetSelector
               pets={pets}
@@ -137,16 +120,6 @@ export function PetFortuneInsightsDashboard({
               onSelectPet={onSelectPet}
             />
           </div>
-        ) : null}
-
-        {mode === "live" && onResetPreview ? (
-          <button
-            type="button"
-            onClick={onResetPreview}
-            className="mt-3 text-xs font-semibold text-stone-600 underline-offset-2 hover:text-stone-900 hover:underline"
-          >
-            {t("editPet")}
-          </button>
         ) : null}
       </div>
 
@@ -209,7 +182,7 @@ export function PetFortuneInsightsDashboard({
             {t("cardNature")}
           </h3>
           <div className="flex items-start gap-3">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-stone-300 bg-gradient-to-br from-stone-100 to-stone-400 text-2xl">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-stone-300 bg-stone-200 text-2xl">
               {pet.icon}
             </div>
             <div className="text-sm leading-relaxed text-stone-800">
@@ -236,17 +209,6 @@ export function PetFortuneInsightsDashboard({
           </div>
         </article>
       </section>
-
-      {showLoginCta ? (
-        <footer className="pet-fortune-dashboard-cta">
-          <p className="flex-1 text-center text-base font-bold leading-snug text-stone-800 sm:text-lg">
-            {t("loginBanner")}
-          </p>
-          <AuthRequiredLink href="/profile" className="pet-fortune-dashboard-login-btn shrink-0">
-            {t("loginCta")}
-          </AuthRequiredLink>
-        </footer>
-      ) : null}
 
       {showPhotoNudge ? (
         <p className="text-center text-sm leading-relaxed text-stone-700">
