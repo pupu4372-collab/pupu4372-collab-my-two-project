@@ -3,6 +3,7 @@ import { CapacitorShell } from "@/components/mobile/CapacitorShell";
 import { NightSkyBackground } from "@/components/layout/NightSkyBackground";
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR } from "next/font/google";
+import Script from "next/script";
 import type { ReactNode } from "react";
 import "./globals.css";
 
@@ -29,6 +30,14 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko">
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7486656033876734"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className={`${noto.variable} safe-area-shell font-sans antialiased`}>
         <CapacitorShell />
         <NightSkyBackground>{children}</NightSkyBackground>
