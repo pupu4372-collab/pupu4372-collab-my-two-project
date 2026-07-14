@@ -8,6 +8,10 @@ import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { PetBasicInfoFields } from "@/components/pet/PetBasicInfoFields";
 import { fetchPetProfileForSaju, petProfileToSajuFormState } from "@/lib/pets/load-pet-for-saju";
 import { Link, useRouter } from "@/i18n/navigation";
+import {
+  formatPetProductPrice,
+  PET_PREMIUM_PACKAGE_CODE,
+} from "@/lib/payments/pet-product-catalog";
 import type { Gender, Locale, SajuBasicResponse, Species } from "@/lib/saju/types";
 import type { MbtiAnswerMap } from "@/lib/pet/calc-mbti";
 import { calcMbti, isMbtiComplete } from "@/lib/pet/calc-mbti";
@@ -51,7 +55,7 @@ const UI = {
     continueSubtitle: "Use the same pet profile for zodiac and bond care guides.",
     zodiacCta: "Zodiac care guide →",
     compatibilityCta: "Pet & butler bond care →",
-    premiumBadge: "Premium ₩4,500",
+    premiumBadge: `Premium ${formatPetProductPrice(PET_PREMIUM_PACKAGE_CODE, "en")}`,
     mbtiResultTitle: (name: string, typeTitle: string) =>
       `${name} is "${typeTitle}"`,
     mbtiResultDesc: "Personality type",
@@ -83,7 +87,7 @@ const UI = {
       "방금 입력한 이름과 생일을 그대로 가져가 별자리·궁합 케어 가이드도 이어서 볼 수 있어요.",
     zodiacCta: "별자리 케어 가이드 →",
     compatibilityCta: "펫·집사 궁합 케어 →",
-    premiumBadge: "프리미엄 ₩4,500",
+    premiumBadge: `프리미엄 ${formatPetProductPrice(PET_PREMIUM_PACKAGE_CODE, "ko")}`,
     mbtiResultTitle: (name: string, typeTitle: string) =>
       `${name}은(는) "${typeTitle}"`,
     mbtiResultDesc: "성격 유형",

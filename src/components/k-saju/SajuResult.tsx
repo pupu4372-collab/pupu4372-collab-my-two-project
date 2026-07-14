@@ -11,6 +11,10 @@ import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
 import { buildPetPremiumPaymentHref } from "@/lib/payments/pet-premium-unlock-client";
+import {
+  formatPetProductPrice,
+  PET_PREMIUM_PACKAGE_CODE,
+} from "@/lib/payments/pet-product-catalog";
 import { formatPetBirthDisplayLabel } from "@/lib/saju/pet-birth-display";
 import { ELEMENT_META } from "@/lib/saju/elements";
 import { buildCarePointText } from "@/lib/saju/care-point-copy";
@@ -59,10 +63,10 @@ const LABELS = {
     kstAt: "Birth time in KST",
     kstWindow: "KST window",
     zodiacCta: "Zodiac care",
-    zodiacCtaBadge: "Premium ₩4,500",
+    zodiacCtaBadge: `Premium ${formatPetProductPrice(PET_PREMIUM_PACKAGE_CODE, "en")}`,
     zodiacBody: "See today's care actions matched to your pet's zodiac traits.",
     bondCta: "Pet-parent bond",
-    bondCtaBadge: "Premium ₩4,500",
+    bondCtaBadge: `Premium ${formatPetProductPrice(PET_PREMIUM_PACKAGE_CODE, "en")}`,
     bondBody: "Learn how you and your pet can care for each other better.",
     luckyColorTitle: "Today's lucky color",
     luckyColorBody: (name: string, color: string) =>
@@ -95,10 +99,10 @@ const LABELS = {
     kstAt: "한국 표준시 기준",
     kstWindow: "KST 구간",
     zodiacCta: "별자리 케어",
-    zodiacCtaBadge: "프리미엄 ₩4,500",
+    zodiacCtaBadge: `프리미엄 ${formatPetProductPrice(PET_PREMIUM_PACKAGE_CODE, "ko")}`,
     zodiacBody: "별자리 성향에 맞는 오늘의 케어 행동을 이어서 볼 수 있어요.",
     bondCta: "집사 궁합",
-    bondCtaBadge: "프리미엄 ₩4,500",
+    bondCtaBadge: `프리미엄 ${formatPetProductPrice(PET_PREMIUM_PACKAGE_CODE, "ko")}`,
     bondBody: "우리가 서로 맞춰가는 케어 방법을 알려드려요.",
     luckyColorTitle: "오늘의 행운 컬러",
     luckyColorBody: (name: string, color: string) =>

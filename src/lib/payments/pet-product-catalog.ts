@@ -14,6 +14,12 @@ export const PET_PRODUCT_AMOUNT_KRW: Record<PetProductCode, number> = {
   [PET_MBTI_STANDALONE_CODE]: 1900,
 };
 
+/** EN display (whole USD). Payment currency switch is P-4 — not wired yet. */
+export const PET_PRODUCT_AMOUNT_USD: Record<PetProductCode, number> = {
+  [PET_PREMIUM_PACKAGE_CODE]: 4,
+  [PET_MBTI_STANDALONE_CODE]: 2,
+};
+
 export const PET_PACKAGE_UNLOCK_CODES = [PET_PREMIUM_PACKAGE_CODE] as const;
 export const PET_MBTI_UNLOCK_CODES = [PET_MBTI_STANDALONE_CODE] as const;
 
@@ -33,10 +39,11 @@ export function isAllowedPetProductCode(value: string): value is PetProductCode 
 }
 
 export function formatPetProductPrice(code: PetProductCode, locale: "ko" | "en"): string {
-  if (locale === "en" && code === PET_MBTI_STANDALONE_CODE) return "$2.00";
-  if (locale === "en" && code === PET_PREMIUM_PACKAGE_CODE) return "$4.00";
+  if (locale === "en") {
+    return `$${PET_PRODUCT_AMOUNT_USD[code]}`;
+  }
   const amount = PET_PRODUCT_AMOUNT_KRW[code];
-  return locale === "ko" ? `₩${amount.toLocaleString("ko-KR")}` : `₩${amount.toLocaleString("en-US")}`;
+  return `₩${amount.toLocaleString("ko-KR")}`;
 }
 
 export const PET_PRODUCT_ORDER_NAME: Record<PetProductCode, string> = {

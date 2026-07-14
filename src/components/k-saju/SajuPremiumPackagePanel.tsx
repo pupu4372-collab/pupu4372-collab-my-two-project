@@ -10,6 +10,11 @@ import {
   buildPetPremiumPaymentHref,
   type PetPremiumReturnTo,
 } from "@/lib/payments/pet-premium-unlock-client";
+import {
+  formatPetProductPrice,
+  PET_MBTI_STANDALONE_CODE,
+  PET_PREMIUM_PACKAGE_CODE,
+} from "@/lib/payments/pet-product-catalog";
 import type { Locale } from "@/lib/saju/types";
 
 function hrefOrLoginGate(target: string, isGuest: boolean) {
@@ -21,9 +26,8 @@ const UI = {
   ko: {
     packageTitle: "프리미엄 패키지",
     packageSubtitle: "집사 궁합 · 별자리 케어 — 우리 아이 맞춤 케어 가이드 한 번에",
-    price: "₩4,500",
     priceNote: "1회 결제 · 해당 펫 영구 잠금 해제",
-    payCta: "₩4,500 결제하기",
+    payCta: (price: string) => `${price} 결제하기`,
     loginPayCta: "로그인하고 결제하기",
     included: "포함",
     viewBadge: "보기",
@@ -32,7 +36,7 @@ const UI = {
     zodiacBody: "별자리 성향에 맞는 오늘의 케어 행동을 이어서 볼 수 있어요.",
     bondCta: "집사 궁합",
     bondBody: "우리가 서로 맞춰가는 케어 방법을 알려드려요.",
-    mbtiStandaloneTitle: "상세 MBTI · ₩1,900",
+    mbtiStandaloneTitle: (price: string) => `상세 MBTI · ${price}`,
     mbtiStandaloneBody: "행동 진단으로 우리 아이 성향 유형과 맞춤 케어 팁",
     mbtiViewResult: "결과 보기",
     mbtiDiagnose: "진단하기",
@@ -40,9 +44,8 @@ const UI = {
   en: {
     packageTitle: "Premium package",
     packageSubtitle: "Pet–butler bond and zodiac care — personalized guides for your pet in one unlock",
-    price: "₩4,500",
     priceNote: "One-time payment · Permanent unlock for this pet",
-    payCta: "Pay ₩4,500",
+    payCta: (price: string) => `Pay ${price}`,
     loginPayCta: "Log in to pay",
     included: "Included",
     viewBadge: "View",
@@ -51,7 +54,7 @@ const UI = {
     zodiacBody: "See today's care actions matched to your pet's zodiac traits.",
     bondCta: "Pet & butler bond",
     bondBody: "Learn how you and your pet can care for each other better.",
-    mbtiStandaloneTitle: "Detailed MBTI · $2.00",
+    mbtiStandaloneTitle: (price: string) => `Detailed MBTI · ${price}`,
     mbtiStandaloneBody: "Discover your pet's type and tailored care tips with a behavior check",
     mbtiViewResult: "View result",
     mbtiDiagnose: "Start diagnosis",
@@ -85,7 +88,10 @@ export function SajuPremiumPackagePanel({
   unlockLoading = false,
   continuation,
 }: SajuPremiumPackagePanelProps) {
-  const t = UI[locale];
+  const priceLocale = locale === "en" ? "en" : "ko";
+  const t = UI[priceLocale];
+  const packagePrice = formatPetProductPrice(PET_PREMIUM_PACKAGE_CODE, priceLocale);
+  const mbtiPrice = formatPetProductPrice(PET_MBTI_STANDALONE_CODE, priceLocale);
   const { ready, configured, isAnonymous, accessToken } = useSupabaseSession();
   const isGuest = configured && ready && isAnonymous;
   const mbtiUnlockEnabled = configured && ready && !isAnonymous && Boolean(petId);
@@ -158,13 +164,13 @@ export function SajuPremiumPackagePanel({
         <p className="mt-2 text-sm leading-relaxed text-plum/85">{t.packageSubtitle}</p>
         {!unlocked ? (
           <>
-            <p className="mt-4 text-3xl font-extrabold text-primary">{t.price}</p>
+            <p className="mt-4 text-3xl font-extrabold text-primary">{packagePrice}</p>
             <p className="mt-1 text-xs text-on-surface-variant">{t.priceNote}</p>
             <Link
               href={hrefOrLoginGate(paymentHref, isGuest)}
               className="mt-5 inline-flex w-full justify-center rounded-full bg-[#6f4b8b] px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#6f4b8b]/35 transition hover:bg-[#5f3f78] active:scale-[0.98]"
             >
-              {isGuest ? t.loginPayCta : t.payCta}
+              {isGuest ? t.loginPayCta : t.payCta(packagePrice)}
             </Link>
           </>
         ) : null}
@@ -216,7 +222,7 @@ export function SajuPremiumPackagePanel({
       </div>
 
       <div className="border-t border-channel-saju/15 bg-sand/30 p-6 text-center">
-        <p className="text-sm font-extrabold text-primary">{t.mbtiStandaloneTitle}</p>
+        <p className="text-sm font-extrabold text-primary">{t.mbtiStandaloneTitle(mbtiPrice)}</p>
         <p className="mt-2 text-sm leading-relaxed text-plum/85">{t.mbtiStandaloneBody}</p>
         {mbtiUnlockEnabled && mbtiUnlockLoading ? (
           <div className="mx-auto mt-5 h-12 w-full max-w-xs animate-pulse rounded-full bg-sand/70" />

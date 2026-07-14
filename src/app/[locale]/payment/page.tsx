@@ -60,7 +60,7 @@ const SHARED_UI = {
 
 const PRODUCT_UI: Record<
   PetProductCode,
-  Record<"ko" | "en", { title: string; subtitle: string; product: string; includes: string[]; cta: string }>
+  Record<"ko" | "en", { title: string; subtitle: string; product: string; includes: string[] }>
 > = {
   [PET_PREMIUM_PACKAGE_CODE]: {
     ko: {
@@ -68,14 +68,12 @@ const PRODUCT_UI: Record<
       subtitle: "집사 궁합 · 별자리 케어 — 우리 아이 맞춤 케어 가이드를 한 번에 받아보세요.",
       product: "펫 프리미엄 패키지",
       includes: ["💞 집사 궁합 케어", "🔭 별자리 케어 가이드"],
-      cta: "₩4,500 결제하기",
     },
     en: {
       title: "Unlock Premium",
       subtitle: "Pet–butler bond and zodiac care—personalized guides for your pet in one unlock.",
       product: "Pet Premium Package",
       includes: ["💞 Pet & butler bond care", "🔭 Zodiac care guide"],
-      cta: "Pay ₩4,500",
     },
   },
   [PET_MBTI_STANDALONE_CODE]: {
@@ -84,14 +82,12 @@ const PRODUCT_UI: Record<
       subtitle: "행동 진단으로 우리 아이 성향 유형과 사주×MBTI 맞춤 케어 팁을 확인해 보세요.",
       product: "펫 MBTI 상세 진단",
       includes: ["🧠 행동 진단", "📊 4축 성향 분석", "💡 사주×MBTI 맞춤 케어"],
-      cta: "₩1,900 결제하기",
     },
     en: {
       title: "Detailed MBTI",
       subtitle: "A behavior check with saju×MBTI personalized care tips.",
       product: "Pet MBTI Detailed Report",
       includes: ["🧠 Behavior check", "📊 Four-axis analysis", "💡 Saju×MBTI care tips"],
-      cta: "Pay $2.00",
     },
   },
 };
@@ -154,6 +150,8 @@ function PaymentContent() {
   const productCopy = PRODUCT_UI[productCode][locale];
   const shared = SHARED_UI[locale];
   const displayPrice = productDisplayPrice(productCode, locale);
+  const payCta =
+    locale === "ko" ? `${displayPrice} 결제하기` : `Pay ${displayPrice}`;
   const chargeAmount = PET_PRODUCT_AMOUNT_KRW[productCode];
 
   const normalizedReturnTo = useMemo(
@@ -453,7 +451,7 @@ function PaymentContent() {
           disabled={payDisabled}
           className="mt-6 w-full rounded-full bg-[#6f4b8b] px-8 py-4 text-base font-extrabold text-white shadow-xl shadow-[#6f4b8b]/25 transition hover:bg-[#5f3f78] active:scale-[0.98] disabled:opacity-60"
         >
-          {status === "processing" ? shared.processing : productCopy.cta}
+          {status === "processing" ? shared.processing : payCta}
         </button>
 
         <button
