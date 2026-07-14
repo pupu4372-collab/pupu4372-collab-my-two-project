@@ -9,7 +9,7 @@ import { CompatibilityResult } from "@/components/k-saju/CompatibilityResult";
 import { PetPremiumPaywall } from "@/components/k-saju/PetPremiumPaywall";
 import { PetPremiumUnlockGate } from "@/components/k-saju/PetPremiumUnlockGate";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   BIRTH_TIME_OPTIONS,
   getBirthTimeOptionLabel,
@@ -90,10 +90,6 @@ function detectTimezone(): string {
   }
 }
 
-function isLocale(value: string | null): value is Locale {
-  return value === "ko" || value === "en";
-}
-
 function isSpecies(value: string | null): value is Species {
   return value === "dog" || value === "cat" || value === "other";
 }
@@ -110,7 +106,9 @@ function isBirthTimeOption(value: string | null): value is string {
 export function CompatibilityForm() {
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const routeLocale = useLocale();
-  const [locale, setLocale] = useState<Locale>(routeLocale === "en" ? "en" : "ko");
+  const router = useRouter();
+  const pathname = usePathname();
+  const locale: Locale = routeLocale === "en" ? "en" : "ko";
   const [petName, setPetName] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [species, setSpecies] = useState<Species>("dog");
@@ -137,7 +135,6 @@ export function CompatibilityForm() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const nextLocale = params.get("locale");
     const nextSpecies = params.get("species");
     const nextPetGender = params.get("petGender");
     const nextName = params.get("petName");
@@ -145,7 +142,6 @@ export function CompatibilityForm() {
     const nextBirthTime = params.get("birthTime");
     const nextTimezone = params.get("timezone");
 
-    if (isLocale(nextLocale)) setLocale(nextLocale);
     if (isSpecies(nextSpecies)) setSpecies(nextSpecies);
     if (isGender(nextPetGender)) setPetGender(nextPetGender);
     if (nextName) setPetName(nextName);
@@ -268,7 +264,11 @@ export function CompatibilityForm() {
             {t.localeLabel}
             <select
               value={locale}
-              onChange={(e) => setLocale(e.target.value as Locale)}
+              onChange={(e) => {
+                const next = e.target.value as Locale;
+                if (next === locale) return;
+                router.replace(pathname, { locale: next });
+              }}
               className={STITCH_INPUT_CLASS}
             >
               <option value="ko">한국어</option>

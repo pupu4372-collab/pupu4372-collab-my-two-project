@@ -30,6 +30,7 @@ import { resolveProductFromQuery } from "@/lib/payments/pet-premium-unlock-clien
 import { verifyPetPremiumPayment } from "@/lib/payments/pet-premium-verify-client";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const SHARED_UI = {
@@ -140,11 +141,12 @@ function PaymentContent() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const routeLocale = useLocale();
   const { accessToken, ready, configured, isAnonymous } = useSupabaseSession();
   const redirectHandled = useRef(false);
   const loginRedirected = useRef(false);
 
-  const locale = (params.get("locale") ?? "ko") as "ko" | "en";
+  const locale = (routeLocale === "en" ? "en" : "ko") as "ko" | "en";
   const productCode = useMemo(
     () => resolveProductFromQuery(params.get("product")),
     [params]

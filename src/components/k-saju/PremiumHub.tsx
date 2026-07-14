@@ -153,10 +153,6 @@ function detectTimezone(): string {
   }
 }
 
-function isLocale(value: string | null): value is Locale {
-  return value === "ko" || value === "en";
-}
-
 function isSpecies(value: string | null): value is Species {
   return value === "dog" || value === "cat" || value === "other";
 }
@@ -180,8 +176,8 @@ export function PremiumHub() {
   const router = useRouter();
   const { ready, configured, isAnonymous, accessToken } = useSupabaseSession();
   const routeLocale = useLocale();
+  const locale: Locale = routeLocale === "en" ? "en" : "ko";
 
-  const [locale, setLocale] = useState<Locale>(routeLocale === "en" ? "en" : "ko");
   const [phase, setPhase] = useState<HubPhase>("menu");
   const [pet, setPet] = useState<PetContext | null>(null);
 
@@ -260,7 +256,6 @@ export function PremiumHub() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const nextLocale = params.get("locale");
     const nextSpecies = params.get("species");
     const nextPetGender = params.get("petGender");
     const nextName = params.get("petName");
@@ -280,9 +275,6 @@ export function PremiumHub() {
       return;
     }
 
-    const resolvedLocale = isLocale(nextLocale) ? nextLocale : locale;
-    if (isLocale(nextLocale)) setLocale(nextLocale);
-
     if (!nextName?.trim() || !nextBirthDate) {
       setInitialized(true);
       return;
@@ -301,7 +293,7 @@ export function PremiumHub() {
       petBirthTime: petTime.birthTime,
       petBirthTimeUnknown: petTime.birthTimeUnknown,
       timezone: nextTimezone ?? detectTimezone(),
-      locale: resolvedLocale,
+      locale,
       petId: nextPetId,
     });
 

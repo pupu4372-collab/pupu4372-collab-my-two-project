@@ -128,10 +128,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const { ready: sessionReady, accessToken, configured, isAnonymous } =
     useSupabaseSession();
   const routeLocale = useLocale();
-
-  const [locale, setLocale] = useState<Locale>(
-    routeLocale === "en" ? "en" : "ko"
-  );
+  const locale: Locale = routeLocale === "en" ? "en" : "ko";
   const [step, setStep] = useState<Step>("form");
 
   const [petName, setPetName] = useState("");
@@ -181,7 +178,9 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     const saved = readSajuResultSession();
     if (!saved) return;
 
-    setLocale(saved.locale);
+    const currentLocale: Locale = routeLocale === "en" ? "en" : "ko";
+    if (saved.locale !== currentLocale) return;
+
     setPetName(saved.petName);
     setSpecies(saved.species);
     setPetGender(saved.petGender);
@@ -196,7 +195,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     if (params.get("restore") === "1") {
       router.replace("/saju");
     }
-  }, [router]);
+  }, [router, routeLocale]);
 
   const handleApiSubmit = useCallback(async () => {
     setError(null);

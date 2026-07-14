@@ -6,7 +6,7 @@ import { PetPremiumPaywall } from "@/components/k-saju/PetPremiumPaywall";
 import { PetPremiumUnlockGate } from "@/components/k-saju/PetPremiumUnlockGate";
 import { ZodiacResult } from "@/components/k-saju/ZodiacResult";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
 import type { Locale, Species } from "@/lib/saju/types";
 import { useLocale } from "next-intl";
@@ -41,10 +41,6 @@ const FIELD_LABEL_CLASS = "block text-sm font-bold text-primary";
 const STITCH_INPUT_CLASS =
   "pastel-input mt-2 w-full rounded-[2rem] border-transparent bg-sand/50 px-4 py-3.5 text-sm text-on-surface focus:ring-primary/20";
 
-function isLocale(value: string | null): value is Locale {
-  return value === "ko" || value === "en";
-}
-
 function isSpecies(value: string | null): value is Species {
   return value === "dog" || value === "cat" || value === "other";
 }
@@ -52,8 +48,10 @@ function isSpecies(value: string | null): value is Species {
 export function ZodiacForm() {
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const routeLocale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
   const formRef = useRef<HTMLFormElement>(null);
-  const [locale, setLocale] = useState<Locale>(routeLocale === "en" ? "en" : "ko");
+  const locale: Locale = routeLocale === "en" ? "en" : "ko";
   const [petName, setPetName] = useState("");
   const [species, setSpecies] = useState<Species>("dog");
   const [birthDate, setBirthDate] = useState("");
@@ -67,12 +65,10 @@ export function ZodiacForm() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const nextLocale = params.get("locale");
     const nextSpecies = params.get("species");
     const nextName = params.get("petName");
     const nextBirthDate = params.get("birthDate");
 
-    if (isLocale(nextLocale)) setLocale(nextLocale);
     if (isSpecies(nextSpecies)) setSpecies(nextSpecies);
     if (nextName) setPetName(nextName);
     if (nextBirthDate) setBirthDate(nextBirthDate);
@@ -177,7 +173,11 @@ export function ZodiacForm() {
               {t.localeLabel}
               <select
                 value={locale}
-                onChange={(e) => setLocale(e.target.value as Locale)}
+                onChange={(e) => {
+                  const next = e.target.value as Locale;
+                  if (next === locale) return;
+                  router.replace(pathname, { locale: next });
+                }}
                 className={STITCH_INPUT_CLASS}
               >
                 <option value="ko">한국어</option>

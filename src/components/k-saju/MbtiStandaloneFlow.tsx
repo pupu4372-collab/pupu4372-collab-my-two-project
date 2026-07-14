@@ -21,6 +21,7 @@ import {
 } from "@/lib/pet/mbti-inference";
 import { computeBasicSaju } from "@/lib/saju/engine";
 import type { ElementKey, Gender, Locale, Species } from "@/lib/saju/types";
+import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -92,8 +93,9 @@ function insightFromReportPayload(
 export function MbtiStandaloneFlow() {
   const params = useSearchParams();
   const { ready, configured, isAnonymous, accessToken } = useSupabaseSession();
+  const routeLocale = useLocale();
 
-  const locale = (params.get("locale") === "en" ? "en" : "ko") as Locale;
+  const locale = (routeLocale === "en" ? "en" : "ko") as Locale;
   const t = UI[locale];
 
   const petName = params.get("petName")?.trim() ?? "";
