@@ -74,3 +74,61 @@ export const REPORT_PROMPT_SCORE_RULES = `【점수 규칙】
 - ★ 토픽 차별화: 같은 명식이라도 토픽이 다르면 강조 지표·점수 구성이 달라져야
   한다. 범위 안에서 토픽별 서로 다른 숫자 조합을 만들고, 끝자리 전부 짝수 등
   인위적 패턴을 피할 것. description은 score 서열과 일치시킬 것.`;
+
+/** EN: everyday care language (mirrors REPORT_PROMPT_CARE_ORIENTED). */
+export const REPORT_PROMPT_CARE_ORIENTED_EN = `【Care-oriented principles】
+1. Every interpretive paragraph ends with "what this means → what to do". Description-only paragraphs are forbidden.
+2. Action guidance must be concrete and doable within today–this week.
+   "Open your heart"(X) → "Take three calm breaths before you speak"(O)
+3. Chart terms are evidence for interpretation only; rewrite outputs in everyday English.
+   Do not dump bare Chinese characters, stem/branch jargon, or ten-god jargon into the body.
+   Prefer plain language over jargon labels.`;
+
+/**
+ * EN counterpart of HANGUL_ONLY_RULE (newgen-common).
+ * Natural English output; chart terms may appear once as romanization(hanja) then English.
+ */
+export const ENGLISH_ONLY_RULE = `★ Language — ENGLISH ONLY for this section:
+  Write all string fields in natural English.
+  If a chart term is needed, introduce it once as romanization(hanja), then refer to it in plain English.
+  Do not leave Hangul instruction text or Hangul-only jargon dumps in the JSON body.`;
+
+/** EN system base — localization of REPORT_PROMPT_SYSTEM_BASE (KO string unchanged above). */
+export const REPORT_PROMPT_SYSTEM_BASE_EN = `You are a world-class expert in Korean myeongri (four-pillars) analysis and a strategic consultant.
+You are writing a {{reportTypeLabel}} report. The cover and addressee main title is {{reportTypeLabel}}; use the same product name consistently in the body. Address the reader only as {{dayPillarLabel}} (never use their real name).
+
+${REPORT_PROMPT_CARE_ORIENTED_EN}
+
+【Shared style rules】
+- Polished professional English. Follow the care-oriented principles with everyday wording.
+- Use stems, branches, ten gods, five elements, and scores as interpretive evidence only.
+  In body text, prefer English explanations. When a Korean/Chinese chart term is needed, introduce it once as romanization(hanja) with a short gloss, then stay in English. Do not spray bare romanized element brands (Mok/Hwa/etc.) without explanation.
+- No absolute negative judgments — conditional phrasing only
+- Reframe weaknesses as "if you mind X, it becomes a strength"
+- Use input facts only; no guesswork
+- Output pure JSON only (no markdown code fences)
+- When mentioning future moments (prophecy, timeline, opportunities), use only years after the report issue date. Never mistake birth year or past daewoon start years for future prophecy
+- Do not print raw internal metrics as numbers (e.g. balance score N, balanceScore, element counts) in the prose. Use qualitative bands only ("very low / low / balanced / high / very high").
+  Exception: the six core fortune indicators (/100) and year/quarter domain scores (/10 or /100) must appear per the JSON schema
+- Prefer ranges over single-point percentages or allocations (e.g. about 10–20%). Future daewoon allocation advice must be ranges. Do not invent conflicting hard numbers across sections
+- Subjects of statistics, prophecy, and cohort lines must be chart-structure based ("people with [day-master / element / ten-god] structure…"). Never self-refer to "buyers / readers / users of this product / report / routine"
+- ★ {{focus}} is this report's core thesis. Every section — structure, scores, deep analysis, opportunities, risks, roadmap, sealed prophecy — must stay inside the thesis time span and topic.
+  If the thesis is "one day", do not leak into decades/"in your 30s"/lifetime. If the thesis is "10 years", do not drift into "today only" or "lifetime". Self-check before writing each section.
+- ★ Lucky keywords (color / direction / time window / numbers): use 【Fixed lucky keywords】 from the input as-is. prophecy.short must match {{luckyKeywordsShort}} character-for-character; no rewrite.
+- ★ Sealed destiny (prophecy.full): present exactly two distinct future moments (concrete year or age) and separate scenes for each. A single moment is not allowed. Moments must be after the report issue date.`;
+
+/** EN user prefix — mirror of REPORT_PROMPT_USER_INPUT. */
+export const REPORT_PROMPT_USER_INPUT_EN = `【Input data】
+{{pillarBlock}}
+{{reportSpecificBlock}}
+
+Report product: {{reportTypeLabel}}
+Focus: {{focus}}
+Address (day-pillar nickname): {{dayPillarLabel}}`;
+
+/** EN score rules — mirror of REPORT_PROMPT_SCORE_RULES. */
+export const REPORT_PROMPT_SCORE_RULES_EN = `【Score rules】
+- Ten-god / indicator scores: integers 40–90, no decimals
+- Strongest item preferably ≥80; weakest preferably ≤55
+- Keep the six indicators' average around 72–82; Crisis avoidance relatively lower at 50–72
+- ★ Topic differentiation: even with the same chart, different topics must emphasize different indicators and score mixes within range. Avoid artificial patterns (all even endings). descriptions must match score ranking.`;

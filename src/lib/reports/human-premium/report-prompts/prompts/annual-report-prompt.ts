@@ -1,5 +1,9 @@
 ﻿import type { ReportSlotPromptMap } from "../prompt-definition";
 import {
+  ENGLISH_ONLY_RULE,
+  REPORT_PROMPT_SCORE_RULES_EN,
+} from "../base-prompt";
+import {
   CARE_STYLE,
   COHORT_RULE,
   ELEMENT_DEFICIENCY_RULE,
@@ -161,4 +165,203 @@ prophecy.full: 올해 흐름을 잇는 조건부 예언, 서로 다른 미래 �
 ${PROPHECY_TWO_MOMENTS_RULE}
 ${YEARLY_TENSE_RULES}
 ${COHORT_RULE}`,
+};
+
+/* —— EN path (yearly only). KO SLOTS above must stay byte-stable. —— */
+
+/** Match content.ts DAILY_SCORE_LABELS_EN order/spelling. */
+export const S3_SCORES_SCHEMA_EN = `{
+  "narrative": "string",
+  "scores": [
+    { "label": "Current fortune strength", "score": number, "description": "string" },
+    { "label": "Timing fit", "score": number, "description": "string" },
+    { "label": "Opportunity catch", "score": number, "description": "string" },
+    { "label": "Crisis avoidance", "score": number, "description": "string" },
+    { "label": "Relationship luck", "score": number, "description": "string" },
+    { "label": "Wealth flow", "score": number, "description": "string" }
+  ]
+}`;
+
+const OUTPUT_FORMAT_RULES_EN = `★ Shared output format:
+  - Do not put internal "[Label]:" / "[Label]" markers in prose — natural sentences and JSON fields only
+  - No markdown (**bold**, # headers, backticks)
+  - tip / countermeasure / script strings must not embed UI labels ("How to catch:", "Countermeasure:")
+  - decisionMoments.script = spoken lines only, without wrapping quotes (the renderer adds them)`;
+
+const JSON_OUTPUT_FORCE_RULE_EN = `★ Force machine-parseable JSON:
+  - JSON only. No markdown fences (\`\`\`) or stray backticks
+  - Each item needs title / body / tip (or countermeasure)
+  - opportunities: exactly 5; risks: exactly 4
+  - Do not put raw double-quotes (") inside string values (breaks JSON)`;
+
+const ELEMENT_DEFICIENCY_RULE_EN = `★ Element consistency:
+  Follow pillarBlock element distribution (%) and the lowest-% deficient element.
+  When naming a shortage, point only at the lowest-% element.`;
+
+const SCORE_CITATION_RULE_EN = `★ Score citation consistency:
+  Later sections that cite S3 scores must reuse the exact label strings and numbers from scores[].
+  Do not invent alternate labels or numbers.`;
+
+const CARE_STYLE_EN = `★ Voice — care-oriented: end paragraphs with actionable next steps.
+  Explain chart jargon in plain English; do not dump bare ten-god jargon into the body.`;
+
+const S3_SCORE_RULES_BLOCK_EN = `${REPORT_PROMPT_SCORE_RULES_EN}
+- Score range: integers 50–90. Crisis avoidance only 50–72.
+- Average of the other five indicators 72–82.
+- Do not put domain scores (N points, N/10, quarter scores) in narrative — those belong in S4.
+- scores.label must be exactly the six English names above (spelling and spaces).
+- ★ Topic differentiation: reflect this yearly topic in the score mix. Keep strongest ≥80, Crisis avoidance 50–72, average 72–82, but vary the mix. Avoid all-even endings or repeated number sets.
+- ★ description must match score rank: highest = most prominent/strong; lower = relatively needs support.`;
+
+const PROPHECY_TWO_MOMENTS_RULE_EN = `★ prophecy.full — two moments required:
+  - Two distinct future moments (concrete year or age) + separate scene for each
+  - Forbidden: a single moment or one blob like "after age OO"
+  - Moments only after {{currentYear}}`;
+
+const COHORT_RULE_EN = `cohortInsight.body: two lines of chart-cohort insight (~120 chars)
+  - Subject: "People with [trait/structure]…"
+  - ★ No fake survey percentages ("appears in ~%", "reaches about N%")
+  - Tendency language only ("tend to…", "often…", "relatively higher/lower")
+  - Folklore "seven out of ten" is OK; integer percent lists are not
+  - No self-reference to buyers/readers of this product`;
+
+const YEARLY_TENSE_RULES_EN = `★ Tense / date rules (use only 【Report-specific input · yearly tense】 — do not self-compute)
+- Cover months 1–12, but tense must match period:
+  · Past months: retrospective ("that stretch felt like…"). No action commands in tips/countermeasures.
+  · Period containing the current month: present ("you are in…").
+  · Upcoming (remaining) months: action-oriented as before.
+- Opportunity tips, risk countermeasures, roadmap actions, and decisionMoments.script must use dates/periods on or after the issue date only.
+- luckyMonths: pick 1–2 from the remaining-month list only. Not past or current month.
+- Refer to this calendar year as "this year" — do not print "2026" style year digits for this year.
+- Sealed prophecy moments: only next year and the year after (no scene set in this year).
+  Prefer "next year" / "the year after" or age; do not print raw calendar digits like "2027".`;
+
+export const SLOTS_EN: ReportSlotPromptMap = {
+  "saju-structure": `■ S2 Chart structure · this year
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+
+Output schema:
+{ "sajuStructure": "string" }
+
+About 600 characters. Natural paragraphs only. Dominant/deficient (lowest % only), daewoon, yearly luck, this-year strategy.
+${CARE_STYLE_EN}`,
+
+  "master-narrative": `■ S3 Core fortune indicators + narrative · this year
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+${S3_SCORES_SCHEMA_EN}
+
+${S3_SCORE_RULES_BLOCK_EN}
+
+Use the six scores.label strings exactly. description ~40 chars each.
+narrative ~200 chars: daewoon context → this year's position → first/second half. No quarter N/10 mentions.
+${YEARLY_TENSE_RULES_EN}`,
+
+  "deep-analysis": `■ S4 Deep analysis · This Year's Major-Luck Plan
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{
+  "intro": "string",
+  "domains": [
+    { "domain": "Q1", "score": number, "analysis": "string" },
+    { "domain": "Q2", "score": number, "analysis": "string" },
+    { "domain": "Q3", "score": number, "analysis": "string" },
+    { "domain": "Q4", "score": number, "analysis": "string" }
+  ],
+  "luckyMonths": ["string", "string"]
+}
+
+{{narrative}}
+
+intro: this year's core setup only (~100 chars). Do not dump quarter scores or golden months here.
+domains: exactly 4. domain names exactly as above. score integers on a /10 scale (6–9; Q2 relatively higher, Q4 relatively lower preferred).
+analysis ~90 chars each — if a quarter mixes past/current/remaining months, follow tense rules.
+luckyMonths: 1–2 strong months from remaining months only (e.g. if remaining are Aug–Dec → "September","November").
+${YEARLY_TENSE_RULES_EN}`,
+
+  opportunities: `■ S5 Five opportunities · this year
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{ "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }
+
+{{narrative}}
+
+Exactly 5 (career / wealth / network / health / self-growth). Do not prefix tip with "How to catch:".
+body follows period tense rules; tip dates/periods must be on/after issue date.
+${YEARLY_TENSE_RULES_EN}`,
+
+  risks: `■ S6 Four predicted risks · this year
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{ "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
+
+{{narrative}}
+
+Exactly 4. Do not prefix countermeasure with "Countermeasure:".
+Past risks = retrospective; countermeasures only for on/after issue date.
+${YEARLY_TENSE_RULES_EN}`,
+
+  roadmap: `■ S7 Time roadmap · month blocks
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{
+  "roadmap": [{ "period": "string", "label": "string", "body": "string" }],
+  "decisionMoments": [{ "situation": "string", "script": "string" }]
+}
+
+{{narrative}}
+
+roadmap 6: Jan–Mar / Apr–Jun / Jul–Aug / Sep–Oct / Nov–Dec / overall daewoon
+— past blocks retrospective (no commands); current-month block present tense;
+  remaining-month blocks action-oriented.
+decisionMoments: 4. script = spoken English without wrapping quotes. ★ situations on/after issue date only.
+${YEARLY_TENSE_RULES_EN}`,
+
+  prophecy: `■ S8 Sealed prophecy · this year
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{
+  "prophecy": { "short": "string", "full": "string" },
+  "cohortInsight": { "body": "string" }
+}
+
+{{narrative}}
+
+prophecy.short: must equal the fixed value below (no rewrite):
+{{luckyKeywordsShort}}
+prophecy.full: conditional prophecy continuing this year's arc; two separated future moments (~120 chars).
+${PROPHECY_TWO_MOMENTS_RULE_EN}
+${YEARLY_TENSE_RULES_EN}
+${COHORT_RULE_EN}`,
 };
