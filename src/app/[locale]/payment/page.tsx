@@ -1,5 +1,6 @@
 "use client";
 
+import { PayPalSpbButton } from "@/components/human-premium/PayPalSpbButton";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
 import { buildPetPremiumSuccessHref, buildPetPremiumCancelHref } from "@/lib/payments/pet-premium-unlock-client";
@@ -19,11 +20,13 @@ import {
 import { normalizePetPremiumReturnTo } from "@/lib/payments/pet-premium-return-to";
 import {
   formatPetProductPrice,
+  getPetChargeAmount,
+  getPetCheckoutCurrency,
   PET_MBTI_STANDALONE_CODE,
   PET_PREMIUM_PACKAGE_CODE,
-  PET_PRODUCT_AMOUNT_KRW,
   PET_PRODUCT_ORDER_NAME,
   PET_PRODUCT_PAYMENT_ID_PREFIX,
+  toPetPortOneTotalAmount,
   type PetProductCode,
 } from "@/lib/payments/pet-product-catalog";
 import { resolveProductFromQuery } from "@/lib/payments/pet-premium-unlock-client";
@@ -32,6 +35,10 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+function isEnCheckoutEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_ENABLE_EN_CHECKOUT === "true";
+}
 
 const SHARED_UI = {
   ko: {
@@ -55,6 +62,7 @@ const SHARED_UI = {
     verifyRetryNote: "If payment already went through, you will not be charged again.",
     cancel: "Cancel",
     priceNote: "One-time payment · Permanent unlock for this pet",
+    unavailable: "Payment is not available yet",
   },
 } as const;
 
@@ -143,6 +151,11 @@ function PaymentContent() {
   const loginRedirected = useRef(false);
 
   const locale = (routeLocale === "en" ? "en" : "ko") as "ko" | "en";
+  const currency = getPetCheckoutCurrency(locale);
+  const enCheckoutOn = isEnCheckoutEnabled();
+  const usePaypalSpb = currency === "USD" && enCheckoutOn;
+  const usdUnavailable = currency === "USD" && !enCheckoutOn;
+
   const productCode = useMemo(
     () => resolveProductFromQuery(params.get("product")),
     [params]
@@ -152,7 +165,8 @@ function PaymentContent() {
   const displayPrice = productDisplayPrice(productCode, locale);
   const payCta =
     locale === "ko" ? `${displayPrice} 결제하기` : `Pay ${displayPrice}`;
-  const chargeAmount = PET_PRODUCT_AMOUNT_KRW[productCode];
+  const chargeAmount = getPetChargeAmount(productCode, currency);
+  const spbTotalAmount = toPetPortOneTotalAmount(chargeAmount, "USD");
 
   const normalizedReturnTo = useMemo(
     () => normalizePetPremiumReturnTo(params.get("returnTo")),
@@ -196,6 +210,7 @@ function PaymentContent() {
   const [sdkReady, setSdkReady] = useState(false);
   const [returnNotice, setReturnNotice] = useState<string | null>(null);
   const [verifyFailedPaymentId, setVerifyFailedPaymentId] = useState<string | null>(null);
+  const [spbPaymentId, setSpbPaymentId] = useState<string | null>(null);
 
   useEffect(() => {
     savePetPremiumCheckout({
@@ -217,6 +232,23 @@ function PaymentContent() {
     script.onerror = () => setStatus("sdk_error");
     document.head.appendChild(script);
   }, []);
+
+  // EN SPB: mint paymentId when PayPal path is ready (refresh on product change).
+  useEffect(() => {
+    if (!usePaypalSpb || !sessionAllowed || !sdkReady) {
+      setSpbPaymentId(null);
+      return;
+    }
+    const paymentId = `${PET_PRODUCT_PAYMENT_ID_PREFIX[productCode]}_${Date.now()}`;
+    savePendingPetPremiumPaymentId(paymentId);
+    savePetPremiumCheckout({
+      continuationQuery,
+      returnTo: normalizedReturnTo,
+      productCode,
+    });
+    setSpbPaymentId(paymentId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- remint only on product/auth/sdk gate
+  }, [usePaypalSpb, sessionAllowed, sdkReady, productCode]);
 
   const replaceWithCleanCheckoutUrl = useCallback(() => {
     const cleanQs = buildCleanPaymentSearch(stripPortOneRedirectParams(params));
@@ -295,8 +327,37 @@ function PaymentContent() {
     await runVerify(verifyFailedPaymentId, stored?.productCode ?? productCode);
   }
 
+  async function handleSpbSuccess(paymentId: string) {
+    if (!sessionAllowed || !accessToken) return;
+
+    setStatus("processing");
+    setReturnNotice(null);
+    setVerifyFailedPaymentId(null);
+
+    const checkout = await assertPetPremiumCheckoutAllowed(accessToken, productCode);
+    if (!checkout.ok) {
+      if (checkout.status === 401) {
+        const qs = params.toString();
+        const returnPath = getSafeInternalReturnPath(qs ? `/payment?${qs}` : "/payment");
+        router.replace(`/login?next=${encodeURIComponent(returnPath)}`);
+        return;
+      }
+      setStatus("error");
+      return;
+    }
+
+    await runVerify(paymentId, productCode);
+  }
+
+  function handleSpbError(message: string) {
+    clearPendingPetPremiumPaymentId();
+    setReturnNotice(message || SHARED_UI.en.unavailable);
+    setStatus("idle");
+  }
+
   async function handlePay() {
     if (!sessionAllowed || !accessToken) return;
+    if (currency !== "KRW") return;
 
     setStatus("processing");
     setReturnNotice(null);
@@ -446,13 +507,43 @@ function PaymentContent() {
           </p>
         )}
 
-        <button
-          onClick={() => void handlePay()}
-          disabled={payDisabled}
-          className="mt-6 w-full rounded-full bg-[#6f4b8b] px-8 py-4 text-base font-extrabold text-white shadow-xl shadow-[#6f4b8b]/25 transition hover:bg-[#5f3f78] active:scale-[0.98] disabled:opacity-60"
-        >
-          {status === "processing" ? shared.processing : payCta}
-        </button>
+        {usdUnavailable ? (
+          <p
+            className="mt-6 rounded-2xl bg-sand/60 px-4 py-3 text-center text-sm text-plum"
+            role="status"
+          >
+            {SHARED_UI.en.unavailable}
+          </p>
+        ) : usePaypalSpb ? (
+          <div className="mt-6 w-full space-y-2">
+            {status === "processing" || status === "success" ? (
+              <p className="text-center text-sm text-on-surface-variant">
+                {status === "success" ? shared.successMsg : shared.processing}
+              </p>
+            ) : !sdkReady || !spbPaymentId ? (
+              <p className="text-center text-sm text-on-surface-variant">
+                Preparing PayPal…
+              </p>
+            ) : (
+              <PayPalSpbButton
+                paymentId={spbPaymentId}
+                orderName={PET_PRODUCT_ORDER_NAME[productCode]}
+                totalAmount={spbTotalAmount}
+                currency="USD"
+                onSuccess={(paymentId) => void handleSpbSuccess(paymentId)}
+                onError={handleSpbError}
+              />
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={() => void handlePay()}
+            disabled={payDisabled}
+            className="mt-6 w-full rounded-full bg-[#6f4b8b] px-8 py-4 text-base font-extrabold text-white shadow-xl shadow-[#6f4b8b]/25 transition hover:bg-[#5f3f78] active:scale-[0.98] disabled:opacity-60"
+          >
+            {status === "processing" ? shared.processing : payCta}
+          </button>
+        )}
 
         <button
           type="button"

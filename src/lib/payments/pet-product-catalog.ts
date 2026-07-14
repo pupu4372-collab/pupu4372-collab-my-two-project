@@ -14,11 +14,34 @@ export const PET_PRODUCT_AMOUNT_KRW: Record<PetProductCode, number> = {
   [PET_MBTI_STANDALONE_CODE]: 1900,
 };
 
-/** EN display (whole USD). Payment currency switch is P-4 — not wired yet. */
+/** EN catalog amounts (whole USD). PortOne request uses cents via toPetPortOneTotalAmount. */
 export const PET_PRODUCT_AMOUNT_USD: Record<PetProductCode, number> = {
   [PET_PREMIUM_PACKAGE_CODE]: 4,
   [PET_MBTI_STANDALONE_CODE]: 2,
 };
+
+export type PetCheckoutCurrency = "KRW" | "USD";
+
+export function getPetCheckoutCurrency(locale: "ko" | "en"): PetCheckoutCurrency {
+  return locale === "en" ? "USD" : "KRW";
+}
+
+export function getPetChargeAmount(
+  code: PetProductCode,
+  currency: PetCheckoutCurrency
+): number {
+  return currency === "USD"
+    ? PET_PRODUCT_AMOUNT_USD[code]
+    : PET_PRODUCT_AMOUNT_KRW[code];
+}
+
+/** PortOne V2: KRW = won (1×), USD = cents (×100). Mirrors human toPortOneTotalAmount. */
+export function toPetPortOneTotalAmount(
+  amount: number,
+  currency: PetCheckoutCurrency
+): number {
+  return currency === "USD" ? Math.round(amount * 100) : Math.round(amount);
+}
 
 export const PET_PACKAGE_UNLOCK_CODES = [PET_PREMIUM_PACKAGE_CODE] as const;
 export const PET_MBTI_UNLOCK_CODES = [PET_MBTI_STANDALONE_CODE] as const;

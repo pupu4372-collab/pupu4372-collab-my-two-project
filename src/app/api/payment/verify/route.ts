@@ -1,6 +1,7 @@
 import {
   isAllowedPetProductCode,
   PET_PRODUCT_AMOUNT_KRW,
+  PET_PRODUCT_AMOUNT_USD,
   type PetProductCode,
 } from "@/lib/payments/pet-product-catalog";
 import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "unknown product" }, { status: 400 });
     }
 
-    const expectedAmount = PET_PRODUCT_AMOUNT_KRW[product_code as PetProductCode];
+    const code = product_code as PetProductCode;
 
     // 1. PortOne V2 서버에서 결제 정보 검증
     const payment = await fetchPortOnePayment(payment_id);
@@ -64,6 +65,21 @@ export async function POST(req: NextRequest) {
       );
       return NextResponse.json({ error: "not paid" }, { status: 400 });
     }
+
+    const paymentCurrency = String(payment.currency ?? "").trim().toUpperCase();
+    const isUsd = paymentCurrency === "USD" || paymentCurrency === "CURRENCY_USD";
+
+    if (isUsd && process.env.NEXT_PUBLIC_ENABLE_EN_CHECKOUT !== "true") {
+      return NextResponse.json(
+        { error: "en_checkout_unsupported", paymentMethod: "unsupported" },
+        { status: 501 }
+      );
+    }
+
+    const expectedAmount = isUsd
+      ? Math.round(PET_PRODUCT_AMOUNT_USD[code] * 100)
+      : PET_PRODUCT_AMOUNT_KRW[code];
+
     if (!verifyPortOneAmount(payment, expectedAmount)) {
       console.error(
         `[PET_PREMIUM_VERIFY_FAILED] paymentId=${payment_id} product_code=${product_code} status=400 error=amount_mismatch expected=${expectedAmount}`
@@ -90,6 +106,9 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = registeredUserId;
+    const catalogAmount = isUsd
+      ? PET_PRODUCT_AMOUNT_USD[code]
+      : PET_PRODUCT_AMOUNT_KRW[code];
 
     // 3. pet_premium_unlocks 저장
     const { error: dbError } = await supabase
@@ -99,7 +118,9 @@ export async function POST(req: NextRequest) {
           user_id: userId,
           product_code,
           payment_id,
-          price_krw: expectedAmount,
+          currency: isUsd ? "USD" : "KRW",
+          amount: catalogAmount,
+          price_krw: isUsd ? null : catalogAmount,
           paid_at: new Date().toISOString(),
           ...(pet_id ? { pet_id } : {}),
         } as any,

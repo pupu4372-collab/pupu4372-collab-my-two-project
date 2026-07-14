@@ -6,7 +6,9 @@ export type { PetPremiumPaymentRecord } from "@/lib/payments/pet-premium-shared"
 type UnlockRow = {
   payment_id: string | null;
   product_code: string;
-  price_krw: number;
+  price_krw: number | null;
+  amount: number | null;
+  currency: string | null;
   paid_at: string | null;
   created_at: string;
   expires_at: string | null;
@@ -40,7 +42,7 @@ export async function listPetPremiumPaymentHistory(userId: string): Promise<PetP
   const { data, error } = await supabase
     .from("pet_premium_unlocks")
     .select(
-      "payment_id, product_code, price_krw, paid_at, created_at, expires_at, pet_id, pets ( name, species, gender, birth_date, birth_timezone )"
+      "payment_id, product_code, price_krw, amount, currency, paid_at, created_at, expires_at, pet_id, pets ( name, species, gender, birth_date, birth_timezone )"
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
@@ -49,19 +51,23 @@ export async function listPetPremiumPaymentHistory(userId: string): Promise<PetP
 
   return (data as UnlockRow[])
     .filter((row) => row.payment_id)
-    .map((row) => ({
-      paymentId: row.payment_id as string,
-      productCode: row.product_code,
-      petId: row.pet_id,
-      petName: row.pets?.name ?? "—",
-      species: row.pets?.species ?? null,
-      petGender: row.pets?.gender ?? null,
-      birthDate: row.pets?.birth_date ?? null,
-      timezone: row.pets?.birth_timezone ?? null,
-      amount: row.price_krw,
-      currency: "KRW" as const,
-      createdAt: row.paid_at ?? row.created_at,
-      expiresAt: row.expires_at,
-      isLifetime: !row.expires_at,
-    }));
+    .map((row) => {
+      const currencyRaw = String(row.currency ?? "KRW").trim().toUpperCase();
+      const currency: "KRW" | "USD" = currencyRaw === "USD" ? "USD" : "KRW";
+      return {
+        paymentId: row.payment_id as string,
+        productCode: row.product_code,
+        petId: row.pet_id,
+        petName: row.pets?.name ?? "—",
+        species: row.pets?.species ?? null,
+        petGender: row.pets?.gender ?? null,
+        birthDate: row.pets?.birth_date ?? null,
+        timezone: row.pets?.birth_timezone ?? null,
+        amount: row.amount ?? row.price_krw ?? 0,
+        currency,
+        createdAt: row.paid_at ?? row.created_at,
+        expiresAt: row.expires_at,
+        isLifetime: !row.expires_at,
+      };
+    });
 }

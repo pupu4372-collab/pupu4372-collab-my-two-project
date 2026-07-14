@@ -24,7 +24,7 @@ export type PetPremiumPaymentRecord = {
   birthDate: string | null;
   timezone: string | null;
   amount: number;
-  currency: "KRW";
+  currency: "KRW" | "USD";
   createdAt: string;
   expiresAt: string | null;
   isLifetime: boolean;
