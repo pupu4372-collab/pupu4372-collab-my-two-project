@@ -105,6 +105,24 @@ function ResetPasswordContent() {
       return;
     }
 
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      try {
+        await fetch("/api/auth/confirm-password-set", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ password }),
+        });
+      } catch {
+        // Flag may be missing until next login; password itself was saved.
+      }
+    }
+
     setMessage(copy.success);
     await supabase.auth.signOut();
     window.setTimeout(() => window.location.replace(next), 1200);

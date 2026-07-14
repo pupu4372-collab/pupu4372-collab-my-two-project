@@ -4,10 +4,11 @@ import { PetBasicInfoFields } from "@/components/pet/PetBasicInfoFields";
 import { PetPhotoUploadField } from "@/components/pet/PetPhotoUploadField";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { uploadPetFortunePhotoClient } from "@/lib/pets/photo-upload-client";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Gender, Locale, Species } from "@/lib/saju/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 const SPECIES_OPTIONS: { value: Species; emoji: string; labelKey: "dog" | "cat" | "reptile" | "otherFriends" }[] = [
   { value: "dog", emoji: "🐕", labelKey: "dog" },
@@ -62,14 +63,18 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
   const locale = useLocale() as Locale;
   const isKo = locale === "ko";
   const t = useTranslations("home.guestFortune");
-  const { ready, accessToken } = useSupabaseSession();
+  const { ready, accessToken, email: sessionEmail, isFullMember, refresh } =
+    useSupabaseSession();
   const sessionReady = ready && Boolean(accessToken);
+  /** Guest-grade: matches server !getRegisteredUserIdFromRequest / !isFullMember. */
+  const isGuestGrade = !isFullMember;
   const [petName, setPetName] = useState("");
   const [species, setSpecies] = useState<Species | "">("");
   const [petGender, setPetGender] = useState<Gender>("female");
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("unknown");
   const [timezone, setTimezone] = useState(detectTimezone);
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -77,6 +82,82 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
   const [photoConsent, setPhotoConsent] = useState(false);
   const [photoFileError, setPhotoFileError] = useState<string | null>(null);
   const [photoUploadNotice, setPhotoUploadNotice] = useState<string | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradePassword, setUpgradePassword] = useState("");
+  const [upgradePasswordConfirm, setUpgradePasswordConfirm] = useState("");
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [upgradeError, setUpgradeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isGuestGrade || !sessionEmail) return;
+    setEmail((prev) => (prev.trim() ? prev : sessionEmail));
+  }, [isGuestGrade, sessionEmail]);
+
+  function isStrongPassword(value: string) {
+    return value.length >= 10 && /[A-Za-z]/.test(value) && /\d/.test(value);
+  }
+
+  async function handleUpgradeSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (!accessToken || !sessionEmail) return;
+
+    if (!isStrongPassword(upgradePassword)) {
+      setUpgradeError(t("upgradeWeak"));
+      return;
+    }
+    if (upgradePassword !== upgradePasswordConfirm) {
+      setUpgradeError(t("upgradeMismatch"));
+      return;
+    }
+
+    setUpgradeLoading(true);
+    setUpgradeError(null);
+    setPhotoUploadNotice(null);
+
+    try {
+      const client = getSupabaseBrowserClient();
+      if (!client) {
+        setUpgradeError(t("upgradeFailed"));
+        return;
+      }
+
+      const { error: passwordError } = await client.auth.updateUser({
+        password: upgradePassword,
+      });
+      if (passwordError) {
+        setUpgradeError(passwordError.message || t("upgradeFailed"));
+        return;
+      }
+
+      const flagRes = await fetch("/api/auth/confirm-password-set", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ password: upgradePassword }),
+      });
+      const flagData = (await flagRes.json()) as { error?: string };
+      if (!flagRes.ok) {
+        setUpgradeError(
+          typeof flagData.error === "string" ? flagData.error : t("upgradeFailed")
+        );
+        return;
+      }
+
+      await client.auth.refreshSession();
+      await refresh();
+
+      setUpgradeOpen(false);
+      setUpgradePassword("");
+      setUpgradePasswordConfirm("");
+      setMessage(t("upgradeSuccess"));
+    } catch {
+      setUpgradeError(t("upgradeFailed"));
+    } finally {
+      setUpgradeLoading(false);
+    }
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -139,6 +220,28 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
 
       const addedName = petName.trim();
       const petId = data.petId as string;
+      const trimmedEmail = email.trim();
+
+      if (trimmedEmail) {
+        try {
+          const client = getSupabaseBrowserClient();
+          const { error: emailError } = (await client?.auth.updateUser({
+            email: trimmedEmail,
+          })) ?? { error: null };
+          if (emailError) {
+            console.warn("[auth] updateUser email failed:", emailError.message);
+            setPhotoUploadNotice(t("emailLinkFailed"));
+          } else {
+            await refresh();
+          }
+        } catch (err) {
+          console.warn(
+            "[auth] updateUser email failed:",
+            err instanceof Error ? err.message : err
+          );
+          setPhotoUploadNotice(t("emailLinkFailed"));
+        }
+      }
 
       if (photoFile && !photoFileError) {
         try {
@@ -158,6 +261,11 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
       setBirthDate("");
       setBirthTime("unknown");
       setTimezone(detectTimezone());
+      if (isGuestGrade) {
+        setEmail(trimmedEmail || sessionEmail || "");
+      } else {
+        setEmail("");
+      }
       setPhotoFile(null);
       setPhotoConsent(false);
       setPhotoFileError(null);
@@ -236,6 +344,31 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
         ) : null}
         {message ? <p className="text-center text-xs font-semibold text-channel-community">{message}</p> : null}
 
+        {isGuestGrade ? (
+          <label className="pet-fortune-field">
+            <div className="pet-fortune-input pet-fortune-input--compact">
+              <input
+                className="pet-fortune-input-field"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={
+                  sessionEmail
+                    ? t("emailLinkedGuestPlaceholder", { email: sessionEmail })
+                    : t("emailOptionalPlaceholder")
+                }
+                autoComplete="email"
+                disabled={loading || !sessionReady}
+                aria-label={
+                  sessionEmail
+                    ? t("emailLinkedGuestPlaceholder", { email: sessionEmail })
+                    : t("emailOptionalPlaceholder")
+                }
+              />
+            </div>
+          </label>
+        ) : null}
+
         <PetPhotoUploadField
           locale={locale}
           petName={petName}
@@ -261,6 +394,90 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
           {loading ? t("loading") : t("quickAddSubmit")}
         </button>
       </form>
+
+      {isGuestGrade && sessionEmail ? (
+        <div className="mt-3 space-y-2">
+          {!upgradeOpen ? (
+            <button
+              type="button"
+              className="w-full rounded-2xl border border-channel-saju/30 bg-lavender/40 px-4 py-2.5 text-xs font-bold text-plum transition hover:bg-lavender/70"
+              disabled={!sessionReady || loading}
+              onClick={() => {
+                setUpgradeOpen(true);
+                setUpgradeError(null);
+              }}
+            >
+              {t("upgradeOpen")}
+            </button>
+          ) : (
+            <form
+              onSubmit={(e) => void handleUpgradeSubmit(e)}
+              className="space-y-2 rounded-2xl border border-stone-200/80 bg-white/80 p-3"
+            >
+              <label className="pet-fortune-field">
+                <span className="mb-1 block text-[11px] font-semibold text-stone-600">
+                  {t("upgradePassword")}
+                </span>
+                <div className="pet-fortune-input pet-fortune-input--compact">
+                  <input
+                    className="pet-fortune-input-field"
+                    type="password"
+                    value={upgradePassword}
+                    onChange={(e) => setUpgradePassword(e.target.value)}
+                    autoComplete="new-password"
+                    required
+                    disabled={upgradeLoading}
+                    aria-label={t("upgradePassword")}
+                  />
+                </div>
+              </label>
+              <label className="pet-fortune-field">
+                <span className="mb-1 block text-[11px] font-semibold text-stone-600">
+                  {t("upgradePasswordConfirm")}
+                </span>
+                <div className="pet-fortune-input pet-fortune-input--compact">
+                  <input
+                    className="pet-fortune-input-field"
+                    type="password"
+                    value={upgradePasswordConfirm}
+                    onChange={(e) => setUpgradePasswordConfirm(e.target.value)}
+                    autoComplete="new-password"
+                    required
+                    disabled={upgradeLoading}
+                    aria-label={t("upgradePasswordConfirm")}
+                  />
+                </div>
+              </label>
+              <p className="text-[11px] font-semibold text-stone-500">{t("upgradePasswordRule")}</p>
+              {upgradeError ? (
+                <p className="pet-fortune-entry-error !mt-0 !py-2">{upgradeError}</p>
+              ) : null}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="flex-1 rounded-2xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-bold text-stone-600"
+                  disabled={upgradeLoading}
+                  onClick={() => {
+                    setUpgradeOpen(false);
+                    setUpgradeError(null);
+                    setUpgradePassword("");
+                    setUpgradePasswordConfirm("");
+                  }}
+                >
+                  {t("upgradeCancel")}
+                </button>
+                <button
+                  type="submit"
+                  className="pet-fortune-quick-add-btn flex-1 !py-2 text-xs"
+                  disabled={upgradeLoading || !sessionReady}
+                >
+                  {upgradeLoading ? t("loading") : t("upgradeSubmit")}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

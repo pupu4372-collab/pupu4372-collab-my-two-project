@@ -7,6 +7,7 @@ import {
   shouldInvalidateSession,
 } from "@/lib/supabase/auth-session-policy";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { isFullMember as checkIsFullMember } from "@/lib/supabase/membership";
 import type { Session } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
 
@@ -15,7 +16,10 @@ export interface SessionInfo {
   accessToken: string | null;
   userId: string | null;
   email: string | null;
+  /** Supabase auth flag (is_anonymous). Prefer isFullMember for product-grade gates. */
   isAnonymous: boolean;
+  /** Matches server getRegisteredUserIdFromRequest / isFullMember. */
+  isFullMember: boolean;
   provider: string | null;
   configured: boolean;
   refresh: () => Promise<void>;
@@ -24,7 +28,13 @@ export interface SessionInfo {
 function readUser(session: Session | null) {
   const user = session?.user;
   if (!user) {
-    return { userId: null, email: null, isAnonymous: true, provider: null };
+    return {
+      userId: null,
+      email: null,
+      isAnonymous: true,
+      isFullMember: false,
+      provider: null,
+    };
   }
 
   const provider =
@@ -36,6 +46,7 @@ function readUser(session: Session | null) {
     userId: user.id,
     email: user.email ?? null,
     isAnonymous: user.is_anonymous !== false,
+    isFullMember: checkIsFullMember(user),
     provider,
   };
 }
@@ -46,6 +57,7 @@ export function useSupabaseSession(): SessionInfo {
   const [userId, setUserId] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [isAnonymous, setIsAnonymous] = useState(true);
+  const [isFullMember, setIsFullMember] = useState(false);
   const [provider, setProvider] = useState<string | null>(null);
   const configured = isSupabaseConfigured();
 
@@ -55,6 +67,7 @@ export function useSupabaseSession(): SessionInfo {
       setUserId(null);
       setEmail(null);
       setIsAnonymous(true);
+      setIsFullMember(false);
       setProvider(null);
       return;
     }
@@ -64,6 +77,7 @@ export function useSupabaseSession(): SessionInfo {
     setUserId(info.userId);
     setEmail(info.email);
     setIsAnonymous(info.isAnonymous);
+    setIsFullMember(info.isFullMember);
     setProvider(info.provider);
   }, []);
 
@@ -71,13 +85,18 @@ export function useSupabaseSession(): SessionInfo {
     const client = getSupabaseBrowserClient();
     if (!client) return null;
 
-    let { data: { session } } = await client.auth.getSession();
+    let {
+      data: { session },
+    } = await client.auth.getSession();
 
     if (session && !session.user.is_anonymous) {
-      const { error: userError } = await client.auth.getUser();
+      const { data: userData, error: userError } = await client.auth.getUser();
       if (userError) {
         const { data: refreshed } = await client.auth.refreshSession();
         session = refreshed.session ?? session;
+      } else if (userData.user && session) {
+        // Prefer authoritative user (includes latest app_metadata.has_password).
+        session = { ...session, user: userData.user };
       }
 
       finalizeOAuthLoginPolicy();
@@ -85,14 +104,18 @@ export function useSupabaseSession(): SessionInfo {
 
       if (shouldInvalidateSession()) {
         await client.auth.signOut();
-        const { data: { session: afterSignOut } } = await client.auth.getSession();
+        const {
+          data: { session: afterSignOut },
+        } = await client.auth.getSession();
         if (!afterSignOut) {
           const { error } = await client.auth.signInAnonymously();
           if (error) {
             console.warn("[auth] anonymous sign-in failed:", error.message);
           }
         }
-        const { data: { session: refreshed } } = await client.auth.getSession();
+        const {
+          data: { session: refreshed },
+        } = await client.auth.getSession();
         session = refreshed;
       } else {
         markSessionAlive();
@@ -104,7 +127,9 @@ export function useSupabaseSession(): SessionInfo {
       if (error) {
         console.warn("[auth] anonymous sign-in failed:", error.message);
       }
-      const { data: { session: guest } } = await client.auth.getSession();
+      const {
+        data: { session: guest },
+      } = await client.auth.getSession();
       session = guest;
     }
 
@@ -129,7 +154,9 @@ export function useSupabaseSession(): SessionInfo {
     const client = getSupabaseBrowserClient();
     if (!client) return;
 
-    const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session && !session.user.is_anonymous) {
         finalizeOAuthLoginPolicy();
         markSessionAlive();
@@ -141,5 +168,15 @@ export function useSupabaseSession(): SessionInfo {
     return () => subscription.unsubscribe();
   }, [refresh, applySession]);
 
-  return { ready, accessToken, userId, email, isAnonymous, provider, configured, refresh };
+  return {
+    ready,
+    accessToken,
+    userId,
+    email,
+    isAnonymous,
+    isFullMember,
+    provider,
+    configured,
+    refresh,
+  };
 }

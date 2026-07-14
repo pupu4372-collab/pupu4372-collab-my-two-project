@@ -1,5 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
+import { isFullMember } from "./membership";
+
+export { isFullMember } from "./membership";
 
 export async function getUserIdFromRequest(request: Request): Promise<string | null> {
   const authHeader = request.headers.get("authorization");
@@ -27,7 +30,7 @@ export async function getUserIdFromRequest(request: Request): Promise<string | n
   return user.id;
 }
 
-/** Returns null for missing auth or anonymous (guest) sessions. */
+/** Returns null for missing auth or guest-grade sessions (incl. email-only). */
 export async function getRegisteredUserIdFromRequest(
   request: Request
 ): Promise<string | null> {
@@ -52,7 +55,7 @@ export async function getRegisteredUserIdFromRequest(
     error,
   } = await supabase.auth.getUser(token);
 
-  if (error || !user || user.is_anonymous) return null;
+  if (error || !user || !isFullMember(user)) return null;
   return user.id;
 }
 
