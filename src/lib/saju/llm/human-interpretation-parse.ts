@@ -26,10 +26,28 @@ function nonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }
 
+/**
+ * EN bodies sometimes leak Hangul glosses (e.g. "을묘 cycle"). Strip Hangul only when
+ * it is sparse vs Latin — leave KO-majority strings untouched.
+ */
+function stripSparseHangulLeak(text: string): string {
+  const hangulChars = text.match(/[\uac00-\ud7a3]/g)?.length ?? 0;
+  if (hangulChars === 0) return text;
+  const letterChars = text.match(/[A-Za-z\uac00-\ud7a3]/g)?.length ?? 0;
+  if (letterChars === 0) return text;
+  if (hangulChars / letterChars > 0.3) return text;
+  return text
+    .replace(/[\uac00-\ud7a3]+/g, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([,.;:!?])/g, "$1")
+    .replace(/\(\s+\)/g, "")
+    .trim();
+}
+
 function parsedSlotString(slot: string, value: unknown): string | null {
   const raw = nonEmptyString(value);
   if (!raw) return null;
-  return sanitizeLlmSlotText(slot, raw);
+  return stripSparseHangulLeak(sanitizeLlmSlotText(slot, raw));
 }
 
 /** Read first matching string field (aliases / case-insensitive). */

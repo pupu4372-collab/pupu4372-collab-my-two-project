@@ -1,4 +1,4 @@
-import { ELEMENT_META, charToElement } from "@/lib/saju/elements";
+import { ELEMENT_META, charToElement, formatStemBranchLabels } from "@/lib/saju/elements";
 import {
   computeManAge,
   pickCurrentAndUpcomingCycles,
@@ -181,8 +181,21 @@ function chapter(
   };
 }
 
-/** Compact seun/pillar label: 丙午(병오) — no nested 병(丙) wrapping. */
-function pillarText(pillar: PillarDisplay): string {
+/** Compact seun/pillar label: KO 丙午(병오); EN 丙午 (ByeongO) — no Hangul on EN. */
+function pillarText(pillar: PillarDisplay, locale: Locale = "ko"): string {
+  if (locale === "en") {
+    const { stemLabel, branchLabel } = formatStemBranchLabels(
+      pillar.stemHanja || pillar.stem,
+      pillar.branchHanja || pillar.branch,
+      "en"
+    );
+    const stemR = stemLabel.match(/\(([^)]+)\)/)?.[1]?.trim() ?? "";
+    const branchR = branchLabel.match(/\(([^)]+)\)/)?.[1]?.trim() ?? "";
+    // e.g. Mu + Jin → Mujin (match requested EN form)
+    const roman =
+      stemR && branchR ? `${stemR}${branchR.toLowerCase()}` : `${stemR}${branchR}`;
+    return roman ? `${pillar.pillar} (${roman})` : pillar.pillar;
+  }
   const stemHangul = pillar.stemLabel.replace(/\([^)]*\)/g, "").trim();
   const branchHangul = pillar.branchLabel.replace(/\([^)]*\)/g, "").trim();
   if (stemHangul && branchHangul) {
@@ -770,7 +783,7 @@ function buildTemplateRoadmap(
       body:
         locale === "ko"
           ? `${pillarText(cycle.pillar)} 대운: ${bodiesKo[index] ?? bodiesKo[0]}`
-          : `${pillarText(cycle.pillar)} cycle: ${bodiesEn[index] ?? bodiesEn[0]}`,
+          : `${pillarText(cycle.pillar, "en")} cycle: ${bodiesEn[index] ?? bodiesEn[0]}`,
     };
   });
 
@@ -1021,7 +1034,15 @@ export function formatStructuredSectionBodies(
   const cleaned: Partial<Record<string, string>> = {};
   for (const [sectionId, text] of Object.entries(raw)) {
     if (!text?.trim()) continue;
-    cleaned[sectionId] = sanitizeLlmSlotText(`assemble:${sectionId}`, text);
+    const sanitized = sanitizeLlmSlotText(`assemble:${sectionId}`, text);
+    cleaned[sectionId] =
+      locale === "en"
+        ? sanitized
+            .replace(/[\uac00-\ud7a3]+/g, "")
+            .replace(/[ \t]{2,}/g, " ")
+            .replace(/\s+([,.;:!?])/g, "$1")
+            .trim()
+        : sanitized;
   }
   return cleaned;
 }
@@ -1062,7 +1083,7 @@ ${slots || "십성 데이터를 표준 축으로 정리했습니다."}
   return `${nickname} chart structure keys into ${focus}.
 
 Day master ${saju.pillars.day.stemLabel} (${saju.pillars.day.stemHanja}) · day-master element ${elLabel(dayMasterElement(saju), locale)} (chart-dominant ${elLabel(saju.dominantElement, locale)})
-${saju.birthTimeUnknown ? "Hour unknown — three-pillar reading (year, month, day)." : `Four pillars including hour ${pillarText(saju.pillars.hour!)}.`}
+${saju.birthTimeUnknown ? "Hour unknown — three-pillar reading (year, month, day)." : `Four pillars including hour ${pillarText(saju.pillars.hour!, "en")}.`}
 
 ${slots || "Ten-God axes are organized on standard pillars."}
 
@@ -1185,7 +1206,7 @@ ${summary.story}
 
   const coverBodyEn = `${name}'s ${typeLabel} report.
 
-Pillars: Year ${pillarText(saju.pillars.year)}, Month ${pillarText(saju.pillars.month)}, Day ${pillarText(saju.pillars.day)}${includeHour ? `, Hour ${pillarText(hour)}` : " (hour unknown, three-pillar reading)"}.
+Pillars: Year ${pillarText(saju.pillars.year, "en")}, Month ${pillarText(saju.pillars.month, "en")}, Day ${pillarText(saju.pillars.day, "en")}${includeHour ? `, Hour ${pillarText(hour, "en")}` : " (hour unknown, three-pillar reading)"}.
 
 ${summary.story}
 

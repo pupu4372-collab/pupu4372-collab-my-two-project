@@ -22,6 +22,11 @@ function pdfSafeText(value: string): string {
     .replace(/[–—]/g, "-");
 }
 
+/** Keep hyphenated EN product titles from mid-compound wraps (Major- / Luck). */
+function pdfTitleText(value: string): string {
+  return pdfSafeText(value).replace(/-/g, "\u2011");
+}
+
 function paragraph(text: string, style: string = "body"): Content {
   return { text: pdfSafeText(text), style, margin: [0, 0, 0, 8] };
 }
@@ -39,6 +44,13 @@ export function buildPdfCoverBlocks(
   const reportTypeLabel = isKo
     ? REPORT_TYPE_LABELS[reportTypeKey]
     : REPORT_TYPE_LABELS_EN[reportTypeKey];
+  const enTitleNeedsFit = !isKo && reportTypeLabel.length > 22;
+  const coverSubtitleOpts = enTitleNeedsFit
+    ? { fontSize: 12, lineHeight: 1.35 }
+    : {};
+  const reportTitleOpts = enTitleNeedsFit
+    ? { fontSize: 18, lineHeight: 1.25 }
+    : {};
   const motto = isKo
     ? "운명을 아는 것(知)에서 그치지 않고,\n그 흐름을 멀리서 관조(觀)하며 대처하는 법을 익히는 서재"
     : "A study where knowing fate (知) meets\nobserving its flow (觀).";
@@ -80,10 +92,11 @@ export function buildPdfCoverBlocks(
 
   blocks.push(
     {
-      text: pdfSafeText(reportTypeLabel),
+      text: pdfTitleText(reportTypeLabel),
       style: "coverSubtitle",
       alignment: "center",
       margin: [0, 4, 0, 12],
+      ...coverSubtitleOpts,
     },
     { text: pdfSafeText(motto), style: "coverMotto", alignment: "center", margin: [0, 0, 0, 8] },
     { text: pdfSafeText(maxim), style: "coverMaxim", alignment: "center", margin: [0, 0, 0, 20] },
@@ -103,7 +116,12 @@ export function buildPdfCoverBlocks(
               style: "bodyMuted",
               margin: [0, 4, 0, 0],
             },
-            { text: reportTypeLabel, style: "reportTypeTitle", margin: [0, 6, 0, 0] },
+            {
+              text: pdfTitleText(reportTypeLabel),
+              style: "reportTypeTitle",
+              margin: [0, 6, 0, 0],
+              ...reportTitleOpts,
+            },
           ],
         },
         {
