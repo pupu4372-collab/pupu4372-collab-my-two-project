@@ -1,4 +1,8 @@
-import { REPORT_PROMPT_SCORE_RULES } from "../base-prompt";
+import {
+  ENGLISH_ONLY_RULE,
+  REPORT_PROMPT_SCORE_RULES,
+  REPORT_PROMPT_SCORE_RULES_EN,
+} from "../base-prompt";
 import type { ReportSlotPromptMap } from "../prompt-definition";
 
 /** No.09 · 월간 로드맵 (monthly) — S4: 4영역+행운의 날 / S7: 5일×6구간 */
@@ -251,4 +255,241 @@ cohortInsight.body: 동일 명식 구조 코호트 통찰 2줄 (120자)
   - 경향성만: "~하는 경향이 뚜렷합니다", "~한 경우가 많습니다"
   - 수치 비유는 '열에 일곱은' 수준 관용만 허용
   - 상품 구매자·독자 자기지시 금지`,
+};
+
+/* —— EN path. KO SLOTS above must stay byte-stable. —— */
+
+const OUTPUT_FORMAT_RULES_EN = `★ Shared output format:
+  - Do not put internal "[Label]:" / "[Label]" markers in prose — natural sentences and JSON fields only
+  - No markdown (**bold**, # headers, backticks)
+  - tip / countermeasure / script strings must not embed UI labels ("How to catch:", "Countermeasure:")
+  - decisionMoments.script = spoken lines only, without wrapping quotes (the renderer adds them)`;
+
+const ELEMENT_DEFICIENCY_RULE_EN = `★ Element consistency:
+  Follow pillarBlock element distribution (%) and the lowest-% deficient element.
+  When naming a shortage, point only at the lowest-% element.
+  Do not invent a deficient element absent from the input, or treat the second-lowest as the shortage.`;
+
+const SCORE_CITATION_RULE_EN = `★ Score citation consistency:
+  Later sections that cite S3 scores must reuse the exact label strings and numbers from scores[].
+  Do not invent alternate labels or numbers.`;
+
+const CARE_STYLE_EN = `★ Voice — care-oriented: end paragraphs with actionable next steps executable this month.
+  Explain chart jargon in plain everyday English; do not dump bare ten-god jargon into the body.
+  ★ en: natural everyday English. No romanization dumps or myeongri term lists.`;
+
+const MONTHLY_S3_SCORES_SCHEMA_EN = `{
+  "narrative": "string",
+  "scores": [
+    { "label": "${MONTHLY_SCORE_LABELS_EN[0]}", "score": number, "description": "string" },
+    { "label": "${MONTHLY_SCORE_LABELS_EN[1]}", "score": number, "description": "string" },
+    { "label": "${MONTHLY_SCORE_LABELS_EN[2]}", "score": number, "description": "string" },
+    { "label": "${MONTHLY_SCORE_LABELS_EN[3]}", "score": number, "description": "string" },
+    { "label": "${MONTHLY_SCORE_LABELS_EN[4]}", "score": number, "description": "string" },
+    { "label": "${MONTHLY_SCORE_LABELS_EN[5]}", "score": number, "description": "string" }
+  ]
+}`;
+
+const COHORT_RULE_EN = `cohortInsight.body: two lines of chart-cohort insight (~120 chars)
+  - Subject: "People with [trait/structure]…"
+  - ★ No fake survey percentages ("appears in ~%", "reaches about N%")
+  - Tendency language only ("tend to…", "often…", "relatively higher/lower")
+  - Folklore "seven out of ten" is OK; integer percent lists are not
+  - No self-reference to buyers/readers of this product`;
+
+const MONTH_BOUND_RULE_EN = `★ Month-bound only:
+  Every time reference must stay inside this month (early/mid/late or date bands).
+  No age-based, decade, or lifetime framing.
+  Advice must be concrete actions executable this month.`;
+
+export const SLOTS_EN: ReportSlotPromptMap = {
+  "saju-structure": `■ S2 Chart structure · this month's monthly luck
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+
+★ Must reference this month's monthly branch and element % from pillarBlock·reportSpecificBlock. Require "this month" phrasing.
+
+Output schema:
+{ "sajuStructure": "string" }
+
+Within ~600 characters. Natural paragraphs only in one sajuStructure field (no internal labels).
+
+Include (as paragraphs):
+- How the dominant element shapes life·this month
+- Deficient element (lowest % only) + this-month support moves
+- Core task linking dominant+deficient + support suggestion
+- How this month's qi meshes with the natal chart (plain English)
+- This month's character (rehearsal/execution/tune-up) + one operating principle
+  e.g. "Conservative on relationships; aggressive on work and money"
+
+${REPORT_PROMPT_SCORE_RULES_EN}
+
+${CARE_STYLE_EN}
+${MONTH_BOUND_RULE_EN}`,
+
+  "master-narrative": `■ S3 Core fortune indicators + deep_narrative · this month
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+${MONTHLY_S3_SCORES_SCHEMA_EN}
+
+※ Field aliases allowed: name↔label, desc↔description (prefer label/description)
+
+Within ~750 characters (narrative + scores descriptions combined). This month's monthly luck × natal chart.
+
+[Six indicators] scores[] with MONTHLY_SCORE_LABELS_EN labels exactly (keep spaces), each score/100 + description ~40 chars:
+- Current fortune strength (sense of major·year·month luck combined)
+- Timing fit (act · tidy · wait)
+- Opportunity catch
+- Crisis avoidance (50–72)
+- Relationship luck
+- Wealth flow
+
+Score rules: integers 50–90, six-item average 72–82, Crisis avoidance alone relatively lower at 50–72.
+Strongest preferably ≥80; weakest preferably ≤55.
+
+[Deep narrative]: narrative field (250–300 chars)
+  ※ {{dayPillarLabel}} once + this month's core mechanics in everyday English
+  ※ Where this month sits inside the major luck (rehearsal, harvest prep, etc.) — no jargon dumps
+  ※ One attitude slogan for the month (e.g. "Three imperfect executions beat one perfect plan")
+★ Forbidden: domain scores (N points, N/10) or domain analysis in narrative — that belongs in S4 (deep-analysis).
+${MONTH_BOUND_RULE_EN}`,
+
+  "deep-analysis": `■ S4 Deep analysis · Monthly Roadmap exclusive (core of this report)
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{
+  "intro": "string",
+  "domains": [
+    { "domain": "Career", "score": number, "analysis": "string" },
+    { "domain": "Finance", "score": number, "analysis": "string" },
+    { "domain": "Relationships", "score": number, "analysis": "string" },
+    { "domain": "Health", "score": number, "analysis": "string" }
+  ],
+  "luckyDates": ["string", "string", "string"]
+}
+
+※ Aliases allowed: score_out_of_10↔score, name/title↔domain, body/desc↔analysis
+※ Do not cram domain analysis into one deepAnalysis string — use the domains array.
+
+{{narrative}}
+
+intro: this month's energy + early/mid/late flow only (100–120 chars, address as {{dayPillarLabel}}).
+  ★ Do not put domain scores, domain analysis, or lucky dates in intro.
+
+domains: exactly 4. domain names exactly as above (English).
+  score: integer out of 10 (6–8 preferred; Relationships 6–7).
+  analysis: 100–120 chars each (Career=work energy·conflict·action / Finance=income·spend·invest /
+  Relationships=new vs existing / Health=lowest-% deficient element·watch areas·habits).
+
+luckyDates: exactly 3 date strings this month (monthly luck·day-stem flow, ~9–10 days apart).
+  ★ Only dates after the issue date (e.g. issued on the 11th → ["15th", "22nd", "28th"]).
+  e.g. ["7th", "16th", "25th"]
+${MONTH_BOUND_RULE_EN}`,
+
+  opportunities: `■ S5 Five opportunities · this month
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${SCORE_CITATION_RULE_EN}
+
+★ Action directives (tip·countermeasure·roadmap·decision script·lucky dates) only use dates on/after the issue date.
+  (Respect issue date and remaining dates this month from the input.)
+
+Output schema:
+{ "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }
+
+{{narrative}}
+
+Exactly 5. title ≤10 chars, body ties to this month's chart (~80 chars),
+tip: concrete date-band·action guidance (100–120 chars). May link lucky dates.
+★ Do not prefix tip with "How to catch:" — the UI already adds it.
+${MONTH_BOUND_RULE_EN}`,
+
+  risks: `■ S6 Four predicted risks + countermeasures · this month
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{ "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
+
+{{narrative}}
+
+Exactly 4. title ≤10 chars, body chart basis (~80 chars),
+countermeasure: this-month practice + optional date band (100–120 chars).
+★ Do not prefix countermeasure with "Countermeasure:" — the UI already adds it.
+${MONTH_BOUND_RULE_EN}`,
+
+  roadmap: `■ S7 Time roadmap + decision scripts · 5-day × 6 bands
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{
+  "roadmap": [{ "period": "string", "label": "string", "body": "string" }],
+  "decisionMoments": [{ "situation": "string", "script": "string" }]
+}
+
+{{narrative}}
+
+★ period = date bands within this month only. No age·decade·major-luck spans.
+
+roadmap exactly 6 items (fixed):
+- 1–5: tidy·check·prepare
+- 6–10: propose·communicate·ideas
+- 11–15: execute·test
+- 16–20: relationship tuning
+- 21–25: finance structure
+- 26–30: review·next-month design
+
+Each body 100–130 chars, two sentences: (1) why this band fits this month's qi·natal chart
+(2) concrete action. If citing S3 scores, reuse exact label strings and numbers only.
+
+decisionMoments 4 items (script = spoken only, no wrapping quotes, ~100 chars):
+- negotiation hesitation / unreasonable demand / family money conflict / pushing work while exhausted
+★ Spoken voice: short as if said aloud; avoid formal written tone.
+
+Fold decision frames Q1–Q3 into the last roadmap body (26–30) naturally:
+- Emotion vs data? / Structure three years out? / What can I control directly?
+${MONTH_BOUND_RULE_EN}`,
+
+  prophecy: `■ S8 Sealed prophecy · lucky keyword card
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+
+Output schema:
+{
+  "prophecy": { "short": "string", "full": "string" },
+  "cohortInsight": { "body": "string" }
+}
+
+★ Required: fill prophecy(short, full) and cohortInsight(body).
+
+{{narrative}}
+
+prophecy.short: must equal the fixed value below (no rewrite):
+{{luckyKeywordsShort}}
+prophecy.full: sealed prophecy — ★ rules required
+  - Current year is {{currentYear}}. Future moments only after {{currentYear}}
+  - Two separate future years (concrete years in issue+1–3 range); do not blur into one span
+  - Causality between this month's action and those future scenes (100–120 chars)
+  - No myeongri jargon dumps — real scenarios · colloquial advice voice
+
+${COHORT_RULE_EN}`,
 };

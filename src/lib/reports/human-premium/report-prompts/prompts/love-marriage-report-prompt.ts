@@ -1,5 +1,9 @@
 ﻿import type { ReportSlotPromptMap } from "../prompt-definition";
 import {
+  ENGLISH_ONLY_RULE,
+  REPORT_PROMPT_SCORE_RULES_EN,
+} from "../base-prompt";
+import {
   CARE_STYLE,
   COHORT_RULE,
   ELEMENT_DEFICIENCY_RULE,
@@ -13,6 +17,7 @@ import {
   S3_SCORES_SCHEMA,
   SCORE_CITATION_RULE,
 } from "../newgen-common";
+import { S3_SCORES_SCHEMA_EN } from "./annual-report-prompt";
 
 /** No.05 · 로맨스시그널 (love) */
 export const FOCUS_KO =
@@ -141,4 +146,195 @@ prophecy.short: 반드시 아래 고정값을 그대로 (창작 금지):
 prophecy.full: 관계·인연 장면, 서로 다른 미래 시점 2개 분리 (120자).
 ${PROPHECY_TWO_MOMENTS_RULE}
 ${COHORT_RULE}`,
+};
+
+/* —— EN path. KO SLOTS above must stay byte-stable. —— */
+
+const OUTPUT_FORMAT_RULES_EN = `★ Shared output format:
+  - Do not put internal "[Label]:" / "[Label]" markers in prose — natural sentences and JSON fields only
+  - No markdown (**bold**, # headers, backticks)
+  - tip / countermeasure / script strings must not embed UI labels ("How to catch:", "Countermeasure:")
+  - decisionMoments.script = spoken lines only, without wrapping quotes (the renderer adds them)`;
+
+const JSON_OUTPUT_FORCE_RULE_EN = `★ Force machine-parseable JSON:
+  - JSON only. No markdown fences (\`\`\`) or stray backticks
+  - Each item needs title / body / tip (or countermeasure)
+  - opportunities: exactly 5; risks: exactly 4
+  - Do not put raw double-quotes (") inside string values (breaks JSON)`;
+
+const ELEMENT_DEFICIENCY_RULE_EN = `★ Element consistency:
+  Follow pillarBlock element distribution (%) and the lowest-% deficient element.
+  When naming a shortage, point only at the lowest-% element.`;
+
+const SCORE_CITATION_RULE_EN = `★ Score citation consistency:
+  Later sections that cite S3 scores must reuse the exact label strings and numbers from scores[].
+  Do not invent alternate labels or numbers.`;
+
+const CARE_STYLE_EN = `★ Voice — care-oriented: end paragraphs with actionable next steps.
+  Explain chart jargon in plain English; do not dump bare ten-god jargon into the body.`;
+
+const S3_SCORE_RULES_BLOCK_EN = `${REPORT_PROMPT_SCORE_RULES_EN}
+- Score range: integers 50–90. Crisis avoidance only 50–72.
+- Average of the other five indicators 72–82.
+- Do not put domain scores (N points, N/10, quarter scores) in narrative — those belong in S4.
+- scores.label must be exactly the six English names above (spelling and spaces).
+- ★ Topic differentiation: reflect this romance topic in the score mix. Keep strongest ≥80, Crisis avoidance 50–72, average 72–82, but vary the mix. Avoid all-even endings or repeated number sets.
+- ★ description must match score rank: highest = most prominent/strong; lower = relatively needs support.
+★ Relationship luck allowed in the 75–90 upper band (romance product). Crisis avoidance must stay 50–72.
+  Wealth flow follows the common 50–90 range and average rules (no upper-band exception).`;
+
+const PROPHECY_TWO_MOMENTS_RULE_EN = `★ prophecy.full — two moments required:
+  - Two distinct future moments (concrete year or age) + separate scene for each
+  - Forbidden: a single moment or one blob like "after age OO"
+  - Moments only after {{currentYear}}`;
+
+const COHORT_RULE_EN = `cohortInsight.body: two lines of chart-cohort insight (~120 chars)
+  - Subject: "People with [trait/structure]…"
+  - ★ No fake survey percentages ("appears in ~%", "reaches about N%")
+  - Tendency language only ("tend to…", "often…", "relatively higher/lower")
+  - Folklore "seven out of ten" is OK; integer percent lists are not
+  - No self-reference to buyers/readers of this product`;
+
+const NUMERIC_RANGE_RULE_EN = `★ Numeric consistency:
+  - Prefer ranges (e.g. about 10–20%) over single-point percentages or spans
+  - Future daewoon allocation advice must use ranges
+  - Do not invent hard numbers that contradict earlier narrative or deep analysis`;
+
+const ROADMAP_DAEWOON_RULE_EN = `★ period (block header) = only the sub-years that block's body covers:
+  - Correct: "2030–2034 (next major-luck first half)", "2035–2039 (next major-luck second half)"
+  - Forbidden: one 10-year period ("2030–2039") with body alone split into halves
+  - Forbidden: duplicate period strings across different blocks
+  - label: short sub-span name (first/second half · path so far, etc.)
+
+★ Past summary (path so far):
+  - If there is past before the current major luck, compress it into 1 leading roadmap block (do not split individual past daewoon)
+  - Retrospective voice only ("those years shaped…"). No action commands
+  - period e.g. "past–before current major luck" or a real past year cluster
+  - Young charts (current is first/early second daewoon) may omit this block
+
+★ Detail level:
+  - ★Current major luck + ★next major luck only — each split into two 5-year blocks (first half / second half)
+  - "Next major luck" = the single cycle immediately after current (input's ★next major-luck mark / engine span)
+  - Later distant / past cycles stay as one 10-year block (do not 5-year-split like next)
+  - Forbidden: writing the next cycle as one 10-year block like "2033–2042 (next major luck)"`;
+
+export const SLOTS_EN: ReportSlotPromptMap = {
+  "saju-structure": `■ S2 Chart structure · love & marriage
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+
+Output schema:
+{ "sajuStructure": "string" }
+
+About 600 characters. Natural paragraphs only. Dominant/deficient (lowest % only) · relationship patterns · current major-luck reset.
+${CARE_STYLE_EN}`,
+
+  "master-narrative": `■ S3 Core fortune indicators + narrative · love & marriage
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+${S3_SCORES_SCHEMA_EN}
+
+${S3_SCORE_RULES_BLOCK_EN}
+
+scores description ~40 chars each, relationship context:
+Current fortune strength / Timing fit (new vs existing) / Opportunity catch /
+Crisis avoidance (50–72) / Relationship luck (75–90) / Wealth flow
+
+narrative ~200 chars. No domain N/10 mentions.`,
+
+  "deep-analysis": `■ S4 Deep analysis · Romance Signal
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{
+  "intro": "string",
+  "sections": [{ "title": "string", "body": "string" }]
+}
+
+{{narrative}}
+
+intro: relationship lead-in only (80–100 chars).
+sections exactly 4, fixed titles:
+1) "Love style" — strengths · complements · comfortable settings (~120 chars)
+2) "Ideal partner type" — complementary traits · types to watch · activation windows (~120 chars)
+3) "Relationship conflict patterns" — 2–3 recurring conflicts + resolution (~150 chars)
+4) "Resetting the current relationship" — major-luck impact · speech shifts · 3 routines (~200 chars)`,
+
+  opportunities: `■ S5 Five opportunities · love & marriage
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{ "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }
+
+{{narrative}}
+
+Exactly 5. Do not prefix tip with "How to catch:".`,
+
+  risks: `■ S6 Four predicted risks · love & marriage
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{ "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
+
+{{narrative}}
+
+Exactly 4. Do not prefix countermeasure with "Countermeasure:".`,
+
+  roadmap: `■ S7 Time roadmap · major luck + 6 routine steps
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+${NUMERIC_RANGE_RULE_EN}
+${ROADMAP_DAEWOON_RULE_EN}
+
+Output schema:
+{
+  "roadmap": [{ "period": "string", "label": "string", "body": "string" }],
+  "decisionMoments": [{ "situation": "string", "script": "string" }]
+}
+
+{{narrative}}
+
+roadmap 6–7 items (past summary 1 + ★current·next 5-year splits + later).
+decisionMoments 4 (partner·family). script = spoken only, without wrapping quotes.`,
+
+  prophecy: `■ S8 Sealed prophecy · love & marriage
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{
+  "prophecy": { "short": "string", "full": "string" },
+  "cohortInsight": { "body": "string" }
+}
+
+{{narrative}}
+
+prophecy.short: must equal the fixed value below (no rewrite):
+{{luckyKeywordsShort}}
+prophecy.full: relationship·bond scenes; two distinct future moments separated (~120 chars).
+${PROPHECY_TWO_MOMENTS_RULE_EN}
+${COHORT_RULE_EN}`,
 };

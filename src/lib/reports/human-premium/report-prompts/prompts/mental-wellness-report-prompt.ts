@@ -1,5 +1,9 @@
 ﻿import type { ReportSlotPromptMap } from "../prompt-definition";
 import {
+  ENGLISH_ONLY_RULE,
+  REPORT_PROMPT_SCORE_RULES_EN,
+} from "../base-prompt";
+import {
   CARE_STYLE,
   COHORT_RULE,
   ELEMENT_DEFICIENCY_RULE,
@@ -11,6 +15,7 @@ import {
   S3_SCORES_SCHEMA,
   SCORE_CITATION_RULE,
 } from "../newgen-common";
+import { S3_SCORES_SCHEMA_EN } from "./annual-report-prompt";
 
 /** No.03 · 멘탈디톡스 (mental) */
 export const FOCUS_KO =
@@ -134,4 +139,167 @@ prophecy.short: 반드시 아래 고정값을 그대로 (창작 금지):
 prophecy.full: 대운 파장·감정 관리, 서로 다른 미래 시점 2개 분리 (120자).
 ${PROPHECY_TWO_MOMENTS_RULE}
 ${COHORT_RULE}`,
+};
+
+/* —— EN path. KO SLOTS above must stay byte-stable. —— */
+
+const OUTPUT_FORMAT_RULES_EN = `★ Shared output format:
+  - Do not put internal "[Label]:" / "[Label]" markers in prose — natural sentences and JSON fields only
+  - No markdown (**bold**, # headers, backticks)
+  - tip / countermeasure / script strings must not embed UI labels ("How to catch:", "Countermeasure:")
+  - decisionMoments.script = spoken lines only, without wrapping quotes (the renderer adds them)`;
+
+const JSON_OUTPUT_FORCE_RULE_EN = `★ Force machine-parseable JSON:
+  - JSON only. No markdown fences (\`\`\`) or stray backticks
+  - Each item needs title / body / tip (or countermeasure)
+  - opportunities: exactly 5; risks: exactly 4
+  - Do not put raw double-quotes (") inside string values (breaks JSON)`;
+
+const ELEMENT_DEFICIENCY_RULE_EN = `★ Element consistency:
+  Follow pillarBlock element distribution (%) and the lowest-% deficient element.
+  When naming a shortage, point only at the lowest-% element.`;
+
+const SCORE_CITATION_RULE_EN = `★ Score citation consistency:
+  Later sections that cite S3 scores must reuse the exact label strings and numbers from scores[].
+  Do not invent alternate labels or numbers.`;
+
+const CARE_STYLE_EN = `★ Voice — care-oriented: end paragraphs with actionable next steps.
+  Explain chart jargon in plain English; do not dump bare ten-god jargon into the body.`;
+
+const S3_SCORE_RULES_BLOCK_EN = `${REPORT_PROMPT_SCORE_RULES_EN}
+- Score range: integers 50–90. Crisis avoidance only 50–72.
+- Average of the other five indicators 72–82.
+- Do not put domain scores (N points, N/10, quarter scores) in narrative — those belong in S4.
+- scores.label must be exactly the six English names above (spelling and spaces).
+- ★ Topic differentiation: reflect this mental topic in the score mix. Keep strongest ≥80, Crisis avoidance 50–72, average 72–82, but vary the mix. Avoid all-even endings or repeated number sets.
+- ★ description must match score rank: highest = most prominent/strong; lower = relatively needs support.`;
+
+const PROPHECY_TWO_MOMENTS_RULE_EN = `★ prophecy.full — two moments required:
+  - Two distinct future moments (concrete year or age) + separate scene for each
+  - Forbidden: a single moment or one blob like "after age OO"
+  - Moments only after {{currentYear}}`;
+
+const COHORT_RULE_EN = `cohortInsight.body: two lines of chart-cohort insight (~120 chars)
+  - Subject: "People with [trait/structure]…"
+  - ★ No fake survey percentages ("appears in ~%", "reaches about N%")
+  - Tendency language only ("tend to…", "often…", "relatively higher/lower")
+  - Folklore "seven out of ten" is OK; integer percent lists are not
+  - No self-reference to buyers/readers of this product`;
+
+export const SLOTS_EN: ReportSlotPromptMap = {
+  "saju-structure": `■ S2 Chart structure · mind & mental
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+
+Output schema:
+{ "sajuStructure": "string" }
+
+About 600 characters. Natural paragraphs only. Dominant/deficient (lowest % only) · emotion · recovery patterns.
+${CARE_STYLE_EN}`,
+
+  "master-narrative": `■ S3 Core fortune indicators + narrative · mental
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${ELEMENT_DEFICIENCY_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+${S3_SCORES_SCHEMA_EN}
+
+${S3_SCORE_RULES_BLOCK_EN}
+
+scores description ~40 chars each, mental context:
+Current fortune strength (emotional energy) / Timing fit (inner exploration) / Opportunity catch (intuition·empathy) /
+Crisis avoidance (50–72, burnout) / Relationship luck (emotional connection) / Wealth flow (mind→material indirect)
+
+narrative ~200 chars. No domain N/10 mentions.`,
+
+  "deep-analysis": `■ S4 Deep analysis · Mental Detox
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{
+  "intro": "string",
+  "sections": [{ "title": "string", "body": "string" }]
+}
+
+{{narrative}}
+
+intro: mental lead-in only (80–100 chars).
+sections exactly 4, fixed titles:
+1) "Inner psyche type" — type name · strengths · comfortable settings (~120 chars)
+2) "Stress patterns" — triggers · signals · recovery (~200 chars)
+3) "Emotion management" — immediate/daily/crisis vows (no wrapping quotes) · recovery pace (~200 chars)
+4) "Resolving interpersonal conflict" — pattern · 3-step resolution (~200 chars)`,
+
+  opportunities: `■ S5 Five opportunities · mental
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{ "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }
+
+{{narrative}}
+
+Exactly 5. Do not prefix tip with "How to catch:".`,
+
+  risks: `■ S6 Four predicted risks · mental
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{ "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
+
+{{narrative}}
+
+Exactly 4. Do not prefix countermeasure with "Countermeasure:". Mind·body actions on both sides.`,
+
+  roadmap: `■ S7 Time roadmap · six recovery stages
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+${SCORE_CITATION_RULE_EN}
+
+Output schema:
+{
+  "roadmap": [{ "period": "string", "label": "string", "body": "string" }],
+  "decisionMoments": [{ "situation": "string", "script": "string" }]
+}
+
+{{narrative}}
+
+roadmap 6 items (year-span · recovery stages). decisionMoments 4. script = spoken only, without wrapping quotes.`,
+
+  prophecy: `■ S8 Sealed prophecy · mental
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{
+  "prophecy": { "short": "string", "full": "string" },
+  "cohortInsight": { "body": "string" }
+}
+
+{{narrative}}
+
+prophecy.short: must equal the fixed value below (no rewrite):
+{{luckyKeywordsShort}}
+prophecy.full: major-luck waves · emotion care; two distinct future moments separated (~120 chars).
+${PROPHECY_TWO_MOMENTS_RULE_EN}
+${COHORT_RULE_EN}`,
 };

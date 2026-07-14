@@ -10,8 +10,14 @@ import {
 import type { HumanPremiumPromptProductKey } from "./products";
 import { getProductSlotMap } from "./prompts";
 import { SLOTS_EN as YEARLY_SLOTS_EN } from "./prompts/annual-report-prompt";
+import { SLOTS_EN as BUSINESS_SLOTS_EN } from "./prompts/business-partner-report-prompt";
+import { SLOTS_EN as CAREER_SLOTS_EN } from "./prompts/career-roadmap-report-prompt";
 import { SLOTS_EN as DECADE_SLOTS_EN } from "./prompts/decade-life-strategy-report-prompt";
 import { SLOTS_EN as LIFETIME_SLOTS_EN } from "./prompts/lifetime-life-strategy-report-prompt";
+import { SLOTS_EN as LOVE_SLOTS_EN } from "./prompts/love-marriage-report-prompt";
+import { SLOTS_EN as MENTAL_SLOTS_EN } from "./prompts/mental-wellness-report-prompt";
+import { SLOTS_EN as MONTHLY_SLOTS_EN } from "./prompts/monthly-life-architecture-report-prompt";
+import { SLOTS_EN as WEALTH_SLOTS_EN } from "./prompts/wealth-growth-report-prompt";
 import { resolvePromptProduct } from "./registry";
 import {
   applyPromptTemplate,
@@ -32,6 +38,12 @@ const EN_PRODUCT_SLOTS: Partial<
   yearly: YEARLY_SLOTS_EN,
   decade: DECADE_SLOTS_EN,
   lifetime: LIFETIME_SLOTS_EN,
+  career: CAREER_SLOTS_EN,
+  love: LOVE_SLOTS_EN,
+  wealth: WEALTH_SLOTS_EN,
+  business: BUSINESS_SLOTS_EN,
+  mental: MENTAL_SLOTS_EN,
+  monthly: MONTHLY_SLOTS_EN,
 };
 
 /**
@@ -39,8 +51,8 @@ const EN_PRODUCT_SLOTS: Partial<
  * system = BASE_SYSTEM
  * Returns null when the product slot is empty (caller uses template defaults).
  *
- * EN path (yearly / decade / lifetime): EN system/user base + SLOTS_EN.
- * Other products keep the existing Korean slot map even when locale is en.
+ * EN path (paid topics with SLOTS_EN): EN system/user base + product SLOTS_EN.
+ * Daily and any product without SLOTS_EN keep Korean slots even when locale is en.
  * KO path: byte-stable use of REPORT_PROMPT_* and KO SLOTS.
  */
 export function buildSlotPrompt(
