@@ -1,3 +1,4 @@
+import { Webhook } from "@portone/server-sdk";
 import {
   fetchPortOnePayment,
   isPortOnePaymentPaid,
@@ -20,10 +21,25 @@ interface PortOneWebhookBody {
   paymentId?: string;
   tx_id?: string;
   payment?: { id?: string; status?: string };
+  data?: { paymentId?: string };
 }
 
 function extractPaymentId(body: PortOneWebhookBody): string | null {
-  return body.paymentId ?? body.payment?.id ?? null;
+  return (
+    body.paymentId ??
+    body.payment?.id ??
+    (typeof body.data?.paymentId === "string" ? body.data.paymentId : null) ??
+    null
+  );
+}
+
+function clientIp(request: Request): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  return request.headers.get("x-real-ip")?.trim() || "unknown";
 }
 
 export async function POST(request: Request) {
@@ -31,9 +47,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "PortOne not configured." }, { status: 503 });
   }
 
+  const secret = process.env.PORTONE_V2_WEBHOOK_SECRET?.trim();
+  if (!secret) {
+    console.error("[WEBHOOK_SECRET_MISSING_FALLBACK]", {
+      ip: clientIp(request),
+    });
+    return NextResponse.json({ error: "webhook_secret_missing" }, { status: 500 });
+  }
+
+  const rawBody = await request.text();
+
+  try {
+    await Webhook.verify(secret, rawBody, {
+      "webhook-id": request.headers.get("webhook-id") ?? undefined,
+      "webhook-signature": request.headers.get("webhook-signature") ?? undefined,
+      "webhook-timestamp": request.headers.get("webhook-timestamp") ?? undefined,
+    });
+  } catch (err) {
+    console.error("[WEBHOOK_SIGNATURE_INVALID_FALLBACK]", {
+      ip: clientIp(request),
+      message: err instanceof Error ? err.message : String(err),
+    });
+    return NextResponse.json({ error: "invalid_webhook_signature" }, { status: 401 });
+  }
+
   let body: PortOneWebhookBody;
   try {
-    body = (await request.json()) as PortOneWebhookBody;
+    body = JSON.parse(rawBody) as PortOneWebhookBody;
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }

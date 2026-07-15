@@ -50,6 +50,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Cart order not found." }, { status: 404 });
     }
 
+    // Logged-in carts: only the owning user may fulfill. Guest carts (user_id null) skip this check.
+    if (row.user_id) {
+      const requesterId = await getUserIdFromRequest(request);
+      if (!requesterId || requesterId !== row.user_id) {
+        console.error("[CART_OWNERSHIP_MISMATCH_FALLBACK]", {
+          paymentId,
+          cartUserId: row.user_id,
+          requesterId,
+        });
+        return NextResponse.json({ error: "cart_ownership_mismatch" }, { status: 403 });
+      }
+    }
+
     const payment = await fetchPortOnePayment(paymentId);
     if (!payment || !isPortOnePaymentPaid(payment)) {
       return NextResponse.json({ error: "not_paid" }, { status: 400 });

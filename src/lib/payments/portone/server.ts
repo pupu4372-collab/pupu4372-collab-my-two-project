@@ -32,9 +32,10 @@ export async function fetchPortOnePayment(
   return (await response.json()) as PortOnePaymentSnapshot;
 }
 
+/** True only when funds are captured — virtual-account issued is not paid yet. */
 export function isPortOnePaymentPaid(payment: PortOnePaymentSnapshot): boolean {
   const status = payment.status?.toUpperCase() ?? "";
-  return status === "PAID" || status === "VIRTUAL_ACCOUNT_ISSUED";
+  return status === "PAID";
 }
 
 export function verifyPortOneAmount(
