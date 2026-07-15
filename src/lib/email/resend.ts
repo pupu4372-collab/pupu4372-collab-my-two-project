@@ -1,3 +1,12 @@
+interface ResendAttachment {
+  filename: string;
+  /** Base64-encoded file contents */
+  content: string;
+  contentType?: string;
+  /** For inline CID embeds (`cid:contentId` in HTML) */
+  contentId?: string;
+}
+
 interface ResendEmailRequest {
   to: string;
   subject: string;
@@ -5,6 +14,7 @@ interface ResendEmailRequest {
   text?: string;
   from?: string;
   replyTo?: string;
+  attachments?: ResendAttachment[];
 }
 
 export interface ResendEmailResult {
@@ -26,6 +36,7 @@ export async function sendResendEmail({
   text,
   from,
   replyTo,
+  attachments,
 }: ResendEmailRequest): Promise<ResendEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -45,6 +56,18 @@ export async function sendResendEmail({
       html,
       text,
       ...(replyTo ? { reply_to: replyTo } : {}),
+      ...(attachments?.length
+        ? {
+            attachments: attachments.map((file) => ({
+              filename: file.filename,
+              content: file.content,
+              ...(file.contentType ? { content_type: file.contentType } : {}),
+              ...(file.contentId
+                ? { content_id: file.contentId, contentId: file.contentId }
+                : {}),
+            })),
+          }
+        : {}),
     }),
   });
 

@@ -21,9 +21,10 @@ import { useLocale } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   clearSajuResultSession,
-  isBackForwardNavigation,
+  isValidSajuResultSession,
   readSajuResultSession,
   saveSajuResultSession,
+  type SajuResultSessionSnapshot,
 } from "@/lib/saju/saju-result-session";
 
 type Step = "form" | "result";
@@ -153,6 +154,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const autoSubmitPendingRef = useRef(false);
   const skipSoloPetRedirectRef = useRef(false);
   const soloPetRedirectAttemptedRef = useRef(false);
+  const sessionRestoreAppliedRef = useRef(false);
 
   const t = UI[locale];
   const mbtiQuestions = useMemo(
@@ -167,27 +169,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     ? "block text-xs font-medium text-plum/80"
     : FIELD_LABEL_CLASS;
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("new") === "1") {
-      clearSajuResultSession();
-      skipSoloPetRedirectRef.current = true;
-      router.replace("/saju");
-      return;
-    }
-
-    const shouldRestore =
-      params.get("restore") === "1" || isBackForwardNavigation();
-    if (!shouldRestore) return;
-
-    const saved = readSajuResultSession();
-    if (!saved) return;
-
-    const currentLocale: Locale = routeLocale === "en" ? "en" : "ko";
-    if (saved.locale !== currentLocale) return;
-
+  const applySessionSnapshot = useCallback((saved: SajuResultSessionSnapshot) => {
     setPetName(saved.petName);
     setSpecies(saved.species);
     setPetGender(saved.petGender);
@@ -198,11 +180,55 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     if (saved.mbtiAnswers) setMbtiAnswers(saved.mbtiAnswers);
     setResult(saved.result);
     setStep("result");
+    autoSubmitPendingRef.current = false;
+    sessionRestoreAppliedRef.current = true;
+    skipSoloPetRedirectRef.current = true;
+  }, []);
+
+  const tryRestoreFromSession = useCallback(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("new") === "1") return false;
+
+    const saved = readSajuResultSession();
+    if (!isValidSajuResultSession(saved)) return false;
+
+    applySessionSnapshot(saved);
+    return true;
+  }, [applySessionSnapshot]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("new") === "1") {
+      clearSajuResultSession();
+      skipSoloPetRedirectRef.current = true;
+      sessionRestoreAppliedRef.current = false;
+      router.replace("/saju");
+      return;
+    }
+
+    tryRestoreFromSession();
 
     if (params.get("restore") === "1") {
       router.replace("/saju");
     }
-  }, [router, routeLocale]);
+
+    const onPageShow = () => {
+      tryRestoreFromSession();
+    };
+    const onPopState = () => {
+      tryRestoreFromSession();
+    };
+
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [router, tryRestoreFromSession]);
 
   /** When the owner has exactly one pet, land on ?petId= to reuse prefill + auto-submit. */
   useEffect(() => {
@@ -211,12 +237,13 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     if (step !== "form") return;
     if (skipSoloPetRedirectRef.current) return;
     if (soloPetRedirectAttemptedRef.current) return;
+    if (sessionRestoreAppliedRef.current) return;
+    if (isValidSajuResultSession(readSajuResultSession())) return;
 
     const params = new URLSearchParams(window.location.search);
     if (params.get("petId")?.trim()) return;
     if (params.get("restore") === "1") return;
     if (params.get("new") === "1") return;
-    if (isBackForwardNavigation() && readSajuResultSession()) return;
 
     soloPetRedirectAttemptedRef.current = true;
     let cancelled = false;
@@ -328,6 +355,8 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
 
   useEffect(() => {
     if (typeof window === "undefined" || !accessToken || step !== "form") return;
+    if (sessionRestoreAppliedRef.current) return;
+    if (isValidSajuResultSession(readSajuResultSession())) return;
 
     const params = new URLSearchParams(window.location.search);
     const petIdParam = params.get("petId")?.trim();
@@ -360,6 +389,11 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   useEffect(() => {
     if (!autoSubmitPendingRef.current || step !== "form" || !consent || !birthDate) return;
     if (configured && !sessionReady) return;
+    if (sessionRestoreAppliedRef.current) return;
+    if (isValidSajuResultSession(readSajuResultSession())) {
+      autoSubmitPendingRef.current = false;
+      return;
+    }
 
     autoSubmitPendingRef.current = false;
     void handleApiSubmit();

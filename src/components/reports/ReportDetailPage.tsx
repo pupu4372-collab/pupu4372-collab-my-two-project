@@ -230,14 +230,17 @@ function ReportRenderer({ report }: { report: ReportDetailRow }) {
 export function ReportDetailPage({ reportId }: { reportId: string }) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
+  const { ready, accessToken, configured } = useSupabaseSession();
   const [report, setReport] = useState<ReportDetailRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!configured || !ready || !accessToken || isAnonymous) {
+    if (!configured || !ready) return;
+
+    if (!accessToken) {
       setLoading(false);
+      setReport(null);
       return;
     }
 
@@ -266,7 +269,7 @@ export function ReportDetailPage({ reportId }: { reportId: string }) {
     }
 
     void load();
-  }, [accessToken, configured, isAnonymous, isKo, ready, reportId]);
+  }, [accessToken, configured, isKo, ready, reportId]);
 
   const title = useMemo(() => {
     if (report?.title) return report.title;
@@ -284,7 +287,7 @@ export function ReportDetailPage({ reportId }: { reportId: string }) {
     >
       {!configured ? (
         <GlassCard className="text-sm text-plum/70">Supabase 설정 후 리포트 다시보기를 사용할 수 있어요.</GlassCard>
-      ) : isAnonymous ? (
+      ) : !accessToken ? (
         <GlassCard className="text-center">
           <p className="text-sm text-plum/70">{isKo ? "리포트를 보려면 로그인이 필요해요." : "Please log in to view this report."}</p>
           <Link href="/login" className="mt-4 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-bold text-white">

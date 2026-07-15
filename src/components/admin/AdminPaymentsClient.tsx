@@ -1,16 +1,18 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import type { AdminPaymentHistoryEntry } from "@/lib/admin/payment-history";
 import { formatMoney } from "@/lib/reports/human-premium/pricing";
 import {
   REPORT_TYPE_LABELS,
   REPORT_TYPE_LABELS_EN,
+  type ReportType,
 } from "@/lib/reports/human-premium/types";
 import { PET_PREMIUM_PRODUCT_LABELS } from "@/lib/payments/pet-premium-shared";
 import { notFound } from "next/navigation";
 import { useLocale } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 function formatDate(value: string, isKo: boolean) {
   const date = new Date(value);
@@ -24,6 +26,96 @@ function formatDate(value: string, isKo: boolean) {
   });
 }
 
+/** Local calendar day bounds for YYYY-MM-DD filters (inclusive). */
+function entryInDateRange(createdAt: string, startDate: string, endDate: string): boolean {
+  const t = new Date(createdAt).getTime();
+  if (Number.isNaN(t)) return false;
+  if (startDate) {
+    const start = new Date(`${startDate}T00:00:00`).getTime();
+    if (!Number.isNaN(start) && t < start) return false;
+  }
+  if (endDate) {
+    const end = new Date(`${endDate}T23:59:59.999`).getTime();
+    if (!Number.isNaN(end) && t > end) return false;
+  }
+  return true;
+}
+
+function csvEscape(value: string): string {
+  if (/[",\n\r]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
+function accountLabel(entry: AdminPaymentHistoryEntry): string {
+  const parts = [entry.userLabel];
+  if (entry.userId) parts.push(entry.userId);
+  if (entry.kind === "human" && entry.order.email) parts.push(entry.order.email);
+  return parts.filter(Boolean).join(" · ");
+}
+
+function productLabel(
+  entry: AdminPaymentHistoryEntry,
+  typeLabels: Record<ReportType, string>,
+  petLabels: Record<string, string>
+): string {
+  if (entry.kind === "human") {
+    return entry.order.items.map((type) => typeLabels[type] ?? type).join(" / ");
+  }
+  return petLabels[entry.order.productCode] ?? entry.order.productCode;
+}
+
+function orderIdOf(entry: AdminPaymentHistoryEntry): string {
+  return entry.kind === "human" ? entry.order.orderId : entry.order.paymentId;
+}
+
+function downloadPaymentsCsv(
+  rows: AdminPaymentHistoryEntry[],
+  options: {
+    isKo: boolean;
+    startDate: string;
+    endDate: string;
+    typeLabels: Record<ReportType, string>;
+    petLabels: Record<string, string>;
+  }
+) {
+  const headers = options.isKo
+    ? ["결제일시", "계정 식별정보", "상품명", "주문번호", "결제금액", "통화"]
+    : ["Paid at", "Account", "Product", "Order ID", "Amount", "Currency"];
+
+  const lines = [
+    headers.join(","),
+    ...rows.map((entry) =>
+      [
+        csvEscape(formatDate(entry.createdAt, options.isKo)),
+        csvEscape(accountLabel(entry)),
+        csvEscape(productLabel(entry, options.typeLabels, options.petLabels)),
+        csvEscape(orderIdOf(entry)),
+        String(entry.order.amount),
+        csvEscape(entry.order.currency ?? ""),
+      ].join(",")
+    ),
+  ];
+
+  const startPart = options.startDate || "all";
+  const endPart = options.endDate || "all";
+  const filename =
+    !options.startDate && !options.endDate
+      ? "payments_all.csv"
+      : `payments_${startPart}_${endPart}.csv`;
+
+  const blob = new Blob(["\uFEFF" + lines.join("\n")], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function AdminPaymentsClient() {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -33,6 +125,8 @@ export function AdminPaymentsClient() {
   const [entries, setEntries] = useState<AdminPaymentHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     if (!configured || !ready) return;
@@ -72,6 +166,11 @@ export function AdminPaymentsClient() {
     };
   }, [configured, ready, isAnonymous, accessToken]);
 
+  const filteredEntries = useMemo(
+    () => entries.filter((entry) => entryInDateRange(entry.createdAt, startDate, endDate)),
+    [entries, startDate, endDate]
+  );
+
   return (
     <div className="space-y-6">
       <header>
@@ -84,7 +183,62 @@ export function AdminPaymentsClient() {
             ? "최신순 · 펫·사람 프리미엄 결제 (관리자 전용)"
             : "Newest first · pet & human premium (admins only)"}
         </p>
+        <Link
+          href="/admin"
+          className="mt-3 inline-flex text-sm font-semibold text-white/85 underline-offset-2 hover:text-white hover:underline"
+        >
+          {isKo ? "← 관리자 대시보드" : "← Admin dashboard"}
+        </Link>
       </header>
+
+      <div className="pastel-card flex flex-col gap-3 rounded-2xl border border-plum/10 p-4 sm:flex-row sm:flex-wrap sm:items-end">
+        <label className="flex min-w-[9rem] flex-1 flex-col gap-1 text-xs font-bold text-plum">
+          {isKo ? "시작일" : "Start"}
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="rounded-xl border border-plum/15 bg-white px-3 py-2 text-sm font-semibold text-primary outline-none focus:border-channel-saju"
+          />
+        </label>
+        <label className="flex min-w-[9rem] flex-1 flex-col gap-1 text-xs font-bold text-plum">
+          {isKo ? "종료일" : "End"}
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="rounded-xl border border-plum/15 bg-white px-3 py-2 text-sm font-semibold text-primary outline-none focus:border-channel-saju"
+          />
+        </label>
+        <button
+          type="button"
+          disabled={loading || filteredEntries.length === 0}
+          onClick={() =>
+            downloadPaymentsCsv(filteredEntries, {
+              isKo,
+              startDate,
+              endDate,
+              typeLabels,
+              petLabels,
+            })
+          }
+          className="inline-flex rounded-full bg-channel-saju px-5 py-2.5 text-sm font-extrabold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isKo ? "다운로드" : "Download"}
+        </button>
+        {(startDate || endDate) && (
+          <button
+            type="button"
+            onClick={() => {
+              setStartDate("");
+              setEndDate("");
+            }}
+            className="text-sm font-semibold text-plum/70 underline-offset-2 hover:text-plum hover:underline"
+          >
+            {isKo ? "전체 기간" : "All dates"}
+          </button>
+        )}
+      </div>
 
       {loading ? <p className="text-sm text-white/65">{isKo ? "불러오는 중…" : "Loading…"}</p> : null}
       {error ? (
@@ -93,12 +247,12 @@ export function AdminPaymentsClient() {
         </p>
       ) : null}
 
-      {!loading && entries.length === 0 ? (
+      {!loading && filteredEntries.length === 0 ? (
         <p className="text-sm text-white/65">{isKo ? "결제 내역이 없습니다." : "No payments found."}</p>
       ) : null}
 
       <div className="space-y-3">
-        {entries.map((entry) =>
+        {filteredEntries.map((entry) =>
           entry.kind === "human" ? (
             <article
               key={`human-${entry.order.orderId}`}

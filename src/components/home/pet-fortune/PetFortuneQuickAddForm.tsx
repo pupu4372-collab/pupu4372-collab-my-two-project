@@ -4,6 +4,7 @@ import { PetBasicInfoFields } from "@/components/pet/PetBasicInfoFields";
 import { PetPhotoUploadField } from "@/components/pet/PetPhotoUploadField";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { uploadPetFortunePhotoClient } from "@/lib/pets/photo-upload-client";
+import { requestPetDailyCareEmail } from "@/lib/fortune/request-daily-care-email";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Gender, Locale, Species } from "@/lib/saju/types";
 import { Link } from "@/i18n/navigation";
@@ -233,6 +234,14 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
             setPhotoUploadNotice(t("emailLinkFailed"));
           } else {
             await refresh();
+            if (accessToken) {
+              requestPetDailyCareEmail({
+                accessToken,
+                locale: isKo ? "ko" : "en",
+                email: trimmedEmail,
+                source: "email_capture",
+              });
+            }
           }
         } catch (err) {
           console.warn(

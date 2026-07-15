@@ -35,6 +35,17 @@ export function readSajuResultSession(): SajuResultSessionSnapshot | null {
   }
 }
 
+/** True when sessionStorage holds a usable basic-result snapshot (locale may differ). */
+export function isValidSajuResultSession(
+  saved: SajuResultSessionSnapshot | null | undefined
+): saved is SajuResultSessionSnapshot {
+  if (!saved || typeof saved !== "object") return false;
+  if (!saved.result || typeof saved.result !== "object") return false;
+  if (typeof saved.petName !== "string" || !saved.petName.trim()) return false;
+  if (typeof saved.birthDate !== "string" || !saved.birthDate.trim()) return false;
+  return true;
+}
+
 export function clearSajuResultSession(): void {
   if (typeof window === "undefined") return;
   try {
