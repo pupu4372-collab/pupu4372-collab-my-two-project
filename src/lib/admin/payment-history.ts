@@ -1,6 +1,10 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { humanPremiumWebExpiresAt } from "@/lib/reports/human-premium/retention";
-import type { ReportType } from "@/lib/reports/human-premium/types";
+import {
+  normalizeReportTypeKey,
+  type ReportType,
+} from "@/lib/reports/human-premium/types";
+import { parseCartReportTypes } from "@/lib/reports/human-premium/cart";
 import type { PetPremiumPaymentRecord } from "@/lib/payments/pet-premium-shared";
 
 export type AdminHumanPaymentOrder = {
@@ -62,16 +66,44 @@ type HumanAdminRow = {
   currency: string | null;
   locale: string | null;
   created_at: string;
-  report_payload: Record<string, unknown> | null;
+  report_type: string | null;
+  birth_basis: {
+    cart?: {
+      cartOrder?: boolean;
+      items?: unknown;
+      generated?: Record<string, unknown>;
+    };
+  } | null;
 };
 
-function cartMeta(payload: Record<string, unknown> | null) {
-  const cart = payload?.cart;
-  if (!cart || typeof cart !== "object") return null;
-  return cart as {
-    items?: ReportType[];
-    generated?: Record<string, unknown>;
-  };
+/** Prefer birth_basis.cart (parent cart order); fall back to report_type. */
+function resolveHumanCartItems(row: HumanAdminRow): {
+  items: ReportType[];
+  generatedCount: number;
+} {
+  const birthCart = row.birth_basis?.cart;
+  if (birthCart && typeof birthCart === "object") {
+    const items = parseCartReportTypes(birthCart.items);
+    if (items.length > 0) {
+      return {
+        items,
+        generatedCount: Object.keys(birthCart.generated ?? {}).length,
+      };
+    }
+  }
+
+  const fallback =
+    typeof row.report_type === "string" ? normalizeReportTypeKey(row.report_type) : null;
+  if (fallback) {
+    return { items: [fallback], generatedCount: 0 };
+  }
+
+  return { items: [], generatedCount: 0 };
+}
+
+/** Parent cart order ids only: hp_cart_ + 20 hex chars (exclude child item rows). */
+function isParentCartOrderId(orderId: string | null | undefined): boolean {
+  return Boolean(orderId && /^hp_cart_[a-f0-9]{20}$/.test(orderId));
 }
 
 /** Service-role admin listing — newest first. */
@@ -91,7 +123,7 @@ export async function listAllPaymentHistoryForAdmin(): Promise<AdminPaymentHisto
     supabase
       .from("human_premium_reports")
       .select(
-        "payment_order_id, user_id, email, person_name, amount_paid, currency, locale, created_at, report_payload"
+        "payment_order_id, user_id, email, person_name, amount_paid, currency, locale, created_at, report_type, birth_basis"
       )
       .like("payment_order_id", "hp_cart_%")
       .gt("amount_paid", 0)
@@ -100,7 +132,9 @@ export async function listAllPaymentHistoryForAdmin(): Promise<AdminPaymentHisto
   ]);
 
   const petRows = (petRes.data ?? []) as UnlockAdminRow[];
-  const humanRows = (humanRes.data ?? []) as HumanAdminRow[];
+  const humanRows = ((humanRes.data ?? []) as HumanAdminRow[]).filter((row) =>
+    isParentCartOrderId(row.payment_order_id)
+  );
 
   const userIds = [
     ...new Set([
@@ -160,9 +194,7 @@ export async function listAllPaymentHistoryForAdmin(): Promise<AdminPaymentHisto
   for (const [orderId, rows] of humanByOrder) {
     const first = rows[0];
     if (!first) continue;
-    const meta = cartMeta(first.report_payload);
-    const items = meta?.items ?? [];
-    const generatedCount = Object.keys(meta?.generated ?? {}).length;
+    const { items, generatedCount } = resolveHumanCartItems(first);
     const email = first.email?.trim() || null;
     const userId = first.user_id;
     const displayName = userId ? nameByUserId.get(userId) : undefined;
