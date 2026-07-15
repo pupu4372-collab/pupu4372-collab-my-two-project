@@ -7,8 +7,8 @@ export default function AdminPage() {
     <div className="min-h-screen night-sky-page">
       <AppTopNav active="profile" />
       <PageContainer className="max-w-6xl">
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-channel-saju">Admin</p>
-        <h1 className="mb-8 text-2xl font-extrabold text-primary md:text-3xl">K-Saju Pet 관리자</h1>
+        <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#ffd7ff]">Admin</p>
+        <h1 className="mb-8 text-2xl font-extrabold text-white md:text-3xl">K-Saju Pet 관리자</h1>
         <AdminDashboard />
       </PageContainer>
     </div>

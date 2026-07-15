@@ -235,7 +235,7 @@ export function PaymentHistoryClient() {
           ) : (
             <article
               key={`pet-${entry.order.paymentId}`}
-              className="rounded-[1.5rem] border border-channel-saju/25 bg-lavender/30 p-5 shadow-[0_12px_28px_rgba(61,42,74,0.14)]"
+              className="rounded-[1.5rem] border border-white/15 bg-white p-5 shadow-[0_12px_28px_rgba(61,42,74,0.14)]"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -263,7 +263,7 @@ export function PaymentHistoryClient() {
                 {petIncludes.map((item) => (
                   <li
                     key={item}
-                    className="rounded-full border border-channel-saju/20 bg-white/80 px-3 py-1 text-xs font-semibold text-primary"
+                    className="rounded-full border border-plum/10 bg-cream/80 px-3 py-1 text-xs font-semibold text-plum"
                   >
                     {item}
                   </li>

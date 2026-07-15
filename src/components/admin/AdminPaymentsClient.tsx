@@ -75,18 +75,18 @@ export function AdminPaymentsClient() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-saju">Admin</p>
-        <h2 className="mt-1 text-2xl font-extrabold text-primary">
+        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#ffd7ff]">Admin</p>
+        <h2 className="mt-1 text-2xl font-extrabold text-white">
           {isKo ? "전체 결제 내역" : "All payments"}
         </h2>
-        <p className="mt-1 text-sm text-plum/65">
+        <p className="mt-1 text-sm text-white/75">
           {isKo
             ? "최신순 · 펫·사람 프리미엄 결제 (관리자 전용)"
             : "Newest first · pet & human premium (admins only)"}
         </p>
       </header>
 
-      {loading ? <p className="text-sm text-plum/60">{isKo ? "불러오는 중…" : "Loading…"}</p> : null}
+      {loading ? <p className="text-sm text-white/65">{isKo ? "불러오는 중…" : "Loading…"}</p> : null}
       {error ? (
         <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">
           {error}
@@ -94,7 +94,7 @@ export function AdminPaymentsClient() {
       ) : null}
 
       {!loading && entries.length === 0 ? (
-        <p className="text-sm text-plum/60">{isKo ? "결제 내역이 없습니다." : "No payments found."}</p>
+        <p className="text-sm text-white/65">{isKo ? "결제 내역이 없습니다." : "No payments found."}</p>
       ) : null}
 
       <div className="space-y-3">
@@ -102,7 +102,7 @@ export function AdminPaymentsClient() {
           entry.kind === "human" ? (
             <article
               key={`human-${entry.order.orderId}`}
-              className="rounded-2xl border border-plum/15 bg-white/80 p-4"
+              className="pastel-card rounded-2xl border border-plum/10 p-4 shadow-[0_12px_28px_rgba(61,42,74,0.14)]"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
@@ -141,7 +141,7 @@ export function AdminPaymentsClient() {
           ) : (
             <article
               key={`pet-${entry.order.paymentId}`}
-              className="rounded-2xl border border-channel-saju/20 bg-lavender/25 p-4"
+              className="pastel-card rounded-2xl border border-plum/10 p-4 shadow-[0_12px_28px_rgba(61,42,74,0.14)]"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
