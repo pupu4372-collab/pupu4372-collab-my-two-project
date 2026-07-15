@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 const FORTUNE_EXAMPLE_IMAGES = [
@@ -9,42 +9,64 @@ const FORTUNE_EXAMPLE_IMAGES = [
   "/home/fortune-carousel-3.png",
 ] as const;
 
+const LAST_INDEX = FORTUNE_EXAMPLE_IMAGES.length - 1;
+const AUTO_MS = 5000;
+const SWIPE_THRESHOLD_PX = 50;
+
 export function PetFortuneExampleCarousel() {
   const t = useTranslations("home.guestFortune");
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const touchStartXRef = useRef<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const mostVisible = entries.reduce(
-          (best, entry) =>
-            entry.intersectionRatio > (best?.intersectionRatio ?? 0) ? entry : best,
-          entries[0]
-        );
-        if (mostVisible?.isIntersecting) {
-          const index = cardRefs.current.findIndex((el) => el === mostVisible.target);
-          if (index !== -1) setActiveIndex(index);
-        }
-      },
-      { root: container, threshold: [0.5, 0.75, 1] }
-    );
-
-    cardRefs.current.forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
   }, []);
 
-  const scrollToIndex = (index: number) => {
-    cardRefs.current[index]?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  };
+  const startTimer = useCallback(() => {
+    clearTimer();
+    timerRef.current = setInterval(() => {
+      setActiveIndex((prev) => (prev >= LAST_INDEX ? 0 : prev + 1));
+    }, AUTO_MS);
+  }, [clearTimer]);
+
+  useEffect(() => {
+    startTimer();
+    return clearTimer;
+  }, [startTimer, clearTimer]);
+
+  const goToClamped = useCallback(
+    (index: number) => {
+      setActiveIndex(Math.min(LAST_INDEX, Math.max(0, index)));
+      startTimer();
+    },
+    [startTimer]
+  );
+
+  function handleTouchStart(event: React.TouchEvent) {
+    touchStartXRef.current = event.changedTouches[0]?.clientX ?? null;
+  }
+
+  function handleTouchEnd(event: React.TouchEvent) {
+    const startX = touchStartXRef.current;
+    touchStartXRef.current = null;
+    if (startX == null) return;
+
+    const endX = event.changedTouches[0]?.clientX ?? startX;
+    const delta = endX - startX;
+    if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
+
+    // swipe left → next, swipe right → prev (manual: clamp, no wrap)
+    if (delta < 0) {
+      setActiveIndex((prev) => Math.min(LAST_INDEX, prev + 1));
+    } else {
+      setActiveIndex((prev) => Math.max(0, prev - 1));
+    }
+    startTimer();
+  }
 
   return (
     <div className="space-y-3">
@@ -52,35 +74,48 @@ export function PetFortuneExampleCarousel() {
         {t("shareExampleCaption")}
       </p>
 
-      {/* full-bleed wrapper: 부모의 padding 값과 무관하게 항상 뷰포트 기준으로 꽉 참 */}
-      <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen touch-pan-x overscroll-x-contain">
+      <div
+        className="[--slide-w:85%] overflow-hidden md:[--slide-w:70%]"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label={t("shareExampleCaption")}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <div
-          ref={scrollRef}
-          className="carousel-scroll flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-[6%] px-[6%] pb-2"
-          role="region"
-          aria-roledescription="carousel"
-          aria-label={t("shareExampleCaption")}
+          className="flex transition-transform duration-300 ease-out"
+          style={{
+            width: "100%",
+            transform: `translateX(calc((100% - var(--slide-w)) / 2 - ${activeIndex} * var(--slide-w)))`,
+          }}
         >
-          {FORTUNE_EXAMPLE_IMAGES.map((src, index) => (
-            <div
-              key={src}
-              ref={(el) => {
-                cardRefs.current[index] = el;
-              }}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`${index + 1} / ${FORTUNE_EXAMPLE_IMAGES.length}`}
-              className="w-[88%] max-w-xs shrink-0 snap-center overflow-hidden rounded-2xl border border-stone-200/80 bg-stone-100 shadow-sm"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt=""
-                className="aspect-square w-full object-cover"
-                draggable={false}
-              />
-            </div>
-          ))}
+          {FORTUNE_EXAMPLE_IMAGES.map((src, index) => {
+            const isActive = index === activeIndex;
+            return (
+              <button
+                key={src}
+                type="button"
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${index + 1} / ${FORTUNE_EXAMPLE_IMAGES.length}`}
+                aria-current={isActive ? "true" : undefined}
+                onClick={() => {
+                  if (!isActive) goToClamped(index);
+                }}
+                className={`w-[85%] flex-shrink-0 origin-center overflow-hidden rounded-2xl border border-stone-200/80 bg-stone-100 shadow-sm transition duration-300 md:w-[70%] ${
+                  isActive ? "scale-100 opacity-100" : "scale-95 opacity-60"
+                }`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt=""
+                  className="aspect-square w-full object-cover"
+                  draggable={false}
+                />
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -97,7 +132,7 @@ export function PetFortuneExampleCarousel() {
               role="tab"
               aria-selected={activeIndex === index}
               aria-label={`${index + 1} / ${FORTUNE_EXAMPLE_IMAGES.length}`}
-              onClick={() => scrollToIndex(index)}
+              onClick={() => goToClamped(index)}
               className={`h-1.5 rounded-full transition-all ${
                 activeIndex === index ? "w-5 bg-stone-700" : "w-1.5 bg-stone-300"
               }`}
@@ -105,16 +140,6 @@ export function PetFortuneExampleCarousel() {
           ))}
         </div>
       ) : null}
-
-      <style jsx>{`
-        .carousel-scroll::-webkit-scrollbar {
-          display: none;
-        }
-        .carousel-scroll {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-      `}</style>
     </div>
   );
 }
