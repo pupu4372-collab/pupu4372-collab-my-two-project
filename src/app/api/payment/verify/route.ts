@@ -104,6 +104,35 @@ export async function POST(req: NextRequest) {
       ? PET_PRODUCT_AMOUNT_USD[code]
       : PET_PRODUCT_AMOUNT_KRW[code];
 
+    // 2b. pet_id present → must be owned by the paying user (prevents anon-pet / other-user unlock)
+    if (pet_id) {
+      const { data: petRow, error: petLookupError } = await supabase
+        .from("pets")
+        .select("owner_id")
+        .eq("id", pet_id)
+        .maybeSingle();
+
+      const actualOwnerId =
+        petRow && typeof (petRow as { owner_id?: string }).owner_id === "string"
+          ? (petRow as { owner_id: string }).owner_id
+          : null;
+
+      if (petLookupError || !actualOwnerId || actualOwnerId !== userId) {
+        console.error("[PET_UNLOCK_OWNERSHIP_MISMATCH_FALLBACK]", {
+          userId,
+          petId: pet_id,
+          actualOwnerId,
+          paymentId: payment_id,
+          product_code,
+          petLookupError: petLookupError?.message ?? null,
+        });
+        return NextResponse.json(
+          { error: "pet_ownership_mismatch" },
+          { status: 400 }
+        );
+      }
+    }
+
     // 3. pet_premium_unlocks 저장
     const { error: dbError } = await supabase
       .from("pet_premium_unlocks")
