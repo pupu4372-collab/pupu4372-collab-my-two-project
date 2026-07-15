@@ -5,7 +5,7 @@ import {
   type PetProductCode,
 } from "@/lib/payments/pet-product-catalog";
 import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import {
   fetchPortOnePayment,
   isPortOnePaymentPaid,
@@ -87,10 +87,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "amount mismatch" }, { status: 400 });
     }
 
-    // 2. Supabase 유저 확인
-    let supabase: Awaited<ReturnType<typeof createSupabaseServerClient>> | null = null;
+    // 2. Service-role client for unlock write (no anon fallback)
+    let supabase: ReturnType<typeof getSupabaseServiceRoleClient>;
     try {
-      supabase = await createSupabaseServerClient();
+      supabase = getSupabaseServiceRoleClient();
     } catch {
       console.error(
         `[PET_PREMIUM_VERIFY_FAILED] paymentId=${payment_id} product_code=${product_code} status=503 error=db_unavailable`
@@ -98,13 +98,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "db unavailable" }, { status: 503 });
     }
 
-    if (!supabase) {
-      console.error(
-        `[PET_PREMIUM_VERIFY_FAILED] paymentId=${payment_id} product_code=${product_code} status=503 error=db_unavailable`
-      );
-      return NextResponse.json({ error: "db unavailable" }, { status: 503 });
-    }
-
+    // user_id from Bearer-verified registered user only (never from request body)
     const userId = registeredUserId;
     const catalogAmount = isUsd
       ? PET_PRODUCT_AMOUNT_USD[code]

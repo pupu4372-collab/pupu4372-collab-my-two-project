@@ -35,6 +35,21 @@ export function getSupabaseServerClient(): SupabaseClient<Database> | null {
   });
 }
 
+/**
+ * Service-role only — no anon fallback.
+ * Use for privileged writes (e.g. payment unlocks) where silent RLS failure is unacceptable.
+ */
+export function getSupabaseServiceRoleClient(): SupabaseClient<Database> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!url || !key) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required");
+  }
+  return createClient<Database>(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
 /** Cookie-backed server client for OAuth PKCE callback and session refresh. */
 export async function createSupabaseServerClient() {
   const { url, key } = readSupabaseEnv();
