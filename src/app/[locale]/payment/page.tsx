@@ -167,6 +167,12 @@ function PaymentContent() {
     locale === "ko" ? `${displayPrice} 결제하기` : `Pay ${displayPrice}`;
   const chargeAmount = getPetChargeAmount(productCode, currency);
   const spbTotalAmount = toPetPortOneTotalAmount(chargeAmount, "USD");
+  const petPaymentCustomData = useMemo(() => {
+    const data: Record<string, unknown> = { productCode };
+    const petId = params.get("petId");
+    if (petId) data.petId = petId;
+    return data;
+  }, [params, productCode]);
 
   const normalizedReturnTo = useMemo(
     () => normalizePetPremiumReturnTo(params.get("returnTo")),
@@ -407,6 +413,7 @@ function PaymentContent() {
         currency: "KRW",
         channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
         payMethod: "CARD",
+        customData: petPaymentCustomData,
         customer: {
           fullName: params.get("petName") ?? "펫",
         },
@@ -530,6 +537,7 @@ function PaymentContent() {
                 orderName={PET_PRODUCT_ORDER_NAME[productCode]}
                 totalAmount={spbTotalAmount}
                 currency="USD"
+                customData={petPaymentCustomData}
                 onSuccess={(paymentId) => void handleSpbSuccess(paymentId)}
                 onError={handleSpbError}
               />

@@ -1,3 +1,5 @@
+import { catalogAmountToPortOneTotal } from "@/lib/payments/portone/amount";
+
 export const PET_PREMIUM_PACKAGE_CODE = "pet_premium_v1" as const;
 export const PET_MBTI_STANDALONE_CODE = "pet_mbti_v1" as const;
 
@@ -35,12 +37,12 @@ export function getPetChargeAmount(
     : PET_PRODUCT_AMOUNT_KRW[code];
 }
 
-/** PortOne V2: KRW = won (1×), USD = cents (×100). Mirrors human toPortOneTotalAmount. */
+/** PortOne V2: KRW = won (1×), USD = cents (×100). */
 export function toPetPortOneTotalAmount(
   amount: number,
   currency: PetCheckoutCurrency
 ): number {
-  return currency === "USD" ? Math.round(amount * 100) : Math.round(amount);
+  return catalogAmountToPortOneTotal(amount, currency);
 }
 
 export const PET_PACKAGE_UNLOCK_CODES = [PET_PREMIUM_PACKAGE_CODE] as const;

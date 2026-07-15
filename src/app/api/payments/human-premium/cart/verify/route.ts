@@ -1,4 +1,5 @@
 import {
+  catalogAmountToPortOneTotal,
   fetchPortOnePayment,
   isPortOnePaymentPaid,
   verifyPortOneAmount,
@@ -82,11 +83,11 @@ export async function POST(request: Request) {
 
     const expectedCatalogAmount = Number(row.amount_paid) || Number(row.amount_original);
     // Row stores catalog units (USD = whole dollars). PortOne payment.amount.total uses
-    // ISO minor units (USD = cents). Match PortOne before compare — same rule as checkout totalAmount.
-    const expectedPortOneAmount =
-      rowCurrency === "USD" || rowCurrency === "CURRENCY_USD"
-        ? Math.round(expectedCatalogAmount * 100) // USD: cents
-        : Math.round(expectedCatalogAmount);
+    // ISO minor units (USD = cents). Shared helper matches checkout totalAmount.
+    const expectedPortOneAmount = catalogAmountToPortOneTotal(
+      expectedCatalogAmount,
+      rowCurrency || paymentCurrency
+    );
     if (!verifyPortOneAmount(payment, expectedPortOneAmount)) {
       return NextResponse.json({ error: "amount_mismatch" }, { status: 400 });
     }

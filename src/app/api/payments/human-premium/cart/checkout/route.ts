@@ -1,4 +1,5 @@
 import { getPortOneShopId, isPortOneConfigured } from "@/lib/payments/portone/config";
+import { catalogAmountToPortOneTotal } from "@/lib/payments/portone/amount";
 import {
   cartOrderDisplayName,
   createPendingCartOrder,
@@ -8,20 +9,6 @@ import { resolveHumanPremiumEmail } from "@/lib/reports/human-premium/email-poli
 import { getCheckoutCurrency } from "@/lib/reports/human-premium/pricing";
 import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
-
-/**
- * Catalog/DB amounts: KRW = won, USD = whole dollars (REPORT_PRICING_USD).
- * PortOne V2 request/payment totals: KRW = won (1×), USD = cents (×100).
- * @see PortOne LoadPaymentUIRequest totalAmount (ISO 4217 minor units);
- * PayPal SPB docs: $17×2 + $23×3 → totalAmount 10300 with currency USD.
- */
-function toPortOneTotalAmount(amount: number, currency: string): number {
-  const code = currency.trim().toUpperCase();
-  if (code === "USD" || code === "CURRENCY_USD") {
-    return Math.round(amount * 100); // USD: cents
-  }
-  return Math.round(amount); // KRW: won
-}
 
 /**
  * Cart checkout payment-method branch:
@@ -84,7 +71,7 @@ export async function POST(request: Request) {
     const storeId = getPortOneShopId();
     // `amount` stays catalog units (USD whole dollars) for DB/display.
     // `totalAmount` is the sole PortOne-facing amount (USD: cents). Client must not re-convert.
-    const totalAmount = toPortOneTotalAmount(amount, currency);
+    const totalAmount = catalogAmountToPortOneTotal(amount, currency);
 
     return NextResponse.json({
       configured: true,

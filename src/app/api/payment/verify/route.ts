@@ -9,6 +9,7 @@ import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import {
   fetchPortOnePayment,
   isPortOnePaymentPaid,
+  parsePortOneCustomData,
   verifyPortOneAmount,
 } from "@/lib/payments/portone/server";
 import { NextRequest, NextResponse } from "next/server";
@@ -64,6 +65,42 @@ export async function POST(req: NextRequest) {
         `[PET_PREMIUM_VERIFY_FAILED] paymentId=${payment_id} product_code=${product_code} status=400 error=not_paid`
       );
       return NextResponse.json({ error: "not paid" }, { status: 400 });
+    }
+
+    const customData = parsePortOneCustomData(payment.customData);
+    if (!customData) {
+      console.error("[PET_UNLOCK_CUSTOMDATA_MISSING_FALLBACK]", {
+        paymentId: payment_id,
+        product_code,
+        petId: pet_id ?? null,
+        customDataRawType: payment.customData == null ? "null" : typeof payment.customData,
+      });
+    } else {
+      const paidProductCode =
+        typeof customData.productCode === "string" ? customData.productCode : null;
+      if (paidProductCode && paidProductCode !== product_code) {
+        console.error("[PET_UNLOCK_PRODUCT_MISMATCH_FALLBACK]", {
+          paymentId: payment_id,
+          requestedProductCode: product_code,
+          paidProductCode,
+          petId: pet_id ?? null,
+        });
+        return NextResponse.json({ error: "payment_product_mismatch" }, { status: 400 });
+      }
+
+      const paidPetId =
+        typeof customData.petId === "string" && customData.petId.trim()
+          ? customData.petId.trim()
+          : null;
+      if (paidPetId && pet_id && paidPetId !== pet_id) {
+        console.error("[PET_UNLOCK_PET_MISMATCH_FALLBACK]", {
+          paymentId: payment_id,
+          product_code,
+          requestedPetId: pet_id,
+          paidPetId,
+        });
+        return NextResponse.json({ error: "payment_pet_mismatch" }, { status: 400 });
+      }
     }
 
     const paymentCurrency = String(payment.currency ?? "").trim().toUpperCase();

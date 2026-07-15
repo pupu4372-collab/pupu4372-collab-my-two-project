@@ -7,6 +7,8 @@ export type PayPalSpbButtonProps = {
   orderName: string;
   totalAmount: number;
   currency: string;
+  /** Bound into PortOne customData (object). */
+  customData?: Record<string, unknown>;
   onSuccess: (paymentId: string) => void;
   onError: (message: string) => void;
 };
@@ -29,6 +31,7 @@ function buildSpbRequest(input: {
   currency: string;
   storeId: string;
   channelKey: string;
+  customData?: Record<string, unknown>;
 }): Record<string, unknown> {
   // totalAmount must already be PortOne units from cart/checkout (`totalAmount`:
   // KRW = won, USD = cents). Do not multiply again here.
@@ -40,6 +43,7 @@ function buildSpbRequest(input: {
     orderName: input.orderName,
     totalAmount: input.totalAmount,
     currency: input.currency,
+    ...(input.customData ? { customData: input.customData } : {}),
   };
 }
 
@@ -52,6 +56,7 @@ export function PayPalSpbButton({
   orderName,
   totalAmount,
   currency,
+  customData,
   onSuccess,
   onError,
 }: PayPalSpbButtonProps) {
@@ -59,6 +64,7 @@ export function PayPalSpbButton({
   const loadedRef = useRef(false);
   const callbacksRef = useRef({ onSuccess, onError });
   callbacksRef.current = { onSuccess, onError };
+  const customDataKey = customData ? JSON.stringify(customData) : "";
 
   useEffect(() => {
     const storeId = process.env.NEXT_PUBLIC_PORTONE_SHOP_ID?.trim() ?? "";
@@ -81,6 +87,7 @@ export function PayPalSpbButton({
       currency,
       storeId,
       channelKey,
+      customData: customDataKey ? (JSON.parse(customDataKey) as Record<string, unknown>) : undefined,
     });
 
     if (!loadedRef.current) {
@@ -107,7 +114,7 @@ export function PayPalSpbButton({
     if (typeof PortOne.updateLoadPaymentUIRequest === "function") {
       PortOne.updateLoadPaymentUIRequest(request);
     }
-  }, [paymentId, orderName, totalAmount, currency]);
+  }, [paymentId, orderName, totalAmount, currency, customDataKey]);
 
   useEffect(() => {
     return () => {

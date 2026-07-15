@@ -4,12 +4,38 @@ import {
   PORTONE_API_BASE,
 } from "./config";
 
+export { catalogAmountToPortOneTotal } from "./amount";
+
 export interface PortOnePaymentSnapshot {
   id: string;
   status: string;
   amount: { total: number };
   currency: string;
-  customData?: Record<string, unknown> | null;
+  /** PortOne V2 returns an object; older payloads may stringify JSON. */
+  customData?: Record<string, unknown> | string | null;
+}
+
+/** Parse PortOne payment customData whether object or JSON string. */
+export function parsePortOneCustomData(
+  customData: PortOnePaymentSnapshot["customData"]
+): Record<string, unknown> | null {
+  if (customData == null) return null;
+  if (typeof customData === "object" && !Array.isArray(customData)) {
+    return customData as Record<string, unknown>;
+  }
+  if (typeof customData === "string") {
+    const trimmed = customData.trim();
+    if (!trimmed) return null;
+    try {
+      const parsed = JSON.parse(trimmed) as unknown;
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>;
+      }
+    } catch {
+      return null;
+    }
+  }
+  return null;
 }
 
 export async function fetchPortOnePayment(

@@ -1,5 +1,6 @@
 import { Webhook } from "@portone/server-sdk";
 import {
+  catalogAmountToPortOneTotal,
   fetchPortOnePayment,
   isPortOnePaymentPaid,
   verifyPortOneAmount,
@@ -93,8 +94,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Report not found." }, { status: 404 });
   }
 
-  const expectedAmount = Number(row.amount_paid) || Number(row.amount_original);
-  if (!verifyPortOneAmount(payment, expectedAmount)) {
+  const expectedCatalogAmount = Number(row.amount_paid) || Number(row.amount_original);
+  const expectedPortOneAmount = catalogAmountToPortOneTotal(
+    expectedCatalogAmount,
+    row.currency ?? payment.currency
+  );
+  if (!verifyPortOneAmount(payment, expectedPortOneAmount)) {
     return NextResponse.json({ error: "Amount mismatch." }, { status: 400 });
   }
 
@@ -129,7 +134,7 @@ export async function POST(request: Request) {
         provider: "card_pg",
         orderId: paymentId,
         captureId: body.tx_id ?? payment.id,
-        amountPaid: expectedAmount,
+        amountPaid: expectedCatalogAmount,
       },
       { request }
     );
