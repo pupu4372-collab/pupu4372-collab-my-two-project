@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
@@ -117,35 +116,27 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
               ? `${NAV_LINK_BASE} border-primary font-extrabold text-primary`
               : `${NAV_LINK_BASE} border-transparent text-plum/65 hover:border-primary/25 hover:text-primary`;
 
-            if (item.key === "home") {
-              return (
-                <Link key={item.key} href={item.href} className={className} aria-current={isActive ? "page" : undefined}>
-                  <NavLabel label={nav(item.key)} />
-                </Link>
-              );
-            }
-
             return (
-              <AuthRequiredLink
+              <Link
                 key={item.key}
                 href={item.href}
                 className={className}
                 aria-current={isActive ? "page" : undefined}
               >
                 <NavLabel label={nav(item.key)} />
-              </AuthRequiredLink>
+              </Link>
             );
           })}
         </nav>
 
         <div className="flex items-center gap-2">
-          <AuthRequiredLink
+          <Link
             href="/saju"
             className={`${SAJU_CTA_BASE} hidden md:inline-flex ${isSajuActive ? "brightness-95 shadow-md" : ""}`}
             aria-current={isSajuActive ? "page" : undefined}
           >
             <span className="whitespace-nowrap">{nav("saju")}</span>
-          </AuthRequiredLink>
+          </Link>
           <ul className="block">
             <LanguageSwitcher />
           </ul>

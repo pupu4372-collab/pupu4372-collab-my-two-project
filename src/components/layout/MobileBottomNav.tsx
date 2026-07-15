@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 
@@ -11,14 +10,13 @@ const MOBILE_LINKS: Array<{
   key: NavKey;
   href: "/" | "/dog" | "/cat" | "/reptile" | "/saju" | "/community";
   icon: string;
-  requiresAuth?: boolean;
 }> = [
   { key: "home", href: "/", icon: "⌂" },
-  { key: "dog", href: "/dog", icon: "🐕", requiresAuth: true },
-  { key: "cat", href: "/cat", icon: "🐈", requiresAuth: true },
-  { key: "reptile", href: "/reptile", icon: "🦎", requiresAuth: true },
-  { key: "saju", href: "/saju", icon: "✨", requiresAuth: true },
-  { key: "community", href: "/community", icon: "💬", requiresAuth: true },
+  { key: "dog", href: "/dog", icon: "🐕" },
+  { key: "cat", href: "/cat", icon: "🐈" },
+  { key: "reptile", href: "/reptile", icon: "🦎" },
+  { key: "saju", href: "/saju", icon: "✨" },
+  { key: "community", href: "/community", icon: "💬" },
 ];
 
 interface MobileBottomNavProps {
@@ -44,34 +42,19 @@ export function MobileBottomNav({ active = "home" }: MobileBottomNavProps) {
               ? "flex min-w-0 flex-1 flex-col items-center justify-center border-b-2 border-primary px-1 py-1.5 text-primary"
               : "flex min-w-0 flex-1 flex-col items-center justify-center border-b-2 border-transparent px-1 py-1.5 text-plum/60 transition active:scale-95";
 
-          const content = (
-            <>
-              <span className="text-base leading-none" aria-hidden>
-                {item.icon}
-              </span>
-              <span className="mt-0.5 max-w-full truncate text-center text-[9px] font-extrabold leading-tight">
-                {label}
-              </span>
-            </>
-          );
-
-          return item.requiresAuth ? (
-            <AuthRequiredLink
-              key={item.key}
-              href={item.href}
-              className={className}
-              aria-current={isActive ? "page" : undefined}
-            >
-              {content}
-            </AuthRequiredLink>
-          ) : (
+          return (
             <Link
               key={item.key}
               href={item.href}
               className={className}
               aria-current={isActive ? "page" : undefined}
             >
-              {content}
+              <span className="text-base leading-none" aria-hidden>
+                {item.icon}
+              </span>
+              <span className="mt-0.5 max-w-full truncate text-center text-[9px] font-extrabold leading-tight">
+                {label}
+              </span>
             </Link>
           );
         })}

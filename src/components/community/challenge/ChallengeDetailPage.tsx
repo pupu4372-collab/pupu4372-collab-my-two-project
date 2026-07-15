@@ -10,7 +10,8 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { PetShowSectionTabs } from "@/components/community/PetShowSectionTabs";
 import { NightPageShell, PageContainer } from "@/components/layout/StitchLayout";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
-import { Link } from "@/i18n/navigation";
+import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
+import { Link, useRouter } from "@/i18n/navigation";
 import { localizeChallenge } from "@/lib/community/challenge-localize";
 import { compressImageForUpload } from "@/lib/images/upload-compression";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
@@ -40,6 +41,7 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
   const { id } = use(params);
   const locale = useLocale();
   const isKo = locale === "ko";
+  const router = useRouter();
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -119,7 +121,9 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!accessToken || isAnonymous) {
-      setSubmitError(isKo ? "로그인 후 인증할 수 있어요." : "Log in to verify your mission.");
+      router.push(
+        `/login?next=${encodeURIComponent(getSafeInternalReturnPath(`/community/challenge/${id}`))}`
+      );
       return;
     }
     if (!file) {
@@ -211,7 +215,9 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
                 type="button"
                 onClick={() => {
                   if (!configured || !ready || isAnonymous) {
-                    setSubmitError(isKo ? "로그인 후 인증할 수 있어요." : "Log in to verify your mission.");
+                    router.push(
+                      `/login?next=${encodeURIComponent(getSafeInternalReturnPath(`/community/challenge/${id}`))}`
+                    );
                     return;
                   }
                   setShowComposer((prev) => !prev);

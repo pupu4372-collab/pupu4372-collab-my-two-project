@@ -1,7 +1,6 @@
 import { FooterNavLinks } from "@/components/layout/FooterNavLinks";
 import { Link } from "@/i18n/navigation";
 import { LEGAL_ENTITY } from "@/lib/legal/company";
-import { getServerPaymentHistoryFlag } from "@/lib/reports/human-premium/payment-history";
 import { getLocale, getTranslations } from "next-intl/server";
 import Image from "next/image";
 
@@ -11,7 +10,6 @@ export async function AppFooter() {
   const nav = await getTranslations("nav");
   const auth = await getTranslations("auth");
   const year = new Date().getFullYear();
-  const hasServerPayments = await getServerPaymentHistoryFlag();
 
   return (
     <footer className="relative z-10 w-full border-t border-white/10 bg-night-sky py-12 md:py-14">
@@ -38,8 +36,6 @@ export async function AppFooter() {
           termsLabel={auth("terms")}
           privacyLabel={auth("privacy")}
           supportLabel={nav("support")}
-          paymentsLabel={nav("paymentHistory")}
-          hasServerPayments={hasServerPayments}
         />
 
         <div className="mt-2 max-w-3xl space-y-1.5 text-[11px] leading-relaxed text-white/40 md:text-xs">

@@ -1,14 +1,9 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
-import {
-  getPaidHumanPremiumOrderIds,
-  loadHumanPremiumProfile,
-  resolveHumanPremiumStorageUserId,
-  syncPaidOrdersFromVault,
-} from "@/lib/reports/human-premium/cart-session";
 import { formatMoney } from "@/lib/reports/human-premium/pricing";
 import {
   REPORT_TYPE_LABELS,
@@ -60,8 +55,8 @@ export function PaymentHistoryClient() {
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
   const petProductLabels = PET_PREMIUM_PRODUCT_LABELS[locale];
   const petIncludes = PET_PREMIUM_INCLUDES[locale];
-  const { accessToken, userId, isAnonymous } = useSupabaseSession();
-  const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
+  const router = useRouter();
+  const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
 
   const [humanOrders, setHumanOrders] = useState<HumanPaymentOrder[]>([]);
   const [petOrders, setPetOrders] = useState<PetPremiumPaymentRecord[]>([]);
@@ -78,26 +73,34 @@ export function PaymentHistoryClient() {
     );
   }, [humanOrders, petOrders]);
 
+  useEffect(() => {
+    if (!configured || !ready) return;
+    if (isAnonymous || !accessToken) {
+      const next = getSafeInternalReturnPath("/my/payments");
+      router.replace(`/login?next=${encodeURIComponent(next)}`);
+    }
+  }, [configured, ready, isAnonymous, accessToken, router]);
+
   const refresh = useCallback(async () => {
+    if (!accessToken || isAnonymous) return;
+
     setLoading(true);
     setError(null);
     try {
-      const profile = loadHumanPremiumProfile(storageUserId);
-      const orderIds = getPaidHumanPremiumOrderIds(storageUserId);
-      const params = new URLSearchParams({ locale: routeLocale });
-      if (orderIds.length) params.set("orderIds", orderIds.join(","));
-      if (profile.email.trim()) params.set("email", profile.email.trim());
-
-      const headers: Record<string, string> = {};
-      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
-
+      const headers = { Authorization: `Bearer ${accessToken}` };
       const [humanRes, petRes] = await Promise.all([
-        fetch(`/api/payments/human-premium/history?${params.toString()}`, { headers }),
+        fetch(`/api/payments/human-premium/history?locale=${routeLocale}`, { headers }),
         fetch("/api/payments/pet-premium/history", { headers }),
       ]);
 
       const humanData = await humanRes.json();
       const petData = await petRes.json();
+
+      if (humanRes.status === 401 || petRes.status === 401) {
+        const next = getSafeInternalReturnPath("/my/payments");
+        router.replace(`/login?next=${encodeURIComponent(next)}`);
+        return;
+      }
 
       if (!humanRes.ok) {
         throw new Error(humanData.error ?? "Payment history load failed");
@@ -106,9 +109,7 @@ export function PaymentHistoryClient() {
         throw new Error(petData.error ?? "Payment history load failed");
       }
 
-      const nextHumanOrders = (humanData.orders ?? []) as HumanPaymentOrder[];
-      syncPaidOrdersFromVault(storageUserId, nextHumanOrders);
-      setHumanOrders(nextHumanOrders);
+      setHumanOrders((humanData.orders ?? []) as HumanPaymentOrder[]);
       setPetOrders((petData.orders ?? []) as PetPremiumPaymentRecord[]);
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Payment history load failed";
@@ -118,11 +119,20 @@ export function PaymentHistoryClient() {
     } finally {
       setLoading(false);
     }
-  }, [accessToken, routeLocale, storageUserId]);
+  }, [accessToken, isAnonymous, routeLocale, router]);
 
   useEffect(() => {
+    if (!ready || !configured || isAnonymous || !accessToken) return;
     void refresh();
-  }, [refresh]);
+  }, [ready, configured, isAnonymous, accessToken, refresh]);
+
+  if (!configured || !ready || isAnonymous || !accessToken) {
+    return (
+      <p className="text-center text-sm text-white/65">
+        {isKo ? "로그인 상태를 확인하는 중…" : "Checking sign-in…"}
+      </p>
+    );
+  }
 
   const hasPayments = entries.length > 0;
 
@@ -133,12 +143,12 @@ export function PaymentHistoryClient() {
           {isKo ? "결제 내역" : "Payment history"}
         </p>
         <h1 className="mt-2 text-2xl font-bold text-white">
-          {isKo ? "프리미엄 결제" : "Premium payments"}
+          {isKo ? "내 프리미엄 결제" : "My premium payments"}
         </h1>
         <p className="mt-2 text-sm text-white/75">
           {isKo
-            ? "펫 프리미엄과 사람 프리미엄 리포트 결제 내역을 확인할 수 있어요."
-            : "View pet premium and human premium report payments."}
+            ? "본인 계정의 펫·사람 프리미엄 결제만 표시됩니다."
+            : "Only payments on your account are shown."}
         </p>
       </header>
 
@@ -225,7 +235,7 @@ export function PaymentHistoryClient() {
           ) : (
             <article
               key={`pet-${entry.order.paymentId}`}
-              className="rounded-[1.5rem] border border-channel-saju/25 bg-gradient-to-br from-white via-lavender/30 to-petal/20 p-5 shadow-[0_12px_28px_rgba(61,42,74,0.14)]"
+              className="rounded-[1.5rem] border border-channel-saju/25 bg-lavender/30 p-5 shadow-[0_12px_28px_rgba(61,42,74,0.14)]"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>

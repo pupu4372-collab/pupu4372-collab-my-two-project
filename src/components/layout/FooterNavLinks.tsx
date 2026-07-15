@@ -1,18 +1,13 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useSupabaseSession } from "@/hooks/useSupabaseSession";
-import { getPaidHumanPremiumOrderIds, resolveHumanPremiumStorageUserId } from "@/lib/reports/human-premium/cart-session";
 import { useLocale } from "next-intl";
-import { useEffect, useState } from "react";
 
 type FooterNavLinksProps = {
   aboutLabel: string;
   termsLabel: string;
   privacyLabel: string;
   supportLabel: string;
-  paymentsLabel: string;
-  hasServerPayments: boolean;
 };
 
 export function FooterNavLinks({
@@ -20,28 +15,10 @@ export function FooterNavLinks({
   termsLabel,
   privacyLabel,
   supportLabel,
-  paymentsLabel,
-  hasServerPayments,
 }: FooterNavLinksProps) {
   const locale = useLocale();
-  const { userId, isAnonymous } = useSupabaseSession();
-  const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
-  const [showPayments, setShowPayments] = useState(hasServerPayments);
   const pricingLabel = locale === "en" ? "Pricing" : "이용요금";
   const refundLabel = locale === "en" ? "Refund Policy" : "환불 정책";
-
-  useEffect(() => {
-    const sync = () => {
-      setShowPayments(hasServerPayments || getPaidHumanPremiumOrderIds(storageUserId).length > 0);
-    };
-    sync();
-    window.addEventListener("human-premium-paid", sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener("human-premium-paid", sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, [hasServerPayments, storageUserId]);
 
   const links = [
     { href: "/about" as const, label: aboutLabel },
@@ -50,7 +27,6 @@ export function FooterNavLinks({
     { href: "/support" as const, label: supportLabel },
     { href: "/pricing" as const, label: pricingLabel },
     { href: "/refund-policy" as const, label: refundLabel },
-    ...(showPayments ? [{ href: "/payments" as const, label: paymentsLabel }] : []),
   ];
 
   return (

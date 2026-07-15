@@ -2,6 +2,7 @@
 
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
 import { Link } from "@/i18n/navigation";
 import { compressImageForUpload } from "@/lib/images/upload-compression";
 import { isNativeImagePickerAvailable, pickNativeImage } from "@/lib/mobile/native-image-picker";
@@ -185,7 +186,7 @@ export function PetShowComposer({ onPosted }: PetShowComposerProps) {
           {isKo ? "사진을 업로드하려면 로그인이 필요해요." : "Please log in to upload photos."}
         </p>
         <Link
-          href="/login"
+          href={`/login?next=${encodeURIComponent(getSafeInternalReturnPath("/community/pet-show/upload"))}`}
           className="mt-4 inline-flex rounded-full bg-channel-community px-6 py-3 text-sm font-semibold text-white transition hover:brightness-105"
         >
           {isKo ? "로그인하기" : "Log in"}

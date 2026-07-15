@@ -60,6 +60,12 @@ export function ProfileActivitySummary() {
       href: "/profile/posts" as const,
     },
     {
+      icon: "💳",
+      value: isKo ? "내역" : "View",
+      label: isKo ? "결제 내역" : "Payment history",
+      href: "/my/payments" as const,
+    },
+    {
       icon: "💬",
       value: loading ? "…" : String(postCount),
       label: isKo ? "Pet Show 글" : "Pet Show posts",
@@ -74,7 +80,7 @@ export function ProfileActivitySummary() {
   return (
     <section className="space-y-4">
       <h3 className="px-2 text-xl font-bold text-white">{isKo ? "나의 활동" : "My activity"}</h3>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {items.map((item) => (
           item.href ? (
             <Link key={item.label} href={item.href} className="block">

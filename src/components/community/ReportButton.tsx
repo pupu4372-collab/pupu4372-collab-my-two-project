@@ -1,7 +1,8 @@
 "use client";
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
-import { Link } from "@/i18n/navigation";
+import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
+import { Link, usePathname } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useState } from "react";
 
@@ -33,6 +34,7 @@ interface ReportButtonProps {
 export function ReportButton({ postId, commentId, compact = false }: ReportButtonProps) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const pathname = usePathname();
   const { accessToken, configured, isAnonymous } = useSupabaseSession();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<ReportReason>("spam");
@@ -45,7 +47,10 @@ export function ReportButton({ postId, commentId, compact = false }: ReportButto
 
   if (isAnonymous || !accessToken) {
     return (
-      <Link href="/login" className="text-xs font-semibold text-plum/45 underline hover:text-plum">
+      <Link
+        href={`/login?next=${encodeURIComponent(getSafeInternalReturnPath(pathname || "/"))}`}
+        className="text-xs font-semibold text-plum/45 underline hover:text-plum"
+      >
         {isKo ? "로그인 후 신고" : "Log in to report"}
       </Link>
     );

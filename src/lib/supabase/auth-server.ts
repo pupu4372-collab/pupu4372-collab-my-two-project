@@ -75,3 +75,31 @@ export function getBearerToken(request: Request): string | null {
   if (!authHeader?.startsWith("Bearer ")) return null;
   return authHeader.slice(7);
 }
+
+/**
+ * Signed-in non-anonymous user id (email-linked guests included; anon UUID excluded).
+ * Prefer this for owner-scoped payment / account APIs.
+ */
+export async function getNonAnonymousUserIdFromRequest(
+  request: Request
+): Promise<string | null> {
+  const token = getBearerToken(request);
+  if (!token) return null;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+
+  const supabase = createClient<Database>(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
+
+  if (error || !user || user.is_anonymous) return null;
+  return user.id;
+}

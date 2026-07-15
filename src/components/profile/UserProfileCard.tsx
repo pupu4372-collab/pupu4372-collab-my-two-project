@@ -485,10 +485,18 @@ export function UserProfileCard({
           )}
         </div>
         {profile?.role === "admin" && (
-          <Link href="/admin" className="mt-3 text-sm font-semibold text-primary underline">
-            {isKo ? "관리자 대시보드" : "Admin dashboard"} →
-          </Link>
+          <div className="mt-3 flex flex-col items-start gap-1">
+            <Link href="/admin" className="text-sm font-semibold text-primary underline">
+              {isKo ? "관리자 대시보드" : "Admin dashboard"} →
+            </Link>
+          </div>
         )}
+        <Link
+          href="/my/payments"
+          className="mt-3 inline-flex text-sm font-semibold text-channel-saju underline"
+        >
+          {isKo ? "결제 내역" : "Payment history"} →
+        </Link>
         {onEdit && (
           <button
             type="button"

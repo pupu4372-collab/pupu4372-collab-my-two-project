@@ -1,12 +1,13 @@
 import { listPetPremiumPaymentHistory } from "@/lib/payments/pet-premium-history";
-import { getUserIdFromRequest } from "@/lib/supabase/auth-server";
+import { getNonAnonymousUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
 
+/** Owner-only pet premium payment history (Bearer, non-anonymous). */
 export async function GET(request: Request) {
   try {
-    const userId = await getUserIdFromRequest(request);
+    const userId = await getNonAnonymousUserIdFromRequest(request);
     if (!userId) {
-      return NextResponse.json({ orders: [], hasPayments: false });
+      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
     }
 
     const orders = await listPetPremiumPaymentHistory(userId);

@@ -11,6 +11,7 @@ import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
 import type { PetShowRankingFallbackFlags } from "@/lib/community/ranking";
 import type { PetShowRankingRow } from "@/lib/supabase/types";
+import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -82,7 +83,7 @@ function RankingPreviewList({
             <ol className="flex w-max min-w-full snap-x snap-mandatory gap-2">
               {rows.slice(0, 5).map((row, index) => (
                 <li key={row.id} className="w-[38vw] max-w-32 shrink-0 snap-start sm:w-32 md:w-28 lg:w-32">
-                  <AuthRequiredLink
+                  <Link
                     href={
                       row.id.startsWith("mock-")
                         ? "/community/pet-show/snapzone"
@@ -103,7 +104,7 @@ function RankingPreviewList({
                     </div>
                     <p className="mt-1 truncate text-[11px] font-bold text-plum">{row.title ?? "Pet Show"}</p>
                     <p className="text-[10px] font-bold text-plum/70">♥ {row.like_count}</p>
-                  </AuthRequiredLink>
+                  </Link>
                 </li>
               ))}
             </ol>
@@ -275,7 +276,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
         >
           {isKo ? "사진 업로드하고 랭킹 참여" : "Upload and join ranking"}
         </AuthRequiredLink>
-        <AuthRequiredLink
+        <Link
           href="/community/pet-show/snapzone"
           className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 ${
             isNight
@@ -284,8 +285,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
           }`}
         >
           {isKo ? "우리아이 자랑 보기" : "View Pet Show"}
-        </AuthRequiredLink>
-        <AuthRequiredLink
+        </Link>
+        <Link
           href="/community/pet-show/fails"
           className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 ${
             isNight
@@ -294,8 +295,8 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
           }`}
         >
           {isKo ? "웃긴 실패 사진" : "Funny fails"}
-        </AuthRequiredLink>
-        <AuthRequiredLink
+        </Link>
+        <Link
           href="/community/challenge"
           className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 hover:brightness-105 ${
             isNight
@@ -304,7 +305,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
           }`}
         >
           {isKo ? "챌린지 참여하기" : "Join Challenge"}
-        </AuthRequiredLink>
+        </Link>
       </div>
       <GlassCard className={`min-w-0 p-4 sm:p-5 ${nightGlassCard}`}>
         <div className="grid gap-3">
@@ -394,7 +395,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             </div>
 
             <div className="mt-6 min-w-0 md:col-start-1 md:row-start-2 md:mt-0">
-              <AuthRequiredLink
+              <Link
                 href="/saju"
                 className={`inline-flex rounded-full px-6 py-3.5 text-sm font-extrabold text-white shadow-sm transition hover:scale-[1.02] hover:brightness-105 ${
                   isNight
@@ -403,7 +404,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
                 }`}
               >
                 {t("heroCta")}
-              </AuthRequiredLink>
+              </Link>
             </div>
 
             <div className="mt-8 grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:contents md:gap-0">

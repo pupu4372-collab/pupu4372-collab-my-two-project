@@ -1,8 +1,9 @@
 "use client";
 
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link, useRouter, usePathname } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useState } from "react";
 import { ReportButton } from "./ReportButton";
@@ -41,11 +42,17 @@ export function PetShowPostActions({
   const locale = useLocale();
   const isKo = locale === "ko";
   const router = useRouter();
+  const pathname = usePathname();
   const { accessToken, configured, isAnonymous, ready } = useSupabaseSession();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function redirectToLogin() {
+    const returnPath = getSafeInternalReturnPath(pathname || `/community/pet-show/${postId}`);
+    router.push(`/login?next=${encodeURIComponent(returnPath)}`);
+  }
 
   async function requestLike(token: string) {
     return fetch("/api/community/pet-show/like", {
@@ -63,7 +70,7 @@ export function PetShowPostActions({
     setError(null);
 
     if (isAnonymous || !accessToken) {
-      router.push("/login");
+      redirectToLogin();
       return;
     }
 
@@ -71,7 +78,7 @@ export function PetShowPostActions({
     try {
       let token = await resolveAccessToken(accessToken);
       if (!token) {
-        router.push("/login");
+        redirectToLogin();
         return;
       }
 
@@ -88,7 +95,7 @@ export function PetShowPostActions({
       const data = (await res.json()) as { liked?: boolean; like_count?: number; error?: string };
       if (!res.ok) {
         if (res.status === 401) {
-          router.push("/login");
+          redirectToLogin();
           return;
         }
         setError(
