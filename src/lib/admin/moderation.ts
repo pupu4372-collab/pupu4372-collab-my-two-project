@@ -4,7 +4,7 @@ import {
   isAdminPostBoardFilter,
 } from "@/lib/admin/post-board";
 import { COMMUNITY_POST_SELECT } from "@/lib/community/post-select";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { CommunityPost, PostComment, PostReport, ReportStatus } from "@/lib/supabase/types";
 
 export type { AdminPostBoardFilter } from "@/lib/admin/post-board";
@@ -26,12 +26,9 @@ export interface AdminReportRow extends PostReport {
 
 export async function fetchAdminRecentPosts(limit = 30, board: AdminPostBoardFilter = "all"): Promise<{
   posts: AdminPostRow[];
-  source: "supabase" | "mock";
+  source: "supabase";
 }> {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) {
-    return { posts: [], source: "mock" };
-  }
+  const supabase = getSupabaseServiceRoleClient();
 
   let query = supabase
     .from("community_posts")
@@ -78,8 +75,7 @@ export async function fetchAdminRecentPosts(limit = 30, board: AdminPostBoardFil
 }
 
 export async function setPostHidden(postId: string, hidden: boolean): Promise<boolean> {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return false;
+  const supabase = getSupabaseServiceRoleClient();
 
   const { error } = await supabase
     .from("community_posts")
@@ -90,8 +86,7 @@ export async function setPostHidden(postId: string, hidden: boolean): Promise<bo
 }
 
 export async function deletePostByAdmin(postId: string): Promise<boolean> {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return false;
+  const supabase = getSupabaseServiceRoleClient();
 
   const { error } = await supabase
     .from("community_posts")
@@ -108,12 +103,9 @@ function resolvePostHref(post: CommunityPost | null | undefined) {
 
 export async function fetchAdminReports(limit = 40): Promise<{
   reports: AdminReportRow[];
-  source: "supabase" | "mock";
+  source: "supabase";
 }> {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) {
-    return { reports: [], source: "mock" };
-  }
+  const supabase = getSupabaseServiceRoleClient();
 
   const { data, error } = await supabase
     .from("post_reports")
@@ -187,8 +179,7 @@ export async function fetchAdminReports(limit = 40): Promise<{
 }
 
 export async function setCommentHidden(commentId: string, hidden: boolean): Promise<boolean> {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return false;
+  const supabase = getSupabaseServiceRoleClient();
 
   const { error } = await supabase
     .from("post_comments")
@@ -202,8 +193,7 @@ export async function updateReportStatus(
   reportId: string,
   status: ReportStatus
 ): Promise<boolean> {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return false;
+  const supabase = getSupabaseServiceRoleClient();
 
   const patch: Partial<PostReport> = {
     status,

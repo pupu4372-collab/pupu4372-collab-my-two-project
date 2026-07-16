@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireAdminResponse } from "@/lib/admin/auth";
 import { deletePostByAdmin, setPostHidden } from "@/lib/admin/moderation";
 import { NextResponse } from "next/server";
 
@@ -7,10 +7,8 @@ interface RouteContext {
 }
 
 export async function PATCH(request: Request, { params }: RouteContext) {
-  const adminId = await requireAdmin(request);
-  if (!adminId) {
-    return NextResponse.json({ error: "Admin access required." }, { status: 403 });
-  }
+  const gate = await requireAdminResponse(request);
+  if ("response" in gate) return gate.response;
 
   const { id } = await params;
   let body: { is_hidden?: boolean };
@@ -24,25 +22,31 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: "is_hidden boolean required." }, { status: 400 });
   }
 
-  const ok = await setPostHidden(id, body.is_hidden);
-  if (!ok) {
-    return NextResponse.json({ error: "Failed to update post." }, { status: 500 });
+  try {
+    const ok = await setPostHidden(id, body.is_hidden);
+    if (!ok) {
+      return NextResponse.json({ error: "Failed to update post." }, { status: 500 });
+    }
+    return NextResponse.json({ id, is_hidden: body.is_hidden });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Service unavailable.";
+    return NextResponse.json({ error: message }, { status: 503 });
   }
-
-  return NextResponse.json({ id, is_hidden: body.is_hidden });
 }
 
 export async function DELETE(request: Request, { params }: RouteContext) {
-  const adminId = await requireAdmin(request);
-  if (!adminId) {
-    return NextResponse.json({ error: "Admin access required." }, { status: 403 });
-  }
+  const gate = await requireAdminResponse(request);
+  if ("response" in gate) return gate.response;
 
   const { id } = await params;
-  const ok = await deletePostByAdmin(id);
-  if (!ok) {
-    return NextResponse.json({ error: "Failed to delete post." }, { status: 500 });
+  try {
+    const ok = await deletePostByAdmin(id);
+    if (!ok) {
+      return NextResponse.json({ error: "Failed to delete post." }, { status: 500 });
+    }
+    return NextResponse.json({ id, deleted: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Service unavailable.";
+    return NextResponse.json({ error: message }, { status: 503 });
   }
-
-  return NextResponse.json({ id, deleted: true });
 }

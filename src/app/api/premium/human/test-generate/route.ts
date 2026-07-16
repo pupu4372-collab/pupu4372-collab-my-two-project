@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireAdminResponse } from "@/lib/admin/auth";
 import {
   generateHumanPremiumTestReport,
   parseHumanPremiumReportInput,
@@ -6,10 +6,14 @@ import {
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const adminId = await requireAdmin(request);
-  if (!adminId) {
-    return NextResponse.json({ error: "Admin only." }, { status: 403 });
+  const gate = await requireAdminResponse(request);
+  if ("response" in gate) {
+    if (gate.response.status === 403) {
+      return NextResponse.json({ error: "Admin only." }, { status: 403 });
+    }
+    return gate.response;
   }
+  const { adminId } = gate;
 
   let body: Record<string, unknown>;
   try {

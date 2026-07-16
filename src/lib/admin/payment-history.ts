@@ -1,4 +1,4 @@
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { humanPremiumWebExpiresAt } from "@/lib/reports/human-premium/retention";
 import {
   normalizeReportTypeKey,
@@ -108,8 +108,7 @@ function isParentCartOrderId(orderId: string | null | undefined): boolean {
 
 /** Service-role admin listing — newest first. */
 export async function listAllPaymentHistoryForAdmin(): Promise<AdminPaymentHistoryEntry[]> {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return [];
+  const supabase = getSupabaseServiceRoleClient();
 
   const [petRes, humanRes] = await Promise.all([
     supabase

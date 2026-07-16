@@ -1,13 +1,16 @@
-import { requireAdmin } from "@/lib/admin/auth";
+import { requireAdminResponse } from "@/lib/admin/auth";
 import { fetchAdminReports } from "@/lib/admin/moderation";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-  const adminId = await requireAdmin(request);
-  if (!adminId) {
-    return NextResponse.json({ error: "Admin access required." }, { status: 403 });
-  }
+  const gate = await requireAdminResponse(request);
+  if ("response" in gate) return gate.response;
 
-  const page = await fetchAdminReports(60);
-  return NextResponse.json(page);
+  try {
+    const page = await fetchAdminReports(60);
+    return NextResponse.json(page);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Service unavailable.";
+    return NextResponse.json({ error: message }, { status: 503 });
+  }
 }
