@@ -37,6 +37,23 @@ export type AdminPaymentHistoryEntry =
       order: PetPremiumPaymentRecord;
     };
 
+export type AdminPaymentHistoryListParams = {
+  /** YYYY-MM-DD inclusive start (Asia/Seoul day). */
+  from: string;
+  /** YYYY-MM-DD inclusive end (Asia/Seoul day). */
+  to: string;
+  /** Page size (default 50, max 100). */
+  limit?: number;
+  /** Opaque cursor from previous page (`created_at` + entry id). */
+  cursor?: string | null;
+};
+
+export type AdminPaymentHistoryListResult = {
+  entries: AdminPaymentHistoryEntry[];
+  nextCursor: string | null;
+  hasMore: boolean;
+};
+
 type UnlockAdminRow = {
   payment_id: string | null;
   product_code: string;
@@ -76,6 +93,84 @@ type HumanAdminRow = {
   } | null;
 };
 
+type DecodedCursor = {
+  createdAt: string;
+  kind: "human" | "pet";
+  id: string;
+};
+
+/** Max report rows per parent cart — over-fetch factor for grouping. */
+const HUMAN_ROWS_PER_ORDER = 12;
+
+/** Parent cart order ids only: hp_cart_ + 20 hex chars (exclude child item rows). */
+const PARENT_CART_ORDER_RE = /^hp_cart_[a-f0-9]{20}$/;
+const PARENT_CART_ORDER_MATCH = "^hp_cart_[a-f0-9]{20}$";
+
+function isYmd(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+/** Inclusive Seoul calendar-day bounds as timestamptz ISO strings. */
+export function seoulDayRangeIso(from: string, to: string): { gte: string; lte: string } {
+  return {
+    gte: `${from}T00:00:00+09:00`,
+    lte: `${to}T23:59:59.999+09:00`,
+  };
+}
+
+export function clampAdminPaymentLimit(raw: unknown): number {
+  const n = typeof raw === "number" ? raw : Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return 50;
+  return Math.min(100, Math.floor(n));
+}
+
+function entrySortKey(entry: AdminPaymentHistoryEntry): string {
+  const id = entry.kind === "human" ? entry.order.orderId : entry.order.paymentId;
+  return `${entry.kind}:${id}`;
+}
+
+function compareEntriesDesc(a: AdminPaymentHistoryEntry, b: AdminPaymentHistoryEntry): number {
+  const tb = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  if (tb !== 0) return tb;
+  return entrySortKey(b).localeCompare(entrySortKey(a));
+}
+
+/** True when `entry` is strictly older than cursor in (createdAt desc, kind:id desc) order. */
+function isAfterCursor(entry: AdminPaymentHistoryEntry, cursor: DecodedCursor): boolean {
+  const t = new Date(entry.createdAt).getTime();
+  const ct = new Date(cursor.createdAt).getTime();
+  if (t < ct) return true;
+  if (t > ct) return false;
+  const cursorKey = `${cursor.kind}:${cursor.id}`;
+  return entrySortKey(entry).localeCompare(cursorKey) < 0;
+}
+
+export function encodeAdminPaymentCursor(entry: AdminPaymentHistoryEntry): string {
+  const id = entry.kind === "human" ? entry.order.orderId : entry.order.paymentId;
+  return Buffer.from(
+    JSON.stringify({ createdAt: entry.createdAt, kind: entry.kind, id }),
+    "utf8"
+  ).toString("base64url");
+}
+
+export function decodeAdminPaymentCursor(raw: string | null | undefined): DecodedCursor | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(raw, "base64url").toString("utf8")) as Partial<DecodedCursor>;
+    if (
+      typeof parsed.createdAt !== "string" ||
+      (parsed.kind !== "human" && parsed.kind !== "pet") ||
+      typeof parsed.id !== "string" ||
+      !parsed.id
+    ) {
+      return null;
+    }
+    return { createdAt: parsed.createdAt, kind: parsed.kind, id: parsed.id };
+  } catch {
+    return null;
+  }
+}
+
 /** Prefer birth_basis.cart (parent cart order); fall back to report_type. */
 function resolveHumanCartItems(row: HumanAdminRow): {
   items: ReportType[];
@@ -101,65 +196,21 @@ function resolveHumanCartItems(row: HumanAdminRow): {
   return { items: [], generatedCount: 0 };
 }
 
-/** Parent cart order ids only: hp_cart_ + 20 hex chars (exclude child item rows). */
 function isParentCartOrderId(orderId: string | null | undefined): boolean {
-  return Boolean(orderId && /^hp_cart_[a-f0-9]{20}$/.test(orderId));
+  return Boolean(orderId && PARENT_CART_ORDER_RE.test(orderId));
 }
 
-/** Service-role admin listing — newest first. */
-export async function listAllPaymentHistoryForAdmin(): Promise<AdminPaymentHistoryEntry[]> {
-  const supabase = getSupabaseServiceRoleClient();
-
-  const [petRes, humanRes] = await Promise.all([
-    supabase
-      .from("pet_premium_unlocks")
-      .select(
-        "payment_id, product_code, price_krw, amount, currency, paid_at, created_at, expires_at, pet_id, user_id, pets ( name, species, gender, birth_date, birth_timezone )"
-      )
-      .not("payment_id", "is", null)
-      .order("created_at", { ascending: false })
-      .limit(200),
-    supabase
-      .from("human_premium_reports")
-      .select(
-        "payment_order_id, user_id, email, person_name, amount_paid, currency, locale, created_at, report_type, birth_basis"
-      )
-      .like("payment_order_id", "hp_cart_%")
-      .gt("amount_paid", 0)
-      .order("created_at", { ascending: false })
-      .limit(400),
-  ]);
-
-  const petRows = (petRes.data ?? []) as UnlockAdminRow[];
-  const humanRows = ((humanRes.data ?? []) as HumanAdminRow[]).filter((row) =>
-    isParentCartOrderId(row.payment_order_id)
-  );
-
-  const userIds = [
-    ...new Set([
-      ...petRows.map((r) => r.user_id),
-      ...humanRows.map((r) => r.user_id).filter((id): id is string => Boolean(id)),
-    ]),
-  ];
-
-  const nameByUserId = new Map<string, string>();
-  if (userIds.length) {
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, display_name")
-      .in("id", userIds);
-    for (const profile of profiles ?? []) {
-      const name = (profile as { id: string; display_name: string | null }).display_name?.trim();
-      if (name) nameByUserId.set((profile as { id: string }).id, name);
-    }
-  }
-
-  const petEntries: AdminPaymentHistoryEntry[] = petRows.map((row) => {
+function mapPetEntries(
+  petRows: UnlockAdminRow[],
+  nameByUserId: Map<string, string>
+): AdminPaymentHistoryEntry[] {
+  return petRows.map((row) => {
     const currencyRaw = String(row.currency ?? "KRW").trim().toUpperCase();
     const currency: "KRW" | "USD" = currencyRaw === "USD" ? "USD" : "KRW";
+    // Sort/cursor use DB created_at; order.createdAt keeps paid_at for record consumers.
     return {
-      kind: "pet",
-      createdAt: row.paid_at ?? row.created_at,
+      kind: "pet" as const,
+      createdAt: row.created_at,
       userId: row.user_id,
       userLabel: nameByUserId.get(row.user_id) || row.user_id.slice(0, 8),
       order: {
@@ -179,9 +230,15 @@ export async function listAllPaymentHistoryForAdmin(): Promise<AdminPaymentHisto
       },
     };
   });
+}
 
+function mapHumanEntries(
+  humanRows: HumanAdminRow[],
+  nameByUserId: Map<string, string>
+): AdminPaymentHistoryEntry[] {
+  const parentRows = humanRows.filter((row) => isParentCartOrderId(row.payment_order_id));
   const humanByOrder = new Map<string, HumanAdminRow[]>();
-  for (const row of humanRows) {
+  for (const row of parentRows) {
     const orderId = row.payment_order_id;
     if (!orderId) continue;
     const list = humanByOrder.get(orderId) ?? [];
@@ -217,8 +274,119 @@ export async function listAllPaymentHistoryForAdmin(): Promise<AdminPaymentHisto
       },
     });
   }
+  return humanEntries;
+}
 
-  return [...petEntries, ...humanEntries].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+/**
+ * Paginated admin payment history (pet unlocks + human parent cart orders).
+ * Date range + order + limit are applied in Supabase queries (not full-table load).
+ * Cursor: created_at + kind + id (base64url JSON).
+ */
+export async function listPaymentHistoryForAdmin(
+  params: AdminPaymentHistoryListParams
+): Promise<AdminPaymentHistoryListResult> {
+  if (!isYmd(params.from) || !isYmd(params.to)) {
+    throw new Error("Invalid from/to date (expected YYYY-MM-DD).");
+  }
+  if (params.from > params.to) {
+    throw new Error("from must be on or before to.");
+  }
+
+  const limit = clampAdminPaymentLimit(params.limit);
+  const cursor = decodeAdminPaymentCursor(params.cursor);
+  if (params.cursor && !cursor) {
+    throw new Error("Invalid cursor.");
+  }
+
+  const { gte, lte } = seoulDayRangeIso(params.from, params.to);
+  const supabase = getSupabaseServiceRoleClient();
+  const fetchNeed = limit + 1;
+
+  let petQuery = supabase
+    .from("pet_premium_unlocks")
+    .select(
+      "payment_id, product_code, price_krw, amount, currency, paid_at, created_at, expires_at, pet_id, user_id, pets ( name, species, gender, birth_date, birth_timezone )"
+    )
+    .not("payment_id", "is", null)
+    .gte("created_at", gte)
+    .lte("created_at", lte)
+    .order("created_at", { ascending: false })
+    .order("payment_id", { ascending: false })
+    .limit(fetchNeed);
+
+  let humanQuery = supabase
+    .from("human_premium_reports")
+    .select(
+      "payment_order_id, user_id, email, person_name, amount_paid, currency, locale, created_at, report_type, birth_basis"
+    )
+    .filter("payment_order_id", "match", PARENT_CART_ORDER_MATCH)
+    .gt("amount_paid", 0)
+    .gte("created_at", gte)
+    .lte("created_at", lte)
+    .order("created_at", { ascending: false })
+    .order("payment_order_id", { ascending: false })
+    .limit(fetchNeed * HUMAN_ROWS_PER_ORDER);
+
+  if (cursor) {
+    // Quote filter values — ISO timestamps contain `:` / `+`.
+    const t = `"${cursor.createdAt.replace(/"/g, "")}"`;
+    const id = `"${cursor.id.replace(/"/g, "")}"`;
+    if (cursor.kind === "pet") {
+      // Pets older than cursor; humans at same timestamp sort after all pets (kind:id key).
+      petQuery = petQuery.or(`created_at.lt.${t},and(created_at.eq.${t},payment_id.lt.${id})`);
+      humanQuery = humanQuery.lte("created_at", cursor.createdAt);
+    } else {
+      petQuery = petQuery.lt("created_at", cursor.createdAt);
+      humanQuery = humanQuery.or(
+        `created_at.lt.${t},and(created_at.eq.${t},payment_order_id.lt.${id})`
+      );
+    }
+  }
+
+  const [petRes, humanRes] = await Promise.all([petQuery, humanQuery]);
+
+  if (petRes.error) {
+    throw new Error(petRes.error.message || "Failed to load pet payments.");
+  }
+  if (humanRes.error) {
+    throw new Error(humanRes.error.message || "Failed to load human payments.");
+  }
+
+  const petRows = (petRes.data ?? []) as UnlockAdminRow[];
+  const humanRows = (humanRes.data ?? []) as HumanAdminRow[];
+
+  const userIds = [
+    ...new Set([
+      ...petRows.map((r) => r.user_id),
+      ...humanRows.map((r) => r.user_id).filter((id): id is string => Boolean(id)),
+    ]),
+  ];
+
+  const nameByUserId = new Map<string, string>();
+  if (userIds.length) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, display_name")
+      .in("id", userIds);
+    for (const profile of profiles ?? []) {
+      const name = (profile as { id: string; display_name: string | null }).display_name?.trim();
+      if (name) nameByUserId.set((profile as { id: string }).id, name);
+    }
+  }
+
+  let petEntries = mapPetEntries(petRows, nameByUserId);
+  let humanEntries = mapHumanEntries(humanRows, nameByUserId);
+
+  if (cursor) {
+    petEntries = petEntries.filter((e) => isAfterCursor(e, cursor));
+    humanEntries = humanEntries.filter((e) => isAfterCursor(e, cursor));
+  }
+
+  const merged = [...petEntries, ...humanEntries].sort(compareEntriesDesc);
+  const page = merged.slice(0, limit);
+  const hasMore = merged.length > limit;
+  const nextCursor =
+    hasMore && page.length > 0 ? encodeAdminPaymentCursor(page[page.length - 1]!) : null;
+
+  return { entries: page, nextCursor, hasMore };
 }

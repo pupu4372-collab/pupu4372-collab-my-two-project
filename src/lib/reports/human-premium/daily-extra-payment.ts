@@ -2,10 +2,12 @@ import { randomBytes } from "node:crypto";
 import {
   fetchPortOnePayment,
   isPortOnePaymentPaid,
+  parsePortOneCustomData,
   verifyPortOneAmount,
 } from "@/lib/payments/portone/server";
 import { resolveDailyExtraPayPalLink } from "@/lib/payments/paypal-links";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { DAILY_EXTRA_PRODUCT_CODE } from "./daily-extra-constants";
 import {
   getDailyExtraPrice,
   getCheckoutCurrency,
@@ -14,6 +16,8 @@ import {
 } from "./pricing";
 
 export type DailyExtraPaymentProvider = "portone" | "paypal_link" | "demo";
+
+export { DAILY_EXTRA_PRODUCT_CODE };
 
 export interface DailyExtraOrderRow {
   id: string;
@@ -145,6 +149,19 @@ export async function verifyDailyExtraPortOnePayment(
   if (!payment || !isPortOnePaymentPaid(payment)) {
     throw new Error("Payment not completed.");
   }
+
+  const customData = parsePortOneCustomData(payment.customData);
+  const paidProductCode =
+    typeof customData?.productCode === "string" ? customData.productCode : null;
+  if (!paidProductCode || paidProductCode !== DAILY_EXTRA_PRODUCT_CODE) {
+    console.error("[DAILY_EXTRA_CUSTOMDATA_MISMATCH]", {
+      paymentId: paymentOrderId,
+      paidProductCode,
+      expected: DAILY_EXTRA_PRODUCT_CODE,
+    });
+    throw new Error("custom_data_mismatch");
+  }
+
   if (!verifyPortOneAmount(payment, expectedAmount)) {
     throw new Error("Payment amount mismatch.");
   }

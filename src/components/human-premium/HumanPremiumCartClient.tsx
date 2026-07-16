@@ -420,6 +420,7 @@ export function HumanPremiumCartClient() {
       currency: String(checkout.currency ?? "KRW"),
       channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
       payMethod: "CARD",
+      customData: { orderId: paymentId },
     });
 
     if (payResult?.code !== undefined) {
@@ -724,6 +725,7 @@ export function HumanPremiumCartClient() {
                   orderName={spbDraft.orderName}
                   totalAmount={spbDraft.totalAmount}
                   currency={spbDraft.currency}
+                  customData={{ orderId: spbDraft.paymentId }}
                   onSuccess={(paymentId) => void handleSpbSuccess(paymentId)}
                   onError={(message) => {
                     setError(formatHumanPremiumError(message, "en"));

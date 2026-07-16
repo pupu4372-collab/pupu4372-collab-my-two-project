@@ -2,6 +2,7 @@ import {
   catalogAmountToPortOneTotal,
   fetchPortOnePayment,
   isPortOnePaymentPaid,
+  parsePortOneCustomData,
   verifyPortOneAmount,
 } from "@/lib/payments/portone/server";
 import { isPortOneConfigured } from "@/lib/payments/portone/config";
@@ -68,6 +69,17 @@ export async function POST(request: Request) {
     const payment = await fetchPortOnePayment(paymentId);
     if (!payment || !isPortOnePaymentPaid(payment)) {
       return NextResponse.json({ error: "not_paid" }, { status: 400 });
+    }
+
+    const customData = parsePortOneCustomData(payment.customData);
+    const paidOrderId =
+      typeof customData?.orderId === "string" ? customData.orderId.trim() : "";
+    if (!paidOrderId || paidOrderId !== paymentId) {
+      console.error("[CART_CUSTOMDATA_MISMATCH]", {
+        paymentId,
+        paidOrderId: paidOrderId || null,
+      });
+      return NextResponse.json({ error: "custom_data_mismatch" }, { status: 400 });
     }
 
     const rowCurrency = String(row.currency ?? "").trim().toUpperCase();

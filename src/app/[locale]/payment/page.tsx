@@ -216,6 +216,7 @@ function PaymentContent() {
   const [sdkReady, setSdkReady] = useState(false);
   const [returnNotice, setReturnNotice] = useState<string | null>(null);
   const [verifyFailedPaymentId, setVerifyFailedPaymentId] = useState<string | null>(null);
+  const [verifyFailedMessage, setVerifyFailedMessage] = useState<string | null>(null);
   const [spbPaymentId, setSpbPaymentId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -273,6 +274,7 @@ function PaymentContent() {
 
       clearPendingPetPremiumPaymentId();
       setVerifyFailedPaymentId(null);
+      setVerifyFailedMessage(null);
       setReturnNotice(null);
       setStatus("success");
       setTimeout(() => router.push(nextHref), 800);
@@ -290,6 +292,7 @@ function PaymentContent() {
         productCode: verifyProductCode,
         petId: params.get("petId"),
         accessToken,
+        locale: locale === "en" ? "en" : "ko",
       });
 
       if (result.ok) {
@@ -298,10 +301,11 @@ function PaymentContent() {
       }
 
       setVerifyFailedPaymentId(paymentId);
+      setVerifyFailedMessage(result.message);
       setStatus("verify_failed");
       replaceWithCleanCheckoutUrl();
     },
-    [accessToken, completeVerifiedPayment, params, productCode, replaceWithCleanCheckoutUrl]
+    [accessToken, completeVerifiedPayment, locale, params, productCode, replaceWithCleanCheckoutUrl]
   );
 
   useEffect(() => {
@@ -437,10 +441,12 @@ function PaymentContent() {
         productCode,
         petId: params.get("petId"),
         accessToken,
+        locale: locale === "en" ? "en" : "ko",
       });
 
       if (!result.ok) {
         setVerifyFailedPaymentId(paymentId);
+        setVerifyFailedMessage(result.message);
         setStatus("verify_failed");
         return;
       }
@@ -496,7 +502,7 @@ function PaymentContent() {
 
         {status === "verify_failed" && (
           <div className="mt-4 space-y-3 rounded-2xl bg-petal/40 px-4 py-3 text-sm text-plum" role="alert">
-            <p>{shared.verifyFailedMsg}</p>
+            <p>{verifyFailedMessage ?? shared.verifyFailedMsg}</p>
             <p className="text-xs text-plum/80">{shared.verifyRetryNote}</p>
             <button
               type="button"

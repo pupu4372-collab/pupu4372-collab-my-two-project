@@ -1,5 +1,6 @@
 import { getUserIdFromRequest } from "@/lib/supabase/auth-server";
-import { createSupabaseServerClient, getSupabaseServiceRoleClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server-rsc";
 import { notFound } from "next/navigation";
 import { NextResponse } from "next/server";
 

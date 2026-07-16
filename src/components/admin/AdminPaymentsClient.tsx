@@ -12,7 +12,9 @@ import {
 import { PET_PREMIUM_PRODUCT_LABELS } from "@/lib/payments/pet-premium-shared";
 import { notFound } from "next/navigation";
 import { useLocale } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+const PAGE_LIMIT = 50;
 
 function formatDate(value: string, isKo: boolean) {
   const date = new Date(value);
@@ -26,19 +28,18 @@ function formatDate(value: string, isKo: boolean) {
   });
 }
 
-/** Local calendar day bounds for YYYY-MM-DD filters (inclusive). */
-function entryInDateRange(createdAt: string, startDate: string, endDate: string): boolean {
-  const t = new Date(createdAt).getTime();
-  if (Number.isNaN(t)) return false;
-  if (startDate) {
-    const start = new Date(`${startDate}T00:00:00`).getTime();
-    if (!Number.isNaN(start) && t < start) return false;
-  }
-  if (endDate) {
-    const end = new Date(`${endDate}T23:59:59.999`).getTime();
-    if (!Number.isNaN(end) && t > end) return false;
-  }
-  return true;
+function toYmdLocal(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function defaultDateRange(): { start: string; end: string } {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 7);
+  return { start: toYmdLocal(start), end: toYmdLocal(end) };
 }
 
 function csvEscape(value: string): string {
@@ -98,12 +99,7 @@ function downloadPaymentsCsv(
     ),
   ];
 
-  const startPart = options.startDate || "all";
-  const endPart = options.endDate || "all";
-  const filename =
-    !options.startDate && !options.endDate
-      ? "payments_all.csv"
-      : `payments_${startPart}_${endPart}.csv`;
+  const filename = `payments_${options.startDate}_${options.endDate}.csv`;
 
   const blob = new Blob(["\uFEFF" + lines.join("\n")], {
     type: "text/csv;charset=utf-8;",
@@ -122,11 +118,46 @@ export function AdminPaymentsClient() {
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
   const petLabels = PET_PREMIUM_PRODUCT_LABELS[isKo ? "ko" : "en"];
   const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
+  const defaults = defaultDateRange();
+  const [startDate, setStartDate] = useState(defaults.start);
+  const [endDate, setEndDate] = useState(defaults.end);
   const [entries, setEntries] = useState<AdminPaymentHistoryEntry[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+
+  const fetchPage = useCallback(
+    async (opts: { cursor?: string | null }) => {
+      if (!accessToken) {
+        throw new Error("Not signed in.");
+      }
+      const params = new URLSearchParams({
+        from: startDate,
+        to: endDate,
+        limit: String(PAGE_LIMIT),
+      });
+      if (opts.cursor) params.set("cursor", opts.cursor);
+
+      const res = await fetch(`/api/admin/payments?${params}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.status === 404 || res.status === 401) {
+        notFound();
+        throw new Error("Not found.");
+      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to load payments");
+
+      return {
+        page: (data.entries ?? []) as AdminPaymentHistoryEntry[],
+        nextCursor: typeof data.nextCursor === "string" ? data.nextCursor : null,
+        hasMore: Boolean(data.hasMore),
+      };
+    },
+    [accessToken, startDate, endDate]
+  );
 
   useEffect(() => {
     if (!configured || !ready) return;
@@ -139,21 +170,21 @@ export function AdminPaymentsClient() {
     async function load() {
       setLoading(true);
       setError(null);
+      setEntries([]);
+      setNextCursor(null);
+      setHasMore(false);
       try {
-        const res = await fetch("/api/admin/payments", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (res.status === 404 || res.status === 401) {
-          notFound();
-          return;
-        }
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Failed to load payments");
-        if (!cancelled) setEntries((data.entries ?? []) as AdminPaymentHistoryEntry[]);
+        const result = await fetchPage({});
+        if (cancelled) return;
+        setEntries(result.page);
+        setNextCursor(result.nextCursor);
+        setHasMore(result.hasMore);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Failed to load payments");
           setEntries([]);
+          setNextCursor(null);
+          setHasMore(false);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -164,12 +195,23 @@ export function AdminPaymentsClient() {
     return () => {
       cancelled = true;
     };
-  }, [configured, ready, isAnonymous, accessToken]);
+  }, [configured, ready, isAnonymous, accessToken, startDate, endDate, fetchPage]);
 
-  const filteredEntries = useMemo(
-    () => entries.filter((entry) => entryInDateRange(entry.createdAt, startDate, endDate)),
-    [entries, startDate, endDate]
-  );
+  async function onLoadMore() {
+    if (!hasMore || !nextCursor || loadingMore || loading) return;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const result = await fetchPage({ cursor: nextCursor });
+      setEntries((prev) => [...prev, ...result.page]);
+      setNextCursor(result.nextCursor);
+      setHasMore(result.hasMore);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load payments");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -197,6 +239,7 @@ export function AdminPaymentsClient() {
           <input
             type="date"
             value={startDate}
+            max={endDate}
             onChange={(e) => setStartDate(e.target.value)}
             className="rounded-xl border border-plum/15 bg-white px-3 py-2 text-sm font-semibold text-primary outline-none focus:border-channel-saju"
           />
@@ -206,15 +249,16 @@ export function AdminPaymentsClient() {
           <input
             type="date"
             value={endDate}
+            min={startDate}
             onChange={(e) => setEndDate(e.target.value)}
             className="rounded-xl border border-plum/15 bg-white px-3 py-2 text-sm font-semibold text-primary outline-none focus:border-channel-saju"
           />
         </label>
         <button
           type="button"
-          disabled={loading || filteredEntries.length === 0}
+          disabled={loading || entries.length === 0}
           onClick={() =>
-            downloadPaymentsCsv(filteredEntries, {
+            downloadPaymentsCsv(entries, {
               isKo,
               startDate,
               endDate,
@@ -226,18 +270,17 @@ export function AdminPaymentsClient() {
         >
           {isKo ? "다운로드" : "Download"}
         </button>
-        {(startDate || endDate) && (
-          <button
-            type="button"
-            onClick={() => {
-              setStartDate("");
-              setEndDate("");
-            }}
-            className="text-sm font-semibold text-plum/70 underline-offset-2 hover:text-plum hover:underline"
-          >
-            {isKo ? "전체 기간" : "All dates"}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => {
+            const range = defaultDateRange();
+            setStartDate(range.start);
+            setEndDate(range.end);
+          }}
+          className="text-sm font-semibold text-plum/70 underline-offset-2 hover:text-plum hover:underline"
+        >
+          {isKo ? "최근 7일" : "Last 7 days"}
+        </button>
       </div>
 
       {loading ? <p className="text-sm text-white/65">{isKo ? "불러오는 중…" : "Loading…"}</p> : null}
@@ -247,12 +290,12 @@ export function AdminPaymentsClient() {
         </p>
       ) : null}
 
-      {!loading && filteredEntries.length === 0 ? (
+      {!loading && entries.length === 0 ? (
         <p className="text-sm text-white/65">{isKo ? "결제 내역이 없습니다." : "No payments found."}</p>
       ) : null}
 
       <div className="space-y-3">
-        {filteredEntries.map((entry) =>
+        {entries.map((entry) =>
           entry.kind === "human" ? (
             <article
               key={`human-${entry.order.orderId}`}
@@ -322,6 +365,25 @@ export function AdminPaymentsClient() {
           )
         )}
       </div>
+
+      {!loading && hasMore ? (
+        <div className="flex justify-center pt-2">
+          <button
+            type="button"
+            disabled={loadingMore}
+            onClick={() => void onLoadMore()}
+            className="inline-flex rounded-full border border-plum/20 bg-white px-5 py-2.5 text-sm font-extrabold text-plum transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loadingMore
+              ? isKo
+                ? "불러오는 중…"
+                : "Loading…"
+              : isKo
+                ? "더 보기"
+                : "Load more"}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

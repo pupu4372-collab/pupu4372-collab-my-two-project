@@ -8,6 +8,7 @@ import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
+import { DAILY_EXTRA_PRODUCT_CODE } from "@/lib/reports/human-premium/daily-extra-constants";
 import type { HumanPremiumProfile } from "@/lib/reports/human-premium/cart-session";
 import {
   REPORT_TYPE_SUBTITLES_EN,
@@ -221,6 +222,7 @@ export function DayPillarPreview({
           currency: "KRW",
           channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
           payMethod: "CARD",
+          customData: { productCode: DAILY_EXTRA_PRODUCT_CODE },
         });
 
         if (payResult.code !== undefined) {

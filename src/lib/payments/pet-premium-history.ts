@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server-rsc";
 import type { PetPremiumPaymentRecord } from "@/lib/payments/pet-premium-shared";
 
 export type { PetPremiumPaymentRecord } from "@/lib/payments/pet-premium-shared";

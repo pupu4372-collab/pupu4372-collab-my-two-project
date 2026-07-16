@@ -33,7 +33,7 @@ const copies = [
   ["favicon.ico", path.join(appDir, "favicon.ico")],
   ["icon-512.png", path.join(appDir, "icon.png")],
   ["apple-touch-icon.png", path.join(appDir, "apple-icon.png")],
-  ["favicon.ico", path.join(publicDir, "favicon.ico")],
+  // Do not copy favicon.ico to public/ — conflicts with src/app/favicon.ico (Next 500).
   ["apple-touch-icon.png", path.join(publicDir, "apple-touch-icon.png")],
   ["icon-192.png", path.join(publicDir, "icon-192.png")],
   ["icon-512.png", path.join(publicDir, "icon-512.png")],
@@ -50,7 +50,10 @@ for (const [srcName, dest] of copies) {
   console.log("Synced", path.relative(root, dest));
 }
 
-const obsolete = [path.join(publicDir, "favicon-48x48.png")];
+const obsolete = [
+  path.join(publicDir, "favicon-48x48.png"),
+  path.join(publicDir, "favicon.ico"),
+];
 for (const file of obsolete) {
   if (fs.existsSync(file)) {
     fs.unlinkSync(file);

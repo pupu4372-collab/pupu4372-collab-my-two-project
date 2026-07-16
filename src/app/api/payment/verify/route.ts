@@ -69,37 +69,43 @@ export async function POST(req: NextRequest) {
 
     const customData = parsePortOneCustomData(payment.customData);
     if (!customData) {
-      console.error("[PET_UNLOCK_CUSTOMDATA_MISSING_FALLBACK]", {
+      console.error("[PET_UNLOCK_CUSTOMDATA_MISMATCH]", {
         paymentId: payment_id,
         product_code,
         petId: pet_id ?? null,
+        reason: "missing",
         customDataRawType: payment.customData == null ? "null" : typeof payment.customData,
       });
-    } else {
-      const paidProductCode =
-        typeof customData.productCode === "string" ? customData.productCode : null;
-      if (paidProductCode && paidProductCode !== product_code) {
-        console.error("[PET_UNLOCK_PRODUCT_MISMATCH_FALLBACK]", {
-          paymentId: payment_id,
-          requestedProductCode: product_code,
-          paidProductCode,
-          petId: pet_id ?? null,
-        });
-        return NextResponse.json({ error: "payment_product_mismatch" }, { status: 400 });
-      }
+      return NextResponse.json({ error: "custom_data_mismatch" }, { status: 400 });
+    }
 
-      const paidPetId =
-        typeof customData.petId === "string" && customData.petId.trim()
-          ? customData.petId.trim()
-          : null;
-      if (paidPetId && pet_id && paidPetId !== pet_id) {
-        console.error("[PET_UNLOCK_PET_MISMATCH_FALLBACK]", {
+    const paidProductCode =
+      typeof customData.productCode === "string" ? customData.productCode : null;
+    if (!paidProductCode || paidProductCode !== product_code) {
+      console.error("[PET_UNLOCK_CUSTOMDATA_MISMATCH]", {
+        paymentId: payment_id,
+        requestedProductCode: product_code,
+        paidProductCode,
+        petId: pet_id ?? null,
+        reason: "product_code",
+      });
+      return NextResponse.json({ error: "custom_data_mismatch" }, { status: 400 });
+    }
+
+    const paidPetId =
+      typeof customData.petId === "string" && customData.petId.trim()
+        ? customData.petId.trim()
+        : null;
+    if (pet_id) {
+      if (!paidPetId || paidPetId !== pet_id) {
+        console.error("[PET_UNLOCK_CUSTOMDATA_MISMATCH]", {
           paymentId: payment_id,
           product_code,
           requestedPetId: pet_id,
           paidPetId,
+          reason: "pet_id",
         });
-        return NextResponse.json({ error: "payment_pet_mismatch" }, { status: 400 });
+        return NextResponse.json({ error: "custom_data_mismatch" }, { status: 400 });
       }
     }
 
