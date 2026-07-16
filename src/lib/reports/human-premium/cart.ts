@@ -88,20 +88,42 @@ function rowMatchesBirthProfile(
   );
 }
 
+/**
+ * Purchased cart report types for exclusion.
+ * Primary: fulfilled orders for `userId` (any grade, including anonymous).
+ * Legacy OR: `user_id` null rows matched by email + birth profile
+ * (pre–stage-2 guest carts that never recorded user_id).
+ */
 async function getPurchasedReportTypesForInput(
   input: HumanPremiumReportInput,
   userId?: string | null,
   email?: string
 ): Promise<Set<ReportType>> {
-  const rows = await listHumanPremiumCartOrderRows({ userId, email, limit: 50 });
   const types = new Set<ReportType>();
-  for (const row of rows) {
-    if (!isFulfilledCartRow(row)) continue;
-    if (!rowMatchesBirthProfile(row, input)) continue;
-    const cart = getCartMeta(row);
-    if (!cart) continue;
-    for (const item of cart.items) types.add(item);
+
+  if (userId) {
+    const byUser = await listHumanPremiumCartOrderRows({ userId, limit: 50 });
+    for (const row of byUser) {
+      if (!isFulfilledCartRow(row)) continue;
+      const cart = getCartMeta(row);
+      if (!cart) continue;
+      for (const item of cart.items) types.add(item);
+    }
   }
+
+  // Legacy null-user_id orders: email + birth profile only.
+  if (email) {
+    const byEmail = await listHumanPremiumCartOrderRows({ email, limit: 50 });
+    for (const row of byEmail) {
+      if (row.user_id) continue;
+      if (!isFulfilledCartRow(row)) continue;
+      if (!rowMatchesBirthProfile(row, input)) continue;
+      const cart = getCartMeta(row);
+      if (!cart) continue;
+      for (const item of cart.items) types.add(item);
+    }
+  }
+
   return types;
 }
 
@@ -121,32 +143,18 @@ async function buildCartOrderDraft(
   const input = parseHumanPremiumReportInput(body, userId);
   const { email, deliverEmail } = resolveHumanPremiumEmail(body.email);
 
-  let effectiveItems = items;
-  if (userId) {
-    const orders = await listHumanPremiumVaultOrders({ userId });
-    const purchased = new Set<ReportType>();
-    for (const order of orders) {
-      for (const item of order.items) purchased.add(item);
-    }
-    const excluded = items.filter((item) => purchased.has(item));
-    effectiveItems = items.filter((item) => !purchased.has(item));
-    if (!effectiveItems.length) {
-      throw new Error("cart_items_already_purchased");
-    }
-    if (excluded.length) {
-      console.error("[HUMAN_CART_PURCHASED_EXCLUDED]", {
-        userId,
-        excluded,
-        remaining: effectiveItems,
-      });
-    }
-  } else {
-    // TODO: email-based purchased exclusion for guests / anonymous sessions
-    const purchased = await getPurchasedReportTypesForInput(input, userId, email);
-    const duplicates = items.filter((item) => purchased.has(item));
-    if (duplicates.length) {
-      throw new Error("cart_items_already_purchased");
-    }
+  const purchased = await getPurchasedReportTypesForInput(input, userId, email);
+  const excluded = items.filter((item) => purchased.has(item));
+  const effectiveItems = items.filter((item) => !purchased.has(item));
+  if (!effectiveItems.length) {
+    throw new Error("cart_items_already_purchased");
+  }
+  if (excluded.length) {
+    console.error("[HUMAN_CART_PURCHASED_EXCLUDED]", {
+      userId: userId ?? null,
+      excluded,
+      remaining: effectiveItems,
+    });
   }
 
   const amount = resolveCartAmount(effectiveItems, input.locale);

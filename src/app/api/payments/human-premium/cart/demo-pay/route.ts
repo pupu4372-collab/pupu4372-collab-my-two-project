@@ -4,7 +4,7 @@ import {
 } from "@/lib/payments/human-premium-demo";
 import { createPaidCartOrder, pregenerateAllCartReports } from "@/lib/reports/human-premium/cart";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
-import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
+import { getUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { after, NextResponse } from "next/server";
 
 /**
@@ -34,7 +34,10 @@ export async function POST(request: Request) {
   const locale = body.locale === "en" ? "en" : "ko";
 
   try {
-    const userId = await getRegisteredUserIdFromRequest(request);
+    const userId = await getUserIdFromRequest(request);
+    if (!userId) {
+      return NextResponse.json({ error: "login_required" }, { status: 400 });
+    }
     const { orderId, amount } = await createPaidCartOrder(body, userId);
 
     after(() => {

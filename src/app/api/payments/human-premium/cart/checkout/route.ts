@@ -7,7 +7,7 @@ import {
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { resolveHumanPremiumEmail } from "@/lib/reports/human-premium/email-policy";
 import { getCheckoutCurrency } from "@/lib/reports/human-premium/pricing";
-import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
+import { getUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
 
 /**
@@ -65,7 +65,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const userId = await getRegisteredUserIdFromRequest(request);
+    // Attribute cart orders to any authenticated visitor (anonymous included).
+    // New orders must always have user_id — no Bearer / no session → reject.
+    const userId = await getUserIdFromRequest(request);
+    if (!userId) {
+      return NextResponse.json({ error: "login_required" }, { status: 400 });
+    }
     const { orderId, amount, items } = await createPendingCartOrder(body, userId);
     const currency = getCheckoutCurrency(locale);
     const storeId = getPortOneShopId();

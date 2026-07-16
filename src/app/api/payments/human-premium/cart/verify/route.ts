@@ -51,7 +51,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Cart order not found." }, { status: 404 });
     }
 
-    // Logged-in carts: only the owning user may fulfill. Guest carts (user_id null) skip this check.
+    // Ownership: Bearer userId must match row.user_id when set.
+    // Legacy null-user_id carts (pre–stage-2 guest orders): skip check for backward compat.
     if (row.user_id) {
       const requesterId = await getUserIdFromRequest(request);
       if (!requesterId || requesterId !== row.user_id) {

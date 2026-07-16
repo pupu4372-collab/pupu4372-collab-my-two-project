@@ -90,12 +90,13 @@ isHumanPremiumDemoCheckoutAllowed() === true 일 때만
 
 | 등급 | 의미 | 집사 카트 `user_id` |
 |------|------|---------------------|
-| `anonymous` | Supabase anon 세션 | 게스트 → **null** (email은 연락처) |
-| `email_linked` | 이메일만 연결, 비밀번호·OAuth 없음 | 게스트 → **null** |
-| `full_member` | 비밀번호 또는 Google/Kakao | `getRegisteredUserIdFromRequest` → UUID 기록 |
+| `anonymous` | Supabase anon 세션 | `getUserIdFromRequest` → UUID 기록 |
+| `email_linked` | 이메일만 연결, 비밀번호·OAuth 없음 | 동일 → UUID 기록 |
+| `full_member` | 비밀번호 또는 Google/Kakao | 동일 → UUID 기록 |
 
-원칙: **주문의 주인은 `user_id`(있을 때), 이메일은 연락처/배송일 뿐.**  
-서버 헬퍼(`getUserIdFromRequest` / `getRegisteredUserIdFromRequest` / `getNonAnonymousUserIdFromRequest`)는 이 등급에 위임한다. 새 결제 게이트는 ad-hoc `is_anonymous` 대신 `getMembershipGrade`를 쓴다.
+원칙: **주문의 주인은 `user_id`(항상 기록; Bearer 없으면 checkout 400). 이메일은 연락처/배송일 뿐.**  
+레거시 `user_id` null 주문은 verify 스킵·purchases `guest`+localStorage·제외 시 email+출생 OR로만 하위호환.  
+서버 헬퍼는 `src/lib/auth/identity.ts` 등급에 위임한다.
 
 ---
 
@@ -128,7 +129,7 @@ isHumanPremiumDemoCheckoutAllowed() === true 일 때만
 | `src/app/api/payments/human-premium/cart/generate/route.ts` | 카트 항목 리포트 생성 |
 | `src/app/api/payments/human-premium/cart/pregenerate/route.ts` | 카트 일괄 생성 |
 | `src/app/api/payments/human-premium/webhook/route.ts` | PortOne 웹훅 (카트 + 잔여 단건 행) |
-| `src/app/api/premium/human/purchases/route.ts` | 구매 이력 (`full_member`만 user_id; 게스트는 `guest: true`) |
+| `src/app/api/premium/human/purchases/route.ts` | 구매 이력 (any `user_id` incl. anon; `guest: true`면 localStorage 병합) |
 | `src/app/api/payments/human-premium/config/route.ts` | portone/paypal/demo 플래그 |
 | `src/app/api/payments/human-premium/demo-complete/route.ts` | 단건 demo 완료 |
 | `src/app/api/payments/human-premium/daily-extra/checkout/route.ts` | 데일리 추가 checkout |

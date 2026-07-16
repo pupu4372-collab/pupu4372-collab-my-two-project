@@ -56,6 +56,7 @@ export function useHumanPremiumPurchases(options: {
 
       setUseFallback(false);
       setDegraded(false);
+      // guest: true → merge localStorage for legacy null-user_id orders (stage-1/2 compat).
       setGuest(data.guest === true);
       setApiTypes(data.purchasedReportTypes ?? []);
     } catch {

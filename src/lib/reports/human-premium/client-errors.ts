@@ -17,9 +17,16 @@ const KO_MESSAGES: Record<string, string> = {
   RESEND_NOT_CONFIGURED: "이메일 발송 설정이 아직 준비되지 않았어요.",
   EMAIL_NOT_ON_FILE: "결제 시 입력한 이메일이 없어 발송할 수 없어요.",
   "RESEND_API_KEY is not configured.": "이메일 발송 설정이 아직 준비되지 않았어요.",
+  cart_ownership_mismatch:
+    "결제 확인 중 세션이 변경되었습니다. 결제가 완료된 경우 리포트는 입력하신 이메일로 발송되니 메일함을 확인해주세요.",
+};
+
+const EN_MESSAGES: Record<string, string> = {
+  cart_ownership_mismatch:
+    "Your session changed during payment verification. If the payment went through, your report will be sent to the email you provided — please check your inbox.",
 };
 
 export function formatHumanPremiumError(message: string, locale: "ko" | "en"): string {
-  if (locale !== "ko") return message;
+  if (locale === "en") return EN_MESSAGES[message] ?? message;
   return KO_MESSAGES[message] ?? message;
 }

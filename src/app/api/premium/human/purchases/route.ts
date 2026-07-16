@@ -1,20 +1,26 @@
 import { listHumanPremiumVaultOrders } from "@/lib/reports/human-premium/cart";
 import type { ReportType } from "@/lib/reports/human-premium/types";
-import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
+import {
+  getRegisteredUserIdFromRequest,
+  getUserIdFromRequest,
+} from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
 
 /**
  * GET /api/premium/human/purchases
- * Registered (full_member) users: unique ReportType[] from fulfilled cart orders (user_id).
- * Guest / anonymous / email_linked: empty list + `guest: true` (client merges localStorage).
+ * Any authenticated user (anonymous included): ReportType[] by user_id.
+ * `guest: true` when not full_member — client merges localStorage for legacy
+ * null-user_id orders (pre–stage-2) that never got a user_id attribution.
  */
 export async function GET(request: Request) {
-  const userId = await getRegisteredUserIdFromRequest(request);
+  const userId = await getUserIdFromRequest(request);
+  const fullMemberId = await getRegisteredUserIdFromRequest(request);
+  const guest = !fullMemberId;
 
   if (!userId) {
-    // TODO: email-based purchase lookup for guests / anonymous sessions
     return NextResponse.json({
       purchasedReportTypes: [] as ReportType[],
+      // No session: treat as guest so client may still use localStorage fallback.
       guest: true,
     });
   }
@@ -29,13 +35,13 @@ export async function GET(request: Request) {
     }
     return NextResponse.json({
       purchasedReportTypes: [...types],
-      guest: false,
+      guest,
     });
   } catch {
     return NextResponse.json({
       purchasedReportTypes: [] as ReportType[],
       degraded: true,
-      guest: false,
+      guest,
     });
   }
 }
