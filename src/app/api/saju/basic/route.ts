@@ -35,10 +35,19 @@ function redisConfigured(): boolean {
   return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
 }
 
+function logRateLimitFallback(
+  limiter: "ip" | "guest_daily" | "user_daily",
+  cause: "env_missing" | "limit_error",
+  extra?: Record<string, unknown>
+) {
+  console.error("[RATE_LIMIT_FALLBACK]", { limiter, cause, ...extra });
+}
+
 function getIpRatelimit(): Ratelimit | null {
   if (ipRatelimit !== undefined) return ipRatelimit;
   if (!redisConfigured()) {
     ipRatelimit = null;
+    logRateLimitFallback("ip", "env_missing");
     return null;
   }
   try {
@@ -49,8 +58,12 @@ function getIpRatelimit(): Ratelimit | null {
       analytics: true,
     });
     return ipRatelimit;
-  } catch {
+  } catch (err) {
     ipRatelimit = null;
+    logRateLimitFallback("ip", "limit_error", {
+      message: err instanceof Error ? err.message : String(err),
+      phase: "init",
+    });
     return null;
   }
 }
@@ -59,6 +72,7 @@ function getUserDailyRatelimit(): Ratelimit | null {
   if (userDailyRatelimit !== undefined) return userDailyRatelimit;
   if (!redisConfigured()) {
     userDailyRatelimit = null;
+    logRateLimitFallback("user_daily", "env_missing");
     return null;
   }
   try {
@@ -69,8 +83,12 @@ function getUserDailyRatelimit(): Ratelimit | null {
       analytics: true,
     });
     return userDailyRatelimit;
-  } catch {
+  } catch (err) {
     userDailyRatelimit = null;
+    logRateLimitFallback("user_daily", "limit_error", {
+      message: err instanceof Error ? err.message : String(err),
+      phase: "init",
+    });
     return null;
   }
 }
@@ -79,6 +97,7 @@ function getGuestDailyRatelimit(): Ratelimit | null {
   if (guestDailyRatelimit !== undefined) return guestDailyRatelimit;
   if (!redisConfigured()) {
     guestDailyRatelimit = null;
+    logRateLimitFallback("guest_daily", "env_missing");
     return null;
   }
   try {
@@ -89,8 +108,12 @@ function getGuestDailyRatelimit(): Ratelimit | null {
       analytics: true,
     });
     return guestDailyRatelimit;
-  } catch {
+  } catch (err) {
     guestDailyRatelimit = null;
+    logRateLimitFallback("guest_daily", "limit_error", {
+      message: err instanceof Error ? err.message : String(err),
+      phase: "init",
+    });
     return null;
   }
 }
@@ -155,8 +178,12 @@ export async function POST(request: Request) {
           guestCookie
         );
       }
-    } catch {
+    } catch (err) {
       // Upstash misconfigured — do not block saju in local/dev.
+      logRateLimitFallback("ip", "limit_error", {
+        message: err instanceof Error ? err.message : String(err),
+        phase: "limit",
+      });
     }
   }
 
@@ -186,8 +213,11 @@ export async function POST(request: Request) {
             guestCookie
           );
         }
-      } catch {
-        // fail-open
+      } catch (err) {
+        logRateLimitFallback("user_daily", "limit_error", {
+          message: err instanceof Error ? err.message : String(err),
+          phase: "limit",
+        });
       }
     }
   } else if (guestCookie) {
@@ -216,8 +246,11 @@ export async function POST(request: Request) {
             guestCookie
           );
         }
-      } catch {
-        // fail-open
+      } catch (err) {
+        logRateLimitFallback("guest_daily", "limit_error", {
+          message: err instanceof Error ? err.message : String(err),
+          phase: "limit",
+        });
       }
     }
   }

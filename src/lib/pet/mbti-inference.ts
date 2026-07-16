@@ -97,6 +97,46 @@ export const PET_MBTI_QUESTIONS: PetMbtiQuestion[] = [
     ],
   },
   {
+    id: "q16",
+    axis: "EI",
+    promptKo: "집에 손님이 여럿 와서 시끌벅적할 때?",
+    promptEn: "When several guests visit and it gets lively?",
+    options: [
+      {
+        id: "q16a",
+        labelKo: "신나서 사람들 사이를 돌아다닌다",
+        labelEn: "Wanders excitedly among people",
+        letter: "E",
+      },
+      {
+        id: "q16b",
+        labelKo: "조용한 곳으로 피한다",
+        labelEn: "Retreats to a quiet spot",
+        letter: "I",
+      },
+    ],
+  },
+  {
+    id: "q17",
+    axis: "EI",
+    promptKo: "신나게 논 다음에는?",
+    promptEn: "After an exciting play session?",
+    options: [
+      {
+        id: "q17a",
+        labelKo: "바로 다음 놀이를 조른다",
+        labelEn: "Begs for the next game right away",
+        letter: "E",
+      },
+      {
+        id: "q17b",
+        labelKo: "혼자 쉬면서 재충전한다",
+        labelEn: "Rests alone to recharge",
+        letter: "I",
+      },
+    ],
+  },
+  {
     id: "q5",
     axis: "SN",
     promptKo: "장난감에 대한 반응?",
@@ -124,6 +164,66 @@ export const PET_MBTI_QUESTIONS: PetMbtiQuestion[] = [
     options: [
       { id: "q7a", labelKo: "바로 탐색 시작", labelEn: "Starts exploring right away", letter: "N" },
       { id: "q7b", labelKo: "익숙한 냄새를 찾는다", labelEn: "Seeks familiar scents", letter: "S" },
+    ],
+  },
+  {
+    id: "q18",
+    axis: "SN",
+    promptKo: "처음 보는 물건이 생기면?",
+    promptEn: "When something new appears at home?",
+    options: [
+      {
+        id: "q18a",
+        labelKo: "경계하며 천천히 확인한다",
+        labelEn: "Approaches cautiously, checks slowly",
+        letter: "S",
+      },
+      {
+        id: "q18b",
+        labelKo: "바로 관심 갖고 다가간다",
+        labelEn: "Gets curious and goes right up",
+        letter: "N",
+      },
+    ],
+  },
+  {
+    id: "q19",
+    axis: "SN",
+    promptKo: "평소 관심을 끄는 것은?",
+    promptEn: "What usually catches their attention?",
+    options: [
+      {
+        id: "q19a",
+        labelKo: "눈앞의 간식·장난감",
+        labelEn: "Treats and toys right in front",
+        letter: "S",
+      },
+      {
+        id: "q19b",
+        labelKo: "창밖 새나 먼 소리 같은 자극",
+        labelEn: "Birds outside or distant sounds",
+        letter: "N",
+      },
+    ],
+  },
+  {
+    id: "q20",
+    axis: "SN",
+    promptKo: "숨겨둔 간식을 찾을 때?",
+    promptEn: "Finding a hidden treat?",
+    options: [
+      {
+        id: "q20a",
+        labelKo: "냄새를 따라 차근차근 찾는다",
+        labelEn: "Follows the scent step by step",
+        letter: "S",
+      },
+      {
+        id: "q20b",
+        labelKo: "여기저기 감으로 뒤진다",
+        labelEn: "Searches around on instinct",
+        letter: "N",
+      },
     ],
   },
   {
@@ -167,6 +267,46 @@ export const PET_MBTI_QUESTIONS: PetMbtiQuestion[] = [
     ],
   },
   {
+    id: "q21",
+    axis: "TF",
+    promptKo: "혼난 다음에는?",
+    promptEn: "After being scolded?",
+    options: [
+      {
+        id: "q21a",
+        labelKo: "금방 평소대로 돌아온다",
+        labelEn: "Back to normal quickly",
+        letter: "T",
+      },
+      {
+        id: "q21b",
+        labelKo: "한동안 눈치를 보거나 시무룩하다",
+        labelEn: "Sulks or watches your mood for a while",
+        letter: "F",
+      },
+    ],
+  },
+  {
+    id: "q22",
+    axis: "TF",
+    promptKo: "집사가 아파서 누워 있으면?",
+    promptEn: "When you're sick in bed?",
+    options: [
+      {
+        id: "q22a",
+        labelKo: "평소처럼 자기 할 일을 한다",
+        labelEn: "Goes about their day as usual",
+        letter: "T",
+      },
+      {
+        id: "q22b",
+        labelKo: "곁에 붙어서 떠나지 않는다",
+        labelEn: "Stays right by your side",
+        letter: "F",
+      },
+    ],
+  },
+  {
     id: "q12",
     axis: "JP",
     promptKo: "식사 패턴?",
@@ -204,6 +344,46 @@ export const PET_MBTI_QUESTIONS: PetMbtiQuestion[] = [
     options: [
       { id: "q15a", labelKo: "패턴 파악하고 기다린다", labelEn: "Learns pattern and waits", letter: "J" },
       { id: "q15b", labelKo: "매번 새롭게 반응", labelEn: "Reacts freshly each time", letter: "P" },
+    ],
+  },
+  {
+    id: "q23",
+    axis: "JP",
+    promptKo: "산책 코스는?",
+    promptEn: "Walk routes?",
+    options: [
+      {
+        id: "q23a",
+        labelKo: "익숙한 길을 좋아한다",
+        labelEn: "Prefers the familiar path",
+        letter: "J",
+      },
+      {
+        id: "q23b",
+        labelKo: "새로운 길로 가려고 한다",
+        labelEn: "Pulls toward new routes",
+        letter: "P",
+      },
+    ],
+  },
+  {
+    id: "q24",
+    axis: "JP",
+    promptKo: "배변 습관은?",
+    promptEn: "Bathroom habits?",
+    options: [
+      {
+        id: "q24a",
+        labelKo: "항상 같은 장소, 같은 방식",
+        labelEn: "Same spot, same way every time",
+        letter: "J",
+      },
+      {
+        id: "q24b",
+        labelKo: "그때그때 다르다",
+        labelEn: "Varies each time",
+        letter: "P",
+      },
     ],
   },
 ];

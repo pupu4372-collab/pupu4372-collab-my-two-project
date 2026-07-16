@@ -1,9 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
-import { isFullMember } from "./membership";
+import { getMembershipGrade, isFullMember } from "@/lib/auth/identity";
 
-export { isFullMember } from "./membership";
+export { isFullMember, getMembershipGrade } from "@/lib/auth/identity";
+export type { MembershipGrade } from "@/lib/auth/identity";
 
+/**
+ * Any authenticated Supabase user id, including `anonymous` grade.
+ * Passes: anonymous | email_linked | full_member.
+ * Rejects: missing/invalid Bearer.
+ */
 export async function getUserIdFromRequest(request: Request): Promise<string | null> {
   const authHeader = request.headers.get("authorization");
   const token = authHeader?.startsWith("Bearer ")
@@ -30,7 +36,12 @@ export async function getUserIdFromRequest(request: Request): Promise<string | n
   return user.id;
 }
 
-/** Returns null for missing auth or guest-grade sessions (incl. email-only). */
+/**
+ * Full-member user id only (`getMembershipGrade === "full_member"`).
+ * Passes: full_member.
+ * Rejects: anonymous, email_linked, missing/invalid Bearer.
+ * (Former “registered / guest-grade” gate — email-only sessions stay null.)
+ */
 export async function getRegisteredUserIdFromRequest(
   request: Request
 ): Promise<string | null> {
@@ -55,7 +66,7 @@ export async function getRegisteredUserIdFromRequest(
     error,
   } = await supabase.auth.getUser(token);
 
-  if (error || !user || !isFullMember(user)) return null;
+  if (error || !user || getMembershipGrade(user) !== "full_member") return null;
   return user.id;
 }
 
@@ -77,8 +88,10 @@ export function getBearerToken(request: Request): string | null {
 }
 
 /**
- * Signed-in non-anonymous user id (email-linked guests included; anon UUID excluded).
- * Prefer this for owner-scoped payment / account APIs.
+ * Non-anonymous user id (`email_linked` | `full_member`).
+ * Passes: email_linked, full_member.
+ * Rejects: anonymous, missing/invalid Bearer.
+ * Prefer for owner-scoped payment / account APIs that allow email-linked guests.
  */
 export async function getNonAnonymousUserIdFromRequest(
   request: Request
@@ -100,6 +113,6 @@ export async function getNonAnonymousUserIdFromRequest(
     error,
   } = await supabase.auth.getUser(token);
 
-  if (error || !user || user.is_anonymous) return null;
+  if (error || !user || getMembershipGrade(user) === "anonymous") return null;
   return user.id;
 }

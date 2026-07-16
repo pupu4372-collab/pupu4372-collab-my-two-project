@@ -5,15 +5,18 @@ import { NextResponse } from "next/server";
 
 /**
  * GET /api/premium/human/purchases
- * Registered users: unique ReportType[] from fulfilled cart orders (user_id).
- * Guest / anonymous: empty list (email lookup deferred).
+ * Registered (full_member) users: unique ReportType[] from fulfilled cart orders (user_id).
+ * Guest / anonymous / email_linked: empty list + `guest: true` (client merges localStorage).
  */
 export async function GET(request: Request) {
   const userId = await getRegisteredUserIdFromRequest(request);
 
   if (!userId) {
     // TODO: email-based purchase lookup for guests / anonymous sessions
-    return NextResponse.json({ purchasedReportTypes: [] as ReportType[] });
+    return NextResponse.json({
+      purchasedReportTypes: [] as ReportType[],
+      guest: true,
+    });
   }
 
   try {
@@ -26,11 +29,13 @@ export async function GET(request: Request) {
     }
     return NextResponse.json({
       purchasedReportTypes: [...types],
+      guest: false,
     });
   } catch {
     return NextResponse.json({
       purchasedReportTypes: [] as ReportType[],
       degraded: true,
+      guest: false,
     });
   }
 }

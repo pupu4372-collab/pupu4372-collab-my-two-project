@@ -14,10 +14,51 @@ import type { Gender, Locale, Species } from "@/lib/saju/types";
 import {
   createUserSupabaseClient,
   getBearerToken,
+  getRegisteredUserIdFromRequest,
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
+
+let mbtiRetakeRatelimit: Ratelimit | null | undefined;
+
+function redisConfigured(): boolean {
+  return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+}
+
+function logRateLimitFallback(
+  cause: "env_missing" | "limit_error",
+  extra?: Record<string, unknown>
+) {
+  console.error("[RATE_LIMIT_FALLBACK]", { limiter: "mbti_retake", cause, ...extra });
+}
+
+function getMbtiRetakeRatelimit(): Ratelimit | null {
+  if (mbtiRetakeRatelimit !== undefined) return mbtiRetakeRatelimit;
+  if (!redisConfigured()) {
+    mbtiRetakeRatelimit = null;
+    logRateLimitFallback("env_missing");
+    return null;
+  }
+  try {
+    mbtiRetakeRatelimit = new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(2, "24 h"),
+      prefix: "pet_mbti_retake",
+      analytics: true,
+    });
+    return mbtiRetakeRatelimit;
+  } catch (err) {
+    mbtiRetakeRatelimit = null;
+    logRateLimitFallback("limit_error", {
+      message: err instanceof Error ? err.message : String(err),
+      phase: "init",
+    });
+    return null;
+  }
+}
 
 function isValidDate(s: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s));
@@ -38,6 +79,36 @@ function parseMbtiAnswers(body: Record<string, unknown>): Record<string, string>
     }
   }
   return isPetMbtiComplete(answers) ? answers : null;
+}
+
+async function petHasExistingMbtiReport(
+  request: Request,
+  petId: string | null
+): Promise<boolean> {
+  if (!petId || !isSupabaseConfigured()) return false;
+  const ownerId = await getRegisteredUserIdFromRequest(request);
+  const token = getBearerToken(request);
+  if (!ownerId || !token) return false;
+  const supabase = createUserSupabaseClient(token);
+  if (!supabase) return false;
+
+  const { data, error } = await supabase
+    .from("saju_results")
+    .select("id")
+    .eq("owner_id", ownerId)
+    .eq("pet_id", petId)
+    .eq("saju_type", "mbti")
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[mbti_retake] existing_report_check_failed", {
+      petId,
+      message: error.message,
+    });
+    return false;
+  }
+  return Boolean(data);
 }
 
 export async function POST(request: Request) {
@@ -90,6 +161,50 @@ export async function POST(request: Request) {
   );
   if (gateError) {
     return NextResponse.json({ error: gateError.error }, { status: gateError.status });
+  }
+
+  const petIdForCheck = body.petId ? String(body.petId) : null;
+  const clientRetake = body.retake === true;
+  const hasExisting = await petHasExistingMbtiReport(request, petIdForCheck);
+  const isRetake = clientRetake || hasExisting;
+
+  if (isRetake) {
+    const registeredUserId = await getRegisteredUserIdFromRequest(request);
+    if (registeredUserId) {
+      const limiter = getMbtiRetakeRatelimit();
+      if (limiter) {
+        try {
+          const { success, limit, reset, remaining } = await limiter.limit(registeredUserId);
+          if (!success) {
+            console.warn(
+              `[saju/premium/mbti] mbti_retake_limited userId=${registeredUserId}`
+            );
+            return NextResponse.json(
+              {
+                error:
+                  locale === "ko"
+                    ? "오늘은 더 이상 다시 입력할 수 없어요. 내일 다시 시도해주세요."
+                    : "You've reached today's retake limit. Please try again tomorrow.",
+                code: "mbti_retake_limited",
+              },
+              {
+                status: 429,
+                headers: {
+                  "X-RateLimit-Limit": limit.toString(),
+                  "X-RateLimit-Remaining": remaining.toString(),
+                  "X-RateLimit-Reset": reset.toString(),
+                },
+              }
+            );
+          }
+        } catch (err) {
+          logRateLimitFallback("limit_error", {
+            message: err instanceof Error ? err.message : String(err),
+            phase: "limit",
+          });
+        }
+      }
+    }
   }
 
   try {

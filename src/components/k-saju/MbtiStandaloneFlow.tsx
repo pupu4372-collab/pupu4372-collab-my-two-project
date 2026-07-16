@@ -35,6 +35,7 @@ const UI = {
     networkError: "네트워크 오류가 발생했어요.",
     premiumRequired: "결제 후 이용할 수 있어요.",
     retake: "다시 진단하기",
+    retakeLimited: "오늘은 더 이상 다시 입력할 수 없어요. 내일 다시 시도해주세요.",
     viewReport: "저장된 결과 보기",
     typeTitle: (name: string, type: string) => `${name}은(는) ${type}형이에요`,
   },
@@ -47,6 +48,7 @@ const UI = {
     networkError: "Network error.",
     premiumRequired: "Available after payment.",
     retake: "Diagnose again",
+    retakeLimited: "You've reached today's retake limit. Please try again tomorrow.",
     viewReport: "View saved result",
     typeTitle: (name: string, type: string) => `${name} is ${type}`,
   },
@@ -254,10 +256,15 @@ export function MbtiStandaloneFlow() {
             mbtiType,
             mbtiAnswers,
             petId,
+            retake: retakeMode,
           }),
         });
         const data = await res.json();
         if (!res.ok) {
+          if (data.code === "mbti_retake_limited" || res.status === 429) {
+            setError(t.retakeLimited);
+            return;
+          }
           setError(data.error === "premium_required" ? t.premiumRequired : (data.error ?? t.networkError));
           return;
         }
@@ -291,6 +298,7 @@ export function MbtiStandaloneFlow() {
     timezone,
     t.networkError,
     t.premiumRequired,
+    t.retakeLimited,
     unlocked,
   ]);
 

@@ -63,14 +63,18 @@ AI 어시스턴트와 개발자는 결제 작업 시 이 문서를 먼저 따른
     → 데일리 리포트 재생성
 ```
 
-#### C. 단건/번들 draft API (레거시·보조)
+#### C. PortOne 웹훅 (카트·잔여 단건 행)
+
+레거시 `POST …/human-premium/checkout`(단건/번들 draft) **라우트는 삭제됨.**  
+실결제·draft는 **카트**(`…/cart/checkout`)와 **데일리 추가**(`…/daily-extra/checkout`)만 사용한다.
 
 ```
-POST …/human-premium/checkout  → payment_pending draft
-    → (구 샵 UI는 카트 도입 시 제거됨; API·webhook은 단건 이행용으로 유지)
-POST …/human-premium/webhook   → 단건 completeHumanPremiumPayment
-                                 또는 카트 fulfillPaidCartOrder
+POST …/human-premium/webhook
+    → 카트 행(hp_cart_*) → fulfillPaidCartOrder → pregenerate
+    → 그 외 단건 행(있을 경우) → completeHumanPremiumPayment
 ```
+
+비프로덕션 단건 demo는 `…/demo-complete`가 별도로 draft를 만들 수 있다 (§D).
 
 #### D. Demo (비프로덕션 한정)
 
@@ -79,6 +83,19 @@ isHumanPremiumDemoCheckoutAllowed() === true 일 때만
     → …/cart/demo-pay 또는 …/demo-complete
 프로덕션(NODE_ENV=production) → 항상 403
 ```
+
+### 1.3 신원 등급 (결제 게이트)
+
+단일 판정: `src/lib/auth/identity.ts` (`getMembershipGrade`).
+
+| 등급 | 의미 | 집사 카트 `user_id` |
+|------|------|---------------------|
+| `anonymous` | Supabase anon 세션 | 게스트 → **null** (email은 연락처) |
+| `email_linked` | 이메일만 연결, 비밀번호·OAuth 없음 | 게스트 → **null** |
+| `full_member` | 비밀번호 또는 Google/Kakao | `getRegisteredUserIdFromRequest` → UUID 기록 |
+
+원칙: **주문의 주인은 `user_id`(있을 때), 이메일은 연락처/배송일 뿐.**  
+서버 헬퍼(`getUserIdFromRequest` / `getRegisteredUserIdFromRequest` / `getNonAnonymousUserIdFromRequest`)는 이 등급에 위임한다. 새 결제 게이트는 ad-hoc `is_anonymous` 대신 `getMembershipGrade`를 쓴다.
 
 ---
 
@@ -110,8 +127,8 @@ isHumanPremiumDemoCheckoutAllowed() === true 일 때만
 | `src/app/api/payments/human-premium/cart/demo-pay/route.ts` | 카트 demo (비프로덕션) |
 | `src/app/api/payments/human-premium/cart/generate/route.ts` | 카트 항목 리포트 생성 |
 | `src/app/api/payments/human-premium/cart/pregenerate/route.ts` | 카트 일괄 생성 |
-| `src/app/api/payments/human-premium/checkout/route.ts` | 단건/번들 draft |
-| `src/app/api/payments/human-premium/webhook/route.ts` | PortOne 웹훅 (단건+카트) |
+| `src/app/api/payments/human-premium/webhook/route.ts` | PortOne 웹훅 (카트 + 잔여 단건 행) |
+| `src/app/api/premium/human/purchases/route.ts` | 구매 이력 (`full_member`만 user_id; 게스트는 `guest: true`) |
 | `src/app/api/payments/human-premium/config/route.ts` | portone/paypal/demo 플래그 |
 | `src/app/api/payments/human-premium/demo-complete/route.ts` | 단건 demo 완료 |
 | `src/app/api/payments/human-premium/daily-extra/checkout/route.ts` | 데일리 추가 checkout |
@@ -136,6 +153,7 @@ isHumanPremiumDemoCheckoutAllowed() === true 일 때만
 |------|------|
 | **`src/lib/payments/portone/config.ts`** | shop ID / API secret / `isPortOneConfigured` |
 | **`src/lib/payments/portone/server.ts`** | `fetchPortOnePayment` / paid·amount 검증 |
+| **`src/lib/auth/identity.ts`** | 3등급 신원 (`anonymous` / `email_linked` / `full_member`) — 결제 게이트 공통 |
 
 **경고: 위 두 파일을 수정하면 펫·집사 양쪽 결제 회귀 테스트를 반드시 수행한다.**  
 가능하면 공유 파일을 바꾸지 말고, 제품별 래퍼·라우트에서 분기한다.
