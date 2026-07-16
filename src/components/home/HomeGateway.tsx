@@ -7,8 +7,6 @@ import { GlassCard, PageContainer, SectionHeader } from "@/components/layout/Sti
 import { HomePetFortuneCard } from "@/components/home/pet-fortune/HomePetFortuneCard";
 import { type FortuneTodayState } from "@/components/home/PetDailyFortunePanel";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
-import { requestPetDailyCareEmail } from "@/lib/fortune/request-daily-care-email";
-import { isDeliverableHumanPremiumEmail } from "@/lib/reports/human-premium/email-policy";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
 import type { PetShowRankingFallbackFlags } from "@/lib/community/ranking";
@@ -126,7 +124,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   const t = useTranslations("home");
   const tPetShow = useTranslations("petshow");
   const isKo = locale === "ko";
-  const { ready, accessToken, email: sessionEmail } = useSupabaseSession();
+  const { ready, accessToken } = useSupabaseSession();
   const [rankingRows, setRankingRows] = useState<WeeklyRankingRows>(emptyRankingRows);
   const [funnyRankingRows, setFunnyRankingRows] = useState<PetShowRankingRow[]>([]);
   const [rankingFallback, setRankingFallback] = useState<PetShowRankingFallbackFlags>({
@@ -187,20 +185,6 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
 
         const data = (await fortuneRes.json()) as FortuneTodayState;
         setFortuneData(data);
-
-        if (
-          data.mode === "personalized" &&
-          accessToken &&
-          sessionEmail &&
-          isDeliverableHumanPremiumEmail(sessionEmail)
-        ) {
-          requestPetDailyCareEmail({
-            accessToken,
-            locale: isKo ? "ko" : "en",
-            email: sessionEmail,
-            source: "fortune_refresh",
-          });
-        }
       } catch {
         setFortuneData(null);
       } finally {
@@ -209,7 +193,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
     }
 
     void loadFortune();
-  }, [ready, accessToken, locale, sessionEmail, isKo]);
+  }, [ready, accessToken, locale]);
 
   async function handleSelectPet(petId: string) {
     try {

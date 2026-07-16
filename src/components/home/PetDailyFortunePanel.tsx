@@ -100,7 +100,7 @@ function CommonFortunePanel({
 
         {revealed ? (
           <>
-            <AuthRequiredLink
+            <Link
               href="/saju"
               className="jig-fortune-reveal-btn mx-auto flex w-full max-w-xs items-center justify-center gap-3 bg-[var(--jig-ink)] text-white transition hover:opacity-90 active:scale-[0.98]"
             >
@@ -108,7 +108,7 @@ function CommonFortunePanel({
                 <span className="human-premium-serif text-base italic text-white">知</span>
               </span>
               <span className="human-premium-label-caps text-sm tracking-widest">{fortune.cta}</span>
-            </AuthRequiredLink>
+            </Link>
             <JigFortuneFoldButton isKo={isKo} onClick={() => setRevealed(false)} />
           </>
         ) : (
@@ -142,14 +142,14 @@ function CommonFortunePanel({
           {isKo ? "반려동물 생일을 입력하면 내 아이 맞춤 운세가 열려요." : "Enter your pet's birthday to unlock your pet's personalized fortune."}
         </p>
       )}
-      <AuthRequiredLink
+      <Link
         href="/saju"
         className={`mt-5 inline-flex rounded-full px-4 py-2 text-xs font-extrabold shadow-sm transition hover:scale-105 ${
           isNight ? "bg-primary text-white shadow-[0_8px_20px_rgba(61,22,79,0.22)] hover:brightness-105" : "bg-primary text-white hover:brightness-105"
         }`}
       >
         {fortune.cta}
-      </AuthRequiredLink>
+      </Link>
     </div>
   );
 }
@@ -409,7 +409,7 @@ function PersonalizedFortunePanel({
             </div>
 
             <Link
-              href="/saju/compatibility"
+              href={`/saju/compatibility?petId=${encodeURIComponent(selectedPet.id)}`}
               className="block rounded-sm border border-[var(--jig-ink)]/15 bg-white/70 px-3 py-2.5 text-center text-xs font-bold text-[var(--jig-ink)] transition hover:bg-white"
             >
               {isKo ? "펫 궁합 보러가기" : "Pet compatibility"}
@@ -609,7 +609,7 @@ function PersonalizedFortunePanel({
 
           <div className="flex gap-2">
             <Link
-              href="/saju/compatibility"
+              href={`/saju/compatibility?petId=${encodeURIComponent(selectedPet.id)}`}
               className={`flex-1 rounded-2xl px-3 py-2.5 text-center text-xs font-extrabold transition hover:brightness-105 ${
                 isNight ? "border border-white/25 bg-[#6b4a82] text-white" : "bg-white/85 text-channel-saju"
               }`}

@@ -1,5 +1,4 @@
 import type { ChannelContent } from "@/lib/channel/content";
-import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { Link } from "@/i18n/navigation";
 
 interface CatChannelHomeProps {
@@ -350,12 +349,12 @@ export function CatChannelHome({
           {isKo ? "우리 냥이 사주도 같이 볼까요?" : "Read your cat's K-Saju too?"}
         </h2>
         <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-plum/80">{content.sajuCta}</p>
-        <AuthRequiredLink
+        <Link
           href="/saju"
           className="mt-5 inline-flex rounded-full bg-[#6f4b8b] px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-110"
         >
           {isKo ? "우리 아이 맞춤 케어 보기" : "Personalized pet care"}
-        </AuthRequiredLink>
+        </Link>
       </section>
     </div>
   );

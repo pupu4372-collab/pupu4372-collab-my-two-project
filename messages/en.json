@@ -245,7 +245,7 @@
       "quickAddSubmit": "Add pet",
       "sessionPreparing": "Preparing session…",
       "guestPetLimit": "Guests can register one pet. Sign up to add and manage more.",
-      "emailOptionalPlaceholder": "Email (optional) · Get a link to save your results",
+      "emailOptionalPlaceholder": "Leave your email and your pet's records will be here when you come back",
       "emailLinkedGuestPlaceholder": "Linked email: {email} · Not a full member yet",
       "emailLinkFailed": "We couldn't save your email. Please try again later.",
       "upgradeOpen": "Set a password to become a full member",

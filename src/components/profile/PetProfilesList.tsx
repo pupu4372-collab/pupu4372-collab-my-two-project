@@ -98,6 +98,7 @@ function normalizeSpecies(species: string): PetEditDraft["species"] {
 
 function petQuery(pet: PetRow, locale: string) {
   return new URLSearchParams({
+    petId: pet.id,
     petName: pet.name,
     species: pet.species,
     birthDate: pet.birth_date,

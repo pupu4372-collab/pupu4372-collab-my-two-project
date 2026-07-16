@@ -108,6 +108,7 @@ export async function GET(request: Request) {
       return {
         ...pet,
         latestSaju: readings[0] ?? null,
+        latestSajuResultId: readings[0]?.id ?? null,
         readings,
       };
     }),

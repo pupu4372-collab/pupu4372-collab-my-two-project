@@ -72,6 +72,7 @@ function ageLabel(birthDate: string, isKo: boolean) {
 
 function petQuery(pet: PetRow, locale: string) {
   return new URLSearchParams({
+    petId: pet.id,
     petName: pet.name,
     species: pet.species,
     birthDate: pet.birth_date,

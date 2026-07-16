@@ -1,7 +1,6 @@
 "use client";
 
 import type { ChannelContent } from "@/lib/channel/content";
-import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -294,12 +293,12 @@ export function ReptileChannelHome({
               ? "강아지, 고양이, 다른 동물까지 생일 정보로 오행 밸런스와 성향을 확인할 수 있어요."
               : "Use birth data to check elemental balance and care cues for dogs, cats, and other pets."}
           </p>
-          <AuthRequiredLink
+          <Link
             href="/saju"
             className="mt-5 inline-flex rounded-full bg-channel-community px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
           >
             {isKo ? "우리 아이 사주 보기" : "Read K-Saju"}
-          </AuthRequiredLink>
+          </Link>
         </div>
 
         <div className="my-8 border-t border-channel-community/15" />

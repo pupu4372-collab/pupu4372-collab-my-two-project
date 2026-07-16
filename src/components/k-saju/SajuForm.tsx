@@ -1,12 +1,19 @@
 "use client";
 
+import { PetFortunePetSelector } from "@/components/home/pet-fortune/PetFortunePetSelector";
 import { MbtiLockTeaserCard } from "@/components/k-saju/MbtiLockTeaserCard";
 import { SajuResult } from "@/components/k-saju/SajuResult";
 import { usePetPremiumUnlock } from "@/hooks/usePetPremiumUnlock";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { PetBasicInfoFields } from "@/components/pet/PetBasicInfoFields";
-import { fetchPetProfileForSaju, petProfileToSajuFormState } from "@/lib/pets/load-pet-for-saju";
+import {
+  fetchPetProfileForSaju,
+  fetchPetsForSajuEntry,
+  petProfileToSajuFormState,
+  sajuHrefForRegisteredPet,
+  type PetEntryListItem,
+} from "@/lib/pets/load-pet-for-saju";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
   formatPetProductPrice,
@@ -28,6 +35,14 @@ import {
 } from "@/lib/saju/saju-result-session";
 
 type Step = "form" | "result";
+type EntryGate = "resolving" | "pick" | "form";
+
+function speciesIcon(species: string): string {
+  if (species === "dog") return "🐕";
+  if (species === "cat") return "🐱";
+  if (species === "reptile") return "🦎";
+  return "🐾";
+}
 
 const UI = {
   en: {
@@ -152,9 +167,11 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const [prefillPhotoUrl, setPrefillPhotoUrl] = useState<string | null>(null);
   const [prefillPetId, setPrefillPetId] = useState<string | null>(null);
   const autoSubmitPendingRef = useRef(false);
-  const skipSoloPetRedirectRef = useRef(false);
-  const soloPetRedirectAttemptedRef = useRef(false);
+  const skipEntryGateRef = useRef(false);
+  const entryGateAttemptedRef = useRef(false);
   const sessionRestoreAppliedRef = useRef(false);
+  const [entryGate, setEntryGate] = useState<EntryGate>(embedded ? "form" : "resolving");
+  const [entryPets, setEntryPets] = useState<PetEntryListItem[]>([]);
 
   const t = UI[locale];
   const mbtiQuestions = useMemo(
@@ -182,7 +199,8 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     setStep("result");
     autoSubmitPendingRef.current = false;
     sessionRestoreAppliedRef.current = true;
-    skipSoloPetRedirectRef.current = true;
+    skipEntryGateRef.current = true;
+    setEntryGate("form");
   }, []);
 
   const tryRestoreFromSession = useCallback(() => {
@@ -197,16 +215,42 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     return true;
   }, [applySessionSnapshot]);
 
+  const openNewPetForm = useCallback(() => {
+    clearSajuResultSession();
+    skipEntryGateRef.current = true;
+    setEntryGate("form");
+    setEntryPets([]);
+    router.replace("/saju?new=1");
+  }, [router]);
+
+  const navigateRegisteredPet = useCallback(
+    (pet: PetEntryListItem) => {
+      const href = sajuHrefForRegisteredPet(pet);
+      if (href.startsWith("/reports/")) {
+        router.push(href);
+      } else {
+        router.replace(href);
+      }
+    },
+    [router]
+  );
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const params = new URLSearchParams(window.location.search);
     if (params.get("new") === "1") {
       clearSajuResultSession();
-      skipSoloPetRedirectRef.current = true;
+      skipEntryGateRef.current = true;
       sessionRestoreAppliedRef.current = false;
+      setEntryGate("form");
       router.replace("/saju");
       return;
+    }
+
+    if (params.get("petId")?.trim()) {
+      skipEntryGateRef.current = true;
+      setEntryGate("form");
     }
 
     tryRestoreFromSession();
@@ -230,49 +274,68 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     };
   }, [router, tryRestoreFromSession]);
 
-  /** When the owner has exactly one pet, land on ?petId= to reuse prefill + auto-submit. */
+  /**
+   * Entry gate: 0 pets → form; 1 pet → reports or ?petId=; 2+ → pick UI.
+   * Runs for anon + full members (Bearer via getUserIdFromRequest).
+   */
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!sessionReady || !accessToken) return;
+    if (!sessionReady) return;
     if (step !== "form") return;
-    if (skipSoloPetRedirectRef.current) return;
-    if (soloPetRedirectAttemptedRef.current) return;
+    if (skipEntryGateRef.current) {
+      setEntryGate("form");
+      return;
+    }
+    if (entryGateAttemptedRef.current) return;
     if (sessionRestoreAppliedRef.current) return;
     if (isValidSajuResultSession(readSajuResultSession())) return;
 
     const params = new URLSearchParams(window.location.search);
-    if (params.get("petId")?.trim()) return;
+    if (params.get("petId")?.trim()) {
+      setEntryGate("form");
+      return;
+    }
     if (params.get("restore") === "1") return;
-    if (params.get("new") === "1") return;
+    if (params.get("new") === "1") {
+      setEntryGate("form");
+      return;
+    }
 
-    soloPetRedirectAttemptedRef.current = true;
+    if (!accessToken) {
+      setEntryGate("form");
+      return;
+    }
+
+    entryGateAttemptedRef.current = true;
     let cancelled = false;
 
     void (async () => {
       try {
-        const res = await fetch("/api/profile/pets", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (!res.ok || cancelled) return;
+        const pets = await fetchPetsForSajuEntry(accessToken);
+        if (cancelled || skipEntryGateRef.current) return;
 
-        const data = (await res.json()) as { pets?: Array<{ id: string }> };
-        const pets = data.pets ?? [];
-        if (cancelled || pets.length !== 1) return;
-        if (skipSoloPetRedirectRef.current) return;
+        if (pets.length === 0) {
+          setEntryPets([]);
+          setEntryGate("form");
+          return;
+        }
 
-        const latest = new URLSearchParams(window.location.search);
-        if (latest.get("petId")?.trim()) return;
+        if (pets.length === 1) {
+          navigateRegisteredPet(pets[0]!);
+          return;
+        }
 
-        router.replace(`/saju?petId=${encodeURIComponent(pets[0].id)}`);
+        setEntryPets(pets);
+        setEntryGate("pick");
       } catch {
-        // keep empty form
+        if (!cancelled) setEntryGate("form");
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [sessionReady, accessToken, step, router]);
+  }, [sessionReady, accessToken, step, navigateRegisteredPet]);
 
   const handleApiSubmit = useCallback(async () => {
     setError(null);
@@ -485,6 +548,53 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
           mbtiType={restoredMbtiResult?.type}
           birthTimeSelect={birthTime}
         />
+      </div>
+    );
+  }
+
+  if (entryGate === "resolving" && !embedded && step === "form") {
+    return (
+      <div className="rounded-[1.75rem] border border-channel-saju/15 bg-surface px-5 py-8 text-center text-sm text-on-surface-variant shadow-sm">
+        {locale === "ko" ? "등록된 아이를 확인하는 중…" : "Checking your pets…"}
+      </div>
+    );
+  }
+
+  if (entryGate === "pick" && !embedded && step === "form") {
+    return (
+      <div className="space-y-5 pb-28 md:pb-10">
+        <section className="relative overflow-hidden rounded-[1.75rem] border border-channel-saju/15 bg-surface px-5 py-5 shadow-sm md:px-6">
+          <h2 className="text-xl font-extrabold tracking-tight text-primary md:text-2xl">
+            {locale === "ko" ? "어떤 아이의 사주를 볼까요?" : "Whose K-Saju do you want to see?"}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-on-surface-variant">
+            {locale === "ko"
+              ? "등록된 아이를 고르면 저장된 결과가 있으면 바로 열고, 없으면 생일로 새로 계산해요."
+              : "Pick a registered pet to open a saved reading, or compute a new one from their birth details."}
+          </p>
+          <div className="mt-5">
+            <PetFortunePetSelector
+              pets={entryPets.map((pet) => ({
+                id: pet.id,
+                name: pet.name,
+                icon: speciesIcon(pet.species),
+                photo_url: pet.photo_url,
+                profile_image_url: pet.profile_image_url ?? null,
+              }))}
+              onSelectPet={(petId) => {
+                const pet = entryPets.find((p) => p.id === petId);
+                if (pet) navigateRegisteredPet(pet);
+              }}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={openNewPetForm}
+            className="mt-6 w-full rounded-full border border-channel-saju/25 bg-white px-5 py-3 text-sm font-extrabold text-channel-saju transition hover:bg-lavender/30"
+          >
+            {locale === "ko" ? "새로운 아이 사주 보기" : "Read K-Saju for a new pet"}
+          </button>
+        </section>
       </div>
     );
   }

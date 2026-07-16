@@ -245,7 +245,7 @@
       "quickAddSubmit": "펫 추가하기",
       "sessionPreparing": "세션 준비 중…",
       "guestPetLimit": "게스트는 1마리까지 등록할 수 있어요. 회원가입하면 여러 아이를 등록하고 관리할 수 있어요.",
-      "emailOptionalPlaceholder": "이메일 (선택) · 결과 저장 링크를 보내드려요",
+      "emailOptionalPlaceholder": "이메일을 남기면 다시 와도 우리아이 기록이 이어져요",
       "emailLinkedGuestPlaceholder": "연결된 이메일: {email} · 아직 비회원이에요",
       "emailLinkFailed": "이메일 저장에 실패했어요. 나중에 다시 시도해주세요.",
       "upgradeOpen": "비밀번호 설정하고 회원 전환",

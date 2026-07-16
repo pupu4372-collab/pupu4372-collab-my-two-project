@@ -81,6 +81,7 @@ export function ZodiacResult({
     species: result.species,
     birthDate: result.birthDate,
     locale: result.locale,
+    ...(result.petId ? { petId: result.petId } : {}),
   }).toString();
   const compatibilityHref = isGuest ? "/login" : `/saju/compatibility?${compatibilityQuery}`;
 
