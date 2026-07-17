@@ -76,7 +76,7 @@ export async function GET(request: Request) {
   if (petIds.length > 0) {
     const { data: sajuRows } = await supabase
       .from("saju_results")
-      .select("id, pet_id, title, saju_type, created_at")
+      .select("id, pet_id, title, saju_type, is_premium, created_at")
       .in("pet_id", petIds)
       .order("created_at", { ascending: false });
 
@@ -85,10 +85,22 @@ export async function GET(request: Request) {
       pet_id: string;
       title: string | null;
       saju_type: SajuType;
+      is_premium: boolean;
       created_at: string;
     };
 
+    const latestBasicByPet: Record<string, string> = {};
+
     for (const row of (sajuRows ?? []) as SajuSummary[]) {
+      // Pet-picker "open saved" → free basic K-Saju only (premium types stay in /reports).
+      if (
+        row.saju_type === "basic" &&
+        !row.is_premium &&
+        !latestBasicByPet[row.pet_id]
+      ) {
+        latestBasicByPet[row.pet_id] = row.id;
+      }
+
       if (!sajuByPet[row.pet_id]) sajuByPet[row.pet_id] = [];
       if (sajuByPet[row.pet_id].length < 4) {
         sajuByPet[row.pet_id].push({
@@ -100,18 +112,28 @@ export async function GET(request: Request) {
         });
       }
     }
+
+    return NextResponse.json({
+      pets: petList.map((pet) => {
+        const readings = sajuByPet[pet.id] ?? [];
+        const latestBasicId = latestBasicByPet[pet.id] ?? null;
+        return {
+          ...pet,
+          latestSaju: readings[0] ?? null,
+          latestSajuResultId: latestBasicId,
+          readings,
+        };
+      }),
+    });
   }
 
   return NextResponse.json({
-    pets: petList.map((pet) => {
-      const readings = sajuByPet[pet.id] ?? [];
-      return {
-        ...pet,
-        latestSaju: readings[0] ?? null,
-        latestSajuResultId: readings[0]?.id ?? null,
-        readings,
-      };
-    }),
+    pets: petList.map((pet) => ({
+      ...pet,
+      latestSaju: null,
+      latestSajuResultId: null,
+      readings: [],
+    })),
   });
 }
 

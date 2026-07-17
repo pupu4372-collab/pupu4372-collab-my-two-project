@@ -6,6 +6,7 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { GlassCard, PageContainer, SectionHeader } from "@/components/layout/StitchLayout";
 import { HomePetFortuneCard } from "@/components/home/pet-fortune/HomePetFortuneCard";
 import { type FortuneTodayState } from "@/components/home/PetDailyFortunePanel";
+import { SajuHubPremiumBanner } from "@/components/k-saju/SajuHubPremiumSidebar";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
@@ -217,18 +218,24 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
     : "";
 
   const fortunePanel = fortuneLoading ? (
-    <div className="pet-fortune-guest-shell flex min-h-[280px] items-center justify-center">
-      <p className="text-sm font-semibold text-stone-600">
-        {isKo ? "오늘의 케어 가이드를 불러오는 중이에요…" : "Loading today's care guide…"}
-      </p>
+    <div className="space-y-4">
+      <SajuHubPremiumBanner />
+      <div className="pet-fortune-guest-shell flex min-h-[280px] items-center justify-center">
+        <p className="text-sm font-semibold text-stone-600">
+          {isKo ? "오늘의 케어 가이드를 불러오는 중이에요…" : "Loading today's care guide…"}
+        </p>
+      </div>
     </div>
   ) : (
-    <HomePetFortuneCard
-      fortuneData={fortuneData}
-      careReminders={fortuneData?.careReminders}
-      onSelectPet={handleSelectPet}
-      onPetAdded={handleSelectPet}
-    />
+    <div className="space-y-4">
+      <SajuHubPremiumBanner />
+      <HomePetFortuneCard
+        fortuneData={fortuneData}
+        careReminders={fortuneData?.careReminders}
+        onSelectPet={handleSelectPet}
+        onPetAdded={handleSelectPet}
+      />
+    </div>
   );
 
   const petShowSection = (

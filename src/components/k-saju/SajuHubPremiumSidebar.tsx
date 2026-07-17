@@ -4,6 +4,30 @@ import { PremiumReportPreviewSample } from "@/components/k-saju/PremiumReportPre
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
+/** Wide CTA banner → /premium/human (saju hub sidebar + home reuse). */
+export function SajuHubPremiumBanner() {
+  const t = useTranslations("saju");
+
+  return (
+    <section className="overflow-hidden rounded-[1.75rem] bg-primary p-5 text-cream shadow-xl">
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-cream/70">
+        Premium
+      </p>
+      <h2 className="mt-2 text-lg font-extrabold leading-snug">{t("premiumTitle")}</h2>
+      <p className="mt-2 text-xs leading-relaxed text-cream/80">{t("premiumSubtitle")}</p>
+      <span className="mt-4 inline-flex rounded-full border border-cream/25 bg-cream/15 px-3 py-1 text-[11px] font-bold text-cream">
+        {t("premiumDailyFree")}
+      </span>
+      <Link
+        href="/premium/human"
+        className="mt-4 flex w-full items-center justify-center rounded-full bg-cream px-5 py-3 text-sm font-bold leading-none text-primary transition hover:bg-white"
+      >
+        {t("premium")}
+      </Link>
+    </section>
+  );
+}
+
 export function SajuHubPremiumSidebar() {
   const routeLocale = useLocale();
   const locale = routeLocale === "en" ? "en" : "ko";
@@ -11,22 +35,7 @@ export function SajuHubPremiumSidebar() {
 
   return (
     <aside className="space-y-4">
-      <section className="overflow-hidden rounded-[1.75rem] bg-primary p-5 text-cream shadow-xl">
-        <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-cream/70">
-          Premium
-        </p>
-        <h2 className="mt-2 text-lg font-extrabold leading-snug">{t("premiumTitle")}</h2>
-        <p className="mt-2 text-xs leading-relaxed text-cream/80">{t("premiumSubtitle")}</p>
-        <span className="mt-4 inline-flex rounded-full border border-cream/25 bg-cream/15 px-3 py-1 text-[11px] font-bold text-cream">
-          {t("premiumDailyFree")}
-        </span>
-        <Link
-          href="/premium/human"
-          className="mt-4 flex w-full items-center justify-center rounded-full bg-cream px-5 py-3 text-sm font-bold leading-none text-primary transition hover:bg-white"
-        >
-          {t("premium")}
-        </Link>
-      </section>
+      <SajuHubPremiumBanner />
 
       <section className="overflow-hidden rounded-[1.75rem] border border-channel-saju/20 bg-white shadow-sm">
         <div className="border-b border-channel-saju/10 px-4 py-3">

@@ -166,7 +166,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const [result, setResult] = useState<SajuBasicResponse | null>(null);
   const [prefillPhotoUrl, setPrefillPhotoUrl] = useState<string | null>(null);
   const [prefillPetId, setPrefillPetId] = useState<string | null>(null);
-  const autoSubmitPendingRef = useRef(false);
   const skipEntryGateRef = useRef(false);
   const entryGateAttemptedRef = useRef(false);
   const sessionRestoreAppliedRef = useRef(false);
@@ -197,7 +196,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     if (saved.mbtiAnswers) setMbtiAnswers(saved.mbtiAnswers);
     setResult(saved.result);
     setStep("result");
-    autoSubmitPendingRef.current = false;
     sessionRestoreAppliedRef.current = true;
     skipEntryGateRef.current = true;
     setEntryGate("form");
@@ -441,33 +439,12 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
       setTimezone(next.timezone);
       setPrefillPhotoUrl(next.photoUrl);
       setConsent(true);
-      autoSubmitPendingRef.current = true;
     })();
 
     return () => {
       cancelled = true;
     };
   }, [accessToken, step]);
-
-  useEffect(() => {
-    if (!autoSubmitPendingRef.current || step !== "form" || !consent || !birthDate) return;
-    if (configured && !sessionReady) return;
-    if (sessionRestoreAppliedRef.current) return;
-    if (isValidSajuResultSession(readSajuResultSession())) {
-      autoSubmitPendingRef.current = false;
-      return;
-    }
-
-    autoSubmitPendingRef.current = false;
-    void handleApiSubmit();
-  }, [
-    birthDate,
-    configured,
-    consent,
-    handleApiSubmit,
-    sessionReady,
-    step,
-  ]);
 
   const petId = result?.petId ?? prefillPetId;
   const mbtiUnlockCheckEnabled = configured && sessionReady && !isAnonymous && Boolean(petId);

@@ -69,7 +69,7 @@ export function petProfileToSajuFormState(pet: PetProfileForSaju) {
   };
 }
 
-/** Href for choosing a registered pet on /saju: snapshot report or prefill+compute. */
+/** Href for choosing a registered pet on /saju: snapshot report or form prefill. */
 export function sajuHrefForRegisteredPet(pet: {
   id: string;
   latestSajuResultId: string | null;

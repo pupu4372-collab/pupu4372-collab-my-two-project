@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { signOut } from "@/lib/supabase/auth-client";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 type NavKey = "home" | "dog" | "cat" | "reptile" | "saju" | "community";
 /** Removed from nav bar but still accepted so sub-pages do not break active-state typing. */
@@ -48,6 +48,26 @@ function NavLabel({ label }: { label: string }) {
   );
 }
 
+function ProfilePersonIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.75" />
+      <path
+        d="M5.5 19.25c.9-3.1 3.2-4.75 6.5-4.75s5.6 1.65 6.5 4.75"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 const NAV_LINK_BASE =
   "inline-flex min-h-[2.25rem] min-w-[2.5rem] items-center justify-center border-b-2 px-2 py-1 text-center text-[11px] font-bold leading-none transition sm:px-2.5 sm:text-xs lg:px-3 lg:text-sm";
 
@@ -65,6 +85,9 @@ const MAIN_NAV_LINKS: Array<{
 const SAJU_CTA_BASE =
   "inline-flex shrink-0 items-center justify-center rounded-full bg-primary px-3 py-2 text-xs font-extrabold text-white shadow-sm transition hover:brightness-105 lg:px-4 lg:text-sm";
 
+const SECONDARY_CTA_BASE =
+  "inline-flex shrink-0 items-center justify-center rounded-full border border-primary/20 bg-white/75 px-3 py-2 text-xs font-extrabold text-primary shadow-sm transition hover:bg-white hover:shadow-md lg:px-3.5";
+
 interface AppTopNavProps {
   active?: NavActiveKey;
 }
@@ -75,6 +98,32 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
   const isKo = locale === "ko";
   const { ready, configured, isAnonymous, email, refresh } = useSupabaseSession();
   const [signingOut, setSigningOut] = useState(false);
+  const [vaultOpen, setVaultOpen] = useState(false);
+  const vaultWrapRef = useRef<HTMLDivElement>(null);
+  const vaultMenuId = useId();
+
+  useEffect(() => {
+    if (!vaultOpen) return;
+
+    function onPointerDown(event: MouseEvent | TouchEvent) {
+      const target = event.target as Node | null;
+      if (target && vaultWrapRef.current?.contains(target)) return;
+      setVaultOpen(false);
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setVaultOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [vaultOpen]);
 
   async function handleLogout() {
     setSigningOut(true);
@@ -88,7 +137,6 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
   }
 
   const isSignedIn = configured && ready && !isAnonymous;
-  const accountLabel = email?.split("@")[0] ?? nav("account");
   const isSajuActive = active === "saju";
 
   return (
@@ -129,7 +177,47 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="relative" ref={vaultWrapRef}>
+            <button
+              type="button"
+              className={SECONDARY_CTA_BASE}
+              aria-expanded={vaultOpen}
+              aria-haspopup="menu"
+              aria-controls={vaultMenuId}
+              onClick={() => setVaultOpen((open) => !open)}
+            >
+              <span className="whitespace-nowrap">{nav("vault")}</span>
+              <span className="ml-1 text-[0.65rem] leading-none opacity-70" aria-hidden>
+                {vaultOpen ? "▴" : "▾"}
+              </span>
+            </button>
+            {vaultOpen ? (
+              <div
+                id={vaultMenuId}
+                role="menu"
+                className="absolute right-0 z-50 mt-2 min-w-[12.5rem] overflow-hidden rounded-2xl border border-primary/15 bg-white py-1 shadow-lg shadow-primary/10"
+              >
+                <Link
+                  href="/reports"
+                  role="menuitem"
+                  className="block px-4 py-2.5 text-sm font-bold text-primary transition hover:bg-lavender/40"
+                  onClick={() => setVaultOpen(false)}
+                >
+                  {nav("vaultPet")}
+                </Link>
+                <Link
+                  href="/premium/human/vault"
+                  role="menuitem"
+                  className="block px-4 py-2.5 text-sm font-bold text-primary transition hover:bg-lavender/40"
+                  onClick={() => setVaultOpen(false)}
+                >
+                  {nav("vaultHuman")}
+                </Link>
+              </div>
+            ) : null}
+          </div>
+
           <Link
             href="/saju"
             className={`${SAJU_CTA_BASE} hidden md:inline-flex ${isSajuActive ? "brightness-95 shadow-md" : ""}`}
@@ -141,20 +229,21 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
             <LanguageSwitcher />
           </ul>
           {isSignedIn ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Link
                 href="/profile"
-                className="max-w-[5.25rem] cursor-pointer truncate rounded-full bg-white/70 px-2.5 py-2 text-xs font-extrabold text-primary shadow-sm transition hover:bg-white hover:shadow-md active:bg-white/90 sm:max-w-32 sm:px-3"
-                title={email ?? nav("account")}
-                aria-label={`${nav("profile")}: ${accountLabel}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary px-3 py-2 text-xs font-extrabold text-white shadow-sm transition hover:brightness-105 active:brightness-95"
+                title={email ?? nav("myPage")}
+                aria-label={nav("myPage")}
               >
-                {accountLabel}
+                <ProfilePersonIcon className="h-3.5 w-3.5 shrink-0" />
+                <span className="whitespace-nowrap">{nav("myPage")}</span>
               </Link>
               <button
                 type="button"
                 onClick={() => void handleLogout()}
                 disabled={signingOut}
-                className="rounded-full bg-primary px-3 py-2 text-xs font-extrabold text-white shadow-sm transition hover:brightness-105 disabled:opacity-60"
+                className="rounded-full border border-primary/20 bg-white/75 px-3 py-2 text-xs font-extrabold text-primary shadow-sm transition hover:bg-white disabled:opacity-60"
               >
                 {signingOut ? nav("loggingOut") : nav("logout")}
               </button>

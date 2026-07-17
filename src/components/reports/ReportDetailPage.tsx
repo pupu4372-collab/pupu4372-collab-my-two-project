@@ -299,7 +299,15 @@ export function ReportDetailPage({ reportId }: { reportId: string }) {
       ) : error ? (
         <GlassCard className="text-sm text-red-700/80">{error}</GlassCard>
       ) : report ? (
-        <ReportRenderer report={report} />
+        <div className="space-y-4">
+          <Link
+            href="/saju"
+            className="inline-flex text-sm font-semibold text-channel-saju underline decoration-channel-saju/40 underline-offset-2 transition hover:text-primary"
+          >
+            {isKo ? "다른 아이 보기" : "See another pet"}
+          </Link>
+          <ReportRenderer report={report} />
+        </div>
       ) : (
         <GlassCard className="text-sm text-plum/70">{isKo ? "리포트를 찾을 수 없어요." : "Report not found."}</GlassCard>
       )}

@@ -29,6 +29,7 @@ const UI = {
     priceNote: "1회 결제 · 해당 펫 영구 잠금 해제",
     payCta: (price: string) => `${price} 결제하기`,
     loginPayCta: "로그인하고 결제하기",
+    includedProducts: "포함 상품",
     included: "포함",
     viewBadge: "보기",
     viewCta: "보기",
@@ -36,7 +37,8 @@ const UI = {
     zodiacBody: "별자리 성향에 맞는 오늘의 케어 행동을 이어서 볼 수 있어요.",
     bondCta: "집사 궁합",
     bondBody: "우리가 서로 맞춰가는 케어 방법을 알려드려요.",
-    mbtiStandaloneTitle: (price: string) => `상세 MBTI · ${price}`,
+    mbtiStandaloneEyebrow: (price: string) => `개별 상품 · ${price}`,
+    mbtiStandaloneTitle: "상세 MBTI",
     mbtiStandaloneBody: "행동 진단으로 우리 아이 성향 유형과 맞춤 케어 팁",
     mbtiViewResult: "결과 보기",
     mbtiDiagnose: "진단하기",
@@ -47,6 +49,7 @@ const UI = {
     priceNote: "One-time payment · Permanent unlock for this pet",
     payCta: (price: string) => `Pay ${price}`,
     loginPayCta: "Log in to pay",
+    includedProducts: "Included",
     included: "Included",
     viewBadge: "View",
     viewCta: "View",
@@ -54,7 +57,8 @@ const UI = {
     zodiacBody: "See today's care actions matched to your pet's zodiac traits.",
     bondCta: "Pet & butler bond",
     bondBody: "Learn how you and your pet can care for each other better.",
-    mbtiStandaloneTitle: (price: string) => `Detailed MBTI · ${price}`,
+    mbtiStandaloneEyebrow: (price: string) => `Standalone · ${price}`,
+    mbtiStandaloneTitle: "Detailed MBTI",
     mbtiStandaloneBody: "Discover your pet's type and tailored care tips with a behavior check",
     mbtiViewResult: "View result",
     mbtiDiagnose: "Start diagnosis",
@@ -107,11 +111,7 @@ export function SajuPremiumPackagePanel({
       key: "compatibility",
       returnTo: "compatibility" as PetPremiumReturnTo,
       href: `${premiumHubHref}&view=compatibility`,
-      badgeClass: "bg-hwa-red",
       titleClass: "text-[#8b3a3a]",
-      gradient: "from-petal via-white to-element-fire",
-      borderClass: "border-hwa-red/35",
-      blurClass: "bg-hwa-red/20",
       buttonClass: "bg-[#6f4b8b] hover:bg-[#5f3f78]",
       title: t.bondCta,
       body: t.bondBody,
@@ -120,11 +120,7 @@ export function SajuPremiumPackagePanel({
       key: "zodiac",
       returnTo: "zodiac" as PetPremiumReturnTo,
       href: `${premiumHubHref}&view=zodiac`,
-      badgeClass: "bg-channel-saju",
       titleClass: "text-channel-saju",
-      gradient: "from-lavender via-white to-mint/60",
-      borderClass: "border-channel-saju/35",
-      blurClass: "bg-channel-saju/25",
       buttonClass: "bg-channel-saju hover:brightness-110",
       title: t.zodiacCta,
       body: t.zodiacBody,
@@ -156,90 +152,104 @@ export function SajuPremiumPackagePanel({
   const mbtiCtaLabel = mbtiUnlocked ? t.mbtiViewResult : t.mbtiDiagnose;
 
   return (
-    <GlassCard className="overflow-hidden border-2 border-channel-saju/40 !bg-white p-0 shadow-xl shadow-channel-saju/10">
-      <div className="border-b border-channel-saju/15 bg-lavender/40 p-6 text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-channel-saju/70">
-          {t.packageTitle}
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-plum/85">{t.packageSubtitle}</p>
-        {!unlocked ? (
-          <>
-            <p className="mt-4 text-3xl font-extrabold text-primary">{packagePrice}</p>
-            <p className="mt-1 text-xs text-on-surface-variant">{t.priceNote}</p>
+    <div className="space-y-4">
+      <GlassCard
+        variant="solid"
+        className="overflow-hidden !border-2 !border-channel-saju !bg-lavender p-0 !shadow-md"
+      >
+        <div className="border-b border-channel-saju/30 bg-lavender p-6 text-center">
+          <p className="text-xs font-bold uppercase tracking-widest text-channel-saju">
+            {t.packageTitle}
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-plum">{t.packageSubtitle}</p>
+          {!unlocked ? (
+            <>
+              <p className="mt-4 text-3xl font-extrabold text-primary">{packagePrice}</p>
+              <p className="mt-1 text-xs text-on-surface-variant">{t.priceNote}</p>
+              <Link
+                href={hrefOrLoginGate(paymentHref, isGuest)}
+                className="mt-5 inline-flex w-full justify-center rounded-full bg-[#6f4b8b] px-4 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#5f3f78] active:scale-[0.98]"
+              >
+                {isGuest ? t.loginPayCta : t.payCta(packagePrice)}
+              </Link>
+            </>
+          ) : null}
+        </div>
+
+        <div className="bg-lavender px-4 py-5 sm:px-5">
+          <p className="px-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-channel-saju">
+            {t.includedProducts}
+          </p>
+          <div className="mt-3 divide-y divide-channel-saju/25 overflow-hidden rounded-2xl border border-channel-saju/35 bg-cream">
+            {sections.map((section) => {
+              const sectionHref = unlocked
+                ? section.href
+                : buildPetPremiumPaymentHref({
+                    ...payBase,
+                    returnTo: section.returnTo,
+                  });
+              const linkHref = hrefOrLoginGate(sectionHref, isGuest && !unlocked);
+              const badgeLabel = unlocked ? t.viewBadge : t.included;
+              const buttonLabel = unlocked ? `${t.viewCta} →` : `${section.title} →`;
+
+              return (
+                <div key={section.key} className="px-4 py-4 text-left sm:px-5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {unlockLoading ? (
+                      <div className="h-5 w-12 animate-pulse rounded-full bg-sand" />
+                    ) : (
+                      <span className="rounded-full bg-channel-saju px-2 py-0.5 text-[10px] font-bold text-white">
+                        {badgeLabel}
+                      </span>
+                    )}
+                    <h3 className={`text-sm font-bold ${section.titleClass}`}>{section.title}</h3>
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-plum">{section.body}</p>
+                  {unlockLoading ? (
+                    <div className="mt-3 h-10 w-full max-w-xs animate-pulse rounded-full bg-sand" />
+                  ) : (
+                    <Link
+                      href={linkHref}
+                      className={`mt-3 inline-flex rounded-full px-4 py-2.5 text-xs font-bold text-white shadow-sm transition ${section.buttonClass}`}
+                    >
+                      {isGuest && !unlocked ? t.loginPayCta : buttonLabel}
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard
+        variant="solid"
+        className="overflow-hidden !border-2 !border-plum/40 !bg-sand p-0 !shadow-md"
+      >
+        <div className="bg-sand p-6 text-center">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-plum">
+            {locale === "ko" ? "개별 상품" : "Standalone"}
+          </p>
+          <p className="mt-3 text-3xl font-extrabold text-primary">{mbtiPrice}</p>
+          <p className="mt-2 text-lg font-extrabold text-primary">{t.mbtiStandaloneTitle}</p>
+          <p className="mt-2 text-sm leading-relaxed text-plum">{t.mbtiStandaloneBody}</p>
+          <p className="mt-2 text-xs leading-5 text-on-surface-variant">
+            {locale === "ko"
+              ? "결과 리포트는 현재 언어(한국어)로 생성됩니다."
+              : "Your report will be generated in the current language (English)."}
+          </p>
+          {mbtiUnlockEnabled && mbtiUnlockLoading ? (
+            <div className="mx-auto mt-5 h-12 w-full max-w-xs animate-pulse rounded-full bg-cream" />
+          ) : (
             <Link
-              href={hrefOrLoginGate(paymentHref, isGuest)}
-              className="mt-5 inline-flex w-full justify-center rounded-full bg-[#6f4b8b] px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#6f4b8b]/35 transition hover:bg-[#5f3f78] active:scale-[0.98]"
+              href={mbtiCtaHref}
+              className="mt-5 inline-flex w-full justify-center rounded-full bg-[#6f4b8b] px-4 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#5f3f78] active:scale-[0.98]"
             >
-              {isGuest ? t.loginPayCta : t.payCta(packagePrice)}
+              {mbtiCtaLabel}
             </Link>
-          </>
-        ) : null}
-      </div>
-
-      <div className="divide-y divide-channel-saju/10">
-        {sections.map((section) => {
-          const sectionHref = unlocked
-            ? section.href
-            : buildPetPremiumPaymentHref({
-                ...payBase,
-                returnTo: section.returnTo,
-              });
-          const linkHref = hrefOrLoginGate(sectionHref, isGuest && !unlocked);
-          const badgeLabel = unlocked ? t.viewBadge : t.included;
-          const buttonLabel = unlocked ? `${t.viewCta} →` : `${section.title} →`;
-
-          return (
-            <div
-              key={section.key}
-              className={`relative overflow-hidden border-t ${section.borderClass} bg-white p-6 text-center first:border-t-0`}
-            >
-              {unlockLoading ? (
-                <div className="relative mx-auto mb-2 h-5 w-12 animate-pulse rounded-full bg-sand/70" />
-              ) : (
-                <span
-                  className={`relative mb-2 inline-block rounded-full ${section.badgeClass} px-2.5 py-1 text-[10px] font-bold text-white`}
-                >
-                  {badgeLabel}
-                </span>
-              )}
-              <h3 className={`relative text-base font-bold ${section.titleClass}`}>
-                {section.title}
-              </h3>
-              <p className="relative mt-3 text-sm leading-relaxed text-plum/85">{section.body}</p>
-              {unlockLoading ? (
-                <div className="relative mx-auto mt-5 h-12 w-full max-w-xs animate-pulse rounded-full bg-sand/70" />
-              ) : (
-                <Link
-                  href={linkHref}
-                  className={`relative mt-5 inline-flex w-full justify-center rounded-full px-4 py-3.5 text-sm font-bold text-white shadow-lg transition ${section.buttonClass}`}
-                >
-                  {isGuest && !unlocked ? t.loginPayCta : buttonLabel}
-                </Link>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="border-t border-channel-saju/15 bg-sand/30 p-6 text-center">
-        <p className="text-sm font-extrabold text-primary">{t.mbtiStandaloneTitle(mbtiPrice)}</p>
-        <p className="mt-2 text-sm leading-relaxed text-plum/85">{t.mbtiStandaloneBody}</p>
-        <p className="mt-2 text-xs leading-5 text-on-surface-variant">
-          {locale === "ko"
-            ? "결과 리포트는 현재 언어(한국어)로 생성됩니다."
-            : "Your report will be generated in the current language (English)."}
-        </p>
-        {mbtiUnlockEnabled && mbtiUnlockLoading ? (
-          <div className="mx-auto mt-5 h-12 w-full max-w-xs animate-pulse rounded-full bg-sand/70" />
-        ) : (
-          <Link
-            href={mbtiCtaHref}
-            className="mt-5 inline-flex w-full justify-center rounded-full border-2 border-plum/25 bg-white px-4 py-3.5 text-sm font-bold text-plum shadow-sm transition hover:bg-petal/30"
-          >
-            {mbtiCtaLabel}
-          </Link>
-        )}
-      </div>
-    </GlassCard>
+          )}
+        </div>
+      </GlassCard>
+    </div>
   );
 }
