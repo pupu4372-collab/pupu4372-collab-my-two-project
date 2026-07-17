@@ -1,3 +1,4 @@
+import { catalogAmountToPortOneTotal } from "@/lib/payments/portone/amount";
 import { getPortOneShopId, isPortOneConfigured } from "@/lib/payments/portone/config";
 import {
   createDailyExtraCheckoutOrder,
@@ -30,16 +31,19 @@ export async function POST(request: Request) {
   try {
     const order = await createDailyExtraCheckoutOrder(userId, locale);
     const { amount, currency } = resolveDailyExtraCheckout(locale);
+    // `amount` = catalog units (USD whole dollars). `totalAmount` = PortOne units (USD cents).
+    const totalAmount = catalogAmountToPortOneTotal(amount, currency);
     const storeId = getPortOneShopId();
     const paypalLink = locale === "en" ? resolveDailyExtraPayPalLinkForOrder(order.payment_order_id) : null;
 
     return NextResponse.json({
       paymentId: order.payment_order_id,
       amount,
+      totalAmount,
       currency,
       formattedPrice: formatPrice(getDailyExtraPrice(locale), locale),
       orderName:
-        locale === "ko" ? "데일리 럭키 루틴 추가" : "Daily Lucky Routine — extra chart",
+        locale === "ko" ? "데일리 럭키 운세" : "Daily Lucky Reading",
       portone: {
         configured: isPortOneConfigured(),
         storeId,

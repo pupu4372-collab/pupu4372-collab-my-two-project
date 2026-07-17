@@ -54,7 +54,7 @@ export function resolvePayPalPaymentLink(options: {
   return augmentPayPalLink(base, options);
 }
 
-/** Daily-extra add-on (after free quota) — prefers PAYPAL_LINK_DAILY_EXTRA. */
+/** Daily Lucky Reading checkout — prefers PAYPAL_LINK_DAILY_EXTRA. */
 export function resolveDailyExtraPayPalLink(paymentId: string): string | null {
   const base =
     readPayPalLink("PAYPAL_LINK_DAILY_EXTRA") ??

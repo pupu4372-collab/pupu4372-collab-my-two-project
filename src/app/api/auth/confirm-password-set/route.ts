@@ -90,6 +90,9 @@ export async function POST(request: Request) {
     );
   }
 
+  const { tryGrantLaunchDailyLuckyCoupon } = await import("@/lib/coupons/coupons");
+  await tryGrantLaunchDailyLuckyCoupon(userId);
+
   return NextResponse.json({
     ok: true,
     has_password: updated.user.app_metadata?.has_password === true,

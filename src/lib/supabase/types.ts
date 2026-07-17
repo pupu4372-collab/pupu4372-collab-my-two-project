@@ -370,6 +370,24 @@ export type HumanPremiumReportInsert = Pick<
   currency?: string;
 };
 
+export interface Coupon {
+  id: string;
+  user_id: string;
+  coupon_type: string;
+  granted_reason: string;
+  used_at: string | null;
+  used_for: string | null;
+  created_at: string;
+}
+
+export type CouponInsert = {
+  user_id: string;
+  coupon_type: string;
+  granted_reason: string;
+  used_at?: string | null;
+  used_for?: string | null;
+};
+
 type TableDef<Row, Insert, Update = Partial<Row>> = {
   Row: Row;
   Insert: Insert;
@@ -497,6 +515,7 @@ export interface Database {
       saju_llm_cache: TableDef<SajuLlmCacheRow, SajuLlmCacheInsert>;
       challenges: TableDef<Challenge, Partial<Challenge>>;
       challenge_posts: TableDef<ChallengePost, ChallengePostInsert>;
+      coupons: TableDef<Coupon, CouponInsert, Partial<Coupon>>;
     };
     Views: {
       pet_show_ranking_weekly: { Row: PetShowRankingRow; Relationships: [] };

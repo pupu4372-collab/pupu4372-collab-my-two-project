@@ -35,7 +35,7 @@ const UI = {
 } as const;
 
 /**
- * Premium report body for free daily routine — same 8 sections as paid HumanPremiumReportView.
+ * Premium report body for daily lucky routine — same 8 sections as paid HumanPremiumReportView.
  * Rendered from DayPillarPreview after POST /api/human-premium/daily-routine.
  */
 export function HumanPremiumFreePreviewReport({

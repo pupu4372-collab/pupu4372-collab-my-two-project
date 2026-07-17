@@ -5,21 +5,22 @@ import { formatPrice, getDailyExtraPrice } from "@/lib/reports/human-premium/pri
 
 const UI = {
   ko: {
-    title: "오늘의 무료 리포트를 이미 확인하셨어요",
-    body: "계정당 하루 1회 무료예요. 다른 사주 리포트는 유료로 이용할 수 있어요.",
-    viewAgain: "오늘 본 내 리포트 다시 보기",
+    title: "결제가 필요해요",
+    body: "데일리 럭키는 유료 상품이에요. 오픈기념 쿠폰이 있으면 무료로 볼 수 있어요.",
+    viewAgain: "내 리포트 다시 보기",
     close: "닫기",
     paying: "결제 처리 중…",
   },
   en: {
-    title: "You've used today's free report",
-    body: "One free daily report per account (KST). Additional charts require payment.",
-    viewAgain: "View today's report again",
+    title: "Payment required",
+    body: "Daily Lucky Reading is a paid product. Use a launch coupon for one free reading.",
+    viewAgain: "View my report again",
     close: "Close",
     paying: "Processing payment…",
   },
 } as const;
 
+/** Paywall when coupon is unavailable (kept for optional reuse). */
 export function DailyQuotaModal({
   open,
   isKo,
@@ -39,8 +40,8 @@ export function DailyQuotaModal({
 
   const t = UI[isKo ? "ko" : "en"];
   const payCta = isKo
-    ? "1,900원으로 추가 리포트 보기"
-    : `Unlock another report for ${formatPrice(getDailyExtraPrice("en"), "en")}`;
+    ? `${formatPrice(getDailyExtraPrice("ko"), "ko")}으로 보기`
+    : `Unlock for ${formatPrice(getDailyExtraPrice("en"), "en")}`;
 
   return (
     <div

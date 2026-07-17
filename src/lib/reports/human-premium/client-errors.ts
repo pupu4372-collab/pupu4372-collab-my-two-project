@@ -13,7 +13,10 @@ const KO_MESSAGES: Record<string, string> = {
     "이미 생성된 리포트로 이동합니다.",
   cart_items_already_purchased: "이미 구매한 리포트는 장바구니에 담을 수 없어요. 보관함에서 확인해 주세요.",
   login_required: "로그인이 필요해요.",
-  daily_quota_exceeded: "오늘의 무료 리포트를 이미 사용하셨어요.",
+  signup_required: "가입하면 오픈기념 럭키운세 쿠폰을 드려요",
+  payment_required: "데일리 럭키는 결제 후 이용할 수 있어요.",
+  daily_quota_exceeded: "데일리 럭키는 결제 후 이용할 수 있어요.",
+  daily_generating_in_progress: "이미 생성 중입니다. 잠시 후 다시 확인해 주세요.",
   RESEND_NOT_CONFIGURED: "이메일 발송 설정이 아직 준비되지 않았어요.",
   EMAIL_NOT_ON_FILE: "결제 시 입력한 이메일이 없어 발송할 수 없어요.",
   "RESEND_API_KEY is not configured.": "이메일 발송 설정이 아직 준비되지 않았어요.",
@@ -24,6 +27,11 @@ const KO_MESSAGES: Record<string, string> = {
 };
 
 const EN_MESSAGES: Record<string, string> = {
+  login_required: "Please log in to continue.",
+  signup_required: "Sign up to get a free Lucky Reading coupon",
+  payment_required: "Daily Lucky Reading requires payment.",
+  daily_quota_exceeded: "Daily Lucky Reading requires payment.",
+  daily_generating_in_progress: "Your report is already being generated. Please wait a moment.",
   cart_ownership_mismatch:
     "Your session changed during payment verification. If the payment went through, your report will be sent to the email you provided — please check your inbox.",
   custom_data_mismatch:

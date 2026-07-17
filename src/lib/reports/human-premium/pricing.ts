@@ -43,7 +43,7 @@ export const BUNDLE_PRICING_USD = {
 
 export type HumanPremiumBundleKind = keyof typeof BUNDLE_PRICING;
 
-/** Paid add-on when daily free quota (1/day KST) is exhausted. */
+/** Paid Daily Lucky Reading (₩1,900 / $2). Free only via daily_lucky_free coupon. */
 export const DAILY_EXTRA_PRODUCT = "daily-extra" as const;
 
 export const DAILY_EXTRA_PRICING = {
@@ -91,7 +91,7 @@ export const REPORT_TYPE_SUBTITLES_EN: Record<ReportType, string> = {
   lifetime: "Full major-luck life design",
 };
 
-/** Paid shop grid — `daily` (데일리 럭키 루틴) is free via DayPillarPreview */
+/** Paid shop grid — `daily` (데일리 럭키) is sold via DayPillarPreview + coupon/payment */
 export const REPORT_TYPE_ORDER: ReportType[] = [
   "decade",
   "monthly",

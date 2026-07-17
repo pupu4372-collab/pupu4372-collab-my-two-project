@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import {
+  catalogAmountToPortOneTotal,
   fetchPortOnePayment,
   isPortOnePaymentPaid,
   parsePortOneCustomData,
@@ -9,7 +10,6 @@ import { resolveDailyExtraPayPalLink } from "@/lib/payments/paypal-links";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { DAILY_EXTRA_PRODUCT_CODE } from "./daily-extra-constants";
 import {
-  getDailyExtraPrice,
   getCheckoutCurrency,
   resolveDailyExtraCheckout,
   type PricingLocale,
@@ -144,7 +144,6 @@ export async function verifyDailyExtraPortOnePayment(
     return order;
   }
 
-  const expectedAmount = getDailyExtraPrice(locale);
   const payment = await fetchPortOnePayment(paymentOrderId);
   if (!payment || !isPortOnePaymentPaid(payment)) {
     throw new Error("Payment not completed.");
@@ -162,7 +161,13 @@ export async function verifyDailyExtraPortOnePayment(
     throw new Error("custom_data_mismatch");
   }
 
-  if (!verifyPortOneAmount(payment, expectedAmount)) {
+  // Order stores catalog units (USD whole dollars). PortOne total uses cents for USD.
+  const expectedCurrency = order.currency || getCheckoutCurrency(locale);
+  const expectedPortOneAmount = catalogAmountToPortOneTotal(
+    Number(order.amount_paid),
+    expectedCurrency
+  );
+  if (!verifyPortOneAmount(payment, expectedPortOneAmount)) {
     throw new Error("Payment amount mismatch.");
   }
 

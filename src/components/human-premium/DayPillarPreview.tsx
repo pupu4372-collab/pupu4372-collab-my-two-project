@@ -1,24 +1,22 @@
 "use client";
 
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
-import { DailyQuotaModal } from "@/components/human-premium/DailyQuotaModal";
 import { HumanPremiumFreePreviewReport } from "@/components/human-premium/HumanPremiumFreePreviewReport";
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
+import { COUPON_TYPE_DAILY_LUCKY_FREE } from "@/lib/coupons/constants";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { DAILY_EXTRA_PRODUCT_CODE } from "@/lib/reports/human-premium/daily-extra-constants";
 import type { HumanPremiumProfile } from "@/lib/reports/human-premium/cart-session";
 import {
+  formatPrice,
+  getDailyExtraPrice,
   REPORT_TYPE_SUBTITLES_EN,
   REPORT_TYPE_SUBTITLES_KO,
 } from "@/lib/reports/human-premium/pricing";
-import {
-  REPORT_TYPE_LABELS,
-  REPORT_TYPE_LABELS_EN,
-  type HumanPremiumReportPayload,
-} from "@/lib/reports/human-premium/types";
+import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import {
   BIRTH_TIME_OPTIONS,
   getBirthTimeOptionLabel,
@@ -28,16 +26,25 @@ import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
-const LOGIN_UI = {
+/** Product header + CTA labels (no duplicate title/sub on the same button). */
+const PRODUCT_UI = {
   ko: {
-    title: "로그인이 필요해요",
-    body: "로그인하면 매일 1회 무료로 데일리 럭키 루틴을 볼 수 있어요.",
-    login: "로그인하기",
+    title: "데일리 럭키 운세",
+    description: REPORT_TYPE_SUBTITLES_KO.daily,
+    signupAlertTitle: "가입이 필요해요",
+    signupAlertBody: "가입하면 오픈기념 럭키운세 쿠폰을 드려요",
+    ctaGuest: "가입하고 오픈기념 무료 쿠폰 받기",
+    ctaCoupon: "오픈기념 쿠폰으로 무료로 보기",
+    ctaPay: (price: string) => `${price} 결제하고 보기`,
   },
   en: {
-    title: "Sign in required",
-    body: "Sign in for one free Daily Lucky Routine per day (KST).",
-    login: "Sign in",
+    title: "Daily Lucky Reading",
+    description: REPORT_TYPE_SUBTITLES_EN.daily,
+    signupAlertTitle: "Sign up required",
+    signupAlertBody: "Sign up to get a free Lucky Reading coupon",
+    ctaGuest: "Sign up for a free launch coupon",
+    ctaCoupon: "View free with launch coupon",
+    ctaPay: (price: string) => `Pay ${price} to view`,
   },
 } as const;
 
@@ -75,21 +82,18 @@ export function DayPillarPreview({
   const routeLocale = useLocale();
   const tNav = useTranslations("nav");
   const isKo = routeLocale === "ko";
-  const { accessToken, isAnonymous, ready: sessionReady } = useSupabaseSession();
-  const dailyTitle = isKo ? REPORT_TYPE_LABELS.daily : REPORT_TYPE_LABELS_EN.daily;
-  const dailySubtitles = isKo ? REPORT_TYPE_SUBTITLES_KO : REPORT_TYPE_SUBTITLES_EN;
-  const dailySubtitle = isKo
-    ? `로그인 · 하루 1회 무료 · ${dailySubtitles.daily}`
-    : `Sign in · 1 free/day (KST) · ${dailySubtitles.daily}`;
+  const ui = PRODUCT_UI[isKo ? "ko" : "en"];
+  const { accessToken, isFullMember, ready: sessionReady } = useSupabaseSession();
+  const paidPriceLabel = formatPrice(getDailyExtraPrice(isKo ? "ko" : "en"), isKo ? "ko" : "en");
+
   const [loading, setLoading] = useState(false);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loginPrompt, setLoginPrompt] = useState(false);
-  const [quotaOpen, setQuotaOpen] = useState(false);
-  const [todayReportToken, setTodayReportToken] = useState<string | null>(null);
+  const [signupPrompt, setSignupPrompt] = useState(false);
   const [portoneReady, setPortoneReady] = useState(false);
   const [report, setReport] = useState<HumanPremiumReportPayload | null>(null);
   const [webToken, setWebToken] = useState<string | null>(null);
+  const [hasCoupon, setHasCoupon] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (document.querySelector('script[src*="cdn.portone.io"]')) {
@@ -103,6 +107,36 @@ export function DayPillarPreview({
     document.head.appendChild(script);
   }, []);
 
+  useEffect(() => {
+    if (!sessionReady) return;
+    if (!isFullMember || !accessToken) {
+      setHasCoupon(null);
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(
+          `/api/coupons/usable?type=${encodeURIComponent(COUPON_TYPE_DAILY_LUCKY_FREE)}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        if (!res.ok) {
+          if (!cancelled) setHasCoupon(false);
+          return;
+        }
+        const data = (await res.json()) as { usable?: boolean };
+        if (!cancelled) setHasCoupon(Boolean(data.usable));
+      } catch {
+        if (!cancelled) setHasCoupon(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionReady, isFullMember, accessToken]);
+
   function patchProfile(partial: Partial<HumanPremiumProfile>) {
     onPatchProfile(partial);
   }
@@ -114,6 +148,12 @@ export function DayPillarPreview({
     if (birthTimeUnknown) return null;
     return parseBirthTimeSelect(profile.birthTimeSelect).birthTime;
   }, [profile.birthTimeSelect, birthTimeUnknown]);
+
+  const ctaLabel = !isFullMember
+    ? ui.ctaGuest
+    : hasCoupon
+      ? ui.ctaCoupon
+      : ui.ctaPay(paidPriceLabel);
 
   async function requestDailyReport(dailyExtraPaymentId?: string) {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -135,15 +175,21 @@ export function DayPillarPreview({
       ),
     });
     const data = (await res.json()) as Record<string, unknown>;
+    const errCode = String(data.code ?? data.error ?? "");
 
-    if (res.status === 401 && data.error === "login_required") {
-      setLoginPrompt(true);
+    if (res.status === 402 && errCode === "signup_required") {
+      setSignupPrompt(true);
       return null;
     }
-    if (res.status === 402 && data.error === "daily_quota_exceeded") {
-      setTodayReportToken(String(data.todayReportToken ?? "") || null);
-      setQuotaOpen(true);
+    if (res.status === 402 && errCode === "payment_required") {
+      return { paymentRequired: true as const };
+    }
+    if (res.status === 401 && data.error === "login_required") {
+      setSignupPrompt(true);
       return null;
+    }
+    if (res.status === 409 && data.error === "daily_generating_in_progress") {
+      throw new Error("daily_generating_in_progress");
     }
     if (!res.ok) {
       if (data.webUrl && (data.reused || data.duplicate)) {
@@ -161,16 +207,35 @@ export function DayPillarPreview({
 
     setReport(data.report as HumanPremiumReportPayload);
     setWebToken(String(data.webToken ?? ""));
-    setQuotaOpen(false);
-    setLoginPrompt(false);
+    setSignupPrompt(false);
+    if (data.couponUsed === true) {
+      setHasCoupon(false);
+    }
     return data;
   }
 
-  async function handleGenerate(dailyExtraPaymentId?: string) {
+  async function handleGenerate() {
+    if (!isFullMember) {
+      setSignupPrompt(true);
+      return;
+    }
+
+    // Paid path: skip daily-routine free gate — go straight to daily_extra checkout.
+    if (hasCoupon === false) {
+      await handleDailyExtraPay();
+      return;
+    }
+
     setError(null);
     setLoading(true);
     try {
-      await requestDailyReport(dailyExtraPaymentId);
+      const result = await requestDailyReport();
+      if (result && "paymentRequired" in result && result.paymentRequired) {
+        // Coupon race / stale UI — clear generate overlay before PortOne opens.
+        setHasCoupon(false);
+        setLoading(false);
+        await handleDailyExtraPay();
+      }
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Report failed";
       setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
@@ -180,8 +245,8 @@ export function DayPillarPreview({
   }
 
   async function handleDailyExtraPay() {
-    if (!accessToken || isAnonymous) {
-      setLoginPrompt(true);
+    if (!accessToken || !isFullMember) {
+      setSignupPrompt(true);
       return;
     }
 
@@ -214,12 +279,13 @@ export function DayPillarPreview({
           throw new Error(isKo ? "결제 모듈을 불러오지 못했어요." : "Payment module unavailable.");
         }
 
+        // Keep full-screen generate loader OFF while PortOne modal is open (z-[80] would cover it).
         const payResult = await PortOne.requestPayment({
           storeId: process.env.NEXT_PUBLIC_PORTONE_SHOP_ID,
           paymentId,
-          orderName: String(checkout.orderName ?? dailyTitle),
-          totalAmount: Number(checkout.amount ?? 1900),
-          currency: "KRW",
+          orderName: String(checkout.orderName ?? ui.title),
+          totalAmount: Number(checkout.totalAmount ?? checkout.amount ?? 1900),
+          currency: String(checkout.currency ?? "KRW"),
           channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
           payMethod: "CARD",
           customData: { productCode: DAILY_EXTRA_PRODUCT_CODE },
@@ -271,7 +337,6 @@ export function DayPillarPreview({
         }
       }
 
-      setQuotaOpen(false);
       setLoading(true);
       await requestDailyReport(paymentId);
     } catch (err) {
@@ -306,41 +371,34 @@ export function DayPillarPreview({
     );
   }
 
-  const loginUi = LOGIN_UI[isKo ? "ko" : "en"];
+  const submitBusy = loading || paying || !sessionReady || (isFullMember && hasCoupon === null);
 
   return (
     <>
-      <DailyQuotaModal
-        open={quotaOpen}
-        isKo={isKo}
-        todayReportToken={todayReportToken}
-        paying={paying}
-        onClose={() => setQuotaOpen(false)}
-        onPay={() => void handleDailyExtraPay()}
-      />
-      <ReportGenerateLoader isKo={isKo} active={loading || paying} />
+      {/* Loader only during report generation — never while PortOne/PayPal checkout is open */}
+      <ReportGenerateLoader isKo={isKo} active={loading} />
       <section className="human-premium-birth-card mx-auto w-full max-w-sm space-y-6 p-6 sm:max-w-md sm:p-8">
         <div className="text-center">
           <p className="human-premium-birth-eyebrow">
             {isKo ? "집사님의 사주" : "Butler birth chart"}
           </p>
-          <h2 className="mt-2 text-2xl font-bold">
-            {isKo ? "사주 정보 입력" : "Birth details"}
-          </h2>
+          <h2 className="mt-2 text-2xl font-bold">{ui.title}</h2>
+          <p className="mt-2 text-sm text-plum/75">{ui.description}</p>
+          <p className="mt-1 text-base font-bold text-ink">{paidPriceLabel}</p>
         </div>
 
-        {loginPrompt ? (
+        {signupPrompt ? (
           <div
             role="alert"
             className="rounded-2xl border border-channel-saju/30 bg-white/90 px-4 py-4 text-sm"
           >
-            <p className="font-bold text-ink">{loginUi.title}</p>
-            <p className="mt-2 text-plum/80">{loginUi.body}</p>
+            <p className="font-bold text-ink">{ui.signupAlertTitle}</p>
+            <p className="mt-2 text-plum/80">{ui.signupAlertBody}</p>
             <Link
               href="/login"
               className="mt-3 inline-block font-semibold text-channel-saju underline"
             >
-              {loginUi.login}
+              {ui.ctaGuest}
             </Link>
           </div>
         ) : null}
@@ -490,34 +548,38 @@ export function DayPillarPreview({
               {error}
             </p>
           ) : null}
-          <button
-            type="button"
-            disabled={
-              !profile.birthDate ||
-              !profile.privacyConsent ||
-              loading ||
-              paying ||
-              !sessionReady
-            }
-            onClick={() => void handleGenerate()}
-            className="human-premium-birth-submit human-premium-birth-submit--plan"
-          >
-            {!loading ? (
-              <span className="human-premium-birth-submit-index" aria-hidden>
-                1
+
+          {!isFullMember ? (
+            <Link
+              href="/login"
+              className="human-premium-birth-submit human-premium-birth-submit--plan"
+            >
+              <span className="human-premium-birth-submit-body">
+                <span className="human-premium-birth-submit-title">{ui.ctaGuest}</span>
               </span>
-            ) : null}
-            <span className="human-premium-birth-submit-body">
-              {loading ? (
-                isKo ? "생성 중…" : "Generating…"
-              ) : (
-                <>
-                  <span className="human-premium-birth-submit-title">{dailyTitle}</span>
-                  <span className="human-premium-birth-submit-sub">{dailySubtitle}</span>
-                </>
-              )}
-            </span>
-          </button>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled={!profile.birthDate || !profile.privacyConsent || submitBusy}
+              onClick={() => void handleGenerate()}
+              className="human-premium-birth-submit human-premium-birth-submit--plan"
+            >
+              <span className="human-premium-birth-submit-body">
+                {loading || paying ? (
+                  isKo
+                    ? paying
+                      ? "결제 창 여는 중…"
+                      : "생성 중…"
+                    : paying
+                      ? "Opening checkout…"
+                      : "Generating…"
+                ) : (
+                  <span className="human-premium-birth-submit-title">{ctaLabel}</span>
+                )}
+              </span>
+            </button>
+          )}
         </div>
 
         <p className="text-center text-xs text-plum/60">

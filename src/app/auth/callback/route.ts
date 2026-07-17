@@ -1,3 +1,4 @@
+import { isFullMember } from "@/lib/auth/identity";
 import { createSupabaseServerClient } from "@/lib/supabase/server-rsc";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
@@ -45,6 +46,21 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
     return response(`${loginUrl}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user && isFullMember(user)) {
+      const { tryGrantLaunchDailyLuckyCoupon } = await import("@/lib/coupons/coupons");
+      await tryGrantLaunchDailyLuckyCoupon(user.id);
+    }
+  } catch (err) {
+    console.error("COUPON_GRANT_FALLBACK", {
+      phase: "auth_callback",
+      message: err instanceof Error ? err.message : String(err),
+    });
   }
 
   return response(`${origin}${next}`);

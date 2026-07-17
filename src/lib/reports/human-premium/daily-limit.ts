@@ -2,6 +2,8 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { HumanPremiumCalendarType, HumanPremiumReportRow } from "./types";
 
 const KST_TIMEZONE = "Asia/Seoul";
+/** Stale `generating` rows older than this do not consume free quota (crash/timeout recovery). */
+const GENERATING_STALE_MS = 10 * 60 * 1000;
 
 export interface DailyBirthInput {
   birthDate: string;
@@ -14,7 +16,7 @@ export interface DailyBirthInput {
 
 export interface DailyLimitResult {
   allowed: boolean;
-  reason?: "guest" | "quota_exceeded";
+  reason?: "guest" | "quota_exceeded" | "generating_in_progress";
   /** Same birth re-submit — reuse without consuming quota. */
   existingReportToken?: string;
   /** Today's free daily report token for "view again" link on paywall. */
@@ -57,12 +59,26 @@ export function dailyBirthInputFromRow(row: HumanPremiumReportRow): DailyBirthIn
   };
 }
 
-function isCountableDailyReport(row: HumanPremiumReportRow): boolean {
-  return row.report_type === "daily" && (row.status === "ready" || row.status === "email_sent");
+function isFreshGenerating(row: HumanPremiumReportRow, now: Date): boolean {
+  if (row.status !== "generating") return false;
+  const created = new Date(row.created_at).getTime();
+  if (Number.isNaN(created)) return false;
+  return now.getTime() - created < GENERATING_STALE_MS;
 }
 
-function isFreeDailyReport(row: HumanPremiumReportRow): boolean {
-  return isCountableDailyReport(row) && Number(row.amount_paid) === 0;
+/** Free seat: in-flight generating (fresh) or completed free report. `failed` never counts. */
+function isFreeQuotaSeat(row: HumanPremiumReportRow, now: Date): boolean {
+  if (row.report_type !== "daily") return false;
+  if (Number(row.amount_paid) !== 0) return false;
+  if (row.status === "ready" || row.status === "email_sent") return true;
+  return isFreshGenerating(row, now);
+}
+
+function isReusableCompleted(row: HumanPremiumReportRow): boolean {
+  return (
+    row.report_type === "daily" &&
+    (row.status === "ready" || row.status === "email_sent")
+  );
 }
 
 async function listTodayDailyReports(userId: string): Promise<HumanPremiumReportRow[]> {
@@ -76,7 +92,7 @@ async function listTodayDailyReports(userId: string): Promise<HumanPremiumReport
     .eq("user_id", userId)
     .eq("report_type", "daily")
     .gte("created_at", since)
-    .in("status", ["ready", "email_sent"])
+    .in("status", ["generating", "ready", "email_sent", "failed"])
     .order("created_at", { ascending: true });
 
   if (error) throw new Error(error.message);
@@ -84,8 +100,10 @@ async function listTodayDailyReports(userId: string): Promise<HumanPremiumReport
 }
 
 /**
- * Enforce logged-in daily quota (KST). Re-visiting token URLs is unaffected.
- * MVP: concurrent double-submit may rarely create 2 free rows — no distributed lock.
+ * Enforce logged-in daily free quota (KST).
+ * Counts fresh `generating` + completed free rows so concurrent requests cannot
+ * start a second LLM before the first row is ready.
+ * `failed` does not consume the free seat (retry allowed).
  */
 export async function checkDailyReportLimit(
   userId: string | null,
@@ -95,22 +113,32 @@ export async function checkDailyReportLimit(
     return { allowed: false, reason: "guest" };
   }
 
+  const now = new Date();
   const fingerprint = dailyBirthFingerprint(birthInput);
   const todayRows = await listTodayDailyReports(userId);
 
   for (const row of todayRows) {
-    if (dailyBirthFingerprint(dailyBirthInputFromRow(row)) === fingerprint) {
+    if (dailyBirthFingerprint(dailyBirthInputFromRow(row)) !== fingerprint) continue;
+
+    if (isReusableCompleted(row)) {
       return {
         allowed: true,
         existingReportToken: row.web_access_token,
       };
     }
+
+    if (isFreshGenerating(row, now) && Number(row.amount_paid) === 0) {
+      return {
+        allowed: false,
+        reason: "generating_in_progress",
+      };
+    }
   }
 
-  const freeRows = todayRows.filter(isFreeDailyReport);
-  const todayFreeReportToken = freeRows[0]?.web_access_token;
+  const freeSeats = todayRows.filter((row) => isFreeQuotaSeat(row, now));
+  const todayFreeReportToken = freeSeats.find(isReusableCompleted)?.web_access_token;
 
-  if (freeRows.length >= 1) {
+  if (freeSeats.length >= 1) {
     return {
       allowed: false,
       reason: "quota_exceeded",
