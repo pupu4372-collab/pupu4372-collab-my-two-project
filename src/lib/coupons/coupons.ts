@@ -1,19 +1,14 @@
 import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
+import type { Coupon, CouponInsert } from "@/lib/supabase/types";
 import { COUPON_TYPE_DAILY_LUCKY_FREE } from "./constants";
 
 export { COUPON_TYPE_DAILY_LUCKY_FREE } from "./constants";
 
 export type CouponType = typeof COUPON_TYPE_DAILY_LUCKY_FREE | (string & {});
 
-export type CouponRow = {
-  id: string;
-  user_id: string;
-  coupon_type: string;
-  granted_reason: string;
-  used_at: string | null;
-  used_for: string | null;
-  created_at: string;
-};
+export type CouponRow = Coupon;
+
+type CouponIdRow = Pick<Coupon, "id">;
 
 /**
  * Grant one coupon if the user has no unused coupon of this type.
@@ -26,7 +21,7 @@ export async function grantCoupon(
 ): Promise<{ granted: boolean; couponId?: string }> {
   const supabase = getSupabaseServiceRoleClient();
 
-  const { data: existing, error: findError } = await supabase
+  const findResult = await supabase
     .from("coupons")
     .select("id")
     .eq("user_id", userId)
@@ -35,28 +30,35 @@ export async function grantCoupon(
     .limit(1)
     .maybeSingle();
 
-  if (findError) {
-    throw new Error(findError.message);
+  if (findResult.error) {
+    throw new Error(findResult.error.message);
   }
+
+  // Client Select inference is `never` while Database Row interfaces lack index signatures
+  // for GenericTable; pin the known shape explicitly (not `any`).
+  const existing = findResult.data as CouponIdRow | null;
   if (existing?.id) {
     return { granted: false, couponId: existing.id };
   }
 
-  const { data, error } = await supabase
+  const insertRow: CouponInsert = {
+    user_id: userId,
+    coupon_type: type,
+    granted_reason: reason,
+  };
+
+  const insertResult = await supabase
     .from("coupons")
-    .insert({
-      user_id: userId,
-      coupon_type: type,
-      granted_reason: reason,
-    })
+    .insert(insertRow as never)
     .select("id")
     .single();
 
-  if (error) {
-    throw new Error(error.message);
+  if (insertResult.error) {
+    throw new Error(insertResult.error.message);
   }
 
-  return { granted: true, couponId: data?.id };
+  const created = insertResult.data as CouponIdRow;
+  return { granted: true, couponId: created.id };
 }
 
 /** First unused coupon of the given type, or null. */
@@ -66,7 +68,7 @@ export async function findUsableCoupon(
 ): Promise<CouponRow | null> {
   const supabase = getSupabaseServiceRoleClient();
 
-  const { data, error } = await supabase
+  const result = await supabase
     .from("coupons")
     .select("*")
     .eq("user_id", userId)
@@ -76,11 +78,11 @@ export async function findUsableCoupon(
     .limit(1)
     .maybeSingle();
 
-  if (error) {
-    throw new Error(error.message);
+  if (result.error) {
+    throw new Error(result.error.message);
   }
 
-  return (data as CouponRow | null) ?? null;
+  return result.data as CouponRow | null;
 }
 
 /**
@@ -92,23 +94,25 @@ export async function consumeCoupon(
 ): Promise<boolean> {
   const supabase = getSupabaseServiceRoleClient();
   const now = new Date().toISOString();
+  const patch: Pick<Coupon, "used_at" | "used_for"> = {
+    used_at: now,
+    used_for: usedFor,
+  };
 
-  const { data, error } = await supabase
+  const result = await supabase
     .from("coupons")
-    .update({
-      used_at: now,
-      used_for: usedFor,
-    })
+    .update(patch as never)
     .eq("id", couponId)
     .is("used_at", null)
     .select("id")
     .maybeSingle();
 
-  if (error) {
-    throw new Error(error.message);
+  if (result.error) {
+    throw new Error(result.error.message);
   }
 
-  return Boolean(data?.id);
+  const updated = result.data as CouponIdRow | null;
+  return Boolean(updated?.id);
 }
 
 /** Best-effort launch promo grant — never throws to callers. */

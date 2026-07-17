@@ -123,10 +123,11 @@ async function callGeminiJsonParsed(
 async function callProviderJson(
   provider: PremiumLlmProvider,
   prompts: LlmPromptPair,
-  maxTokens: number
+  maxTokens: number,
+  slot?: string
 ): Promise<{ data: unknown; stopReason: string | null }> {
   if (provider === "claude") {
-    const { text, stopReason } = await callClaudeJson(prompts, maxTokens);
+    const { text, stopReason } = await callClaudeJson(prompts, maxTokens, { slot });
     try {
       return { data: parseJsonObject(text), stopReason };
     } catch (error) {
@@ -247,7 +248,8 @@ async function callPremiumJsonCached(options: {
         const { data, stopReason } = await callProviderJson(
           provider,
           options.prompts,
-          options.maxTokens
+          options.maxTokens,
+          options.callKind
         );
         const parseFailed =
           Boolean(data) &&
@@ -389,6 +391,15 @@ roadmap / decisionMoments 배열을 채울 것.
 스키마: { "roadmap": [{ "period", "label", "body" }], "decisionMoments": [{ "situation", "script" }] }`;
 
 function appendUserCorrection(prompts: LlmPromptPair, correction: string): LlmPromptPair {
+  if (prompts.userCachePrefix != null && prompts.userVariable != null) {
+    const userVariable = `${prompts.userVariable}${correction}`;
+    return {
+      system: prompts.system,
+      userCachePrefix: prompts.userCachePrefix,
+      userVariable,
+      user: `${prompts.userCachePrefix}\n\n${userVariable}`,
+    };
+  }
   return {
     system: prompts.system,
     user: `${prompts.user}${correction}`,

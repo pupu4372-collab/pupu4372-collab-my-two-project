@@ -73,7 +73,14 @@ export type InterpretSajuResult =
 
 export interface LlmPromptPair {
   system: string;
+  /** Full user message (OpenAI/Gemini + Claude fallback). Must equal cache join when parts set. */
   user: string;
+  /**
+   * Optional Claude prompt-cache split (human-premium slots).
+   * Assembled as `${userCachePrefix}\n\n${userVariable}` === `user`.
+   */
+  userCachePrefix?: string;
+  userVariable?: string;
 }
 
 export class SajuInterpretationError extends Error {

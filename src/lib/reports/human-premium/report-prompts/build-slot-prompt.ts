@@ -88,10 +88,11 @@ export function buildSlotPrompt(
   const baseUser = applyPromptTemplate(userBase, vars);
   const slotInstructions = applyPromptTemplate(slotContent, vars);
 
-  let user = `${baseUser}\n\n${slotInstructions}`;
+  // Variable tail only — join with `\n\n` so full `user` matches prior assembly.
+  let userVariable = slotInstructions;
 
   if (useEn && !slotInstructions.includes("ENGLISH ONLY")) {
-    user = `${user}\n\n${ENGLISH_ONLY_RULE}`;
+    userVariable = `${userVariable}\n\n${ENGLISH_ONLY_RULE}`;
   }
 
   const narrative = options.narrative?.trim() ?? "";
@@ -102,13 +103,20 @@ export function buildSlotPrompt(
     slotKey !== "saju-structure" &&
     slotKey !== "master-narrative"
   ) {
-    user +=
+    userVariable +=
       ctx.locale === "ko"
         ? `\n\n[마스터 내러티브]\n${narrative.slice(0, 1200)}`
         : `\n\n[Master narrative]\n${narrative.slice(0, 1200)}`;
   }
 
-  return { system, user };
+  const user = `${baseUser}\n\n${userVariable}`;
+
+  return {
+    system,
+    user,
+    userCachePrefix: baseUser,
+    userVariable,
+  };
 }
 
 export function isProductSlotFilled(

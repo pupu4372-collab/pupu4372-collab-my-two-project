@@ -45,7 +45,7 @@ export async function tryAcquireDailyFreeLock(userId: string): Promise<DailyFree
     const redis = Redis.fromEnv();
     const key = lockKey(userId);
     const result = await redis.set(key, "1", { nx: true, ex: LOCK_TTL_SEC });
-    if (result === "OK" || result === true) return "acquired";
+    if (result === "OK") return "acquired";
     return "held";
   } catch (err) {
     logRateLimitFallback("limit_error", {

@@ -8,6 +8,7 @@ import {
 } from "@/lib/supabase/auth-session-policy";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { isFullMember as checkIsFullMember } from "@/lib/supabase/membership";
+import { syncPersonalStorageOwner, clearPersonalClientStorage, resetPersonalStorageOwner } from "@/lib/storage/clear-personal-storage";
 import type { Session } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
 
@@ -72,6 +73,8 @@ export function useSupabaseSession(): SessionInfo {
       return;
     }
 
+    syncPersonalStorageOwner(session.user);
+
     const info = readUser(session);
     setAccessToken(session.access_token);
     setUserId(info.userId);
@@ -103,6 +106,8 @@ export function useSupabaseSession(): SessionInfo {
       ensurePolicyInitialized(session.user.is_anonymous ?? false);
 
       if (shouldInvalidateSession()) {
+        clearPersonalClientStorage();
+        resetPersonalStorageOwner();
         await client.auth.signOut();
         const {
           data: { session: afterSignOut },

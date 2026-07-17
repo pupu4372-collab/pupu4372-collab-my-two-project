@@ -370,7 +370,7 @@ export type HumanPremiumReportInsert = Pick<
   currency?: string;
 };
 
-export interface Coupon {
+export type Coupon = {
   id: string;
   user_id: string;
   coupon_type: string;
@@ -378,14 +378,16 @@ export interface Coupon {
   used_at: string | null;
   used_for: string | null;
   created_at: string;
-}
+};
 
 export type CouponInsert = {
+  id?: string;
   user_id: string;
   coupon_type: string;
   granted_reason: string;
   used_at?: string | null;
   used_for?: string | null;
+  created_at?: string;
 };
 
 type TableDef<Row, Insert, Update = Partial<Row>> = {
@@ -522,5 +524,8 @@ export interface Database {
     };
     Functions: Record<string, never>;
     Enums: Record<string, never>;
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
 }

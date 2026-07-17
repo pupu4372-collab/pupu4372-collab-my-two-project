@@ -7,6 +7,10 @@ import {
 } from "@/lib/supabase/auth-session-policy";
 import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
 import {
+  clearPersonalClientStorage,
+  resetPersonalStorageOwner,
+} from "@/lib/storage/clear-personal-storage";
+import {
   clearSupabaseBrowserSession,
   getSupabaseAuthActionClient,
   getSupabaseBrowserClient,
@@ -206,6 +210,8 @@ export async function checkSignupEmail(email: string) {
 }
 
 export async function signOut() {
+  clearPersonalClientStorage();
+  resetPersonalStorageOwner();
   const client = getSupabaseBrowserClient();
   if (!client) {
     clearAuthSessionPolicy();
@@ -217,6 +223,8 @@ export async function signOut() {
 
 /** Sign out and return to guest session for continued browsing. */
 export async function signOutToGuest() {
+  clearPersonalClientStorage();
+  resetPersonalStorageOwner();
   const client = getSupabaseBrowserClient();
   if (!client) return;
   clearAuthSessionPolicy();
