@@ -494,7 +494,7 @@ const EN: PrivacyPolicyContent = {
           type: "ul",
           items: [
             "Account registration, login, identity verification, fraud prevention",
-            "Pet K-Saju (four pillars) analysis, saved results, butler–pet compatibility and fortune features",
+            "Pet K-Saju (four pillars) analysis, saved results, you & your pet compatibility and fortune features",
             "Human premium report generation, storage, viewing, payment confirmation, optional email delivery",
             "Pet profiles and photos, Pet Show, community boards (Q&A, tips, free board, breed experiences, etc.)",
             "Customer support and service notices",
@@ -537,8 +537,8 @@ const EN: PrivacyPolicyContent = {
               "You upload or post",
             ],
             [
-              "Butler saju & compatibility (optional)",
-              "Butler birth date/time, timezone, optional gender",
+              "Pet parent saju & compatibility (optional)",
+              "Your birth date/time, timezone, optional gender",
               "You enter directly",
             ],
             [

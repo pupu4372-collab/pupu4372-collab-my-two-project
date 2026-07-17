@@ -15,7 +15,7 @@ const SECTIONS = {
   en: [
     { key: "personalityBlend", title: "Personality blend", accent: "border-l-channel-saju" },
     { key: "sajuCombo", title: "Chart × MBTI", accent: "element" },
-    { key: "butlerFit", title: "Bond with butler", accent: "border-l-hwa-red" },
+    { key: "butlerFit", title: "Bond with you", accent: "border-l-hwa-red" },
     { key: "health", title: "Health & stress", accent: "border-l-mok-green" },
     { key: "dailyCare", title: "Daily care", accent: "border-l-to-yellow" },
   ],

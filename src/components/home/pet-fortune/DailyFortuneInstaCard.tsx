@@ -38,7 +38,7 @@ export const DailyFortuneInstaCard = forwardRef<HTMLDivElement, Props>(function 
       accent: "#3A362D",
     },
     {
-      title: isKo ? "집사를 위한 팁" : "Tip for butler",
+      title: isKo ? "집사를 위한 팁" : "Tip for you",
       body: sections.tipBody,
       accent: "#E8874A",
     },

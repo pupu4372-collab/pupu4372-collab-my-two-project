@@ -51,7 +51,7 @@ export const PET_PREMIUM_SECTION_THEME = {
     accent: "#6F4B8B",
     soft: "#E6E1F9",
     labelKo: "집사 궁합",
-    labelEn: "Pet–butler bond",
+    labelEn: "You & your pet bond",
   },
   zodiac: {
     accent: "#5C3D6E",

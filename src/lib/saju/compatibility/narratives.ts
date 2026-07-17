@@ -55,7 +55,7 @@ const RELATION_COPY: Record<
     en: {
       title: (pet, owner) => `${pet} × ${owner} — same element wavelength`,
       story: (pet, owner, pEl, oEl, sp) =>
-        `${pet} and ${owner} share ${pEl} energy. This ${sp} and butler sync cushions and moods without many words.`,
+        `${pet} and ${owner} share ${pEl} energy. This ${sp} and pet-parent sync cushions and moods without many words.`,
       tips: [
         "Shared routines deepen the bond",
         "Same energy can overheat—try a fresh walk route sometimes",
@@ -77,14 +77,14 @@ const RELATION_COPY: Record<
       ],
     },
     en: {
-      title: (pet, owner) => `${pet} × ${owner} — butler nourishes pet`,
+      title: (pet, owner) => `${pet} × ${owner} — you nourish pet`,
       story: (pet, owner, pEl, oEl, sp) =>
         `${owner}'s ${oEl} energy feeds ${pet}'s ${pEl}. Meals, walks, and calm presence are love languages.`,
       tips: [
         "Steady care maximizes compatibility",
         "Keep praise and treat timing consistent",
         "Fixed meal, walk, and sleep times build trust quickly",
-        "A calm voice from the butler is the strongest safety signal",
+        "A calm voice from you is the strongest safety signal",
       ],
     },
   },
@@ -101,7 +101,7 @@ const RELATION_COPY: Record<
       ],
     },
     en: {
-      title: (pet, owner) => `${pet} × ${owner} — pet heals the butler`,
+      title: (pet, owner) => `${pet} × ${owner} — pet heals you`,
       story: (pet, owner, pEl, oEl, sp) =>
         `${pet}'s ${pEl} brightens ${owner}'s ${oEl} heart. One greeting after work resets the day.`,
       tips: [
@@ -132,7 +132,7 @@ const RELATION_COPY: Record<
         "Short training + instant reward",
         "Redirect instead of only saying no",
         "Keep only 2–3 fixed rules and stay flexible on the rest",
-        "When the butler speaks calmly first, the pet follows faster",
+        "When you speak calmly first, the pet follows faster",
       ],
     },
   },

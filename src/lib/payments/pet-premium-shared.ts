@@ -11,7 +11,7 @@ export const PET_PREMIUM_PRODUCT_LABELS = {
 
 export const PET_PREMIUM_INCLUDES = {
   ko: ["집사 궁합 케어", "별자리 케어 가이드"],
-  en: ["Pet & butler bond care", "Zodiac care guide"],
+  en: ["You & your pet — bond care", "Zodiac care guide"],
 } as const;
 
 export type PetPremiumPaymentRecord = {

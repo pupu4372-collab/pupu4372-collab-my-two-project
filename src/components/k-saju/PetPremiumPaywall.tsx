@@ -26,7 +26,7 @@ const UI = {
   },
   en: {
     title: "Premium package",
-    subtitle: "Pet–butler bond and zodiac care guides in one unlock",
+    subtitle: "You & your pet bond and zodiac care guides in one unlock",
     notice: "Available right after payment",
     priceNote: "One-time payment · Permanent unlock for this pet",
     payCta: (price: string) => `Pay ${price}`,

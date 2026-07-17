@@ -149,7 +149,7 @@ export function PetMbtiChecklist() {
               </article>
               <article className="pastel-card p-5">
                 <h4 className="font-semibold text-ink">
-                  {isKo ? "집사와의 궁합" : "Bond with butler"}
+                  {isKo ? "집사와의 궁합" : "Bond with you"}
                 </h4>
                 <p className="mt-2 text-sm leading-relaxed text-plum/90">{premium.butlerFit}</p>
               </article>

@@ -70,7 +70,7 @@ const UI = {
     continueTitle: "Keep going",
     continueSubtitle: "Use the same pet profile for zodiac and bond care guides.",
     zodiacCta: "Zodiac care guide →",
-    compatibilityCta: "Pet & butler bond care →",
+    compatibilityCta: "You & your pet — bond care →",
     premiumBadge: `Premium ${formatPetProductPrice(PET_PREMIUM_PACKAGE_CODE, "en")}`,
     mbtiResultTitle: (name: string, typeTitle: string) =>
       `${name} is "${typeTitle}"`,

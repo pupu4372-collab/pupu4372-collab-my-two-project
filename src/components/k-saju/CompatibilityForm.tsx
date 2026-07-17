@@ -51,7 +51,7 @@ const UI = {
   },
   en: {
     petSection: "Pet",
-    ownerSection: "Butler (you)",
+    ownerSection: "You (pet parent)",
     petName: "Name",
     ownerName: "Name",
     species: "Species",

@@ -24,7 +24,7 @@ const LABELS = {
     today: "Today",
     snack: "Lucky snack",
     caution: "Caution",
-    tip: "Butler tip",
+    tip: "Care tip for you",
     luck: "Luck",
     dateNote: "Fortune date (KST)",
     back: "Edit birth info",

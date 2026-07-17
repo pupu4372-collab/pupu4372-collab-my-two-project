@@ -180,7 +180,7 @@ export function buildPhotoInstaCardContent(
     harmony: harmonyScore(fortune),
     todayStateTitle: isKo ? "오늘의 아이 상태" : "Today's mood",
     todayStateBody: sections.todayState,
-    tipTitle: isKo ? "집사를 위한 팁" : "Tip for butler",
+    tipTitle: isKo ? "집사를 위한 팁" : "Tip for you",
     tipBody: sections.tipBody,
   };
 }

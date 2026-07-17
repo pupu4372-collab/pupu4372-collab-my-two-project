@@ -230,7 +230,7 @@ export function ReportVaultPage() {
               href="/premium/human/vault"
               className="mt-3 inline-flex text-sm font-semibold text-[#ffd7ff] underline hover:text-white"
             >
-              {isKo ? "집사 프리미엄 보관함 →" : "Butler premium vault →"}
+              {isKo ? "집사 프리미엄 보관함 →" : "Pet parent premium vault →"}
             </Link>
           </div>
           <label className="relative w-full md:w-80">

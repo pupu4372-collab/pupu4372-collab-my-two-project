@@ -101,7 +101,7 @@ const UI = {
   },
   en: {
     petSection: "Pet",
-    ownerSection: "Butler (you)",
+    ownerSection: "You (pet parent)",
     petName: "Name",
     ownerName: "Name",
     species: "Species",
@@ -119,14 +119,14 @@ const UI = {
     birthTime: "Birth time",
     birthTimeUnknown: "Unknown",
     timezone: "Birth timezone",
-    butlerIntro: "Enter your details to see pet–butler compatibility.",
+    butlerIntro: "Enter your details to see you & your pet compatibility.",
     butlerSubmit: "View bond",
     butlerCancel: "← Back to menu",
     errorConsent: "Privacy consent is required.",
     menuTitle: "Your premium readings",
     menuSubtitle: "Tap each item in order to view.",
     btnZodiac: "Zodiac care guide",
-    btnCompatibility: "Pet & butler bond care",
+    btnCompatibility: "You & your pet — bond care",
     backToMenu: "← Back to premium menu",
     loginRequired: "Please log in to view premium content.",
     login: "Log in",
@@ -669,7 +669,7 @@ export function PremiumHub() {
 
     const ownerTime = parseBirthTimeSelect(ownerBirthTime);
     const session: ButlerSession = {
-      ownerName: ownerName.trim() || (locale === "ko" ? "집사" : "Butler"),
+      ownerName: ownerName.trim() || (locale === "ko" ? "집사" : "Pet parent"),
       ownerGender,
       ownerBirthDate,
       ownerCalendarType,
@@ -735,7 +735,7 @@ export function PremiumHub() {
               value={ownerName}
               onChange={(e) => setOwnerName(e.target.value)}
               className={STITCH_INPUT_CLASS}
-              placeholder={locale === "ko" ? "집사" : "Butler"}
+              placeholder={locale === "ko" ? "집사" : "Pet parent"}
               maxLength={32}
             />
           </label>

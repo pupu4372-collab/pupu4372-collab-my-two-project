@@ -380,7 +380,7 @@ export function DayPillarPreview({
       <section className="human-premium-birth-card mx-auto w-full max-w-sm space-y-6 p-6 sm:max-w-md sm:p-8">
         <div className="text-center">
           <p className="human-premium-birth-eyebrow">
-            {isKo ? "집사님의 사주" : "Butler birth chart"}
+            {isKo ? "집사님의 사주" : "Your birth chart"}
           </p>
           <h2 className="mt-2 text-2xl font-bold">{ui.title}</h2>
           <p className="mt-2 text-sm text-plum/75">{ui.description}</p>

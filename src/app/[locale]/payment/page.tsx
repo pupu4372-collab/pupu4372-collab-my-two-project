@@ -79,9 +79,9 @@ const PRODUCT_UI: Record<
     },
     en: {
       title: "Unlock Premium",
-      subtitle: "Pet–butler bond and zodiac care—personalized guides for your pet in one unlock.",
+      subtitle: "You & your pet bond and zodiac care—personalized guides for your pet in one unlock.",
       product: "Pet Premium Package",
-      includes: ["💞 Pet & butler bond care", "🔭 Zodiac care guide"],
+      includes: ["💞 You & your pet — bond care", "🔭 Zodiac care guide"],
     },
   },
   [PET_MBTI_STANDALONE_CODE]: {

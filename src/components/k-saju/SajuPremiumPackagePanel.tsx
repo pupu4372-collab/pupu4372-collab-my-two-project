@@ -45,7 +45,7 @@ const UI = {
   },
   en: {
     packageTitle: "Premium package",
-    packageSubtitle: "Pet–butler bond and zodiac care — personalized guides for your pet in one unlock",
+    packageSubtitle: "You & your pet bond and zodiac care — personalized guides for your pet in one unlock",
     priceNote: "One-time payment · Permanent unlock for this pet",
     payCta: (price: string) => `Pay ${price}`,
     loginPayCta: "Log in to pay",
@@ -55,7 +55,7 @@ const UI = {
     viewCta: "View",
     zodiacCta: "Zodiac care",
     zodiacBody: "See today's care actions matched to your pet's zodiac traits.",
-    bondCta: "Pet & butler bond",
+    bondCta: "You & your pet bond",
     bondBody: "Learn how you and your pet can care for each other better.",
     mbtiStandaloneEyebrow: (price: string) => `Standalone · ${price}`,
     mbtiStandaloneTitle: "Detailed MBTI",

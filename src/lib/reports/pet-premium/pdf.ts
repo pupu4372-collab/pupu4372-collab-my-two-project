@@ -79,7 +79,7 @@ function buildCover(payload: PetPremiumPdfPayload): Content[] {
         {
           text: isKo
             ? "집사 궁합 · 별자리 케어를 한 권에 담았어요."
-            : "Pet–butler bond and zodiac care in one guide.",
+            : "You & your pet bond and zodiac care in one guide.",
           style: "coverMotto",
           alignment: "center",
           margin: [0, 12, 0, 0],
@@ -124,7 +124,7 @@ function buildCompatibilitySection(payload: PetPremiumPdfPayload): Content[] {
       paragraph(
         isKo
           ? "집사 생년월일을 입력하면 궁합 섹션이 포함됩니다."
-          : "Enter butler birth info to include the bond section."
+          : "Enter your birth info to include the bond section."
       ),
     ];
   }
@@ -243,7 +243,7 @@ function buildZodiacSection(payload: PetPremiumPdfPayload): Content[] {
   );
   blocks.push(
     elementHighlightBox(
-      isKo ? `집사 팁: ${z.daily.ownerTip}` : `Butler tip: ${z.daily.ownerTip}`,
+      isKo ? `집사 팁: ${z.daily.ownerTip}` : `Care tip: ${z.daily.ownerTip}`,
       0
     )
   );
