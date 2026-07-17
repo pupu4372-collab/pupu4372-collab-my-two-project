@@ -5,7 +5,6 @@ import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import {
   getPaidHumanPremiumOrderIds,
-  loadHumanPremiumProfile,
   resolveHumanPremiumStorageUserId,
 } from "@/lib/reports/human-premium/cart-session";
 import {
@@ -53,17 +52,15 @@ export function HumanPremiumVaultClient() {
     setLoading(true);
     setError(null);
     try {
-      const profile = loadHumanPremiumProfile(storageUserId);
+      // orderIds: legacy null-user_id rows + session splits (localStorage paid list).
       const orderIds = getPaidHumanPremiumOrderIds(storageUserId);
       const params = new URLSearchParams({ locale: routeLocale });
       if (orderIds.length) params.set("orderIds", orderIds.join(","));
-      if (profile.email.trim()) params.set("email", profile.email.trim());
 
       const headers: Record<string, string> = {};
       if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
-      // Always fetch: registered users rely on Bearer → server userId lookup
-      // even when localStorage orderIds is empty.
+      // Always fetch: Bearer → server userId (anon included) even when orderIds empty.
       const res = await fetch(`/api/payments/human-premium/vault?${params.toString()}`, {
         headers,
       });

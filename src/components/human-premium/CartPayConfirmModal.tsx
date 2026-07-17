@@ -13,6 +13,7 @@ export function CartPayConfirmModal({
   savings,
   isAllInOneBundle,
   paying,
+  showGuestAccessNotice,
   onConfirm,
   onCancel,
 }: {
@@ -25,6 +26,7 @@ export function CartPayConfirmModal({
   savings: number;
   isAllInOneBundle: boolean;
   paying: boolean;
+  showGuestAccessNotice?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -75,6 +77,14 @@ export function CartPayConfirmModal({
             {isKo ? "결제 금액" : "Total"} {formatPrice(amount, priceLocale)}
           </p>
         </div>
+
+        {showGuestAccessNotice ? (
+          <p className="mt-4 rounded-2xl bg-lavender/40 px-4 py-3 text-xs font-semibold text-plum/80">
+            {isKo
+              ? "PDF로 저장해두세요. 회원가입하면 언제든 다시 볼 수 있어요"
+              : "Save your report as PDF. Sign up to access it anytime."}
+          </p>
+        ) : null}
 
         <div className="mt-6 flex flex-col gap-2.5">
           <button

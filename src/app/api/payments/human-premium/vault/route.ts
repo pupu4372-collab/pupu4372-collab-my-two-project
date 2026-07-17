@@ -1,24 +1,21 @@
 import { listHumanPremiumVaultOrders } from "@/lib/reports/human-premium/cart";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
-import { isDeliverableHumanPremiumEmail } from "@/lib/reports/human-premium/email-policy";
-import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
+import { getUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const locale = searchParams.get("locale") === "en" ? "en" : "ko";
-  const orderIds = searchParams.get("orderIds")?.split(",").map((id) => id.trim()).filter(Boolean) ?? [];
-  const emailParam = searchParams.get("email")?.trim().toLowerCase() ?? "";
+  // Legacy null-user_id rows + session splits: merge localStorage paid orderIds.
+  const orderIds =
+    searchParams.get("orderIds")?.split(",").map((id) => id.trim()).filter(Boolean) ?? [];
 
   try {
-    // Registered login only — anon UUID must not query user_id rows.
-    // Merges with orderIds/email via listHumanPremiumVaultOrders (dedupe by orderId).
-    const userId = await getRegisteredUserIdFromRequest(request);
-    const email = isDeliverableHumanPremiumEmail(emailParam) ? emailParam : undefined;
+    // Any authenticated visitor (anonymous included) — same user_id lookup, no grade split.
+    const userId = await getUserIdFromRequest(request);
 
     const orders = await listHumanPremiumVaultOrders({
       userId,
-      email,
       orderIds: orderIds.length ? orderIds : undefined,
     });
 

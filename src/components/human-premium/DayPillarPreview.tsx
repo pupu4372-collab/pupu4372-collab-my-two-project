@@ -419,7 +419,7 @@ export function DayPillarPreview({
             </span>
           </label>
           <label className="human-premium-birth-field">
-            {isKo ? "이메일 (선택)" : "Email (optional)"}
+            {isKo ? "리포트를 받으실 이메일" : "Email for your report"}
             <input
               type="email"
               className="human-premium-birth-input"
@@ -429,8 +429,8 @@ export function DayPillarPreview({
             />
             <span className="human-premium-birth-hint">
               {isKo
-                ? "원하시면 이메일을 적어주세요. 입력 시 리포트 링크를 보내드려요."
-                : "Optional — we'll email your report link if provided."}
+                ? "리포트 링크를 받을 이메일을 입력해 주세요."
+                : "We'll email your report link to this address."}
             </span>
           </label>
           <BirthDateSelect
@@ -550,14 +550,21 @@ export function DayPillarPreview({
           ) : null}
 
           {!isFullMember ? (
-            <Link
-              href="/login"
-              className="human-premium-birth-submit human-premium-birth-submit--plan"
-            >
-              <span className="human-premium-birth-submit-body">
-                <span className="human-premium-birth-submit-title">{ui.ctaGuest}</span>
-              </span>
-            </Link>
+            <>
+              <p className="text-center text-xs font-semibold text-plum/70">
+                {isKo
+                  ? "PDF로 저장해두세요. 회원가입하면 언제든 다시 볼 수 있어요"
+                  : "Save your report as PDF. Sign up to access it anytime."}
+              </p>
+              <Link
+                href="/login"
+                className="human-premium-birth-submit human-premium-birth-submit--plan"
+              >
+                <span className="human-premium-birth-submit-body">
+                  <span className="human-premium-birth-submit-title">{ui.ctaGuest}</span>
+                </span>
+              </Link>
+            </>
           ) : (
             <button
               type="button"

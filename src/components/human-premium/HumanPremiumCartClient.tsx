@@ -99,7 +99,8 @@ export function HumanPremiumCartClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
-  const { userId, isAnonymous, accessToken } = useSupabaseSession();
+  const { userId, isAnonymous, accessToken, isFullMember, email: sessionEmail } =
+    useSupabaseSession();
   const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
   const purchaseProfile = loadHumanPremiumProfile(storageUserId);
   const { purchasedTypes, loading: purchasesLoading, refresh: refreshPurchases } =
@@ -110,7 +111,7 @@ export function HumanPremiumCartClient() {
 
   const [cart, setCart] = useState<HumanPremiumCartState>({ items: [], orderId: null, paid: false });
   const [profileReady, setProfileReady] = useState(false);
-  /** EN SPB: deliverable email required before checkout draft / PayPal button. */
+  /** Deliverable email required before checkout (KO + EN). Profile email skips re-entry. */
   const [emailReady, setEmailReady] = useState(false);
   const [cartEmail, setCartEmail] = useState("");
   const [paying, setPaying] = useState(false);
@@ -140,11 +141,21 @@ export function HumanPremiumCartClient() {
 
   const refreshCart = useCallback(() => {
     const profile = loadHumanPremiumProfile(storageUserId);
+    let email = profile.email;
+    // Prefer existing profile email; seed from session when empty (members / email_linked).
+    if (
+      !isDeliverableHumanPremiumEmail(email) &&
+      sessionEmail &&
+      isDeliverableHumanPremiumEmail(sessionEmail)
+    ) {
+      email = sessionEmail.trim();
+      saveHumanPremiumProfile(storageUserId, { ...profile, email });
+    }
     setCart(loadHumanPremiumCart(storageUserId));
     setProfileReady(profileHasBirthData(profile));
-    setCartEmail(profile.email);
-    setEmailReady(isDeliverableHumanPremiumEmail(profile.email));
-  }, [storageUserId]);
+    setCartEmail(email);
+    setEmailReady(isDeliverableHumanPremiumEmail(email));
+  }, [storageUserId, sessionEmail]);
 
   useEffect(() => {
     if (purchasesLoading || cart.paid) return;
@@ -354,6 +365,10 @@ export function HumanPremiumCartClient() {
     setError(null);
     if (!profileReady) {
       setError(isKo ? "먼저 사주 정보를 입력해 주세요." : "Enter your birth details first.");
+      return;
+    }
+    if (!emailReady) {
+      setError(isKo ? "리포트를 받으실 이메일을 입력해 주세요." : "Enter your email to receive your report.");
       return;
     }
     if (!visibleItems.length) {
@@ -691,6 +706,7 @@ export function HumanPremiumCartClient() {
           savings={cartPricing.savings}
           isAllInOneBundle={cartPricing.isAllInOneBundle}
           paying={paying}
+          showGuestAccessNotice={!isFullMember}
           onConfirm={() => void handleConfirmPay()}
           onCancel={() => {
             if (!paying) setConfirmOpen(false);
@@ -702,9 +718,7 @@ export function HumanPremiumCartClient() {
             <div className="w-full max-w-sm space-y-2">
               {!emailReady ? (
                 <div className="space-y-2 rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <p className="text-center text-sm text-white/90">
-                    Enter your email to receive your report
-                  </p>
+                  <p className="text-center text-sm text-white/90">Email for your report</p>
                   <input
                     type="email"
                     value={cartEmail}
@@ -712,14 +726,21 @@ export function HumanPremiumCartClient() {
                     placeholder="you@email.com"
                     autoComplete="email"
                     className="pastel-input w-full px-4 py-3 text-sm text-ink"
-                    aria-label="Email for report delivery"
+                    aria-label="Email for your report"
                   />
                 </div>
-              ) : spbPreparing || !portoneReady || !spbDraft ? (
+              ) : null}
+              {emailReady && !isFullMember ? (
+                <p className="text-center text-xs text-white/75">
+                  Save your report as PDF. Sign up to access it anytime.
+                </p>
+              ) : null}
+              {emailReady && (spbPreparing || !portoneReady || !spbDraft) ? (
                 <p className="text-center text-sm text-white/75">
                   {paying ? "Processing…" : "Preparing PayPal…"}
                 </p>
-              ) : (
+              ) : null}
+              {emailReady && !spbPreparing && portoneReady && spbDraft ? (
                 <PayPalSpbButton
                   paymentId={spbDraft.paymentId}
                   orderName={spbDraft.orderName}
@@ -731,20 +752,45 @@ export function HumanPremiumCartClient() {
                     setError(formatHumanPremiumError(message, "en"));
                   }}
                 />
-              )}
+              ) : null}
             </div>
           ) : null}
           {!cart.paid && visibleItems.length > 0 && paymentMethod !== "portone_paypal_spb" ? (
-            <button
-              type="button"
-              disabled={paying || !profileReady}
-              onClick={openPayConfirm}
-              className="rounded-full bg-channel-saju px-6 py-3 font-bold text-white disabled:opacity-50"
-            >
-              {isKo
-                ? `결제하기 ${formatPrice(cartPricing.amount, priceLocale)}`
-                : `Pay ${formatPrice(cartPricing.amount, priceLocale)}`}
-            </button>
+            <div className="flex w-full max-w-sm flex-col items-center gap-3">
+              {!emailReady ? (
+                <div className="w-full space-y-2 rounded-2xl border border-white/20 bg-white/10 p-4">
+                  <p className="text-center text-sm text-white/90">
+                    {isKo ? "리포트를 받으실 이메일" : "Email for your report"}
+                  </p>
+                  <input
+                    type="email"
+                    value={cartEmail}
+                    onChange={(e) => saveCartEmail(e.target.value)}
+                    placeholder="you@email.com"
+                    autoComplete="email"
+                    className="pastel-input w-full px-4 py-3 text-sm text-ink"
+                    aria-label={isKo ? "리포트를 받으실 이메일" : "Email for your report"}
+                  />
+                </div>
+              ) : null}
+              {emailReady && !isFullMember ? (
+                <p className="text-center text-xs text-white/75">
+                  {isKo
+                    ? "PDF로 저장해두세요. 회원가입하면 언제든 다시 볼 수 있어요"
+                    : "Save your report as PDF. Sign up to access it anytime."}
+                </p>
+              ) : null}
+              <button
+                type="button"
+                disabled={paying || !profileReady || !emailReady}
+                onClick={openPayConfirm}
+                className="rounded-full bg-channel-saju px-6 py-3 font-bold text-white disabled:opacity-50"
+              >
+                {isKo
+                  ? `결제하기 ${formatPrice(cartPricing.amount, priceLocale)}`
+                  : `Pay ${formatPrice(cartPricing.amount, priceLocale)}`}
+              </button>
+            </div>
           ) : null}
           {cart.paid ? (
             <Link

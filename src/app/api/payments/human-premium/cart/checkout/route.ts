@@ -56,12 +56,10 @@ export async function POST(request: Request) {
     );
   }
 
-  // EN guest checkout: refuse placeholder (noemail) emails before drafting a pending row.
-  if (locale === "en") {
-    const { deliverEmail } = resolveHumanPremiumEmail(body.email);
-    if (!deliverEmail) {
-      return NextResponse.json({ error: "email_required_for_en" }, { status: 400 });
-    }
+  // Deliverable email required for report delivery (KO + EN).
+  const { deliverEmail } = resolveHumanPremiumEmail(body.email);
+  if (!deliverEmail) {
+    return NextResponse.json({ error: "email_required" }, { status: 400 });
   }
 
   try {

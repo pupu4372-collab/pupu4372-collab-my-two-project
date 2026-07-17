@@ -13,6 +13,7 @@ import {
   getHumanPremiumReportById,
   getHumanPremiumReportByPaymentOrderId,
   listHumanPremiumCartOrderRows,
+  listLegacyNullUserCartOrdersByEmail,
   updateHumanPremiumReport,
 } from "./storage";
 import type {
@@ -111,11 +112,10 @@ async function getPurchasedReportTypesForInput(
     }
   }
 
-  // Legacy null-user_id orders: email + birth profile only.
+  // Legacy null-user_id orders: email + birth profile only (cart exclusion, not vault).
   if (email) {
-    const byEmail = await listHumanPremiumCartOrderRows({ email, limit: 50 });
+    const byEmail = await listLegacyNullUserCartOrdersByEmail(email, 50);
     for (const row of byEmail) {
-      if (row.user_id) continue;
       if (!isFulfilledCartRow(row)) continue;
       if (!rowMatchesBirthProfile(row, input)) continue;
       const cart = getCartMeta(row);
@@ -496,7 +496,6 @@ export async function pregenerateAllCartReports(options: {
 
 export async function listHumanPremiumVaultOrders(options: {
   userId?: string | null;
-  email?: string | null;
   orderIds?: string[];
 }) {
   const rows = await listHumanPremiumCartOrderRows(options);

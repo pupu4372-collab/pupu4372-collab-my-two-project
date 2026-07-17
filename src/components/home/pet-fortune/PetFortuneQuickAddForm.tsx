@@ -8,7 +8,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Gender, Locale, Species } from "@/lib/saju/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 const SPECIES_OPTIONS: { value: Species; emoji: string; labelKey: "dog" | "cat" | "reptile" | "otherFriends" }[] = [
   { value: "dog", emoji: "🐕", labelKey: "dog" },
@@ -74,7 +74,6 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("unknown");
   const [timezone, setTimezone] = useState(detectTimezone);
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -87,11 +86,6 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
   const [upgradePasswordConfirm, setUpgradePasswordConfirm] = useState("");
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [upgradeError, setUpgradeError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isGuestGrade || !sessionEmail) return;
-    setEmail((prev) => (prev.trim() ? prev : sessionEmail));
-  }, [isGuestGrade, sessionEmail]);
 
   function isStrongPassword(value: string) {
     return value.length >= 10 && /[A-Za-z]/.test(value) && /\d/.test(value);
@@ -220,28 +214,6 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
 
       const addedName = petName.trim();
       const petId = data.petId as string;
-      const trimmedEmail = email.trim();
-
-      if (trimmedEmail) {
-        try {
-          const client = getSupabaseBrowserClient();
-          const { error: emailError } = (await client?.auth.updateUser({
-            email: trimmedEmail,
-          })) ?? { error: null };
-          if (emailError) {
-            console.warn("[auth] updateUser email failed:", emailError.message);
-            setPhotoUploadNotice(t("emailLinkFailed"));
-          } else {
-            await refresh();
-          }
-        } catch (err) {
-          console.warn(
-            "[auth] updateUser email failed:",
-            err instanceof Error ? err.message : err
-          );
-          setPhotoUploadNotice(t("emailLinkFailed"));
-        }
-      }
 
       if (photoFile && !photoFileError) {
         try {
@@ -261,11 +233,6 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
       setBirthDate("");
       setBirthTime("unknown");
       setTimezone(detectTimezone());
-      if (isGuestGrade) {
-        setEmail(trimmedEmail || sessionEmail || "");
-      } else {
-        setEmail("");
-      }
       setPhotoFile(null);
       setPhotoConsent(false);
       setPhotoFileError(null);
@@ -343,31 +310,6 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
           </p>
         ) : null}
         {message ? <p className="text-center text-xs font-semibold text-channel-community">{message}</p> : null}
-
-        {isGuestGrade ? (
-          <label className="pet-fortune-field">
-            <div className="pet-fortune-input pet-fortune-input--compact">
-              <input
-                className="pet-fortune-input-field"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={
-                  sessionEmail
-                    ? t("emailLinkedGuestPlaceholder", { email: sessionEmail })
-                    : t("emailOptionalPlaceholder")
-                }
-                autoComplete="email"
-                disabled={loading || !sessionReady}
-                aria-label={
-                  sessionEmail
-                    ? t("emailLinkedGuestPlaceholder", { email: sessionEmail })
-                    : t("emailOptionalPlaceholder")
-                }
-              />
-            </div>
-          </label>
-        ) : null}
 
         <PetPhotoUploadField
           locale={locale}

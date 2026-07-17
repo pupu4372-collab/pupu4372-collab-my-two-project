@@ -12,9 +12,10 @@
  *   Google/Kakao OAuth
  *
  * ## Orders vs contact
- * The owner of a paid human-premium order is `user_id` when set (full members
- * on cart checkout). Email on the order row is a **contact / delivery** field,
- * not identity. Guest carts keep `user_id` null and rely on email + tokens.
+ * Paid human-premium cart checkout always records `user_id` for the current
+ * session (anonymous UUID included). Email on the order row is a **contact /
+ * delivery** field, not identity. Vault listing uses Bearer `user_id` (+ optional
+ * localStorage `orderIds` for legacy null-user rows / session splits).
  *
  * Do not invent a fourth grade. Prefer `getMembershipGrade` over ad-hoc
  * `is_anonymous` / email checks when adding new gates.

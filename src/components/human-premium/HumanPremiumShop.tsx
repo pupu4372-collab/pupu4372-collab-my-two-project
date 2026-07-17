@@ -43,7 +43,7 @@ export function HumanPremiumShop() {
   const isKo = routeLocale === "ko";
   const priceLocale = isKo ? "ko" : "en";
   const cartRef = useRef<HTMLDivElement>(null);
-  const { userId, isAnonymous } = useSupabaseSession();
+  const { userId, isAnonymous, accessToken } = useSupabaseSession();
   const storageUserId = resolveHumanPremiumStorageUserId(userId, isAnonymous);
 
   const [profile, setProfile] = useState<HumanPremiumProfile>(() => loadHumanPremiumProfile(storageUserId));
@@ -93,12 +93,17 @@ export function HumanPremiumShop() {
   useEffect(() => {
     async function syncPurchasedFromVault() {
       try {
+        // orderIds: legacy null-user_id rows + session splits (localStorage paid list).
         const orderIds = getPaidHumanPremiumOrderIds(storageUserId);
         const params = new URLSearchParams({ locale: routeLocale });
         if (orderIds.length) params.set("orderIds", orderIds.join(","));
-        if (profile.email.trim()) params.set("email", profile.email.trim());
 
-        const res = await fetch(`/api/payments/human-premium/vault?${params.toString()}`);
+        const headers: Record<string, string> = {};
+        if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+        const res = await fetch(`/api/payments/human-premium/vault?${params.toString()}`, {
+          headers,
+        });
         const data = await res.json();
         if (!res.ok) return;
 
@@ -109,14 +114,7 @@ export function HumanPremiumShop() {
     }
 
     void syncPurchasedFromVault();
-  }, [
-    profile.personName,
-    profile.birthDate,
-    profile.birthTimeSelect,
-    profile.email,
-    routeLocale,
-    storageUserId,
-  ]);
+  }, [routeLocale, storageUserId, accessToken]);
 
   const patchProfile = useCallback(
     (partial: Partial<HumanPremiumProfile>) => {

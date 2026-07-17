@@ -282,7 +282,6 @@ export async function markHumanPremiumReportReady(
 
 export async function listHumanPremiumCartOrderRows(options: {
   userId?: string | null;
-  email?: string | null;
   orderIds?: string[];
   limit?: number;
 }): Promise<HumanPremiumReportRow[]> {
@@ -290,6 +289,7 @@ export async function listHumanPremiumCartOrderRows(options: {
   const limit = options.limit ?? 20;
   const rows: HumanPremiumReportRow[] = [];
 
+  // Legacy null-user_id rows + device session splits: merge client-provided paid orderIds.
   if (options.orderIds?.length) {
     const { data, error } = await supabase
       .from("human_premium_reports")
@@ -314,27 +314,39 @@ export async function listHumanPremiumCartOrderRows(options: {
     rows.push(...(data ?? []).map(rowFromDb));
   }
 
-  const normalizedEmail =
-    typeof options.email === "string" ? options.email.trim().toLowerCase() : "";
-  if (normalizedEmail && !normalizedEmail.endsWith("@ksajupet.local")) {
-    const { data, error } = await supabase
-      .from("human_premium_reports")
-      .select("*")
-      .eq("email", normalizedEmail)
-      .like("payment_order_id", "hp_cart_%")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (error) throw new Error(error.message);
-    rows.push(...(data ?? []).map(rowFromDb));
-  }
-
   const seen = new Set<string>();
   return rows.filter((row) => {
     if (seen.has(row.id)) return false;
     seen.add(row.id);
     return Boolean(row.birth_basis?.cart?.cartOrder);
   });
+}
+
+/**
+ * Legacy cart-exclusion only: null-user_id rows matched by deliverable email.
+ * Not used for vault recovery.
+ */
+export async function listLegacyNullUserCartOrdersByEmail(
+  email: string,
+  limit = 50
+): Promise<HumanPremiumReportRow[]> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized || normalized.endsWith("@ksajupet.local")) return [];
+
+  const supabase = requireDb();
+  const { data, error } = await supabase
+    .from("human_premium_reports")
+    .select("*")
+    .eq("email", normalized)
+    .is("user_id", null)
+    .like("payment_order_id", "hp_cart_%")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+  return (data ?? [])
+    .map(rowFromDb)
+    .filter((row) => Boolean(row.birth_basis?.cart?.cartOrder));
 }
 
 export async function markHumanPremiumReportFailed(
