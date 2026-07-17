@@ -51,10 +51,11 @@ function currentChannel(active: MobileNavActiveKey): ChannelPick | null {
 }
 
 function tabClass(isSaju: boolean, isActive: boolean) {
+  // EN "Birth Chart" needs ~5.5rem; keep modest so other flex-1 tabs stay balanced.
   if (isSaju) {
     return isActive
-      ? "flex min-w-0 max-w-[4.25rem] flex-1 flex-col items-center justify-center rounded-full bg-primary px-1 py-1.5 text-white shadow-md brightness-95"
-      : "flex min-w-0 max-w-[4.25rem] flex-1 flex-col items-center justify-center rounded-full bg-primary px-1 py-1.5 text-white shadow-sm transition active:brightness-95";
+      ? "flex min-w-0 max-w-[5.5rem] flex-1 flex-col items-center justify-center rounded-full bg-primary px-1 py-1.5 text-white shadow-md brightness-95"
+      : "flex min-w-0 max-w-[5.5rem] flex-1 flex-col items-center justify-center rounded-full bg-primary px-1 py-1.5 text-white shadow-sm transition active:brightness-95";
   }
   return isActive
     ? "flex min-w-0 flex-1 flex-col items-center justify-center border-b-2 border-primary px-1 py-1.5 text-primary"
@@ -160,7 +161,7 @@ export function MobileBottomNav({ active = "home" }: MobileBottomNavProps) {
                   <span className="text-base leading-none" aria-hidden>
                     {item.icon}
                   </span>
-                  <span className="mt-0.5 max-w-full truncate text-center text-[9px] font-extrabold leading-tight">
+                  <span className="mt-0.5 max-w-full text-center text-[9px] font-extrabold leading-[1.1]">
                     {label}
                   </span>
                 </button>
@@ -177,7 +178,13 @@ export function MobileBottomNav({ active = "home" }: MobileBottomNavProps) {
                 <span className="text-base leading-none" aria-hidden>
                   {item.icon}
                 </span>
-                <span className="mt-0.5 max-w-full truncate text-center text-[9px] font-extrabold leading-tight">
+                <span
+                  className={
+                    isSaju
+                      ? "mt-0.5 max-w-full text-center text-[9px] font-extrabold leading-[1.1]"
+                      : "mt-0.5 max-w-full truncate text-center text-[9px] font-extrabold leading-tight"
+                  }
+                >
                   {label}
                 </span>
               </Link>
