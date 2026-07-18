@@ -25,11 +25,22 @@ function localeFromIpCountry(request: NextRequest): "ko" | "en" {
   return country === "KR" ? "ko" : "en";
 }
 
+function isSearchBot(request: NextRequest): boolean {
+  const ua = request.headers.get("user-agent")?.toLowerCase() ?? "";
+  return /googlebot|bingbot|yeti|naverbot|daum|kakaotalk-scrap|slurp|duckduckbot|baiduspider|yandexbot|applebot|facebookexternalhit|twitterbot/.test(
+    ua
+  );
+}
+
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only bare root with no URL locale and no NEXT_LOCALE cookie.
+  // Bare root, no NEXT_LOCALE: bots stay on ko; humans use geo (KR→ko, else→/en).
   if (pathname === "/" && !hasLocalePreferenceCookie(request)) {
+    if (isSearchBot(request)) {
+      return handleRootFirstVisitKo(request);
+    }
+
     const locale = localeFromIpCountry(request);
     if (locale === "en") {
       // as-needed keeps default (ko) unprefixed; force /en for non-KR.
