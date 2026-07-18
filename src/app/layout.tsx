@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://ksajupet.com"),
   // Icons: App Router file convention (app/favicon.ico, app/icon.png, app/apple-icon.png)
   manifest: "/site.webmanifest",
+  verification: {
+    google: "0LhfXoi9YGFBX-1xvYkYFZh1gd1K2X7RXEhdEp8uLf4",
+    other: {
+      "naver-site-verification": "2188bc0307dfa5a7f22f3f8d3039a5354661c805",
+    },
+  },
 };
 
 export const viewport: Viewport = {
