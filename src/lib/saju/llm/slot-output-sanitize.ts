@@ -9,6 +9,168 @@ import type { Locale } from "@/lib/saju/types";
 const CJK_HANJA_RE = /[\u4E00-\u9FFF]/g;
 const GANZI_PAIR_RE = /[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/g;
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Shinsal (神殺) terms used by human-premium / special-sal / shinsal.ts.
+ * Longer phrases first (replace order sorts by length).
+ * EN display: "Romanized (meaning)".
+ */
+const SHINSAL_HANJA_TO_EN: Record<string, string> = {
+  文昌貴人: "Munchang Gwiin (scholarly nobleman)",
+  天乙貴人: "Cheoneul Gwiin (heavenly nobleman)",
+  桃花殺: "Dohwa Sal (peach blossom)",
+  驛馬殺: "Yeokma Sal (traveling horse)",
+  華蓋殺: "Hwagae Sal (canopy)",
+  白虎殺: "Baekho Sal (white tiger)",
+  羊刃殺: "Yangin Sal (yang blade)",
+  魁罡殺: "Goegang Sal (kui-gang)",
+  桃花: "Dohwa (peach blossom)",
+  驛馬: "Yeokma (traveling horse)",
+  華蓋: "Hwagae (canopy)",
+  羊刃: "Yangin (yang blade)",
+  白虎: "Baekho (white tiger)",
+  魁罡: "Goegang (kui-gang)",
+  神殺: "Shinsal (spirit stars)",
+};
+
+/**
+ * Ten Gods (十神) + core myungri terms used in human-premium reports.
+ * Meanings align with ManseTable / formatTenGodLabel EN labels.
+ * Simplified-Chinese variants included (LLM / tables sometimes emit these).
+ */
+const MYEONGRI_HANJA_TO_EN: Record<string, string> = {
+  // Ten Gods — traditional
+  正財: "jeongjae (direct wealth)",
+  偏財: "pyeonjae (indirect wealth)",
+  正官: "jeonggwan (direct officer)",
+  偏官: "pyeongwan (seven killings)",
+  七殺: "chilsal (seven killings)",
+  正印: "jeongin (direct resource)",
+  偏印: "pyeonin (indirect resource)",
+  比肩: "bigyeon (peer)",
+  劫財: "geopjae (rob wealth)",
+  食神: "siksin (eating god)",
+  傷官: "sanggwan (hurting officer)",
+  十神: "sipsin (ten gods)",
+  // Ten Gods — simplified
+  正财: "jeongjae (direct wealth)",
+  偏财: "pyeonjae (indirect wealth)",
+  七杀: "chilsal (seven killings)",
+  劫财: "geopjae (rob wealth)",
+  伤官: "sanggwan (hurting officer)",
+  // Core myungri
+  用神: "yongsin (useful god / balancing element)",
+  喜神: "huisin (favorable god)",
+  忌神: "gisin (unfavorable god)",
+  日干: "ilgan (day stem)",
+  日主: "ilju (day master)",
+  格局: "gyeokguk (chart frame)",
+};
+
+/** Chinese pinyin spellings → Korean romanization (meaning). Case-insensitive. */
+const MYEONGRI_PINYIN_TO_EN: Record<string, string> = {
+  zhengcai: "jeongjae (direct wealth)",
+  piancai: "pyeonjae (indirect wealth)",
+  zhengguan: "jeonggwan (direct officer)",
+  pianguan: "pyeongwan (seven killings)",
+  qisha: "chilsal (seven killings)",
+  zhengyin: "jeongin (direct resource)",
+  pianyin: "pyeonin (indirect resource)",
+  bijian: "bigyeon (peer)",
+  jiecai: "geopjae (rob wealth)",
+  shishen: "siksin (eating god)",
+  shangguan: "sanggwan (hurting officer)",
+  yongshen: "yongsin (useful god / balancing element)",
+  xishen: "huisin (favorable god)",
+  jishen: "gisin (unfavorable god)",
+  rigan: "ilgan (day stem)",
+  rizhu: "ilju (day master)",
+};
+
+const HANJA_PHRASE_TO_EN: Record<string, string> = {
+  ...SHINSAL_HANJA_TO_EN,
+  ...MYEONGRI_HANJA_TO_EN,
+};
+
+const HANJA_PHRASES = Object.keys(HANJA_PHRASE_TO_EN).sort(
+  (a, b) => b.length - a.length
+);
+
+/** Strip gloss parens only — do not consume leading Latin (avoids eating "and yongsin"). */
+const HANJA_PAREN_GLOSS_RE = new RegExp(
+  `[(\\uFF08](?:${HANJA_PHRASES.map(escapeRegExp).join("|")})[)\\uFF09]`,
+  "g"
+);
+
+const PINYIN_KEYS = Object.keys(MYEONGRI_PINYIN_TO_EN).sort(
+  (a, b) => b.length - a.length
+);
+
+const PINYIN_WORD_RE = new RegExp(
+  `\\b(?:${PINYIN_KEYS.map(escapeRegExp).join("|")})\\b`,
+  "gi"
+);
+
+/** Korean romanization bare tokens (after "(한자)" stripped) → full EN label. */
+const MYEONGRI_ROMAN_TO_EN: Record<string, string> = {
+  jeongjae: "jeongjae (direct wealth)",
+  pyeonjae: "pyeonjae (indirect wealth)",
+  jeonggwan: "jeonggwan (direct officer)",
+  pyeongwan: "pyeongwan (seven killings)",
+  chilsal: "chilsal (seven killings)",
+  jeongin: "jeongin (direct resource)",
+  pyeonin: "pyeonin (indirect resource)",
+  bigyeon: "bigyeon (peer)",
+  geopjae: "geopjae (rob wealth)",
+  siksin: "siksin (eating god)",
+  sanggwan: "sanggwan (hurting officer)",
+  sipsin: "sipsin (ten gods)",
+  yongsin: "yongsin (useful god / balancing element)",
+  huisin: "huisin (favorable god)",
+  gisin: "gisin (unfavorable god)",
+  ilgan: "ilgan (day stem)",
+  ilju: "ilju (day master)",
+  gyeokguk: "gyeokguk (chart frame)",
+};
+
+const ROMAN_KEYS = Object.keys(MYEONGRI_ROMAN_TO_EN).sort(
+  (a, b) => b.length - a.length
+);
+
+/** Bare roman not already followed by a meaning paren. */
+const BARE_ROMAN_WORD_RE = new RegExp(
+  `\\b(?:${ROMAN_KEYS.map(escapeRegExp).join("|")})\\b(?!\\s*\\()`,
+  "gi"
+);
+
+function replaceHanjaPhrasesWithEn(text: string): string {
+  let next = text.replace(HANJA_PAREN_GLOSS_RE, "");
+  for (const phrase of HANJA_PHRASES) {
+    const label = HANJA_PHRASE_TO_EN[phrase];
+    if (!label || !next.includes(phrase)) continue;
+    next = next.split(phrase).join(label);
+  }
+  return next.replace(/[ \t]{2,}/g, " ");
+}
+
+function expandBareMyeongriRoman(text: string): string {
+  return text.replace(BARE_ROMAN_WORD_RE, (match) => {
+    return MYEONGRI_ROMAN_TO_EN[match.toLowerCase()] ?? match;
+  });
+}
+
+/** Normalize Chinese pinyin ten-god / myungri spellings to Korean romanization. */
+export function replaceChinesePinyinMyeongri(text: string): string {
+  const afterPinyin = text.replace(PINYIN_WORD_RE, (match) => {
+    const mapped = MYEONGRI_PINYIN_TO_EN[match.toLowerCase()];
+    return mapped ?? match;
+  });
+  return expandBareMyeongriRoman(afterPinyin);
+}
+
 /** Cover / TOC bullets that are ziwei section titles (never show on saju reports). */
 const ZIWEI_BULLET_TITLES = new Set([
   "자미두수 명반 개요",
@@ -85,7 +247,8 @@ export function replaceKnownHanjaWithHangul(text: string): {
 }
 
 /**
- * EN path: ganzi pairs → "Jeongmyo (Fire-Rabbit)"; lone stem/branch/element → romanized/meaning.
+ * EN path: ganzi pairs → "Jeongmyo (Fire-Rabbit)"; shinsal/ten-god/myungri phrases →
+ * romanized (meaning); lone stem/branch/element → romanized/meaning.
  * Manse table UI is not passed through this sanitizer.
  */
 export function replaceKnownHanjaWithEnLabel(text: string): {
@@ -104,6 +267,8 @@ export function replaceKnownHanjaWithEnLabel(text: string): {
     if (!isGanziPair(stem, branch)) return pair;
     return formatGanziLabel(pair, "en");
   });
+
+  next = replaceHanjaPhrasesWithEn(next);
 
   const unmappedSet = new Set<string>();
   next = next.replace(CJK_HANJA_RE, (char) => {
@@ -144,10 +309,6 @@ export function stripMarkdownArtifacts(text: string): string {
     .replace(/`([^`]+)`/g, "$1")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
@@ -197,7 +358,8 @@ export function filterZiweiCoverBullets(bullets: string[] | undefined): string[]
 
 /**
  * Post-process a report slot / display string:
- * KO: hanja→hangul; EN: hanja→romanization (meaning); strip labels/markdown.
+ * KO: hanja→hangul; EN: hanja→romanization (meaning) + Chinese pinyin→Korean romanization;
+ * strip labels/markdown.
  */
 export function sanitizeLlmSlotText(
   slotName: string,
@@ -209,6 +371,9 @@ export function sanitizeLlmSlotText(
     locale === "en"
       ? replaceKnownHanjaWithEnLabel(text)
       : replaceKnownHanjaWithHangul(text);
+
+  const afterLocale =
+    locale === "en" ? replaceChinesePinyinMyeongri(afterHanja) : afterHanja;
 
   // Log only when hanja remain unmapped after replacement (fully mapped EN/KO stays quiet).
   if (unmapped) {
@@ -232,5 +397,5 @@ export function sanitizeLlmSlotText(
     });
   }
 
-  return stripMarkdownArtifacts(stripInternalBracketLabels(afterHanja));
+  return stripMarkdownArtifacts(stripInternalBracketLabels(afterLocale));
 }

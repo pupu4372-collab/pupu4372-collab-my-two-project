@@ -9,7 +9,12 @@ import {
   parseBirthTimeSelect,
 } from "@/lib/saju/birth-time-options";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
-import type { HumanPremiumReportRow } from "@/lib/reports/human-premium/types";
+import {
+  REPORT_TYPE_LABELS,
+  REPORT_TYPE_LABELS_EN,
+  type HumanPremiumReportRow,
+  type ReportType,
+} from "@/lib/reports/human-premium/types";
 import type { Locale } from "@/lib/saju/types";
 import { Link } from "@/i18n/navigation";
 import { useMemo, useState } from "react";
@@ -17,6 +22,54 @@ import { useMemo, useState } from "react";
 type CalendarType = "solar" | "lunar";
 
 type ReportResult = HumanPremiumReportRow & { webUrl?: string };
+
+type BatchStatus = "pending" | "running" | "done" | "error";
+
+type BatchItem = {
+  reportType: ReportType;
+  status: BatchStatus;
+  elapsedMs?: number;
+  error?: string;
+  report?: ReportResult;
+  webUrl?: string;
+};
+
+const ALL_REPORT_TYPES: ReportType[] = [
+  "daily",
+  "decade",
+  "monthly",
+  "yearly",
+  "mental",
+  "love",
+  "career",
+  "business",
+  "wealth",
+  "lifetime",
+];
+
+function reportTypeLabel(type: ReportType, locale: Locale): string {
+  const labels = locale === "en" ? REPORT_TYPE_LABELS_EN : REPORT_TYPE_LABELS;
+  return labels[type] ?? type;
+}
+
+function statusLabel(status: BatchStatus): string {
+  switch (status) {
+    case "pending":
+      return "대기";
+    case "running":
+      return "생성중";
+    case "done":
+      return "완료";
+    case "error":
+      return "실패";
+  }
+}
+
+function formatElapsed(ms: number | undefined): string {
+  if (ms == null) return "—";
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
 
 function resolveLocalWebReportUrl(url: string): string {
   if (typeof window === "undefined") return url;
@@ -35,7 +88,8 @@ function resolveLocalWebReportUrl(url: string): string {
 
 export function HumanPremiumAdminTest() {
   const { accessToken, isAnonymous } = useSupabaseSession();
-  const [locale, setLocale] = useState<Locale>("ko");
+  // Default EN: this tool is mainly for EN report QA (cart EN checkout is gated).
+  const [locale, setLocale] = useState<Locale>("en");
   const [personName, setPersonName] = useState("");
   const [email, setEmail] = useState("");
   const [calendarType, setCalendarType] = useState<CalendarType>("solar");
@@ -45,9 +99,10 @@ export function HumanPremiumAdminTest() {
   const [gender, setGender] = useState<"" | "male" | "female">("");
   const [consent, setConsent] = useState(false);
   const [sendEmail, setSendEmail] = useState(true);
+  const [selectedTypes, setSelectedTypes] = useState<ReportType[]>(["lifetime"]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<ReportResult | null>(null);
+  const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ReportResult[]>([]);
   const [actionId, setActionId] = useState<string | null>(null);
@@ -58,6 +113,8 @@ export function HumanPremiumAdminTest() {
     return Array.from(set);
   }, [timezone]);
 
+  const allSelected = selectedTypes.length === ALL_REPORT_TYPES.length;
+
   function authHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -66,9 +123,57 @@ export function HumanPremiumAdminTest() {
     return headers;
   }
 
-  async function generateReport() {
+  function toggleType(type: ReportType) {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  }
+
+  function selectAllTypes() {
+    setSelectedTypes([...ALL_REPORT_TYPES]);
+  }
+
+  function clearAllTypes() {
+    setSelectedTypes([]);
+  }
+
+  function buildGenerateBody(reportType: ReportType) {
+    return {
+      personName,
+      email,
+      calendarType,
+      birthDate,
+      birthTime: petTime.birthTime,
+      birthTimeUnknown: petTime.birthTimeUnknown,
+      timezone,
+      locale,
+      privacyConsent: true,
+      reportType,
+      ...(gender ? { gender } : {}),
+      sendEmail,
+    };
+  }
+
+  async function generateOne(reportType: ReportType): Promise<{
+    report: ReportResult;
+    webUrl: string;
+  }> {
+    const res = await fetch("/api/premium/human/test-generate", {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(buildGenerateBody(reportType)),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "생성 실패");
+    return {
+      report: { ...data.report, webUrl: data.webUrl },
+      webUrl: String(data.webUrl ?? ""),
+    };
+  }
+
+  /** Sequential batch — one type at a time (LLM rate limits). */
+  async function generateReportBatch() {
     setError(null);
-    setResult(null);
     if (!consent) {
       setError("개인정보 동의가 필요합니다.");
       return;
@@ -77,35 +182,59 @@ export function HumanPremiumAdminTest() {
       setError("관리자 로그인이 필요합니다.");
       return;
     }
-
-    setLoading(true);
-    try {
-      const res = await fetch("/api/premium/human/test-generate", {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({
-          personName,
-          email,
-          calendarType,
-          birthDate,
-          birthTime: petTime.birthTime,
-          birthTimeUnknown: petTime.birthTimeUnknown,
-          timezone,
-          locale,
-          privacyConsent: true,
-          ...(gender ? { gender } : {}),
-          sendEmail,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "생성 실패");
-
-      setResult({ ...data.report, webUrl: data.webUrl });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "생성 실패");
-    } finally {
-      setLoading(false);
+    if (!selectedTypes.length) {
+      setError("리포트 종류를 하나 이상 선택해 주세요.");
+      return;
     }
+
+    const queue = ALL_REPORT_TYPES.filter((t) => selectedTypes.includes(t));
+    setBatchItems(
+      queue.map((reportType) => ({
+        reportType,
+        status: "pending" as const,
+      }))
+    );
+    setLoading(true);
+
+    for (const reportType of queue) {
+      setBatchItems((prev) =>
+        prev.map((item) =>
+          item.reportType === reportType
+            ? { ...item, status: "running", error: undefined }
+            : item
+        )
+      );
+      const started = performance.now();
+      try {
+        const { report, webUrl } = await generateOne(reportType);
+        const elapsedMs = Math.round(performance.now() - started);
+        setBatchItems((prev) =>
+          prev.map((item) =>
+            item.reportType === reportType
+              ? {
+                  ...item,
+                  status: "done",
+                  elapsedMs,
+                  report,
+                  webUrl: webUrl || report.webUrl,
+                }
+              : item
+          )
+        );
+      } catch (err) {
+        const elapsedMs = Math.round(performance.now() - started);
+        const message = err instanceof Error ? err.message : "생성 실패";
+        setBatchItems((prev) =>
+          prev.map((item) =>
+            item.reportType === reportType
+              ? { ...item, status: "error", elapsedMs, error: message }
+              : item
+          )
+        );
+      }
+    }
+
+    setLoading(false);
   }
 
   async function searchReports() {
@@ -139,9 +268,16 @@ export function HumanPremiumAdminTest() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "이메일 발송 실패");
-      if (result?.id === reportId) {
-        setResult({ ...data.report, webUrl: result.webUrl });
-      }
+      setBatchItems((items) =>
+        items.map((item) =>
+          item.report?.id === reportId
+            ? {
+                ...item,
+                report: { ...data.report, webUrl: item.webUrl ?? item.report?.webUrl },
+              }
+            : item
+        )
+      );
       setSearchResults((rows) =>
         rows.map((row) => (row.id === reportId ? { ...data.report, webUrl: row.webUrl } : row))
       );
@@ -166,7 +302,13 @@ export function HumanPremiumAdminTest() {
       if (!res.ok) throw new Error(data.error ?? "링크 재발급 실패");
 
       const updated = { ...data.report, webUrl: data.webUrl } as ReportResult;
-      if (result?.id === reportId) setResult(updated);
+      setBatchItems((items) =>
+        items.map((item) =>
+          item.report?.id === reportId
+            ? { ...item, report: updated, webUrl: data.webUrl }
+            : item
+        )
+      );
       setSearchResults((rows) =>
         rows.map((row) => (row.id === reportId ? updated : row))
       );
@@ -179,6 +321,11 @@ export function HumanPremiumAdminTest() {
 
   function ReportCard({ report }: { report: ReportResult }) {
     const webUrl = report.webUrl ? resolveLocalWebReportUrl(report.webUrl) : undefined;
+    const typeKey = report.report_type as ReportType | undefined;
+    const typeLabel =
+      typeKey && ALL_REPORT_TYPES.includes(typeKey)
+        ? reportTypeLabel(typeKey, (report.locale as Locale) || locale)
+        : typeKey ?? "—";
 
     return (
       <article className="rounded-2xl border border-plum/15 bg-white/70 p-4">
@@ -186,7 +333,9 @@ export function HumanPremiumAdminTest() {
           <div>
             <p className="font-semibold text-plum">{report.person_name}</p>
             <p className="text-sm text-plum/70">{report.email}</p>
-            <p className="mt-1 text-xs text-plum/55">ID: {report.id}</p>
+            <p className="mt-1 text-xs text-plum/55">
+              {typeLabel} · {report.locale} · ID: {report.id}
+            </p>
           </div>
           <div className="text-right text-xs text-plum/65">
             <p>status: {report.status}</p>
@@ -239,6 +388,9 @@ export function HumanPremiumAdminTest() {
     );
   }
 
+  const doneCount = batchItems.filter((i) => i.status === "done").length;
+  const errorCount = batchItems.filter((i) => i.status === "error").length;
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -257,7 +409,7 @@ export function HumanPremiumAdminTest() {
         className="pastel-card space-y-4 p-6"
         onSubmit={(e) => {
           e.preventDefault();
-          void generateReport();
+          void generateReportBatch();
         }}
       >
         <h2 className="text-lg font-bold text-plum">무결제 테스트 생성</h2>
@@ -297,6 +449,53 @@ export function HumanPremiumAdminTest() {
             <option value="solar">양력</option>
             <option value="lunar">음력</option>
           </select>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-plum">리포트 종류</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={selectAllTypes}
+                disabled={loading || allSelected}
+                className="rounded-full border border-plum/20 px-3 py-1 text-xs font-semibold text-plum disabled:opacity-50"
+              >
+                전체 선택
+              </button>
+              <button
+                type="button"
+                onClick={clearAllTypes}
+                disabled={loading || selectedTypes.length === 0}
+                className="rounded-full border border-plum/20 px-3 py-1 text-xs font-semibold text-plum disabled:opacity-50"
+              >
+                전체 해제
+              </button>
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {ALL_REPORT_TYPES.map((type) => (
+              <label
+                key={type}
+                className="flex cursor-pointer items-start gap-2 rounded-xl border border-plum/10 bg-white/60 px-3 py-2 text-sm text-plum"
+              >
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={selectedTypes.includes(type)}
+                  disabled={loading}
+                  onChange={() => toggleType(type)}
+                />
+                <span>
+                  <span className="font-semibold">{reportTypeLabel(type, locale)}</span>
+                  <span className="mt-0.5 block text-xs text-plum/55">{type}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-plum/55">
+            선택 {selectedTypes.length}종 · 순차 생성 (동시 호출 없음)
+          </p>
         </div>
 
         <BirthDateSelect
@@ -340,7 +539,13 @@ export function HumanPremiumAdminTest() {
           <option value="female">여</option>
         </select>
 
-        <PrivacyConsent checked={consent} onChange={setConsent} locale={locale} variant="pastel" audience="human" />
+        <PrivacyConsent
+          checked={consent}
+          onChange={setConsent}
+          locale={locale}
+          variant="pastel"
+          audience="human"
+        />
 
         <label className="flex items-center gap-2 text-sm text-plum/80">
           <input
@@ -359,14 +564,103 @@ export function HumanPremiumAdminTest() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || selectedTypes.length === 0}
           className="w-full rounded-full bg-channel-saju py-3 font-semibold text-white disabled:opacity-60"
         >
-          {loading ? "처리 중…" : "테스트 리포트 생성"}
+          {loading
+            ? `일괄 생성 중… (${doneCount + errorCount}/${batchItems.length || selectedTypes.length})`
+            : selectedTypes.length <= 1
+              ? "테스트 리포트 생성"
+              : `선택 ${selectedTypes.length}종 일괄 생성`}
         </button>
       </form>
 
-      {result && <ReportCard report={result} />}
+      {batchItems.length > 0 && (
+        <section className="pastel-card space-y-4 p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-lg font-bold text-plum">일괄 생성 진행</h2>
+            <p className="text-xs text-plum/55">
+              완료 {doneCount} · 실패 {errorCount} · 전체 {batchItems.length}
+            </p>
+          </div>
+          <ul className="space-y-3">
+            {batchItems.map((item) => {
+              const webUrl = item.webUrl
+                ? resolveLocalWebReportUrl(item.webUrl)
+                : undefined;
+              return (
+                <li
+                  key={item.reportType}
+                  className="rounded-2xl border border-plum/15 bg-white/70 p-4"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <p className="font-semibold text-plum">
+                        {reportTypeLabel(item.reportType, locale)}
+                      </p>
+                      <p className="text-xs text-plum/55">{item.reportType}</p>
+                    </div>
+                    <div className="text-right text-xs text-plum/65">
+                      <p
+                        className={
+                          item.status === "error"
+                            ? "font-bold text-red-700"
+                            : item.status === "done"
+                              ? "font-bold text-channel-community"
+                              : item.status === "running"
+                                ? "font-bold text-channel-saju"
+                                : ""
+                        }
+                      >
+                        {statusLabel(item.status)}
+                      </p>
+                      <p>소요 {formatElapsed(item.elapsedMs)}</p>
+                    </div>
+                  </div>
+                  {item.error && (
+                    <p className="mt-2 text-sm text-red-700/80" role="alert">
+                      {item.error}
+                    </p>
+                  )}
+                  {webUrl && (
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <a
+                        href={webUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-full bg-channel-saju px-3 py-1.5 text-xs font-semibold text-white"
+                      >
+                        새 탭에서 열기
+                      </a>
+                      <p className="break-all text-xs text-channel-saju/80">{webUrl}</p>
+                    </div>
+                  )}
+                  {item.report && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        disabled={actionId === item.report.id}
+                        onClick={() => void resendEmail(item.report!.id)}
+                        className="rounded-full border border-plum/20 px-3 py-1.5 text-xs text-plum"
+                      >
+                        이메일 재발송
+                      </button>
+                      <button
+                        type="button"
+                        disabled={actionId === `${item.report.id}-link`}
+                        onClick={() => void refreshWebLink(item.report!.id)}
+                        className="rounded-full border border-plum/20 px-3 py-1.5 text-xs text-plum"
+                      >
+                        링크 재발급
+                      </button>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <section className="pastel-card space-y-4 p-6">
         <h2 className="text-lg font-bold text-plum">리포트 검색 / A/S</h2>

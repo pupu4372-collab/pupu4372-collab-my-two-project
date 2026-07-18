@@ -4,6 +4,7 @@ import {
   formatDayPillarAddress,
   formatElementLabelForLocale,
   formatGanziLabel,
+  formatSingleHanjaEn,
 } from "@/lib/saju/elements";
 import {
   computeManAge,
@@ -1071,7 +1072,7 @@ ${slots || "십성 데이터를 표준 축으로 정리했습니다."}
 
   return `${nickname} chart structure keys into ${focus}.
 
-Day master ${saju.pillars.day.stemLabel} (${saju.pillars.day.stemHanja}) · day-master element ${elLabel(dayMasterElement(saju), locale)} (chart-dominant ${elLabel(saju.dominantElement, locale)})
+Day master ${formatSingleHanjaEn(saju.pillars.day.stemHanja) ?? saju.pillars.day.stemLabel} · day-master element ${elLabel(dayMasterElement(saju), locale)} (chart-dominant ${elLabel(saju.dominantElement, locale)})
 ${saju.birthTimeUnknown ? "Hour unknown — three-pillar reading (year, month, day)." : `Four pillars including hour ${pillarText(saju.pillars.hour!, "en")}.`}
 
 ${slots || "Ten-God axes are organized on standard pillars."}

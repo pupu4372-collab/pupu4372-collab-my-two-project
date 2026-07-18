@@ -75,10 +75,11 @@ export function dayPillarElementHeadline(
   day: PillarDisplay,
   isKo: boolean
 ): string {
+  const ganzi = (day.pillar || `${day.stemHanja ?? ""}${day.branchHanja ?? ""}`).trim();
   if (isKo) {
-    return `${day.pillar} · ${stemHangulLabel(day.stemHanja)} · ${branchHangulLabel(day.branchHanja)}`;
+    return `${ganzi} · ${stemHangulLabel(day.stemHanja)} · ${branchHangulLabel(day.branchHanja)}`;
   }
-  return formatGanziLabel(day.pillar, "en");
+  return formatGanziLabel(ganzi, "en");
 }
 
 export function firstProphecyLine(text: string): string {

@@ -1,5 +1,9 @@
 import type { Content } from "pdfmake/interfaces";
-import { branchHangulLabel, stemHangulLabel } from "@/lib/saju/elements";
+import {
+  branchHangulLabel,
+  formatGanziLabel,
+  stemHangulLabel,
+} from "@/lib/saju/elements";
 import {
   formatBirthInputSummary,
   formatIssuedDate,
@@ -68,9 +72,11 @@ export function buildPdfCoverBlocks(
   const pillars = asPillars(report.saju.pillars);
   const hasHour = report.analysisMode === "four_pillars" && Boolean(pillars.hour);
   const day = pillars.day;
+  const dayGanzi =
+    (day.pillar || `${day.stemHanja ?? ""}${day.branchHanja ?? ""}`).trim();
   const dayLine = isKo
-    ? `${day.pillar} · ${stemHangulLabel(day.stemHanja)} · ${branchHangulLabel(day.branchHanja)}`
-    : `${day.pillar} · ${day.stemLabel} · ${day.branchLabel}`;
+    ? `${dayGanzi} · ${stemHangulLabel(day.stemHanja)} · ${branchHangulLabel(day.branchHanja)}`
+    : formatGanziLabel(dayGanzi, "en");
 
   const blocks: Content[] = [];
 
