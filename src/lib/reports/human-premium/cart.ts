@@ -13,6 +13,7 @@ import {
   getHumanPremiumReportById,
   getHumanPremiumReportByPaymentOrderId,
   listHumanPremiumCartOrderRows,
+  listHumanPremiumDailyVaultRows,
   listLegacyNullUserCartOrdersByEmail,
   updateHumanPremiumReport,
 } from "./storage";
@@ -498,20 +499,31 @@ export async function listHumanPremiumVaultOrders(options: {
   userId?: string | null;
   orderIds?: string[];
 }) {
-  const rows = await listHumanPremiumCartOrderRows(options);
-  const orders = rows
+  const cartRows = await listHumanPremiumCartOrderRows(options);
+  const cartOrders = cartRows
     .filter((row) => isFulfilledCartRow(row))
     .map((row) => {
       const snapshot = cartOrderSnapshot(row);
       if (!snapshot) return null;
       return {
         ...snapshot,
+        kind: "cart" as const,
+        paymentKind: "cart" as const,
         createdAt: row.created_at,
         expiresAt: humanPremiumWebExpiresAt(new Date(row.created_at).getTime()),
       };
     })
     .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry?.orderId));
 
+  const dailyOrders =
+    options.userId != null && options.userId !== ""
+      ? (await listHumanPremiumDailyVaultRows({ userId: options.userId }))
+          .filter((row) => isFulfilledDailyVaultRow(row))
+          .map((row) => dailyVaultSnapshot(row))
+          .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry?.orderId))
+      : [];
+
+  const orders = [...cartOrders, ...dailyOrders];
   orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const seen = new Set<string>();
@@ -520,6 +532,56 @@ export async function listHumanPremiumVaultOrders(options: {
     seen.add(order.orderId);
     return true;
   });
+}
+
+const DAILY_VAULT_STATUSES = new Set([
+  "ready",
+  "email_sent",
+  "email_failed",
+  "generating",
+]);
+
+function isFulfilledDailyVaultRow(row: HumanPremiumReportRow): boolean {
+  return DAILY_VAULT_STATUSES.has(row.status) && Boolean(row.payment_order_id);
+}
+
+function dailyVaultSnapshot(row: HumanPremiumReportRow) {
+  const orderId = row.payment_order_id;
+  if (!orderId) return null;
+
+  const amountPaid = Number(row.amount_paid ?? 0);
+  const isCoupon =
+    orderId.startsWith("daily-free-") || amountPaid <= 0;
+  const ready =
+    (row.status === "ready" || row.status === "email_sent") &&
+    Boolean(row.report_payload) &&
+    Boolean(row.web_access_token);
+
+  return {
+    orderId,
+    amount: amountPaid,
+    currency: row.currency ?? "KRW",
+    items: ["daily"] as ReportType[],
+    generated: ready
+      ? {
+          daily: {
+            reportId: row.id,
+            webToken: row.web_access_token,
+          },
+        }
+      : ({} as Partial<Record<ReportType, HumanPremiumCartGeneratedItem>>),
+    deliverEmail: null as string | null,
+    personName: row.person_name,
+    email: row.email,
+    locale: row.locale,
+    birthDate: row.birth_date,
+    birthTime: row.birth_time,
+    birthTimeUnknown: row.birth_time_unknown,
+    kind: "daily" as const,
+    paymentKind: (isCoupon ? "coupon" : "paid") as "coupon" | "paid",
+    createdAt: row.created_at,
+    expiresAt: humanPremiumWebExpiresAt(new Date(row.created_at).getTime()),
+  };
 }
 
 export function cartOrderSnapshot(row: HumanPremiumReportRow) {

@@ -33,7 +33,15 @@ type VaultOrder = {
   locale: "ko" | "en";
   createdAt: string;
   expiresAt: string;
+  /** Cart checkout vs daily lucky routine row. */
+  kind?: "cart" | "daily";
+  /** Daily only: coupon (free) vs paid daily-extra. */
+  paymentKind?: "cart" | "coupon" | "paid";
 };
+
+function isDailyVaultOrder(order: VaultOrder): boolean {
+  return order.kind === "daily" || order.orderId.startsWith("daily-free-") || order.orderId.startsWith("daily_extra_");
+}
 
 export function HumanPremiumVaultClient() {
   const routeLocale = useLocale();
@@ -107,6 +115,7 @@ export function HumanPremiumVaultClient() {
 
   useEffect(() => {
     for (const order of orders) {
+      if (isDailyVaultOrder(order)) continue;
       const pending = order.items.some((type) => !order.generated[type]?.webToken);
       if (!pending || pregenerateStarted.current.has(order.orderId)) continue;
       pregenerateStarted.current.add(order.orderId);
@@ -150,86 +159,109 @@ export function HumanPremiumVaultClient() {
           </Link>
         </section>
       ) : (
-        orders.map((order) => (
-          <section key={order.orderId} className="pastel-card space-y-3 p-5">
-            <header className="border-b border-plum/10 pb-3">
-              <p className="text-sm font-bold text-ink">{order.personName}</p>
-              <p className="mt-1 text-xs text-plum/60">
-                {new Date(order.createdAt).toLocaleDateString(isKo ? "ko-KR" : "en-US")} ·{" "}
-                {formatMoney(order.amount, order.currency ?? getCheckoutCurrency(order.locale))}
-              </p>
-              <p className="mt-1 text-[11px] text-plum/50">
-                {isKo ? "보관 만료" : "Available until"}{" "}
-                {new Date(order.expiresAt).toLocaleDateString(isKo ? "ko-KR" : "en-US")}
-              </p>
-            </header>
+        orders.map((order) => {
+          const daily = isDailyVaultOrder(order);
+          const coupon = daily && (order.paymentKind === "coupon" || order.amount <= 0);
+          return (
+            <section key={order.orderId} className="pastel-card space-y-3 p-5">
+              <header className="border-b border-plum/10 pb-3">
+                <p className="text-sm font-bold text-ink">{order.personName}</p>
+                <p className="mt-1 text-xs text-plum/60">
+                  {new Date(order.createdAt).toLocaleDateString(isKo ? "ko-KR" : "en-US")} ·{" "}
+                  {coupon
+                    ? isKo
+                      ? "무료 (쿠폰)"
+                      : "Free (coupon)"
+                    : formatMoney(order.amount, order.currency ?? getCheckoutCurrency(order.locale))}
+                </p>
+                <p className="mt-1 text-[11px] text-plum/50">
+                  {isKo ? "보관 만료" : "Available until"}{" "}
+                  {new Date(order.expiresAt).toLocaleDateString(isKo ? "ko-KR" : "en-US")}
+                </p>
+              </header>
 
-            {order.items.map((reportType) => {
-              const theme = REPORT_CARD_THEMES[reportType];
-              const token = order.generated[reportType]?.webToken;
-              const ready = Boolean(token);
-              const itemKey = `${order.orderId}:${reportType}`;
-              const isGenerating = generatingKey === itemKey;
-              return (
-                <article
-                  key={`${order.orderId}-${reportType}`}
-                  className="flex items-center gap-3 rounded-2xl border border-plum/10 bg-white p-4"
+              {order.items.map((reportType) => {
+                const theme = REPORT_CARD_THEMES[reportType];
+                const token = order.generated[reportType]?.webToken;
+                const ready = Boolean(token);
+                const itemKey = `${order.orderId}:${reportType}`;
+                const isGenerating = generatingKey === itemKey;
+                return (
+                  <article
+                    key={`${order.orderId}-${reportType}`}
+                    className="flex items-center gap-3 rounded-2xl border border-plum/10 bg-white p-4"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold" style={{ color: theme.accent }}>
+                        {typeLabels[reportType]}
+                      </p>
+                      <p className="text-sm font-bold text-ink">
+                        {daily
+                          ? coupon
+                            ? isKo
+                              ? "쿠폰"
+                              : "Coupon"
+                            : formatMoney(
+                                order.amount,
+                                order.currency ?? getCheckoutCurrency(order.locale)
+                              )
+                          : formatPrice(
+                              getReportPrice(reportType, order.locale === "en" ? "en" : "ko"),
+                              order.locale === "en" ? "en" : "ko"
+                            )}
+                      </p>
+                      <p className="text-[11px] text-plum/55">
+                        {ready
+                          ? isKo
+                            ? "생성 완료"
+                            : "Ready"
+                          : isKo
+                            ? "생성 중…"
+                            : "Generating…"}
+                      </p>
+                    </div>
+                    {ready ? (
+                      <Link
+                        href={`/reports/human/${token}`}
+                        className="rounded-full bg-channel-saju px-4 py-2 text-xs font-bold text-white"
+                      >
+                        {isKo ? "보기" : "View"}
+                      </Link>
+                    ) : daily ? (
+                      <span className="rounded-full bg-plum/15 px-4 py-2 text-xs font-bold text-plum/60">
+                        {isKo ? "생성 중…" : "Generating…"}
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={isGenerating || generatingKey !== null}
+                        onClick={() => void handleGenerate(order.orderId, reportType)}
+                        className="rounded-full bg-channel-saju px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+                      >
+                        {isGenerating
+                          ? isKo
+                            ? "생성 중…"
+                            : "Generating…"
+                          : isKo
+                            ? "준비중"
+                            : "Coming soon"}
+                      </button>
+                    )}
+                  </article>
+                );
+              })}
+
+              {!daily ? (
+                <Link
+                  href={`/premium/human/cart?orderId=${encodeURIComponent(order.orderId)}`}
+                  className="block text-center text-xs font-semibold text-channel-saju underline"
                 >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold" style={{ color: theme.accent }}>
-                      {typeLabels[reportType]}
-                    </p>
-                    <p className="text-sm font-bold text-ink">
-                      {formatPrice(
-                        getReportPrice(reportType, order.locale === "en" ? "en" : "ko"),
-                        order.locale === "en" ? "en" : "ko"
-                      )}
-                    </p>
-                    <p className="text-[11px] text-plum/55">
-                      {ready
-                        ? isKo
-                          ? "생성 완료"
-                          : "Ready"
-                        : isKo
-                          ? "생성 중…"
-                          : "Generating…"}
-                    </p>
-                  </div>
-                  {ready ? (
-                    <Link
-                      href={`/reports/human/${token}`}
-                      className="rounded-full bg-channel-saju px-4 py-2 text-xs font-bold text-white"
-                    >
-                      {isKo ? "보기" : "View"}
-                    </Link>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={isGenerating || generatingKey !== null}
-                      onClick={() => void handleGenerate(order.orderId, reportType)}
-                      className="rounded-full bg-channel-saju px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
-                    >
-                      {isGenerating
-                        ? isKo
-                          ? "생성 중…"
-                          : "Generating…"
-                        : isKo
-                          ? "준비중"
-                          : "Coming soon"}
-                    </button>
-                  )}
-                </article>
-              );
-            })}
-
-            <Link
-              href={`/premium/human/cart?orderId=${encodeURIComponent(order.orderId)}`}
-              className="block text-center text-xs font-semibold text-channel-saju underline"
-            >
-              {isKo ? "장바구니 화면에서 열기" : "Open in cart view"}
-            </Link>
-          </section>
-        ))
+                  {isKo ? "장바구니 화면에서 열기" : "Open in cart view"}
+                </Link>
+              ) : null}
+            </section>
+          );
+        })
       )}
 
       <div className="flex justify-center">

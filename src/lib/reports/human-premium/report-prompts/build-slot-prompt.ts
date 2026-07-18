@@ -12,6 +12,7 @@ import { getProductSlotMap } from "./prompts";
 import { SLOTS_EN as YEARLY_SLOTS_EN } from "./prompts/annual-report-prompt";
 import { SLOTS_EN as BUSINESS_SLOTS_EN } from "./prompts/business-partner-report-prompt";
 import { SLOTS_EN as CAREER_SLOTS_EN } from "./prompts/career-roadmap-report-prompt";
+import { SLOTS_EN as DAILY_SLOTS_EN } from "./prompts/daily-action-plan-report-prompt";
 import { SLOTS_EN as DECADE_SLOTS_EN } from "./prompts/decade-life-strategy-report-prompt";
 import { SLOTS_EN as LIFETIME_SLOTS_EN } from "./prompts/lifetime-life-strategy-report-prompt";
 import { SLOTS_EN as LOVE_SLOTS_EN } from "./prompts/love-marriage-report-prompt";
@@ -44,6 +45,7 @@ const EN_PRODUCT_SLOTS: Partial<
   business: BUSINESS_SLOTS_EN,
   mental: MENTAL_SLOTS_EN,
   monthly: MONTHLY_SLOTS_EN,
+  daily: DAILY_SLOTS_EN,
 };
 
 /**
@@ -51,8 +53,8 @@ const EN_PRODUCT_SLOTS: Partial<
  * system = BASE_SYSTEM
  * Returns null when the product slot is empty (caller uses template defaults).
  *
- * EN path (paid topics with SLOTS_EN): EN system/user base + product SLOTS_EN.
- * Daily and any product without SLOTS_EN keep Korean slots even when locale is en.
+ * EN path (products with SLOTS_EN, including daily): EN system/user base + product SLOTS_EN.
+ * Any product without SLOTS_EN keeps Korean slots even when locale is en.
  * KO path: byte-stable use of REPORT_PROMPT_* and KO SLOTS.
  */
 export function buildSlotPrompt(

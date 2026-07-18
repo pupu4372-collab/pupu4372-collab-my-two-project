@@ -33,7 +33,7 @@ export function KeyIndicatorsSection({
               </span>
             </div>
             <ScoreBar score={item.score} />
-            <BodyText body={item.description} className="mt-4 text-sm" />
+            <BodyText body={item.description} className="mt-4 text-sm" locale={report.locale} />
           </article>
         ))}
       </div>

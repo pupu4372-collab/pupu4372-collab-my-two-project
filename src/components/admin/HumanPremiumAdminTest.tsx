@@ -242,10 +242,13 @@ export function HumanPremiumAdminTest() {
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-plum/70">
+        <p className="text-sm text-white/75">
           결제 없이 인간용 Premium 리포트를 생성하고 이메일·링크 A/S를 테스트합니다.
         </p>
-        <Link href="/admin" className="text-sm font-semibold text-channel-saju underline">
+        <Link
+          href="/admin"
+          className="text-sm font-semibold text-[#ffd7ff] underline underline-offset-2 hover:text-white"
+        >
           ← 관리자 홈
         </Link>
       </div>

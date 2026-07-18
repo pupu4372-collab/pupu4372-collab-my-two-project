@@ -40,7 +40,7 @@ export function RoadmapSection({
             <span className="absolute -left-[1.6rem] top-1 h-3 w-3 rounded-full bg-[var(--jig-seal)]" />
             <p className="human-premium-label-caps text-[var(--jig-muted)]">{item.period}</p>
             <h3 className="human-premium-serif text-lg font-semibold">{item.label}</h3>
-            <BodyText body={item.body} className="mt-2 text-sm" />
+            <BodyText body={item.body} className="mt-2 text-sm" locale={report.locale} />
           </article>
         ))}
       </div>
@@ -58,7 +58,7 @@ export function RoadmapSection({
             <p className="mt-3 human-premium-serif text-base leading-relaxed text-[var(--jig-ink)]">
               &ldquo;
               {normalizeDecisionScriptQuotes(
-                sanitizeLlmSlotText("display:decision.script", item.script)
+                sanitizeLlmSlotText("display:decision.script", item.script, report.locale)
               )}
               &rdquo;
             </p>

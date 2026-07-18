@@ -22,7 +22,7 @@ export function sectionBodyText(
   const meta = findChapterSection(report, sectionId);
   const raw = meta?.section.body.trim() ?? "";
   if (!raw) return "";
-  return sanitizeLlmSlotText(`display:${sectionId}`, raw);
+  return sanitizeLlmSlotText(`display:${sectionId}`, raw, report.locale);
 }
 
 /** Sections omitted on web and PDF (e.g. daily reports with no deep-analysis LLM body). */

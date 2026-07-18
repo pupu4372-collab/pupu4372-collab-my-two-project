@@ -57,7 +57,7 @@ export function DeepAnalysisSection({
       />
       {body.trim() ? (
         <article className="human-premium-paper-warm border-l-4 border-[var(--jig-seal)] p-8 sm:p-10">
-          <BodyText body={body} className="human-premium-serif text-lg leading-[2]" />
+          <BodyText body={body} className="human-premium-serif text-lg leading-[2]" locale={report.locale} />
         </article>
       ) : null}
 
@@ -87,7 +87,7 @@ export function DeepAnalysisSection({
                     style={{ width: `${Math.max(0, Math.min(100, item.score * 10))}%` }}
                   />
                 </div>
-                <BodyText body={item.analysis} className="mt-3 text-sm" />
+                <BodyText body={item.analysis} className="mt-3 text-sm" locale={report.locale} />
               </article>
             ))}
           </div>
@@ -104,7 +104,7 @@ export function DeepAnalysisSection({
               <h3 className="human-premium-serif text-lg font-semibold text-[var(--jig-ink)]">
                 {item.title}
               </h3>
-              <BodyText body={item.body} className="mt-3 text-sm" />
+              <BodyText body={item.body} className="mt-3 text-sm" locale={report.locale} />
             </article>
           ))}
         </div>
@@ -134,7 +134,7 @@ export function DeepAnalysisSection({
                     style={{ width: `${Math.max(0, Math.min(100, item.score))}%` }}
                   />
                 </div>
-                <BodyText body={item.summary} className="mt-2 text-sm" />
+                <BodyText body={item.summary} className="mt-2 text-sm" locale={report.locale} />
               </article>
             ))}
           </div>
@@ -154,7 +154,7 @@ export function DeepAnalysisSection({
               >
                 <p className="human-premium-label-caps text-[var(--jig-muted)]">{item.period}</p>
                 <h3 className="human-premium-serif mt-1 text-lg font-semibold">{item.title}</h3>
-                <BodyText body={item.body} className="mt-3 text-sm" />
+                <BodyText body={item.body} className="mt-3 text-sm" locale={report.locale} />
               </article>
             ))}
           </div>

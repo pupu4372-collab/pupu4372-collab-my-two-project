@@ -43,7 +43,7 @@ export function RisksSection({
               {isKo ? "주의" : "Caution"} {index + 1}
             </p>
             <h3 className="human-premium-serif mt-2 text-lg font-semibold">{item.title}</h3>
-            <BodyText body={item.body} className="mt-3 text-sm" />
+            <BodyText body={item.body} className="mt-3 text-sm" locale={report.locale} />
             <p
               className="mt-4 rounded-lg border px-4 py-3 text-sm"
               style={{
@@ -59,7 +59,11 @@ export function RisksSection({
               </span>
               {" · "}
               {normalizeRiskCountermeasure(
-                sanitizeLlmSlotText("display:risk.countermeasure", item.countermeasure)
+                sanitizeLlmSlotText(
+                  "display:risk.countermeasure",
+                  item.countermeasure,
+                  report.locale
+                )
               )}
             </p>
           </article>

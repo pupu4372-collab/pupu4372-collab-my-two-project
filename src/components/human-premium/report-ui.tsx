@@ -1,4 +1,5 @@
 import { sanitizeLlmSlotText } from "@/lib/saju/llm/slot-output-sanitize";
+import type { Locale } from "@/lib/saju/types";
 
 const BODY_PARAGRAPH_MAX = 140;
 
@@ -34,11 +35,13 @@ function splitReadableParagraphs(body: string): string[] {
 export function BodyText({
   body,
   className = "",
+  locale = "ko",
 }: {
   body: string;
   className?: string;
+  locale?: Locale;
 }) {
-  const cleaned = sanitizeLlmSlotText("display:body", body);
+  const cleaned = sanitizeLlmSlotText("display:body", body, locale);
   const paragraphs = splitReadableParagraphs(cleaned);
 
   return (

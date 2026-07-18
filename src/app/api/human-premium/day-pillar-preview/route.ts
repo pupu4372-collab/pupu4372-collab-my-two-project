@@ -3,7 +3,7 @@ import { computeBasicSaju } from "@/lib/saju/engine";
 import { buildDayPillarFreeFullView, buildHumanSummary } from "@/lib/reports/human-premium/content";
 import { resolveSolarBirthDate } from "@/lib/reports/human-premium/birth-basis";
 import { parseHumanPremiumReportInput } from "@/lib/reports/human-premium/service";
-import { ELEMENT_META } from "@/lib/saju/elements";
+import { ELEMENT_META, formatDayPillarAddress } from "@/lib/saju/elements";
 import type { ElementKey } from "@/lib/saju/types";
 import { NextResponse } from "next/server";
 
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       dayPillar: day.pillar,
       dayStem: day.stemLabel,
       dayBranch: day.branchLabel,
-      dayPillarNickname: isKo ? `${day.pillar} 일주` : `${day.pillar} day pillar`,
+      dayPillarNickname: formatDayPillarAddress(day.pillar, input.locale),
       dominantElement: isKo
         ? `${dominant.romanized}(${dominant.hangul})`
         : dominant.romanized,

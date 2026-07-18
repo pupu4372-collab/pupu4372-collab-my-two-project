@@ -11,7 +11,7 @@ import {
   type ElementDisplayRow,
 } from "@/lib/reports/human-premium/element-display";
 import type { PillarDisplay } from "@/lib/saju/types";
-import { charToElement } from "@/lib/saju/elements";
+import { charToElement, formatDayPillarAddress, formatGanziLabel, stemHangulLabel, branchHangulLabel } from "@/lib/saju/elements";
 import { sanitizeLlmSlotText } from "@/lib/saju/llm/slot-output-sanitize";
 
 export { OBANG_COLORS } from "@/lib/reports/human-premium/element-display";
@@ -52,7 +52,11 @@ export function findSectionBody(
   for (const chapter of report.saju.chapters) {
     const section = chapter.sections.find((item) => item.id === sectionId);
     if (section?.body.trim()) {
-      return sanitizeLlmSlotText(`display:${sectionId}`, section.body);
+      return sanitizeLlmSlotText(
+        `display:${sectionId}`,
+        section.body,
+        report.locale
+      );
     }
   }
   return "";
@@ -63,7 +67,18 @@ export function dayPillarNickname(
   isKo: boolean
 ): string {
   const day = asPillars(report.saju.pillars).day;
-  return isKo ? `${day.pillar} 일주` : `${day.pillar} day pillar`;
+  return formatDayPillarAddress(day.pillar, isKo ? "ko" : "en");
+}
+
+/** Cover "Day pillar element" line — Manse table below keeps hanja. */
+export function dayPillarElementHeadline(
+  day: PillarDisplay,
+  isKo: boolean
+): string {
+  if (isKo) {
+    return `${day.pillar} · ${stemHangulLabel(day.stemHanja)} · ${branchHangulLabel(day.branchHanja)}`;
+  }
+  return formatGanziLabel(day.pillar, "en");
 }
 
 export function firstProphecyLine(text: string): string {

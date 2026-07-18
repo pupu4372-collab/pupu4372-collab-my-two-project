@@ -55,8 +55,8 @@ function pdfSafeText(value: string): string {
     .replace(/[–—]/g, "-");
 }
 
-function paragraph(text: string, style: string = "body"): Content {
-  const cleaned = sanitizeLlmSlotText("pdf:body", text);
+function paragraph(text: string, style: string = "body", locale: "ko" | "en" = "ko"): Content {
+  const cleaned = sanitizeLlmSlotText("pdf:body", text, locale);
   return { text: pdfSafeText(cleaned), style, margin: [0, 0, 0, 8] };
 }
 
@@ -88,11 +88,12 @@ function labelCaps(text: string): Content {
 
 function metricsBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[] {
   const scores = report.structured?.scores ?? [];
+  const locale = isKo ? "ko" : "en";
   const header = isKo
     ? "핵심 운세 지표는 6개 영역 각각 100점 만점으로 읽습니다. 최저 40점은 '조건부 강점'으로 해석합니다."
     : "Six domains are scored out of 100. Scores at or above 40 are read as conditional strengths.";
 
-  const blocks: Content[] = [paragraph(header)];
+  const blocks: Content[] = [paragraph(header, "body", locale)];
 
   const cardFor = (item: (typeof scores)[number]): Content =>
     pdfBorderedCard(
@@ -118,7 +119,7 @@ function metricsBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conten
           margin: [0, 0, 0, 2],
         },
         pdfScoreBar(item.score),
-        paragraph(item.description),
+        paragraph(item.description, "body", locale),
       ],
       { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
     );
@@ -146,6 +147,7 @@ function metricsBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conten
 function opportunitiesBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[] {
   const items = report.structured?.opportunities ?? [];
   const catchLabel = isKo ? "잡는 법" : "How to catch";
+  const locale = isKo ? "ko" : "en";
 
   return items.map((item, index) =>
     pdfBorderedCard(
@@ -156,11 +158,13 @@ function opportunitiesBlocks(report: HumanPremiumReportPayload, isKo: boolean): 
           style: "sectionTitle",
           margin: [0, 0, 0, 4],
         },
-        paragraph(item.body),
+        paragraph(item.body, "body", locale),
         pdfInsetTip(
           catchLabel,
           pdfSafeText(
-            normalizeOpportunityTip(sanitizeLlmSlotText("pdf:opportunity.tip", item.tip))
+            normalizeOpportunityTip(
+              sanitizeLlmSlotText("pdf:opportunity.tip", item.tip, locale)
+            )
           ),
           {
             fillColor: PDF_OPPORTUNITY_TIP_FILL,
@@ -177,6 +181,7 @@ function risksBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[
   const items = report.structured?.risks ?? [];
   const counterLabel = isKo ? "대비책" : "Countermeasure";
   const cautionLabel = isKo ? "주의" : "Caution";
+  const locale = isKo ? "ko" : "en";
 
   return items.map((item, index) =>
     pdfBorderedCard(
@@ -187,12 +192,12 @@ function risksBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[
           style: "sectionTitle",
           margin: [0, 0, 0, 4],
         },
-        paragraph(item.body),
+        paragraph(item.body, "body", locale),
         pdfInsetTip(
           counterLabel,
           pdfSafeText(
             normalizeRiskCountermeasure(
-              sanitizeLlmSlotText("pdf:risk.countermeasure", item.countermeasure)
+              sanitizeLlmSlotText("pdf:risk.countermeasure", item.countermeasure, locale)
             )
           ),
           {
@@ -210,6 +215,7 @@ function roadmapBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conten
   const roadmap = report.structured?.roadmap ?? [];
   const moments = report.structured?.decisionMoments ?? [];
   const reportType = report.reportType ?? DEFAULT_REPORT_TYPE;
+  const locale = isKo ? "ko" : "en";
 
   const header =
     reportType === "daily"
@@ -220,7 +226,7 @@ function roadmapBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conten
         ? "대운별 행동 전략과 결정의 순간을 함께 봅니다."
         : "Major-cycle strategies paired with decision moments.";
 
-  const blocks: Content[] = [paragraph(header)];
+  const blocks: Content[] = [paragraph(header, "body", locale)];
 
   for (const item of roadmap) {
     blocks.push(
@@ -231,7 +237,7 @@ function roadmapBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conten
           style: "sectionTitle",
           margin: [0, 0, 0, 4],
         },
-        paragraph(item.body),
+        paragraph(item.body, "body", locale),
       ])
     );
   }
@@ -255,7 +261,7 @@ function roadmapBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conten
             {
               text: pdfSafeText(
                 `"${normalizeDecisionScriptQuotes(
-                  sanitizeLlmSlotText("pdf:decision.script", item.script)
+                  sanitizeLlmSlotText("pdf:decision.script", item.script, locale)
                 )}"`
               ),
               style: "decisionQuote",
@@ -274,19 +280,21 @@ function roadmapBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conten
 function prophecyBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[] {
   const prophecy = report.structured?.prophecy;
   const cohort = report.structured?.cohortInsight;
+  const locale = isKo ? "ko" : "en";
   const sealed = sanitizeLlmSlotText(
     "pdf:prophecy",
-    prophecy?.full ?? prophecy?.short ?? ""
+    prophecy?.full ?? prophecy?.short ?? "",
+    locale
   );
   const keywordCard = sanitizeLlmSlotText(
     "pdf:prophecy.short",
-    prophecy?.short ?? ""
+    prophecy?.short ?? "",
+    locale
   );
   const showKeywordCard =
     Boolean(keywordCard) &&
     Boolean(prophecy?.full) &&
-    keywordCard !== sanitizeLlmSlotText("pdf:prophecy.full", prophecy?.full ?? "");
-  const locale = isKo ? "ko" : "en";
+    keywordCard !== sanitizeLlmSlotText("pdf:prophecy.full", prophecy?.full ?? "", locale);
 
   const blocks: Content[] = [];
 
@@ -295,7 +303,7 @@ function prophecyBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conte
       pdfBorderedCard(
         [
           labelCaps(isKo ? "행운 키워드" : "Lucky keywords"),
-          paragraph(keywordCard),
+          paragraph(keywordCard, "body", locale),
         ],
         { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
       )
@@ -346,7 +354,7 @@ function prophecyBlocks(report: HumanPremiumReportPayload, isKo: boolean): Conte
       pdfBorderedCard(
         [
           labelCaps(isKo ? COHORT_INSIGHT_TITLE_KO : COHORT_INSIGHT_TITLE_EN),
-          paragraph(stripCohortBodyPrefix(cohort.body, locale)),
+          paragraph(stripCohortBodyPrefix(cohort.body, locale), "body", locale),
         ],
         { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
       )
@@ -363,10 +371,11 @@ function depthBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[
   const sections = report.structured?.deepSections ?? [];
   const yearCards = report.structured?.yearCards ?? [];
   const lifeCycles = report.structured?.lifeCycles ?? [];
+  const locale = isKo ? "ko" : "en";
   const blocks: Content[] = [];
 
   if (body.trim()) {
-    blocks.push(paragraph(body));
+    blocks.push(paragraph(body, "body", locale));
   }
 
   if (domains.length) {
@@ -400,7 +409,7 @@ function depthBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[
               margin: [0, 0, 0, 4],
             },
             pdfScoreBar(item.score * 10),
-            paragraph(item.analysis),
+            paragraph(item.analysis, "body", locale),
           ],
           { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
         )
@@ -418,7 +427,7 @@ function depthBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[
               style: "sectionTitle",
               margin: [0, 0, 0, 4],
             },
-            paragraph(item.body),
+            paragraph(item.body, "body", locale),
           ],
           { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
         )
@@ -456,7 +465,7 @@ function depthBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[
               margin: [0, 0, 0, 4],
             },
             pdfScoreBar(item.score),
-            paragraph(item.summary),
+            paragraph(item.summary, "body", locale),
           ],
           { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
         )
@@ -480,7 +489,7 @@ function depthBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[
               style: "sectionTitle",
               margin: [0, 0, 0, 4],
             },
-            paragraph(item.body),
+            paragraph(item.body, "body", locale),
           ],
           { fillColor: PDF_PAPER_FILL, borderColor: PDF_PAPER_BORDER }
         )
@@ -517,11 +526,12 @@ function depthBlocks(report: HumanPremiumReportPayload, isKo: boolean): Content[
 
 function defaultSectionBlocks(
   report: HumanPremiumReportPayload,
-  sectionId: HumanPremiumSectionId
+  sectionId: HumanPremiumSectionId,
+  isKo: boolean
 ): Content[] {
   const body = sectionBodyText(report, sectionId);
   if (!body) return [];
-  return [paragraph(body)];
+  return [paragraph(body, "body", isKo ? "ko" : "en")];
 }
 
 export function buildPdfSectionBlocks(
@@ -574,7 +584,7 @@ export function buildPdfSectionBlocks(
       blocks.push(...prophecyBlocks(report, isKo));
       break;
     default:
-      blocks.push(...defaultSectionBlocks(report, sectionId));
+      blocks.push(...defaultSectionBlocks(report, sectionId, isKo));
       break;
   }
 

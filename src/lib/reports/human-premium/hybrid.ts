@@ -1,4 +1,5 @@
 import { computeBasicSaju } from "@/lib/saju/engine";
+import { formatDayPillarAddress } from "@/lib/saju/elements";
 import {
   applyHumanInterpretationToPremiumReport,
   HUMAN_INTERPRET_SECTION_IDS,
@@ -9,6 +10,7 @@ import {
   type PremiumLlmContext,
 } from "@/lib/saju/llm/human-premium-orchestrator";
 import { computeHumanSajuMappingFromPremiumBirth } from "@/lib/saju/ksaju-adapter";
+import { runWithHanjaSanitizeLocale } from "@/lib/saju/llm/slot-output-sanitize-server";
 import { resolveSolarBirthDate } from "./birth-basis";
 import { buildHumanPremiumFacts } from "./facts";
 import { kstDateParts } from "./issue-calendar";
@@ -25,8 +27,7 @@ function dayPillarLabel(
   saju: ReturnType<typeof computeBasicSaju>,
   locale: HumanPremiumReportInput["locale"]
 ): string {
-  const day = saju.pillars.day;
-  return locale === "ko" ? `${day.pillar} 일주` : `${day.pillar} day pillar`;
+  return formatDayPillarAddress(saju.pillars.day.pillar, locale);
 }
 
 export async function buildHumanPremiumReportHybrid(
@@ -105,7 +106,10 @@ export async function buildHumanPremiumReportHybrid(
   };
 
   try {
-    const { interpretation, meta } = await buildHumanPremiumStructuredWithLlm(ctx);
+    const { interpretation, meta } = await runWithHanjaSanitizeLocale(
+      input.locale,
+      () => buildHumanPremiumStructuredWithLlm(ctx)
+    );
 
     applyHumanInterpretationToPremiumReport(payload, interpretation);
 

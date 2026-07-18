@@ -1,5 +1,10 @@
-import { REPORT_PROMPT_SCORE_RULES } from "../base-prompt";
+import {
+  ENGLISH_ONLY_RULE,
+  REPORT_PROMPT_SCORE_RULES,
+  REPORT_PROMPT_SCORE_RULES_EN,
+} from "../base-prompt";
 import type { ReportSlotPromptMap } from "../prompt-definition";
+import { S3_SCORES_SCHEMA_EN } from "./annual-report-prompt";
 
 /** No.06 · 데일리 럭키 루틴 (daily) — S4 의도적 공백 / S7: 5시간대+대운 */
 export const FOCUS_KO =
@@ -245,4 +250,189 @@ cohortInsight.body: 동일 명식 구조를 가진 사람들의 장기 패턴 �
   40대 중후반~50대 초반에 재정 구조를 재정비하며 두 번째 커리어를
   설계하는 경우가 많습니다. 이들 중 열에 일곱은 말·기술·전문성을 활용한 일에서
   가장 안정적인 수입원을 확보하는 경향을 보입니다."`,
+};
+
+/* —— EN path (daily). KO SLOTS above must stay byte-stable. —— */
+
+const OUTPUT_FORMAT_RULES_EN = `★ Shared output format:
+  - Do not put internal "[Label]:" / "[Label]" markers in prose — natural sentences and JSON fields only
+  - No markdown (**bold**, # headers, backticks)
+  - tip / countermeasure / script strings must not embed UI labels ("How to catch:", "Countermeasure:")
+  - decisionMoments.script = spoken lines only, without wrapping quotes (the renderer adds them)`;
+
+const JSON_OUTPUT_FORCE_RULE_EN = `★ Force machine-parseable JSON:
+  - JSON only. No markdown fences (\`\`\`) or stray backticks
+  - Each opportunity/risk item needs title / body / tip (or countermeasure)
+  - opportunities: exactly 5; risks: exactly 4; roadmap: exactly 7; decisionMoments: exactly 4
+  - Do not put raw double-quotes (") inside string values (breaks JSON)`;
+
+const CARE_STYLE_EN = `★ Voice — care-oriented: end paragraphs with actionable next steps for today–this week.
+  Explain chart jargon in plain English; do not dump bare ten-god jargon into the body.`;
+
+const S3_SCORE_RULES_BLOCK_EN = `${REPORT_PROMPT_SCORE_RULES_EN}
+- Score range: integers 50–90. Crisis avoidance only 50–72.
+- Average of the other five indicators 72–82.
+- scores.label must be exactly the six English names in the schema (spelling and spaces).
+- ★ Topic differentiation: reflect today's day-luck topic in the score mix. Keep strongest ≥80, Crisis avoidance 50–72, average 72–82, but vary the mix.
+- ★ description must match score rank (~40 chars each).`;
+
+const COHORT_RULE_EN = `cohortInsight.body: two lines of chart-cohort insight (~120 chars)
+  - Subject: "People with [trait/structure]…"
+  - ★ No fake survey percentages ("appears in ~%", "reaches about N%")
+  - Tendency language only ("tend to…", "often…", "relatively higher/lower")
+  - Folklore "seven out of ten" is OK; integer percent lists are not
+  - No self-reference to buyers/readers of this product`;
+
+export const SLOTS_EN: ReportSlotPromptMap = {
+  "saju-structure": `■ S2 Chart structure · today's day-luck × natal chart
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+
+★ Daily report: analyze today's day-luck vs natal clashes/combinations. Use "today" often.
+
+Output schema:
+{ "sajuStructure": "string" }
+
+About 600 characters total in sajuStructure alone.
+Cover dominant element + today's effect; deficient element + how to support; brief synthesis;
+ten-god angles as they show up today; closing diagnosis starting with {{dayPillarLabel}}.
+${CARE_STYLE_EN}
+${REPORT_PROMPT_SCORE_RULES_EN}
+Bad: "Shi-shen jargon dumps with bare romanization lists."
+Good: "Words come easily today. Soften important messages — take three calm breaths before you speak."`,
+
+  "master-narrative": `■ S3 Core fortune indicators + narrative · today
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+
+Output schema:
+${S3_SCORES_SCHEMA_EN}
+
+${S3_SCORE_RULES_BLOCK_EN}
+
+Total ~750 characters. Today's day-luck × natal chart.
+Use the six scores.label strings exactly (match content.ts DAILY_SCORE_LABELS_EN).
+narrative ~250–300 chars: {{dayPillarLabel}} once + day-luck×natal + peak energy window + one thought to note today.
+${CARE_STYLE_EN}`,
+
+  "deep-analysis": `■ S4 Deep analysis · Daily Lucky Plan only (intentional blank)
+
+${ENGLISH_ONLY_RULE}
+
+Output schema:
+{ "deepAnalysis": "" }
+
+★ This product must return deepAnalysis as an empty string only.
+Do not fill content, paragraphs, or summaries. Return only the schema above.`,
+
+  opportunities: `■ S5 Five opportunities · executable today
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{ "opportunities": [{ "title": "string", "body": "string", "tip": "string" }] }
+
+{{narrative}}
+
+Exactly 5. title ≤ ~10 words, body ties to today's chart (~80 chars),
+tip: concrete action with time · place · method (~100–120 chars).
+Do not prefix tip with "How to catch:" — UI already labels it.`,
+
+  risks: `■ S6 Four predicted risks + countermeasures · today
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{ "risks": [{ "title": "string", "body": "string", "countermeasure": "string" }] }
+
+{{narrative}}
+
+Exactly 4. title ≤ ~10 words, body chart-grounded (~80 chars),
+countermeasure: concrete action for today (~100–120 chars).
+Do not prefix countermeasure with "Countermeasure:" — UI already labels it.`,
+
+  roadmap: `■ S7 Time roadmap + decision scripts · 3-hour blocks ×6 + today's one line
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{
+  "roadmap": [{ "period": "string", "label": "string", "body": "string" }],
+  "decisionMoments": [{ "situation": "string", "script": "string" }]
+}
+
+{{narrative}}
+
+★ Forbidden: ages, decade bands, major-luck spans, or lifetime ranges in period.
+  period must be today's clock windows only (HH~HH).
+roadmap exactly 7 items (no more, no fewer — do not split or merge windows):
+★ Each body ~100–130 chars, exactly two sentences:
+  1) Why this window resonates with today's chart (plain English; no bare jargon dumps)
+  2) Concrete action (what · how) grounded in that reason
+  ※ Action-only lists without "why this hour" are forbidden.
+★ Use these windows exactly — do not invent new ones or split (e.g. do not create both "07~09" and "09~13"):
+
+- 07~10: morning · start
+- 10~13: late morning wrap
+- 13~16: afternoon execute
+- 16~19: afternoon close
+- 19~22: evening · relationships
+- 22~01: night · tidy-up
+- Today's one-line alignment (not a clock window; period must be exactly "Today's one line"):
+  same 2-sentence structure; one through-line for the day
+  (★ thesis is "one day" — if major luck is mentioned, tie it back to today only)
+
+★ Never create a 01~07 (dawn) block.
+
+decisionMoments: exactly 4 (script = spoken English, no wrapping quotes, ~100 chars):
+- Hesitation in a negotiation / Family friction / Spending·investing wobble / Work overload fog
+★ Spoken voice — not formal essay English:
+  Prefer "I already know where I stand on this, so let's not overthink it"
+  over "I have already established my criteria."
+  Keep lines short; chart terms must not be the grammatical subject.
+decision-frame Q1–Q3 live in the last roadmap body:
+- money·assets / words·relationships / priority·urgency`,
+
+  prophecy: `■ S8 Sealed prophecy · lucky-keyword card
+
+${ENGLISH_ONLY_RULE}
+${OUTPUT_FORMAT_RULES_EN}
+${JSON_OUTPUT_FORCE_RULE_EN}
+
+Output schema:
+{
+  "prophecy": { "short": "string", "full": "string" },
+  "cohortInsight": { "body": "string" }
+}
+
+★ Required: prophecy.short, prophecy.full, and cohortInsight.body must all be non-empty.
+  Omitting or blanking cohortInsight.body is an error. Self-check before finishing.
+
+{{narrative}}
+
+prophecy.short: must equal the fixed value below (no rewrite):
+{{luckyKeywordsShort}}
+prophecy.full: sealed destiny — all rules required
+  - Current year is {{currentYear}}. Every future moment must be after {{currentYear}}; never mistake birth year or past daewoon starts for future prophecy
+  - ★ Two concrete moments, separated — not one blob like "2027–2031"
+    Format: "[moment1: a season/month within this year]… and [moment2: a season/month within next year]…"
+    ★ Use "this year"/"next year" + season/month only — do not print digits like "2026" or "2027"
+      (internal year anchor is {{currentYear}})
+  - ★ Each moment must name a concrete event type (at least one of):
+    offer·message / document·contract / meeting someone / small income·opportunity / move·job news
+    Pure metaphor with no event type is forbidden
+  - Show how today's tidy-up / notes / conversation connect to that event
+  - ~100–120 chars
+  ★ Plain advisory English — no bare element/stem/branch dumps; real-life scenario tone
+    Derive natural season phrases from the issue date (e.g. July issue → "this fall"; December → "next spring").
+    Both moments after issue date and distinct from each other.
+${COHORT_RULE_EN}`,
 };

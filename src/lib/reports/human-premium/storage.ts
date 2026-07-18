@@ -322,6 +322,41 @@ export async function listHumanPremiumCartOrderRows(options: {
   });
 }
 
+/** Coupon (`daily-free-*`) and paid daily-extra (`daily_extra_*`) rows for vault. */
+export function isDailyVaultPaymentOrderId(paymentOrderId: string | null | undefined): boolean {
+  if (!paymentOrderId) return false;
+  return (
+    paymentOrderId.startsWith("daily-free-") || paymentOrderId.startsWith("daily_extra_")
+  );
+}
+
+/**
+ * Daily lucky routine reports for vault (separate from cart `hp_cart_%` query).
+ * Does not change {@link listHumanPremiumCartOrderRows}.
+ */
+export async function listHumanPremiumDailyVaultRows(options: {
+  userId: string;
+  limit?: number;
+}): Promise<HumanPremiumReportRow[]> {
+  const supabase = requireDb();
+  const limit = options.limit ?? 40;
+
+  const { data, error } = await supabase
+    .from("human_premium_reports")
+    .select("*")
+    .eq("user_id", options.userId)
+    .eq("report_type", "daily")
+    .or("payment_order_id.like.daily-free-%,payment_order_id.like.daily_extra_%")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? [])
+    .map(rowFromDb)
+    .filter((row) => isDailyVaultPaymentOrderId(row.payment_order_id));
+}
+
 /**
  * Legacy cart-exclusion only: null-user_id rows matched by deliverable email.
  * Not used for vault recovery.

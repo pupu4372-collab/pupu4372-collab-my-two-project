@@ -43,7 +43,7 @@ export function OpportunitiesSection({
               {String(index + 1).padStart(2, "0")}
             </p>
             <h3 className="human-premium-serif mt-2 text-xl font-semibold">{item.title}</h3>
-            <BodyText body={item.body} className="mt-3 text-sm" />
+            <BodyText body={item.body} className="mt-3 text-sm" locale={report.locale} />
             <p
               className="mt-4 rounded-lg px-4 py-3 text-sm font-medium text-[var(--jig-ink)]"
               style={{
@@ -55,7 +55,7 @@ export function OpportunitiesSection({
               </span>
               {" · "}
               {normalizeOpportunityTip(
-                sanitizeLlmSlotText("display:opportunity.tip", item.tip)
+                sanitizeLlmSlotText("display:opportunity.tip", item.tip, report.locale)
               )}
             </p>
           </article>

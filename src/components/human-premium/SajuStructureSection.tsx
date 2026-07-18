@@ -21,7 +21,7 @@ export function SajuStructureSection({
         subtitle={isKo ? "오행 · 십신 · 명리 진단" : "Elements · Ten Gods · frame"}
       />
       <article className="human-premium-paper rounded-lg p-6 sm:p-8">
-        <BodyText body={body} className="human-premium-serif text-lg leading-[1.95]" />
+        <BodyText body={body} className="human-premium-serif text-lg leading-[1.95]" locale={report.locale} />
       </article>
     </section>
   );

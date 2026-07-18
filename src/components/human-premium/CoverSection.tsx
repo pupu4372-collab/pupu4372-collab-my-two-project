@@ -12,15 +12,12 @@ import {
   OBANG_COLORS,
   asElements,
   asPillars,
+  dayPillarElementHeadline,
   formatBirthInputSummary,
   formatIssuedDate,
   obangPaleBg,
 } from "./report-helpers";
-import {
-  branchHangulLabel,
-  formatElementLabelForLocale,
-  stemHangulLabel,
-} from "@/lib/saju/elements";
+import { formatElementLabelForLocale } from "@/lib/saju/elements";
 import type { ElementKey } from "@/lib/saju/types";
 import { BodyText, ReportTypeTitle } from "./report-ui";
 
@@ -111,11 +108,9 @@ export function CoverSection({ report, isKo }: CoverSectionProps) {
           {isKo ? "일주 오행" : "Day pillar element"}
         </p>
         <p className="human-premium-serif text-2xl font-bold text-[var(--jig-ink)]">
-          {isKo
-            ? `${day.pillar} · ${stemHangulLabel(day.stemHanja)} · ${branchHangulLabel(day.branchHanja)}`
-            : `${day.pillar} · ${day.stemLabel} · ${day.branchLabel}`}
+          {dayPillarElementHeadline(day, isKo)}
         </p>
-        <BodyText body={report.summary.story} className="mt-4 text-[var(--jig-ink)]/85" />
+        <BodyText body={report.summary.story} className="mt-4 text-[var(--jig-ink)]/85" locale={report.locale} />
       </div>
 
       <div className="space-y-4">

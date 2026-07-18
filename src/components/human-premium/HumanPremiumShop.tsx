@@ -107,7 +107,16 @@ export function HumanPremiumShop() {
         const data = await res.json();
         if (!res.ok) return;
 
-        syncPaidOrdersFromVault(storageUserId, data.orders ?? []);
+        syncPaidOrdersFromVault(
+          storageUserId,
+          (data.orders ?? []).filter(
+            (order: { kind?: string; orderId?: string }) =>
+              order.kind !== "daily" &&
+              typeof order.orderId === "string" &&
+              !order.orderId.startsWith("daily-free-") &&
+              !order.orderId.startsWith("daily_extra_")
+          )
+        );
       } catch {
         // ignore vault sync errors; local paid orders still apply
       }

@@ -229,3 +229,55 @@ export function formatBranchSign(branchHanja: string, locale: Locale): string {
   const zodiac = BRANCH_ZODIAC_EN[branchHanja] ?? b.romanized;
   return `${zodiac} (${branchHanja})`;
 }
+
+/**
+ * Ganzi (stem+branch) display.
+ * KO: return hanja as-is (callers append " 일주" etc.).
+ * EN: "Jeongmyo (Fire-Rabbit)" — romanization + (stem-element − branch animal).
+ */
+export function formatGanziLabel(ganzi: string, locale: Locale): string {
+  const trimmed = ganzi.trim();
+  if (!trimmed) return trimmed;
+  if (locale === "ko") return trimmed;
+
+  const stem = trimmed.charAt(0);
+  const branch = trimmed.charAt(1);
+  const s = STEM_LABEL[stem];
+  const b = BRANCH_LABEL[branch];
+  if (!s || !b || trimmed.length < 2) {
+    return formatSingleHanjaEn(trimmed.charAt(0)) ?? trimmed;
+  }
+
+  const roman = `${s.romanized}${b.romanized.toLowerCase()}`;
+  const stemEl = STEM_BRANCH_ELEMENT[stem];
+  const elementMeaning = stemEl ? ELEMENT_META[stemEl].meaning : null;
+  const animal = BRANCH_ZODIAC_EN[branch] ?? b.romanized;
+  if (elementMeaning) {
+    return `${roman} (${elementMeaning}-${animal})`;
+  }
+  return `${roman} (${animal})`;
+}
+
+/** Day-pillar address used in prompts / headers. */
+export function formatDayPillarAddress(ganzi: string, locale: Locale): string {
+  if (locale === "ko") return `${ganzi.trim()} 일주`;
+  return `${formatGanziLabel(ganzi, "en")} day pillar`;
+}
+
+/** Single stem / branch / element hanja → EN token (romanized or meaning). */
+export function formatSingleHanjaEn(hanja: string): string | null {
+  if (hanja.length !== 1) return null;
+  const stem = STEM_LABEL[hanja];
+  if (stem) return stem.romanized;
+  const branch = BRANCH_LABEL[hanja];
+  if (branch) return branch.romanized;
+  for (const meta of Object.values(ELEMENT_META)) {
+    if (meta.hanja === hanja) return meta.meaning;
+  }
+  return null;
+}
+
+/** True when both chars form a known stem+branch ganzi pair. */
+export function isGanziPair(stem: string, branch: string): boolean {
+  return Boolean(STEM_LABEL[stem] && BRANCH_LABEL[branch]);
+}

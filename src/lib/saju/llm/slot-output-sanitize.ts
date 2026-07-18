@@ -1,6 +1,13 @@
-import { hanjaCharToHangul } from "@/lib/saju/elements";
+import {
+  formatGanziLabel,
+  formatSingleHanjaEn,
+  hanjaCharToHangul,
+  isGanziPair,
+} from "@/lib/saju/elements";
+import type { Locale } from "@/lib/saju/types";
 
 const CJK_HANJA_RE = /[\u4E00-\u9FFF]/g;
+const GANZI_PAIR_RE = /[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/g;
 
 /** Cover / TOC bullets that are ziwei section titles (never show on saju reports). */
 const ZIWEI_BULLET_TITLES = new Set([
@@ -11,6 +18,20 @@ const ZIWEI_BULLET_TITLES = new Set([
   "Twelve palaces",
   "Major star reading guide",
 ]);
+
+/** Optional server ALS getter — registered only from slot-output-sanitize-server.ts. */
+let hanjaSanitizeLocaleStore: (() => Locale | undefined) | null = null;
+
+/** Called once from the server-only ALS module; keep this file client-safe. */
+export function registerHanjaSanitizeLocaleStore(
+  getter: () => Locale | undefined
+): void {
+  hanjaSanitizeLocaleStore = getter;
+}
+
+function resolveSanitizeLocale(override?: Locale): Locale {
+  return override ?? hanjaSanitizeLocaleStore?.() ?? "ko";
+}
 
 function collectHanjaChars(text: string): string[] {
   const matches = text.match(CJK_HANJA_RE);
@@ -23,7 +44,7 @@ const PRESERVED_HANGUL_HANJA_PAREN_RE =
   /[가-힣]\([木火土金水甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥]\)/g;
 
 /**
- * Replace known stem/branch/element hanja with hangul labels.
+ * Replace known stem/branch/element hanja with hangul labels (KO path).
  * Preserves already-correct `한글(漢字)` pairs (e.g. 목(木), 병(丙)).
  * Unmapped hanja are kept as-is; callers log via sanitizeLlmSlotText().
  */
@@ -58,6 +79,42 @@ export function replaceKnownHanjaWithHangul(text: string): {
 
   return {
     text: restored,
+    detected: detectedChars.join(""),
+    unmapped: [...unmappedSet].join(""),
+  };
+}
+
+/**
+ * EN path: ganzi pairs → "Jeongmyo (Fire-Rabbit)"; lone stem/branch/element → romanized/meaning.
+ * Manse table UI is not passed through this sanitizer.
+ */
+export function replaceKnownHanjaWithEnLabel(text: string): {
+  text: string;
+  detected: string;
+  unmapped: string;
+} {
+  const detectedChars = collectHanjaChars(text);
+  if (!detectedChars.length) {
+    return { text, detected: "", unmapped: "" };
+  }
+
+  let next = text.replace(GANZI_PAIR_RE, (pair) => {
+    const stem = pair.charAt(0);
+    const branch = pair.charAt(1);
+    if (!isGanziPair(stem, branch)) return pair;
+    return formatGanziLabel(pair, "en");
+  });
+
+  const unmappedSet = new Set<string>();
+  next = next.replace(CJK_HANJA_RE, (char) => {
+    const en = formatSingleHanjaEn(char);
+    if (en) return en;
+    unmappedSet.add(char);
+    return char;
+  });
+
+  return {
+    text: next,
     detected: detectedChars.join(""),
     unmapped: [...unmappedSet].join(""),
   };
@@ -140,22 +197,38 @@ export function filterZiweiCoverBullets(bullets: string[] | undefined): string[]
 
 /**
  * Post-process a report slot / display string:
- * hanja→hangul, strip internal `[labels]`, strip markdown noise.
+ * KO: hanja→hangul; EN: hanja→romanization (meaning); strip labels/markdown.
  */
-export function sanitizeLlmSlotText(slotName: string, text: string): string {
-  const { text: afterHanja, detected, unmapped } = replaceKnownHanjaWithHangul(text);
+export function sanitizeLlmSlotText(
+  slotName: string,
+  text: string,
+  localeOverride?: Locale
+): string {
+  const locale = resolveSanitizeLocale(localeOverride);
+  const { text: afterHanja, detected, unmapped } =
+    locale === "en"
+      ? replaceKnownHanjaWithEnLabel(text)
+      : replaceKnownHanjaWithHangul(text);
 
-  if (detected) {
+  // Log only when hanja remain unmapped after replacement (fully mapped EN/KO stays quiet).
+  if (unmapped) {
+    console.error("[LLM_SLOT_HANJA_DETECTED]", {
+      slot: slotName,
+      locale,
+      detected,
+      unmapped,
+    });
+    console.error("[LLM_SLOT_HANJA_UNMAPPED]", {
+      slot: slotName,
+      locale,
+      chars: unmapped,
+    });
+  } else if (detected && locale === "ko") {
+    // Preserve prior KO visibility when mapping succeeded.
     console.error("[LLM_SLOT_HANJA_DETECTED]", {
       slot: slotName,
       detected,
-      unmapped: unmapped || null,
-    });
-  }
-  if (unmapped) {
-    console.error("[LLM_SLOT_HANJA_UNMAPPED]", {
-      slot: slotName,
-      chars: unmapped,
+      unmapped: null,
     });
   }
 

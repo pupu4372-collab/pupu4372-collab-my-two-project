@@ -272,7 +272,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             : "Demo data (no DB or no posts this week)"}
         </p>
       )}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-col items-start gap-2">
         <AuthRequiredLink
           href="/community/pet-show/upload"
           className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
@@ -285,33 +285,13 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
         </AuthRequiredLink>
         <Link
           href="/community/pet-show/snapzone"
-          className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 ${
+          className={`text-sm font-semibold underline-offset-2 transition hover:underline ${
             isNight
-              ? "border border-white/30 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25"
-              : "bg-white/75 text-channel-community hover:bg-white"
+              ? "text-white/75 hover:text-white"
+              : "text-channel-community/80 hover:text-channel-community"
           }`}
         >
           {isKo ? "우리아이 자랑 보기" : "View Pet Show"}
-        </Link>
-        <Link
-          href="/community/pet-show/fails"
-          className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 ${
-            isNight
-              ? "bg-[#ffd7ff] text-primary hover:brightness-105"
-              : "bg-[#ffd7ff] text-primary hover:brightness-105"
-          }`}
-        >
-          {isKo ? "웃긴 실패 사진" : "Funny fails"}
-        </Link>
-        <Link
-          href="/community/challenge"
-          className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold shadow-sm transition hover:scale-105 hover:brightness-105 ${
-            isNight
-              ? "border border-white/30 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25"
-              : "border border-channel-community/25 bg-white/75 text-channel-community hover:bg-white"
-          }`}
-        >
-          {isKo ? "챌린지 참여하기" : "Join Challenge"}
         </Link>
       </div>
       <GlassCard className={`min-w-0 p-4 sm:p-5 ${nightGlassCard}`}>

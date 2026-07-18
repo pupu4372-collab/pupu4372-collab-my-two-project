@@ -1,8 +1,9 @@
 import {
   ELEMENT_META,
   charToElement,
+  formatDayPillarAddress,
   formatElementLabelForLocale,
-  formatStemBranchLabels,
+  formatGanziLabel,
 } from "@/lib/saju/elements";
 import {
   computeManAge,
@@ -183,20 +184,10 @@ function chapter(
   };
 }
 
-/** Compact seun/pillar label: KO 丙午(병오); EN 丙午 (ByeongO) — no Hangul on EN. */
+/** Compact seun/pillar label: KO 丙午(병오); EN Jeongmyo (Fire-Rabbit). */
 function pillarText(pillar: PillarDisplay, locale: Locale = "ko"): string {
   if (locale === "en") {
-    const { stemLabel, branchLabel } = formatStemBranchLabels(
-      pillar.stemHanja || pillar.stem,
-      pillar.branchHanja || pillar.branch,
-      "en"
-    );
-    const stemR = stemLabel.match(/\(([^)]+)\)/)?.[1]?.trim() ?? "";
-    const branchR = branchLabel.match(/\(([^)]+)\)/)?.[1]?.trim() ?? "";
-    // e.g. Mu + Jin → Mujin (match requested EN form)
-    const roman =
-      stemR && branchR ? `${stemR}${branchR.toLowerCase()}` : `${stemR}${branchR}`;
-    return roman ? `${pillar.pillar} (${roman})` : pillar.pillar;
+    return formatGanziLabel(pillar.pillar, "en");
   }
   const stemHangul = pillar.stemLabel.replace(/\([^)]*\)/g, "").trim();
   const branchHangul = pillar.branchLabel.replace(/\([^)]*\)/g, "").trim();
@@ -211,11 +202,7 @@ function clampScore(value: number): number {
 }
 
 function dayPillarNickname(saju: SajuBasicResponse, locale: Locale): string {
-  const day = saju.pillars.day;
-  if (locale === "ko") {
-    return `${day.pillar} 일주`;
-  }
-  return `${day.pillar} day pillar`;
+  return formatDayPillarAddress(saju.pillars.day.pillar, locale);
 }
 
 export function resolveReportType(reportType?: ReportType): ReportType {
@@ -1036,7 +1023,7 @@ export function formatStructuredSectionBodies(
   const cleaned: Partial<Record<string, string>> = {};
   for (const [sectionId, text] of Object.entries(raw)) {
     if (!text?.trim()) continue;
-    const sanitized = sanitizeLlmSlotText(`assemble:${sectionId}`, text);
+    const sanitized = sanitizeLlmSlotText(`assemble:${sectionId}`, text, locale);
     cleaned[sectionId] =
       locale === "en"
         ? sanitized

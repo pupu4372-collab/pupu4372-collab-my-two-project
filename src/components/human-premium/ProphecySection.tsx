@@ -32,16 +32,19 @@ export function ProphecySection({
   const cohort = report.structured?.cohortInsight;
   const sealed = sanitizeLlmSlotText(
     "display:prophecy",
-    prophecy?.full ?? prophecy?.short ?? ""
+    prophecy?.full ?? prophecy?.short ?? "",
+    report.locale
   );
   const keywordCard = sanitizeLlmSlotText(
     "display:prophecy.short",
-    prophecy?.short ?? ""
+    prophecy?.short ?? "",
+    report.locale
   );
   const showKeywordCard =
     Boolean(keywordCard) &&
     Boolean(prophecy?.full) &&
-    keywordCard !== sanitizeLlmSlotText("display:prophecy.full", prophecy?.full ?? "");
+    keywordCard !==
+      sanitizeLlmSlotText("display:prophecy.full", prophecy?.full ?? "", report.locale);
   const mantra = prophecyMantra(isKo);
   const destinyTitle = lockedDestinyTitle(isKo);
 
@@ -97,6 +100,7 @@ export function ProphecySection({
           <BodyText
             body={stripCohortBodyPrefix(cohort.body, isKo ? "ko" : "en")}
             className="mt-3"
+            locale={report.locale}
           />
         </article>
       ) : null}
