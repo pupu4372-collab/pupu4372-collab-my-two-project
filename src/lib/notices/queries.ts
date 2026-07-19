@@ -1,7 +1,8 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { Notice, NoticeLocale } from "@/lib/supabase/types";
 
-const NOTICE_COLUMNS = "id, title, body, locale, is_pinned, published_at, created_at";
+const NOTICE_COLUMNS =
+  "id, title, body, locale, is_pinned, show_home_banner, published_at, created_at";
 
 function asLocale(value: string): NoticeLocale {
   return value === "en" ? "en" : "ko";
@@ -51,6 +52,28 @@ export async function fetchPinnedNotices(locale: string, limit = 3): Promise<Not
   }
 
   return (data ?? []) as Notice[];
+}
+
+/** Latest published home-banner notice for a locale (0–1). */
+export async function fetchHomeBannerNotice(locale: string): Promise<Notice | null> {
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("notices")
+    .select(NOTICE_COLUMNS)
+    .eq("locale", asLocale(locale))
+    .eq("show_home_banner", true)
+    .lte("published_at", new Date().toISOString())
+    .order("published_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("[notices] fetchHomeBannerNotice:", error.message);
+    return null;
+  }
+
+  return ((data ?? [])[0] as Notice | undefined) ?? null;
 }
 
 export async function fetchPublishedNoticeById(

@@ -252,6 +252,7 @@ export interface Notice {
   body: string;
   locale: NoticeLocale;
   is_pinned: boolean;
+  show_home_banner: boolean;
   published_at: string;
   created_at: string;
 }
@@ -261,6 +262,7 @@ export type NoticeInsert = {
   body: string;
   locale: NoticeLocale;
   is_pinned?: boolean;
+  show_home_banner?: boolean;
   published_at?: string;
 };
 

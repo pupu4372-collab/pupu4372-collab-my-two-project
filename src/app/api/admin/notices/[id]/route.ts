@@ -3,7 +3,8 @@ import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { NoticeLocale } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
-const NOTICE_COLUMNS = "id, title, body, locale, is_pinned, published_at, created_at";
+const NOTICE_COLUMNS =
+  "id, title, body, locale, is_pinned, show_home_banner, published_at, created_at";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -58,6 +59,10 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
   if ("is_pinned" in body) {
     patch.is_pinned = Boolean(body.is_pinned);
+  }
+
+  if ("show_home_banner" in body) {
+    patch.show_home_banner = Boolean(body.show_home_banner);
   }
 
   if ("published_at" in body) {

@@ -3,7 +3,8 @@ import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { NoticeInsert, NoticeLocale } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
-const NOTICE_COLUMNS = "id, title, body, locale, is_pinned, published_at, created_at";
+const NOTICE_COLUMNS =
+  "id, title, body, locale, is_pinned, show_home_banner, published_at, created_at";
 
 function parseLocale(value: unknown): NoticeLocale | null {
   if (value === "ko" || value === "en") return value;
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
   const noticeBody = typeof body.body === "string" ? body.body.trim() : "";
   const locale = parseLocale(body.locale);
   const isPinned = Boolean(body.is_pinned);
+  const showHomeBanner = Boolean(body.show_home_banner);
   const publishedAt =
     typeof body.published_at === "string" && body.published_at.trim()
       ? body.published_at.trim()
@@ -83,6 +85,7 @@ export async function POST(request: Request) {
         body: noticeBody,
         locale,
         is_pinned: isPinned,
+        show_home_banner: showHomeBanner,
         published_at: publishedAt,
       } as never)
       .select(NOTICE_COLUMNS)

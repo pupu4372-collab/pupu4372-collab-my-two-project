@@ -1,6 +1,7 @@
 import { HomeGateway } from "@/components/home/HomeGateway";
 import { getPathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { fetchHomeBannerNotice } from "@/lib/notices/queries";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -44,5 +45,15 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <HomeGateway previewTheme="night" />;
+  const homeBannerNotice = await fetchHomeBannerNotice(locale);
+  return (
+    <HomeGateway
+      previewTheme="night"
+      homeBannerNotice={
+        homeBannerNotice
+          ? { id: homeBannerNotice.id, title: homeBannerNotice.title }
+          : null
+      }
+    />
+  );
 }

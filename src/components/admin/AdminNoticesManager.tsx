@@ -10,6 +10,7 @@ const EMPTY_FORM = {
   body: "",
   locale: "ko" as NoticeLocale,
   is_pinned: false,
+  show_home_banner: false,
   published_at: "",
 };
 
@@ -76,6 +77,7 @@ export function AdminNoticesManager() {
       body: notice.body,
       locale: notice.locale,
       is_pinned: notice.is_pinned,
+      show_home_banner: notice.show_home_banner,
       published_at: toDatetimeLocalValue(notice.published_at),
     });
   }
@@ -91,6 +93,7 @@ export function AdminNoticesManager() {
       body: form.body,
       locale: form.locale,
       is_pinned: form.is_pinned,
+      show_home_banner: form.show_home_banner,
       published_at: fromDatetimeLocalValue(form.published_at),
     };
 
@@ -132,6 +135,26 @@ export function AdminNoticesManager() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "고정 상태 변경 실패");
+    }
+  }
+
+  async function toggleHomeBanner(notice: Notice) {
+    if (!accessToken) return;
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/notices/${notice.id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ show_home_banner: !notice.show_home_banner }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "홈 배너 상태 변경 실패");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "홈 배너 상태 변경 실패");
     }
   }
 
@@ -206,7 +229,7 @@ export function AdminNoticesManager() {
             className="rounded-2xl border border-plum/15 bg-sand/40 px-4 py-3 text-sm font-semibold leading-6 text-primary"
             placeholder="본문 (플레인 텍스트)"
           />
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label className="text-sm font-bold text-plum">
               로케일
               <select
@@ -237,6 +260,17 @@ export function AdminNoticesManager() {
                 className="h-4 w-4"
               />
               커뮤니티 상단 고정
+            </label>
+            <label className="flex items-end gap-2 pb-2 text-sm font-bold text-plum">
+              <input
+                type="checkbox"
+                checked={form.show_home_banner}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, show_home_banner: e.target.checked }))
+                }
+                className="h-4 w-4"
+              />
+              홈 배너 노출
             </label>
           </div>
           <button
@@ -272,6 +306,11 @@ export function AdminNoticesManager() {
                           PIN
                         </span>
                       ) : null}
+                      {notice.show_home_banner ? (
+                        <span className="rounded-full bg-[#090f32]/10 px-2.5 py-1 text-[#090f32]">
+                          HOME
+                        </span>
+                      ) : null}
                       <span>{new Date(notice.published_at).toLocaleString("ko-KR")}</span>
                     </div>
                     <h3 className="mt-2 text-base font-extrabold text-primary">{notice.title}</h3>
@@ -284,6 +323,13 @@ export function AdminNoticesManager() {
                       className="rounded-full border border-channel-community/30 bg-white px-3 py-1.5 text-xs font-bold text-channel-community"
                     >
                       {notice.is_pinned ? "고정 해제" : "고정"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void toggleHomeBanner(notice)}
+                      className="rounded-full border border-[#090f32]/25 bg-white px-3 py-1.5 text-xs font-bold text-[#090f32]"
+                    >
+                      {notice.show_home_banner ? "홈배너 해제" : "홈배너"}
                     </button>
                     <button
                       type="button"

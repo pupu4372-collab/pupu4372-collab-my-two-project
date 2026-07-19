@@ -4,6 +4,7 @@ import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import { AppTopNav } from "@/components/layout/AppTopNav";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { GlassCard, PageContainer, SectionHeader } from "@/components/layout/StitchLayout";
+import { HomeNoticeBanner } from "@/components/home/HomeNoticeBanner";
 import { HomePetFortuneCard } from "@/components/home/pet-fortune/HomePetFortuneCard";
 import { type FortuneTodayState } from "@/components/home/PetDailyFortunePanel";
 import { SajuHubPremiumBanner } from "@/components/k-saju/SajuHubPremiumSidebar";
@@ -11,7 +12,7 @@ import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
 import type { PetShowRankingFallbackFlags } from "@/lib/community/ranking";
-import type { PetShowRankingRow } from "@/lib/supabase/types";
+import type { Notice, PetShowRankingRow } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -118,9 +119,10 @@ function RankingPreviewList({
 
 interface HomeGatewayProps {
   previewTheme?: "night";
+  homeBannerNotice?: Pick<Notice, "id" | "title"> | null;
 }
 
-export function HomeGateway({ previewTheme }: HomeGatewayProps) {
+export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatewayProps) {
   const locale = useLocale();
   const t = useTranslations("home");
   const tPetShow = useTranslations("petshow");
@@ -344,6 +346,7 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
   return (
     <div className="min-h-screen overflow-x-hidden bg-transparent">
       <AppTopNav active="home" />
+      {homeBannerNotice ? <HomeNoticeBanner notice={homeBannerNotice} isKo={isKo} /> : null}
       <PageContainer className="space-y-10 md:space-y-14">
         <section className="py-4 md:py-8">
           <div className="md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:grid-rows-[auto_auto_1fr] md:items-start md:gap-x-12 md:gap-y-8 lg:gap-x-16">
