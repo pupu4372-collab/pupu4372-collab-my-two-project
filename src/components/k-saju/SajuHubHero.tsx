@@ -6,7 +6,7 @@ export function SajuHubHero() {
   const t = useTranslations("saju");
 
   return (
-    <section className="box-border flex h-full min-h-full flex-col overflow-hidden rounded-[1.75rem] border border-channel-saju/20 bg-white px-5 py-5 shadow-sm md:px-6 md:py-6">
+    <section className="box-border flex h-auto min-h-0 flex-col overflow-hidden rounded-[1.75rem] border border-channel-saju/20 bg-white px-5 py-5 shadow-sm md:px-6 md:py-6 lg:h-full">
       <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-channel-saju">
         ✨ K-Saju Pet
       </p>

@@ -42,7 +42,7 @@ export function PremiumReportPreviewSample({ locale }: { locale: "ko" | "en" }) 
   return (
     <div className="human-premium-stage rounded-b-[1.75rem]">
       <div
-        className="human-premium-paper-sheet max-h-[32rem] overflow-y-auto overscroll-y-contain px-3 py-4 sm:max-h-[36rem] sm:px-4 [&_.human-premium-accent-bar]:h-5 [&_.human-premium-accent-bar]:w-1 [&_.human-premium-label-caps]:text-[10px] [&_.human-premium-serif]:text-base [&_h2]:text-lg [&_h3]:text-sm [&_section]:scroll-mt-0 [&_section]:space-y-3 [&_section_h2]:text-lg"
+        className="human-premium-paper-sheet max-h-[32rem] min-w-0 overflow-y-auto overscroll-y-contain break-words px-3 py-4 sm:max-h-[36rem] sm:px-4 [&_.human-premium-accent-bar]:h-5 [&_.human-premium-accent-bar]:w-1 [&_.human-premium-label-caps]:text-[10px] [&_.human-premium-serif]:text-base [&_article]:p-3 sm:[&_article]:p-6 [&_article.rounded-2xl]:p-4 sm:[&_article.rounded-2xl]:p-8 md:[&_article.rounded-2xl]:p-10 [&_h2]:text-lg [&_h3]:text-sm [&_section]:scroll-mt-0 [&_section]:space-y-3 [&_section_h2]:text-lg"
         tabIndex={0}
         aria-label={isKo ? "프리미엄 리포트 샘플" : "Premium report sample"}
       >

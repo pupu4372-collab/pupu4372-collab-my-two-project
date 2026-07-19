@@ -41,7 +41,7 @@ export const PET_BASIC_INFO_UI = {
 
 const FIELD_LABEL_CLASS = "block text-sm font-bold text-primary";
 const STITCH_INPUT_CLASS =
-  "pastel-input mt-2 w-full rounded-[2rem] border-transparent bg-sand/50 px-4 py-3.5 text-sm text-on-surface focus:ring-primary/20";
+  "pastel-input mt-2 w-full min-w-0 max-w-full rounded-[2rem] border-transparent bg-sand/50 px-4 py-3.5 text-sm text-on-surface focus:ring-primary/20";
 
 export type PetBasicInfoVariant = "stitch" | "stitch-embedded" | "compact";
 
@@ -90,9 +90,9 @@ export function PetBasicInfoFields({
   const isEmbedded = variant === "stitch-embedded";
 
   const inputClass = isEmbedded
-    ? "mt-1 w-full rounded-xl border border-plum/10 bg-white px-3 py-2 text-xs leading-5 text-ink outline-none transition focus:border-mint/80 focus:shadow-[0_0_0_3px_rgba(168,230,207,0.25)]"
+    ? "mt-1 w-full min-w-0 max-w-full rounded-xl border border-plum/10 bg-white px-3 py-2 text-xs leading-5 text-ink outline-none transition focus:border-mint/80 focus:shadow-[0_0_0_3px_rgba(168,230,207,0.25)]"
     : isCompact
-      ? "pet-fortune-input-field pet-fortune-select text-center"
+      ? "pet-fortune-input-field pet-fortune-select min-w-0 max-w-full text-center"
       : STITCH_INPUT_CLASS;
   const labelClass = isEmbedded
     ? "block text-xs font-medium text-plum/80"
@@ -166,7 +166,7 @@ export function PetBasicInfoFields({
       selectClassName={
         isEmbedded
           ? inputClass
-          : "w-full rounded-2xl border-0 bg-surface-container-low px-3 py-3 text-center text-sm font-bold text-primary focus:ring-4 focus:ring-primary/10"
+          : "w-full min-w-0 max-w-full rounded-2xl border-0 bg-surface-container-low px-3 py-3 text-center text-sm font-bold text-primary focus:ring-4 focus:ring-primary/10"
       }
     />
   );

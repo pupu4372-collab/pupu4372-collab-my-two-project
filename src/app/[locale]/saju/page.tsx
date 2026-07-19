@@ -15,14 +15,14 @@ export default async function SajuHubPage() {
       hideHero
       hideBreadcrumbRow
     >
-      <div className="mx-auto max-w-6xl">
-        <div className="grid gap-6 lg:grid-cols-3 lg:items-start lg:gap-8">
-          <div className="order-1 space-y-4 lg:col-span-2 lg:space-y-5">
+      <div className="mx-auto max-w-6xl min-w-0">
+        <div className="grid min-w-0 gap-6 lg:grid-cols-3 lg:items-start lg:gap-8">
+          <div className="order-1 min-w-0 space-y-4 lg:col-span-2 lg:space-y-5">
             <SajuHubTopRow />
             <SajuForm />
           </div>
 
-          <div className="order-2 lg:sticky lg:top-24 lg:col-span-1 lg:self-start">
+          <div className="order-2 min-w-0 lg:sticky lg:top-24 lg:col-span-1 lg:self-start">
             <SajuHubPremiumSidebar />
           </div>
         </div>

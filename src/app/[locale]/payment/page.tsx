@@ -17,6 +17,7 @@ import {
   portOneReturnNotice,
   stripPortOneRedirectParams,
 } from "@/lib/payments/portone-redirect-return";
+import { buildPortOnePageRedirectUrl, portOnePaymentDisplayOptions } from "@/lib/payments/portone-display";
 import { normalizePetPremiumReturnTo } from "@/lib/payments/pet-premium-return-to";
 import {
   formatPetProductPrice,
@@ -133,12 +134,7 @@ function buildContinuationQuery(params: URLSearchParams, locale: string): string
 }
 
 function buildPortOneRedirectUrl(): string | undefined {
-  if (typeof window === "undefined") return undefined;
-  const url = new URL(window.location.href);
-  for (const key of ["paymentId", "code", "message", "pgCode", "pgMessage"] as const) {
-    url.searchParams.delete(key);
-  }
-  return url.toString();
+  return buildPortOnePageRedirectUrl();
 }
 
 function PaymentContent() {
@@ -421,9 +417,9 @@ function PaymentContent() {
         customer: {
           fullName: params.get("petName") ?? "펫",
         },
+        ...portOnePaymentDisplayOptions(redirectUrl),
         ...(redirectUrl
           ? {
-              redirectUrl,
               forceRedirect: true,
             }
           : {}),

@@ -18,16 +18,16 @@ interface BirthDateSelectProps {
 
 const COPY = {
   ko: {
-    year: "연도 선택",
-    month: "월 선택",
-    day: "일 선택",
+    year: "연도",
+    month: "월",
+    day: "일",
     monthSuffix: "월",
     daySuffix: "일",
   },
   en: {
-    year: "Select year",
-    month: "Select month",
-    day: "Select day",
+    year: "Year",
+    month: "Month",
+    day: "Day",
     monthSuffix: "",
     daySuffix: "",
   },
@@ -110,8 +110,8 @@ export function BirthDateSelect({
 
   const isFortuneCompact = layout === "pet-fortune-compact";
   const selectClass = isFortuneCompact
-    ? "pet-fortune-input-field pet-fortune-select text-center"
-    : selectClassName;
+    ? "pet-fortune-input-field pet-fortune-select min-w-0 max-w-full text-center"
+    : `${selectClassName} min-w-0 max-w-full`.trim();
 
   function renderSelect(select: ReactNode) {
     if (!isFortuneCompact) return select;
@@ -127,7 +127,13 @@ export function BirthDateSelect({
   }
 
   const grid = (
-    <div className={isFortuneCompact ? "grid grid-cols-3 gap-2" : "mt-1 grid grid-cols-3 gap-2"}>
+    <div
+      className={
+        isFortuneCompact
+          ? "grid min-w-0 grid-cols-3 gap-2 [&>*]:min-w-0"
+          : "mt-1 grid min-w-0 grid-cols-3 gap-1.5 sm:gap-2 [&>*]:min-w-0"
+      }
+    >
       {renderSelect(
         <select
           value={year}

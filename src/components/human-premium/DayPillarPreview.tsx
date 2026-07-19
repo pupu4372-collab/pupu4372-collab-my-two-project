@@ -24,7 +24,14 @@ import {
 } from "@/lib/saju/birth-time-options";
 import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { portOnePaymentDisplayOptions } from "@/lib/payments/portone-display";
+import {
+  parsePortOneRedirectReturn,
+  portOneReturnNotice,
+  stripPortOneRedirectParams,
+} from "@/lib/payments/portone-redirect-return";
 
 /** Product header + CTA labels (no duplicate title/sub on the same button). */
 const PRODUCT_UI = {
@@ -85,6 +92,10 @@ export function DayPillarPreview({
   const ui = PRODUCT_UI[isKo ? "ko" : "en"];
   const { accessToken, isFullMember, ready: sessionReady } = useSupabaseSession();
   const paidPriceLabel = formatPrice(getDailyExtraPrice(isKo ? "ko" : "en"), isKo ? "ko" : "en");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const portoneRedirectHandled = useRef(false);
 
   const [loading, setLoading] = useState(false);
   const [paying, setPaying] = useState(false);
@@ -106,6 +117,79 @@ export function DayPillarPreview({
     script.onload = () => setPortoneReady(true);
     document.head.appendChild(script);
   }, []);
+
+  useEffect(() => {
+    if (portoneRedirectHandled.current) return;
+    const parsed = parsePortOneRedirectReturn(new URLSearchParams(searchParams.toString()));
+    if (parsed.kind === "none") return;
+
+    if (parsed.kind === "cancel_or_fail") {
+      portoneRedirectHandled.current = true;
+      const cleaned = stripPortOneRedirectParams(new URLSearchParams(searchParams.toString()));
+      const qs = cleaned.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname);
+      setError(portOneReturnNotice(parsed.code, isKo ? "ko" : "en"));
+      return;
+    }
+
+    if (!accessToken || !sessionReady) return;
+
+    portoneRedirectHandled.current = true;
+    const cleaned = stripPortOneRedirectParams(new URLSearchParams(searchParams.toString()));
+    const qs = cleaned.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+
+    const paymentId = parsed.paymentId;
+    setPaying(true);
+    setError(null);
+    void (async () => {
+      try {
+        const verifyRes = await fetch("/api/payments/human-premium/daily-extra/verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ paymentId, locale: routeLocale, paymentMethod: "portone" }),
+        });
+        const verifyData = (await verifyRes.json()) as {
+          error?: string;
+          status?: string;
+          paymentId?: string;
+        };
+        if (!verifyRes.ok) {
+          throw new Error(verifyData.error ?? "Payment verify failed");
+        }
+        const resolvedPaymentId = String(verifyData.paymentId ?? paymentId);
+        setLoading(true);
+
+        // Already consumed / report exists: open existing report — do not re-generate.
+        if (verifyData.status === "consumed") {
+          const opened = await openExistingDailyReport(resolvedPaymentId);
+          if (!opened) {
+            throw new Error(
+              isKo
+                ? "이미 결제된 리포트를 찾지 못했어요. 보관함에서 확인해 주세요."
+                : "Could not find your paid report. Please check the vault."
+            );
+          }
+          return;
+        }
+
+        const alreadyOpen = await openExistingDailyReport(resolvedPaymentId);
+        if (alreadyOpen) return;
+
+        await requestDailyReport(resolvedPaymentId);
+      } catch (err) {
+        const raw = err instanceof Error ? err.message : "Payment failed";
+        setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
+      } finally {
+        setPaying(false);
+        setLoading(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot PortOne redirect resume
+  }, [accessToken, isKo, pathname, routeLocale, router, searchParams, sessionReady]);
 
   useEffect(() => {
     if (!sessionReady) return;
@@ -154,6 +238,27 @@ export function DayPillarPreview({
     : hasCoupon
       ? ui.ctaCoupon
       : ui.ctaPay(paidPriceLabel);
+
+  /** Vault lookup only — no daily-routine generate. Returns true if navigated. */
+  async function openExistingDailyReport(paymentOrderId: string): Promise<boolean> {
+    if (!accessToken || !paymentOrderId) return false;
+    const vaultRes = await fetch(
+      `/api/payments/human-premium/vault?locale=${encodeURIComponent(routeLocale)}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    if (!vaultRes.ok) return false;
+    const data = (await vaultRes.json()) as {
+      orders?: Array<{
+        orderId?: string;
+        generated?: Partial<Record<string, { webToken?: string }>>;
+      }>;
+    };
+    const order = (data.orders ?? []).find((entry) => entry.orderId === paymentOrderId);
+    const token = order?.generated?.daily?.webToken?.trim();
+    if (!token) return false;
+    window.location.assign(`/${routeLocale}/reports/human/${token}`);
+    return true;
+  }
 
   async function requestDailyReport(dailyExtraPaymentId?: string) {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -289,6 +394,7 @@ export function DayPillarPreview({
           channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
           payMethod: "CARD",
           customData: { productCode: DAILY_EXTRA_PRODUCT_CODE },
+          ...portOnePaymentDisplayOptions(),
         });
 
         if (payResult.code !== undefined) {

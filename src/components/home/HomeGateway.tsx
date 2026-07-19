@@ -275,26 +275,26 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
         </p>
       )}
       <div className="flex flex-col items-start gap-2">
-        <AuthRequiredLink
-          href="/community/pet-show/upload"
+        <Link
+          href="/community/pet-show/snapzone"
           className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
             isNight
               ? "bg-[#22c55e] shadow-[0_0_22px_rgba(34,197,94,0.25)]"
               : "bg-channel-community"
           }`}
         >
-          {isKo ? "사진 업로드하고 랭킹 참여" : "Upload and join ranking"}
-        </AuthRequiredLink>
-        <Link
-          href="/community/pet-show/snapzone"
+          {isKo ? "우리아이 자랑 보기" : "View Pet Show"}
+        </Link>
+        <AuthRequiredLink
+          href="/community/pet-show/upload"
           className={`text-sm font-semibold underline-offset-2 transition hover:underline ${
             isNight
               ? "text-white/75 hover:text-white"
               : "text-channel-community/80 hover:text-channel-community"
           }`}
         >
-          {isKo ? "우리아이 자랑 보기" : "View Pet Show"}
-        </Link>
+          {isKo ? "사진 업로드하고 랭킹 참여" : "Upload and join ranking"}
+        </AuthRequiredLink>
       </div>
       <GlassCard className={`min-w-0 p-4 sm:p-5 ${nightGlassCard}`}>
         <div className="grid gap-3">

@@ -179,7 +179,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   );
 
   const inputClass = embedded
-    ? "mt-1 w-full rounded-xl border border-plum/10 bg-white px-3 py-2 text-xs leading-5 text-ink outline-none transition focus:border-mint/80 focus:shadow-[0_0_0_3px_rgba(168,230,207,0.25)]"
+    ? "mt-1 w-full min-w-0 max-w-full rounded-xl border border-plum/10 bg-white px-3 py-2 text-xs leading-5 text-ink outline-none transition focus:border-mint/80 focus:shadow-[0_0_0_3px_rgba(168,230,207,0.25)]"
     : STITCH_INPUT_CLASS;
   const labelClass = embedded
     ? "block text-xs font-medium text-plum/80"

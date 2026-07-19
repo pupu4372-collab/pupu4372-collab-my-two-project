@@ -13,7 +13,7 @@ export function SajuHubVaultLink() {
   return (
     <Link
       href="/reports"
-      className="group box-border flex h-full min-h-full w-full flex-col items-center justify-center gap-3 rounded-[1.75rem] border border-petal/50 bg-petal px-4 py-5 text-center shadow-sm transition hover:border-petal hover:bg-petal/90 hover:shadow-md"
+      className="group box-border flex h-auto min-h-0 w-full flex-col items-center justify-center gap-3 rounded-[1.75rem] border border-petal/50 bg-petal px-4 py-5 text-center shadow-sm transition hover:border-petal hover:bg-petal/90 hover:shadow-md lg:h-full"
     >
       <span
         className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/70 text-3xl transition group-hover:bg-white"

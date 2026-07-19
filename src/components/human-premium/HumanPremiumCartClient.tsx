@@ -34,8 +34,14 @@ import {
   type ReportType,
 } from "@/lib/reports/human-premium/types";
 import { useLocale } from "next-intl";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  parsePortOneRedirectReturn,
+  portOneReturnNotice,
+  stripPortOneRedirectParams,
+} from "@/lib/payments/portone-redirect-return";
+import { portOnePaymentDisplayOptions } from "@/lib/payments/portone-display";
 
 type PaymentConfig = {
   portone: boolean;
@@ -73,7 +79,7 @@ function isEnCheckoutEnabled(): boolean {
 
 /**
  * Cart payment-method resolution.
- * - KO + PortOne → portone (modal + requestPayment CARD)
+ * - KO + PortOne → portone (PC IFRAME / mobile REDIRECTION + requestPayment CARD)
  * - KO + no PortOne + demo allowed → demo (dev only)
  * - EN + flag ON + PortOne → portone_paypal_spb (PayPal SPB button)
  * - EN + flag OFF → unsupported (P2 “not available yet” copy)
@@ -97,7 +103,9 @@ export function HumanPremiumCartClient() {
   const isKo = routeLocale === "ko";
   const priceLocale = isKo ? "ko" : "en";
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const portoneRedirectHandled = useRef(false);
   const typeLabels = isKo ? REPORT_TYPE_LABELS : REPORT_TYPE_LABELS_EN;
   const { userId, isAnonymous, accessToken, isFullMember, email: sessionEmail } =
     useSupabaseSession();
@@ -220,6 +228,74 @@ export function HumanPremiumCartClient() {
     if (!orderIdFromUrl) return;
     void loadOrderSnapshot(orderIdFromUrl).catch(() => undefined);
   }, [orderIdFromUrl, loadOrderSnapshot]);
+
+  useEffect(() => {
+    if (portoneRedirectHandled.current) return;
+    const parsed = parsePortOneRedirectReturn(new URLSearchParams(searchParams.toString()));
+    if (parsed.kind === "none") return;
+
+    if (parsed.kind === "cancel_or_fail") {
+      portoneRedirectHandled.current = true;
+      const cleaned = stripPortOneRedirectParams(new URLSearchParams(searchParams.toString()));
+      const qs = cleaned.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname);
+      setError(portOneReturnNotice(parsed.code, isKo ? "ko" : "en"));
+      setConfirmOpen(false);
+      return;
+    }
+
+    if (!accessToken) return;
+
+    portoneRedirectHandled.current = true;
+    const cleaned = stripPortOneRedirectParams(new URLSearchParams(searchParams.toString()));
+    const qs = cleaned.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+
+    const paymentId = parsed.paymentId;
+    setPaying(true);
+    setError(null);
+    void (async () => {
+      try {
+        const verifyRes = await fetch("/api/payments/human-premium/cart/verify", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            paymentId,
+            locale: routeLocale,
+            paymentMethod: "portone",
+          }),
+        });
+        const verifyData = (await verifyRes.json()) as { error?: string; orderId?: string };
+        if (!verifyRes.ok) {
+          throw new Error(verifyData.error ?? "Payment verify failed");
+        }
+        const orderId = String(verifyData.orderId ?? paymentId);
+        // Restore UI from server snapshot before touching local paid state.
+        try {
+          await loadOrderSnapshot(orderId);
+        } catch {
+          // Do not markPaidLocally — empty/stale local cart must not get a paid badge.
+          setError(
+            isKo
+              ? "결제된 주문을 불러오지 못했어요. 잠시 후 새로고침하거나 보관함에서 확인해 주세요."
+              : "Could not load your paid order. Refresh shortly or check the vault."
+          );
+          return;
+        }
+        markPaidLocally(orderId);
+      } catch (err) {
+        const raw = err instanceof Error ? err.message : "Payment verify failed";
+        setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
+      } finally {
+        setPaying(false);
+      }
+    })();
+    // markPaidLocally / loadOrderSnapshot are stable enough for this mount cycle
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-shot redirect handler
+  }, [accessToken, isKo, pathname, routeLocale, router, searchParams]);
 
   const visibleItemsKey = visibleItems.join(",");
 
@@ -436,6 +512,7 @@ export function HumanPremiumCartClient() {
       channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
       payMethod: "CARD",
       customData: { orderId: paymentId },
+      ...portOnePaymentDisplayOptions(),
     });
 
     if (payResult?.code !== undefined) {
