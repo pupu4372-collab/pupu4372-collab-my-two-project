@@ -33,6 +33,11 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
       locale: locale === "en" ? "en_US" : "ko_KR",
       url: canonical,
     },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title"),
+      description: t("description"),
+    },
   };
 }
 

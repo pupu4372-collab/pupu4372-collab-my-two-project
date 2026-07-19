@@ -405,6 +405,35 @@ export function HomeGateway({ previewTheme }: HomeGatewayProps) {
             </div>
           </div>
         </section>
+
+        {isKo ? (
+          <section
+            className={`rounded-[2rem] px-5 py-8 md:px-8 md:py-10 ${
+              isNight
+                ? "border border-white/15 bg-white/5"
+                : "border border-plum/10 bg-white/50"
+            }`}
+            aria-labelledby="what-is-pet-saju-heading"
+          >
+            <h2
+              id="what-is-pet-saju-heading"
+              className={`text-xl font-extrabold md:text-2xl ${
+                isNight ? "text-white" : "text-primary"
+              }`}
+            >
+              {t("whatIsPetSajuTitle")}
+            </h2>
+            <div
+              className={`mt-4 space-y-4 text-sm font-semibold leading-7 md:text-[15px] md:leading-8 ${
+                isNight ? "text-white/80" : "text-plum/80"
+              }`}
+            >
+              <p>{t("whatIsPetSajuP1")}</p>
+              <p>{t("whatIsPetSajuP2")}</p>
+              <p>{t("whatIsPetSajuP3")}</p>
+            </div>
+          </section>
+        ) : null}
       </PageContainer>
       <MobileBottomNav active="home" />
     </div>
