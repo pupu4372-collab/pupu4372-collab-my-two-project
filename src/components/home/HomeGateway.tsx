@@ -52,11 +52,13 @@ function RankingPreviewList({
 }) {
   return (
     <div
-      className={`max-w-full overflow-hidden rounded-[1.75rem] p-4 shadow-sm ${
-        isNight ? "border border-white/30 bg-white/32 backdrop-blur-sm" : "bg-white/55"
+      className={`max-w-full overflow-hidden rounded-[1.75rem] p-5 shadow-sm ${
+        isNight
+          ? "border border-white/30 bg-white/32 backdrop-blur-sm"
+          : "border border-plum/40 bg-[#ffffff]"
       }`}
     >
-      <p className={`text-xs font-extrabold ${isNight ? "text-primary" : "text-primary"}`}>
+      <p className={`text-xs font-extrabold ${isNight ? "text-primary" : "text-plum"}`}>
         {emoji} {label}
         {isLastWeekFallback && lastWeekLabel ? (
           <span className="ml-2 rounded-full bg-[#ffd7ff]/55 px-2 py-0.5 text-[10px] font-extrabold text-primary">
@@ -215,9 +217,9 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
   }
 
   const isNight = previewTheme === "night";
-  const nightGlassCard = isNight
-    ? "border border-white/20 bg-white/12 shadow-[0_8px_32px_rgba(0,0,0,0.18)] backdrop-blur-md"
-    : "";
+  /** Home lower-section CTAs only — not in global palette */
+  const homeGoldCtaClass =
+    "inline-flex rounded-full bg-[#e6c15e] px-5 py-3 text-sm font-extrabold text-[#3a2c08] shadow-sm transition hover:scale-105 hover:brightness-105";
 
   const fortunePanel = fortuneLoading ? (
     <div className="space-y-4">
@@ -240,64 +242,38 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
     </div>
   );
 
+  /* Lower section: light surfaces + ink/plum text (hero stays night) */
   const petShowSection = (
-    <div className="space-y-6">
-      {isNight ? (
-        <div>
-          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#22c55e] drop-shadow-[0_0_12px_rgba(34,197,94,0.28)]">
-            {isKo ? "Pet Show" : "Pet Show"}
-          </p>
-          <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white drop-shadow-[0_0_18px_rgba(245,217,255,0.2)] md:text-3xl">
-            {isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/80 md:text-base">
-            {isKo
-              ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요."
-              : "Top photos by likes from the last 7 days, grouped by species."}
-          </p>
-        </div>
-      ) : (
-        <SectionHeader
-          eyebrow={isKo ? "Pet Show" : "Pet Show"}
-          title={isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
-          subtitle={
-            isKo
-              ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요."
-              : "Top photos by likes from the last 7 days, grouped by species."
-          }
-        />
-      )}
+    <div className="space-y-6 rounded-[2rem] bg-cream px-4 py-6 sm:px-5 sm:py-7 md:px-6">
+      <SectionHeader
+        eyebrow={isKo ? "Pet Show" : "Pet Show"}
+        title={isKo ? "이번 주의 우리 아이들" : "Weekly Pet Show Top 5"}
+        subtitle={
+          isKo
+            ? "최근 7일간 가장 많은 사랑을 받은 사진을 종별로 보여줘요."
+            : "Top photos by likes from the last 7 days, grouped by species."
+        }
+      />
       {rankingSource === "mock" && (
-        <p className={`text-xs font-semibold ${isNight ? "text-white/60" : "text-plum/45"}`}>
+        <p className="text-xs font-semibold text-plum/45">
           {isKo
             ? "데모 데이터 (DB 연결 또는 이번 주 게시물 없음)"
             : "Demo data (no DB or no posts this week)"}
         </p>
       )}
       <div className="flex flex-col items-start gap-2">
-        <Link
-          href="/community/pet-show/snapzone"
-          className={`inline-flex rounded-full px-5 py-3 text-sm font-extrabold text-white shadow-sm transition hover:scale-105 hover:brightness-105 ${
-            isNight
-              ? "bg-[#22c55e] shadow-[0_0_22px_rgba(34,197,94,0.25)]"
-              : "bg-channel-community"
-          }`}
-        >
+        <Link href="/community/pet-show/snapzone" className={homeGoldCtaClass}>
           {isKo ? "우리아이 자랑 보기" : "View Pet Show"}
         </Link>
         <AuthRequiredLink
           href="/community/pet-show/upload"
-          className={`text-sm font-semibold underline-offset-2 transition hover:underline ${
-            isNight
-              ? "text-white/75 hover:text-white"
-              : "text-channel-community/80 hover:text-channel-community"
-          }`}
+          className="text-sm font-semibold text-channel-community/80 underline-offset-2 transition hover:text-channel-community hover:underline"
         >
           {isKo ? "사진 업로드하고 랭킹 참여" : "Upload and join ranking"}
         </AuthRequiredLink>
       </div>
-      <GlassCard className={`min-w-0 p-4 sm:p-5 ${nightGlassCard}`}>
-        <div className="grid gap-3">
+      <GlassCard className="min-w-0 border border-plum/20 bg-[#ffffff] p-5 shadow-sm sm:p-6">
+        <div className="grid gap-4">
           <RankingPreviewList
             emoji="🐕"
             label={isKo ? "강아지 Top 5" : "Dog Top 5"}
@@ -305,7 +281,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             emptyText={isKo ? "이번 주 강아지 사진을 기다려요." : "Waiting for dog photos."}
             isLastWeekFallback={rankingFallback.dog}
             lastWeekLabel={tPetShow("rankingLastWeekLabel")}
-            isNight={isNight}
+            isNight={false}
             isKo={isKo}
           />
           <RankingPreviewList
@@ -315,7 +291,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             emptyText={isKo ? "이번 주 고양이 사진을 기다려요." : "Waiting for cat photos."}
             isLastWeekFallback={rankingFallback.cat}
             lastWeekLabel={tPetShow("rankingLastWeekLabel")}
-            isNight={isNight}
+            isNight={false}
             isKo={isKo}
           />
           <RankingPreviewList
@@ -325,7 +301,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             emptyText={tPetShow("reptileTop5Empty")}
             isLastWeekFallback={rankingFallback.reptile}
             lastWeekLabel={tPetShow("rankingLastWeekLabel")}
-            isNight={isNight}
+            isNight={false}
             isKo={isKo}
           />
           <RankingPreviewList
@@ -335,7 +311,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             emptyText={isKo ? "이번 주 웃긴 사진을 기다려요." : "Waiting for funny photos this week."}
             isLastWeekFallback={rankingFallback.funny}
             lastWeekLabel={tPetShow("rankingLastWeekLabel")}
-            isNight={isNight}
+            isNight={false}
             isKo={isKo}
           />
         </div>
@@ -403,7 +379,9 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
               </div>
 
               <div className="relative min-w-0 overflow-visible md:col-start-2 md:row-start-1 md:row-span-3 md:pl-2 md:sticky md:top-24 lg:pl-4">
-                {fortunePanel}
+                <div className="rounded-[2rem] border border-plum/15 bg-white p-4 shadow-sm sm:p-5">
+                  {fortunePanel}
+                </div>
               </div>
             </div>
           </div>
@@ -411,26 +389,16 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
 
         {isKo ? (
           <section
-            className={`rounded-[2rem] px-5 py-8 md:px-8 md:py-10 ${
-              isNight
-                ? "border border-white/15 bg-white/5"
-                : "border border-plum/10 bg-white/50"
-            }`}
+            className="rounded-[2rem] border border-plum/10 bg-cream px-5 py-8 md:px-8 md:py-10"
             aria-labelledby="what-is-pet-saju-heading"
           >
             <h2
               id="what-is-pet-saju-heading"
-              className={`text-xl font-extrabold md:text-2xl ${
-                isNight ? "text-white" : "text-primary"
-              }`}
+              className="text-xl font-extrabold text-primary md:text-2xl"
             >
               {t("whatIsPetSajuTitle")}
             </h2>
-            <div
-              className={`mt-4 space-y-4 text-sm font-semibold leading-7 md:text-[15px] md:leading-8 ${
-                isNight ? "text-white/80" : "text-plum/80"
-              }`}
-            >
+            <div className="mt-4 space-y-4 text-sm font-semibold leading-7 text-plum/80 md:text-[15px] md:leading-8">
               <p>{t("whatIsPetSajuP1")}</p>
               <p>{t("whatIsPetSajuP2")}</p>
               <p>{t("whatIsPetSajuP3")}</p>
