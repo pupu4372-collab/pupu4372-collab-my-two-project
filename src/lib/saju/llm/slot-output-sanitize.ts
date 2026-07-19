@@ -68,6 +68,17 @@ const MYEONGRI_HANJA_TO_EN: Record<string, string> = {
   日干: "ilgan (day stem)",
   日主: "ilju (day master)",
   格局: "gyeokguk (chart frame)",
+  // Ten-god group / day-master strength (traditional + simplified)
+  財星: "jaeseong (wealth stars)",
+  财星: "jaeseong (wealth stars)",
+  官星: "gwanseong (officer stars)",
+  印星: "inseong (resource stars)",
+  比劫: "bigeop (peers and rob wealth)",
+  食傷: "siksang (output stars)",
+  食伤: "siksang (output stars)",
+  身強: "singang (strong day master)",
+  身强: "singang (strong day master)",
+  身弱: "sinyak (weak day master)",
 };
 
 /** Chinese pinyin spellings → Korean romanization (meaning). Case-insensitive. */
@@ -88,6 +99,13 @@ const MYEONGRI_PINYIN_TO_EN: Record<string, string> = {
   jishen: "gisin (unfavorable god)",
   rigan: "ilgan (day stem)",
   rizhu: "ilju (day master)",
+  caixing: "jaeseong (wealth stars)",
+  guanxing: "gwanseong (officer stars)",
+  yinxing: "inseong (resource stars)",
+  bijie: "bigeop (peers and rob wealth)",
+  shishang: "siksang (output stars)",
+  shenqiang: "singang (strong day master)",
+  shenruo: "sinyak (weak day master)",
 };
 
 const HANJA_PHRASE_TO_EN: Record<string, string> = {
@@ -134,6 +152,13 @@ const MYEONGRI_ROMAN_TO_EN: Record<string, string> = {
   ilgan: "ilgan (day stem)",
   ilju: "ilju (day master)",
   gyeokguk: "gyeokguk (chart frame)",
+  jaeseong: "jaeseong (wealth stars)",
+  gwanseong: "gwanseong (officer stars)",
+  inseong: "inseong (resource stars)",
+  bigeop: "bigeop (peers and rob wealth)",
+  siksang: "siksang (output stars)",
+  singang: "singang (strong day master)",
+  sinyak: "sinyak (weak day master)",
 };
 
 const ROMAN_KEYS = Object.keys(MYEONGRI_ROMAN_TO_EN).sort(
