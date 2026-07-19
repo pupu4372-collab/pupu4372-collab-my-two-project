@@ -244,6 +244,26 @@ export interface SupportInquiry {
   resolved_at: string | null;
 }
 
+export type NoticeLocale = "ko" | "en";
+
+export interface Notice {
+  id: string;
+  title: string;
+  body: string;
+  locale: NoticeLocale;
+  is_pinned: boolean;
+  published_at: string;
+  created_at: string;
+}
+
+export type NoticeInsert = {
+  title: string;
+  body: string;
+  locale: NoticeLocale;
+  is_pinned?: boolean;
+  published_at?: string;
+};
+
 export interface PetShowRankingRow {
   id: string;
   author_id: string;
@@ -518,6 +538,7 @@ export interface Database {
       challenges: TableDef<Challenge, Partial<Challenge>>;
       challenge_posts: TableDef<ChallengePost, ChallengePostInsert>;
       coupons: TableDef<Coupon, CouponInsert, Partial<Coupon>>;
+      notices: TableDef<Notice, NoticeInsert, Partial<Notice>>;
     };
     Views: {
       pet_show_ranking_weekly: { Row: PetShowRankingRow; Relationships: [] };

@@ -1,56 +1,17 @@
+import { SupportNoticeList } from "@/components/support/SupportNoticeList";
 import { Link } from "@/i18n/navigation";
 import { AppTopNav } from "@/components/layout/AppTopNav";
 import { SupportQuickActions } from "@/components/support/SupportQuickActions";
+import { fetchPublishedNotices } from "@/lib/notices/queries";
 
 interface SupportPageProps {
   params: Promise<{ locale: string }>;
 }
 
-const notices = [
-  {
-    type: "Update",
-    koTitle: "K-사주 펫 모바일 앱 버전 2.1 업데이트 안내",
-    enTitle: "K-Saju Pet mobile app v2.1 update",
-    date: "2024.05.20",
-    tone: {
-      card: "border-[#d9c7e6] bg-[#f3edf8] hover:bg-[#fbf7ff]",
-      badge: "bg-[#e4d7ee] text-[#5a3a6f]",
-      date: "text-[#5a3a6f]",
-      text: "text-primary",
-      body: "text-plum",
-    },
-  },
-  {
-    type: "Service",
-    koTitle: "서버 점검 및 안정화 작업 공지 (5월 22일)",
-    enTitle: "Server maintenance notice (May 22)",
-    date: "2024.05.15",
-    tone: {
-      card: "border-[#c5c8d6] bg-[#eef0f7] hover:bg-[#f8f9fc]",
-      badge: "bg-[#dde0ea] text-[#4c5268]",
-      date: "text-[#4c5268]",
-      text: "text-primary",
-      body: "text-plum",
-    },
-  },
-  {
-    type: "Notice",
-    koTitle: "개인정보 처리방침 개정 안내",
-    enTitle: "Privacy policy update notice",
-    date: "2024.05.10",
-    tone: {
-      card: "border-[#e9bbc9] bg-[#fff0f4] hover:bg-[#fff8fa]",
-      badge: "bg-[#f5dbe4] text-[#7a4058]",
-      date: "text-[#7a4058]",
-      text: "text-primary",
-      body: "text-plum",
-    },
-  },
-] as const;
-
 export default async function SupportPage({ params }: SupportPageProps) {
   const { locale } = await params;
   const isKo = locale !== "en";
+  const notices = await fetchPublishedNotices(locale, 20);
 
   return (
     <div className="min-h-screen text-white">
@@ -93,34 +54,17 @@ export default async function SupportPage({ params }: SupportPageProps) {
             <div>
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-extrabold text-white">{isKo ? "공지사항" : "Notice"}</h2>
-                <Link href="/community" className="text-xs font-extrabold text-white/70 transition hover:text-white">
-                  {isKo ? "더보기" : "More"} →
+                <Link href="/support" className="text-xs font-extrabold text-white/70 transition hover:text-white">
+                  {isKo ? "목록" : "List"}
                 </Link>
               </div>
-              <div className="mt-6 space-y-4">
-                {notices.map((notice) => (
-                  <article
-                    key={notice.koTitle}
-                    className={`rounded-2xl border p-5 shadow-[0_12px_28px_rgba(61,42,74,0.14)] transition hover:-translate-y-0.5 ${notice.tone.card}`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider ${notice.tone.badge}`}>
-                        {notice.type}
-                      </span>
-                      <span className={`text-xs font-extrabold ${notice.tone.date}`}>{notice.date}</span>
-                    </div>
-                    <h3 className={`mt-3 text-base font-extrabold ${notice.tone.text}`}>{isKo ? notice.koTitle : notice.enTitle}</h3>
-                    <p className={`mt-2 text-sm font-extrabold ${notice.tone.body}`}>
-                      {isKo
-                        ? "더욱 빠르고 정확해진 반려동물 사주 분석 로직이 적용되었습니다."
-                        : "Updated support details for K-Saju Pet users."}
-                    </p>
-                  </article>
-                ))}
+              <div className="mt-6">
+                <SupportNoticeList notices={notices} isKo={isKo} />
               </div>
             </div>
 
             <aside className="relative min-h-[380px] overflow-hidden rounded-[2rem] border border-[#ffe6c7]/45 bg-[#271649] p-7 shadow-[0_24px_55px_-36px_rgba(0,0,0,0.7)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/stitch/global-design-system/dog/dog-02.jpg"
                 alt=""

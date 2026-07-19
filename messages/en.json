@@ -206,7 +206,8 @@
     "dogChannelDesc": "Walk, training, and feeding guides",
     "catChannel": "Cat channel",
     "catChannelDesc": "Litter, behavior, and play guides",
-    "toSaju": "Go to personalized pet care hub →"
+    "toSaju": "Go to personalized pet care hub →",
+    "pinnedNotices": "Pinned notices"
   },
   "common": {
     "backHome": "← Home",

@@ -3,6 +3,7 @@
 import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityDetailSurface";
 import { FirstPlaceCard, RunnerUpCard, petShowRankingHref } from "@/components/community/PetShowRankingCards";
 import { PetShowTopFiveStrip } from "@/components/community/PetShowTopFiveStrip";
+import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
 import type { PetShowRankingFallbackFlags } from "@/lib/community/ranking";
 import type { PetShowRankingRow, RankingPeriod } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
@@ -83,12 +84,12 @@ function SpeciesRankingPanel({
     return (
       <div className="rounded-2xl border border-dashed border-channel-community/25 bg-white px-6 py-10 text-center">
         <p className="text-sm leading-relaxed text-plum/65">{emptyText}</p>
-        <Link
+        <AuthRequiredLink
           href="/community/pet-show/upload"
           className="mt-4 inline-flex rounded-full bg-channel-community px-5 py-2.5 text-sm font-extrabold text-white"
         >
           {isKo ? "사진 올리기" : "Upload photo"}
-        </Link>
+        </AuthRequiredLink>
       </div>
     );
   }

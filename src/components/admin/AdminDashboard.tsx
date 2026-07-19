@@ -103,6 +103,23 @@ export function AdminDashboard() {
       <GlassCard className="p-5" variant="solid">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
+            <p className="text-sm font-bold text-primary">공지사항 관리</p>
+            <p className="mt-1 text-sm text-plum/70">
+              고객센터 공지 등록 · 커뮤니티 상단 고정
+            </p>
+          </div>
+          <Link
+            href="/admin/notices"
+            className="inline-flex rounded-full bg-channel-saju px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+          >
+            공지 관리 열기
+          </Link>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-5" variant="solid">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
             <p className="text-sm font-bold text-primary">결제 내역</p>
             <p className="mt-1 text-sm text-plum/70">
               펫·사람 프리미엄 결제 전체 조회 · CSV 다운로드

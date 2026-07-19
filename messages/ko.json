@@ -206,7 +206,8 @@
     "dogChannelDesc": "산책·훈련·식단 에디토리얼",
     "catChannel": "고양이 채널",
     "catChannelDesc": "행동·화장실·사냥 놀이 가이드",
-    "toSaju": "맞춤 케어 허브로 이동 →"
+    "toSaju": "맞춤 케어 허브로 이동 →",
+    "pinnedNotices": "고정 공지"
   },
   "common": {
     "backHome": "← 홈",

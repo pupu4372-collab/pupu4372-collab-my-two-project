@@ -1,10 +1,12 @@
 import { ChannelShell } from "@/components/layout/ChannelShell";
 import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
+import { CommunityPinnedNotices } from "@/components/community/CommunityPinnedNotices";
 import { COMMUNITY_SOLID_CARD_CLASS } from "@/components/community/CommunityDetailSurface";
 import { GlassCard, SectionHeader } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
 import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
 import { fetchWeeklyPetShowSpeciesRankings } from "@/lib/community/ranking";
+import { fetchPinnedNotices } from "@/lib/notices/queries";
 import { getTranslations } from "next-intl/server";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 
@@ -16,7 +18,10 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
   const { locale } = await params;
   const isKo = locale !== "en";
   const t = await getTranslations("community");
-  const weeklyRanking = await fetchWeeklyPetShowSpeciesRankings();
+  const [weeklyRanking, pinnedNotices] = await Promise.all([
+    fetchWeeklyPetShowSpeciesRankings(),
+    fetchPinnedNotices(locale, 3),
+  ]);
   const tPetShow = await getTranslations({ locale, namespace: "petshow" });
   const tSpecies = await getTranslations({ locale, namespace: "petSpecies" });
   const reptileTop5Rows = mergeReptileChannelRankingRows(
@@ -69,6 +74,8 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
       ]}
     >
       <div className="space-y-10">
+        <CommunityPinnedNotices notices={pinnedNotices} isKo={isKo} />
+
         <nav className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar" aria-label={isKo ? "커뮤니티 카테고리" : "Community categories"}>
           <Link href="/community" className="whitespace-nowrap rounded-full bg-channel-community px-6 py-3 text-sm font-extrabold text-white shadow-md">
             {isKo ? "전체" : "All"}
@@ -147,7 +154,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                         <ol className="flex w-max min-w-full snap-x snap-mandatory gap-2">
                           {rows.slice(0, 5).map((row, index) => (
                             <li key={row.id} className="w-[34vw] max-w-28 shrink-0 snap-start sm:w-28 md:w-24 lg:w-28">
-                              <AuthRequiredLink
+                              <Link
                                 href={row.id.startsWith("mock-") ? "/community/pet-show/snapzone" : `/community/pet-show/${row.id}`}
                                 className="block rounded-2xl bg-channel-community/10 p-2 transition hover:-translate-y-0.5 hover:bg-channel-community/15"
                               >
@@ -164,7 +171,7 @@ export default async function CommunityHubPage({ params }: CommunityHubPageProps
                                 </div>
                                 <p className="mt-1 truncate text-[11px] font-bold text-plum">{row.title ?? "Pet Show"}</p>
                                 <p className="text-[10px] text-plum/45">♥ {row.like_count}</p>
-                              </AuthRequiredLink>
+                              </Link>
                             </li>
                           ))}
                         </ol>
