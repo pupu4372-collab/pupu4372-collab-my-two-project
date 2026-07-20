@@ -2,6 +2,7 @@ import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { NIGHT_SKY_BASE } from "@/lib/theme/night-sky";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -31,6 +32,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <>
+      <Script id="pwa-capture" strategy="beforeInteractive">
+        {`window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();
+    window.__deferredInstallPrompt=e;
+    window.dispatchEvent(new Event('pwa-installable'));
+  });`}
+      </Script>
       {children}
       <ServiceWorkerRegister />
     </>

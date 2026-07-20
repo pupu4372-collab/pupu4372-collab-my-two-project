@@ -21,6 +21,12 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
+declare global {
+  interface Window {
+    __deferredInstallPrompt?: BeforeInstallPromptEvent;
+  }
+}
+
 function isStandaloneDisplay(): boolean {
   if (typeof window === "undefined") return false;
   if (window.matchMedia("(display-mode: standalone)").matches) return true;
@@ -104,14 +110,16 @@ export function InstallPrompt() {
       return;
     }
 
-    const onBeforeInstall = (event: Event) => {
-      event.preventDefault();
-      setDeferredPrompt(event as BeforeInstallPromptEvent);
+    const adoptDeferred = () => {
+      const prompt = window.__deferredInstallPrompt;
+      if (!prompt) return;
+      setDeferredPrompt(prompt);
       setMode("native");
     };
 
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
-    return () => window.removeEventListener("beforeinstallprompt", onBeforeInstall);
+    adoptDeferred();
+    window.addEventListener("pwa-installable", adoptDeferred);
+    return () => window.removeEventListener("pwa-installable", adoptDeferred);
   }, []);
 
   function dismiss() {
@@ -132,6 +140,7 @@ export function InstallPrompt() {
     } catch {
       // user dismissed or prompt failed
     }
+    window.__deferredInstallPrompt = undefined;
     setDeferredPrompt(null);
     setMode(null);
   }
