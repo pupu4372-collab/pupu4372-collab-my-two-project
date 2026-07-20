@@ -4,51 +4,51 @@ export type PricingLocale = "ko" | "en";
 
 export const REPORT_PRICING: Record<ReportType, number> = {
   daily: 0,
-  decade: 4900,
-  monthly: 3900,
+  decade: 5900,
+  monthly: 4900,
   yearly: 5900,
-  mental: 3900,
-  love: 4900,
+  mental: 6900,
+  love: 5900,
   career: 4900,
-  business: 4900,
-  wealth: 5900,
+  business: 8900,
+  wealth: 9900,
   lifetime: 9900,
 };
 
 /** EN shop display + checkout (whole USD) */
 export const REPORT_PRICING_USD: Record<ReportType, number> = {
   daily: 0,
-  decade: 5,
-  monthly: 4,
+  decade: 6,
+  monthly: 5,
   yearly: 6,
-  mental: 4,
-  love: 5,
+  mental: 7,
+  love: 6,
   career: 5,
-  business: 5,
-  wealth: 6,
+  business: 9,
+  wealth: 10,
   lifetime: 10,
 };
 
 export const BUNDLE_PRICING = {
-  all: 30000,
+  all: 45000,
   themepack: 9900,
   timepack: 9900,
 } as const;
 
 export const BUNDLE_PRICING_USD = {
-  all: 33,
+  all: 45,
   themepack: 11,
   timepack: 11,
 } as const;
 
 export type HumanPremiumBundleKind = keyof typeof BUNDLE_PRICING;
 
-/** Paid Daily Lucky Reading (₩1,900 / $2). Free only via daily_lucky_free coupon. */
+/** Paid Daily Lucky Reading (₩2,900 / $3). Free only via daily_lucky_free coupon. */
 export const DAILY_EXTRA_PRODUCT = "daily-extra" as const;
 
 export const DAILY_EXTRA_PRICING = {
-  ko: 1900,
-  en: 2,
+  ko: 2900,
+  en: 3,
 } as const;
 
 export function getDailyExtraPrice(locale: PricingLocale = "ko"): number {
