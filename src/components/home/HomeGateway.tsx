@@ -11,7 +11,11 @@ import { SajuHubPremiumBanner } from "@/components/k-saju/SajuHubPremiumSidebar"
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
-import type { PetShowRankingFallbackFlags } from "@/lib/community/ranking";
+import {
+  EMPTY_RANKING_FALLBACK_FLAGS,
+  petShowFallbackWeekLabel,
+  type PetShowRankingFallbackFlags,
+} from "@/lib/community/ranking";
 import type { Notice, PetShowRankingRow } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -52,10 +56,10 @@ function RankingPreviewList({
 }) {
   return (
     <div
-      className={`max-w-full overflow-hidden rounded-[1.75rem] p-5 shadow-sm ${
+      className={`max-w-full overflow-hidden p-5 shadow-sm ${
         isNight
-          ? "border border-white/30 bg-white/32 backdrop-blur-sm"
-          : "border border-plum/40 bg-[#ffffff]"
+          ? "rounded-[1.75rem] border border-white/30 bg-white/32 backdrop-blur-sm"
+          : "rounded-[4px] border-2 border-[#2a2520] bg-[#f8f1e4]"
       }`}
     >
       <p className={`text-xs font-extrabold ${isNight ? "text-primary" : "text-plum"}`}>
@@ -132,12 +136,9 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
   const { ready, accessToken } = useSupabaseSession();
   const [rankingRows, setRankingRows] = useState<WeeklyRankingRows>(emptyRankingRows);
   const [funnyRankingRows, setFunnyRankingRows] = useState<PetShowRankingRow[]>([]);
-  const [rankingFallback, setRankingFallback] = useState<PetShowRankingFallbackFlags>({
-    dog: false,
-    cat: false,
-    reptile: false,
-    funny: false,
-  });
+  const [rankingFallback, setRankingFallback] = useState<PetShowRankingFallbackFlags>(
+    EMPTY_RANKING_FALLBACK_FLAGS,
+  );
   const [rankingSource, setRankingSource] = useState<"supabase" | "mock" | null>(null);
   const [fortuneData, setFortuneData] = useState<FortuneTodayState | null>(null);
   const [fortuneLoading, setFortuneLoading] = useState(true);
@@ -160,12 +161,12 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
           other: data.rows?.other ?? [],
         });
         setFunnyRankingRows(data.funny ?? []);
-        setRankingFallback(data.lastWeekFallback ?? { dog: false, cat: false, reptile: false, funny: false });
+        setRankingFallback(data.lastWeekFallback ?? EMPTY_RANKING_FALLBACK_FLAGS);
         setRankingSource(data.source ?? null);
       } catch {
         setRankingRows(emptyRankingRows);
         setFunnyRankingRows([]);
-        setRankingFallback({ dog: false, cat: false, reptile: false, funny: false });
+        setRankingFallback(EMPTY_RANKING_FALLBACK_FLAGS);
         setRankingSource(null);
       }
     }
@@ -279,8 +280,8 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             label={isKo ? "강아지 Top 5" : "Dog Top 5"}
             rows={rankingRows.dog}
             emptyText={isKo ? "이번 주 강아지 사진을 기다려요." : "Waiting for dog photos."}
-            isLastWeekFallback={rankingFallback.dog}
-            lastWeekLabel={tPetShow("rankingLastWeekLabel")}
+            isLastWeekFallback={rankingFallback.dog > 0}
+            lastWeekLabel={petShowFallbackWeekLabel(rankingFallback.dog, tPetShow)}
             isNight={false}
             isKo={isKo}
           />
@@ -289,8 +290,8 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             label={isKo ? "고양이 Top 5" : "Cat Top 5"}
             rows={rankingRows.cat}
             emptyText={isKo ? "이번 주 고양이 사진을 기다려요." : "Waiting for cat photos."}
-            isLastWeekFallback={rankingFallback.cat}
-            lastWeekLabel={tPetShow("rankingLastWeekLabel")}
+            isLastWeekFallback={rankingFallback.cat > 0}
+            lastWeekLabel={petShowFallbackWeekLabel(rankingFallback.cat, tPetShow)}
             isNight={false}
             isKo={isKo}
           />
@@ -299,8 +300,8 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             label={tPetShow("reptileTop5")}
             rows={mergeReptileChannelRankingRows(rankingRows.reptile, rankingRows.other)}
             emptyText={tPetShow("reptileTop5Empty")}
-            isLastWeekFallback={rankingFallback.reptile}
-            lastWeekLabel={tPetShow("rankingLastWeekLabel")}
+            isLastWeekFallback={rankingFallback.reptile > 0}
+            lastWeekLabel={petShowFallbackWeekLabel(rankingFallback.reptile, tPetShow)}
             isNight={false}
             isKo={isKo}
           />
@@ -309,8 +310,8 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             label={isKo ? "웃긴 사진 Top 5" : "Funny Top 5"}
             rows={funnyRankingRows}
             emptyText={isKo ? "이번 주 웃긴 사진을 기다려요." : "Waiting for funny photos this week."}
-            isLastWeekFallback={rankingFallback.funny}
-            lastWeekLabel={tPetShow("rankingLastWeekLabel")}
+            isLastWeekFallback={rankingFallback.funny > 0}
+            lastWeekLabel={petShowFallbackWeekLabel(rankingFallback.funny, tPetShow)}
             isNight={false}
             isKo={isKo}
           />

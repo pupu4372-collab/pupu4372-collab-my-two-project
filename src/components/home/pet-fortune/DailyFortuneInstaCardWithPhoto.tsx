@@ -20,6 +20,14 @@ function findFortuneCategory(fortune: PetDailyFortune, labelKo: string, labelEn:
   return fortune.categories.find((c) => c.label === labelKo || c.label === labelEn);
 }
 
+/** Mockup neon pill colors (health / vitality / joy / luck) — visual only; scores stay dynamic. */
+const STAT_PILL_COLORS: Record<string, string> = {
+  health: "#ec4899",
+  activity: "#10b981",
+  appetite: "#fb923c",
+  sleep: "#a855f7",
+};
+
 export const DailyFortuneInstaCardWithPhoto = forwardRef<HTMLDivElement, Props>(
   function DailyFortuneInstaCardWithPhoto({ pet, fortune, isKo, photoUrl, onPhotoReady }, ref) {
     const content = useMemo(
@@ -37,16 +45,16 @@ export const DailyFortuneInstaCardWithPhoto = forwardRef<HTMLDivElement, Props>(
 
       return [
         health
-          ? { key: "health", label: isKo ? "건강" : "Health", score: health.score, color: health.color }
+          ? { key: "health", label: isKo ? "건강" : "Health", score: health.score }
           : null,
         activity
-          ? { key: "activity", label: isKo ? "활력" : "Vitality", score: activity.score, color: activity.color }
+          ? { key: "activity", label: isKo ? "활력" : "Vitality", score: activity.score }
           : null,
         appetite
-          ? { key: "appetite", label: isKo ? "기쁨" : "Joy", score: appetite.score, color: appetite.color }
+          ? { key: "appetite", label: isKo ? "기쁨" : "Joy", score: appetite.score }
           : null,
         sleep
-          ? { key: "sleep", label: isKo ? "행운" : "Luck", score: sleep.score, color: sleep.color }
+          ? { key: "sleep", label: isKo ? "행운" : "Luck", score: sleep.score }
           : null,
       ].filter((item): item is NonNullable<typeof item> => item !== null);
     }, [fortune, isKo]);
@@ -75,6 +83,8 @@ export const DailyFortuneInstaCardWithPhoto = forwardRef<HTMLDivElement, Props>(
 
     return (
       <div ref={ref} className="daily-fortune-insta-card daily-fortune-insta-card--photo">
+        <div className="daily-fortune-insta-card--photo__aurora" aria-hidden />
+        <div className="daily-fortune-insta-card--photo__stars" aria-hidden />
         <div className="daily-fortune-insta-card--photo__body">
           <div className="daily-fortune-insta-card--photo__top">
             <div className="daily-fortune-insta-card--photo__media">
@@ -96,20 +106,40 @@ export const DailyFortuneInstaCardWithPhoto = forwardRef<HTMLDivElement, Props>(
             </div>
 
             <div className="daily-fortune-insta-card--photo__elements">
-              {statBars.map((stat) => (
-                <div key={stat.key} className="daily-fortune-insta-card--photo__element-row">
-                  <div className="daily-fortune-insta-card--photo__element-head">
-                    <span className="daily-fortune-insta-card--photo__element-label">{stat.label}</span>
-                    <span className="daily-fortune-insta-card--photo__element-pct">{stat.score}%</span>
+              {statBars.map((stat) => {
+                const pillColor = STAT_PILL_COLORS[stat.key] ?? "#a855f7";
+                const fillPct = Math.max(12, Math.min(100, Math.round(stat.score)));
+                return (
+                  <div
+                    key={stat.key}
+                    className="daily-fortune-insta-card--photo__element-row"
+                    style={{
+                      ["--stat-color" as string]: pillColor,
+                      boxShadow: `0 0 16px ${pillColor}99, 0 0 28px ${pillColor}55`,
+                      borderRadius: 9999,
+                    }}
+                  >
+                    <div className="daily-fortune-insta-card--photo__element-track">
+                      <div
+                        className="daily-fortune-insta-card--photo__element-fill"
+                        style={{
+                          width: `${fillPct}%`,
+                          backgroundColor: pillColor,
+                          boxShadow: `inset 0 0 0 1px rgba(255,255,255,0.25), 0 0 14px ${pillColor}aa`,
+                        }}
+                      />
+                      <div className="daily-fortune-insta-card--photo__element-head">
+                        <span className="daily-fortune-insta-card--photo__element-label">
+                          {stat.label}
+                        </span>
+                        <span className="daily-fortune-insta-card--photo__element-pct">
+                          {stat.score}%
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="daily-fortune-insta-card--photo__element-track">
-                    <div
-                      className="daily-fortune-insta-card--photo__element-fill"
-                      style={{ width: `${Math.max(4, stat.score)}%`, backgroundColor: stat.color }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -132,11 +162,21 @@ export const DailyFortuneInstaCardWithPhoto = forwardRef<HTMLDivElement, Props>(
               </article>
             </div>
 
-            <p className="daily-fortune-insta-card--photo__watermark">#ksajupet</p>
+            <p className="daily-fortune-insta-card--photo__watermark">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/icon-192.png"
+                alt=""
+                width={28}
+                height={28}
+                className="daily-fortune-insta-card--photo__brand-icon"
+              />
+              <span>K-Saju Pet</span>
+            </p>
           </div>
         </div>
 
-        <footer className="daily-fortune-insta-card__footer">
+        <footer className="daily-fortune-insta-card__footer daily-fortune-insta-card__footer--photo">
           {isKo ? "내 아이 오늘의 케어법 보기  ksajupet.com" : "See my pet's care guide today  ksajupet.com"}
         </footer>
       </div>

@@ -1,6 +1,10 @@
 import { loadSpeciesByPetId, resolvePostSpecies } from "@/lib/community/pet-show-species";
 import { mergeReptileChannelRankingRows } from "@/lib/pets/species";
-import { getKstWeekEndUtc, getKstWeekStartUtc } from "@/lib/time/kst-week";
+import {
+  getKstWeekEndUtc,
+  getKstWeekStartUtc,
+  isCreatedAtInKstWeek,
+} from "@/lib/time/kst-week";
 import type { PetShowRankingRow, PetShowSpecies, RankingPeriod } from "@/lib/supabase/types";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -8,6 +12,11 @@ const TOP_LIMIT = 5;
 const MONTH_DAYS = 30;
 const SPECIES_SCAN_LIMIT = 120;
 const FUNNY_SCAN_LIMIT = 40;
+/** Max past KST weeks to search when the current week is empty for a species. */
+const MAX_FALLBACK_WEEKS = 12;
+/** Single-range scan covering current + fallback weeks (enough for low post volume). */
+const LOOKBACK_CUTE_LIMIT = 500;
+const LOOKBACK_FUNNY_LIMIT = 200;
 
 export type PetShowPhotoCategory = "cute" | "funny";
 
@@ -84,6 +93,9 @@ function buildPhotoShowRankingQuery(
     photoCategory: PetShowPhotoCategory;
     period?: Extract<RankingPeriod, "week" | "month">;
     weeksAgo?: number;
+    /** Inclusive lower / exclusive upper ISO bounds (overrides period week window when both set). */
+    createdFromIso?: string;
+    createdToIso?: string;
     limit: number;
   },
 ) {
@@ -104,7 +116,11 @@ function buildPhotoShowRankingQuery(
     query = query.or("category.eq.cute,category.is.null");
   }
 
-  if (options.period === "week") {
+  if (options.createdFromIso && options.createdToIso) {
+    query = query
+      .gte("created_at", options.createdFromIso)
+      .lt("created_at", options.createdToIso);
+  } else if (options.period === "week") {
     const weeksAgo = options.weeksAgo ?? 0;
     query = query
       .gte("created_at", getKstWeekStartUtc(new Date(), weeksAgo).toISOString())
@@ -152,18 +168,29 @@ export interface PetShowSpeciesRankings {
 }
 
 export interface PetShowRankingFallbackFlags {
-  dog: boolean;
-  cat: boolean;
-  reptile: boolean;
-  funny: boolean;
+  /** 0 = current week (no badge). 1+ = filled from that many KST weeks ago. */
+  dog: number;
+  cat: number;
+  reptile: number;
+  funny: number;
 }
 
 export const EMPTY_RANKING_FALLBACK_FLAGS: PetShowRankingFallbackFlags = {
-  dog: false,
-  cat: false,
-  reptile: false,
-  funny: false,
+  dog: 0,
+  cat: 0,
+  reptile: 0,
+  funny: 0,
 };
+
+/** Badge copy: 1 → last-week key; 2+ → weeks-ago key with `{n}`. */
+export function petShowFallbackWeekLabel(
+  weeksAgo: number,
+  t: (key: string, values?: { n: number }) => string,
+): string {
+  if (weeksAgo <= 0) return "";
+  if (weeksAgo === 1) return t("rankingLastWeekLabel");
+  return t("rankingWeeksAgoLabel", { n: weeksAgo });
+}
 
 export interface PetShowRankingsBundle {
   rows: PetShowSpeciesRankings;
@@ -252,37 +279,138 @@ async function fetchRankingsForWindow(
   };
 }
 
-function applyWeeklyLastWeekFallback(
-  current: { grouped: PetShowSpeciesRankings; funny: PetShowRankingRow[] },
-  previous: { grouped: PetShowSpeciesRankings; funny: PetShowRankingRow[] },
-): { rows: PetShowSpeciesRankings; funny: PetShowRankingRow[]; lastWeekFallback: PetShowRankingFallbackFlags } {
-  const lastWeekFallback: PetShowRankingFallbackFlags = { ...EMPTY_RANKING_FALLBACK_FLAGS };
-  const rows: PetShowSpeciesRankings = { ...current.grouped };
-  let funny = current.funny;
-
-  if (rows.dog.length === 0 && previous.grouped.dog.length > 0) {
-    rows.dog = previous.grouped.dog;
-    lastWeekFallback.dog = true;
+function resolveKstWeeksAgo(createdAt: string, now: Date): number | null {
+  for (let weeksAgo = 0; weeksAgo <= MAX_FALLBACK_WEEKS; weeksAgo += 1) {
+    if (isCreatedAtInKstWeek(createdAt, now, weeksAgo)) return weeksAgo;
   }
-  if (rows.cat.length === 0 && previous.grouped.cat.length > 0) {
-    rows.cat = previous.grouped.cat;
-    lastWeekFallback.cat = true;
+  return null;
+}
+
+function emptyWeekBuckets(): Array<{
+  grouped: PetShowSpeciesRankings;
+  funny: PetShowRankingRow[];
+}> {
+  return Array.from({ length: MAX_FALLBACK_WEEKS + 1 }, () => ({
+    grouped: { dog: [], cat: [], reptile: [], other: [] },
+    funny: [],
+  }));
+}
+
+/**
+ * One range query (cute + funny) over current week … MAX_FALLBACK_WEEKS ago,
+ * then bucket by KST week and fill empty species from the nearest past week.
+ */
+async function fetchWeeklyRankingsWithLookback(
+  supabase: NonNullable<ReturnType<typeof getSupabaseServerClient>>,
+  now: Date = new Date(),
+): Promise<{
+  rows: PetShowSpeciesRankings;
+  funny: PetShowRankingRow[];
+  lastWeekFallback: PetShowRankingFallbackFlags;
+}> {
+  const createdFromIso = getKstWeekStartUtc(now, MAX_FALLBACK_WEEKS).toISOString();
+  const createdToIso = getKstWeekEndUtc(now, 0).toISOString();
+
+  const [cuteResult, funnyResult] = await Promise.all([
+    buildPhotoShowRankingQuery(supabase, {
+      photoCategory: "cute",
+      createdFromIso,
+      createdToIso,
+      limit: LOOKBACK_CUTE_LIMIT,
+    }),
+    buildPhotoShowRankingQuery(supabase, {
+      photoCategory: "funny",
+      createdFromIso,
+      createdToIso,
+      limit: LOOKBACK_FUNNY_LIMIT,
+    }),
+  ]);
+
+  if (cuteResult.error || funnyResult.error) {
+    throw cuteResult.error ?? funnyResult.error;
   }
 
-  const currentReptile = mergeReptileChannelRankingRows(rows.reptile, rows.other);
-  const previousReptile = mergeReptileChannelRankingRows(
-    previous.grouped.reptile,
-    previous.grouped.other,
+  const cuteRows = (cuteResult.data ?? []) as unknown as RankingPostRow[];
+  const funnyRows = (funnyResult.data ?? []) as unknown as RankingPostRow[];
+  const speciesByPetId = await loadSpeciesByPetId(supabase, [...cuteRows, ...funnyRows]);
+
+  const cuteByWeek: RankingPostRow[][] = Array.from(
+    { length: MAX_FALLBACK_WEEKS + 1 },
+    () => [],
   );
-  if (currentReptile.length === 0 && previousReptile.length > 0) {
-    rows.reptile = previous.grouped.reptile;
-    rows.other = previous.grouped.other;
-    lastWeekFallback.reptile = true;
+  const funnyByWeek: RankingPostRow[][] = Array.from(
+    { length: MAX_FALLBACK_WEEKS + 1 },
+    () => [],
+  );
+
+  for (const post of cuteRows) {
+    const weeksAgo = resolveKstWeeksAgo(post.created_at, now);
+    if (weeksAgo == null) continue;
+    cuteByWeek[weeksAgo].push(post);
+  }
+  for (const post of funnyRows) {
+    const weeksAgo = resolveKstWeeksAgo(post.created_at, now);
+    if (weeksAgo == null) continue;
+    funnyByWeek[weeksAgo].push(post);
   }
 
-  if (funny.length === 0 && previous.funny.length > 0) {
-    funny = previous.funny;
-    lastWeekFallback.funny = true;
+  const buckets = emptyWeekBuckets();
+  for (let weeksAgo = 0; weeksAgo <= MAX_FALLBACK_WEEKS; weeksAgo += 1) {
+    buckets[weeksAgo] = {
+      grouped: groupPostsBySpecies(cuteByWeek[weeksAgo], speciesByPetId),
+      funny: groupFunnyPosts(funnyByWeek[weeksAgo]),
+    };
+  }
+
+  const current = buckets[0];
+  const rows: PetShowSpeciesRankings = {
+    dog: [...current.grouped.dog],
+    cat: [...current.grouped.cat],
+    reptile: [...current.grouped.reptile],
+    other: [...current.grouped.other],
+  };
+  let funny = [...current.funny];
+  const lastWeekFallback: PetShowRankingFallbackFlags = { ...EMPTY_RANKING_FALLBACK_FLAGS };
+
+  const fillSpecies = (
+    key: "dog" | "cat",
+    isEmpty: boolean,
+  ) => {
+    if (!isEmpty) return;
+    for (let weeksAgo = 1; weeksAgo <= MAX_FALLBACK_WEEKS; weeksAgo += 1) {
+      const candidate = buckets[weeksAgo].grouped[key];
+      if (candidate.length > 0) {
+        rows[key] = candidate;
+        lastWeekFallback[key] = weeksAgo;
+        return;
+      }
+    }
+  };
+
+  fillSpecies("dog", rows.dog.length === 0);
+  fillSpecies("cat", rows.cat.length === 0);
+
+  if (mergeReptileChannelRankingRows(rows.reptile, rows.other).length === 0) {
+    for (let weeksAgo = 1; weeksAgo <= MAX_FALLBACK_WEEKS; weeksAgo += 1) {
+      const prev = buckets[weeksAgo].grouped;
+      if (mergeReptileChannelRankingRows(prev.reptile, prev.other).length > 0) {
+        rows.reptile = prev.reptile;
+        rows.other = prev.other;
+        lastWeekFallback.reptile = weeksAgo;
+        break;
+      }
+    }
+  }
+
+  if (funny.length === 0) {
+    for (let weeksAgo = 1; weeksAgo <= MAX_FALLBACK_WEEKS; weeksAgo += 1) {
+      const candidate = buckets[weeksAgo].funny;
+      if (candidate.length > 0) {
+        funny = candidate;
+        lastWeekFallback.funny = weeksAgo;
+        break;
+      }
+    }
   }
 
   return { rows, funny, lastWeekFallback };
@@ -304,22 +432,12 @@ export async function fetchPetShowSpeciesRankings(
   }
 
   try {
-    const current = await fetchRankingsForWindow(supabase, period, 0);
-
     if (period === "week") {
-      const needsFallback =
-        current.grouped.dog.length === 0 ||
-        current.grouped.cat.length === 0 ||
-        mergeReptileChannelRankingRows(current.grouped.reptile, current.grouped.other).length === 0 ||
-        current.funny.length === 0;
-
-      if (needsFallback) {
-        const previous = await fetchRankingsForWindow(supabase, period, 1);
-        const { rows, funny, lastWeekFallback } = applyWeeklyLastWeekFallback(current, previous);
-        return { rows, funny, source: "supabase", lastWeekFallback };
-      }
+      const { rows, funny, lastWeekFallback } = await fetchWeeklyRankingsWithLookback(supabase);
+      return { rows, funny, source: "supabase", lastWeekFallback };
     }
 
+    const current = await fetchRankingsForWindow(supabase, period, 0);
     return {
       rows: current.grouped,
       funny: current.funny,

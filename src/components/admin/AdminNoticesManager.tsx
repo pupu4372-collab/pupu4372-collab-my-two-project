@@ -307,7 +307,7 @@ export function AdminNoticesManager() {
                         </span>
                       ) : null}
                       {notice.show_home_banner ? (
-                        <span className="rounded-full bg-[#090f32]/10 px-2.5 py-1 text-[#090f32]">
+                        <span className="rounded-full bg-[#3d5a8c]/10 px-2.5 py-1 text-[#3d5a8c]">
                           HOME
                         </span>
                       ) : null}
@@ -327,7 +327,7 @@ export function AdminNoticesManager() {
                     <button
                       type="button"
                       onClick={() => void toggleHomeBanner(notice)}
-                      className="rounded-full border border-[#090f32]/25 bg-white px-3 py-1.5 text-xs font-bold text-[#090f32]"
+                      className="rounded-full border border-[#3d5a8c]/25 bg-white px-3 py-1.5 text-xs font-bold text-[#3d5a8c]"
                     >
                       {notice.show_home_banner ? "홈배너 해제" : "홈배너"}
                     </button>

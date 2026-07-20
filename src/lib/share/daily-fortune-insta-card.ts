@@ -257,7 +257,7 @@ export async function captureDailyFortuneInstaCard(cardEl: HTMLElement): Promise
   });
 
   const canvas = await html2canvas(cardEl, {
-    backgroundColor: "#1a1814",
+    backgroundColor: "#eef4f8",
     scale: 1,
     useCORS: true,
     width: INSTA_SIZE,

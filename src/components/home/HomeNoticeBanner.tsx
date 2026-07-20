@@ -38,7 +38,7 @@ export function HomeNoticeBanner({ notice, isKo }: HomeNoticeBannerProps) {
 
   return (
     <div
-      className="border-b border-white/10 bg-[#090f32] text-white"
+      className="border-b border-white/10 bg-[#3d5a8c] text-white"
       role="region"
       aria-label={isKo ? "홈 공지 배너" : "Home notice banner"}
     >

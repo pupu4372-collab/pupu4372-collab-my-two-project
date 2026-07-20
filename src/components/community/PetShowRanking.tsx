@@ -4,7 +4,10 @@ import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityD
 import { FirstPlaceCard, RunnerUpCard, petShowRankingHref } from "@/components/community/PetShowRankingCards";
 import { PetShowTopFiveStrip } from "@/components/community/PetShowTopFiveStrip";
 import { AuthRequiredLink } from "@/components/auth/AuthRequiredLink";
-import type { PetShowRankingFallbackFlags } from "@/lib/community/ranking";
+import {
+  petShowFallbackWeekLabel,
+  type PetShowRankingFallbackFlags,
+} from "@/lib/community/ranking";
 import type { PetShowRankingRow, RankingPeriod } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -149,11 +152,14 @@ export function PetShowWeeklySpeciesRanking({
     { id: "reptile", label: tSpecies("reptile") },
   ];
 
-  const fallbackBySpecies: Record<RankingSpeciesTab, boolean> = {
-    dog: Boolean(lastWeekFallback?.dog),
-    cat: Boolean(lastWeekFallback?.cat),
-    reptile: Boolean(lastWeekFallback?.reptile),
+  const fallbackBySpecies: Record<RankingSpeciesTab, number> = {
+    dog: lastWeekFallback?.dog ?? 0,
+    cat: lastWeekFallback?.cat ?? 0,
+    reptile: lastWeekFallback?.reptile ?? 0,
   };
+
+  const activeFallbackWeeks = fallbackBySpecies[activeSpecies];
+  const funnyFallbackWeeks = lastWeekFallback?.funny ?? 0;
 
   return (
     <section className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-5 md:p-6`}>
@@ -199,8 +205,8 @@ export function PetShowWeeklySpeciesRanking({
           rows={rowsBySpecies[activeSpecies]}
           emptyText={emptyBySpecies[activeSpecies]}
           isKo={isKo}
-          isLastWeekFallback={!isMonthly && fallbackBySpecies[activeSpecies]}
-          lastWeekLabel={t("rankingLastWeekLabel")}
+          isLastWeekFallback={!isMonthly && activeFallbackWeeks > 0}
+          lastWeekLabel={petShowFallbackWeekLabel(activeFallbackWeeks, t)}
         />
       </div>
 
@@ -215,8 +221,8 @@ export function PetShowWeeklySpeciesRanking({
           rows={funnyRows}
           isKo={isKo}
           emptyText={isMonthly ? t("rankingEmptyFunnyMonth") : t("rankingEmptyFunnyWeek")}
-          isLastWeekFallback={!isMonthly && Boolean(lastWeekFallback?.funny)}
-          lastWeekLabel={t("rankingLastWeekLabel")}
+          isLastWeekFallback={!isMonthly && funnyFallbackWeeks > 0}
+          lastWeekLabel={petShowFallbackWeekLabel(funnyFallbackWeeks, t)}
         />
       </div>
     </section>

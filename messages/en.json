@@ -46,6 +46,7 @@
     "rankingTitleMonth": "Pet Show Monthly Top 5",
     "rankingDescWeek": "Ranked by likes this week (from Monday 00:00 KST). Ties go to earlier uploads first.",
     "rankingLastWeekLabel": "Last week's Top 5",
+    "rankingWeeksAgoLabel": "Top 5 from {n} weeks ago",
     "rankingDescMonth": "Ranked by likes from the last 30 days. Ties go to earlier uploads first.",
     "rankingSpeciesNav": "Ranking by species",
     "rankingEmptyDogWeek": "Waiting for dog photos this week.",
