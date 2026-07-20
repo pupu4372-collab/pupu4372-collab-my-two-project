@@ -7,6 +7,7 @@ import { GlassCard, PageContainer, SectionHeader } from "@/components/layout/Sti
 import { HomeNoticeBanner } from "@/components/home/HomeNoticeBanner";
 import { HomePetFortuneCard } from "@/components/home/pet-fortune/HomePetFortuneCard";
 import { type FortuneTodayState } from "@/components/home/PetDailyFortunePanel";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { SajuHubPremiumBanner } from "@/components/k-saju/SajuHubPremiumSidebar";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
@@ -413,6 +414,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
         ) : null}
       </PageContainer>
       <MobileBottomNav active="home" />
+      <InstallPrompt />
     </div>
   );
 }

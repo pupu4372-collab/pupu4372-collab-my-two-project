@@ -283,5 +283,22 @@
       "instagramShareSavedToast": "이미지가 저장됐어요. 인스타그램에 올려보세요!",
       "instagramShareFailed": "인스타 스토리 공유를 열 수 없어요."
     }
+  },
+  "pwa": {
+    "install": {
+      "bannerLabel": "앱 설치 안내",
+      "dismiss": "닫기",
+      "nativeMessage": "홈 화면에서 앱처럼 빠르게 열어보세요.",
+      "nativeCta": "앱으로 설치하기",
+      "iosMessage": "홈 화면에 추가하고 앱처럼 쓰세요",
+      "iosCta": "추가 방법 보기",
+      "iosModalTitle": "홈 화면에 추가하기",
+      "iosStep1": "하단(또는 상단)의 공유 아이콘(□↑)을 탭하세요.",
+      "iosStep2": "목록에서 ‘홈 화면에 추가’를 선택하세요.",
+      "iosModalClose": "확인",
+      "inappMessage": "브라우저에서 열면 설치할 수 있어요",
+      "inappKakaoCta": "브라우저에서 열기",
+      "inappOtherHint": "Safari/Chrome으로 열어주세요"
+    }
   }
 }

@@ -283,5 +283,22 @@
       "instagramShareSavedToast": "Image saved. Try posting it on Instagram!",
       "instagramShareFailed": "Could not open Instagram story share."
     }
+  },
+  "pwa": {
+    "install": {
+      "bannerLabel": "App install guide",
+      "dismiss": "Dismiss",
+      "nativeMessage": "Install for quick access like an app.",
+      "nativeCta": "Install app",
+      "iosMessage": "Add to Home Screen and use it like an app",
+      "iosCta": "How to add",
+      "iosModalTitle": "Add to Home Screen",
+      "iosStep1": "Tap the Share icon (□↑) in Safari.",
+      "iosStep2": "Choose “Add to Home Screen”.",
+      "iosModalClose": "Got it",
+      "inappMessage": "Open in your browser to install",
+      "inappKakaoCta": "Open in browser",
+      "inappOtherHint": "Please open in Safari or Chrome"
+    }
   }
 }
