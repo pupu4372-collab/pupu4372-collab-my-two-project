@@ -253,6 +253,7 @@
       "labelSpecies": "Pet type",
       "labelName": "Name",
       "shareExampleCaption": "Add a photo and get a shareable card like this",
+      "quickAddSectionLabel": "Today's Pet Fortune",
       "addPet": "Add pet",
       "quickAddSubmit": "Add pet",
       "sessionPreparing": "Preparing session…",

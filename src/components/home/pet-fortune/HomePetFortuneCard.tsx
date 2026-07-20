@@ -34,6 +34,7 @@ export function HomePetFortuneCard({ fortuneData, careReminders, onSelectPet, on
       <div className="space-y-3">
         <PetFortuneSajuGuide sajuPetId={fortuneData.petId} />
         <div className="pet-fortune-guest-shell relative min-w-0 space-y-5">
+          <h2 className="pet-fortune-guest-shell__title">{t("quickAddSectionLabel")}</h2>
           <PetFortuneQuickAddForm onAdded={onPetAdded} />
           <PetCareReminderBanner
             careReminders={careReminders ?? fortuneData.careReminders}
@@ -55,6 +56,7 @@ export function HomePetFortuneCard({ fortuneData, careReminders, onSelectPet, on
     return (
       <div className="space-y-3">
         <div className="pet-fortune-guest-shell relative min-w-0 space-y-6">
+          <h2 className="pet-fortune-guest-shell__title">{t("quickAddSectionLabel")}</h2>
           <PetFortuneQuickAddForm onAdded={onPetAdded} />
           <PetFortuneSajuGuide />
           <div className="rounded-2xl border border-stone-200/80 bg-white/70 px-5 py-8 text-center shadow-sm">
@@ -74,6 +76,7 @@ export function HomePetFortuneCard({ fortuneData, careReminders, onSelectPet, on
   return (
     <div className="space-y-3">
       <div className="pet-fortune-guest-shell relative min-w-0 space-y-6">
+        <h2 className="pet-fortune-guest-shell__title">{t("quickAddSectionLabel")}</h2>
         <PetFortuneQuickAddForm onAdded={onPetAdded} />
         <PetFortuneExampleCarousel />
       </div>

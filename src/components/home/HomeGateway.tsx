@@ -223,17 +223,22 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
     "inline-flex rounded-full bg-[#e6c15e] px-5 py-3 text-sm font-extrabold text-[#3a2c08] shadow-sm transition hover:scale-105 hover:brightness-105";
 
   const fortunePanel = fortuneLoading ? (
-    <div className="space-y-4">
+    <div className="home-fortune-column">
       <SajuHubPremiumBanner />
-      <div className="pet-fortune-guest-shell flex min-h-[280px] items-center justify-center">
-        <p className="text-sm font-semibold text-stone-600">
-          {isKo ? "오늘의 케어 가이드를 불러오는 중이에요…" : "Loading today's care guide…"}
-        </p>
+      <div className="home-fortune-column__divider" aria-hidden />
+      <div className="pet-fortune-guest-shell relative min-w-0 space-y-5">
+        <h2 className="pet-fortune-guest-shell__title">{t("guestFortune.quickAddSectionLabel")}</h2>
+        <div className="flex min-h-[200px] items-center justify-center">
+          <p className="text-sm font-semibold text-stone-600">
+            {isKo ? "오늘의 케어 가이드를 불러오는 중이에요…" : "Loading today's care guide…"}
+          </p>
+        </div>
       </div>
     </div>
   ) : (
-    <div className="space-y-4">
+    <div className="home-fortune-column">
       <SajuHubPremiumBanner />
+      <div className="home-fortune-column__divider" aria-hidden />
       <HomePetFortuneCard
         fortuneData={fortuneData}
         careReminders={fortuneData?.careReminders}
