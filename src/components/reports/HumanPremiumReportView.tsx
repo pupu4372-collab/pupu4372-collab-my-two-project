@@ -22,7 +22,6 @@ const UI = {
     toc: "목차",
     saju: "사주 리포트",
     shareSectionLabel: "저장 · 공유",
-    shareSectionHint: "링크 복사, PDF 저장, 이메일 발송",
     copyLink: "링크 복사",
     shared: "링크를 복사했어요",
     pdfReady: "한글 폰트가 포함된 PDF를 바로 저장합니다",
@@ -35,7 +34,7 @@ const UI = {
     emailFailed: "이메일 발송에 실패했습니다",
     emailUnavailable: "결제 시 이메일을 입력하면 여기서 다시 발송할 수 있어요",
     disclaimer:
-      "사주란 2,000년전부터 내려오는 통계학에 가까운 학문입니다.\n맹신하기보단 삶의 지침서나 이정표 정도로 삼으시길 바랍니다.",
+      "사주란 천 년 이상 축적된 지식을 담은 동양 학문입니다.\n맹신하기보단 삶의 지혜와 방향을 얻는 이정표로 삼으시길 바랍니다.",
     backToList: "← 리포트 목록으로",
     copyright: "본 리포트는 지관재(知觀齋)의 고유 자산이며 무단 복제를 금합니다.",
     brand: "知觀齋",
@@ -43,10 +42,10 @@ const UI = {
       "section-cover": "표지 & 사주",
       "section-structure": "사주 구조 해석",
       "section-metrics": "핵심 운세 지표",
-      "section-depth": "심층 분석",
-      "section-opportunity": "포착할 기회",
-      "section-risk": "예측 리스크",
-      "section-roadmap": "시간 로드맵",
+      "section-depth": "사주 심층 진단",
+      "section-opportunity": "다가올 행운과 기회",
+      "section-risk": "리스크 대비 전략",
+      "section-roadmap": "운의 흐름과 타임라인",
       "section-prophecy": "잠겨진 천명",
     },
   },
@@ -54,7 +53,6 @@ const UI = {
     toc: "Contents",
     saju: "K-Saju report",
     shareSectionLabel: "Save · Share",
-    shareSectionHint: "Copy link, save PDF, or send email",
     copyLink: "Copy link",
     shared: "Link copied",
     pdfReady: "Download a PDF with embedded Korean fonts",
@@ -66,7 +64,8 @@ const UI = {
     emailSent: "Email sent",
     emailFailed: "Email failed",
     emailUnavailable: "Add your email at checkout to resend from here",
-    disclaimer: "Enjoy fortunes lightly — for fun only.",
+    disclaimer:
+      "Saju is an East Asian discipline built on knowledge refined over a thousand years.\nTake it as guidance for wisdom and direction—not something to believe blindly.",
     backToList: "← Back to report list",
     copyright: "This report is proprietary to Jigwanjae (知觀齋).",
     brand: "Jigwanjae",
@@ -242,9 +241,6 @@ export function HumanPremiumReportView({
             <section className="no-print human-premium-share-panel space-y-3">
               <p className="human-premium-label-caps text-center text-[var(--jig-seal)]">
                 {t.shareSectionLabel}
-              </p>
-              <p className="human-premium-serif text-center text-sm font-semibold text-[var(--jig-ink)]">
-                {t.shareSectionHint}
               </p>
               <div className="grid grid-cols-1 gap-2.5">
                 <button

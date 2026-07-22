@@ -539,6 +539,7 @@ function PaymentContent() {
                 orderName={PET_PRODUCT_ORDER_NAME[productCode]}
                 totalAmount={spbTotalAmount}
                 currency="USD"
+                locale={locale}
                 customData={petPaymentCustomData}
                 onSuccess={(paymentId) => void handleSpbSuccess(paymentId)}
                 onError={handleSpbError}

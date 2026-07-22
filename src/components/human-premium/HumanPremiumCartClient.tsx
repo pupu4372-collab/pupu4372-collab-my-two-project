@@ -823,6 +823,7 @@ export function HumanPremiumCartClient() {
                   orderName={spbDraft.orderName}
                   totalAmount={spbDraft.totalAmount}
                   currency={spbDraft.currency}
+                  locale={isKo ? "ko" : "en"}
                   customData={{ orderId: spbDraft.paymentId }}
                   onSuccess={(paymentId) => void handleSpbSuccess(paymentId)}
                   onError={(message) => {

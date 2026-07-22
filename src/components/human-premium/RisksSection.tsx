@@ -23,7 +23,7 @@ export function RisksSection({
     <section id="section-risk" className="scroll-mt-24 space-y-6">
       <SectionHeading
         id="section-risk-heading"
-        title={isKo ? "예측 리스크" : "Forecast risks"}
+        title={isKo ? "리스크 대비 전략" : "Forecast risks"}
         subtitle={subtitle}
       />
       <div className="grid grid-cols-1 gap-4">

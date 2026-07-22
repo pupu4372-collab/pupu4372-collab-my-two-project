@@ -1238,7 +1238,7 @@ Day-master element: ${dayElementLabel}. Read the chart as a map, not a verdict.`
     {
       id: "section-depth",
       kind: "depth",
-      title: locale === "ko" ? "심층 분석" : "Deep analysis",
+      title: locale === "ko" ? "사주 심층 진단" : "Deep analysis",
       subtitle: locale === "ko" ? "서사 · 핵심 축" : "Narrative · core axes",
       body: reportType === "daily" ? "" : buildDepthBody(saju, name, locale, reportType, summary.story),
       pageEstimate: 4,
@@ -1246,7 +1246,7 @@ Day-master element: ${dayElementLabel}. Read the chart as a map, not a verdict.`
     {
       id: "section-opportunity",
       kind: "opportunity",
-      title: locale === "ko" ? "포착할 기회" : "Opportunities to catch",
+      title: locale === "ko" ? "다가올 행운과 기회" : "Opportunities to catch",
       subtitle: locale === "ko" ? "5가지 + 잡는 법" : "Five openings + how to catch them",
       body: formatOpportunitiesBody(structured.opportunities),
       pageEstimate: 3,
@@ -1254,7 +1254,7 @@ Day-master element: ${dayElementLabel}. Read the chart as a map, not a verdict.`
     {
       id: "section-risk",
       kind: "risk",
-      title: locale === "ko" ? "예측 리스크" : "Forecast risks",
+      title: locale === "ko" ? "리스크 대비 전략" : "Forecast risks",
       subtitle: locale === "ko" ? "4가지 + 대비책" : "Four risks + countermeasures",
       body: formatRisksBody(structured.risks),
       pageEstimate: 3,
@@ -1262,7 +1262,7 @@ Day-master element: ${dayElementLabel}. Read the chart as a map, not a verdict.`
     {
       id: "section-roadmap",
       kind: "roadmap",
-      title: locale === "ko" ? "시간 로드맵" : "Time roadmap",
+      title: locale === "ko" ? "운의 흐름과 타임라인" : "Time roadmap",
       subtitle:
         reportType === "daily"
           ? locale === "ko"

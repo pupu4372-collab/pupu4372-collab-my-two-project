@@ -2,11 +2,16 @@
 
 import { useEffect, useRef } from "react";
 
+/** PortOne V2 LoadPaymentUIRequest.locale (`@portone/browser-sdk`). */
+export type PortOneUiLocale = "KO_KR" | "EN_US";
+
 export type PayPalSpbButtonProps = {
   paymentId: string;
   orderName: string;
   totalAmount: number;
   currency: string;
+  /** App locale → PortOne `locale` (KO_KR / EN_US). PayPal may ignore per PortOne docs. */
+  locale?: "ko" | "en";
   /** Bound into PortOne customData (object). */
   customData?: Record<string, unknown>;
   onSuccess: (paymentId: string) => void;
@@ -24,6 +29,10 @@ type PortOneSdk = {
   updateLoadPaymentUIRequest: (request: Record<string, unknown>) => void;
 };
 
+export function toPortOneUiLocale(locale: "ko" | "en" | undefined): PortOneUiLocale {
+  return locale === "en" ? "EN_US" : "KO_KR";
+}
+
 function buildSpbRequest(input: {
   paymentId: string;
   orderName: string;
@@ -31,6 +40,7 @@ function buildSpbRequest(input: {
   currency: string;
   storeId: string;
   channelKey: string;
+  locale?: "ko" | "en";
   customData?: Record<string, unknown>;
 }): Record<string, unknown> {
   // totalAmount must already be PortOne units from cart/checkout (`totalAmount`:
@@ -43,6 +53,7 @@ function buildSpbRequest(input: {
     orderName: input.orderName,
     totalAmount: input.totalAmount,
     currency: input.currency,
+    locale: toPortOneUiLocale(input.locale),
     ...(input.customData ? { customData: input.customData } : {}),
   };
 }
@@ -50,12 +61,16 @@ function buildSpbRequest(input: {
 /**
  * Renders a single PortOne PayPal SPB button into `.portone-ui-container`.
  * Only one instance should be mounted per page (SDK constraint).
+ *
+ * Light cream wrapper: PayPal labels assume a light surface; night-sky page bg
+ * makes dark widget text unreadable without a local light card.
  */
 export function PayPalSpbButton({
   paymentId,
   orderName,
   totalAmount,
   currency,
+  locale = "en",
   customData,
   onSuccess,
   onError,
@@ -87,6 +102,7 @@ export function PayPalSpbButton({
       currency,
       storeId,
       channelKey,
+      locale,
       customData: customDataKey ? (JSON.parse(customDataKey) as Record<string, unknown>) : undefined,
     });
 
@@ -114,7 +130,7 @@ export function PayPalSpbButton({
     if (typeof PortOne.updateLoadPaymentUIRequest === "function") {
       PortOne.updateLoadPaymentUIRequest(request);
     }
-  }, [paymentId, orderName, totalAmount, currency, customDataKey]);
+  }, [paymentId, orderName, totalAmount, currency, locale, customDataKey]);
 
   useEffect(() => {
     return () => {
@@ -125,10 +141,12 @@ export function PayPalSpbButton({
   }, []);
 
   return (
-    <div
-      ref={containerRef}
-      className="portone-ui-container w-full min-h-[45px]"
-      data-portone-ui-type="paypal-spb"
-    />
+    <div className="w-full rounded-2xl border border-plum/10 bg-cream p-4 shadow-sm sm:p-5">
+      <div
+        ref={containerRef}
+        className="portone-ui-container w-full min-h-[45px]"
+        data-portone-ui-type="paypal-spb"
+      />
+    </div>
   );
 }

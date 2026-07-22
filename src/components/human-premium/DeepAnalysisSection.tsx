@@ -52,7 +52,7 @@ export function DeepAnalysisSection({
     <section id="section-depth" className="scroll-mt-24 space-y-6">
       <SectionHeading
         id="section-depth-heading"
-        title={isKo ? "심층 분석" : "Deep analysis"}
+        title={isKo ? "사주 심층 진단" : "Deep analysis"}
         subtitle={subtitle}
       />
       {body.trim() ? (

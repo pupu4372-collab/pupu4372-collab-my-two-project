@@ -518,11 +518,6 @@ export function DayPillarPreview({
               onChange={(e) => patchProfile({ personName: e.target.value })}
               placeholder={isKo ? "닉네임 입력" : "Your nickname"}
             />
-            <span className="human-premium-birth-hint">
-              {isKo
-                ? "보안을 위해 닉네임으로 넣어주세요."
-                : "For your privacy, please use a nickname."}
-            </span>
           </label>
           <label className="human-premium-birth-field">
             {isKo ? "리포트를 받으실 이메일" : "Email for your report"}

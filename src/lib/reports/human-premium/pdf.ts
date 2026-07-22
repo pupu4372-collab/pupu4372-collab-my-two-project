@@ -33,10 +33,10 @@ const TOC_TITLES_KO: Record<HumanPremiumSectionId, string> = {
   "section-cover": "표지 & 사주",
   "section-structure": "사주 구조 해석",
   "section-metrics": "핵심 운세 지표",
-  "section-depth": "심층 분석",
-  "section-opportunity": "포착할 기회",
-  "section-risk": "예측 리스크",
-  "section-roadmap": "시간 로드맵",
+  "section-depth": "사주 심층 진단",
+  "section-opportunity": "다가올 행운과 기회",
+  "section-risk": "리스크 대비 전략",
+  "section-roadmap": "운의 흐름과 타임라인",
   "section-prophecy": "잠겨진 천명",
 };
 
@@ -226,8 +226,8 @@ function buildDocumentDefinition(
   content.push(
     paragraph(
       isKo
-        ? "사주란 2,000년전부터 내려오는 통계학에 가까운 학문입니다.\n맹신하기보단 삶의 지침서나 이정표 정도로 삼으시길 바랍니다."
-        : "Saju is closer to a statistical discipline handed down for nearly 2,000 years. Rather than blind belief, please use it as a guidepost for life.",
+        ? "사주란 천 년 이상 축적된 지식을 담은 동양 학문입니다.\n맹신하기보단 삶의 지혜와 방향을 얻는 이정표로 삼으시길 바랍니다."
+        : "Saju is an East Asian discipline built on knowledge refined over a thousand years.\nTake it as guidance for wisdom and direction—not something to believe blindly.",
       "disclaimer"
     )
   );
@@ -242,7 +242,7 @@ function buildDocumentDefinition(
     pageMargins: [56, 56, 56, 56],
     defaultStyle: {
       font: PDF_FONT_FAMILY,
-      fontSize: 10.5,
+      fontSize: 11.5,
       color: JIG_INK,
       lineHeight: 1.45,
     },
@@ -254,12 +254,12 @@ function buildDocumentDefinition(
       coverMaxim: { fontSize: 9, color: JIG_MUTED },
       labelCaps: { fontSize: 8, bold: true, color: JIG_MUTED },
       personName: { fontSize: 12, bold: true, color: JIG_INK },
-      bodyMuted: { fontSize: 9.5, color: JIG_MUTED },
-      chapterTitle: { fontSize: 15, bold: true, color: JIG_INK, margin: [0, 0, 0, 4] },
+      bodyMuted: { fontSize: 10.5, color: JIG_MUTED },
+      chapterTitle: { fontSize: 16, bold: true, color: JIG_INK, margin: [0, 0, 0, 4] },
       chapterSubtitle: { fontSize: 10.5, color: JIG_SEAL },
-      sectionTitle: { fontSize: 12, bold: true, color: JIG_INK, margin: [0, 10, 0, 4] },
+      sectionTitle: { fontSize: 13, bold: true, color: JIG_INK, margin: [0, 10, 0, 4] },
       sectionSubtitle: { fontSize: 10, color: JIG_MUTED },
-      body: { fontSize: 10.5, color: JIG_INK },
+      body: { fontSize: 11.5, color: JIG_INK },
       elementLabel: { fontSize: 10.5, bold: true },
       elementPercent: { fontSize: 10.5, bold: true, color: JIG_INK },
       prophecySealed: { fontSize: 11.5, italics: true, color: JIG_INK, lineHeight: 1.6 },

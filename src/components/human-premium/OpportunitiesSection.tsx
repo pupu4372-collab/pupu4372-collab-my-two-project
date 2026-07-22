@@ -23,7 +23,7 @@ export function OpportunitiesSection({
     <section id="section-opportunity" className="scroll-mt-24 space-y-6">
       <SectionHeading
         id="section-opportunity-heading"
-        title={isKo ? "포착할 기회" : "Opportunities to catch"}
+        title={isKo ? "다가올 행운과 기회" : "Opportunities to catch"}
         subtitle={subtitle}
       />
       <div className="grid grid-cols-1 gap-4">

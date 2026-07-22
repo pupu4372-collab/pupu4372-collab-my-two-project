@@ -31,7 +31,7 @@ export function RoadmapSection({
     <section id="section-roadmap" className="scroll-mt-24 space-y-6">
       <SectionHeading
         id="section-roadmap-heading"
-        title={isKo ? "시간 로드맵" : "Time roadmap"}
+        title={isKo ? "운의 흐름과 타임라인" : "Time roadmap"}
         subtitle={subtitle}
       />
       <div className="space-y-4 border-l-2 border-[var(--jig-seal)]/30 pl-6">
