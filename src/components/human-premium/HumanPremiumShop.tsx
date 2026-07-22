@@ -168,6 +168,9 @@ export function HumanPremiumShop() {
               ? "원하는 리포트를 담고 장바구니에서 한 번에 결제하세요."
               : "Add reports to your cart and pay once."}
           </p>
+          <p className="mt-1.5 text-sm text-white/75">
+            {isKo ? "게스트로 결제 이용가능해요" : "Guest checkout available"}
+          </p>
         </header>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -207,8 +210,8 @@ export function HumanPremiumShop() {
                       : "Purchased"
                     : inCart
                       ? isKo
-                        ? "담김"
-                        : "Added"
+                        ? "장바구니"
+                        : "Cart"
                       : isKo
                         ? "담기"
                         : "Add"}
