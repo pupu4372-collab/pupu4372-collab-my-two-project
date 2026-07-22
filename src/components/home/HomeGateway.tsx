@@ -381,14 +381,14 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             </div>
 
             <div className="mt-8 grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:contents md:gap-0">
-              <div className="min-w-0 space-y-8 md:col-start-1 md:row-start-3">
-                {petShowSection}
-              </div>
-
-              <div className="relative min-w-0 overflow-visible md:col-start-2 md:row-start-1 md:row-span-3 md:pl-2 md:sticky md:top-24 lg:pl-4">
+              <div className="relative min-w-0 overflow-visible sm:order-2 md:order-none md:col-start-2 md:row-start-1 md:row-span-3 md:pl-2 md:sticky md:top-24 lg:pl-4">
                 <div className="rounded-[2rem] border border-plum/15 bg-white p-4 shadow-sm sm:p-5">
                   {fortunePanel}
                 </div>
+              </div>
+
+              <div className="min-w-0 space-y-8 sm:order-1 md:order-none md:col-start-1 md:row-start-3">
+                {petShowSection}
               </div>
             </div>
           </div>
