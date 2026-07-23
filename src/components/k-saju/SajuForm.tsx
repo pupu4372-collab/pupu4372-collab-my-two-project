@@ -28,6 +28,7 @@ import { calcMbti, isMbtiComplete } from "@/lib/pet/calc-mbti";
 import { getQuestionsBySpecies } from "@/lib/pet/mbti-questions";
 import { getMbtiTypeData } from "@/lib/pet/mbti-types";
 import { useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   clearSajuResultSession,
@@ -163,6 +164,8 @@ interface SajuFormProps {
 
 export function SajuForm({ embedded = false }: SajuFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const petIdFromQuery = searchParams.get("petId")?.trim() || null;
   const { ready: sessionReady, accessToken, configured, isAnonymous, isFullMember } =
     useSupabaseSession();
   const routeLocale = useLocale();
@@ -186,6 +189,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const [prefillPetId, setPrefillPetId] = useState<string | null>(null);
   const skipEntryGateRef = useRef(false);
   const entryGateAttemptedRef = useRef(false);
+  const petResolveKeyRef = useRef<string | null>(null);
   const [entryGate, setEntryGate] = useState<EntryGate>(embedded ? "form" : "resolving");
   const [entryPets, setEntryPets] = useState<PetEntryListItem[]>([]);
 
@@ -237,8 +241,9 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     const params = new URLSearchParams(window.location.search);
     if (params.get("new") !== "1") {
       if (params.get("petId")?.trim()) {
+        // Pet deep-link: keep resolving until load-or-generate finishes.
         skipEntryGateRef.current = true;
-        setEntryGate("form");
+        setEntryGate("resolving");
       }
       if (params.get("restore") === "1") {
         router.replace("/saju");
@@ -416,21 +421,23 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   ]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !accessToken || embedded) return;
+    if (embedded || !accessToken || !petIdFromQuery) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const petIdParam = params.get("petId")?.trim();
-    if (!petIdParam) return;
+    const resolveKey = `${accessToken}:${petIdFromQuery}`;
+    if (petResolveKeyRef.current === resolveKey) return;
+    petResolveKeyRef.current = resolveKey;
 
     let cancelled = false;
 
     void (async () => {
       setEntryGate("resolving");
       setError(null);
+      setLoading(false);
 
-      const pet = await fetchPetProfileForSaju(accessToken, petIdParam);
+      const pet = await fetchPetProfileForSaju(accessToken, petIdFromQuery);
       if (cancelled) return;
       if (!pet) {
+        petResolveKeyRef.current = null;
         setEntryGate("form");
         return;
       }
@@ -487,6 +494,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
         };
         if (cancelled) return;
         if (!res.ok) {
+          petResolveKeyRef.current = null;
           setError(data.error ?? t.networkError);
           setEntryGate("form");
           return;
@@ -500,6 +508,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
         setEntryGate("form");
       } catch {
         if (!cancelled) {
+          petResolveKeyRef.current = null;
           setError(t.networkError);
           setEntryGate("form");
         }
@@ -510,8 +519,11 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
 
     return () => {
       cancelled = true;
+      if (petResolveKeyRef.current === resolveKey) {
+        petResolveKeyRef.current = null;
+      }
     };
-  }, [accessToken, embedded, locale, router, t.networkError]);
+  }, [accessToken, embedded, locale, petIdFromQuery, router, t.networkError]);
 
   const petId = result?.petId ?? prefillPetId;
   const mbtiUnlockCheckEnabled = configured && sessionReady && !isAnonymous && Boolean(petId);
