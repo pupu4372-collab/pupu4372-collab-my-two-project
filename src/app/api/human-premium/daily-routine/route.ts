@@ -18,11 +18,13 @@ import {
 import { parseHumanPremiumReportInput } from "@/lib/reports/human-premium/service";
 import { getHumanPremiumReportById } from "@/lib/reports/human-premium/storage";
 import {
-  COUPON_TYPE_DAILY_LUCKY_FREE,
   consumeCoupon,
-  findUsableCoupon,
+  ensureSignupBonusDailyLuckyCoupon,
 } from "@/lib/coupons/coupons";
-import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
+import {
+  getRegisteredUserIdFromRequest,
+  getUserIdFromRequest,
+} from "@/lib/supabase/auth-server";
 import { NextResponse, after } from "next/server";
 
 export const maxDuration = 120;
@@ -36,10 +38,15 @@ export async function POST(request: Request) {
   }
 
   const locale = body.locale === "en" ? "en" : "ko";
-  const userId = await getRegisteredUserIdFromRequest(request);
   const dailyExtraPaymentId = String(
     body.dailyExtraPaymentId ?? body.paymentId ?? ""
   ).trim();
+  // Paid path: any authenticated user (anon included). Free path: full member only.
+  const sessionUserId = await getUserIdFromRequest(request);
+  const registeredUserId = dailyExtraPaymentId
+    ? null
+    : await getRegisteredUserIdFromRequest(request);
+  const userId = dailyExtraPaymentId ? sessionUserId : registeredUserId;
 
   try {
     const input = parseHumanPremiumReportInput(body, userId);
@@ -100,7 +107,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ report: payload, webToken, webUrl, paidExtra: true });
     }
 
-    // Coupon / signup gate (no daily free quota)
+    // Lifetime 1× free for full members — claimed at request time (not at signup).
     if (!userId) {
       return NextResponse.json(
         { error: "signup_required", code: "signup_required" },
@@ -108,7 +115,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const coupon = await findUsableCoupon(userId, COUPON_TYPE_DAILY_LUCKY_FREE);
+    const coupon = await ensureSignupBonusDailyLuckyCoupon(userId);
     if (!coupon) {
       return NextResponse.json(
         { error: "payment_required", code: "payment_required" },

@@ -127,3 +127,44 @@ export async function tryGrantLaunchDailyLuckyCoupon(userId: string): Promise<vo
     });
   }
 }
+
+/**
+ * Whether this user already has any daily_lucky_free coupon (used or unused).
+ * Used to derive lifetime free eligibility without a profiles flag.
+ */
+export async function hasDailyLuckyFreeCouponHistory(
+  userId: string
+): Promise<boolean> {
+  const supabase = getSupabaseServiceRoleClient();
+  const result = await supabase
+    .from("coupons")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("coupon_type", COUPON_TYPE_DAILY_LUCKY_FREE)
+    .limit(1)
+    .maybeSingle();
+
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+
+  return Boolean((result.data as CouponIdRow | null)?.id);
+}
+
+/**
+ * Lifetime 1× free for full members — grant at claim time, not at signup.
+ * Returns an unused coupon, or null if the free claim was already used.
+ */
+export async function ensureSignupBonusDailyLuckyCoupon(
+  userId: string
+): Promise<CouponRow | null> {
+  const usable = await findUsableCoupon(userId, COUPON_TYPE_DAILY_LUCKY_FREE);
+  if (usable) return usable;
+
+  if (await hasDailyLuckyFreeCouponHistory(userId)) {
+    return null;
+  }
+
+  await grantCoupon(userId, COUPON_TYPE_DAILY_LUCKY_FREE, "signup_bonus");
+  return findUsableCoupon(userId, COUPON_TYPE_DAILY_LUCKY_FREE);
+}
