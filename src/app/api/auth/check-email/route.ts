@@ -1,3 +1,7 @@
+import {
+  getActiveWithdrawalCooldown,
+  normalizeEmailForHash,
+} from "@/lib/auth/withdrawn-accounts";
 import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
@@ -45,7 +49,14 @@ function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-type SignupStatus = { exists: boolean; confirmed: boolean };
+type SignupStatus = {
+  exists: boolean;
+  confirmed: boolean;
+  /** Active post-withdrawal rejoin block, if any. */
+  rejoinBlocked: boolean;
+  rejoinBlockedDays: number | null;
+  rejoinAvailableAt: string | null;
+};
 
 async function lookupSignupStatus(email: string): Promise<SignupStatus> {
   const supabase = getSupabaseServiceRoleClient();
@@ -63,16 +74,21 @@ async function lookupSignupStatus(email: string): Promise<SignupStatus> {
     data && typeof data === "object" && !Array.isArray(data)
       ? (data as { exists?: unknown; confirmed?: unknown })
       : null;
+
+  const cooldown = await getActiveWithdrawalCooldown(email);
+
   return {
     exists: Boolean(row?.exists),
     confirmed: Boolean(row?.confirmed),
+    rejoinBlocked: Boolean(cooldown),
+    rejoinBlockedDays: cooldown?.daysRemaining ?? null,
+    rejoinAvailableAt: cooldown?.availableAt ?? null,
   };
 }
 
 /**
- * Signup-confirm UI (`LoginButtons` mode=confirm): whether an email is registered
- * and whether email_confirmed_at is set. Existence distinction is required for UX
- * (signupEmailMissing / Confirmed / Unconfirmed) — keep exists+confirmed + IP rate limit.
+ * Signup-confirm UI + signup/promotion pre-check: registration status and
+ * 30-day post-withdrawal rejoin cooldown.
  */
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous";
@@ -108,7 +124,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const email = body.email?.trim().toLowerCase();
+  const email = normalizeEmailForHash(body.email ?? "");
   if (!email || !isEmail(email)) {
     return NextResponse.json({ error: "Valid email is required." }, { status: 400 });
   }
