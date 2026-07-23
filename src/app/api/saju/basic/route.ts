@@ -12,8 +12,8 @@ import { interpretSaju, isSajuInterpretLlmEnabled } from "@/lib/saju/llm/interpr
 import { enrichBasicResultDisplayFields } from "@/lib/saju/enrich-basic-result-display";
 import { finalizePetHeadline } from "@/lib/saju/pet-headline";
 import { validatePetName } from "@/lib/saju/moderation";
+import { GuestPetLimitError, persistPetProfile } from "@/lib/saju/persist-pet";
 import { persistSajuResult } from "@/lib/saju/persist";
-import { GuestPetLimitError } from "@/lib/saju/persist-pet";
 import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
 import { normalizeBirthCalendarType } from "@/lib/saju/resolve-birth-date";
 import {
@@ -152,114 +152,122 @@ export async function POST(request: Request) {
   const registeredUserId = await getRegisteredUserIdFromRequest(request);
   const guestCookie = registeredUserId ? null : resolvePetBasicGuestCookie(request);
 
-  const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
-
-  const ipLimiter = getIpRatelimit();
-  if (ipLimiter) {
-    try {
-      const { success, limit, reset, remaining } = await ipLimiter.limit(ip);
-      if (!success) {
-        console.warn(
-          `[saju/basic] ip_rate_limited ip=${ip} registered=${Boolean(registeredUserId)}`
-        );
-        return jsonResponse(
-          {
-            error: "요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.",
-            code: "ip_rate_limited",
-          },
-          {
-            status: 429,
-            headers: {
-              "X-RateLimit-Limit": limit.toString(),
-              "X-RateLimit-Remaining": remaining.toString(),
-              "X-RateLimit-Reset": reset.toString(),
-            },
-          },
-          guestCookie
-        );
-      }
-    } catch (err) {
-      // Upstash misconfigured — do not block saju in local/dev.
-      logRateLimitFallback("ip", "limit_error", {
-        message: err instanceof Error ? err.message : String(err),
-        phase: "limit",
-      });
-    }
-  }
-
-  if (registeredUserId) {
-    const daily = getUserDailyRatelimit();
-    if (daily) {
-      try {
-        const key = `user:${registeredUserId}`;
-        const { success, limit, reset, remaining } = await daily.limit(key);
-        if (!success) {
-          console.warn(
-            `[saju/basic] daily_quota_exceeded scope=user userId=${registeredUserId}`
-          );
-          return jsonResponse(
-            {
-              error: "오늘의 기본 사주 조회 한도를 모두 사용했어요. 내일 다시 시도해 주세요.",
-              code: "daily_quota_exceeded",
-            },
-            {
-              status: 429,
-              headers: {
-                "X-RateLimit-Limit": limit.toString(),
-                "X-RateLimit-Remaining": remaining.toString(),
-                "X-RateLimit-Reset": reset.toString(),
-              },
-            },
-            guestCookie
-          );
-        }
-      } catch (err) {
-        logRateLimitFallback("user_daily", "limit_error", {
-          message: err instanceof Error ? err.message : String(err),
-          phase: "limit",
-        });
-      }
-    }
-  } else if (guestCookie) {
-    const daily = getGuestDailyRatelimit();
-    if (daily) {
-      try {
-        const key = `guest:${guestCookie.id}`;
-        const { success, limit, reset, remaining } = await daily.limit(key);
-        if (!success) {
-          console.warn(
-            `[saju/basic] daily_quota_exceeded scope=guest guestId=${guestCookie.id}`
-          );
-          return jsonResponse(
-            {
-              error: "게스트는 하루에 한 번만 기본 사주를 볼 수 있어요. 내일 다시 시도하거나 로그인해 주세요.",
-              code: "daily_quota_exceeded",
-            },
-            {
-              status: 429,
-              headers: {
-                "X-RateLimit-Limit": limit.toString(),
-                "X-RateLimit-Remaining": remaining.toString(),
-                "X-RateLimit-Reset": reset.toString(),
-              },
-            },
-            guestCookie
-          );
-        }
-      } catch (err) {
-        logRateLimitFallback("guest_daily", "limit_error", {
-          message: err instanceof Error ? err.message : String(err),
-          phase: "limit",
-        });
-      }
-    }
-  }
-
-  let body: Partial<SajuBasicRequest>;
+  let body: Partial<SajuBasicRequest> & { skipNarrative?: boolean };
   try {
     body = await request.json();
   } catch {
     return jsonResponse({ error: "Invalid JSON body." }, { status: 400 }, guestCookie);
+  }
+
+  const skipNarrative = body.skipNarrative === true;
+  const skipRateLimits =
+    process.env.NODE_ENV === "development" || process.env.SAJU_BASIC_SKIP_RATE_LIMIT === "1";
+
+  const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
+
+  // Pet-only registration must not consume the daily "view saju" quota.
+  // Full narrative generation keeps IP + daily limits (skipped in local development).
+  if (!skipRateLimits && !skipNarrative) {
+    const ipLimiter = getIpRatelimit();
+    if (ipLimiter) {
+      try {
+        const { success, limit, reset, remaining } = await ipLimiter.limit(ip);
+        if (!success) {
+          console.warn(
+            `[saju/basic] ip_rate_limited ip=${ip} registered=${Boolean(registeredUserId)}`
+          );
+          return jsonResponse(
+            {
+              error: "요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.",
+              code: "ip_rate_limited",
+            },
+            {
+              status: 429,
+              headers: {
+                "X-RateLimit-Limit": limit.toString(),
+                "X-RateLimit-Remaining": remaining.toString(),
+                "X-RateLimit-Reset": reset.toString(),
+              },
+            },
+            guestCookie
+          );
+        }
+      } catch (err) {
+        // Upstash misconfigured — do not block saju in local/dev.
+        logRateLimitFallback("ip", "limit_error", {
+          message: err instanceof Error ? err.message : String(err),
+          phase: "limit",
+        });
+      }
+    }
+
+    if (registeredUserId) {
+      const daily = getUserDailyRatelimit();
+      if (daily) {
+        try {
+          const key = `user:${registeredUserId}`;
+          const { success, limit, reset, remaining } = await daily.limit(key);
+          if (!success) {
+            console.warn(
+              `[saju/basic] daily_quota_exceeded scope=user userId=${registeredUserId}`
+            );
+            return jsonResponse(
+              {
+                error: "오늘의 기본 사주 조회 한도를 모두 사용했어요. 내일 다시 시도해 주세요.",
+                code: "daily_quota_exceeded",
+              },
+              {
+                status: 429,
+                headers: {
+                  "X-RateLimit-Limit": limit.toString(),
+                  "X-RateLimit-Remaining": remaining.toString(),
+                  "X-RateLimit-Reset": reset.toString(),
+                },
+              },
+              guestCookie
+            );
+          }
+        } catch (err) {
+          logRateLimitFallback("user_daily", "limit_error", {
+            message: err instanceof Error ? err.message : String(err),
+            phase: "limit",
+          });
+        }
+      }
+    } else if (guestCookie) {
+      const daily = getGuestDailyRatelimit();
+      if (daily) {
+        try {
+          const key = `guest:${guestCookie.id}`;
+          const { success, limit, reset, remaining } = await daily.limit(key);
+          if (!success) {
+            console.warn(
+              `[saju/basic] daily_quota_exceeded scope=guest guestId=${guestCookie.id}`
+            );
+            return jsonResponse(
+              {
+                error: "게스트는 하루에 한 번만 기본 사주를 볼 수 있어요. 내일 다시 시도하거나 로그인해 주세요.",
+                code: "daily_quota_exceeded",
+              },
+              {
+                status: 429,
+                headers: {
+                  "X-RateLimit-Limit": limit.toString(),
+                  "X-RateLimit-Remaining": remaining.toString(),
+                  "X-RateLimit-Reset": reset.toString(),
+                },
+              },
+              guestCookie
+            );
+          }
+        } catch (err) {
+          logRateLimitFallback("guest_daily", "limit_error", {
+            message: err instanceof Error ? err.message : String(err),
+            phase: "limit",
+          });
+        }
+      }
+    }
   }
 
   if (!body.privacyConsent) {
@@ -321,6 +329,70 @@ export async function POST(request: Request) {
     const { result, mapping } = computePetSajuBundle(sajuRequest);
     result.narrativeSource = "template";
     let llmApplied = false;
+
+    // Home pet registration: deterministic calc + pet row only — no LLM / no saju_results.
+    if (skipNarrative) {
+      console.info("[saju/basic] skip_narrative pet_register_only");
+      let persisted = false;
+      let petId: string | null = null;
+      let persistError: string | null = null;
+
+      if (isSupabaseConfigured()) {
+        const ownerId = await getUserIdFromRequest(request);
+        const token = getBearerToken(request);
+        const userClient = token ? createUserSupabaseClient(token) : null;
+
+        if (ownerId && userClient) {
+          try {
+            petId = await persistPetProfile(userClient, {
+              ownerId,
+              name: sajuRequest.petName,
+              species: sajuRequest.species,
+              gender: sajuRequest.petGender ?? null,
+              birthDate: sajuRequest.birthDate,
+              birthTime: sajuRequest.birthTime,
+              birthTimeUnknown: sajuRequest.birthTimeUnknown,
+              timezone: sajuRequest.timezone,
+              isAnonymousOwner: !registeredUserId,
+            });
+            persisted = true;
+          } catch (err) {
+            if (err instanceof GuestPetLimitError) {
+              const limitMessage =
+                sajuRequest.locale === "en"
+                  ? "Guests can register up to 3 pets. Sign up to add and manage more."
+                  : "게스트는 3마리까지 등록할 수 있어요. 회원가입하면 더 많은 아이를 등록하고 관리할 수 있어요.";
+              return jsonResponse(
+                {
+                  error: limitMessage,
+                  code: "guest_pet_limit",
+                  persisted: false,
+                  petId: null,
+                  sajuResultId: null,
+                },
+                { status: 403 },
+                guestCookie
+              );
+            }
+            persistError =
+              err instanceof Error ? err.message : "Could not save to database.";
+          }
+        }
+      }
+
+      return jsonResponse(
+        {
+          skipNarrative: true,
+          persisted,
+          petId,
+          sajuResultId: null,
+          persistError,
+          dominantElement: result.dominantElement,
+        },
+        undefined,
+        guestCookie
+      );
+    }
 
     if (isSajuInterpretLlmEnabled()) {
       try {

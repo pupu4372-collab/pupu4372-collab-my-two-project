@@ -186,6 +186,7 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
           timezone,
           locale,
           privacyConsent: true,
+          skipNarrative: true,
         }),
       });
       const data = await res.json();

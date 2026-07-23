@@ -1,14 +1,14 @@
 import {
   createUserSupabaseClient,
   getBearerToken,
-  getRegisteredUserIdFromRequest,
+  getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
 import { isVisibleInVault } from "@/lib/reports/vault-policy";
 import type { SajuResultRow } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-  const ownerId = await getRegisteredUserIdFromRequest(request);
+  const ownerId = await getUserIdFromRequest(request);
   const token = getBearerToken(request);
 
   if (!ownerId || !token) {
