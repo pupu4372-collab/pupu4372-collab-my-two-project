@@ -195,6 +195,10 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
           setError(t("guestPetLimit"));
           return;
         }
+        if (data.code === "register_ip_rate_limited") {
+          setError(t("registerRateLimited"));
+          return;
+        }
         setError(typeof data.error === "string" ? data.error : isKo ? "등록에 실패했어요." : "Could not add pet.");
         return;
       }

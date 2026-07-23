@@ -27,7 +27,11 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
 
+/** Pet-only register (`skipNarrative`) IP cap — separate from narrative-generation IP limit. */
+const PET_REGISTER_IP_LIMIT_PER_HOUR = 20;
+
 let ipRatelimit: Ratelimit | null | undefined;
+let petRegisterIpRatelimit: Ratelimit | null | undefined;
 let userDailyRatelimit: Ratelimit | null | undefined;
 let guestDailyRatelimit: Ratelimit | null | undefined;
 
@@ -36,7 +40,7 @@ function redisConfigured(): boolean {
 }
 
 function logRateLimitFallback(
-  limiter: "ip" | "guest_daily" | "user_daily",
+  limiter: "ip" | "register_ip" | "guest_daily" | "user_daily",
   cause: "env_missing" | "limit_error",
   extra?: Record<string, unknown>
 ) {
@@ -61,6 +65,31 @@ function getIpRatelimit(): Ratelimit | null {
   } catch (err) {
     ipRatelimit = null;
     logRateLimitFallback("ip", "limit_error", {
+      message: err instanceof Error ? err.message : String(err),
+      phase: "init",
+    });
+    return null;
+  }
+}
+
+function getPetRegisterIpRatelimit(): Ratelimit | null {
+  if (petRegisterIpRatelimit !== undefined) return petRegisterIpRatelimit;
+  if (!redisConfigured()) {
+    petRegisterIpRatelimit = null;
+    logRateLimitFallback("register_ip", "env_missing");
+    return null;
+  }
+  try {
+    petRegisterIpRatelimit = new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(PET_REGISTER_IP_LIMIT_PER_HOUR, "1 h"),
+      prefix: "pet_basic_register_ip",
+      analytics: true,
+    });
+    return petRegisterIpRatelimit;
+  } catch (err) {
+    petRegisterIpRatelimit = null;
+    logRateLimitFallback("register_ip", "limit_error", {
       message: err instanceof Error ? err.message : String(err),
       phase: "init",
     });
@@ -162,11 +191,51 @@ export async function POST(request: Request) {
   const skipNarrative = body.skipNarrative === true;
   const skipRateLimits =
     process.env.NODE_ENV === "development" || process.env.SAJU_BASIC_SKIP_RATE_LIMIT === "1";
+  const localeHint: Locale = body.locale === "ko" ? "ko" : "en";
+  const registerIpLimitedMessage =
+    localeHint === "ko"
+      ? "잠시 후 다시 시도해 주세요."
+      : "Please try again in a moment.";
 
   const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
 
-  // Pet-only registration must not consume the daily "view saju" quota.
+  // Pet-only registration: dedicated IP cap (does not share counters with narrative limits).
+  if (!skipRateLimits && skipNarrative) {
+    const registerIpLimiter = getPetRegisterIpRatelimit();
+    if (registerIpLimiter) {
+      try {
+        const { success, limit, reset, remaining } = await registerIpLimiter.limit(ip);
+        if (!success) {
+          console.warn(
+            `[saju/basic] register_ip_rate_limited ip=${ip} registered=${Boolean(registeredUserId)}`
+          );
+          return jsonResponse(
+            {
+              error: registerIpLimitedMessage,
+              code: "register_ip_rate_limited",
+            },
+            {
+              status: 429,
+              headers: {
+                "X-RateLimit-Limit": limit.toString(),
+                "X-RateLimit-Remaining": remaining.toString(),
+                "X-RateLimit-Reset": reset.toString(),
+              },
+            },
+            guestCookie
+          );
+        }
+      } catch (err) {
+        logRateLimitFallback("register_ip", "limit_error", {
+          message: err instanceof Error ? err.message : String(err),
+          phase: "limit",
+        });
+      }
+    }
+  }
+
   // Full narrative generation keeps IP + daily limits (skipped in local development).
+  // Pet-only registration must not consume these quotas.
   if (!skipRateLimits && !skipNarrative) {
     const ipLimiter = getIpRatelimit();
     if (ipLimiter) {

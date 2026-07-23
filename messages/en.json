@@ -261,6 +261,7 @@
       "quickAddSubmit": "See fortune / Add pet",
       "sessionPreparing": "Preparing session…",
       "guestPetLimit": "Guests can register up to 3 pets. Sign up to add and manage more.",
+      "registerRateLimited": "Please try again in a moment.",
       "upgradeOpen": "Set a password to become a full member",
       "upgradePassword": "Password",
       "upgradePasswordConfirm": "Confirm password",

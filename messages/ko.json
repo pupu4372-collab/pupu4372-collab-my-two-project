@@ -261,6 +261,7 @@
       "quickAddSubmit": "우리아이 운세보기/펫추가",
       "sessionPreparing": "세션 준비 중…",
       "guestPetLimit": "게스트는 3마리까지 등록할 수 있어요. 회원가입하면 더 많은 아이를 등록하고 관리할 수 있어요.",
+      "registerRateLimited": "잠시 후 다시 시도해 주세요.",
       "upgradeOpen": "비밀번호 설정하고 회원 전환",
       "upgradePassword": "비밀번호",
       "upgradePasswordConfirm": "비밀번호 확인",
