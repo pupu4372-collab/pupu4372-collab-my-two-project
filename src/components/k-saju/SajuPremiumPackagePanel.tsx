@@ -28,7 +28,8 @@ const UI = {
     packageSubtitle: "집사 궁합 · 별자리 케어 — 우리 아이 맞춤 케어 가이드 한 번에",
     priceNote: "1회 결제 · 해당 펫 영구 잠금 해제",
     payCta: (price: string) => `${price} 결제하기`,
-    loginPayCta: "로그인하고 결제하기",
+    loginPayCta: "가입하고 구매하기",
+    accountReason: "구매하신 리포트는 계정에 보관돼요. 다른 기기에서도 이어서 보실 수 있어요.",
     includedProducts: "포함 상품",
     included: "포함",
     viewBadge: "보기",
@@ -48,7 +49,8 @@ const UI = {
     packageSubtitle: "You & your pet bond and zodiac care — personalized guides for your pet in one unlock",
     priceNote: "One-time payment · Permanent unlock for this pet",
     payCta: (price: string) => `Pay ${price}`,
-    loginPayCta: "Log in to pay",
+    loginPayCta: "Sign up to purchase",
+    accountReason: "Your report is saved to your account, so you can pick up where you left off on any device.",
     includedProducts: "Included",
     included: "Included",
     viewBadge: "View",
@@ -172,6 +174,9 @@ export function SajuPremiumPackagePanel({
               >
                 {isGuest ? t.loginPayCta : t.payCta(packagePrice)}
               </Link>
+              {isGuest ? (
+                <p className="mt-3 text-xs leading-relaxed text-plum/70">{t.accountReason}</p>
+              ) : null}
             </>
           ) : null}
         </div>
@@ -241,12 +246,17 @@ export function SajuPremiumPackagePanel({
           {mbtiUnlockEnabled && mbtiUnlockLoading ? (
             <div className="mx-auto mt-5 h-12 w-full max-w-xs animate-pulse rounded-full bg-cream" />
           ) : (
-            <Link
-              href={mbtiCtaHref}
-              className="mt-5 inline-flex w-full justify-center rounded-full bg-[#6f4b8b] px-4 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#5f3f78] active:scale-[0.98]"
-            >
-              {mbtiCtaLabel}
-            </Link>
+            <>
+              <Link
+                href={mbtiCtaHref}
+                className="mt-5 inline-flex w-full justify-center rounded-full bg-[#6f4b8b] px-4 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#5f3f78] active:scale-[0.98]"
+              >
+                {isGuest && !mbtiUnlocked ? t.loginPayCta : mbtiCtaLabel}
+              </Link>
+              {isGuest && !mbtiUnlocked ? (
+                <p className="mt-3 text-xs leading-relaxed text-plum/70">{t.accountReason}</p>
+              ) : null}
+            </>
           )}
         </div>
       </GlassCard>

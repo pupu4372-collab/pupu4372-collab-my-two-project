@@ -27,8 +27,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 const UI = {
   ko: {
-    loginRequired: "MBTI 상세 진단을 보려면 로그인이 필요해요.",
-    login: "로그인하기",
     missingPet: "펫 정보가 없어요. 무료 사주 결과부터 다시 시작해 주세요.",
     backSaju: "K-사주로 돌아가기",
     loading: "불러오는 중…",
@@ -40,8 +38,6 @@ const UI = {
     typeTitle: (name: string, type: string) => `${name}은(는) ${type}형이에요`,
   },
   en: {
-    loginRequired: "Please log in to view detailed MBTI.",
-    login: "Log in",
     missingPet: "Missing pet info. Start again from free K-Saju.",
     backSaju: "Back to K-Saju",
     loading: "Loading…",
@@ -316,21 +312,6 @@ export function MbtiStandaloneFlow() {
     setMbtiAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   }
 
-  if (configured && ready && isAnonymous) {
-    return (
-      <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-4 p-6 text-center`}>
-        <PremiumHubBackToBasicLink locale={locale} sajuResultId={sajuResultId} petId={petId} />
-        <p className="text-sm text-plum/70">{t.loginRequired}</p>
-        <Link
-          href="/login"
-          className="inline-flex rounded-full bg-channel-saju px-6 py-3 text-sm font-semibold text-white transition hover:brightness-105"
-        >
-          {t.login}
-        </Link>
-      </div>
-    );
-  }
-
   if (!hasPetContext) {
     return (
       <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} space-y-4 p-6 text-center`}>
@@ -351,7 +332,7 @@ export function MbtiStandaloneFlow() {
     );
   }
 
-  if (!unlocked) {
+  if ((configured && ready && isAnonymous) || !unlocked) {
     return (
       <div className="space-y-4">
         <PremiumHubBackToBasicLink locale={locale} sajuResultId={sajuResultId} petId={petId} />
@@ -359,6 +340,7 @@ export function MbtiStandaloneFlow() {
           locale={locale}
           continuation={paymentContinuation}
           returnTo="mbti_standalone"
+          loginRequired={configured && ready && isAnonymous}
         />
       </div>
     );

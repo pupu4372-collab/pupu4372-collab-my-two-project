@@ -19,6 +19,8 @@ const UI = {
     subtitle: "행동 진단으로 우리 아이 성향 유형과 맞춤 케어 팁을 확인해 보세요",
     languageNote: "결과 리포트는 현재 언어(한국어)로 생성됩니다.",
     cta: "상세 MBTI 보러가기",
+    signupPayCta: "가입하고 구매하기",
+    accountReason: "구매하신 리포트는 계정에 보관돼요. 다른 기기에서도 이어서 보실 수 있어요.",
     viewResult: "MBTI 결과 보기",
   },
   en: {
@@ -26,6 +28,9 @@ const UI = {
     subtitle: "Discover your pet's type and tailored care tips with a behavior check.",
     languageNote: "Your report will be generated in the current language (English).",
     cta: "View detailed MBTI",
+    signupPayCta: "Sign up to purchase",
+    accountReason:
+      "Your report is saved to your account, so you can pick up where you left off on any device.",
     viewResult: "View MBTI result",
   },
 } as const;
@@ -62,7 +67,11 @@ export function MbtiLockTeaserCard({
   }).toString()}`;
 
   const ctaHref = mbtiUnlocked ? resultHref : hrefOrLoginGate(paymentHref, isGuest);
-  const ctaLabel = mbtiUnlocked ? t.viewResult : t.cta;
+  const ctaLabel = mbtiUnlocked
+    ? t.viewResult
+    : isGuest
+      ? t.signupPayCta
+      : t.cta;
 
   return (
     <section className="rounded-[2rem] border border-channel-saju/20 bg-white p-6 shadow-sm">
@@ -77,12 +86,17 @@ export function MbtiLockTeaserCard({
           {mbtiUnlockLoading ? (
             <div className="mt-4 h-10 w-40 animate-pulse rounded-full bg-sand/70" />
           ) : (
-            <Link
-              href={ctaHref}
-              className="mt-4 inline-flex rounded-full bg-[#6f4b8b] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6f4b8b]/25 transition hover:bg-[#5f3f78]"
-            >
-              {ctaLabel}
-            </Link>
+            <>
+              <Link
+                href={ctaHref}
+                className="mt-4 inline-flex rounded-full bg-[#6f4b8b] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6f4b8b]/25 transition hover:bg-[#5f3f78]"
+              >
+                {ctaLabel}
+              </Link>
+              {isGuest && !mbtiUnlocked ? (
+                <p className="mt-3 text-xs leading-relaxed text-plum/70">{t.accountReason}</p>
+              ) : null}
+            </>
           )}
         </div>
       </div>

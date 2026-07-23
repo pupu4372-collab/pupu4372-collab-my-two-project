@@ -90,8 +90,6 @@ const UI = {
     btnZodiac: "별자리 케어 가이드",
     btnCompatibility: "집사 궁합 케어",
     backToMenu: "← 프리미엄 결과 목록으로",
-    loginRequired: "프리미엄을 보려면 로그인이 필요해요.",
-    login: "로그인하기",
     missingPet: "펫 정보가 없어요. 사주를 먼저 본 뒤 결제해 주세요.",
     backSaju: "← 사주 보기",
     backBasicResult: "← 사주 결과로 돌아가기",
@@ -128,8 +126,6 @@ const UI = {
     btnZodiac: "Zodiac care guide",
     btnCompatibility: "You & your pet — bond care",
     backToMenu: "← Back to premium menu",
-    loginRequired: "Please log in to view premium content.",
-    login: "Log in",
     missingPet: "Missing pet info. Complete K-Saju and payment first.",
     backSaju: "← K-Saju",
     backBasicResult: "← Back to saju result",
@@ -460,23 +456,6 @@ export function PremiumHub() {
     );
   }
 
-  if (configured && ready && isAnonymous) {
-    return (
-      <div className="space-y-4">
-        {backToBasicResultLink()}
-        <div className={`${COMMUNITY_SOLID_SURFACE_CLASS} p-6 text-center`}>
-        <p className="text-sm text-plum/70">{t.loginRequired}</p>
-        <Link
-          href="/login"
-          className="mt-4 inline-flex rounded-full bg-channel-saju px-6 py-3 text-sm font-semibold text-white transition hover:brightness-105"
-        >
-          {t.login}
-        </Link>
-        </div>
-      </div>
-    );
-  }
-
   if (!initialized) {
     return (
       <div className="space-y-4">
@@ -528,7 +507,11 @@ export function PremiumHub() {
     );
   }
 
-  if (premiumBlocked || (unlockCheckEnabled && !unlocked)) {
+  if (
+    (configured && ready && isAnonymous) ||
+    premiumBlocked ||
+    (unlockCheckEnabled && !unlocked)
+  ) {
     return (
       <div className="space-y-4">
         {backToBasicResultLink(petCtx.petId)}
@@ -536,6 +519,7 @@ export function PremiumHub() {
         locale={petCtx.locale}
         continuation={premiumContinuation}
         returnTo={premiumReturnTo}
+        loginRequired={configured && ready && isAnonymous}
       />
       </div>
     );
