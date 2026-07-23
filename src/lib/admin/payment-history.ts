@@ -63,8 +63,8 @@ type UnlockAdminRow = {
   paid_at: string | null;
   created_at: string;
   expires_at: string | null;
-  pet_id: string;
-  user_id: string;
+  pet_id: string | null;
+  user_id: string | null;
   pets: {
     name: string;
     species: string | null;
@@ -207,12 +207,15 @@ function mapPetEntries(
   return petRows.map((row) => {
     const currencyRaw = String(row.currency ?? "KRW").trim().toUpperCase();
     const currency: "KRW" | "USD" = currencyRaw === "USD" ? "USD" : "KRW";
+    const userId = row.user_id;
     // Sort/cursor use DB created_at; order.createdAt keeps paid_at for record consumers.
     return {
       kind: "pet" as const,
       createdAt: row.created_at,
-      userId: row.user_id,
-      userLabel: nameByUserId.get(row.user_id) || row.user_id.slice(0, 8),
+      userId,
+      userLabel: userId
+        ? nameByUserId.get(userId) || userId.slice(0, 8)
+        : "—",
       order: {
         paymentId: row.payment_id as string,
         productCode: row.product_code,
@@ -357,7 +360,7 @@ export async function listPaymentHistoryForAdmin(
 
   const userIds = [
     ...new Set([
-      ...petRows.map((r) => r.user_id),
+      ...petRows.map((r) => r.user_id).filter((id): id is string => Boolean(id)),
       ...humanRows.map((r) => r.user_id).filter((id): id is string => Boolean(id)),
     ]),
   ];
