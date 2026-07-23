@@ -12,7 +12,7 @@ type UnlockRow = {
   paid_at: string | null;
   created_at: string;
   expires_at: string | null;
-  pet_id: string;
+  pet_id: string | null;
   pets: {
     name: string;
     species: string | null;

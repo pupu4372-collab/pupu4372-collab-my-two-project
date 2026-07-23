@@ -17,7 +17,8 @@ export const PET_PREMIUM_INCLUDES = {
 export type PetPremiumPaymentRecord = {
   paymentId: string;
   productCode: string;
-  petId: string;
+  /** Null when the pet (or account) was deleted after purchase. */
+  petId: string | null;
   petName: string;
   species: string | null;
   petGender: string | null;
