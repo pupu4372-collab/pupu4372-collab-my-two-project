@@ -97,3 +97,21 @@ export async function findOrCreatePet(
 
   return saved.id;
 }
+
+/**
+ * Persist pet only (no saju_results). Enforces guest slot limit when requested.
+ */
+export async function persistPetProfile(
+  supabase: DbClient,
+  input: PetProfileInput & { isAnonymousOwner?: boolean }
+): Promise<string> {
+  if (input.isAnonymousOwner) {
+    await assertGuestCanCreatePet(supabase, {
+      ownerId: input.ownerId,
+      name: input.name,
+      species: input.species,
+      birthDate: input.birthDate,
+    });
+  }
+  return findOrCreatePet(supabase, input);
+}

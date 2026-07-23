@@ -76,6 +76,8 @@ const UI = {
       `${name} is "${typeTitle}"`,
     mbtiResultDesc: "Personality type",
     checkingPets: "Checking your pets…",
+    loadingSavedReport: "Opening your saved care guide…",
+    generatingReport: "Creating your pet's care guide…",
     pickTitle: "Whose K-Saju do you want to see?",
     pickSubtitle:
       "Pick a registered pet to open a saved reading, or compute a new one from their birth details.",
@@ -115,6 +117,8 @@ const UI = {
       `${name}은(는) "${typeTitle}"`,
     mbtiResultDesc: "성격 유형",
     checkingPets: "등록된 아이를 확인하는 중…",
+    loadingSavedReport: "저장된 사주 결과를 여는 중…",
+    generatingReport: "맞춤 케어 가이드를 만들고 있어요…",
     pickTitle: "어떤 아이의 사주를 볼까요?",
     pickSubtitle:
       "등록된 아이를 고르면 저장된 결과가 있으면 바로 열고, 없으면 생일로 새로 계산해요.",
@@ -412,7 +416,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   ]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !accessToken || step !== "form") return;
+    if (typeof window === "undefined" || !accessToken || embedded) return;
 
     const params = new URLSearchParams(window.location.search);
     const petIdParam = params.get("petId")?.trim();
@@ -421,8 +425,15 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     let cancelled = false;
 
     void (async () => {
+      setEntryGate("resolving");
+      setError(null);
+
       const pet = await fetchPetProfileForSaju(accessToken, petIdParam);
-      if (cancelled || !pet) return;
+      if (cancelled) return;
+      if (!pet) {
+        setEntryGate("form");
+        return;
+      }
 
       const next = petProfileToSajuFormState(pet);
       setPrefillPetId(pet.id);
@@ -434,12 +445,73 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
       setTimezone(next.timezone);
       setPrefillPhotoUrl(next.photoUrl);
       setConsent(true);
+
+      try {
+        const latestRes = await fetch(
+          `/api/profile/reports/latest-basic?petId=${encodeURIComponent(pet.id)}`,
+          { headers: { Authorization: `Bearer ${accessToken}` }, cache: "no-store" }
+        );
+        if (cancelled) return;
+        if (latestRes.ok) {
+          const latest = (await latestRes.json()) as { id?: string | null };
+          if (latest.id) {
+            router.replace(`/reports/${latest.id}`);
+            return;
+          }
+        }
+
+        setLoading(true);
+        const birthTimeUnknownNow = next.birthTime === "unknown";
+        const res = await fetch("/api/saju/basic", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            petName: next.petName,
+            species: next.species,
+            petGender: next.petGender,
+            birthDate: next.birthDate,
+            calendarType: "solar",
+            birthTime: birthTimeUnknownNow ? null : next.birthTime,
+            birthTimeUnknown: birthTimeUnknownNow,
+            timezone: next.timezone,
+            locale,
+            privacyConsent: true,
+          }),
+        });
+        const data = (await res.json()) as SajuBasicResponse & {
+          error?: string;
+          sajuResultId?: string | null;
+        };
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(data.error ?? t.networkError);
+          setEntryGate("form");
+          return;
+        }
+        if (data.sajuResultId) {
+          router.replace(`/reports/${data.sajuResultId}`);
+          return;
+        }
+        setResult(data);
+        setStep("result");
+        setEntryGate("form");
+      } catch {
+        if (!cancelled) {
+          setError(t.networkError);
+          setEntryGate("form");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [accessToken, step]);
+  }, [accessToken, embedded, locale, router, t.networkError]);
 
   const petId = result?.petId ?? prefillPetId;
   const mbtiUnlockCheckEnabled = configured && sessionReady && !isAnonymous && Boolean(petId);
@@ -527,7 +599,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   if (entryGate === "resolving" && !embedded && step === "form") {
     return (
       <div className="rounded-[1.75rem] border border-channel-saju/15 bg-surface px-5 py-8 text-center text-sm text-on-surface-variant shadow-sm">
-        {t.checkingPets}
+        {loading ? t.generatingReport : prefillPetId ? t.loadingSavedReport : t.checkingPets}
       </div>
     );
   }

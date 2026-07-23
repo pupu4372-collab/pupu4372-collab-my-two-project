@@ -27,7 +27,7 @@ export function PremiumHubBackToBasicLink({
   className = "mb-4 inline-flex text-sm font-semibold text-white/90 underline-offset-2 hover:text-white hover:underline",
 }: Props) {
   const t = LABEL[locale];
-  const { ready, configured, accessToken, isAnonymous } = useSupabaseSession();
+  const { ready, configured, accessToken } = useSupabaseSession();
   const [resolvedId, setResolvedId] = useState<string | null>(sajuResultId ?? null);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export function PremiumHubBackToBasicLink({
       return;
     }
 
-    if (!configured || !ready || isAnonymous || !accessToken || !petId) {
+    if (!configured || !ready || !accessToken || !petId) {
       setResolvedId(null);
       return;
     }
@@ -60,7 +60,7 @@ export function PremiumHubBackToBasicLink({
     return () => {
       cancelled = true;
     };
-  }, [accessToken, configured, isAnonymous, petId, ready, sajuResultId]);
+  }, [accessToken, configured, petId, ready, sajuResultId]);
 
   const href = basicSajuResultHrefFromId(resolvedId);
 

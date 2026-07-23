@@ -1,7 +1,7 @@
+import { persistPetProfile } from "./persist-pet";
 import type { ElementKey, SajuBasicRequest, SajuBasicResponse } from "./types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, SajuResultInsert } from "@/lib/supabase/types";
-import { assertGuestCanCreatePet, findOrCreatePet } from "./persist-pet";
 
 type DbClient = SupabaseClient<Database>;
 
@@ -32,16 +32,7 @@ export async function persistSajuResult(
 ): Promise<PersistSajuOutput> {
   const { request, result, ownerId, isAnonymousOwner } = input;
 
-  if (isAnonymousOwner) {
-    await assertGuestCanCreatePet(supabase, {
-      ownerId,
-      name: request.petName,
-      species: request.species,
-      birthDate: request.birthDate,
-    });
-  }
-
-  const petId = await findOrCreatePet(supabase, {
+  const petId = await persistPetProfile(supabase, {
     ownerId,
     name: request.petName,
     species: request.species,
@@ -50,6 +41,7 @@ export async function persistSajuResult(
     birthTime: request.birthTime,
     birthTimeUnknown: request.birthTimeUnknown,
     timezone: request.timezone,
+    isAnonymousOwner,
   });
 
   const analysisMode = request.birthTimeUnknown ? "three_pillars" : "four_pillars";

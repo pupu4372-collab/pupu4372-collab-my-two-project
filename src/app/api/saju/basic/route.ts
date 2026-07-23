@@ -12,8 +12,8 @@ import { interpretSaju, isSajuInterpretLlmEnabled } from "@/lib/saju/llm/interpr
 import { enrichBasicResultDisplayFields } from "@/lib/saju/enrich-basic-result-display";
 import { finalizePetHeadline } from "@/lib/saju/pet-headline";
 import { validatePetName } from "@/lib/saju/moderation";
+import { GuestPetLimitError, persistPetProfile } from "@/lib/saju/persist-pet";
 import { persistSajuResult } from "@/lib/saju/persist";
-import { GuestPetLimitError } from "@/lib/saju/persist-pet";
 import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
 import { normalizeBirthCalendarType } from "@/lib/saju/resolve-birth-date";
 import {
@@ -255,7 +255,7 @@ export async function POST(request: Request) {
     }
   }
 
-  let body: Partial<SajuBasicRequest>;
+  let body: Partial<SajuBasicRequest> & { skipNarrative?: boolean };
   try {
     body = await request.json();
   } catch {
@@ -303,6 +303,7 @@ export async function POST(request: Request) {
   }
 
   const locale: Locale = body.locale === "ko" ? "ko" : "en";
+  const skipNarrative = body.skipNarrative === true;
 
   const sajuRequest: SajuBasicRequest = {
     petName: (body.petName ?? "").trim(),
@@ -321,6 +322,70 @@ export async function POST(request: Request) {
     const { result, mapping } = computePetSajuBundle(sajuRequest);
     result.narrativeSource = "template";
     let llmApplied = false;
+
+    // Home pet registration: deterministic calc + pet row only — no LLM / no saju_results.
+    if (skipNarrative) {
+      console.info("[saju/basic] skip_narrative pet_register_only");
+      let persisted = false;
+      let petId: string | null = null;
+      let persistError: string | null = null;
+
+      if (isSupabaseConfigured()) {
+        const ownerId = await getUserIdFromRequest(request);
+        const token = getBearerToken(request);
+        const userClient = token ? createUserSupabaseClient(token) : null;
+
+        if (ownerId && userClient) {
+          try {
+            petId = await persistPetProfile(userClient, {
+              ownerId,
+              name: sajuRequest.petName,
+              species: sajuRequest.species,
+              gender: sajuRequest.petGender ?? null,
+              birthDate: sajuRequest.birthDate,
+              birthTime: sajuRequest.birthTime,
+              birthTimeUnknown: sajuRequest.birthTimeUnknown,
+              timezone: sajuRequest.timezone,
+              isAnonymousOwner: !registeredUserId,
+            });
+            persisted = true;
+          } catch (err) {
+            if (err instanceof GuestPetLimitError) {
+              const limitMessage =
+                sajuRequest.locale === "en"
+                  ? "Guests can register up to 3 pets. Sign up to add and manage more."
+                  : "게스트는 3마리까지 등록할 수 있어요. 회원가입하면 더 많은 아이를 등록하고 관리할 수 있어요.";
+              return jsonResponse(
+                {
+                  error: limitMessage,
+                  code: "guest_pet_limit",
+                  persisted: false,
+                  petId: null,
+                  sajuResultId: null,
+                },
+                { status: 403 },
+                guestCookie
+              );
+            }
+            persistError =
+              err instanceof Error ? err.message : "Could not save to database.";
+          }
+        }
+      }
+
+      return jsonResponse(
+        {
+          skipNarrative: true,
+          persisted,
+          petId,
+          sajuResultId: null,
+          persistError,
+          dominantElement: result.dominantElement,
+        },
+        undefined,
+        guestCookie
+      );
+    }
 
     if (isSajuInterpretLlmEnabled()) {
       try {
