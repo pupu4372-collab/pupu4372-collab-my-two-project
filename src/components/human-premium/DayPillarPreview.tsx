@@ -10,6 +10,7 @@ import { COUPON_TYPE_DAILY_LUCKY_FREE } from "@/lib/coupons/constants";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { DAILY_EXTRA_PRODUCT_CODE } from "@/lib/reports/human-premium/daily-extra-constants";
 import type { HumanPremiumProfile } from "@/lib/reports/human-premium/cart-session";
+import { isDeliverableHumanPremiumEmail } from "@/lib/reports/human-premium/email-policy";
 import {
   formatPrice,
   getDailyExtraPrice,
@@ -38,20 +39,22 @@ const PRODUCT_UI = {
   ko: {
     title: "데일리 럭키 운세",
     description: REPORT_TYPE_SUBTITLES_KO.daily,
-    signupAlertTitle: "가입이 필요해요",
-    signupAlertBody: "가입하면 오픈기념 럭키운세 쿠폰을 드려요",
-    ctaGuest: "가입하고 오픈기념 무료 쿠폰 받기",
-    ctaCoupon: "오픈기념 쿠폰으로 무료로 보기",
+    guestPayHint: "게스트도 바로 결제할 수 있어요",
+    guestSignupHint: "가입하시면 데일리 럭키를 평생 1회 무료로 받아볼 수 있어요",
+    ctaSignup: "가입하고 1회 무료 받기",
+    ctaFree: "무료로 받기",
     ctaPay: (price: string) => `${price} 결제하고 보기`,
+    emailRequired: "리포트를 받으실 이메일을 입력해 주세요.",
   },
   en: {
     title: "Daily Lucky Reading",
     description: REPORT_TYPE_SUBTITLES_EN.daily,
-    signupAlertTitle: "Sign up required",
-    signupAlertBody: "Sign up to get a free Lucky Reading coupon",
-    ctaGuest: "Sign up for a free launch coupon",
-    ctaCoupon: "View free with launch coupon",
+    guestPayHint: "Guests can pay and view right away",
+    guestSignupHint: "Sign up to claim one free Daily Lucky Reading (lifetime)",
+    ctaSignup: "Sign up for 1 free reading",
+    ctaFree: "Get it free",
     ctaPay: (price: string) => `Pay ${price} to view`,
+    emailRequired: "Enter your email to receive your report.",
   },
 } as const;
 
@@ -100,7 +103,6 @@ export function DayPillarPreview({
   const [loading, setLoading] = useState(false);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [signupPrompt, setSignupPrompt] = useState(false);
   const [portoneReady, setPortoneReady] = useState(false);
   const [report, setReport] = useState<HumanPremiumReportPayload | null>(null);
   const [webToken, setWebToken] = useState<string | null>(null);
@@ -233,11 +235,9 @@ export function DayPillarPreview({
     return parseBirthTimeSelect(profile.birthTimeSelect).birthTime;
   }, [profile.birthTimeSelect, birthTimeUnknown]);
 
-  const ctaLabel = !isFullMember
-    ? ui.ctaGuest
-    : hasCoupon
-      ? ui.ctaCoupon
-      : ui.ctaPay(paidPriceLabel);
+  const ctaLabel = isFullMember && hasCoupon
+    ? ui.ctaFree
+    : ui.ctaPay(paidPriceLabel);
 
   /** Vault lookup only — no daily-routine generate. Returns true if navigated. */
   async function openExistingDailyReport(paymentOrderId: string): Promise<boolean> {
@@ -283,15 +283,13 @@ export function DayPillarPreview({
     const errCode = String(data.code ?? data.error ?? "");
 
     if (res.status === 402 && errCode === "signup_required") {
-      setSignupPrompt(true);
-      return null;
+      return { paymentRequired: true as const };
     }
     if (res.status === 402 && errCode === "payment_required") {
       return { paymentRequired: true as const };
     }
     if (res.status === 401 && data.error === "login_required") {
-      setSignupPrompt(true);
-      return null;
+      throw new Error(String(data.error));
     }
     if (res.status === 409 && data.error === "daily_generating_in_progress") {
       throw new Error("daily_generating_in_progress");
@@ -312,21 +310,23 @@ export function DayPillarPreview({
 
     setReport(data.report as HumanPremiumReportPayload);
     setWebToken(String(data.webToken ?? ""));
-    setSignupPrompt(false);
     if (data.couponUsed === true) {
       setHasCoupon(false);
     }
     return data;
   }
 
-  async function handleGenerate() {
-    if (!isFullMember) {
-      setSignupPrompt(true);
-      return;
-    }
+  function assertEmailReady(): boolean {
+    if (isDeliverableHumanPremiumEmail(profile.email)) return true;
+    setError(ui.emailRequired);
+    return false;
+  }
 
-    // Paid path: skip daily-routine free gate — go straight to daily_extra checkout.
-    if (hasCoupon === false) {
+  async function handleGenerate() {
+    if (!assertEmailReady()) return;
+
+    // Guests always pay. Members without free claim pay.
+    if (!isFullMember || hasCoupon === false) {
       await handleDailyExtraPay();
       return;
     }
@@ -350,10 +350,15 @@ export function DayPillarPreview({
   }
 
   async function handleDailyExtraPay() {
-    if (!accessToken || !isFullMember) {
-      setSignupPrompt(true);
+    if (!accessToken) {
+      setError(
+        isKo
+          ? "세션을 준비 중이에요. 잠시 후 다시 시도해 주세요."
+          : "Preparing your session. Please try again in a moment."
+      );
       return;
     }
+    if (!assertEmailReady()) return;
 
     setPaying(true);
     setError(null);
@@ -492,22 +497,6 @@ export function DayPillarPreview({
           <p className="mt-2 text-sm text-plum/75">{ui.description}</p>
           <p className="mt-1 text-base font-bold text-ink">{paidPriceLabel}</p>
         </div>
-
-        {signupPrompt ? (
-          <div
-            role="alert"
-            className="rounded-2xl border border-channel-saju/30 bg-white/90 px-4 py-4 text-sm"
-          >
-            <p className="font-bold text-ink">{ui.signupAlertTitle}</p>
-            <p className="mt-2 text-plum/80">{ui.signupAlertBody}</p>
-            <Link
-              href="/login"
-              className="mt-3 inline-block font-semibold text-channel-saju underline"
-            >
-              {ui.ctaGuest}
-            </Link>
-          </div>
-        ) : null}
 
         <div className="human-premium-birth-form-inner space-y-4">
           <label className="human-premium-birth-field">
@@ -651,21 +640,38 @@ export function DayPillarPreview({
           ) : null}
 
           {!isFullMember ? (
-            <>
-              <p className="text-center text-xs font-semibold text-plum/70">
-                {isKo
-                  ? "PDF로 저장해두세요. 회원가입하면 언제든 다시 볼 수 있어요"
-                  : "Save your report as PDF. Sign up to access it anytime."}
-              </p>
-              <Link
-                href="/login"
+            <div className="space-y-3">
+              <p className="text-center text-xs font-semibold text-plum/70">{ui.guestPayHint}</p>
+              <button
+                type="button"
+                disabled={!profile.birthDate || !profile.privacyConsent || submitBusy}
+                onClick={() => void handleGenerate()}
                 className="human-premium-birth-submit human-premium-birth-submit--plan"
               >
                 <span className="human-premium-birth-submit-body">
-                  <span className="human-premium-birth-submit-title">{ui.ctaGuest}</span>
+                  {loading || paying ? (
+                    isKo
+                      ? paying
+                        ? "결제 창 여는 중…"
+                        : "생성 중…"
+                      : paying
+                        ? "Opening checkout…"
+                        : "Generating…"
+                  ) : (
+                    <span className="human-premium-birth-submit-title">{ui.ctaPay(paidPriceLabel)}</span>
+                  )}
                 </span>
-              </Link>
-            </>
+              </button>
+              <div className="rounded-2xl border border-channel-saju/20 bg-lavender/20 px-4 py-3 text-center text-sm text-plum">
+                <p>{ui.guestSignupHint}</p>
+                <Link
+                  href="/login"
+                  className="mt-2 inline-block font-extrabold text-channel-saju underline"
+                >
+                  {ui.ctaSignup}
+                </Link>
+              </div>
+            </div>
           ) : (
             <button
               type="button"

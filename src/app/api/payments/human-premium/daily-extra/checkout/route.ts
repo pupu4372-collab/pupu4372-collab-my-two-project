@@ -10,7 +10,7 @@ import {
   getDailyExtraPrice,
   resolveDailyExtraCheckout,
 } from "@/lib/reports/human-premium/pricing";
-import { getRegisteredUserIdFromRequest } from "@/lib/supabase/auth-server";
+import { getUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -22,7 +22,8 @@ export async function POST(request: Request) {
   }
 
   const locale = body.locale === "en" ? "en" : "ko";
-  const userId = await getRegisteredUserIdFromRequest(request);
+  // Anonymous sessions allowed (same pattern as human-premium cart checkout).
+  const userId = await getUserIdFromRequest(request);
 
   if (!userId) {
     return NextResponse.json({ error: "login_required" }, { status: 401 });
