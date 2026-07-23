@@ -389,8 +389,8 @@ export async function POST(request: Request) {
           if (err instanceof GuestPetLimitError) {
             const limitMessage =
               sajuRequest.locale === "en"
-                ? "Guests can register one pet. Sign up to add and manage more."
-                : "게스트는 1마리까지 등록할 수 있어요. 회원가입하면 여러 아이를 등록하고 관리할 수 있어요.";
+                ? "Guests can register up to 3 pets. Sign up to add and manage more."
+                : "게스트는 3마리까지 등록할 수 있어요. 회원가입하면 더 많은 아이를 등록하고 관리할 수 있어요.";
             return jsonResponse(
               {
                 error: limitMessage,

@@ -2,6 +2,7 @@
 
 import {
   checkSignupEmail,
+  EmailAlreadyRegisteredError,
   saveAuthReturnPath,
   sendPasswordResetEmail,
   signInWithEmail,
@@ -105,6 +106,9 @@ export function LoginButtons({
   const postLoginHref = returnTo ?? (homeHref === "/ko" ? "/" : homeHref);
 
   function formatAuthError(err: unknown) {
+    if (err instanceof EmailAlreadyRegisteredError) {
+      return t("emailAlreadyRegistered");
+    }
     const message = err instanceof Error ? err.message : t("genericError");
     const normalized = message.toLowerCase();
     if (message.includes("non ISO-8859-1 code point")) {
@@ -206,18 +210,29 @@ export function LoginButtons({
     setLoading(mode);
     try {
       if (mode === "signup") {
-        await signUpWithEmail({
+        const result = await signUpWithEmail({
           email: cleanEmail,
           password,
           displayName: cleanDisplayName || cleanEmail.split("@")[0],
           locale,
         });
-        setMessage(t("signupSuccess", { email: cleanEmail }));
+        setMessage(
+          result.promoted
+            ? t("signupPromotedSuccess")
+            : t("signupSuccess", { email: cleanEmail })
+        );
       } else {
         await signInWithEmail(cleanEmail, password, rememberMe);
         window.location.replace(postLoginHref);
       }
     } catch (err) {
+      if (err instanceof EmailAlreadyRegisteredError) {
+        setError(t("emailAlreadyRegistered"));
+        setMode("login");
+        setPassword("");
+        setPasswordConfirm("");
+        return;
+      }
       setError(formatAuthError(err));
     } finally {
       setLoading(null);
@@ -396,9 +411,6 @@ export function LoginButtons({
                 required
                 minLength={10}
               />
-              <p className="px-1 text-left text-[11px] leading-relaxed text-plum/50">
-                {t("signupEmailConfirmHelp")}
-              </p>
               <div className="space-y-3 rounded-[1.25rem] bg-white/45 px-4 py-4 text-left">
                 <label className="flex cursor-pointer items-start gap-3 text-sm text-on-surface">
                   <input

@@ -17,7 +17,7 @@ export interface PersistSajuInput {
   request: SajuBasicRequest;
   result: SajuBasicResponse;
   ownerId: string;
-  /** When true, block creating a second pet for this owner. */
+  /** When true, enforce GUEST_PET_SLOT_LIMIT for new pet profiles. */
   isAnonymousOwner?: boolean;
 }
 

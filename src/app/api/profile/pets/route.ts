@@ -1,6 +1,7 @@
 import {
   createUserSupabaseClient,
   getBearerToken,
+  getRegisteredUserIdFromRequest,
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
 import { isPetSpecies } from "@/lib/pets/species";
@@ -143,6 +144,18 @@ export async function PATCH(request: Request) {
 
   if (!ownerId || !token) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+
+  const registeredOwnerId = await getRegisteredUserIdFromRequest(request);
+  if (!registeredOwnerId) {
+    return NextResponse.json(
+      {
+        error: "guest_pet_edit_forbidden",
+        message:
+          "Guests cannot edit pet profiles. Sign up to update birth details and more.",
+      },
+      { status: 403 }
+    );
   }
 
   let body: {

@@ -14,6 +14,9 @@ import {
   sajuHrefForRegisteredPet,
   type PetEntryListItem,
 } from "@/lib/pets/load-pet-for-saju";
+import {
+  GUEST_PET_SLOT_LIMIT,
+} from "@/lib/saju/persist-pet";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
   formatPetProductPrice,
@@ -28,10 +31,7 @@ import { useLocale } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   clearSajuResultSession,
-  isValidSajuResultSession,
-  readSajuResultSession,
   saveSajuResultSession,
-  type SajuResultSessionSnapshot,
 } from "@/lib/saju/saju-result-session";
 
 type Step = "form" | "result";
@@ -75,6 +75,13 @@ const UI = {
     mbtiResultTitle: (name: string, typeTitle: string) =>
       `${name} is "${typeTitle}"`,
     mbtiResultDesc: "Personality type",
+    checkingPets: "Checking your pets…",
+    pickTitle: "Whose K-Saju do you want to see?",
+    pickSubtitle:
+      "Pick a registered pet to open a saved reading, or compute a new one from their birth details.",
+    guestAtLimit: `Guests can register up to ${GUEST_PET_SLOT_LIMIT} pets. Sign up to add more.`,
+    signupToAddMore: "Sign up to add more pets",
+    newPetCta: "Read K-Saju for a new pet",
   },
   ko: {
     title: "반려동물 K-사주",
@@ -107,6 +114,13 @@ const UI = {
     mbtiResultTitle: (name: string, typeTitle: string) =>
       `${name}은(는) "${typeTitle}"`,
     mbtiResultDesc: "성격 유형",
+    checkingPets: "등록된 아이를 확인하는 중…",
+    pickTitle: "어떤 아이의 사주를 볼까요?",
+    pickSubtitle:
+      "등록된 아이를 고르면 저장된 결과가 있으면 바로 열고, 없으면 생일로 새로 계산해요.",
+    guestAtLimit: `게스트는 ${GUEST_PET_SLOT_LIMIT}마리까지 등록할 수 있어요. 가입하시면 더 많은 아이를 등록하실 수 있어요.`,
+    signupToAddMore: "회원가입하고 더 등록하기",
+    newPetCta: "새로운 아이 사주 보기",
   },
 };
 
@@ -145,7 +159,7 @@ interface SajuFormProps {
 
 export function SajuForm({ embedded = false }: SajuFormProps) {
   const router = useRouter();
-  const { ready: sessionReady, accessToken, configured, isAnonymous } =
+  const { ready: sessionReady, accessToken, configured, isAnonymous, isFullMember } =
     useSupabaseSession();
   const routeLocale = useLocale();
   const locale: Locale = routeLocale === "en" ? "en" : "ko";
@@ -168,7 +182,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   const [prefillPetId, setPrefillPetId] = useState<string | null>(null);
   const skipEntryGateRef = useRef(false);
   const entryGateAttemptedRef = useRef(false);
-  const sessionRestoreAppliedRef = useRef(false);
   const [entryGate, setEntryGate] = useState<EntryGate>(embedded ? "form" : "resolving");
   const [entryPets, setEntryPets] = useState<PetEntryListItem[]>([]);
 
@@ -185,40 +198,20 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     ? "block text-xs font-medium text-plum/80"
     : FIELD_LABEL_CLASS;
 
-  const applySessionSnapshot = useCallback((saved: SajuResultSessionSnapshot) => {
-    setPetName(saved.petName);
-    setSpecies(saved.species);
-    setPetGender(saved.petGender);
-    setBirthDate(saved.birthDate);
-    setBirthTime(saved.birthTime);
-    setTimezone(saved.timezone);
-    setConsent(true);
-    if (saved.mbtiAnswers) setMbtiAnswers(saved.mbtiAnswers);
-    setResult(saved.result);
-    setStep("result");
-    sessionRestoreAppliedRef.current = true;
-    skipEntryGateRef.current = true;
-    setEntryGate("form");
-  }, []);
-
-  const tryRestoreFromSession = useCallback(() => {
-    if (typeof window === "undefined") return false;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("new") === "1") return false;
-
-    const saved = readSajuResultSession();
-    if (!isValidSajuResultSession(saved)) return false;
-
-    applySessionSnapshot(saved);
-    return true;
-  }, [applySessionSnapshot]);
+  // No auto-restore from sessionStorage on /saju entry — always pick/form first.
 
   const openNewPetForm = useCallback(() => {
     clearSajuResultSession();
     skipEntryGateRef.current = true;
     setEntryGate("form");
     setEntryPets([]);
-    router.replace("/saju?new=1");
+    setResult(null);
+    setStep("form");
+    setPetName("");
+    setBirthDate("");
+    setMbtiAnswers({});
+    // Stay on /saju without ?new=1 so the entry gate does not re-run into pick.
+    router.replace("/saju");
   }, [router]);
 
   const navigateRegisteredPet = useCallback(
@@ -235,46 +228,60 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!sessionReady) return;
 
     const params = new URLSearchParams(window.location.search);
-    if (params.get("new") === "1") {
-      clearSajuResultSession();
-      skipEntryGateRef.current = true;
-      sessionRestoreAppliedRef.current = false;
-      setEntryGate("form");
-      router.replace("/saju");
+    if (params.get("new") !== "1") {
+      if (params.get("petId")?.trim()) {
+        skipEntryGateRef.current = true;
+        setEntryGate("form");
+      }
+      if (params.get("restore") === "1") {
+        router.replace("/saju");
+      }
       return;
     }
 
-    if (params.get("petId")?.trim()) {
-      skipEntryGateRef.current = true;
-      setEntryGate("form");
-    }
+    clearSajuResultSession();
+    setResult(null);
+    setStep("form");
+    let cancelled = false;
 
-    tryRestoreFromSession();
+    void (async () => {
+      try {
+        if (accessToken) {
+          const pets = await fetchPetsForSajuEntry(accessToken);
+          if (cancelled) return;
+          const guestAtLimit = !isFullMember && pets.length >= GUEST_PET_SLOT_LIMIT;
+          if (guestAtLimit) {
+            setEntryPets(pets);
+            setEntryGate("pick");
+            entryGateAttemptedRef.current = true;
+            router.replace("/saju");
+            return;
+          }
+        }
+        if (cancelled) return;
+        skipEntryGateRef.current = true;
+        setEntryGate("form");
+        entryGateAttemptedRef.current = true;
+        router.replace("/saju");
+      } catch {
+        if (!cancelled) {
+          skipEntryGateRef.current = true;
+          setEntryGate("form");
+          router.replace("/saju");
+        }
+      }
+    })();
 
-    if (params.get("restore") === "1") {
-      router.replace("/saju");
-    }
-
-    const onPageShow = () => {
-      tryRestoreFromSession();
-    };
-    const onPopState = () => {
-      tryRestoreFromSession();
-    };
-
-    window.addEventListener("pageshow", onPageShow);
-    window.addEventListener("popstate", onPopState);
     return () => {
-      window.removeEventListener("pageshow", onPageShow);
-      window.removeEventListener("popstate", onPopState);
+      cancelled = true;
     };
-  }, [router, tryRestoreFromSession]);
+  }, [sessionReady, accessToken, isFullMember, router]);
 
   /**
-   * Entry gate: 0 pets → form; 1 pet → reports or ?petId=; 2+ → pick UI.
-   * Runs for anon + full members (Bearer via getUserIdFromRequest).
+   * Entry gate: 0 pets → form; 1+ pets → pick UI (never auto-open a report).
    */
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -285,8 +292,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
       return;
     }
     if (entryGateAttemptedRef.current) return;
-    if (sessionRestoreAppliedRef.current) return;
-    if (isValidSajuResultSession(readSajuResultSession())) return;
 
     const params = new URLSearchParams(window.location.search);
     if (params.get("petId")?.trim()) {
@@ -294,10 +299,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
       return;
     }
     if (params.get("restore") === "1") return;
-    if (params.get("new") === "1") {
-      setEntryGate("form");
-      return;
-    }
+    if (params.get("new") === "1") return; // handled above
 
     if (!accessToken) {
       setEntryGate("form");
@@ -318,11 +320,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
           return;
         }
 
-        if (pets.length === 1) {
-          navigateRegisteredPet(pets[0]!);
-          return;
-        }
-
         setEntryPets(pets);
         setEntryGate("pick");
       } catch {
@@ -333,7 +330,7 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
     return () => {
       cancelled = true;
     };
-  }, [sessionReady, accessToken, step, navigateRegisteredPet]);
+  }, [sessionReady, accessToken, step]);
 
   const handleApiSubmit = useCallback(async () => {
     setError(null);
@@ -416,8 +413,6 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
 
   useEffect(() => {
     if (typeof window === "undefined" || !accessToken || step !== "form") return;
-    if (sessionRestoreAppliedRef.current) return;
-    if (isValidSajuResultSession(readSajuResultSession())) return;
 
     const params = new URLSearchParams(window.location.search);
     const petIdParam = params.get("petId")?.trim();
@@ -532,23 +527,20 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
   if (entryGate === "resolving" && !embedded && step === "form") {
     return (
       <div className="rounded-[1.75rem] border border-channel-saju/15 bg-surface px-5 py-8 text-center text-sm text-on-surface-variant shadow-sm">
-        {locale === "ko" ? "등록된 아이를 확인하는 중…" : "Checking your pets…"}
+        {t.checkingPets}
       </div>
     );
   }
 
   if (entryGate === "pick" && !embedded && step === "form") {
+    const guestAtLimit = !isFullMember && entryPets.length >= GUEST_PET_SLOT_LIMIT;
     return (
       <div className="space-y-5 pb-28 md:pb-10">
         <section className="relative overflow-hidden rounded-[1.75rem] border border-channel-saju/15 bg-surface px-5 py-5 shadow-sm md:px-6">
           <h2 className="text-xl font-extrabold tracking-tight text-primary md:text-2xl">
-            {locale === "ko" ? "어떤 아이의 사주를 볼까요?" : "Whose K-Saju do you want to see?"}
+            {t.pickTitle}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-on-surface-variant">
-            {locale === "ko"
-              ? "등록된 아이를 고르면 저장된 결과가 있으면 바로 열고, 없으면 생일로 새로 계산해요."
-              : "Pick a registered pet to open a saved reading, or compute a new one from their birth details."}
-          </p>
+          <p className="mt-2 text-sm leading-6 text-on-surface-variant">{t.pickSubtitle}</p>
           <div className="mt-5">
             <PetFortunePetSelector
               pets={entryPets.map((pet) => ({
@@ -564,13 +556,25 @@ export function SajuForm({ embedded = false }: SajuFormProps) {
               }}
             />
           </div>
-          <button
-            type="button"
-            onClick={openNewPetForm}
-            className="mt-6 w-full rounded-full border border-channel-saju/25 bg-white px-5 py-3 text-sm font-extrabold text-channel-saju transition hover:bg-lavender/30"
-          >
-            {locale === "ko" ? "새로운 아이 사주 보기" : "Read K-Saju for a new pet"}
-          </button>
+          {guestAtLimit ? (
+            <div className="mt-6 space-y-3 rounded-2xl border border-channel-saju/20 bg-lavender/25 px-4 py-4 text-sm text-plum">
+              <p>{t.guestAtLimit}</p>
+              <Link
+                href="/login"
+                className="inline-flex w-full items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-extrabold text-white transition hover:brightness-110"
+              >
+                {t.signupToAddMore}
+              </Link>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={openNewPetForm}
+              className="mt-6 w-full rounded-full border border-channel-saju/25 bg-white px-5 py-3 text-sm font-extrabold text-channel-saju transition hover:bg-lavender/30"
+            >
+              {t.newPetCta}
+            </button>
+          )}
         </section>
       </div>
     );

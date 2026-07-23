@@ -65,6 +65,43 @@ export function resolveHumanPremiumStorageUserId(
   return userId && !isAnonymous ? userId : GUEST_STORAGE_USER_ID;
 }
 
+/**
+ * After anon → member promotion, keep guest cart/profile/paid-order drafts.
+ * Active keys are already unified (not namespaced by userId). This also lifts
+ * any leftover legacy `*:guest` keys into those unified slots.
+ */
+export function migrateGuestCartAfterPromotion(userId: string): void {
+  if (typeof window === "undefined" || !userId) return;
+
+  const guestSuffix = `:${GUEST_STORAGE_USER_ID}`;
+  const sessionPairs: Array<[string, string]> = [
+    [`${PROFILE_KEY}${guestSuffix}`, PROFILE_KEY],
+    [`${CART_KEY}${guestSuffix}`, CART_KEY],
+  ];
+  const localPairs: Array<[string, string]> = [
+    [`${PAID_ORDERS_KEY}${guestSuffix}`, PAID_ORDERS_KEY],
+  ];
+
+  try {
+    for (const [legacyKey, unifiedKey] of sessionPairs) {
+      const raw = sessionStorage.getItem(legacyKey);
+      if (raw && !sessionStorage.getItem(unifiedKey)) {
+        sessionStorage.setItem(unifiedKey, raw);
+      }
+      sessionStorage.removeItem(legacyKey);
+    }
+    for (const [legacyKey, unifiedKey] of localPairs) {
+      const raw = localStorage.getItem(legacyKey);
+      if (raw && !localStorage.getItem(unifiedKey)) {
+        localStorage.setItem(unifiedKey, raw);
+      }
+      localStorage.removeItem(legacyKey);
+    }
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
 type SavedHumanPremiumOrder = {
   orderId: string;
   paidAt: string;

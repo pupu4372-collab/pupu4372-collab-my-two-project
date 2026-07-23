@@ -3,7 +3,8 @@
 import { AdSlot } from "@/components/ads/AdSlot";
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { Link } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { PetProfilesList } from "./PetProfilesList";
 import { PetShowPostsMiniGrid } from "./PetShowPostsMiniGrid";
@@ -16,7 +17,10 @@ type ProfileView = "overview" | "edit";
 export function ProfilePage() {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const tSaju = useTranslations("saju");
   const [view, setView] = useState<ProfileView>("overview");
+  const { isFullMember, ready } = useSupabaseSession();
+  const canEditPets = ready && isFullMember;
 
   if (view === "edit") {
     return (
@@ -41,10 +45,20 @@ export function ProfilePage() {
 
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-white">{isKo ? "펫 프로필 수정" : "Edit pet profiles"}</h2>
-          <p className="text-sm text-white/75">
-            {isKo ? "반려동물 이름, 종류, 성별, 생일 정보를 수정할 수 있어요." : "Update your pet's name, species, gender, and birth details."}
-          </p>
-          <PetProfilesList editable cardStyle="glass" />
+          {canEditPets ? (
+            <>
+              <p className="text-sm text-white/75">
+                {isKo
+                  ? "반려동물 이름, 종류, 성별, 생일 정보를 수정할 수 있어요."
+                  : "Update your pet's name, species, gender, and birth details."}
+              </p>
+              <PetProfilesList editable cardStyle="glass" />
+            </>
+          ) : (
+            <p className="rounded-2xl bg-white/15 px-4 py-3 text-sm text-white/85">
+              {tSaju("guestPetEditForbidden")}
+            </p>
+          )}
         </section>
 
         <AccountDeleteSection />

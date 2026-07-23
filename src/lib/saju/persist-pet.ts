@@ -4,6 +4,9 @@ import type { Gender, Locale } from "./types";
 
 type DbClient = SupabaseClient<Database>;
 
+/** Guests may keep up to this many pets; re-save of the same profile is allowed. */
+export const GUEST_PET_SLOT_LIMIT = 3;
+
 export class GuestPetLimitError extends Error {
   readonly code = "guest_pet_limit" as const;
 
@@ -25,7 +28,7 @@ export interface PetProfileInput {
   locale?: Locale;
 }
 
-/** Guests may keep one pet; re-save of the same profile (name/species/birth) is allowed. */
+/** Guests may keep up to GUEST_PET_SLOT_LIMIT pets; same name/species/birth re-save is free. */
 export async function assertGuestCanCreatePet(
   supabase: DbClient,
   input: Pick<PetProfileInput, "ownerId" | "name" | "species" | "birthDate">
@@ -38,7 +41,7 @@ export async function assertGuestCanCreatePet(
   if (countError) {
     throw new Error(countError.message);
   }
-  if ((count ?? 0) < 1) return;
+  if ((count ?? 0) < GUEST_PET_SLOT_LIMIT) return;
 
   const { data: existing } = await supabase
     .from("pets")

@@ -133,13 +133,14 @@ export function PetProfilesList({
   const locale = useLocale();
   const isKo = locale === "ko";
   const tSpecies = useTranslations("petSpecies");
+  const tSaju = useTranslations("saju");
   const speciesLabels = {
     dog: tSpecies("dog"),
     cat: tSpecies("cat"),
     reptile: tSpecies("reptile"),
     otherFriends: tSpecies("otherFriends"),
   };
-  const { ready, accessToken, configured, isAnonymous } = useSupabaseSession();
+  const { ready, accessToken, configured, isAnonymous, isFullMember } = useSupabaseSession();
   const [pets, setPets] = useState<PetRow[]>([]);
   const [drafts, setDrafts] = useState<Record<string, PetEditDraft>>({});
   const [error, setError] = useState<string | null>(null);
@@ -197,6 +198,10 @@ export function PetProfilesList({
 
   async function savePet(pet: PetRow) {
     if (!accessToken) return;
+    if (!isFullMember) {
+      setError(tSaju("guestPetEditForbidden"));
+      return;
+    }
 
     const draft = drafts[pet.id];
     if (!draft) return;
@@ -455,7 +460,8 @@ export function PetProfilesList({
 
   const totalReadings = pets.reduce((sum, pet) => sum + pet.readings.length, 0);
 
-  const isCompactView = compact && !editable;
+  const canEdit = editable && isFullMember;
+  const isCompactView = compact && !canEdit;
   const useGlassCards = cardStyle === "glass" && isCompactView;
 
   return (
@@ -557,7 +563,7 @@ export function PetProfilesList({
                     const avatar = petAvatarImageProps(
                       {
                         photo_url: pet.photo_url,
-                        profileImageUrl: editable ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url,
+                        profileImageUrl: canEdit ? drafts[pet.id]?.profileImageUrl : pet.profile_image_url,
                       },
                       isCompactView ? 64 : 112
                     );
@@ -568,7 +574,7 @@ export function PetProfilesList({
                       <span aria-hidden>{speciesEmoji(pet.species)}</span>
                     );
                   })()}
-                  {editable && (
+                  {canEdit && (
                     <>
                       <input
                         id={`pet-profile-photo-${pet.id}`}
@@ -637,14 +643,14 @@ export function PetProfilesList({
                     )}
                   </p>
                 </div>
-                {useGlassCards && !editable && (
+                {useGlassCards && !canEdit && (
                   <span className="shrink-0 text-xl text-channel-saju/45" aria-hidden>
                     ›
                   </span>
                 )}
               </div>
 
-              {useGlassCards && !editable && (
+              {useGlassCards && !canEdit && (
                 <Link
                   href={`/profile/pets/${pet.id}`}
                   className="mt-4 block rounded-2xl bg-petal px-4 py-2.5 text-center text-xs font-extrabold text-plum shadow-sm ring-1 ring-white/80 transition hover:bg-white hover:shadow-md"
@@ -653,7 +659,7 @@ export function PetProfilesList({
                 </Link>
               )}
 
-              {editable && drafts[pet.id] && (
+              {canEdit && drafts[pet.id] && (
                 <div className="mt-4 grid gap-3 rounded-2xl border border-petal/50 bg-white p-4 sm:grid-cols-2">
                   <label className="block text-xs font-medium text-plum/80 sm:col-span-2">
                     {isKo ? "펫 이름" : "Pet name"}

@@ -1,5 +1,6 @@
 "use client";
 
+import { isAccountPromotionInProgress } from "@/lib/supabase/account-promotion";
 import {
   ensurePolicyInitialized,
   finalizeOAuthLoginPolicy,
@@ -113,9 +114,13 @@ export function useSupabaseSession(): SessionInfo {
           data: { session: afterSignOut },
         } = await client.auth.getSession();
         if (!afterSignOut) {
-          const { error } = await client.auth.signInAnonymously();
-          if (error) {
-            console.warn("[auth] anonymous sign-in failed:", error.message);
+          if (isAccountPromotionInProgress()) {
+            session = null;
+          } else {
+            const { error } = await client.auth.signInAnonymously();
+            if (error) {
+              console.warn("[auth] anonymous sign-in failed:", error.message);
+            }
           }
         }
         const {
@@ -128,6 +133,9 @@ export function useSupabaseSession(): SessionInfo {
     }
 
     if (!session) {
+      if (isAccountPromotionInProgress()) {
+        return null;
+      }
       const { error } = await client.auth.signInAnonymously();
       if (error) {
         console.warn("[auth] anonymous sign-in failed:", error.message);
