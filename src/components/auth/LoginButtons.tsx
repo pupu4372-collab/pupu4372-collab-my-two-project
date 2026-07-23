@@ -8,6 +8,7 @@ import {
   signInWithEmail,
   signInWithGoogle,
   signUpWithEmail,
+  WithdrawalCooldownError,
 } from "@/lib/supabase/auth-client";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { Link } from "@/i18n/navigation";
@@ -109,6 +110,9 @@ export function LoginButtons({
     if (err instanceof EmailAlreadyRegisteredError) {
       return t("emailAlreadyRegistered");
     }
+    if (err instanceof WithdrawalCooldownError) {
+      return t("rejoinBlocked", { days: err.daysRemaining });
+    }
     const message = err instanceof Error ? err.message : t("genericError");
     const normalized = message.toLowerCase();
     if (message.includes("non ISO-8859-1 code point")) {
@@ -168,7 +172,9 @@ export function LoginButtons({
       setLoading(mode);
       try {
         const result = await checkSignupEmail(cleanEmail);
-        if (!result.exists) {
+        if (result.rejoinBlocked && result.rejoinBlockedDays != null) {
+          setError(t("rejoinBlocked", { days: result.rejoinBlockedDays }));
+        } else if (!result.exists) {
           setMessage(t("signupEmailMissing"));
         } else if (result.confirmed) {
           setMessage(t("signupEmailConfirmed"));

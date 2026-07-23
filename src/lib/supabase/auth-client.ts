@@ -6,6 +6,7 @@ import {
   prepareOAuthLogin,
 } from "@/lib/supabase/auth-session-policy";
 import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
+import { WithdrawalCooldownError } from "@/lib/auth/withdrawal-cooldown-error";
 import { migrateGuestCartAfterPromotion } from "@/lib/reports/human-premium/cart-session";
 import {
   clearPersonalClientStorage,
@@ -22,6 +23,7 @@ import {
 } from "./client";
 
 export { EmailAlreadyRegisteredError } from "@/lib/supabase/account-promotion";
+export { WithdrawalCooldownError } from "@/lib/auth/withdrawal-cooldown-error";
 
 async function saveDisplayNameAfterAuth(displayName: string) {
   const client = getSupabaseBrowserClient();
@@ -136,6 +138,12 @@ export async function signUpWithEmail(params: {
   const emailStatus = await checkSignupEmail(params.email);
   if (emailStatus.exists) {
     throw new EmailAlreadyRegisteredError();
+  }
+  if (emailStatus.rejoinBlocked && emailStatus.rejoinBlockedDays != null) {
+    throw new WithdrawalCooldownError({
+      daysRemaining: emailStatus.rejoinBlockedDays,
+      availableAt: emailStatus.rejoinAvailableAt ?? new Date().toISOString(),
+    });
   }
 
   const browserClient = getSupabaseBrowserClient();
@@ -350,6 +358,9 @@ export async function checkSignupEmail(email: string) {
   const data = (await res.json()) as {
     exists?: boolean;
     confirmed?: boolean;
+    rejoinBlocked?: boolean;
+    rejoinBlockedDays?: number | null;
+    rejoinAvailableAt?: string | null;
     error?: string;
   };
 
@@ -360,6 +371,11 @@ export async function checkSignupEmail(email: string) {
   return {
     exists: Boolean(data.exists),
     confirmed: Boolean(data.confirmed),
+    rejoinBlocked: Boolean(data.rejoinBlocked),
+    rejoinBlockedDays:
+      typeof data.rejoinBlockedDays === "number" ? data.rejoinBlockedDays : null,
+    rejoinAvailableAt:
+      typeof data.rejoinAvailableAt === "string" ? data.rejoinAvailableAt : null,
   };
 }
 

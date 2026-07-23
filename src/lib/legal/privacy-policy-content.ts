@@ -120,6 +120,11 @@ const KO: PrivacyPolicyContent = {
           headers: ["구분", "보유 기간", "근거"],
           rows: [
             ["회원 계정·프로필·펫·사주 결과", "회원 탈퇴 시까지", "회원 관리·서비스 제공"],
+            [
+              "탈퇴 계정 이메일의 일방향 해시값(원문 이메일 미보관)",
+              "탈퇴일로부터 30일(경과 시 삭제)",
+              "탈퇴 후 단기 재가입을 통한 부정 이용 방지",
+            ],
             ["커뮤니티 게시글·Pet Show", "게시물 삭제 또는 회원 탈퇴 시까지", "커뮤니티 운영"],
             ["본인 프리미엄 리포트(웹 보관)", "결제일로부터 30일", "보안·열람 편의(이후 자동 만료)"],
             ["LLM 생성 결과 캐시(서버 설정 시)", "최대 90일", "동일 입력 재생성 비용 절감"],
@@ -591,6 +596,11 @@ const EN: PrivacyPolicyContent = {
           headers: ["Category", "Period", "Basis"],
           rows: [
             ["Account, profile, pets, saju results", "Until account deletion", "Service provision"],
+            [
+              "One-way hash of withdrawn account email (no plaintext email)",
+              "30 days from withdrawal, then deleted",
+              "Prevent short-term re-registration abuse after withdrawal",
+            ],
             ["Community & Pet Show posts", "Until post deletion or account deletion", "Community operation"],
             ["Human premium web reports", "30 days from payment", "Security and viewing convenience"],
             ["LLM result cache (if enabled)", "Up to 90 days", "Cost control for repeat generation"],
