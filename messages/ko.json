@@ -304,5 +304,10 @@
       "inappKakaoCta": "브라우저에서 열기",
       "inappOtherHint": "Safari/Chrome으로 열어주세요"
     }
+  },
+  "humanPremiumReport": {
+    "guestLinkTitle": "이 링크는 30일간 열 수 있어요. 메일을 보관해 주세요.",
+    "guestLinkBody": "계정이 있으면 리포트를 한곳에서 관리할 수 있어요.",
+    "guestSignupCta": "가입하기"
   }
 }

@@ -9,13 +9,17 @@ import { RisksSection } from "@/components/human-premium/RisksSection";
 import { RoadmapSection } from "@/components/human-premium/RoadmapSection";
 import { SajuStructureSection } from "@/components/human-premium/SajuStructureSection";
 import { AppTopNav } from "@/components/layout/AppTopNav";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import { buildHumanPremiumPdfFilename } from "@/lib/reports/human-premium/filename";
 import type { HumanPremiumReportPayload } from "@/lib/reports/human-premium/types";
 import { visibleHumanPremiumSectionIds } from "@/lib/reports/human-premium/section-visibility";
-import { useEffect, useMemo, useState } from "react";
 import { markSessionAlive } from "@/lib/supabase/auth-session-policy";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 
 const UI = {
   ko: {
@@ -157,6 +161,51 @@ function BackToReportListLink({
   );
 }
 
+/** Minimal chrome for email/token guests — no pet channel nav. */
+function GuestReportHeader() {
+  const tNav = useTranslations("nav");
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-white/45 bg-cream/80 shadow-sm backdrop-blur-xl">
+      <div className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between gap-3 px-4 py-2 md:px-8">
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/stitch/brand/symbol-master-transparent.png"
+            alt="K-Saju Pet"
+            width={28}
+            height={28}
+            className="h-7 w-7"
+            priority
+          />
+          <span className="text-lg font-extrabold tracking-tight text-primary md:text-xl">
+            {tNav("brand")}
+          </span>
+        </Link>
+        <ul className="m-0 flex list-none items-center p-0">
+          <LanguageSwitcher />
+        </ul>
+      </div>
+    </header>
+  );
+}
+
+function GuestAccountNudge() {
+  const t = useTranslations("humanPremiumReport");
+
+  return (
+    <section className="no-print mb-6 rounded-2xl border border-[var(--jig-seal)]/20 bg-[var(--jig-seal)]/[0.06] px-4 py-4 text-center sm:px-5">
+      <p className="text-sm font-extrabold leading-snug text-[var(--jig-ink)]">{t("guestLinkTitle")}</p>
+      <p className="mt-2 text-xs leading-relaxed text-[var(--jig-muted)] sm:text-sm">{t("guestLinkBody")}</p>
+      <Link
+        href="/signup"
+        className="mt-4 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:brightness-105"
+      >
+        {t("guestSignupCta")}
+      </Link>
+    </section>
+  );
+}
+
 export function HumanPremiumReportView({
   report,
   webToken,
@@ -164,6 +213,9 @@ export function HumanPremiumReportView({
 }: HumanPremiumReportViewProps) {
   const isKo = report.locale === "ko";
   const t = UI[report.locale];
+  const { ready, configured, isFullMember } = useSupabaseSession();
+  // Until session resolves, keep guest chrome to avoid flashing pet nav for email guests.
+  const showMemberChrome = configured && ready && isFullMember;
   const [pdfState, setPdfState] = useState<"idle" | "downloading" | "failed">("idle");
   const [pdfError, setPdfError] = useState<string | null>(null);
 
@@ -219,12 +271,18 @@ export function HumanPremiumReportView({
 
   return (
     <div className="human-premium-stage safe-area-shell flex min-h-dvh flex-col">
-      <AppTopNav active="saju" />
-      <main className="flex-1 px-3 py-4 pb-32 sm:px-4 sm:py-6">
+      {showMemberChrome ? <AppTopNav active="saju" /> : <GuestReportHeader />}
+      <main
+        className={`flex-1 px-3 py-4 sm:px-4 sm:py-6 ${showMemberChrome ? "pb-32" : "pb-10"}`}
+      >
         <div className="human-premium-paper-sheet mx-auto w-full max-w-3xl px-4 py-6 sm:px-8 sm:py-10">
-          <div className="mb-6">
-            <BackToReportListLink href={backHref} label={t.backToList} />
-          </div>
+          {showMemberChrome ? (
+            <div className="mb-6">
+              <BackToReportListLink href={backHref} label={t.backToList} />
+            </div>
+          ) : (
+            <GuestAccountNudge />
+          )}
 
           <ReportToc items={toc} t={t} />
 
@@ -266,13 +324,15 @@ export function HumanPremiumReportView({
               {t.disclaimer}
             </p>
 
-            <div className="border-t border-[var(--jig-seal)]/15 pt-6 pb-4 text-center">
-              <BackToReportListLink href={backHref} label={t.backToList} />
-            </div>
+            {showMemberChrome ? (
+              <div className="border-t border-[var(--jig-seal)]/15 pt-6 pb-4 text-center">
+                <BackToReportListLink href={backHref} label={t.backToList} />
+              </div>
+            ) : null}
           </div>
         </div>
       </main>
-      <MobileBottomNav active="saju" />
+      {showMemberChrome ? <MobileBottomNav active="saju" /> : null}
     </div>
   );
 }

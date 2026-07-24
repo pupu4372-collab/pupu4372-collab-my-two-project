@@ -304,5 +304,10 @@
       "inappKakaoCta": "Open in browser",
       "inappOtherHint": "Please open in Safari or Chrome"
     }
+  },
+  "humanPremiumReport": {
+    "guestLinkTitle": "This link works for 30 days. Keep the email.",
+    "guestLinkBody": "With an account, you can manage your reports in one place.",
+    "guestSignupCta": "Sign up"
   }
 }
