@@ -1,4 +1,5 @@
 import { LoginButtons } from "@/components/auth/LoginButtons";
+import { getSafeInternalReturnPath } from "@/lib/auth/safe-internal-return-path";
 import { getTranslations } from "next-intl/server";
 
 export default async function SignupPage({
@@ -6,11 +7,12 @@ export default async function SignupPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 }) {
   const { locale } = await params;
   const queryParams = await searchParams;
   const error = queryParams.error;
+  const returnTo = getSafeInternalReturnPath(queryParams.next);
   const t = await getTranslations("auth");
   const homeHref = `/${locale}`;
 
@@ -26,7 +28,11 @@ export default async function SignupPage({
           </p>
         )}
 
-        <LoginButtons homeHref={homeHref} initialMode="signup" />
+        <LoginButtons
+          homeHref={homeHref}
+          initialMode="signup"
+          returnTo={returnTo !== "/" ? returnTo : undefined}
+        />
 
         <div className="mt-6 text-center">
           <a

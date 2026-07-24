@@ -222,11 +222,12 @@ export function LoginButtons({
           displayName: cleanDisplayName || cleanEmail.split("@")[0],
           locale,
         });
-        setMessage(
-          result.promoted
-            ? t("signupPromotedSuccess")
-            : t("signupSuccess", { email: cleanEmail })
-        );
+        // In-place anon promotion keeps the same user id — return to vault/next immediately.
+        if (result.promoted || returnTo) {
+          window.location.replace(postLoginHref);
+          return;
+        }
+        setMessage(t("signupSuccess", { email: cleanEmail }));
       } else {
         await signInWithEmail(cleanEmail, password, rememberMe);
         window.location.replace(postLoginHref);

@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
+import { VaultGuestSignupBanner } from "@/components/reports/VaultGuestSignupBanner";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import {
@@ -136,9 +137,18 @@ export function HumanPremiumVaultClient() {
         <h1 className="mt-2 text-2xl font-bold text-white">
           {isKo ? "결제한 리포트" : "Your paid reports"}
         </h1>
-        <p className="mt-2 text-sm text-white/75">
-          {humanPremiumRetentionNotice(routeLocale as "ko" | "en")}
-        </p>
+        {isAnonymous ? (
+          <div className="mt-4 text-left">
+            <VaultGuestSignupBanner
+              returnPath="/premium/human/vault"
+              footer={humanPremiumRetentionNotice(routeLocale as "ko" | "en")}
+            />
+          </div>
+        ) : (
+          <p className="mt-2 text-sm text-white/75">
+            {humanPremiumRetentionNotice(routeLocale as "ko" | "en")}
+          </p>
+        )}
       </header>
 
       {loading && orders.length === 0 ? (

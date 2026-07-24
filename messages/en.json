@@ -309,5 +309,10 @@
     "guestLinkTitle": "This link works for 30 days. Keep the email.",
     "guestLinkBody": "With an account, you can manage your reports in one place.",
     "guestSignupCta": "Sign up"
+  },
+  "vaultGuest": {
+    "title": "Saved on this browser only",
+    "body": "If you clear your browser data, these reports can't be recovered.\nSign up to keep them on your account and open them on any device.",
+    "signupCta": "Sign up"
   }
 }

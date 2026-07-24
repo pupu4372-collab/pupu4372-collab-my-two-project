@@ -2,6 +2,7 @@
 
 import { GlassCard } from "@/components/layout/StitchLayout";
 import { EmptyStatePanel, getEmptyStatePreset } from "@/components/ui/EmptyStatePanel";
+import { VaultGuestSignupBanner } from "@/components/reports/VaultGuestSignupBanner";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
 import type { VaultReportRow } from "@/lib/reports/vault-policy";
@@ -152,7 +153,7 @@ export function ReportVaultPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!configured || !ready || !accessToken || isAnonymous) {
+    if (!configured || !ready || !accessToken) {
       setLoading(false);
       return;
     }
@@ -179,7 +180,7 @@ export function ReportVaultPage() {
     }
 
     void load();
-  }, [configured, ready, accessToken, isAnonymous, isKo]);
+  }, [configured, ready, accessToken, isKo]);
 
   const filterReports = (reports: VaultReportRow[]) => {
     const normalized = query.trim().toLowerCase();
@@ -199,17 +200,6 @@ export function ReportVaultPage() {
 
   if (!configured) {
     return <GlassCard className="text-sm text-white/75">Supabase 설정 후 리포트 보관함을 사용할 수 있어요.</GlassCard>;
-  }
-
-  if (isAnonymous) {
-    return (
-      <GlassCard className="text-center">
-        <p className="text-sm text-plum/70">{isKo ? "리포트 보관함을 보려면 로그인이 필요해요." : "Please log in to view your report vault."}</p>
-        <Link href="/login" className="mt-4 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-bold text-white">
-          {isKo ? "로그인하기" : "Log in"}
-        </Link>
-      </GlassCard>
-    );
   }
 
   return (
@@ -245,6 +235,7 @@ export function ReportVaultPage() {
             />
           </label>
         </div>
+        {isAnonymous ? <VaultGuestSignupBanner returnPath="/reports" /> : null}
       </section>
 
       {loading || !ready ? (
