@@ -1,4 +1,5 @@
 import { requireAdminResponse } from "@/lib/admin/auth";
+import { revalidateNoticePages } from "@/lib/revalidate-notices";
 import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { NoticeLocale } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
@@ -93,6 +94,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: "Notice not found." }, { status: 404 });
     }
 
+    revalidateNoticePages({ noticeId: (data as { id: string }).id });
     return NextResponse.json({ notice: data });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Service unavailable.";
@@ -123,6 +125,7 @@ export async function DELETE(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: "Notice not found." }, { status: 404 });
     }
 
+    revalidateNoticePages({ noticeId: id });
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Service unavailable.";

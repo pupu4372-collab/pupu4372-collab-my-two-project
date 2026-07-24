@@ -1,4 +1,5 @@
 import { requireAdminResponse } from "@/lib/admin/auth";
+import { revalidateNoticePages } from "@/lib/revalidate-notices";
 import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { NoticeInsert, NoticeLocale } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
@@ -95,6 +96,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error?.message ?? "Failed to create notice." }, { status: 500 });
     }
 
+    revalidateNoticePages({ noticeId: (data as { id: string }).id });
     return NextResponse.json({ notice: data }, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Service unavailable.";
