@@ -13,6 +13,42 @@ import {
   type HumanPremiumReportRow,
 } from "./types";
 
+export type HumanPremiumTokenFailureKind = "load" | "generate";
+
+/** Staged failure from token resolve — page maps `kind` to user copy; details stay in logs. */
+export class HumanPremiumTokenResolveError extends Error {
+  readonly stage: string;
+  readonly kind: HumanPremiumTokenFailureKind;
+
+  constructor(stage: string, kind: HumanPremiumTokenFailureKind, cause: unknown) {
+    const message = cause instanceof Error ? cause.message : String(cause);
+    super(message);
+    this.name = "HumanPremiumTokenResolveError";
+    this.stage = stage;
+    this.kind = kind;
+    if (cause instanceof Error && cause.stack) {
+      this.stack = cause.stack;
+    }
+  }
+}
+
+async function runStage<T>(
+  stage: string,
+  kind: HumanPremiumTokenFailureKind,
+  fn: () => Promise<T>
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (error instanceof HumanPremiumTokenResolveError) throw error;
+    const message = error instanceof Error ? error.message : String(error);
+    if (stage === "select" && message === "Supabase is not configured.") {
+      throw new HumanPremiumTokenResolveError("requireDb", "load", error);
+    }
+    throw new HumanPremiumTokenResolveError(stage, kind, error);
+  }
+}
+
 function rowToInput(row: HumanPremiumReportRow): HumanPremiumReportInput {
   return {
     personName: row.person_name,
@@ -54,23 +90,31 @@ export async function resolveHumanPremiumReportByToken(
   row: HumanPremiumReportRow;
   payload: HumanPremiumReportPayload;
 } | null> {
-  const row = await getHumanPremiumReportByWebToken(token);
+  const row = await runStage("select", "load", () => getHumanPremiumReportByWebToken(token));
   if (!row || isAccessExpired(row)) return null;
 
   if (row.report_payload) {
     const payload = row.report_payload as unknown as HumanPremiumReportPayload;
     if (!isCurrentReportTemplate(payload)) {
-      const rebuilt = await buildHumanPremiumReportHybrid(rowToInput(row));
-      const saved = await markHumanPremiumReportReady(
-        row.id,
-        rebuilt as unknown as Record<string, unknown>,
-        rebuilt.birthBasis
+      const rebuilt = await runStage("regenerate", "generate", () =>
+        buildHumanPremiumReportHybrid(rowToInput(row))
       );
-      await incrementHumanPremiumWebViewCount(saved.id);
+      const saved = await runStage("regenerate", "generate", () =>
+        markHumanPremiumReportReady(
+          row.id,
+          rebuilt as unknown as Record<string, unknown>,
+          rebuilt.birthBasis
+        )
+      );
+      await runStage("incrementView", "load", () =>
+        incrementHumanPremiumWebViewCount(saved.id)
+      );
       return { row: saved, payload: rebuilt };
     }
 
-    await incrementHumanPremiumWebViewCount(row.id);
+    await runStage("incrementView", "load", () =>
+      incrementHumanPremiumWebViewCount(row.id)
+    );
     return {
       row,
       payload,
@@ -89,16 +133,24 @@ export async function resolveHumanPremiumReportByToken(
     return null;
   }
 
-  await updateHumanPremiumReport(row.id, { status: "generating" });
+  await runStage("regenerate", "generate", () =>
+    updateHumanPremiumReport(row.id, { status: "generating" })
+  );
 
   try {
-    const payload = await buildHumanPremiumReportHybrid(rowToInput(row));
-    const saved = await markHumanPremiumReportReady(
-      row.id,
-      payload as unknown as Record<string, unknown>,
-      payload.birthBasis
+    const payload = await runStage("regenerate", "generate", () =>
+      buildHumanPremiumReportHybrid(rowToInput(row))
     );
-    await incrementHumanPremiumWebViewCount(saved.id);
+    const saved = await runStage("regenerate", "generate", () =>
+      markHumanPremiumReportReady(
+        row.id,
+        payload as unknown as Record<string, unknown>,
+        payload.birthBasis
+      )
+    );
+    await runStage("incrementView", "load", () =>
+      incrementHumanPremiumWebViewCount(saved.id)
+    );
     return { row: saved, payload };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Report generation failed.";
@@ -107,6 +159,7 @@ export async function resolveHumanPremiumReportByToken(
       failure_stage: "generation",
       failure_message: message,
     });
-    throw error;
+    if (error instanceof HumanPremiumTokenResolveError) throw error;
+    throw new HumanPremiumTokenResolveError("regenerate", "generate", error);
   }
 }
