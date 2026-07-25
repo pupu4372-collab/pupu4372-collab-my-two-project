@@ -41,6 +41,7 @@ function RankingPreviewList({
   label,
   rows,
   emptyText,
+  loading = false,
   isNight = false,
   isKo = true,
   isLastWeekFallback = false,
@@ -50,6 +51,7 @@ function RankingPreviewList({
   label: string;
   rows: PetShowRankingRow[];
   emptyText: string;
+  loading?: boolean;
   isNight?: boolean;
   isKo?: boolean;
   isLastWeekFallback?: boolean;
@@ -71,7 +73,29 @@ function RankingPreviewList({
           </span>
         ) : null}
       </p>
-      {rows.length === 0 ? (
+      {loading ? (
+        <div
+          className="-mx-1 mt-3 max-w-full overflow-x-hidden px-1 pb-2"
+          aria-busy="true"
+          aria-label={isKo ? "랭킹 불러오는 중" : "Loading ranking"}
+        >
+          <ol className="flex w-max min-w-full gap-2">
+            {[0, 1, 2].map((slot) => (
+              <li
+                key={slot}
+                className="w-[38vw] max-w-32 shrink-0 animate-pulse sm:w-32 md:w-28 lg:w-32"
+              >
+                <div className="rounded-2xl bg-plum/10 p-2">
+                  <div className="h-5 w-5 rounded-full bg-plum/15" />
+                  <div className="mt-1 aspect-square w-full rounded-xl bg-plum/15" />
+                  <div className="mt-2 h-3 w-20 rounded bg-plum/15" />
+                  <div className="mt-1 h-2.5 w-10 rounded bg-plum/10" />
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : rows.length === 0 ? (
         <p
           className={`mt-2 rounded-xl px-2 py-2 text-[11px] ${
             isNight ? "bg-white/45 font-bold text-plum" : "bg-channel-community/10 text-plum/45"
@@ -134,21 +158,29 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
   const t = useTranslations("home");
   const tPetShow = useTranslations("petshow");
   const isKo = locale === "ko";
-  const { ready, accessToken } = useSupabaseSession();
+  const { ready, accessToken, isAnonymous } = useSupabaseSession();
   const [rankingRows, setRankingRows] = useState<WeeklyRankingRows>(emptyRankingRows);
   const [funnyRankingRows, setFunnyRankingRows] = useState<PetShowRankingRow[]>([]);
   const [rankingFallback, setRankingFallback] = useState<PetShowRankingFallbackFlags>(
     EMPTY_RANKING_FALLBACK_FLAGS,
   );
   const [rankingSource, setRankingSource] = useState<"supabase" | "mock" | null>(null);
+  const [rankingLoading, setRankingLoading] = useState(true);
   const [fortuneData, setFortuneData] = useState<FortuneTodayState | null>(null);
   const [fortuneLoading, setFortuneLoading] = useState(true);
 
   useEffect(() => {
     async function loadWeeklyRanking() {
+      setRankingLoading(true);
       try {
         const res = await fetch("/api/community/pet-show/ranking?period=week&group=species");
-        if (!res.ok) return;
+        if (!res.ok) {
+          setRankingRows(emptyRankingRows);
+          setFunnyRankingRows([]);
+          setRankingFallback(EMPTY_RANKING_FALLBACK_FLAGS);
+          setRankingSource(null);
+          return;
+        }
         const data = (await res.json()) as {
           rows?: Partial<WeeklyRankingRows>;
           funny?: PetShowRankingRow[];
@@ -169,6 +201,8 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
         setFunnyRankingRows([]);
         setRankingFallback(EMPTY_RANKING_FALLBACK_FLAGS);
         setRankingSource(null);
+      } finally {
+        setRankingLoading(false);
       }
     }
 
@@ -223,7 +257,21 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
   const homeGoldCtaClass =
     "inline-flex rounded-full bg-[#e6c15e] px-5 py-3 text-sm font-extrabold text-[#3a2c08] shadow-sm transition hover:scale-105 hover:brightness-105";
 
-  const fortunePanel = fortuneLoading ? (
+  // Guests (and pre-ready) can paint the quick-add form without waiting for fortune API.
+  // Full members keep the care-guide loading gate so pet fortune cards do not flash guest UI.
+  const showGuestFormInstant = fortuneLoading && (!ready || isAnonymous);
+
+  const fortunePanel = showGuestFormInstant ? (
+    <div className="home-fortune-column">
+      <SajuHubPremiumBanner />
+      <div className="home-fortune-column__divider" aria-hidden />
+      <HomePetFortuneCard
+        fortuneData={null}
+        onSelectPet={handleSelectPet}
+        onPetAdded={handleSelectPet}
+      />
+    </div>
+  ) : fortuneLoading ? (
     <div className="home-fortune-column">
       <SajuHubPremiumBanner />
       <div className="home-fortune-column__divider" aria-hidden />
@@ -286,6 +334,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             label={isKo ? "강아지 Top 5" : "Dog Top 5"}
             rows={rankingRows.dog}
             emptyText={isKo ? "이번 주 강아지 사진을 기다려요." : "Waiting for dog photos."}
+            loading={rankingLoading}
             isLastWeekFallback={rankingFallback.dog > 0}
             lastWeekLabel={petShowFallbackWeekLabel(rankingFallback.dog, tPetShow)}
             isNight={false}
@@ -296,6 +345,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             label={isKo ? "고양이 Top 5" : "Cat Top 5"}
             rows={rankingRows.cat}
             emptyText={isKo ? "이번 주 고양이 사진을 기다려요." : "Waiting for cat photos."}
+            loading={rankingLoading}
             isLastWeekFallback={rankingFallback.cat > 0}
             lastWeekLabel={petShowFallbackWeekLabel(rankingFallback.cat, tPetShow)}
             isNight={false}
@@ -306,6 +356,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             label={tPetShow("reptileTop5")}
             rows={mergeReptileChannelRankingRows(rankingRows.reptile, rankingRows.other)}
             emptyText={tPetShow("reptileTop5Empty")}
+            loading={rankingLoading}
             isLastWeekFallback={rankingFallback.reptile > 0}
             lastWeekLabel={petShowFallbackWeekLabel(rankingFallback.reptile, tPetShow)}
             isNight={false}
@@ -316,6 +367,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
             label={isKo ? "웃긴 사진 Top 5" : "Funny Top 5"}
             rows={funnyRankingRows}
             emptyText={isKo ? "이번 주 웃긴 사진을 기다려요." : "Waiting for funny photos this week."}
+            loading={rankingLoading}
             isLastWeekFallback={rankingFallback.funny > 0}
             lastWeekLabel={petShowFallbackWeekLabel(rankingFallback.funny, tPetShow)}
             isNight={false}
