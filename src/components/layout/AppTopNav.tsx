@@ -196,7 +196,7 @@ export function AppTopNav({ active = "home" }: AppTopNavProps) {
               <div
                 id={vaultMenuId}
                 role="menu"
-                className="absolute right-0 z-50 mt-2 min-w-[12.5rem] overflow-hidden rounded-2xl border border-primary/15 bg-white py-1 shadow-lg shadow-primary/10"
+                className="fixed left-2 right-2 z-50 mt-2 max-h-[min(70vh,24rem)] overflow-y-auto rounded-2xl border border-primary/15 bg-white py-1 shadow-lg shadow-primary/10 sm:absolute sm:left-auto sm:right-0 sm:min-w-[12.5rem] sm:max-w-none"
               >
                 <Link
                   href="/reports"
