@@ -308,7 +308,11 @@
   "humanPremiumReport": {
     "guestLinkTitle": "이 링크는 30일간 열 수 있어요. 메일을 보관해 주세요.",
     "guestLinkBody": "계정이 있으면 리포트를 한곳에서 관리할 수 있어요.",
-    "guestSignupCta": "가입하기"
+    "guestSignupCta": "가입하기",
+    "loadFailed": "리포트를 불러오지 못했습니다",
+    "generateFailed": "리포트 생성에 실패했습니다",
+    "failureHint": "잠시 후 다시 시도하거나 고객 지원에 문의해 주세요.",
+    "backToPremium": "Premium으로 돌아가기"
   },
   "vaultGuest": {
     "title": "지금은 이 브라우저에서만 보관돼요",

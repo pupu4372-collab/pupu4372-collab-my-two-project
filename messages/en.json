@@ -308,7 +308,11 @@
   "humanPremiumReport": {
     "guestLinkTitle": "This link works for 30 days. Keep the email.",
     "guestLinkBody": "With an account, you can manage your reports in one place.",
-    "guestSignupCta": "Sign up"
+    "guestSignupCta": "Sign up",
+    "loadFailed": "Couldn't load the report",
+    "generateFailed": "Report generation failed",
+    "failureHint": "Please try again later or contact support.",
+    "backToPremium": "Back to Premium"
   },
   "vaultGuest": {
     "title": "Saved on this browser only",
