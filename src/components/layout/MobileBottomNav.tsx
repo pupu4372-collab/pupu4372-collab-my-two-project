@@ -50,16 +50,10 @@ function currentChannel(active: MobileNavActiveKey): ChannelPick | null {
   return null;
 }
 
-function tabClass(isSaju: boolean, isActive: boolean) {
-  // EN "Birth Chart" needs ~5.5rem; keep modest so other flex-1 tabs stay balanced.
-  if (isSaju) {
-    return isActive
-      ? "flex min-w-0 max-w-[5.5rem] flex-1 flex-col items-center justify-center rounded-full bg-primary px-1 py-1.5 text-white shadow-md brightness-95"
-      : "flex min-w-0 max-w-[5.5rem] flex-1 flex-col items-center justify-center rounded-full bg-primary px-1 py-1.5 text-white shadow-sm transition active:brightness-95";
-  }
+function tabClass(isActive: boolean) {
   return isActive
-    ? "flex min-w-0 flex-1 flex-col items-center justify-center border-b-2 border-primary px-1 py-1.5 text-primary"
-    : "flex min-w-0 flex-1 flex-col items-center justify-center border-b-2 border-transparent px-1 py-1.5 text-plum/60 transition active:scale-95";
+    ? "flex min-w-0 flex-1 flex-col items-center justify-center rounded-full bg-primary px-1 py-1.5 text-white shadow-md"
+    : "flex min-w-0 flex-1 flex-col items-center justify-center px-1 py-1.5 text-plum/60 transition active:scale-95";
 }
 
 interface MobileBottomNavProps {
@@ -143,9 +137,10 @@ export function MobileBottomNav({ active = "home" }: MobileBottomNavProps) {
         <div className="mx-auto flex max-w-lg items-stretch justify-around gap-0.5">
           {MOBILE_LINKS.map((item) => {
             const isActive = resolved === item.key;
-            const isSaju = item.key === "saju";
             const label = nav(item.labelKey);
-            const className = tabClass(isSaju, isActive);
+            // EN "Birth Chart" needs ~5.5rem; keep modest so other flex-1 tabs stay balanced.
+            const className =
+              item.key === "saju" ? `${tabClass(isActive)} max-w-[5.5rem]` : tabClass(isActive);
 
             if (item.key === "channels") {
               return (
@@ -161,7 +156,7 @@ export function MobileBottomNav({ active = "home" }: MobileBottomNavProps) {
                   <span className="text-base leading-none" aria-hidden>
                     {item.icon}
                   </span>
-                  <span className="mt-0.5 max-w-full text-center text-[9px] font-extrabold leading-[1.1]">
+                  <span className="mt-0.5 max-w-full truncate text-center text-[9px] font-extrabold leading-tight">
                     {label}
                   </span>
                 </button>
@@ -178,13 +173,7 @@ export function MobileBottomNav({ active = "home" }: MobileBottomNavProps) {
                 <span className="text-base leading-none" aria-hidden>
                   {item.icon}
                 </span>
-                <span
-                  className={
-                    isSaju
-                      ? "mt-0.5 max-w-full text-center text-[9px] font-extrabold leading-[1.1]"
-                      : "mt-0.5 max-w-full truncate text-center text-[9px] font-extrabold leading-tight"
-                  }
-                >
+                <span className="mt-0.5 max-w-full truncate text-center text-[9px] font-extrabold leading-tight">
                   {label}
                 </span>
               </Link>
