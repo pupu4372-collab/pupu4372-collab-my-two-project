@@ -2,6 +2,7 @@
 
 import type { PetMbtiPremiumInsight } from "@/lib/pet/mbti-inference";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
+import { FortuneVetDisclaimer } from "@/components/saju/FortuneVetDisclaimer";
 import type { ElementKey } from "@/lib/saju/types";
 
 const SECTIONS = {
@@ -143,6 +144,8 @@ export function PremiumMbtiReport({ insight, locale, dominantElement }: PremiumM
           </article>
         );
       })}
+
+      <FortuneVetDisclaimer />
     </div>
   );
 }

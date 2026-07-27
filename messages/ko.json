@@ -219,6 +219,9 @@
     "localeKo": "한국어",
     "localeEn": "English"
   },
+  "fortune": {
+    "vetDisclaimer": "이 내용은 사주 해석에 기반한 참고용이며, 수의학적 진단이나 처방을 대체하지 않습니다. 건강 이상이 의심되면 수의사와 상담하세요."
+  },
   "home": {
     "heroEyebrow": "펫사주 · 커뮤니티 · 케어",
     "heroTitleLine1": "펫사주로 알아보는",

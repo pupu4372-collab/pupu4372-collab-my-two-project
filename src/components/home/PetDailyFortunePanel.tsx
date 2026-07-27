@@ -8,15 +8,16 @@ import type {
   PetFortunePetMeta,
 } from "@/lib/saju/pet-daily-fortune";
 import type { CareRemindersPayload } from "@/lib/pet-care/reminders";
-import Link from "next/link";
-import { useEffect, useState } from "react";
 import { PetFortuneShareRow } from "@/components/home/PetFortuneShareRow";
+import { FortuneVetDisclaimer } from "@/components/saju/FortuneVetDisclaimer";
 import {
   JigFortuneContentBox,
   JigFortuneFoldButton,
   JigFortuneToggleButton,
   JigFortuneWatermark,
 } from "@/components/home/jig-fortune/JigFortuneDecor";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export type PetFortuneVisualVariant = "jigwanjae" | "default";
 
@@ -342,6 +343,7 @@ function PersonalizedFortunePanel({
                   </div>
                 ))}
               </div>
+              <FortuneVetDisclaimer className="mt-2.5 text-center text-[10px] font-medium leading-relaxed text-[var(--jig-muted)]" />
             </div>
 
             <div className={`rounded-sm p-4 ${cardBg}`}>
@@ -523,6 +525,7 @@ function PersonalizedFortunePanel({
                 </div>
               ))}
             </div>
+            <FortuneVetDisclaimer className={`mt-2.5 text-center text-[10px] font-medium leading-relaxed ${textMuted}`} />
           </div>
 
           <div className={`rounded-[1.5rem] p-4 ${cardBg}`}>

@@ -219,6 +219,9 @@
     "localeKo": "한국어",
     "localeEn": "English"
   },
+  "fortune": {
+    "vetDisclaimer": "For reference and entertainment only. This is not a substitute for professional veterinary diagnosis or advice. Consult a veterinarian if you have health concerns."
+  },
   "home": {
     "heroEyebrow": "Pet Birth Chart · Community · Care",
     "heroTitleLine1": "Personalized pet care",

@@ -3,6 +3,7 @@
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
 import { GlassCard } from "@/components/layout/StitchLayout";
+import { FortuneVetDisclaimer } from "@/components/saju/FortuneVetDisclaimer";
 import { Link } from "@/i18n/navigation";
 import { ELEMENT_META, formatElementLabelForLocale } from "@/lib/saju/elements";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
@@ -222,6 +223,8 @@ export function ZodiacResult({
           </div>
         </dl>
       </GlassCard>
+
+      <FortuneVetDisclaimer />
 
       <GlassCard>
         <h3 className="font-extrabold text-primary">{t.nextTitle}</h3>

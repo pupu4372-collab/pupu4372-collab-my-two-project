@@ -77,6 +77,7 @@ export function PetFortuneInsightsDashboard({
   onSelectPet,
 }: Props) {
   const t = useTranslations("home.guestFortune");
+  const tFortune = useTranslations("fortune");
   const locale = useLocale();
   const isKo = locale === "ko";
   const health = findCategory(fortune, "건강운", "Health");
@@ -142,18 +143,23 @@ export function PetFortuneInsightsDashboard({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {statItems.map(({ cat, badge, category }) => (
-            <StatBar
-              key={cat.label}
-              label={cat.label}
-              badge={badge}
-              score={cat.score}
-              color={cat.color}
-              category={category}
-              isKo={isKo}
-            />
-          ))}
+        <div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {statItems.map(({ cat, badge, category }) => (
+              <StatBar
+                key={cat.label}
+                label={cat.label}
+                badge={badge}
+                score={cat.score}
+                color={cat.color}
+                category={category}
+                isKo={isKo}
+              />
+            ))}
+          </div>
+          <p className="mt-2.5 text-center text-[11px] leading-relaxed text-stone-500">
+            {tFortune("vetDisclaimer")}
+          </p>
         </div>
       </section>
 

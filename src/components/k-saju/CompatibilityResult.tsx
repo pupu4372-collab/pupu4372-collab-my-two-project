@@ -4,6 +4,7 @@ import { COMMUNITY_SOLID_SURFACE_CLASS } from "@/components/community/CommunityD
 import { BondScoreRing } from "@/components/k-saju/BondScoreRing";
 import { SaveStatusBanner } from "@/components/k-saju/SaveStatusBanner";
 import { GlassCard } from "@/components/layout/StitchLayout";
+import { FortuneVetDisclaimer } from "@/components/saju/FortuneVetDisclaimer";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import type { ElementRelation } from "@/lib/saju/compatibility/elements-cycle";
 import { ELEMENT_ACCENT } from "@/components/k-saju/result-styles";
@@ -327,6 +328,8 @@ export function CompatibilityResult({
           ))}
         </ul>
       </GlassCard>
+
+      <FortuneVetDisclaimer />
     </div>
   );
 }
