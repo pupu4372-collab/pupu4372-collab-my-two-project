@@ -72,6 +72,8 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
   const [categoryTag, setCategoryTag] = useState("all");
   const [subCategoryTag, setSubCategoryTag] = useState("all");
   const [searchInput, setSearchInput] = useState("");
+  /** Wait for URL tag sync before first feed fetch (avoids all → tagged double load). */
+  const [filtersReady, setFiltersReady] = useState(false);
   /** Ignore stale "load more" responses when filters change mid-flight. */
   const loadMoreSeqRef = useRef(0);
 
@@ -90,6 +92,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
   useEffect(() => {
     const tag = parseAnimalTagFromUrl(new URLSearchParams(window.location.search).get("tag"));
     setAnimalTag(tag);
+    setFiltersReady(true);
   }, []);
 
   const categoryBoard = board === "tips" ? "tips" : "qa";
@@ -112,6 +115,8 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
   }, [animalTag, board, categoryTag]);
 
   useEffect(() => {
+    if (!filtersReady) return;
+
     let cancelled = false;
 
     async function loadFeed() {
@@ -142,7 +147,7 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
       cancelled = true;
       loadMoreSeqRef.current += 1;
     };
-  }, [board, q, animalTag, categoryTag, subCategoryTag, refreshKey]);
+  }, [board, q, animalTag, categoryTag, subCategoryTag, refreshKey, filtersReady]);
 
   const loadMore = useCallback(async (cursor: string) => {
     const seq = ++loadMoreSeqRef.current;
