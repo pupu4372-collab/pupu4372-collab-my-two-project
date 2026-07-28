@@ -2,6 +2,7 @@ import {
   assertDailyExtraPaymentForGeneration,
   getDailyExtraOrderByPaymentId,
   markDailyExtraOrderConsumed,
+  releaseDailyExtraOrderClaim,
 } from "@/lib/reports/human-premium/daily-extra-payment";
 import {
   releaseDailyFreeLock,
@@ -57,6 +58,12 @@ export async function POST(request: Request) {
       }
 
       const priorOrder = await getDailyExtraOrderByPaymentId(dailyExtraPaymentId);
+      if (priorOrder?.user_id === userId && priorOrder.status === "generating") {
+        return NextResponse.json(
+          { error: "daily_generating_in_progress", code: "daily_generating_in_progress" },
+          { status: 409 }
+        );
+      }
       if (
         priorOrder?.user_id === userId &&
         priorOrder.status === "consumed" &&
@@ -85,26 +92,31 @@ export async function POST(request: Request) {
         dailyExtraPaymentId
       );
       const priceLocale = order.locale === "en" ? "en" : "ko";
-      const { payload, webToken, webUrl, row } = await persistHumanPremiumDailyRoutineReport(
-        input,
-        {
-          request,
-          paymentProvider: order.payment_provider === "paypal_link" ? "paypal" : "card_pg",
-          paymentOrderId: order.payment_order_id,
-          amountPaid: getDailyExtraPrice(priceLocale),
-          amountOriginal: getDailyExtraPrice(priceLocale),
-          currency: getCheckoutCurrency(priceLocale),
-          pgProvider: order.payment_provider,
-        }
-      );
+      try {
+        const { payload, webToken, webUrl, row } = await persistHumanPremiumDailyRoutineReport(
+          input,
+          {
+            request,
+            paymentProvider: order.payment_provider === "paypal_link" ? "paypal" : "card_pg",
+            paymentOrderId: order.payment_order_id,
+            amountPaid: getDailyExtraPrice(priceLocale),
+            amountOriginal: getDailyExtraPrice(priceLocale),
+            currency: getCheckoutCurrency(priceLocale),
+            pgProvider: order.payment_provider,
+          }
+        );
 
-      await markDailyExtraOrderConsumed(order.payment_order_id, row.id);
+        await markDailyExtraOrderConsumed(order.payment_order_id, row.id);
 
-      after(() => {
-        scheduleHumanPremiumPdfPrewarm(row, payload);
-      });
+        after(() => {
+          scheduleHumanPremiumPdfPrewarm(row, payload);
+        });
 
-      return NextResponse.json({ report: payload, webToken, webUrl, paidExtra: true });
+        return NextResponse.json({ report: payload, webToken, webUrl, paidExtra: true });
+      } catch (err) {
+        await releaseDailyExtraOrderClaim(order.payment_order_id).catch(() => undefined);
+        throw err;
+      }
     }
 
     // Lifetime 1× free for full members — claimed at request time (not at signup).

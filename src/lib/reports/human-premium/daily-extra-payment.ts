@@ -27,7 +27,7 @@ export interface DailyExtraOrderRow {
   currency: "KRW" | "USD";
   amount_paid: number;
   payment_provider: DailyExtraPaymentProvider;
-  status: "pending" | "paid" | "consumed";
+  status: "pending" | "paid" | "generating" | "consumed";
   consumed_report_id: string | null;
   paid_at: string | null;
   created_at: string;
@@ -113,37 +113,69 @@ export async function markDailyExtraOrderConsumed(
   reportId: string
 ): Promise<void> {
   const supabase = requireDb();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("human_premium_daily_extra_orders")
     .update({
       status: "consumed",
       consumed_report_id: reportId,
     } as never)
     .eq("payment_order_id", paymentOrderId)
-    .in("status", ["paid", "pending"]);
+    .eq("status", "generating")
+    .select("id")
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) {
+    throw new Error("Daily-extra order could not be consumed (not in generating state).");
+  }
+}
+
+/**
+ * Atomically claim a paid daily-extra order for one report generation.
+ * Fails when another request already claimed it (or payment is not paid).
+ */
+export async function claimDailyExtraOrderForGeneration(
+  userId: string,
+  paymentOrderId: string
+): Promise<DailyExtraOrderRow> {
+  const supabase = requireDb();
+  const { data, error } = await supabase
+    .from("human_premium_daily_extra_orders")
+    .update({ status: "generating" } as never)
+    .eq("payment_order_id", paymentOrderId)
+    .eq("user_id", userId)
+    .eq("status", "paid")
+    .select("*")
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) {
+    throw new Error("Daily-extra payment already used or not verified.");
+  }
+  return data as DailyExtraOrderRow;
+}
+
+/** Roll claim back to paid after a failed generation attempt. */
+export async function releaseDailyExtraOrderClaim(paymentOrderId: string): Promise<void> {
+  const supabase = requireDb();
+  const { error } = await supabase
+    .from("human_premium_daily_extra_orders")
+    .update({ status: "paid" } as never)
+    .eq("payment_order_id", paymentOrderId)
+    .eq("status", "generating");
 
   if (error) throw new Error(error.message);
 }
 
 /**
- * Returns a paid daily-extra order eligible for one report generation.
- * Consumes the order after successful report persist.
+ * @deprecated Prefer claimDailyExtraOrderForGeneration — kept name for call-site clarity.
+ * Atomically claims paid → generating before report persist.
  */
 export async function assertDailyExtraPaymentForGeneration(
   userId: string,
   paymentOrderId: string
 ): Promise<DailyExtraOrderRow> {
-  const order = await getDailyExtraOrderByPaymentId(paymentOrderId);
-  if (!order || order.user_id !== userId) {
-    throw new Error("Daily-extra payment not found.");
-  }
-  if (order.status === "consumed") {
-    throw new Error("Daily-extra payment already used.");
-  }
-  if (order.status !== "paid") {
-    throw new Error("Daily-extra payment not verified.");
-  }
-  return order;
+  return claimDailyExtraOrderForGeneration(userId, paymentOrderId);
 }
 
 export async function verifyDailyExtraPortOnePayment(
@@ -155,7 +187,7 @@ export async function verifyDailyExtraPortOnePayment(
   if (!order || order.user_id !== userId) {
     throw new Error("Daily-extra order not found.");
   }
-  if (order.status === "paid" || order.status === "consumed") {
+  if (order.status === "paid" || order.status === "consumed" || order.status === "generating") {
     return order;
   }
 
