@@ -39,7 +39,11 @@ export function PetCareReminderBanner({
           <li
             key={item.id}
             className={`text-sm leading-snug ${
-              item.daysUntil === 0 ? "font-semibold text-violet-800" : "text-stone-800"
+              item.isOverdue
+                ? "font-semibold text-rose-800"
+                : item.daysUntil === 0
+                  ? "font-semibold text-violet-800"
+                  : "text-stone-800"
             }`}
           >
             {item.label}
