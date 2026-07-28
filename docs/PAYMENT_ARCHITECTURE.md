@@ -45,7 +45,8 @@ AI 어시스턴트와 개발자는 결제 작업 시 이 문서를 먼저 따른
          │                    → fulfillPaidCartOrder → pregenerate
          │                    → markHumanPremiumCartPaid (클라이언트, verify 성공 후만)
          ├─ KO + demo 허용(비프로덕션) → POST …/cart/demo-pay
-         └─ EN → unsupported (PayPal 미구현, TODO §4)
+         └─ EN → PortOne PayPal SPB (`NEXT_PUBLIC_ENABLE_EN_CHECKOUT=true` 시)
+              / 아니면 unsupported 안내
 ```
 
 - 금액: `resolveCartAmount` / `getCartPricingSummary`  
@@ -53,15 +54,39 @@ AI 어시스턴트와 개발자는 결제 작업 시 이 문서를 먼저 따른
   — 전 품목(`REPORT_TYPE_ORDER`)이면 `BUNDLE_PRICING.all`, 아니면 단가 합
 - 서버는 클라이언트가 보낸 금액을 쓰지 않고 `cartItems`로 재계산한다
 
-#### B. 데일리 추가결제
+#### B. 데일리 추가결제 (Daily Extra)
+
+KO·EN 모두 **PortOne**으로 결제한다. EN의 PayPal은 **PortOne PayPal SPB**이며,  
+호스팅 링크(`PAYPAL_LINK_*` / `paypal-links.ts`) 방식은 **제거됨**.
 
 ```
-[DayPillarPreview 일일 쿼터 소진]
+[DayPillarPreview — 무료 쿼터/쿠폰 소진 후 유료]
     → POST …/daily-extra/checkout
-    → KO: PortOne.requestPayment
+         (서버가 pending 주문 생성, payment_provider=portone, 카탈로그 금액)
+    → KO: PortOne.requestPayment (CARD)
+    → EN: PayPalSpbButton (PortOne uiType PAYPAL_SPB)
     → POST …/daily-extra/verify
-    → 데일리 리포트 재생성
+         (PortOne API 조회로 PAID · 금액 · customData.productCode 검증
+          → 주문 status pending→paid)
+    → POST /api/human-premium/daily-routine  (dailyExtraPaymentId)
+         → 원자적 claim: paid→generating
+         → 리포트 persist
+         → generating→consumed (consumed_report_id)
 ```
+
+**주문 상태 흐름** (`human_premium_daily_extra_orders`):
+
+| 상태 | 의미 |
+|------|------|
+| `pending` | checkout만 됨, 미결제 |
+| `paid` | verify 통과 (PortOne PAID) |
+| `generating` | 리포트 생성 중 원자적 claim (`updated_at` = claim 시각) |
+| `consumed` | 리포트 1건에 연결됨 |
+
+- Claim: `paid`이거나, `generating`이면서 `updated_at`이 **`DAILY_EXTRA_CLAIM_STALE_MS`(15분)** 보다 오래된 고아만 재claim 가능.
+- 신선한 `generating` 동시 요청 → **409** `daily_generating_in_progress`.
+- 미결제·미검증으로 생성 시도 → **403** (정상 거절).
+- 구현: `src/lib/reports/human-premium/daily-extra-payment.ts`, UI: `DayPillarPreview.tsx` + `PayPalSpbButton.tsx`.
 
 #### C. PortOne 웹훅 (카트·잔여 단건 행)
 
@@ -140,13 +165,13 @@ isHumanPremiumDemoCheckoutAllowed() === true 일 때만
 | `src/components/human-premium/HumanPremiumCartClient.tsx` | 카트 UI·PortOne·결제수단 분기 |
 | `src/components/human-premium/CartPayConfirmModal.tsx` | 결제 확인 모달 |
 | `src/components/human-premium/HumanPremiumShop.tsx` | 담기·번들 CTA |
-| `src/components/human-premium/DayPillarPreview.tsx` | 데일리 + 추가결제 |
+| `src/components/human-premium/DayPillarPreview.tsx` | 데일리 + Daily Extra (KO 카드 / EN PayPal SPB) |
+| `src/components/human-premium/PayPalSpbButton.tsx` | PortOne PayPal SPB 버튼 (Daily Extra EN · 카트 EN) |
 | `src/lib/reports/human-premium/cart.ts` | pending/fulfill/pregenerate |
 | `src/lib/reports/human-premium/cart-session.ts` | 브라우저 카트 상태 |
-| `src/lib/reports/human-premium/pricing.ts` | `resolveCartAmount` 등 |
+| `src/lib/reports/human-premium/pricing.ts` | `resolveCartAmount` / Daily Extra 금액 등 |
 | `src/lib/payments/human-premium-demo.ts` | demo 허용 게이트 |
-| `src/lib/payments/paypal-links.ts` | 집사 PayPal 링크 (EN 예정) |
-| `src/lib/reports/human-premium/daily-extra-payment.ts` | 데일리 추가 주문 |
+| `src/lib/reports/human-premium/daily-extra-payment.ts` | Daily Extra 주문·PortOne verify·claim |
 
 ### 2.3 공유 — 수정 시 양쪽 회귀 필수
 
@@ -193,26 +218,19 @@ isHumanPremiumDemoCheckoutAllowed() === true 일 때만
 7. **결제수단 분기**  
    - 집사 카트: `resolveCartPaymentMethod` (`HumanPremiumCartClient.tsx`) 와  
      `cart/checkout` 의 locale/`paymentMethod` 분기를 유지한다.  
-   - EN PayPal은 §4 TODO 위치에서만 추가한다.
+   - Daily Extra EN PayPal은 PortOne SPB만 사용한다. 호스팅 링크·클라이언트 확인 검증을 재도입하지 않는다.
 
 ---
 
 ## 4. 예정 작업 (TODO)
 
-### EN 진출 — 카트 PayPal 연동
+### EN 카트 PayPal SPB (플래그)
 
-- **상태:** 미구현. EN은 `unsupported` + 안내 문구.
-- **이식 위치 (분기점만 확장, KO PortOne 재작성 금지):**
-  1. `src/components/human-premium/HumanPremiumCartClient.tsx`  
-     — `resolveCartPaymentMethod()` / `handleConfirmPay` switch
-  2. `src/app/api/payments/human-premium/cart/checkout/route.ts`  
-     — `locale === "en"` / `paymentMethod === "paypal_link"` 분기 (현재 501)
-  3. `src/app/api/payments/human-premium/cart/verify/route.ts`  
-     — PayPal 확인 분기 (현재 EN 501)
-- **원본 패턴:** 커밋 **`d350855^`** (카트 도입 직전)의  
-  `HumanPremiumShop.tsx` — `prepareCheckout("paypal_link")`, PayPal 링크 오픈, success 폴링.  
-  카트 도입 커밋: **`d350855`** (`Add human premium cart/vault flow…`).
-- **링크 env:** `src/lib/payments/paypal-links.ts` (`PAYPAL_LINK_*`).
+- **Daily Extra EN:** 완료 — PortOne PayPal SPB + PortOne verify (§1.2 B).
+- **카트 EN:** `PayPalSpbButton` + PortOne checkout/verify 경로가 있음.  
+  `NEXT_PUBLIC_ENABLE_EN_CHECKOUT=true` 일 때만 라이브; 아니면 `unsupported` 안내.
+- **제거됨 (재사용 금지):** `paypal-links.ts`, `PAYPAL_LINK_*` 호스팅 링크,  
+  Daily Extra `paymentMethod: "paypal_link"` 클라이언트 신뢰 verify.
 
 ---
 
@@ -229,7 +247,9 @@ isHumanPremiumDemoCheckoutAllowed() === true 일 때만
 - [ ] PortOne 창 취소 → 카트 유지, vault/paid 미반영
 - [ ] 결제 완료 → `cart/verify`(또는 webhook) 성공 후에만 paid·리포트 생성
 - [ ] `POST …/cart/demo-pay` 프로덕션(또는 `NODE_ENV=production`) → 403
-- [ ] EN 카트 → 결제 미지원 안내 (PayPal 미호출)
+- [ ] EN 카트 → 플래그 OFF 시 미지원 안내 / ON 시 PortOne PayPal SPB (호스팅 링크 없음)
+- [ ] Daily Extra EN → SPB 버튼 → verify(PortOne) 후에만 리포트; 미결제 verify/생성 거절
+- [ ] Daily Extra claim → 이중 생성 시 한쪽만 성공(409/403); 15분 고아 generating 재claim
 
 ### 5.2 펫 프리미엄
 
