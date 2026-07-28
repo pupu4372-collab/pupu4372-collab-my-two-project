@@ -92,10 +92,41 @@ export async function POST(request: Request) {
         }
       }
 
-      const order = await assertDailyExtraPaymentForGeneration(
-        userId,
-        dailyExtraPaymentId
-      );
+      let order;
+      try {
+        order = await assertDailyExtraPaymentForGeneration(
+          userId,
+          dailyExtraPaymentId
+        );
+      } catch (claimErr) {
+        const raw =
+          claimErr instanceof Error
+            ? claimErr.message
+            : "Daily-extra payment already used or not verified.";
+        // Lost concurrent claim: peer already holds a fresh generating lock.
+        const raced = await getDailyExtraOrderByPaymentId(dailyExtraPaymentId);
+        if (
+          raced?.user_id === userId &&
+          raced.status === "generating" &&
+          !isDailyExtraClaimStale(raced.updated_at)
+        ) {
+          return NextResponse.json(
+            {
+              error: "daily_generating_in_progress",
+              code: "daily_generating_in_progress",
+            },
+            { status: 409 }
+          );
+        }
+        // Unpaid / already consumed / not owned — expected client rejection, not 5xx.
+        if (raw === "Daily-extra payment already used or not verified.") {
+          return NextResponse.json(
+            { error: formatHumanPremiumError(raw, locale), code: "payment_not_verified" },
+            { status: 403 }
+          );
+        }
+        throw claimErr;
+      }
       const priceLocale = order.locale === "en" ? "en" : "ko";
       try {
         const { payload, webToken, webUrl, row } = await persistHumanPremiumDailyRoutineReport(
@@ -180,6 +211,12 @@ export async function POST(request: Request) {
     }
   } catch (err) {
     const raw = err instanceof Error ? err.message : "Daily routine report failed.";
+    if (raw === "Daily-extra payment already used or not verified.") {
+      return NextResponse.json(
+        { error: formatHumanPremiumError(raw, locale), code: "payment_not_verified" },
+        { status: 403 }
+      );
+    }
     return NextResponse.json({ error: formatHumanPremiumError(raw, locale) }, { status: 500 });
   }
 }
