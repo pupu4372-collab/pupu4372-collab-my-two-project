@@ -9,6 +9,9 @@ import { KST_TIMEZONE } from "@/lib/saju/jiji-hours";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, PetCareCategory } from "@/lib/supabase/types";
 
+/** Look-back window for overdue items (mirrors the +7d upcoming window). */
+export const CARE_REMINDER_OVERDUE_LOOKBACK_DAYS = 7;
+
 export type PetCareReminderItem = {
   id: string;
   petId: string;
@@ -24,6 +27,7 @@ export type PetCareReminderItem = {
 export type CareRemindersPayload = {
   enabled: boolean;
   subscriptionTier: CareSubscriptionTier;
+  overdue: PetCareReminderItem[];
   today: PetCareReminderItem[];
   upcoming: PetCareReminderItem[];
   /** Total pending in window (before display cap). */
@@ -34,6 +38,7 @@ export function emptyCareReminders(): CareRemindersPayload {
   return {
     enabled: isCareRemindersFeatureEnabled(),
     subscriptionTier: resolveCareSubscriptionTier(),
+    overdue: [],
     today: [],
     upcoming: [],
     totalPending: 0,
@@ -94,6 +99,7 @@ export async function fetchPetCareReminders(
   }
 
   const today = todayKstISO();
+  const windowFrom = addDaysKstISO(today, -CARE_REMINDER_OVERDUE_LOOKBACK_DAYS);
   const windowTo = addDaysKstISO(today, 7);
 
   const { data, error } = await supabase
@@ -101,10 +107,10 @@ export async function fetchPetCareReminders(
     .select("id, pet_id, event_date, category, title")
     .eq("user_id", ownerId)
     .eq("pet_id", petId)
-    .gte("event_date", today)
+    .gte("event_date", windowFrom)
     .lte("event_date", windowTo)
     .order("event_date", { ascending: true })
-    .limit(20);
+    .limit(40);
 
   if (error) {
     return base;
@@ -119,14 +125,13 @@ export async function fetchPetCareReminders(
   };
 
   const rows = (data ?? []) as Row[];
+  const overdueItems: PetCareReminderItem[] = [];
   const todayItems: PetCareReminderItem[] = [];
   const upcomingItems: PetCareReminderItem[] = [];
 
   for (const row of rows) {
     const daysUntil = daysBetween(today, row.event_date);
-    if (daysUntil < 0) continue;
-
-    const isOverdue = false;
+    const isOverdue = daysUntil < 0;
     const core = {
       id: row.id,
       petId: row.pet_id,
@@ -141,20 +146,26 @@ export async function fetchPetCareReminders(
       ...core,
       label: reminderLabel(core, isKo),
     };
-    if (daysUntil === 0) {
+    if (isOverdue) {
+      overdueItems.push(item);
+    } else if (daysUntil === 0) {
       todayItems.push(item);
     } else {
       upcomingItems.push(item);
     }
   }
 
+  // Overdue: nearest-to-today first (not oldest-first pile at the top).
+  overdueItems.sort((a, b) => b.daysUntil - a.daysUntil);
+
   const limit = careReminderDisplayLimit(tier);
-  const merged = [...todayItems, ...upcomingItems];
+  const merged = [...overdueItems, ...todayItems, ...upcomingItems];
   const visible = merged.slice(0, limit);
 
   return {
     enabled: true,
     subscriptionTier: tier,
+    overdue: visible.filter((item) => item.isOverdue),
     today: visible.filter((item) => item.daysUntil === 0),
     upcoming: visible.filter((item) => item.daysUntil > 0),
     totalPending: merged.length,
@@ -162,5 +173,5 @@ export async function fetchPetCareReminders(
 }
 
 export function flattenCareReminders(payload: CareRemindersPayload) {
-  return [...payload.today, ...payload.upcoming];
+  return [...payload.overdue, ...payload.today, ...payload.upcoming];
 }
