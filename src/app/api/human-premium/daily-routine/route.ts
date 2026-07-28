@@ -1,7 +1,9 @@
 import {
   assertDailyExtraPaymentForGeneration,
   getDailyExtraOrderByPaymentId,
+  isDailyExtraClaimStale,
   markDailyExtraOrderConsumed,
+  releaseDailyExtraOrderClaim,
 } from "@/lib/reports/human-premium/daily-extra-payment";
 import {
   releaseDailyFreeLock,
@@ -59,6 +61,16 @@ export async function POST(request: Request) {
       const priorOrder = await getDailyExtraOrderByPaymentId(dailyExtraPaymentId);
       if (
         priorOrder?.user_id === userId &&
+        priorOrder.status === "generating" &&
+        !isDailyExtraClaimStale(priorOrder.updated_at)
+      ) {
+        return NextResponse.json(
+          { error: "daily_generating_in_progress", code: "daily_generating_in_progress" },
+          { status: 409 }
+        );
+      }
+      if (
+        priorOrder?.user_id === userId &&
         priorOrder.status === "consumed" &&
         priorOrder.consumed_report_id
       ) {
@@ -80,31 +92,67 @@ export async function POST(request: Request) {
         }
       }
 
-      const order = await assertDailyExtraPaymentForGeneration(
-        userId,
-        dailyExtraPaymentId
-      );
-      const priceLocale = order.locale === "en" ? "en" : "ko";
-      const { payload, webToken, webUrl, row } = await persistHumanPremiumDailyRoutineReport(
-        input,
-        {
-          request,
-          paymentProvider: order.payment_provider === "paypal_link" ? "paypal" : "card_pg",
-          paymentOrderId: order.payment_order_id,
-          amountPaid: getDailyExtraPrice(priceLocale),
-          amountOriginal: getDailyExtraPrice(priceLocale),
-          currency: getCheckoutCurrency(priceLocale),
-          pgProvider: order.payment_provider,
+      let order;
+      try {
+        order = await assertDailyExtraPaymentForGeneration(
+          userId,
+          dailyExtraPaymentId
+        );
+      } catch (claimErr) {
+        const raw =
+          claimErr instanceof Error
+            ? claimErr.message
+            : "Daily-extra payment already used or not verified.";
+        // Lost concurrent claim: peer already holds a fresh generating lock.
+        const raced = await getDailyExtraOrderByPaymentId(dailyExtraPaymentId);
+        if (
+          raced?.user_id === userId &&
+          raced.status === "generating" &&
+          !isDailyExtraClaimStale(raced.updated_at)
+        ) {
+          return NextResponse.json(
+            {
+              error: "daily_generating_in_progress",
+              code: "daily_generating_in_progress",
+            },
+            { status: 409 }
+          );
         }
-      );
+        // Unpaid / already consumed / not owned — expected client rejection, not 5xx.
+        if (raw === "Daily-extra payment already used or not verified.") {
+          return NextResponse.json(
+            { error: formatHumanPremiumError(raw, locale), code: "payment_not_verified" },
+            { status: 403 }
+          );
+        }
+        throw claimErr;
+      }
+      const priceLocale = order.locale === "en" ? "en" : "ko";
+      try {
+        const { payload, webToken, webUrl, row } = await persistHumanPremiumDailyRoutineReport(
+          input,
+          {
+            request,
+            paymentProvider: order.payment_provider === "paypal_link" ? "paypal" : "card_pg",
+            paymentOrderId: order.payment_order_id,
+            amountPaid: getDailyExtraPrice(priceLocale),
+            amountOriginal: getDailyExtraPrice(priceLocale),
+            currency: getCheckoutCurrency(priceLocale),
+            pgProvider: order.payment_provider,
+          }
+        );
 
-      await markDailyExtraOrderConsumed(order.payment_order_id, row.id);
+        await markDailyExtraOrderConsumed(order.payment_order_id, row.id);
 
-      after(() => {
-        scheduleHumanPremiumPdfPrewarm(row, payload);
-      });
+        after(() => {
+          scheduleHumanPremiumPdfPrewarm(row, payload);
+        });
 
-      return NextResponse.json({ report: payload, webToken, webUrl, paidExtra: true });
+        return NextResponse.json({ report: payload, webToken, webUrl, paidExtra: true });
+      } catch (err) {
+        await releaseDailyExtraOrderClaim(order.payment_order_id).catch(() => undefined);
+        throw err;
+      }
     }
 
     // Lifetime 1× free for full members — claimed at request time (not at signup).
@@ -163,6 +211,12 @@ export async function POST(request: Request) {
     }
   } catch (err) {
     const raw = err instanceof Error ? err.message : "Daily routine report failed.";
+    if (raw === "Daily-extra payment already used or not verified.") {
+      return NextResponse.json(
+        { error: formatHumanPremiumError(raw, locale), code: "payment_not_verified" },
+        { status: 403 }
+      );
+    }
     return NextResponse.json({ error: formatHumanPremiumError(raw, locale) }, { status: 500 });
   }
 }

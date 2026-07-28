@@ -1,7 +1,4 @@
-import {
-  verifyDailyExtraPayPalCheckout,
-  verifyDailyExtraPortOnePayment,
-} from "@/lib/reports/human-premium/daily-extra-payment";
+import { verifyDailyExtraPortOnePayment } from "@/lib/reports/human-premium/daily-extra-payment";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { getUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { NextResponse } from "next/server";
@@ -18,7 +15,6 @@ export async function POST(request: Request) {
   // Anonymous sessions allowed (same pattern as human-premium cart verify).
   const userId = await getUserIdFromRequest(request);
   const paymentId = String(body.paymentId ?? body.payment_id ?? "").trim();
-  const method = body.paymentMethod === "paypal_link" ? "paypal_link" : "portone";
 
   if (!userId) {
     return NextResponse.json({ error: "login_required" }, { status: 401 });
@@ -28,10 +24,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const order =
-      method === "paypal_link"
-        ? await verifyDailyExtraPayPalCheckout(userId, paymentId)
-        : await verifyDailyExtraPortOnePayment(userId, paymentId, locale);
+    const order = await verifyDailyExtraPortOnePayment(userId, paymentId, locale);
 
     return NextResponse.json({
       ok: true,

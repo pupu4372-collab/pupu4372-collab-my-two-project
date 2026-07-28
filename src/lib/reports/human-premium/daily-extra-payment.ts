@@ -6,7 +6,6 @@ import {
   parsePortOneCustomData,
   verifyPortOneAmount,
 } from "@/lib/payments/portone/server";
-import { resolveDailyExtraPayPalLink } from "@/lib/payments/paypal-links";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { DAILY_EXTRA_PRODUCT_CODE } from "./daily-extra-constants";
 import {
@@ -15,6 +14,7 @@ import {
   type PricingLocale,
 } from "./pricing";
 
+/** `paypal_link` retained for legacy rows only — new checkouts always use `portone`. */
 export type DailyExtraPaymentProvider = "portone" | "paypal_link" | "demo";
 
 export { DAILY_EXTRA_PRODUCT_CODE };
@@ -27,10 +27,11 @@ export interface DailyExtraOrderRow {
   currency: "KRW" | "USD";
   amount_paid: number;
   payment_provider: DailyExtraPaymentProvider;
-  status: "pending" | "paid" | "consumed";
+  status: "pending" | "paid" | "generating" | "consumed";
   consumed_report_id: string | null;
   paid_at: string | null;
   created_at: string;
+  updated_at?: string;
 }
 
 function requireDb() {
@@ -50,8 +51,6 @@ export async function createDailyExtraCheckoutOrder(
   const supabase = requireDb();
   const { amount, currency } = resolveDailyExtraCheckout(locale);
   const paymentOrderId = createDailyExtraPaymentId();
-  const paymentProvider: DailyExtraPaymentProvider =
-    locale === "en" ? "paypal_link" : "portone";
 
   const { data, error } = await supabase
     .from("human_premium_daily_extra_orders")
@@ -61,7 +60,7 @@ export async function createDailyExtraCheckoutOrder(
       locale,
       currency,
       amount_paid: amount,
-      payment_provider: paymentProvider,
+      payment_provider: "portone",
       status: "pending",
     } as never)
     .select("*")
@@ -115,20 +114,103 @@ export async function markDailyExtraOrderConsumed(
   reportId: string
 ): Promise<void> {
   const supabase = requireDb();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("human_premium_daily_extra_orders")
     .update({
       status: "consumed",
       consumed_report_id: reportId,
     } as never)
     .eq("payment_order_id", paymentOrderId)
-    .in("status", ["paid", "pending"]);
+    .eq("status", "generating")
+    .select("id")
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) {
+    throw new Error("Daily-extra order could not be consumed (not in generating state).");
+  }
+}
+
+/** Stale `generating` claims older than this may be reclaimed (orphan recovery). */
+export const DAILY_EXTRA_CLAIM_STALE_MS = 15 * 60 * 1000;
+
+export function isDailyExtraClaimStale(
+  updatedAt: string | null | undefined,
+  nowMs: number = Date.now()
+): boolean {
+  if (!updatedAt) return true;
+  const claimedAt = Date.parse(updatedAt);
+  if (!Number.isFinite(claimedAt)) return true;
+  return nowMs - claimedAt >= DAILY_EXTRA_CLAIM_STALE_MS;
+}
+
+/**
+ * Atomically claim a paid (or orphaned generating) daily-extra order for one report.
+ * Uses `updated_at` as claim timestamp (trigger bumps it on status→generating).
+ * Excludes rows that already have `consumed_report_id`.
+ */
+export async function claimDailyExtraOrderForGeneration(
+  userId: string,
+  paymentOrderId: string
+): Promise<DailyExtraOrderRow> {
+  const supabase = requireDb();
+  const staleCutoff = new Date(Date.now() - DAILY_EXTRA_CLAIM_STALE_MS).toISOString();
+
+  // Snapshot for monitoring only — claim itself remains a single atomic UPDATE.
+  const before = await getDailyExtraOrderByPaymentId(paymentOrderId);
+  const reclaimingStale =
+    before?.user_id === userId &&
+    before.status === "generating" &&
+    !before.consumed_report_id &&
+    isDailyExtraClaimStale(before.updated_at);
+
+  const { data, error } = await supabase
+    .from("human_premium_daily_extra_orders")
+    .update({ status: "generating" } as never)
+    .eq("payment_order_id", paymentOrderId)
+    .eq("user_id", userId)
+    .is("consumed_report_id", null)
+    .or(`status.eq.paid,and(status.eq.generating,updated_at.lt."${staleCutoff}")`)
+    .select("*")
+    .single();
+
+  if (error || !data) {
+    throw new Error("Daily-extra payment already used or not verified.");
+  }
+
+  if (reclaimingStale) {
+    console.warn("[DAILY_EXTRA_STALE_RECLAIM]", {
+      paymentOrderId,
+      userId,
+      previousUpdatedAt: before?.updated_at ?? null,
+      staleMs: DAILY_EXTRA_CLAIM_STALE_MS,
+    });
+  }
+
+  return data as DailyExtraOrderRow;
+}
+
+/** Roll claim back to paid after a failed generation attempt. */
+export async function releaseDailyExtraOrderClaim(paymentOrderId: string): Promise<void> {
+  const supabase = requireDb();
+  const { error } = await supabase
+    .from("human_premium_daily_extra_orders")
+    .update({ status: "paid" } as never)
+    .eq("payment_order_id", paymentOrderId)
+    .eq("status", "generating");
 
   if (error) throw new Error(error.message);
 }
 
-export function resolveDailyExtraPayPalLinkForOrder(paymentOrderId: string): string | null {
-  return resolveDailyExtraPayPalLink(paymentOrderId);
+/**
+ * @deprecated Prefer claimDailyExtraOrderForGeneration — kept name for call-site clarity.
+ * Atomically claims paid → generating before report persist.
+ */
+export async function assertDailyExtraPaymentForGeneration(
+  userId: string,
+  paymentOrderId: string
+): Promise<DailyExtraOrderRow> {
+  return claimDailyExtraOrderForGeneration(userId, paymentOrderId);
 }
 
 export async function verifyDailyExtraPortOnePayment(
@@ -140,7 +222,7 @@ export async function verifyDailyExtraPortOnePayment(
   if (!order || order.user_id !== userId) {
     throw new Error("Daily-extra order not found.");
   }
-  if (order.status === "paid" || order.status === "consumed") {
+  if (order.status === "paid" || order.status === "consumed" || order.status === "generating") {
     return order;
   }
 
@@ -172,46 +254,6 @@ export async function verifyDailyExtraPortOnePayment(
   }
 
   return markDailyExtraOrderPaid(paymentOrderId);
-}
-
-/** PayPal link flow — order must exist; fulfillment trusts checkout + invoice_id (same as human premium links). */
-export async function verifyDailyExtraPayPalCheckout(
-  userId: string,
-  paymentOrderId: string
-): Promise<DailyExtraOrderRow> {
-  const order = await getDailyExtraOrderByPaymentId(paymentOrderId);
-  if (!order || order.user_id !== userId) {
-    throw new Error("Daily-extra order not found.");
-  }
-  if (order.payment_provider !== "paypal_link") {
-    throw new Error("Invalid payment provider.");
-  }
-  if (order.status === "paid" || order.status === "consumed") {
-    return order;
-  }
-
-  return markDailyExtraOrderPaid(paymentOrderId);
-}
-
-/**
- * Returns a paid daily-extra order eligible for one report generation.
- * Consumes the order after successful report persist.
- */
-export async function assertDailyExtraPaymentForGeneration(
-  userId: string,
-  paymentOrderId: string
-): Promise<DailyExtraOrderRow> {
-  const order = await getDailyExtraOrderByPaymentId(paymentOrderId);
-  if (!order || order.user_id !== userId) {
-    throw new Error("Daily-extra payment not found.");
-  }
-  if (order.status === "consumed") {
-    throw new Error("Daily-extra payment already used.");
-  }
-  if (order.status !== "paid") {
-    throw new Error("Daily-extra payment not verified.");
-  }
-  return order;
 }
 
 export function getCheckoutCurrencyForLocale(locale: PricingLocale): "KRW" | "USD" {
