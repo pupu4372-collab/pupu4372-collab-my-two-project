@@ -20,7 +20,7 @@ import {
 import type { Notice, PetShowRankingRow } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type WeeklyRankingRows = {
   dog: PetShowRankingRow[];
@@ -168,12 +168,17 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
   const [rankingLoading, setRankingLoading] = useState(true);
   const [fortuneData, setFortuneData] = useState<FortuneTodayState | null>(null);
   const [fortuneLoading, setFortuneLoading] = useState(true);
+  /** Ignore stale pet-select fortune responses only (do not share with loadFortune effect). */
+  const petSelectSeqRef = useRef(0);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadWeeklyRanking() {
       setRankingLoading(true);
       try {
         const res = await fetch("/api/community/pet-show/ranking?period=week&group=species");
+        if (cancelled) return;
         if (!res.ok) {
           setRankingRows(emptyRankingRows);
           setFunnyRankingRows([]);
@@ -187,6 +192,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
           source?: "supabase" | "mock";
           lastWeekFallback?: PetShowRankingFallbackFlags;
         };
+        if (cancelled) return;
         setRankingRows({
           dog: data.rows?.dog ?? [],
           cat: data.rows?.cat ?? [],
@@ -197,22 +203,31 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
         setRankingFallback(data.lastWeekFallback ?? EMPTY_RANKING_FALLBACK_FLAGS);
         setRankingSource(data.source ?? null);
       } catch {
-        setRankingRows(emptyRankingRows);
-        setFunnyRankingRows([]);
-        setRankingFallback(EMPTY_RANKING_FALLBACK_FLAGS);
-        setRankingSource(null);
+        if (!cancelled) {
+          setRankingRows(emptyRankingRows);
+          setFunnyRankingRows([]);
+          setRankingFallback(EMPTY_RANKING_FALLBACK_FLAGS);
+          setRankingSource(null);
+        }
       } finally {
-        setRankingLoading(false);
+        if (!cancelled) setRankingLoading(false);
       }
     }
 
     void loadWeeklyRanking();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     if (!ready) return;
 
+    let cancelled = false;
+
     async function loadFortune() {
+      // Snapshot only — never bump petSelectSeqRef from this effect.
+      const selectSeqAtStart = petSelectSeqRef.current;
       setFortuneLoading(true);
       try {
         const params = new URLSearchParams({ locale });
@@ -222,21 +237,31 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
         }
 
         const fortuneRes = await fetch(`/api/fortune/today?${params.toString()}`, { headers });
+        if (cancelled) return;
         if (!fortuneRes.ok) return;
 
         const data = (await fortuneRes.json()) as FortuneTodayState;
+        if (cancelled) return;
+        // A newer pet-select won while this default load was in flight — keep the selection.
+        if (petSelectSeqRef.current !== selectSeqAtStart) return;
         setFortuneData(data);
       } catch {
-        setFortuneData(null);
+        if (!cancelled && petSelectSeqRef.current === selectSeqAtStart) {
+          setFortuneData(null);
+        }
       } finally {
-        setFortuneLoading(false);
+        if (!cancelled) setFortuneLoading(false);
       }
     }
 
     void loadFortune();
+    return () => {
+      cancelled = true;
+    };
   }, [ready, accessToken, locale]);
 
   async function handleSelectPet(petId: string) {
+    const seq = ++petSelectSeqRef.current;
     try {
       const params = new URLSearchParams({ locale, petId });
       const headers: HeadersInit = {};
@@ -244,8 +269,10 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
         headers.Authorization = `Bearer ${accessToken}`;
       }
       const fortuneRes = await fetch(`/api/fortune/today?${params.toString()}`, { headers });
+      if (seq !== petSelectSeqRef.current) return;
       if (!fortuneRes.ok) return;
       const data = (await fortuneRes.json()) as FortuneTodayState;
+      if (seq !== petSelectSeqRef.current) return;
       setFortuneData(data);
     } catch {
       // keep previous fortune visible
@@ -259,7 +286,10 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
 
   // Guests (and pre-ready) can paint the quick-add form without waiting for fortune API.
   // Full members keep the care-guide loading gate so pet fortune cards do not flash guest UI.
-  const showGuestFormInstant = fortuneLoading && (!ready || isAnonymous);
+  // If personalized fortune is already on screen, keep it during reload (do not force example carousel).
+  const hasPersonalizedFortune = fortuneData?.mode === "personalized";
+  const showGuestFormInstant =
+    fortuneLoading && (!ready || isAnonymous) && !hasPersonalizedFortune;
 
   const fortunePanel = showGuestFormInstant ? (
     <div className="home-fortune-column">
@@ -271,7 +301,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
         onPetAdded={handleSelectPet}
       />
     </div>
-  ) : fortuneLoading ? (
+  ) : fortuneLoading && !hasPersonalizedFortune ? (
     <div className="home-fortune-column">
       <SajuHubPremiumBanner />
       <div className="home-fortune-column__divider" aria-hidden />
@@ -288,6 +318,11 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
     <div className="home-fortune-column">
       <SajuHubPremiumBanner />
       <div className="home-fortune-column__divider" aria-hidden />
+      {fortuneLoading ? (
+        <p className="mb-2 text-center text-xs font-semibold text-stone-500">
+          {isKo ? "오늘의 케어 가이드를 불러오는 중이에요…" : "Updating today's care guide…"}
+        </p>
+      ) : null}
       <HomePetFortuneCard
         fortuneData={fortuneData}
         careReminders={fortuneData?.careReminders}

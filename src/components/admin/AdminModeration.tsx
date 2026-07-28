@@ -54,8 +54,39 @@ export function AdminModeration() {
   }, [accessToken, selectedBoard]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    if (!accessToken) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function run() {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({ board: selectedBoard });
+        const res = await fetch(`/api/admin/posts?${params.toString()}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const data = await res.json();
+        if (cancelled) return;
+        if (!res.ok) throw new Error(data.error ?? "불러오기 실패");
+        setPosts(data.posts ?? []);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "불러오기 실패");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken, selectedBoard]);
 
   async function toggleHidden(post: AdminPostRow) {
     if (!accessToken) return;
