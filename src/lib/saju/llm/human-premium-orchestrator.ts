@@ -926,7 +926,8 @@ export async function buildHumanPremiumStructuredWithLlm(
   const template = buildHumanPremiumStructured(
     ctx.saju,
     ctx.locale,
-    ctx.reportType
+    ctx.reportType,
+    ctx.gender ?? null
   );
   const meta: Record<string, HumanPremiumLlmSectionMeta> = {};
   const interpretation: Partial<HumanInterpretationJson> = {};
