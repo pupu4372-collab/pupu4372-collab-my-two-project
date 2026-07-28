@@ -20,7 +20,7 @@ import {
 import type { Notice, PetShowRankingRow } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type WeeklyRankingRows = {
   dog: PetShowRankingRow[];
@@ -168,12 +168,17 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
   const [rankingLoading, setRankingLoading] = useState(true);
   const [fortuneData, setFortuneData] = useState<FortuneTodayState | null>(null);
   const [fortuneLoading, setFortuneLoading] = useState(true);
+  /** Invalidate in-flight pet-select fortune fetches (handler has no effect cleanup). */
+  const petFortuneSeqRef = useRef(0);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadWeeklyRanking() {
       setRankingLoading(true);
       try {
         const res = await fetch("/api/community/pet-show/ranking?period=week&group=species");
+        if (cancelled) return;
         if (!res.ok) {
           setRankingRows(emptyRankingRows);
           setFunnyRankingRows([]);
@@ -187,6 +192,7 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
           source?: "supabase" | "mock";
           lastWeekFallback?: PetShowRankingFallbackFlags;
         };
+        if (cancelled) return;
         setRankingRows({
           dog: data.rows?.dog ?? [],
           cat: data.rows?.cat ?? [],
@@ -197,20 +203,27 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
         setRankingFallback(data.lastWeekFallback ?? EMPTY_RANKING_FALLBACK_FLAGS);
         setRankingSource(data.source ?? null);
       } catch {
-        setRankingRows(emptyRankingRows);
-        setFunnyRankingRows([]);
-        setRankingFallback(EMPTY_RANKING_FALLBACK_FLAGS);
-        setRankingSource(null);
+        if (!cancelled) {
+          setRankingRows(emptyRankingRows);
+          setFunnyRankingRows([]);
+          setRankingFallback(EMPTY_RANKING_FALLBACK_FLAGS);
+          setRankingSource(null);
+        }
       } finally {
-        setRankingLoading(false);
+        if (!cancelled) setRankingLoading(false);
       }
     }
 
     void loadWeeklyRanking();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     if (!ready) return;
+
+    let cancelled = false;
 
     async function loadFortune() {
       setFortuneLoading(true);
@@ -222,21 +235,28 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
         }
 
         const fortuneRes = await fetch(`/api/fortune/today?${params.toString()}`, { headers });
+        if (cancelled) return;
         if (!fortuneRes.ok) return;
 
         const data = (await fortuneRes.json()) as FortuneTodayState;
+        if (cancelled) return;
         setFortuneData(data);
       } catch {
-        setFortuneData(null);
+        if (!cancelled) setFortuneData(null);
       } finally {
-        setFortuneLoading(false);
+        if (!cancelled) setFortuneLoading(false);
       }
     }
 
     void loadFortune();
+    return () => {
+      cancelled = true;
+      petFortuneSeqRef.current += 1;
+    };
   }, [ready, accessToken, locale]);
 
   async function handleSelectPet(petId: string) {
+    const seq = ++petFortuneSeqRef.current;
     try {
       const params = new URLSearchParams({ locale, petId });
       const headers: HeadersInit = {};
@@ -244,8 +264,10 @@ export function HomeGateway({ previewTheme, homeBannerNotice = null }: HomeGatew
         headers.Authorization = `Bearer ${accessToken}`;
       }
       const fortuneRes = await fetch(`/api/fortune/today?${params.toString()}`, { headers });
+      if (seq !== petFortuneSeqRef.current) return;
       if (!fortuneRes.ok) return;
       const data = (await fortuneRes.json()) as FortuneTodayState;
+      if (seq !== petFortuneSeqRef.current) return;
       setFortuneData(data);
     } catch {
       // keep previous fortune visible
