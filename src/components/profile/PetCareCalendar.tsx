@@ -107,8 +107,37 @@ export function PetCareCalendar({
   }, [accessToken, isKo, petId, viewMonth, viewYear]);
 
   useEffect(() => {
-    void loadMonth();
-  }, [loadMonth]);
+    if (!accessToken) return;
+
+    let cancelled = false;
+    const { from, to } = monthBounds(viewYear, viewMonth);
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/profile/pets/${petId}/care?from=${from}&to=${to}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const data = await res.json();
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(data.error ?? (isKo ? "일정을 불러오지 못했어요." : "Failed to load events."));
+          return;
+        }
+        setEvents((data.events ?? []) as PetCareEvent[]);
+      } catch {
+        if (!cancelled) setError(isKo ? "네트워크 오류" : "Network error");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken, isKo, petId, viewMonth, viewYear]);
 
   function shiftMonth(delta: number) {
     const d = new Date(viewYear, viewMonth - 1 + delta, 1);
