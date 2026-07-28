@@ -1,6 +1,7 @@
 import {
   assertDailyExtraPaymentForGeneration,
   getDailyExtraOrderByPaymentId,
+  isDailyExtraClaimStale,
   markDailyExtraOrderConsumed,
   releaseDailyExtraOrderClaim,
 } from "@/lib/reports/human-premium/daily-extra-payment";
@@ -58,7 +59,11 @@ export async function POST(request: Request) {
       }
 
       const priorOrder = await getDailyExtraOrderByPaymentId(dailyExtraPaymentId);
-      if (priorOrder?.user_id === userId && priorOrder.status === "generating") {
+      if (
+        priorOrder?.user_id === userId &&
+        priorOrder.status === "generating" &&
+        !isDailyExtraClaimStale(priorOrder.updated_at)
+      ) {
         return NextResponse.json(
           { error: "daily_generating_in_progress", code: "daily_generating_in_progress" },
           { status: 409 }

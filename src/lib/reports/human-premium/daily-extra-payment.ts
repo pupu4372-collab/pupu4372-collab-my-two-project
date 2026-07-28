@@ -31,6 +31,7 @@ export interface DailyExtraOrderRow {
   consumed_report_id: string | null;
   paid_at: string | null;
   created_at: string;
+  updated_at?: string;
 }
 
 function requireDb() {
@@ -130,26 +131,42 @@ export async function markDailyExtraOrderConsumed(
   }
 }
 
+/** Stale `generating` claims older than this may be reclaimed (orphan recovery). */
+export const DAILY_EXTRA_CLAIM_STALE_MS = 15 * 60 * 1000;
+
+export function isDailyExtraClaimStale(
+  updatedAt: string | null | undefined,
+  nowMs: number = Date.now()
+): boolean {
+  if (!updatedAt) return true;
+  const claimedAt = Date.parse(updatedAt);
+  if (!Number.isFinite(claimedAt)) return true;
+  return nowMs - claimedAt >= DAILY_EXTRA_CLAIM_STALE_MS;
+}
+
 /**
- * Atomically claim a paid daily-extra order for one report generation.
- * Fails when another request already claimed it (or payment is not paid).
+ * Atomically claim a paid (or orphaned generating) daily-extra order for one report.
+ * Uses `updated_at` as claim timestamp (trigger bumps it on status→generating).
+ * Excludes rows that already have `consumed_report_id`.
  */
 export async function claimDailyExtraOrderForGeneration(
   userId: string,
   paymentOrderId: string
 ): Promise<DailyExtraOrderRow> {
   const supabase = requireDb();
+  const staleCutoff = new Date(Date.now() - DAILY_EXTRA_CLAIM_STALE_MS).toISOString();
+
   const { data, error } = await supabase
     .from("human_premium_daily_extra_orders")
     .update({ status: "generating" } as never)
     .eq("payment_order_id", paymentOrderId)
     .eq("user_id", userId)
-    .eq("status", "paid")
+    .is("consumed_report_id", null)
+    .or(`status.eq.paid,and(status.eq.generating,updated_at.lt.${staleCutoff})`)
     .select("*")
-    .maybeSingle();
+    .single();
 
-  if (error) throw new Error(error.message);
-  if (!data) {
+  if (error || !data) {
     throw new Error("Daily-extra payment already used or not verified.");
   }
   return data as DailyExtraOrderRow;
