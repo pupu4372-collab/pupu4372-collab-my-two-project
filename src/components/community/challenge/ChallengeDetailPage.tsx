@@ -70,6 +70,8 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
   }
 
   useEffect(() => {
+    let cancelled = false;
+
     async function load() {
       setLoading(true);
       setError(null);
@@ -81,6 +83,7 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
           challenges?: Challenge[];
           error?: string;
         };
+        if (cancelled) return;
         if (!challengeRes.ok) {
           setError(challengeData.error ?? (isKo ? "챌린지를 불러오지 못했어요." : "Could not load challenge."));
           return;
@@ -91,15 +94,30 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
           return;
         }
         setChallenge(localizeChallenge(found, isKo ? "ko" : "en"));
-        await loadPosts();
+
+        const postsRes = await fetch(`/api/community/challenge/${id}/posts`);
+        const postsData = (await postsRes.json()) as {
+          posts?: ChallengePostWithRelations[];
+          error?: string;
+        };
+        if (cancelled) return;
+        if (!postsRes.ok) {
+          throw new Error(postsData.error ?? (isKo ? "인증글을 불러오지 못했어요." : "Could not load posts."));
+        }
+        setPosts(postsData.posts ?? []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : isKo ? "오류가 발생했어요." : "Something went wrong.");
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : isKo ? "오류가 발생했어요." : "Something went wrong.");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     void load();
+    return () => {
+      cancelled = true;
+    };
   }, [id, isKo]);
 
   async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
