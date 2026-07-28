@@ -35,6 +35,8 @@ export function ChallengeListPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function load() {
       setLoading(true);
       setError(null);
@@ -43,6 +45,7 @@ export function ChallengeListPage() {
         if (channel !== "all") params.set("channel", channel);
         const res = await fetch(`/api/community/challenge?${params.toString()}`);
         const data = (await res.json()) as { challenges?: Challenge[]; error?: string };
+        if (cancelled) return;
         if (!res.ok) {
           setError(data.error ?? (isKo ? "챌린지를 불러오지 못했어요." : "Could not load challenges."));
           setChallenges([]);
@@ -50,14 +53,19 @@ export function ChallengeListPage() {
         }
         setChallenges(localizeChallenges(data.challenges ?? [], isKo ? "ko" : "en"));
       } catch {
-        setError(isKo ? "네트워크 오류가 발생했어요." : "Network error.");
-        setChallenges([]);
+        if (!cancelled) {
+          setError(isKo ? "네트워크 오류가 발생했어요." : "Network error.");
+          setChallenges([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     void load();
+    return () => {
+      cancelled = true;
+    };
   }, [channel, isKo]);
 
   return (
