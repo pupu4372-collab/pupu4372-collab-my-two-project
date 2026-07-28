@@ -729,7 +729,8 @@ function buildTemplateDailyRoadmap(
 
 function buildTemplateRoadmap(
   saju: SajuBasicResponse,
-  locale: Locale
+  locale: Locale,
+  gender: "male" | "female" | null = null
 ): { roadmap: ReportRoadmapItem[]; decisionMoments: ReportDecisionMoment[] } {
   const daewoon = computeDaewoonCandidates({
     birthUtc: saju.birthUtc,
@@ -737,9 +738,10 @@ function buildTemplateRoadmap(
     monthPillar: saju.pillars.month,
     dayStem: saju.pillars.day.stemHanja,
     locale,
-    gender: null,
+    gender,
   });
 
+  // With gender: length 1 (resolved direction). Without: [forward, reverse]; [0] stays forward.
   const primary = daewoon[0];
   const currentAge = computeManAge(saju.birthDate);
   const cycles = pickCurrentAndUpcomingCycles(
@@ -835,7 +837,8 @@ function buildTemplateRoadmap(
 function buildTemplateProphecy(
   saju: SajuBasicResponse,
   locale: Locale,
-  reportType: ReportType
+  reportType: ReportType,
+  gender: "male" | "female" | null = null
 ): ReportProphecy {
   const daewoon = computeDaewoonCandidates({
     birthUtc: saju.birthUtc,
@@ -843,8 +846,9 @@ function buildTemplateProphecy(
     monthPillar: saju.pillars.month,
     dayStem: saju.pillars.day.stemHanja,
     locale,
-    gender: null,
+    gender,
   });
+  // cycles[1] = second cycle of the primary (direction-resolved) candidate — not candidates[1].
   const next = daewoon[0]?.cycles[1];
   const birthYear = new Date(saju.birthUtc).getUTCFullYear();
   const currentYear = new Date().getFullYear();
@@ -908,12 +912,13 @@ function buildTemplateCohortInsight(
 export function buildHumanPremiumStructured(
   saju: SajuBasicResponse,
   locale: Locale,
-  reportType: ReportType
+  reportType: ReportType,
+  gender: "male" | "female" | null = null
 ): HumanPremiumReportStructured {
   const { roadmap, decisionMoments } =
     reportType === "daily"
       ? buildTemplateDailyRoadmap(locale)
-      : buildTemplateRoadmap(saju, locale);
+      : buildTemplateRoadmap(saju, locale, gender);
 
   return {
     scores: buildTemplateScores(saju, locale, reportType),
@@ -921,7 +926,7 @@ export function buildHumanPremiumStructured(
     risks: buildTemplateRisks(saju, locale),
     roadmap,
     decisionMoments,
-    prophecy: buildTemplateProphecy(saju, locale, reportType),
+    prophecy: buildTemplateProphecy(saju, locale, reportType, gender),
     cohortInsight: buildTemplateCohortInsight(saju, locale, reportType),
     deepSections: buildTemplateDeepSections(saju, locale, reportType),
   };
@@ -1163,12 +1168,18 @@ export function buildSajuChapters(
     ziweiChart?: ZiweiChart;
     birthTimeUnknown?: boolean;
     reportType?: ReportType;
+    gender?: "male" | "female" | null;
   }
 ): HumanPremiumReportChapter[] {
   const name = saju.petName;
   const reportType = resolveReportType(options?.reportType);
   const summary = humanElementStory(name, dayMasterElement(saju), locale);
-  const structured = buildHumanPremiumStructured(saju, locale, reportType);
+  const structured = buildHumanPremiumStructured(
+    saju,
+    locale,
+    reportType,
+    options?.gender ?? null
+  );
   const typeLabel = reportTypeLabel(reportType, locale);
   const nickname = dayPillarNickname(saju, locale);
   const hour = saju.pillars.hour;

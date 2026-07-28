@@ -34,10 +34,17 @@ export function buildHumanPremiumReport(
   // Saju (四柱/三柱) reports: skip ziwei chart compute and section/bullet embed.
   const summary = buildHumanSummary(input.personName, saju, input.locale);
   const reportType = resolveReportType(input.reportType);
-  const structured = buildHumanPremiumStructured(saju, input.locale, reportType);
+  const gender = input.gender ?? birthBasis.gender ?? null;
+  const structured = buildHumanPremiumStructured(
+    saju,
+    input.locale,
+    reportType,
+    gender
+  );
   const sajuChapters = buildSajuChapters(saju, input.locale, {
     birthTimeUnknown: input.birthTimeUnknown,
     reportType,
+    gender,
   });
 
   const sajuSectionCount = flattenChapterSections(sajuChapters).length;
