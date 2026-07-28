@@ -2,6 +2,7 @@
 
 import { BirthDateSelect } from "@/components/k-saju/BirthDateSelect";
 import { HumanPremiumFreePreviewReport } from "@/components/human-premium/HumanPremiumFreePreviewReport";
+import { PayPalSpbButton } from "@/components/human-premium/PayPalSpbButton";
 import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateLoader";
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
@@ -33,6 +34,13 @@ import {
   portOneReturnNotice,
   stripPortOneRedirectParams,
 } from "@/lib/payments/portone-redirect-return";
+
+type DailyExtraSpbDraft = {
+  paymentId: string;
+  orderName: string;
+  totalAmount: number;
+  currency: string;
+};
 
 /** Product header + CTA labels (no duplicate title/sub on the same button). */
 const PRODUCT_UI = {
@@ -104,6 +112,7 @@ export function DayPillarPreview({
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [portoneReady, setPortoneReady] = useState(false);
+  const [spbDraft, setSpbDraft] = useState<DailyExtraSpbDraft | null>(null);
   const [report, setReport] = useState<HumanPremiumReportPayload | null>(null);
   const [webToken, setWebToken] = useState<string | null>(null);
   const [hasCoupon, setHasCoupon] = useState<boolean | null>(null);
@@ -152,7 +161,7 @@ export function DayPillarPreview({
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({ paymentId, locale: routeLocale, paymentMethod: "portone" }),
+          body: JSON.stringify({ paymentId, locale: routeLocale }),
         });
         const verifyData = (await verifyRes.json()) as {
           error?: string;
@@ -349,6 +358,47 @@ export function DayPillarPreview({
     }
   }
 
+  async function verifyAndGenerateDailyExtra(paymentId: string) {
+    if (!accessToken) {
+      throw new Error(
+        isKo
+          ? "세션을 준비 중이에요. 잠시 후 다시 시도해 주세요."
+          : "Preparing your session. Please try again in a moment."
+      );
+    }
+
+    const verifyRes = await fetch("/api/payments/human-premium/daily-extra/verify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ paymentId, locale: routeLocale }),
+    });
+    if (!verifyRes.ok) {
+      const verifyData = (await verifyRes.json()) as { error?: string };
+      throw new Error(verifyData.error ?? "Payment verify failed");
+    }
+
+    setLoading(true);
+    await requestDailyReport(paymentId);
+  }
+
+  async function handleSpbSuccess(paymentId: string) {
+    setPaying(true);
+    setError(null);
+    try {
+      await verifyAndGenerateDailyExtra(paymentId);
+      setSpbDraft(null);
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : "Payment failed";
+      setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
+    } finally {
+      setPaying(false);
+      setLoading(false);
+    }
+  }
+
   async function handleDailyExtraPay() {
     if (!accessToken) {
       setError(
@@ -362,6 +412,7 @@ export function DayPillarPreview({
 
     setPaying(true);
     setError(null);
+    setSpbDraft(null);
     try {
       const checkoutRes = await fetch("/api/payments/human-premium/daily-extra/checkout", {
         method: "POST",
@@ -379,77 +430,46 @@ export function DayPillarPreview({
       const paymentId = String(checkout.paymentId ?? "");
       if (!paymentId) throw new Error("Checkout failed");
 
-      if (isKo) {
-        const PortOne = (
-          window as unknown as {
-            PortOne?: { requestPayment: (args: unknown) => Promise<{ code?: string }> };
-          }
-        ).PortOne;
-        if (!PortOne || !portoneReady || !process.env.NEXT_PUBLIC_PORTONE_SHOP_ID) {
-          throw new Error(isKo ? "결제 모듈을 불러오지 못했어요." : "Payment module unavailable.");
+      // EN: PortOne PayPal SPB (same channel as cart). KO: card modal unchanged.
+      if (!isKo) {
+        const totalAmount = Number(checkout.totalAmount ?? checkout.amount);
+        const currency = String(checkout.currency ?? "USD");
+        const orderName = String(checkout.orderName ?? ui.title);
+        if (!Number.isFinite(totalAmount)) throw new Error("Checkout failed");
+        if (!portoneReady) {
+          throw new Error("Payment module unavailable.");
         }
-
-        // Keep full-screen generate loader OFF while PortOne modal is open (z-[80] would cover it).
-        const payResult = await PortOne.requestPayment({
-          storeId: process.env.NEXT_PUBLIC_PORTONE_SHOP_ID,
-          paymentId,
-          orderName: String(checkout.orderName ?? ui.title),
-          totalAmount: Number(checkout.totalAmount ?? checkout.amount ?? 1900),
-          currency: String(checkout.currency ?? "KRW"),
-          channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
-          payMethod: "CARD",
-          customData: { productCode: DAILY_EXTRA_PRODUCT_CODE },
-          ...portOnePaymentDisplayOptions(),
-        });
-
-        if (payResult.code !== undefined) {
-          throw new Error(isKo ? "결제가 취소되었어요." : "Payment cancelled.");
-        }
-
-        const verifyRes = await fetch("/api/payments/human-premium/daily-extra/verify", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ paymentId, locale: routeLocale, paymentMethod: "portone" }),
-        });
-        if (!verifyRes.ok) {
-          const verifyData = (await verifyRes.json()) as { error?: string };
-          throw new Error(verifyData.error ?? "Payment verify failed");
-        }
-      } else {
-        const paypalLink = String((checkout.paypal as { link?: string } | undefined)?.link ?? "");
-        if (paypalLink) {
-          window.open(paypalLink, "_blank", "noopener,noreferrer");
-        }
-        const confirmed = window.confirm(
-          isKo
-            ? "PayPal 결제를 완료하셨나요?"
-            : "Have you completed PayPal checkout?"
-        );
-        if (!confirmed) return;
-
-        const verifyRes = await fetch("/api/payments/human-premium/daily-extra/verify", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            paymentId,
-            locale: routeLocale,
-            paymentMethod: "paypal_link",
-          }),
-        });
-        if (!verifyRes.ok) {
-          const verifyData = (await verifyRes.json()) as { error?: string };
-          throw new Error(verifyData.error ?? "Payment verify failed");
-        }
+        setSpbDraft({ paymentId, orderName, totalAmount, currency });
+        return;
       }
 
-      setLoading(true);
-      await requestDailyReport(paymentId);
+      const PortOne = (
+        window as unknown as {
+          PortOne?: { requestPayment: (args: unknown) => Promise<{ code?: string }> };
+        }
+      ).PortOne;
+      if (!PortOne || !portoneReady || !process.env.NEXT_PUBLIC_PORTONE_SHOP_ID) {
+        throw new Error(isKo ? "결제 모듈을 불러오지 못했어요." : "Payment module unavailable.");
+      }
+
+      // Keep full-screen generate loader OFF while PortOne modal is open (z-[80] would cover it).
+      const payResult = await PortOne.requestPayment({
+        storeId: process.env.NEXT_PUBLIC_PORTONE_SHOP_ID,
+        paymentId,
+        orderName: String(checkout.orderName ?? ui.title),
+        totalAmount: Number(checkout.totalAmount ?? checkout.amount ?? 1900),
+        currency: String(checkout.currency ?? "KRW"),
+        channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "",
+        payMethod: "CARD",
+        customData: { productCode: DAILY_EXTRA_PRODUCT_CODE },
+        ...portOnePaymentDisplayOptions(),
+      });
+
+      if (payResult.code !== undefined) {
+        throw new Error(isKo ? "결제가 취소되었어요." : "Payment cancelled.");
+      }
+
+      await verifyAndGenerateDailyExtra(paymentId);
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Payment failed";
       setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
@@ -482,7 +502,8 @@ export function DayPillarPreview({
     );
   }
 
-  const submitBusy = loading || paying || !sessionReady || (isFullMember && hasCoupon === null);
+  const submitBusy =
+    loading || paying || Boolean(spbDraft) || !sessionReady || (isFullMember && hasCoupon === null);
 
   return (
     <>
@@ -637,6 +658,34 @@ export function DayPillarPreview({
             >
               {error}
             </p>
+          ) : null}
+
+          {!isKo && spbDraft && portoneReady ? (
+            <div className="space-y-2">
+              <p className="text-center text-xs font-semibold text-plum/70">
+                Complete PayPal checkout below
+              </p>
+              <PayPalSpbButton
+                paymentId={spbDraft.paymentId}
+                orderName={spbDraft.orderName}
+                totalAmount={spbDraft.totalAmount}
+                currency={spbDraft.currency}
+                locale="en"
+                customData={{ productCode: DAILY_EXTRA_PRODUCT_CODE }}
+                onSuccess={(paymentId) => void handleSpbSuccess(paymentId)}
+                onError={(message) => {
+                  setError(formatHumanPremiumError(message, "en"));
+                  setSpbDraft(null);
+                }}
+              />
+              <button
+                type="button"
+                className="w-full text-center text-xs font-semibold text-plum/60 underline"
+                onClick={() => setSpbDraft(null)}
+              >
+                Cancel PayPal
+              </button>
+            </div>
           ) : null}
 
           {!isFullMember ? (

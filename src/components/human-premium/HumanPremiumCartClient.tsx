@@ -45,7 +45,6 @@ import { portOnePaymentDisplayOptions } from "@/lib/payments/portone-display";
 
 type PaymentConfig = {
   portone: boolean;
-  paypalLink: boolean;
   demoAllowed: boolean;
   demoReady: boolean;
 };
@@ -205,7 +204,6 @@ export function HumanPremiumCartClient() {
       .catch(() =>
         setPaymentConfig({
           portone: false,
-          paypalLink: false,
           demoAllowed: false,
           demoReady: false,
         })

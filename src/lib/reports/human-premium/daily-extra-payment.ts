@@ -6,7 +6,6 @@ import {
   parsePortOneCustomData,
   verifyPortOneAmount,
 } from "@/lib/payments/portone/server";
-import { resolveDailyExtraPayPalLink } from "@/lib/payments/paypal-links";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { DAILY_EXTRA_PRODUCT_CODE } from "./daily-extra-constants";
 import {
@@ -15,6 +14,7 @@ import {
   type PricingLocale,
 } from "./pricing";
 
+/** `paypal_link` retained for legacy rows only — new checkouts always use `portone`. */
 export type DailyExtraPaymentProvider = "portone" | "paypal_link" | "demo";
 
 export { DAILY_EXTRA_PRODUCT_CODE };
@@ -50,8 +50,6 @@ export async function createDailyExtraCheckoutOrder(
   const supabase = requireDb();
   const { amount, currency } = resolveDailyExtraCheckout(locale);
   const paymentOrderId = createDailyExtraPaymentId();
-  const paymentProvider: DailyExtraPaymentProvider =
-    locale === "en" ? "paypal_link" : "portone";
 
   const { data, error } = await supabase
     .from("human_premium_daily_extra_orders")
@@ -61,7 +59,7 @@ export async function createDailyExtraCheckoutOrder(
       locale,
       currency,
       amount_paid: amount,
-      payment_provider: paymentProvider,
+      payment_provider: "portone",
       status: "pending",
     } as never)
     .select("*")
@@ -127,8 +125,25 @@ export async function markDailyExtraOrderConsumed(
   if (error) throw new Error(error.message);
 }
 
-export function resolveDailyExtraPayPalLinkForOrder(paymentOrderId: string): string | null {
-  return resolveDailyExtraPayPalLink(paymentOrderId);
+/**
+ * Returns a paid daily-extra order eligible for one report generation.
+ * Consumes the order after successful report persist.
+ */
+export async function assertDailyExtraPaymentForGeneration(
+  userId: string,
+  paymentOrderId: string
+): Promise<DailyExtraOrderRow> {
+  const order = await getDailyExtraOrderByPaymentId(paymentOrderId);
+  if (!order || order.user_id !== userId) {
+    throw new Error("Daily-extra payment not found.");
+  }
+  if (order.status === "consumed") {
+    throw new Error("Daily-extra payment already used.");
+  }
+  if (order.status !== "paid") {
+    throw new Error("Daily-extra payment not verified.");
+  }
+  return order;
 }
 
 export async function verifyDailyExtraPortOnePayment(
@@ -172,46 +187,6 @@ export async function verifyDailyExtraPortOnePayment(
   }
 
   return markDailyExtraOrderPaid(paymentOrderId);
-}
-
-/** PayPal link flow — order must exist; fulfillment trusts checkout + invoice_id (same as human premium links). */
-export async function verifyDailyExtraPayPalCheckout(
-  userId: string,
-  paymentOrderId: string
-): Promise<DailyExtraOrderRow> {
-  const order = await getDailyExtraOrderByPaymentId(paymentOrderId);
-  if (!order || order.user_id !== userId) {
-    throw new Error("Daily-extra order not found.");
-  }
-  if (order.payment_provider !== "paypal_link") {
-    throw new Error("Invalid payment provider.");
-  }
-  if (order.status === "paid" || order.status === "consumed") {
-    return order;
-  }
-
-  return markDailyExtraOrderPaid(paymentOrderId);
-}
-
-/**
- * Returns a paid daily-extra order eligible for one report generation.
- * Consumes the order after successful report persist.
- */
-export async function assertDailyExtraPaymentForGeneration(
-  userId: string,
-  paymentOrderId: string
-): Promise<DailyExtraOrderRow> {
-  const order = await getDailyExtraOrderByPaymentId(paymentOrderId);
-  if (!order || order.user_id !== userId) {
-    throw new Error("Daily-extra payment not found.");
-  }
-  if (order.status === "consumed") {
-    throw new Error("Daily-extra payment already used.");
-  }
-  if (order.status !== "paid") {
-    throw new Error("Daily-extra payment not verified.");
-  }
-  return order;
 }
 
 export function getCheckoutCurrencyForLocale(locale: PricingLocale): "KRW" | "USD" {

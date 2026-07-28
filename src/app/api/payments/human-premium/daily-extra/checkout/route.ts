@@ -1,9 +1,6 @@
 import { catalogAmountToPortOneTotal } from "@/lib/payments/portone/amount";
 import { getPortOneShopId, isPortOneConfigured } from "@/lib/payments/portone/config";
-import {
-  createDailyExtraCheckoutOrder,
-  resolveDailyExtraPayPalLinkForOrder,
-} from "@/lib/reports/human-premium/daily-extra-payment";
+import { createDailyExtraCheckoutOrder } from "@/lib/reports/human-premium/daily-extra-payment";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import {
   formatPrice,
@@ -35,7 +32,6 @@ export async function POST(request: Request) {
     // `amount` = catalog units (USD whole dollars). `totalAmount` = PortOne units (USD cents).
     const totalAmount = catalogAmountToPortOneTotal(amount, currency);
     const storeId = getPortOneShopId();
-    const paypalLink = locale === "en" ? resolveDailyExtraPayPalLinkForOrder(order.payment_order_id) : null;
 
     return NextResponse.json({
       paymentId: order.payment_order_id,
@@ -48,9 +44,6 @@ export async function POST(request: Request) {
       portone: {
         configured: isPortOneConfigured(),
         storeId,
-      },
-      paypal: {
-        link: paypalLink,
       },
     });
   } catch (err) {
