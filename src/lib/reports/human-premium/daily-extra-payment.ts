@@ -162,7 +162,7 @@ export async function claimDailyExtraOrderForGeneration(
     .eq("payment_order_id", paymentOrderId)
     .eq("user_id", userId)
     .is("consumed_report_id", null)
-    .or(`status.eq.paid,and(status.eq.generating,updated_at.lt.${staleCutoff})`)
+    .or(`status.eq.paid,and(status.eq.generating,updated_at.lt."${staleCutoff}")`)
     .select("*")
     .single();
 
