@@ -156,6 +156,14 @@ export async function claimDailyExtraOrderForGeneration(
   const supabase = requireDb();
   const staleCutoff = new Date(Date.now() - DAILY_EXTRA_CLAIM_STALE_MS).toISOString();
 
+  // Snapshot for monitoring only — claim itself remains a single atomic UPDATE.
+  const before = await getDailyExtraOrderByPaymentId(paymentOrderId);
+  const reclaimingStale =
+    before?.user_id === userId &&
+    before.status === "generating" &&
+    !before.consumed_report_id &&
+    isDailyExtraClaimStale(before.updated_at);
+
   const { data, error } = await supabase
     .from("human_premium_daily_extra_orders")
     .update({ status: "generating" } as never)
@@ -169,6 +177,16 @@ export async function claimDailyExtraOrderForGeneration(
   if (error || !data) {
     throw new Error("Daily-extra payment already used or not verified.");
   }
+
+  if (reclaimingStale) {
+    console.warn("[DAILY_EXTRA_STALE_RECLAIM]", {
+      paymentOrderId,
+      userId,
+      previousUpdatedAt: before?.updated_at ?? null,
+      staleMs: DAILY_EXTRA_CLAIM_STALE_MS,
+    });
+  }
+
   return data as DailyExtraOrderRow;
 }
 
