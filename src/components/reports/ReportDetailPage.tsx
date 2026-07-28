@@ -244,6 +244,8 @@ export function ReportDetailPage({ reportId }: { reportId: string }) {
       return;
     }
 
+    let cancelled = false;
+
     async function load() {
       setLoading(true);
       setError(null);
@@ -252,6 +254,7 @@ export function ReportDetailPage({ reportId }: { reportId: string }) {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         const data = await res.json();
+        if (cancelled) return;
         if (!res.ok) {
           setError(
             res.status === 410
@@ -262,13 +265,16 @@ export function ReportDetailPage({ reportId }: { reportId: string }) {
         }
         setReport(data.report as ReportDetailRow);
       } catch {
-        setError(isKo ? "네트워크 오류" : "Network error");
+        if (!cancelled) setError(isKo ? "네트워크 오류" : "Network error");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     void load();
+    return () => {
+      cancelled = true;
+    };
   }, [accessToken, configured, isKo, ready, reportId]);
 
   const title = useMemo(() => {
