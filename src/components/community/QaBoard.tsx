@@ -24,7 +24,7 @@ import { communityPostPath } from "@/lib/community/post-path";
 import type { CommunityPost } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 function parseAnimalTagFromUrl(value: string | null): string {
   if (!value || value === "all") return "all";
@@ -72,6 +72,8 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
   const [categoryTag, setCategoryTag] = useState("all");
   const [subCategoryTag, setSubCategoryTag] = useState("all");
   const [searchInput, setSearchInput] = useState("");
+  /** Ignore stale "load more" responses when filters change mid-flight. */
+  const loadMoreSeqRef = useRef(0);
 
   const animalFilterLabels = useMemo(
     () =>
@@ -109,34 +111,60 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
     return [{ id: "all", ko: "전체", en: "All" }, ...getBoardSubcategories("tips", animalTag, categoryTag)];
   }, [animalTag, board, categoryTag]);
 
-  const load = useCallback(
-    async (cursor?: string | null) => {
-      if (cursor) setLoadingMore(true);
-      else setLoading(true);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadFeed() {
+      setLoading(true);
       try {
         const params = new URLSearchParams();
-        if (cursor) params.set("cursor", cursor);
         if (q) params.set("q", q);
         if (animalTag !== "all") params.set("tag", animalTag);
         if (categoryTag !== "all") params.set("category", categoryTag);
         if (board === "tips" && subCategoryTag !== "all") params.set("subCategory", subCategoryTag);
         const res = await fetch(`/api/community/${board}/feed?${params.toString()}`);
         const data: QaFeedResponse = await res.json();
-        setPosts((prev) => (cursor ? [...prev, ...(data.posts ?? [])] : data.posts ?? []));
+        if (cancelled) return;
+        setPosts(data.posts ?? []);
         setNextCursor(data.nextCursor ?? null);
         setTotal(data.total ?? null);
         setSource(data.source ?? "");
       } finally {
-        setLoading(false);
-        setLoadingMore(false);
+        if (!cancelled) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
       }
-    },
-    [board, q, animalTag, categoryTag, subCategoryTag]
-  );
+    }
 
-  useEffect(() => {
-    void load();
-  }, [load, refreshKey]);
+    void loadFeed();
+    return () => {
+      cancelled = true;
+      loadMoreSeqRef.current += 1;
+    };
+  }, [board, q, animalTag, categoryTag, subCategoryTag, refreshKey]);
+
+  const loadMore = useCallback(async (cursor: string) => {
+    const seq = ++loadMoreSeqRef.current;
+    setLoadingMore(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("cursor", cursor);
+      if (q) params.set("q", q);
+      if (animalTag !== "all") params.set("tag", animalTag);
+      if (categoryTag !== "all") params.set("category", categoryTag);
+      if (board === "tips" && subCategoryTag !== "all") params.set("subCategory", subCategoryTag);
+      const res = await fetch(`/api/community/${board}/feed?${params.toString()}`);
+      const data: QaFeedResponse = await res.json();
+      if (seq !== loadMoreSeqRef.current) return;
+      setPosts((prev) => [...prev, ...(data.posts ?? [])]);
+      setNextCursor(data.nextCursor ?? null);
+      if (data.total != null) setTotal(data.total);
+      if (data.source) setSource(data.source);
+    } finally {
+      if (seq === loadMoreSeqRef.current) setLoadingMore(false);
+    }
+  }, [board, q, animalTag, categoryTag, subCategoryTag]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -357,7 +385,9 @@ export function QaBoard({ refreshKey = 0, board = "qa" }: QaBoardProps) {
       {nextCursor && (
         <button
           type="button"
-          onClick={() => void load(nextCursor)}
+          onClick={() => {
+            if (nextCursor) void loadMore(nextCursor);
+          }}
           disabled={loadingMore}
           className="w-full rounded-full border border-channel-community/30 bg-white py-3 text-sm font-semibold text-channel-community shadow-sm disabled:opacity-60"
         >
