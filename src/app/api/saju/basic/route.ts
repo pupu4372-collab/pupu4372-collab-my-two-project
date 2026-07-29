@@ -12,7 +12,7 @@ import { interpretSaju, isSajuInterpretLlmEnabled } from "@/lib/saju/llm/interpr
 import { enrichBasicResultDisplayFields } from "@/lib/saju/enrich-basic-result-display";
 import { finalizePetHeadline } from "@/lib/saju/pet-headline";
 import { validatePetName } from "@/lib/saju/moderation";
-import { GuestPetLimitError, persistPetProfile } from "@/lib/saju/persist-pet";
+import { GUEST_PET_SLOT_LIMIT, GuestPetLimitError, persistPetProfile } from "@/lib/saju/persist-pet";
 import { persistSajuResult } from "@/lib/saju/persist";
 import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
 import { normalizeBirthCalendarType } from "@/lib/saju/resolve-birth-date";
@@ -428,8 +428,8 @@ export async function POST(request: Request) {
             if (err instanceof GuestPetLimitError) {
               const limitMessage =
                 sajuRequest.locale === "en"
-                  ? "Guests can register up to 3 pets. Sign up to add and manage more."
-                  : "게스트는 3마리까지 등록할 수 있어요. 회원가입하면 더 많은 아이를 등록하고 관리할 수 있어요.";
+                  ? `Guests can register up to ${GUEST_PET_SLOT_LIMIT} pets. Sign up to add and manage more.`
+                  : `게스트는 ${GUEST_PET_SLOT_LIMIT}마리까지 등록할 수 있어요. 회원가입하면 더 많은 아이를 등록하고 관리할 수 있어요.`;
               return jsonResponse(
                 {
                   error: limitMessage,
@@ -529,8 +529,8 @@ export async function POST(request: Request) {
           if (err instanceof GuestPetLimitError) {
             const limitMessage =
               sajuRequest.locale === "en"
-                ? "Guests can register up to 3 pets. Sign up to add and manage more."
-                : "게스트는 3마리까지 등록할 수 있어요. 회원가입하면 더 많은 아이를 등록하고 관리할 수 있어요.";
+                ? `Guests can register up to ${GUEST_PET_SLOT_LIMIT} pets. Sign up to add and manage more.`
+                : `게스트는 ${GUEST_PET_SLOT_LIMIT}마리까지 등록할 수 있어요. 회원가입하면 더 많은 아이를 등록하고 관리할 수 있어요.`;
             return jsonResponse(
               {
                 error: limitMessage,
