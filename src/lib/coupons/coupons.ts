@@ -10,9 +10,40 @@ export type CouponRow = Coupon;
 
 type CouponIdRow = Pick<Coupon, "id">;
 
+function isUniqueViolation(error: { code?: string } | null | undefined): boolean {
+  return error?.code === "23505";
+}
+
+async function findCouponIdByUserType(
+  userId: string,
+  type: CouponType,
+  unusedOnly: boolean
+): Promise<string | undefined> {
+  const supabase = getSupabaseServiceRoleClient();
+  let query = supabase
+    .from("coupons")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("coupon_type", type)
+    .order("created_at", { ascending: true })
+    .limit(1);
+
+  if (unusedOnly) {
+    query = query.is("used_at", null);
+  }
+
+  const result = await query.maybeSingle();
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+  return (result.data as CouponIdRow | null)?.id;
+}
+
 /**
  * Grant one coupon if the user has no unused coupon of this type.
  * Idempotent skip when an unused row already exists (does not stack duplicates).
+ * For daily_lucky_free, DB unique also enforces lifetime one row (used or unused);
+ * concurrent inserts that hit 23505 are treated as already granted.
  */
 export async function grantCoupon(
   userId: string,
@@ -21,24 +52,9 @@ export async function grantCoupon(
 ): Promise<{ granted: boolean; couponId?: string }> {
   const supabase = getSupabaseServiceRoleClient();
 
-  const findResult = await supabase
-    .from("coupons")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("coupon_type", type)
-    .is("used_at", null)
-    .limit(1)
-    .maybeSingle();
-
-  if (findResult.error) {
-    throw new Error(findResult.error.message);
-  }
-
-  // Client Select inference is `never` while Database Row interfaces lack index signatures
-  // for GenericTable; pin the known shape explicitly (not `any`).
-  const existing = findResult.data as CouponIdRow | null;
-  if (existing?.id) {
-    return { granted: false, couponId: existing.id };
+  const existingUnusedId = await findCouponIdByUserType(userId, type, true);
+  if (existingUnusedId) {
+    return { granted: false, couponId: existingUnusedId };
   }
 
   const insertRow: CouponInsert = {
@@ -54,6 +70,15 @@ export async function grantCoupon(
     .single();
 
   if (insertResult.error) {
+    if (isUniqueViolation(insertResult.error)) {
+      // Prefer unused; fall back to any row of this type (lifetime-1× types).
+      const unusedId = await findCouponIdByUserType(userId, type, true);
+      if (unusedId) {
+        return { granted: false, couponId: unusedId };
+      }
+      const anyId = await findCouponIdByUserType(userId, type, false);
+      return { granted: false, couponId: anyId };
+    }
     throw new Error(insertResult.error.message);
   }
 
