@@ -3,7 +3,9 @@
 import {
   ensureTimezoneInList,
   formatTimezoneLabel,
+  listCuratedTimeZones,
   listIanaTimeZones,
+  timezoneMatchesQuery,
 } from "@/lib/saju/timezone";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -19,6 +21,7 @@ type TimezoneSelectProps = {
 };
 
 const DEFAULT_PLACEHOLDER = "Search timezone…";
+const SEARCH_RESULT_LIMIT = 200;
 
 export function TimezoneSelect({
   value,
@@ -31,6 +34,7 @@ export function TimezoneSelect({
   placeholder = DEFAULT_PLACEHOLDER,
 }: TimezoneSelectProps) {
   const allZones = useMemo(() => ensureTimezoneInList(listIanaTimeZones(), value), [value]);
+  const curated = useMemo(() => listCuratedTimeZones(allZones), [allZones]);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
@@ -49,35 +53,38 @@ export function TimezoneSelect({
     return () => document.removeEventListener("mousedown", onDocPointer);
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const source = allZones;
-    if (!q) {
-      const favorites = source.filter((tz) =>
-        [
-          "Asia/Seoul",
-          "Asia/Tokyo",
-          "America/New_York",
-          "America/Los_Angeles",
-          "America/Chicago",
-          "Europe/London",
-          "Europe/Paris",
-          "Australia/Sydney",
-        ].includes(tz)
-      );
-      const rest = source.filter((tz) => !favorites.includes(tz)).slice(0, 40);
-      return [...favorites, ...rest];
-    }
-    return source
-      .filter(
-        (tz) =>
-          tz.toLowerCase().includes(q) ||
-          formatTimezoneLabel(tz).toLowerCase().includes(q)
-      )
-      .slice(0, 80);
-  }, [allZones, query]);
+  const q = query.trim();
+  const isSearching = q.length > 0;
+
+  const searchHits = useMemo(() => {
+    if (!isSearching) return [];
+    return allZones.filter((tz) => timezoneMatchesQuery(tz, q)).slice(0, SEARCH_RESULT_LIMIT);
+  }, [allZones, isSearching, q]);
+
+  const showDetected =
+    Boolean(value) && !isSearching && !curated.includes(value);
 
   const display = open ? query : formatTimezoneLabel(value);
+
+  function renderOption(tz: string) {
+    return (
+      <li key={tz} role="option" aria-selected={tz === value}>
+        <button
+          type="button"
+          className={`block w-full px-3 py-2 text-left text-sm hover:bg-sand/80 ${
+            tz === value ? "bg-mint/30 font-semibold text-ink" : "text-ink"
+          }`}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            onChange(tz);
+            setOpen(false);
+          }}
+        >
+          {formatTimezoneLabel(tz)}
+        </button>
+      </li>
+    );
+  }
 
   return (
     <div ref={rootRef} className={className ?? "relative mt-2"}>
@@ -115,29 +122,54 @@ export function TimezoneSelect({
           role="listbox"
           className={
             listClassName ??
-            "absolute z-30 mt-1 max-h-56 w-full overflow-auto rounded-2xl border border-plum/15 bg-white py-1 text-left shadow-lg"
+            "absolute z-30 mt-1 max-h-72 w-full overflow-y-auto rounded-2xl border border-plum/15 bg-white py-1 text-left shadow-lg"
           }
         >
-          {filtered.length === 0 ? (
-            <li className="px-3 py-2 text-xs text-outline">No matches</li>
+          {isSearching ? (
+            searchHits.length === 0 ? (
+              <li className="px-3 py-2 text-xs text-outline">No matches</li>
+            ) : (
+              searchHits.map((tz) => renderOption(tz))
+            )
           ) : (
-            filtered.map((tz) => (
-              <li key={tz} role="option" aria-selected={tz === value}>
-                <button
-                  type="button"
-                  className={`block w-full px-3 py-2 text-left text-sm hover:bg-sand/80 ${
-                    tz === value ? "bg-mint/30 font-semibold text-ink" : "text-ink"
-                  }`}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    onChange(tz);
-                    setOpen(false);
-                  }}
-                >
-                  {formatTimezoneLabel(tz)}
-                </button>
+            <>
+              {showDetected ? (
+                <>
+                  <li
+                    className="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-outline"
+                    role="presentation"
+                  >
+                    Detected
+                  </li>
+                  <li role="option" aria-selected={true}>
+                    <button
+                      type="button"
+                      className="block w-full bg-mint/20 px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-sand/80"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        onChange(value);
+                        setOpen(false);
+                      }}
+                    >
+                      Detected: {formatTimezoneLabel(value)}
+                    </button>
+                  </li>
+                </>
+              ) : null}
+              <li
+                className="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-outline"
+                role="presentation"
+              >
+                Suggested regions
               </li>
-            ))
+              {curated.map((tz) => renderOption(tz))}
+              <li
+                className="sticky bottom-0 border-t border-plum/10 bg-white px-3 py-2 text-xs leading-5 text-outline"
+                role="presentation"
+              >
+                Type to search all {allZones.length} timezones…
+              </li>
+            </>
           )}
         </ul>
       ) : null}

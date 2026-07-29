@@ -129,20 +129,112 @@ export function ensureTimezoneInList(zones: string[], value: string): string[] {
   return [...zones, value].sort((a, b) => a.localeCompare(b));
 }
 
-/** Readable label: city · GMT offset (IANA id). */
-export function formatTimezoneLabel(timeZone: string, at: Date = new Date()): string {
-  const city = timeZone.includes("/")
-    ? timeZone.slice(timeZone.lastIndexOf("/") + 1).replace(/_/g, " ")
-    : timeZone;
-  let offset = "";
+/**
+ * Curated hubs for empty-query suggestions (UTC offset ascending).
+ * Prefer these ids; resolveAliases maps them onto the runtime IANA list when needed.
+ */
+export const CURATED_TIMEZONES = [
+  "Pacific/Honolulu",
+  "America/Anchorage",
+  "America/Los_Angeles",
+  "America/Denver",
+  "America/Chicago",
+  "America/New_York",
+  "America/Toronto",
+  "America/Sao_Paulo",
+  "Europe/London",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "Africa/Lagos",
+  "Asia/Dubai",
+  "Asia/Kolkata",
+  "Asia/Bangkok",
+  "Asia/Shanghai",
+  "Asia/Singapore",
+  "Asia/Manila",
+  "Asia/Seoul",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+  "Pacific/Auckland",
+] as const;
+
+const ZONE_ID_ALIASES: Record<string, string[]> = {
+  "Asia/Kolkata": ["Asia/Calcutta"],
+  "Asia/Calcutta": ["Asia/Kolkata"],
+};
+
+/** Extra search tokens so e.g. "kolkata" hits Asia/Calcutta on older ICU lists. */
+const ZONE_SEARCH_ALIASES: Record<string, string[]> = {
+  "Asia/Calcutta": ["kolkata", "india"],
+  "Asia/Kolkata": ["kolkata", "calcutta", "india"],
+  "America/Sao_Paulo": ["sao", "sao paulo", "brazil"],
+  "America/Denver": ["denver", "mountain"],
+};
+
+/** Pick the first id that exists in `available` (preferred + aliases). */
+export function resolveTimezoneId(
+  preferred: string,
+  available: ReadonlySet<string> | readonly string[]
+): string | null {
+  const set = available instanceof Set ? available : new Set(available);
+  if (set.has(preferred)) return preferred;
+  for (const alt of ZONE_ID_ALIASES[preferred] ?? []) {
+    if (set.has(alt)) return alt;
+  }
+  return null;
+}
+
+/** Curated ids present in the runtime list, preserving CURATED_TIMEZONES order. */
+export function listCuratedTimeZones(allZones: readonly string[]): string[] {
+  const set = new Set(allZones);
+  const out: string[] = [];
+  for (const id of CURATED_TIMEZONES) {
+    const resolved = resolveTimezoneId(id, set);
+    if (resolved && !out.includes(resolved)) out.push(resolved);
+  }
+  return out;
+}
+
+/** Current UTC offset label, e.g. UTC+5:30 / UTC-5. */
+export function formatTimezoneUtcOffset(timeZone: string, at: Date = new Date()): string {
   try {
     const parts = new Intl.DateTimeFormat("en-US", {
       timeZone,
       timeZoneName: "shortOffset",
     }).formatToParts(at);
-    offset = parts.find((p) => p.type === "timeZoneName")?.value ?? "";
+    const raw = parts.find((p) => p.type === "timeZoneName")?.value ?? "";
+    if (!raw) return "";
+    if (raw === "GMT" || raw === "UTC") return "UTC+0";
+    return raw.replace(/^GMT/, "UTC");
   } catch {
-    /* ignore */
+    return "";
   }
-  return offset ? `${city} · ${offset} (${timeZone})` : `${city} (${timeZone})`;
+}
+
+/** Display label: `Asia/Kolkata (UTC+5:30)`. Value stored remains raw IANA. */
+export function formatTimezoneLabel(timeZone: string, at: Date = new Date()): string {
+  const offset = formatTimezoneUtcOffset(timeZone, at);
+  return offset ? `${timeZone} (${offset})` : timeZone;
+}
+
+export function timezoneMatchesQuery(timeZone: string, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  if (timeZone.toLowerCase().includes(q)) return true;
+  if (formatTimezoneLabel(timeZone).toLowerCase().includes(q)) return true;
+  const city = timeZone.includes("/")
+    ? timeZone.slice(timeZone.lastIndexOf("/") + 1).replace(/_/g, " ").toLowerCase()
+    : timeZone.toLowerCase();
+  if (city.includes(q)) return true;
+  for (const token of ZONE_SEARCH_ALIASES[timeZone] ?? []) {
+    if (token.includes(q) || q.includes(token)) return true;
+  }
+  for (const alt of ZONE_ID_ALIASES[timeZone] ?? []) {
+    if (alt.toLowerCase().includes(q)) return true;
+    const altCity = alt.includes("/")
+      ? alt.slice(alt.lastIndexOf("/") + 1).replace(/_/g, " ").toLowerCase()
+      : alt.toLowerCase();
+    if (altCity.includes(q)) return true;
+  }
+  return false;
 }
