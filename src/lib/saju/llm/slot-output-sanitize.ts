@@ -79,6 +79,26 @@ const MYEONGRI_HANJA_TO_EN: Record<string, string> = {
   身強: "singang (strong day master)",
   身强: "singang (strong day master)",
   身弱: "sinyak (weak day master)",
+  // Luck cycles / relations / secondary myungri (traditional + simplified)
+  大運: "daeun (luck pillar / grand fortune)",
+  大运: "daeun (luck pillar / grand fortune)",
+  年運: "yeonun (annual fortune)",
+  年运: "yeonun (annual fortune)",
+  流年: "yeonun (annual fortune)",
+  歲運: "seun (annual fortune)",
+  岁运: "seun (annual fortune)",
+  空亡: "gongmang (void / emptiness)",
+  地藏干: "jijanggan (hidden stems)",
+  十二運星: "sibiunseong (twelve life stages)",
+  十二运星: "sibiunseong (twelve life stages)",
+  三合: "samhap (three-harmony / trine)",
+  六合: "yukhap (six-harmony)",
+  原局: "wonguk (natal chart)",
+  通根: "tonggeun (rootedness)",
+  透出: "tuchul (stem-revealed)",
+  調候: "johu (climatic balance)",
+  调候: "johu (climatic balance)",
+  抑扶: "eokbu (control and support)",
 };
 
 /** Chinese pinyin spellings → Korean romanization (meaning). Case-insensitive. */
@@ -106,6 +126,18 @@ const MYEONGRI_PINYIN_TO_EN: Record<string, string> = {
   shishang: "siksang (output stars)",
   shenqiang: "singang (strong day master)",
   shenruo: "sinyak (weak day master)",
+  dayun: "daeun (luck pillar / grand fortune)",
+  liunian: "yeonun (annual fortune)",
+  kongwang: "gongmang (void / emptiness)",
+  dizanggan: "jijanggan (hidden stems)",
+  shieryunxing: "sibiunseong (twelve life stages)",
+  sanhe: "samhap (three-harmony / trine)",
+  liuhe: "yukhap (six-harmony)",
+  yuanju: "wonguk (natal chart)",
+  tonggen: "tonggeun (rootedness)",
+  touchu: "tuchul (stem-revealed)",
+  tiaohou: "johu (climatic balance)",
+  yifu: "eokbu (control and support)",
 };
 
 const HANJA_PHRASE_TO_EN: Record<string, string> = {
@@ -159,6 +191,19 @@ const MYEONGRI_ROMAN_TO_EN: Record<string, string> = {
   siksang: "siksang (output stars)",
   singang: "singang (strong day master)",
   sinyak: "sinyak (weak day master)",
+  daeun: "daeun (luck pillar / grand fortune)",
+  yeonun: "yeonun (annual fortune)",
+  seun: "seun (annual fortune)",
+  gongmang: "gongmang (void / emptiness)",
+  jijanggan: "jijanggan (hidden stems)",
+  sibiunseong: "sibiunseong (twelve life stages)",
+  samhap: "samhap (three-harmony / trine)",
+  yukhap: "yukhap (six-harmony)",
+  wonguk: "wonguk (natal chart)",
+  tonggeun: "tonggeun (rootedness)",
+  tuchul: "tuchul (stem-revealed)",
+  johu: "johu (climatic balance)",
+  eokbu: "eokbu (control and support)",
 };
 
 const ROMAN_KEYS = Object.keys(MYEONGRI_ROMAN_TO_EN).sort(
