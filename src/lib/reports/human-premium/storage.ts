@@ -7,12 +7,14 @@ import {
   HUMAN_PREMIUM_AMOUNT_PAID_USD,
   HUMAN_PREMIUM_PDF_BUCKET,
   type HumanPremiumBirthBasis,
+  type HumanPremiumCartGeneratedItem,
   type HumanPremiumEmailStatus,
   type HumanPremiumFailureStage,
   type HumanPremiumPaymentProvider,
   type HumanPremiumReportInput,
   type HumanPremiumReportRow,
   type HumanPremiumReportStatus,
+  type ReportType,
 } from "./types";
 import { humanPremiumWebExpiresAt } from "./retention";
 
@@ -239,6 +241,60 @@ export async function updateHumanPremiumReport(
   }
 
   return rowFromDb(data);
+}
+
+/**
+ * Merge one cart `generated[reportType]` entry without clobbering siblings.
+ * Uses optimistic locking on `updated_at` (retry on conflict) so concurrent
+ * generateCartReportItem callers cannot wipe each other's keys.
+ */
+export async function mergeHumanPremiumCartGeneratedItem(
+  cartReportId: string,
+  reportType: ReportType,
+  item: HumanPremiumCartGeneratedItem,
+  maxAttempts = 8
+): Promise<HumanPremiumReportRow> {
+  const supabase = requireDb();
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const fresh = await getHumanPremiumReportById(cartReportId);
+    if (!fresh) throw new Error("Cart order not found.");
+
+    const cart = fresh.birth_basis?.cart;
+    if (!cart?.cartOrder || !Array.isArray(cart.items)) {
+      throw new Error("Invalid cart order.");
+    }
+
+    const existing = cart.generated?.[reportType];
+    if (existing?.reportId === item.reportId && existing.webToken === item.webToken) {
+      return fresh;
+    }
+
+    const nextBasis: HumanPremiumBirthBasis = {
+      ...fresh.birth_basis,
+      cart: {
+        ...cart,
+        generated: {
+          ...(cart.generated ?? {}),
+          [reportType]: item,
+        },
+      },
+    };
+
+    const { data, error } = await supabase
+      .from("human_premium_reports")
+      .update({ birth_basis: nextBasis as never })
+      .eq("id", cartReportId)
+      .eq("updated_at", fresh.updated_at)
+      .select("*")
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (data) return rowFromDb(data);
+    // 0 rows: another writer changed updated_at — re-read and merge again.
+  }
+
+  throw new Error("Failed to merge cart generated item after retries.");
 }
 
 export async function markHumanPremiumReportPaid(

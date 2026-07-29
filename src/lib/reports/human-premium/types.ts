@@ -219,6 +219,11 @@ export interface HumanPremiumCartMeta {
   items: ReportType[];
   generated: Partial<Record<ReportType, HumanPremiumCartGeneratedItem>>;
   deliverEmail: boolean;
+  /**
+   * ISO timestamp when a pregenerateAllCartReports run claimed this cart.
+   * Used to skip overlapping pregenerate entry points; stale after ~15m.
+   */
+  pregenerateStartedAt?: string;
 }
 
 export type HumanPremiumDeliveryMode = "paid";

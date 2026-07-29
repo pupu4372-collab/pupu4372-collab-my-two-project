@@ -15,6 +15,7 @@ import {
   listHumanPremiumCartOrderRows,
   listHumanPremiumDailyVaultRows,
   listLegacyNullUserCartOrdersByEmail,
+  mergeHumanPremiumCartGeneratedItem,
   updateHumanPremiumReport,
 } from "./storage";
 import type {
@@ -392,22 +393,9 @@ async function registerCartGeneratedItem(options: {
   request?: Request | null;
   webUrl?: string;
 }) {
-  const nextGenerated = {
-    ...options.cart.generated,
-    [options.reportType]: {
-      reportId: options.report.id,
-      webToken: options.report.web_access_token,
-    },
-  };
-
-  await updateHumanPremiumReport(options.cartRow.id, {
-    birth_basis: {
-      ...options.cartRow.birth_basis,
-      cart: {
-        ...options.cart,
-        generated: nextGenerated,
-      },
-    },
+  await mergeHumanPremiumCartGeneratedItem(options.cartRow.id, options.reportType, {
+    reportId: options.report.id,
+    webToken: options.report.web_access_token,
   });
 
   return {
