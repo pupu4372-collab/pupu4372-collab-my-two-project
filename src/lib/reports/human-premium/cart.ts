@@ -8,6 +8,7 @@ import {
   parseHumanPremiumReportInput,
 } from "./service";
 import {
+  claimHumanPremiumCartPregenerate,
   createHumanPremiumReportDraft,
   getHumanPremiumReportByCheckoutSession,
   getHumanPremiumReportById,
@@ -450,17 +451,24 @@ export async function pregenerateAllCartReports(options: {
   orderId: string;
   userId?: string | null;
   request?: Request | null;
-}): Promise<{ generated: ReportType[]; failed: ReportType[] }> {
+}): Promise<{ generated: ReportType[]; failed: ReportType[]; skipped?: "done" | "busy" }> {
   const cartRow = await getHumanPremiumReportByPaymentOrderId(options.orderId);
   if (!cartRow) throw new Error("Cart order not found.");
+  if (!getCartMeta(cartRow)) throw new Error("Invalid cart order.");
 
-  const cart = getCartMeta(cartRow);
-  if (!cart) throw new Error("Invalid cart order.");
+  const claim = await claimHumanPremiumCartPregenerate(cartRow.id);
+  const claimCart = getCartMeta(claim.row);
+  if (!claimCart) throw new Error("Invalid cart order.");
+
+  if (claim.status === "done" || claim.status === "busy") {
+    const generated = claimCart.items.filter((type) => Boolean(claimCart.generated[type]));
+    return { generated, failed: [], skipped: claim.status };
+  }
 
   const generated: ReportType[] = [];
   const failed: ReportType[] = [];
 
-  for (const reportType of cart.items) {
+  for (const reportType of claimCart.items) {
     const freshRow = await getHumanPremiumReportByPaymentOrderId(options.orderId);
     const freshCart = freshRow ? getCartMeta(freshRow) : null;
     if (freshCart?.generated[reportType]) {
