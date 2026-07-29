@@ -5,6 +5,7 @@ import { PetPhotoUploadField } from "@/components/pet/PetPhotoUploadField";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { uploadPetFortunePhotoClient } from "@/lib/pets/photo-upload-client";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { GUEST_PET_SLOT_LIMIT } from "@/lib/saju/persist-pet";
 import type { Gender, Locale, Species } from "@/lib/saju/types";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -192,7 +193,7 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
       const data = await res.json();
       if (!res.ok) {
         if (data.code === "guest_pet_limit") {
-          setError(t("guestPetLimit"));
+          setError(t("guestPetLimit", { limit: GUEST_PET_SLOT_LIMIT }));
           return;
         }
         if (data.code === "register_ip_rate_limited") {
@@ -204,7 +205,7 @@ export function PetFortuneQuickAddForm({ onAdded }: Props) {
       }
       if (!data.petId) {
         if (data.code === "guest_pet_limit") {
-          setError(t("guestPetLimit"));
+          setError(t("guestPetLimit", { limit: GUEST_PET_SLOT_LIMIT }));
           return;
         }
         setError(

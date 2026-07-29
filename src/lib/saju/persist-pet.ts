@@ -5,7 +5,7 @@ import type { Gender, Locale } from "./types";
 type DbClient = SupabaseClient<Database>;
 
 /** Guests may keep up to this many pets; re-save of the same profile is allowed. */
-export const GUEST_PET_SLOT_LIMIT = 3;
+export const GUEST_PET_SLOT_LIMIT = 1;
 
 export class GuestPetLimitError extends Error {
   readonly code = "guest_pet_limit" as const;
