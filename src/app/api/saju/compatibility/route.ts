@@ -6,6 +6,7 @@ import { persistCompatibilityResult } from "@/lib/saju/persist-compatibility";
 import { validatePetName } from "@/lib/saju/moderation";
 import type { Gender, Locale, Species } from "@/lib/saju/types";
 import { normalizeBirthCalendarType } from "@/lib/saju/resolve-birth-date";
+import { isValidIanaTimezone } from "@/lib/saju/timezone";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -74,9 +75,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Timezone is required." }, { status: 400 });
   }
 
-  try {
-    Intl.DateTimeFormat(undefined, { timeZone: body.timezone as string });
-  } catch {
+  if (!isValidIanaTimezone(body.timezone as string)) {
     return NextResponse.json({ error: "Invalid timezone." }, { status: 400 });
   }
 

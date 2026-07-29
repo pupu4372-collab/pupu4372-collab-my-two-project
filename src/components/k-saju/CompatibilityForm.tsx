@@ -16,10 +16,10 @@ import {
   parseBirthTimeSelect,
 } from "@/lib/saju/birth-time-options";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
-import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
+import { TimezoneSelect } from "@/components/ui/TimezoneSelect";
 import type { BirthCalendarType, Gender, Locale, Species } from "@/lib/saju/types";
 import { useLocale } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 const UI = {
   ko: {
@@ -128,10 +128,6 @@ export function CompatibilityForm() {
   const [petId, setPetId] = useState<string | null>(null);
 
   const t = UI[locale];
-  const timezoneOptions = useMemo(() => {
-    const set = new Set<string>([...COMMON_TIMEZONES, timezone]);
-    return Array.from(set);
-  }, [timezone]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -419,17 +415,13 @@ export function CompatibilityForm() {
 
         <label className={FIELD_LABEL_CLASS}>
           {t.timezone}
-          <select
+          <TimezoneSelect
             value={timezone}
-            onChange={(e) => setTimezone(e.target.value)}
-            className={STITCH_INPUT_CLASS}
-          >
-            {timezoneOptions.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
+            onChange={setTimezone}
+            aria-label={t.timezone}
+            inputClassName={STITCH_INPUT_CLASS}
+            placeholder={t.timezone}
+          />
         </label>
 
         <div className="rounded-[2rem] border border-white/35 bg-white p-5">

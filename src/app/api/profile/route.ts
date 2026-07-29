@@ -4,18 +4,12 @@ import {
   getUserIdFromRequest,
 } from "@/lib/supabase/auth-server";
 import { normalizeCountryCode } from "@/lib/i18n/countries";
-import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
+import { isValidIanaTimezone } from "@/lib/saju/timezone";
 import type { Profile } from "@/lib/supabase/types";
 import { NextResponse } from "next/server";
 
 function isValidTimezone(value: string): boolean {
-  if (!COMMON_TIMEZONES.includes(value as (typeof COMMON_TIMEZONES)[number])) return false;
-  try {
-    Intl.DateTimeFormat(undefined, { timeZone: value });
-    return true;
-  } catch {
-    return false;
-  }
+  return isValidIanaTimezone(value);
 }
 
 export async function GET(request: Request) {
