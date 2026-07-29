@@ -7,6 +7,7 @@ import { ReportGenerateLoader } from "@/components/human-premium/ReportGenerateL
 import { PrivacyConsent } from "@/components/legal/PrivacyConsent";
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { Link } from "@/i18n/navigation";
+import { TimezoneSelect } from "@/components/ui/TimezoneSelect";
 import { COUPON_TYPE_DAILY_LUCKY_FREE } from "@/lib/coupons/constants";
 import { formatHumanPremiumError } from "@/lib/reports/human-premium/client-errors";
 import { DAILY_EXTRA_PRODUCT_CODE } from "@/lib/reports/human-premium/daily-extra-constants";
@@ -24,7 +25,6 @@ import {
   getBirthTimeOptionLabel,
   parseBirthTimeSelect,
 } from "@/lib/saju/birth-time-options";
-import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -599,17 +599,14 @@ export function DayPillarPreview({
           </fieldset>
           <label className="human-premium-birth-field">
             {isKo ? "타임존" : "Timezone"}
-            <select
-              className="human-premium-birth-input"
+            <TimezoneSelect
               value={profile.timezone}
-              onChange={(e) => patchProfile({ timezone: e.target.value })}
-            >
-              {COMMON_TIMEZONES.map((tz) => (
-                <option key={tz} value={tz}>
-                  {tz}
-                </option>
-              ))}
-            </select>
+              onChange={(timezone) => patchProfile({ timezone })}
+              aria-label={isKo ? "타임존" : "Timezone"}
+              className="relative mt-1"
+              inputClassName="human-premium-birth-input"
+              placeholder={isKo ? "타임존 검색" : "Search timezone"}
+            />
           </label>
           <fieldset className="human-premium-birth-calendar">
             <legend className="human-premium-birth-field">

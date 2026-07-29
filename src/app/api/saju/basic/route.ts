@@ -16,6 +16,7 @@ import { GuestPetLimitError, persistPetProfile } from "@/lib/saju/persist-pet";
 import { persistSajuResult } from "@/lib/saju/persist";
 import type { Gender, Locale, Species, SajuBasicRequest } from "@/lib/saju/types";
 import { normalizeBirthCalendarType } from "@/lib/saju/resolve-birth-date";
+import { isValidIanaTimezone } from "@/lib/saju/timezone";
 import {
   createUserSupabaseClient,
   getBearerToken,
@@ -373,9 +374,7 @@ export async function POST(request: Request) {
     return jsonResponse({ error: "Timezone is required." }, { status: 400 }, guestCookie);
   }
 
-  try {
-    Intl.DateTimeFormat(undefined, { timeZone: body.timezone });
-  } catch {
+  if (!isValidIanaTimezone(body.timezone)) {
     return jsonResponse({ error: "Invalid timezone." }, { status: 400 }, guestCookie);
   }
 

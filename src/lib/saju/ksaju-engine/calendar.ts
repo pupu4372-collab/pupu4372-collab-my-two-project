@@ -2,6 +2,7 @@
  * lunar-javascript 기반 음양력·절기·세운/월운 간지
  */
 import { Lunar, LunarYear, Solar } from "lunar-javascript";
+import { getZonedParts } from "@/lib/saju/timezone";
 import type { Branch, Stem } from "./core-tables";
 
 export function formatSolarYmd(year: number, month: number, day: number): string {
@@ -66,12 +67,24 @@ function solarToInstant(solar: { toYmdHms(): string }): Date {
   return new Date(`${datePart}T${timePart}Z`);
 }
 
-/** birth instant 기준 다음/이전 절기(24) 시각 */
+/**
+ * birth instant 기준 다음/이전 절기(24) 시각.
+ * `timeZone`으로 출생지 IANA 분해 후 Solar.fromYmdHms — 프로세스 로컬 TZ에 의존하지 않음.
+ */
 export function findAdjacentSolarTermInstant(
   birth: Date,
-  direction: "forward" | "reverse"
+  direction: "forward" | "reverse",
+  timeZone: string
 ): Date | null {
-  const lunar = Solar.fromDate(birth).getLunar();
+  const parts = getZonedParts(birth, timeZone);
+  const lunar = Solar.fromYmdHms(
+    parts.year,
+    parts.month,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second
+  ).getLunar();
   const jieQi =
     direction === "forward"
       ? lunar.getNextJieQi(true)

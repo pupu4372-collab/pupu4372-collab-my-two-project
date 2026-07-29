@@ -3,10 +3,10 @@
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
 import { COUNTRY_OPTIONS, getCountryLabel, normalizeCountryCode } from "@/lib/i18n/countries";
-import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
 import { clearSupabaseBrowserSession } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/supabase/types";
 import { GlassCard } from "@/components/layout/StitchLayout";
+import { TimezoneSelect } from "@/components/ui/TimezoneSelect";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
@@ -385,13 +385,14 @@ export function UserProfileCard({
       </label>
       <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant">
         {isKo ? "시간대" : "Timezone"}
-        <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className="pastel-input mt-2 bg-sand/50">
-          {COMMON_TIMEZONES.map((tz) => (
-            <option key={tz} value={tz}>
-              {tz}
-            </option>
-          ))}
-        </select>
+        <TimezoneSelect
+          value={timezone}
+          onChange={setTimezone}
+          aria-label={isKo ? "시간대" : "Timezone"}
+          className="relative mt-2"
+          inputClassName="pastel-input bg-sand/50"
+          placeholder={isKo ? "시간대 검색" : "Search timezone"}
+        />
       </label>
       <label className="block text-xs font-bold uppercase tracking-wide text-on-surface-variant">
         {isKo ? "국가" : "Country"}

@@ -5,9 +5,8 @@ import {
   BIRTH_TIME_OPTIONS,
   getBirthTimeOptionLabel,
 } from "@/lib/saju/birth-time-options";
-import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
+import { TimezoneSelect } from "@/components/ui/TimezoneSelect";
 import type { Gender, Locale } from "@/lib/saju/types";
-import { useMemo } from "react";
 
 export const PET_BASIC_INFO_UI = {
   en: {
@@ -99,11 +98,6 @@ export function PetBasicInfoFields({
     : isCompact
       ? "pet-fortune-field"
       : FIELD_LABEL_CLASS;
-
-  const timezoneOptions = useMemo(() => {
-    const set = new Set<string>([...COMMON_TIMEZONES, timezone]);
-    return Array.from(set);
-  }, [timezone]);
 
   const genderField =
     showGender && !isEmbedded ? (
@@ -259,29 +253,25 @@ export function PetBasicInfoFields({
     <label className={labelClass}>
       {!isCompact ? t.timezone : null}
       {isCompact ? (
-        <div className="pet-fortune-input pet-fortune-input--compact">
-          <select
-            className="pet-fortune-input-field pet-fortune-select"
+        <div className="pet-fortune-input pet-fortune-input--compact relative">
+          <TimezoneSelect
             value={timezone}
-            onChange={(e) => onTimezoneChange(e.target.value)}
+            onChange={onTimezoneChange}
             aria-label={t.timezone}
-          >
-            {timezoneOptions.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
-          <SelectChevron />
+            className="relative w-full"
+            inputClassName="pet-fortune-input-field min-w-0 max-w-full text-center"
+            placeholder={t.timezone}
+          />
         </div>
       ) : (
-        <select value={timezone} onChange={(e) => onTimezoneChange(e.target.value)} className={inputClass}>
-          {timezoneOptions.map((tz) => (
-            <option key={tz} value={tz}>
-              {tz}
-            </option>
-          ))}
-        </select>
+        <TimezoneSelect
+          value={timezone}
+          onChange={onTimezoneChange}
+          aria-label={t.timezone}
+          className="relative mt-2"
+          inputClassName={inputClass}
+          placeholder={t.timezone}
+        />
       )}
       {!isCompact && !isEmbedded ? (
         <p className="mt-2 text-xs leading-5 text-outline">{t.timezoneHint}</p>

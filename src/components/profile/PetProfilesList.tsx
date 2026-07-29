@@ -8,7 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { uploadPetFortunePhotoClient } from "@/lib/pets/photo-upload-client";
 import { compressImageForUpload } from "@/lib/images/upload-compression";
 import { supabaseImageTransformUrl } from "@/lib/images/supabase-transform";
-import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
+import { TimezoneSelect } from "@/components/ui/TimezoneSelect";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -745,17 +745,14 @@ export function PetProfilesList({
 
                   <label className="block text-xs font-medium text-plum/80">
                     {isKo ? "시간대" : "Timezone"}
-                    <select
+                    <TimezoneSelect
                       value={drafts[pet.id].timezone}
-                      onChange={(e) => updateDraft(pet.id, { timezone: e.target.value })}
-                      className="pastel-input"
-                    >
-                      {COMMON_TIMEZONES.map((tz) => (
-                        <option key={tz} value={tz}>
-                          {tz}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(timezone) => updateDraft(pet.id, { timezone })}
+                      aria-label={isKo ? "시간대" : "Timezone"}
+                      className="relative mt-1"
+                      inputClassName="pastel-input"
+                      placeholder={isKo ? "시간대 검색" : "Search timezone"}
+                    />
                   </label>
 
                   <div className="sm:col-span-2">

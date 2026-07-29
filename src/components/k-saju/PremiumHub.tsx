@@ -24,14 +24,14 @@ import {
 } from "@/lib/saju/birth-time-options";
 import type { CompatibilityResponse } from "@/lib/saju/compatibility/engine";
 import type { ZodiacFortuneResponse } from "@/lib/saju/zodiac/engine";
-import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
+import { TimezoneSelect } from "@/components/ui/TimezoneSelect";
 import {
   EMPTY_PET_PREMIUM_SECTION_COMPLETION,
   type PetPremiumSectionCompletion,
 } from "@/lib/reports/pet-premium/section-completion";
 import type { BirthCalendarType, Gender, Locale, Species } from "@/lib/saju/types";
 import { useLocale } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type ButlerSession = {
   ownerName: string;
@@ -240,10 +240,6 @@ export function PremiumHub() {
   );
 
   const t = UI[locale];
-  const timezoneOptions = useMemo(() => {
-    const set = new Set<string>([...COMMON_TIMEZONES, timezone]);
-    return Array.from(set);
-  }, [timezone]);
 
   useEffect(() => {
     if (!configured || !ready || isAnonymous || !pet?.petId || !accessToken) return;
@@ -768,17 +764,13 @@ export function PremiumHub() {
 
         <label className={FIELD_LABEL_CLASS}>
           {t.timezone}
-          <select
+          <TimezoneSelect
             value={timezone}
-            onChange={(e) => setTimezone(e.target.value)}
-            className={STITCH_INPUT_CLASS}
-          >
-            {timezoneOptions.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
+            onChange={setTimezone}
+            aria-label={t.timezone}
+            inputClassName={STITCH_INPUT_CLASS}
+            placeholder={t.timezone}
+          />
         </label>
 
         <div className="rounded-[2rem] border border-white/35 bg-white p-5">

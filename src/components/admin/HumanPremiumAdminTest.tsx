@@ -8,7 +8,7 @@ import {
   getBirthTimeOptionLabel,
   parseBirthTimeSelect,
 } from "@/lib/saju/birth-time-options";
-import { COMMON_TIMEZONES } from "@/lib/saju/timezone";
+import { TimezoneSelect } from "@/components/ui/TimezoneSelect";
 import {
   REPORT_TYPE_LABELS,
   REPORT_TYPE_LABELS_EN,
@@ -17,7 +17,7 @@ import {
 } from "@/lib/reports/human-premium/types";
 import type { Locale } from "@/lib/saju/types";
 import { Link } from "@/i18n/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 type CalendarType = "solar" | "lunar";
 
@@ -108,10 +108,6 @@ export function HumanPremiumAdminTest() {
   const [actionId, setActionId] = useState<string | null>(null);
 
   const petTime = parseBirthTimeSelect(birthTime);
-  const timezoneOptions = useMemo(() => {
-    const set = new Set<string>([...COMMON_TIMEZONES, timezone]);
-    return Array.from(set);
-  }, [timezone]);
 
   const allSelected = selectedTypes.length === ALL_REPORT_TYPES.length;
 
@@ -517,17 +513,14 @@ export function HumanPremiumAdminTest() {
           ))}
         </select>
 
-        <select
-          className="pastel-input"
+        <TimezoneSelect
           value={timezone}
-          onChange={(e) => setTimezone(e.target.value)}
-        >
-          {timezoneOptions.map((tz) => (
-            <option key={tz} value={tz}>
-              {tz}
-            </option>
-          ))}
-        </select>
+          onChange={setTimezone}
+          aria-label="Timezone"
+          className="relative"
+          inputClassName="pastel-input"
+          placeholder="Search timezone"
+        />
 
         <select
           className="pastel-input"
