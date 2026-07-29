@@ -218,6 +218,7 @@ export function buildHumanPremiumFacts(
 
   const daewoonCandidates = computeDaewoonCandidates({
     birthUtc: saju.birthUtc,
+    timezone: saju.timezone,
     yearStem: saju.pillars.year.stemHanja,
     monthPillar: saju.pillars.month,
     dayStem,

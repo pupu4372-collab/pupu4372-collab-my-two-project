@@ -96,10 +96,11 @@ function resolveDaewoonDirection(
 function computeStartAge(
   birthUtc: string,
   direction: DaewoonDirection,
-  locale: Locale
+  locale: Locale,
+  timeZone: string
 ): { age: number; note: string } {
   const birth = new Date(birthUtc);
-  const term = findAdjacentSolarTermInstant(birth, direction);
+  const term = findAdjacentSolarTermInstant(birth, direction, timeZone);
   if (!term) {
     return {
       age: 1,
@@ -122,6 +123,8 @@ function computeStartAge(
 
 export function computeDaewoonCandidates(options: {
   birthUtc: string;
+  /** Birth-place IANA timezone — required for solar-term start age. */
+  timezone: string;
   yearStem: string;
   monthPillar: PillarDisplay;
   dayStem: string;
@@ -137,7 +140,12 @@ export function computeDaewoonCandidates(options: {
     : ["forward", "reverse"];
 
   return directions.map((direction) => {
-    const start = computeStartAge(options.birthUtc, direction, options.locale);
+    const start = computeStartAge(
+      options.birthUtc,
+      direction,
+      options.locale,
+      options.timezone
+    );
     const sign = direction === "forward" ? 1 : -1;
     const cycles = Array.from({ length: 8 }, (_, index) => {
       const pillar = shiftPillar(
@@ -173,6 +181,10 @@ export function computeDaewoonCandidates(options: {
   });
 }
 
+/**
+ * Month luck pillar from civil year/month (already in the report calendar).
+ * Timezone is unused: callers pass local civil Y/M, not a UTC instant.
+ */
 export function computeMonthLuckPillar(
   year: number,
   month: number,

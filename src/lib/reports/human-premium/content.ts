@@ -734,6 +734,7 @@ function buildTemplateRoadmap(
 ): { roadmap: ReportRoadmapItem[]; decisionMoments: ReportDecisionMoment[] } {
   const daewoon = computeDaewoonCandidates({
     birthUtc: saju.birthUtc,
+    timezone: saju.timezone,
     yearStem: saju.pillars.year.stemHanja,
     monthPillar: saju.pillars.month,
     dayStem: saju.pillars.day.stemHanja,
@@ -842,6 +843,7 @@ function buildTemplateProphecy(
 ): ReportProphecy {
   const daewoon = computeDaewoonCandidates({
     birthUtc: saju.birthUtc,
+    timezone: saju.timezone,
     yearStem: saju.pillars.year.stemHanja,
     monthPillar: saju.pillars.month,
     dayStem: saju.pillars.day.stemHanja,
