@@ -41,7 +41,9 @@ export async function AppFooter() {
         <div className="mt-2 max-w-3xl space-y-1.5 text-[11px] leading-relaxed text-white/40 md:text-xs">
           <p>
             {isKo ? "상호명" : "Business"}: 펫스토롤로지(petstrology) | {isKo ? "대표" : "CEO"}: 이경미
-            | {isKo ? "사업자등록번호" : "BRN"}: {LEGAL_ENTITY.businessNumber}
+            | {isKo ? "사업자등록번호" : "BRN"}: {LEGAL_ENTITY.businessNumber} |{" "}
+            {isKo ? "통신판매업 신고번호" : "Mail-order business license"}:{" "}
+            {LEGAL_ENTITY.mailOrderLicense}
           </p>
           <p>
             {isKo ? "주소" : "Address"}: {LEGAL_ENTITY.addressKo} | {isKo ? "전화" : "Tel"}:{" "}
