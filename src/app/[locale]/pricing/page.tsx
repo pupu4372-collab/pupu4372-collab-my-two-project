@@ -31,8 +31,13 @@ const PET_PRODUCT_ORDER: PetProductCode[] = [
   PET_PREMIUM_PACKAGE_CODE,
 ];
 
-/** Shop-purchasable bundles only (`themepack` / `timepack` exist in pricing.ts but are not sold in UI). */
-const PURCHASABLE_BUNDLES: readonly HumanPremiumBundleKind[] = ["all"];
+/**
+ * Shop-purchasable bundles shown in the pricing table.
+ * `all` / `themepack` / `timepack` exist in pricing.ts but are intentionally hidden
+ * from the UI (empty list). Re-add a kind here to expose it again; the full-cart
+ * auto-discount logic in pricing.ts stays intact regardless.
+ */
+const PURCHASABLE_BUNDLES: readonly HumanPremiumBundleKind[] = [];
 
 function bundleLabel(kind: HumanPremiumBundleKind, isKo: boolean): string {
   if (kind === "all") {
@@ -102,26 +107,28 @@ export default async function PricingPage({ params }: PricingPageProps) {
             })}
           </ul>
 
-          <div className="border-t border-plum/15 pt-4">
-            <h3 className="mb-2 text-sm font-semibold text-ink">
-              {isKo ? "번들" : "Bundles"}
-            </h3>
-            <ul className="divide-y divide-plum/10">
-              {PURCHASABLE_BUNDLES.map((kind) => (
-                <li
-                  key={kind}
-                  className="flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
-                >
-                  <div>
-                    <p className="font-medium text-ink">{bundleLabel(kind, isKo)}</p>
-                  </div>
-                  <p className="shrink-0 font-semibold text-ink">
-                    {formatPrice(bundles[kind], priceLocale)}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {PURCHASABLE_BUNDLES.length > 0 ? (
+            <div className="border-t border-plum/15 pt-4">
+              <h3 className="mb-2 text-sm font-semibold text-ink">
+                {isKo ? "번들" : "Bundles"}
+              </h3>
+              <ul className="divide-y divide-plum/10">
+                {PURCHASABLE_BUNDLES.map((kind) => (
+                  <li
+                    key={kind}
+                    className="flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
+                  >
+                    <div>
+                      <p className="font-medium text-ink">{bundleLabel(kind, isKo)}</p>
+                    </div>
+                    <p className="shrink-0 font-semibold text-ink">
+                      {formatPrice(bundles[kind], priceLocale)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </section>
 
         <section className="pastel-card space-y-4 p-5 md:p-6">

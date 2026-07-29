@@ -38,6 +38,13 @@ import {
 import { useLocale } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+/**
+ * Soft flag: hide the all-in-one bundle card + full-cart bundle badge from the shop.
+ * Flip to `true` to expose the bundle CTA again. Singles/cart/checkout and the
+ * full-cart auto-discount pricing logic are unaffected either way.
+ */
+const SHOW_ALL_IN_ONE_BUNDLE = false;
+
 export function HumanPremiumShop() {
   const routeLocale = useLocale();
   const isKo = routeLocale === "ko";
@@ -242,7 +249,7 @@ export function HumanPremiumShop() {
                 ? `${cart.items.length}개 · 합계 ${formatPrice(cartPricing.amount, priceLocale)}`
                 : `${cart.items.length} item(s) · ${formatPrice(cartPricing.amount, priceLocale)}`}
             </p>
-            {cartPricing.isAllInOneBundle ? (
+            {SHOW_ALL_IN_ONE_BUNDLE && cartPricing.isAllInOneBundle ? (
               <p className="mt-1 text-xs font-semibold text-channel-saju">
                 {isKo
                   ? `올인원 번들 적용 · ${formatPrice(cartPricing.savings, priceLocale)} 절약`
@@ -306,37 +313,39 @@ export function HumanPremiumShop() {
         </section>
       </div>
 
-      <section className="rounded-[2rem] bg-gradient-to-br from-channel-saju/90 to-plum p-6 text-white sm:p-8">
-        <p className="text-sm font-semibold text-white/80">
-          {isKo ? "올인원 번들" : "All-in-one bundle"}
-        </p>
-        <h3 className="mt-2 text-xl font-bold sm:text-2xl">
-          {isKo
-            ? `단품으로 모두 구매 시 ${formatPrice(sumPaidReportPricing(priceLocale), priceLocale)}`
-            : `Buying all singles: ${formatPrice(sumPaidReportPricing(priceLocale), priceLocale)}`}
-        </h3>
-        <p className="mt-2 text-lg font-semibold">
-          → {isKo ? "올인원 번들" : "All-in-one bundle"}{" "}
-          <span className="text-2xl">{formatPrice(bundlePricing.all, priceLocale)}</span>
-          <span className="ml-2 text-sm text-white/90">
-            ({isKo ? `${formatPrice(savings, priceLocale)} 절약` : `save ${formatPrice(savings, priceLocale)}`})
-          </span>
-        </p>
-        <button
-          type="button"
-          disabled={bundleAddableCount === 0}
-          onClick={() => handleAddBundle()}
-          className="mt-6 rounded-full bg-white px-8 py-3 font-bold text-channel-saju shadow-lg disabled:opacity-50"
-        >
-          {bundleAddableCount === 0
-            ? isKo
-              ? "모두 구매함"
-              : "All purchased"
-            : isKo
-              ? "전체 담기"
-              : "Add all"}
-        </button>
-      </section>
+      {SHOW_ALL_IN_ONE_BUNDLE ? (
+        <section className="rounded-[2rem] bg-gradient-to-br from-channel-saju/90 to-plum p-6 text-white sm:p-8">
+          <p className="text-sm font-semibold text-white/80">
+            {isKo ? "올인원 번들" : "All-in-one bundle"}
+          </p>
+          <h3 className="mt-2 text-xl font-bold sm:text-2xl">
+            {isKo
+              ? `단품으로 모두 구매 시 ${formatPrice(sumPaidReportPricing(priceLocale), priceLocale)}`
+              : `Buying all singles: ${formatPrice(sumPaidReportPricing(priceLocale), priceLocale)}`}
+          </h3>
+          <p className="mt-2 text-lg font-semibold">
+            → {isKo ? "올인원 번들" : "All-in-one bundle"}{" "}
+            <span className="text-2xl">{formatPrice(bundlePricing.all, priceLocale)}</span>
+            <span className="ml-2 text-sm text-white/90">
+              ({isKo ? `${formatPrice(savings, priceLocale)} 절약` : `save ${formatPrice(savings, priceLocale)}`})
+            </span>
+          </p>
+          <button
+            type="button"
+            disabled={bundleAddableCount === 0}
+            onClick={() => handleAddBundle()}
+            className="mt-6 rounded-full bg-white px-8 py-3 font-bold text-channel-saju shadow-lg disabled:opacity-50"
+          >
+            {bundleAddableCount === 0
+              ? isKo
+                ? "모두 구매함"
+                : "All purchased"
+              : isKo
+                ? "전체 담기"
+                : "Add all"}
+          </button>
+        </section>
+      ) : null}
     </div>
   );
 }
