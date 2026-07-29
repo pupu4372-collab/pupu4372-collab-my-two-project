@@ -7,12 +7,14 @@ import {
   HUMAN_PREMIUM_AMOUNT_PAID_USD,
   HUMAN_PREMIUM_PDF_BUCKET,
   type HumanPremiumBirthBasis,
+  type HumanPremiumCartGeneratedItem,
   type HumanPremiumEmailStatus,
   type HumanPremiumFailureStage,
   type HumanPremiumPaymentProvider,
   type HumanPremiumReportInput,
   type HumanPremiumReportRow,
   type HumanPremiumReportStatus,
+  type ReportType,
 } from "./types";
 import { humanPremiumWebExpiresAt } from "./retention";
 
@@ -239,6 +241,141 @@ export async function updateHumanPremiumReport(
   }
 
   return rowFromDb(data);
+}
+
+/**
+ * Merge one cart `generated[reportType]` entry without clobbering siblings.
+ * Uses optimistic locking on `updated_at` (retry on conflict) so concurrent
+ * generateCartReportItem callers cannot wipe each other's keys.
+ */
+export async function mergeHumanPremiumCartGeneratedItem(
+  cartReportId: string,
+  reportType: ReportType,
+  item: HumanPremiumCartGeneratedItem,
+  maxAttempts = 8
+): Promise<HumanPremiumReportRow> {
+  const supabase = requireDb();
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const fresh = await getHumanPremiumReportById(cartReportId);
+    if (!fresh) throw new Error("Cart order not found.");
+
+    const cart = fresh.birth_basis?.cart;
+    if (!cart?.cartOrder || !Array.isArray(cart.items)) {
+      throw new Error("Invalid cart order.");
+    }
+
+    const existing = cart.generated?.[reportType];
+    if (existing?.reportId === item.reportId && existing.webToken === item.webToken) {
+      return fresh;
+    }
+
+    const nextBasis: HumanPremiumBirthBasis = {
+      ...fresh.birth_basis,
+      cart: {
+        ...cart,
+        generated: {
+          ...(cart.generated ?? {}),
+          [reportType]: item,
+        },
+      },
+    };
+
+    const { data, error } = await supabase
+      .from("human_premium_reports")
+      .update({ birth_basis: nextBasis } as never)
+      .eq("id", cartReportId)
+      .eq("updated_at", fresh.updated_at)
+      .select("*")
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (data) return rowFromDb(data);
+    // 0 rows: another writer changed updated_at — re-read and merge again.
+  }
+
+  throw new Error("Failed to merge cart generated item after retries.");
+}
+
+const PREGENERATE_CLAIM_TTL_MS = 15 * 60 * 1000;
+
+function cartMetaFromRow(row: HumanPremiumReportRow) {
+  const cart = row.birth_basis?.cart;
+  if (!cart?.cartOrder || !Array.isArray(cart.items)) return null;
+  return cart;
+}
+
+function allCartItemsGenerated(cart: NonNullable<ReturnType<typeof cartMetaFromRow>>): boolean {
+  const items = cart.items;
+  const generated = cart.generated ?? {};
+  return items.length > 0 && items.every((type) => Boolean(generated[type]));
+}
+
+function isPregenerateClaimFresh(
+  cart: NonNullable<ReturnType<typeof cartMetaFromRow>>,
+  nowMs: number
+): boolean {
+  const startedAt = cart.pregenerateStartedAt;
+  if (!startedAt) return false;
+  const startedMs = Date.parse(startedAt);
+  if (!Number.isFinite(startedMs)) return false;
+  return nowMs - startedMs < PREGENERATE_CLAIM_TTL_MS;
+}
+
+export type HumanPremiumCartPregenerateClaim =
+  | { status: "done"; row: HumanPremiumReportRow }
+  | { status: "busy"; row: HumanPremiumReportRow }
+  | { status: "claimed"; row: HumanPremiumReportRow };
+
+/**
+ * Claim exclusive pregenerate for a cart shell row (optimistic lock).
+ * Stale claims older than {@link PREGENERATE_CLAIM_TTL_MS} can be reclaimed
+ * so a failed run does not permanently block retries.
+ */
+export async function claimHumanPremiumCartPregenerate(
+  cartReportId: string,
+  maxAttempts = 8
+): Promise<HumanPremiumCartPregenerateClaim> {
+  const supabase = requireDb();
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const fresh = await getHumanPremiumReportById(cartReportId);
+    if (!fresh) throw new Error("Cart order not found.");
+    const cart = cartMetaFromRow(fresh);
+    if (!cart) throw new Error("Invalid cart order.");
+
+    if (allCartItemsGenerated(cart)) {
+      return { status: "done", row: fresh };
+    }
+
+    const nowMs = Date.now();
+    if (isPregenerateClaimFresh(cart, nowMs)) {
+      return { status: "busy", row: fresh };
+    }
+
+    const nextBasis: HumanPremiumBirthBasis = {
+      ...fresh.birth_basis,
+      cart: {
+        ...cart,
+        pregenerateStartedAt: new Date(nowMs).toISOString(),
+      },
+    };
+
+    const { data, error } = await supabase
+      .from("human_premium_reports")
+      .update({ birth_basis: nextBasis } as never)
+      .eq("id", cartReportId)
+      .eq("updated_at", fresh.updated_at)
+      .select("*")
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (data) return { status: "claimed", row: rowFromDb(data) };
+  }
+
+  const latest = await getHumanPremiumReportById(cartReportId);
+  if (!latest) throw new Error("Cart order not found.");
+  return { status: "busy", row: latest };
 }
 
 export async function markHumanPremiumReportPaid(
