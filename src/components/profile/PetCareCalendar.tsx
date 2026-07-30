@@ -8,7 +8,7 @@ import {
   toDateISO,
 } from "@/lib/pet-care/categories";
 import type { PetCareCategory, PetCareEvent } from "@/lib/supabase/types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const WEEKDAYS_KO = ["일", "월", "화", "수", "목", "금", "토"] as const;
 const WEEKDAYS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
@@ -63,6 +63,12 @@ export function PetCareCalendar({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [eventTime, setEventTime] = useState("");
+  // Bumped by every loadMonth() call AND by the month/pet-driven effect
+  // below, so a slow mutation refresh (loadMonth(), called after
+  // addEvent/removeEvent) started under one viewed month can detect either
+  // a newer loadMonth() or a month/pet switch superseded it, and skip
+  // applying its stale response.
+  const monthSeqRef = useRef(0);
 
   const monthLabel = isKo
     ? `${viewYear}년 ${viewMonth}월`
@@ -86,6 +92,7 @@ export function PetCareCalendar({
 
   const loadMonth = useCallback(async () => {
     if (!accessToken) return;
+    const seq = ++monthSeqRef.current;
     setLoading(true);
     setError(null);
     const { from, to } = monthBounds(viewYear, viewMonth);
@@ -94,20 +101,26 @@ export function PetCareCalendar({
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
+      if (seq !== monthSeqRef.current) return;
       if (!res.ok) {
         setError(data.error ?? (isKo ? "일정을 불러오지 못했어요." : "Failed to load events."));
         return;
       }
       setEvents((data.events ?? []) as PetCareEvent[]);
     } catch {
+      if (seq !== monthSeqRef.current) return;
       setError(isKo ? "네트워크 오류" : "Network error");
     } finally {
-      setLoading(false);
+      if (seq === monthSeqRef.current) setLoading(false);
     }
   }, [accessToken, isKo, petId, viewMonth, viewYear]);
 
   useEffect(() => {
     if (!accessToken) return;
+
+    // A month/pet switch (or accessToken change) always supersedes any
+    // loadMonth() call made for the previous month.
+    monthSeqRef.current += 1;
 
     let cancelled = false;
     const { from, to } = monthBounds(viewYear, viewMonth);
