@@ -8,7 +8,7 @@ import {
 } from "@/lib/admin/post-board";
 import type { CommunityPost } from "@/lib/supabase/types";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface AdminPostRow extends CommunityPost {
   author_name?: string;
@@ -30,12 +30,18 @@ export function AdminModeration() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  // Bumped by every load() call AND by the filter-driven effect below, so a
+  // slow mutation refresh (load()) started under one board filter can detect
+  // either a newer load() or a board-filter switch superseded it, and skip
+  // applying its stale response.
+  const loadSeqRef = useRef(0);
 
   const load = useCallback(async () => {
     if (!accessToken) {
       setLoading(false);
       return;
     }
+    const seq = ++loadSeqRef.current;
     setLoading(true);
     setError(null);
     try {
@@ -44,12 +50,14 @@ export function AdminModeration() {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
+      if (seq !== loadSeqRef.current) return;
       if (!res.ok) throw new Error(data.error ?? "불러오기 실패");
       setPosts(data.posts ?? []);
     } catch (err) {
+      if (seq !== loadSeqRef.current) return;
       setError(err instanceof Error ? err.message : "불러오기 실패");
     } finally {
-      setLoading(false);
+      if (seq === loadSeqRef.current) setLoading(false);
     }
   }, [accessToken, selectedBoard]);
 
@@ -58,6 +66,10 @@ export function AdminModeration() {
       setLoading(false);
       return;
     }
+
+    // A board-filter switch (or accessToken change) always supersedes any
+    // load() call made under the previous filter.
+    loadSeqRef.current += 1;
 
     let cancelled = false;
 

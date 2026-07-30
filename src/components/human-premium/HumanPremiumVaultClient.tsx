@@ -57,7 +57,19 @@ export function HumanPremiumVaultClient() {
   const [generatingKey, setGeneratingKey] = useState<string | null>(null);
   const pregenerateStarted = useRef(new Set<string>());
 
+  // Tracks the current identity bucket ("guest" while anonymous, the real
+  // userId once signed in). A vault fetch started under one identity (e.g.
+  // guest, mid-poll) can resolve after the user signs up and a newer,
+  // member-identity fetch has already populated the vault correctly; without
+  // this check the late guest response would wipe out just-verified paid
+  // reports from the screen.
+  const identityRef = useRef(storageUserId);
+  useEffect(() => {
+    identityRef.current = storageUserId;
+  }, [storageUserId]);
+
   const refresh = useCallback(async () => {
+    const requestedIdentity = storageUserId;
     setLoading(true);
     setError(null);
     try {
@@ -74,14 +86,18 @@ export function HumanPremiumVaultClient() {
         headers,
       });
       const data = await res.json();
+
+      if (identityRef.current !== requestedIdentity) return;
+
       if (!res.ok) throw new Error(data.error ?? "Vault load failed");
       setOrders((data.orders ?? []) as VaultOrder[]);
     } catch (err) {
+      if (identityRef.current !== requestedIdentity) return;
       const raw = err instanceof Error ? err.message : "Vault load failed";
       setError(formatHumanPremiumError(raw, routeLocale as "ko" | "en"));
       setOrders([]);
     } finally {
-      setLoading(false);
+      if (identityRef.current === requestedIdentity) setLoading(false);
     }
   }, [routeLocale, storageUserId, accessToken]);
 

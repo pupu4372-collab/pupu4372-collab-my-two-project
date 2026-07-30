@@ -42,6 +42,16 @@ export function PetShowFeed({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingMoreRef = useRef(false);
 
+  // NOTE: `load` has no race guard against `tags`/`photoCategory`/`species`
+  // changing while a "fresh load" (append=false) request is in flight — only
+  // `loadingMoreRef` dedupes concurrent "append" (pagination) calls. This is
+  // safe today only because every current caller remounts this component via
+  // `key={species}` (see PetShowSnapzone) or passes static filter props, so a
+  // stale response can never land on a live instance whose filters changed.
+  // If this component is ever reused with filters that change on a
+  // *persisted* instance (no remount), add a race guard here (cancelled flag
+  // for the effect path, ref-seq for any handler-triggered reload) before
+  // relying on that usage.
   const load = useCallback(
     async (append: boolean, pageCursor: string | null) => {
       if (append && loadingMoreRef.current) return;

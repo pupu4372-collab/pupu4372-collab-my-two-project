@@ -3,7 +3,7 @@
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import type { CommunityPost, PostComment, PostReport, ReportStatus } from "@/lib/supabase/types";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface AdminReportRow extends PostReport {
   reporter_name?: string;
@@ -45,12 +45,17 @@ export function AdminReportsInbox() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [workingId, setWorkingId] = useState<string | null>(null);
+  // Bumped on every load() call so an older, still-in-flight call (e.g. from
+  // a slow mutation refresh) can detect a newer call has superseded it and
+  // skip applying its stale response.
+  const loadSeqRef = useRef(0);
 
   const load = useCallback(async () => {
     if (!accessToken) {
       setLoading(false);
       return;
     }
+    const seq = ++loadSeqRef.current;
     setLoading(true);
     setError(null);
     try {
@@ -58,12 +63,14 @@ export function AdminReportsInbox() {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
+      if (seq !== loadSeqRef.current) return;
       if (!res.ok) throw new Error(data.error ?? "신고함 불러오기 실패");
       setReports(data.reports ?? []);
     } catch (err) {
+      if (seq !== loadSeqRef.current) return;
       setError(err instanceof Error ? err.message : "신고함 불러오기 실패");
     } finally {
-      setLoading(false);
+      if (seq === loadSeqRef.current) setLoading(false);
     }
   }, [accessToken]);
 

@@ -3,7 +3,7 @@
 import { useSupabaseSession } from "@/hooks/useSupabaseSession";
 import type { Notice, NoticeLocale } from "@/lib/supabase/types";
 import { Link } from "@/i18n/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const EMPTY_FORM = {
   title: "",
@@ -36,12 +36,17 @@ export function AdminNoticesManager() {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  // Bumped on every load() call so an older, still-in-flight call (e.g. from
+  // a slow mutation refresh) can detect a newer call has superseded it and
+  // skip applying its stale response.
+  const loadSeqRef = useRef(0);
 
   const load = useCallback(async () => {
     if (!accessToken) {
       setLoading(false);
       return;
     }
+    const seq = ++loadSeqRef.current;
     setLoading(true);
     setError(null);
     try {
@@ -49,12 +54,14 @@ export function AdminNoticesManager() {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
+      if (seq !== loadSeqRef.current) return;
       if (!res.ok) throw new Error(data.error ?? "공지 목록을 불러오지 못했습니다.");
       setNotices(data.notices ?? []);
     } catch (err) {
+      if (seq !== loadSeqRef.current) return;
       setError(err instanceof Error ? err.message : "공지 목록을 불러오지 못했습니다.");
     } finally {
-      setLoading(false);
+      if (seq === loadSeqRef.current) setLoading(false);
     }
   }, [accessToken]);
 

@@ -6,7 +6,7 @@ import {
   type HumanPremiumProfile,
 } from "@/lib/reports/human-premium/cart-session";
 import type { ReportType } from "@/lib/reports/human-premium/types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 function mergeReportTypes(...lists: ReportType[][]): ReportType[] {
   const set = new Set<ReportType>();
@@ -33,7 +33,17 @@ export function useHumanPremiumPurchases(options: {
   const [degraded, setDegraded] = useState(false);
   const [useFallback, setUseFallback] = useState(false);
 
+  // Tracks the current Supabase user id so an in-flight request started under
+  // one identity (e.g. guest) can detect a mid-flight identity switch (e.g.
+  // guest -> signed-in member) and discard its stale, wrong-identity response
+  // instead of overwriting state a newer request already populated correctly.
+  const identityRef = useRef<string | null>(userId);
+  useEffect(() => {
+    identityRef.current = userId;
+  }, [userId]);
+
   const refresh = useCallback(async () => {
+    const requestedIdentity = identityRef.current;
     setLoading(true);
     try {
       const headers: Record<string, string> = {};
@@ -45,6 +55,8 @@ export function useHumanPremiumPurchases(options: {
         degraded?: boolean;
         guest?: boolean;
       };
+
+      if (identityRef.current !== requestedIdentity) return;
 
       if (!res.ok || data.degraded) {
         setUseFallback(true);
@@ -60,12 +72,13 @@ export function useHumanPremiumPurchases(options: {
       setGuest(data.guest === true);
       setApiTypes(data.purchasedReportTypes ?? []);
     } catch {
+      if (identityRef.current !== requestedIdentity) return;
       setUseFallback(true);
       setDegraded(true);
       setGuest(false);
       setApiTypes(null);
     } finally {
-      setLoading(false);
+      if (identityRef.current === requestedIdentity) setLoading(false);
     }
   }, [accessToken]);
 
