@@ -12,7 +12,7 @@ import {
 import { PET_PREMIUM_PRODUCT_LABELS } from "@/lib/payments/pet-premium-shared";
 import { notFound } from "next/navigation";
 import { useLocale } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const PAGE_LIMIT = 50;
 
@@ -127,6 +127,11 @@ export function AdminPaymentsClient() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Bumped every time the date-range effect starts a fresh load, so a
+  // pagination request (onLoadMore) started under the previous range can
+  // detect the range changed mid-flight and discard its response instead of
+  // appending old-range rows / a stale cursor onto the new range's list.
+  const rangeSeqRef = useRef(0);
 
   const fetchPage = useCallback(
     async (opts: { cursor?: string | null }) => {
@@ -167,6 +172,7 @@ export function AdminPaymentsClient() {
     }
 
     let cancelled = false;
+    rangeSeqRef.current += 1;
     async function load() {
       setLoading(true);
       setError(null);
@@ -199,17 +205,20 @@ export function AdminPaymentsClient() {
 
   async function onLoadMore() {
     if (!hasMore || !nextCursor || loadingMore || loading) return;
+    const seq = rangeSeqRef.current;
     setLoadingMore(true);
     setError(null);
     try {
       const result = await fetchPage({ cursor: nextCursor });
+      if (seq !== rangeSeqRef.current) return;
       setEntries((prev) => [...prev, ...result.page]);
       setNextCursor(result.nextCursor);
       setHasMore(result.hasMore);
     } catch (err) {
+      if (seq !== rangeSeqRef.current) return;
       setError(err instanceof Error ? err.message : "Failed to load payments");
     } finally {
-      setLoadingMore(false);
+      if (seq === rangeSeqRef.current) setLoadingMore(false);
     }
   }
 
