@@ -56,13 +56,20 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
   const [photoCategory, setPhotoCategory] = useState<"cute" | "funny">("cute");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Bumped whenever the challenge id changes (new effect run) or loadPosts()
+  // itself is called, so a stale loadPosts() response (e.g. a slow refresh
+  // after submitting a verification) is discarded if it resolves after the
+  // user has already navigated to a different challenge.
+  const postsSeqRef = useRef(0);
 
   async function loadPosts() {
+    const seq = ++postsSeqRef.current;
     const postsRes = await fetch(`/api/community/challenge/${id}/posts`);
     const postsData = (await postsRes.json()) as {
       posts?: ChallengePostWithRelations[];
       error?: string;
     };
+    if (seq !== postsSeqRef.current) return;
     if (!postsRes.ok) {
       throw new Error(postsData.error ?? (isKo ? "인증글을 불러오지 못했어요." : "Could not load posts."));
     }
@@ -71,6 +78,7 @@ export function ChallengeDetailPage({ params }: ChallengeDetailPageProps) {
 
   useEffect(() => {
     let cancelled = false;
+    postsSeqRef.current += 1;
 
     async function load() {
       setLoading(true);
