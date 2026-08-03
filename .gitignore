@@ -43,6 +43,14 @@ supabase/.temp/
 tmp/
 .git-tmp-callback-head.ts
 
+# share-card design previews (local only — rendered output and the scripts that make it)
+.preview/
+.preview_node_example.txt
+scripts/preview-*.cjs
+scripts/preview-sample-data.json
+scripts/diag-*.cjs
+scripts/probe-saju-summary-lines.ts
+
 # duplicate font downloads (tracked copies live in subfolders)
 src/assets/fonts/*.otf
 src/assets/fonts/*.ttf
