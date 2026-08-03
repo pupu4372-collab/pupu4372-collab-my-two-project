@@ -4,7 +4,7 @@
   "description": "반려동물 K-사주와 커뮤니티",
   "start_url": "/ko",
   "display": "standalone",
-  "background_color": "#3d5a8c",
+  "background_color": "#FFFFFF",
   "theme_color": "#3d5a8c",
   "icons": [
     {
