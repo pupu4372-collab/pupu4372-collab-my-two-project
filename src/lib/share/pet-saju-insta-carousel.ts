@@ -103,12 +103,12 @@ const SPECIES_LABEL: Record<Locale, Record<Species, string>> = {
   en: { dog: "dog", cat: "cat", reptile: "reptile", other: "pet" },
 };
 
-/** Bright emoji only — the dark paw print sinks into the navy background. */
+/** Matches the species picker in SajuForm so card and form never disagree. */
 const SPECIES_EMOJI: Record<Species, string> = {
   dog: "🐶",
   cat: "🐱",
   reptile: "🦎",
-  other: "🐹",
+  other: "🐾",
 };
 
 function roundRect(
