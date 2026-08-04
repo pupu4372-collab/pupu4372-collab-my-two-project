@@ -13,6 +13,13 @@ function redisConfigured(): boolean {
   return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
 }
 
+function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+const RATE_LIMIT_UNAVAILABLE =
+  "Service temporarily unavailable. Please try again later.";
+
 function logRateLimitFallback(
   cause: "env_missing" | "limit_error",
   extra?: Record<string, unknown>
@@ -93,7 +100,13 @@ async function lookupSignupStatus(email: string): Promise<SignupStatus> {
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous";
   const limiter = getCheckEmailRatelimit();
-  if (limiter) {
+  if (!limiter) {
+    // Production must not open the door when Upstash is missing.
+    // Dev keeps the open fallback for local convenience.
+    if (isProduction()) {
+      return NextResponse.json({ error: RATE_LIMIT_UNAVAILABLE }, { status: 503 });
+    }
+  } else {
     try {
       const { success, limit, reset, remaining } = await limiter.limit(ip);
       if (!success) {
@@ -114,6 +127,9 @@ export async function POST(request: Request) {
         message: err instanceof Error ? err.message : String(err),
         phase: "limit",
       });
+      if (isProduction()) {
+        return NextResponse.json({ error: RATE_LIMIT_UNAVAILABLE }, { status: 503 });
+      }
     }
   }
 
