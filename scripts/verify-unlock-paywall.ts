@@ -1,6 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
+import { randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+
+/** Prefer TEST_PASSWORD from env / .env.local; otherwise a one-off random password. */
+function resolveTestPassword(env: Record<string, string>): string {
+  const fromEnv = (env.TEST_PASSWORD ?? process.env.TEST_PASSWORD)?.trim();
+  if (fromEnv) return fromEnv;
+  // Product rule: letters + digits, length ≥ 10
+  return `Test${randomBytes(9).toString("hex")}`;
+}
 
 function loadEnvLocal(): Record<string, string> {
   const raw = readFileSync(resolve(process.cwd(), ".env.local"), "utf8");
@@ -27,7 +36,7 @@ async function main() {
     auth: { autoRefreshToken: false, persistSession: false },
   });
   const email = `paywall-verify-${Date.now()}@test.local`;
-  const password = "TestPass1234xx";
+  const password = resolveTestPassword(env);
 
   const created = await admin.auth.admin.createUser({
     email,

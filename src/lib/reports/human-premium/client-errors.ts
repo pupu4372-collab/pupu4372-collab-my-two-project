@@ -1,3 +1,7 @@
+const CONFIG_ERROR_KO = "서버 설정 오류가 발생했어요. 잠시 후 다시 시도해 주세요.";
+const CONFIG_ERROR_EN =
+  "A server configuration error occurred. Please try again later.";
+
 const KO_MESSAGES: Record<string, string> = {
   "Invalid birth date or time": "생년월일과 출생 시간을 다시 확인해 주세요.",
   "Invalid birth date.": "생년월일을 연·월·일까지 모두 선택해 주세요.",
@@ -8,7 +12,8 @@ const KO_MESSAGES: Record<string, string> = {
   email_required_for_en: "Enter your email to receive your report.",
   "personName required.": "닉네임을 입력해 주세요.",
   "Demo checkout is disabled.": "데모 결제가 비활성화되어 있습니다.",
-  "Supabase is not configured.": "Supabase 설정이 필요합니다. .env.local에 NEXT_PUBLIC_SUPABASE_URL 과 SUPABASE_SERVICE_ROLE_KEY 를 넣고 서버를 재시작하세요.",
+  "Supabase is not configured.": CONFIG_ERROR_KO,
+  "SUPABASE_SERVICE_ROLE_KEY is required": CONFIG_ERROR_KO,
   "Demo checkout failed.": "데모 결제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
   "Failed to create human premium report.": "리포트 저장에 실패했습니다. DB 마이그레이션을 확인해 주세요.",
   "duplicate key value violates unique constraint \"human_premium_reports_checkout_session_id_key\"":
@@ -29,6 +34,8 @@ const KO_MESSAGES: Record<string, string> = {
 };
 
 const EN_MESSAGES: Record<string, string> = {
+  "Supabase is not configured.": CONFIG_ERROR_EN,
+  "SUPABASE_SERVICE_ROLE_KEY is required": CONFIG_ERROR_EN,
   login_required: "Please log in to continue.",
   signup_required: "Sign up to get a free Lucky Reading coupon",
   payment_required: "Daily Lucky Reading requires payment.",
@@ -40,7 +47,17 @@ const EN_MESSAGES: Record<string, string> = {
     "Payment information could not be verified. If you were charged, please contact support.",
 };
 
+/** Hide internal env var names from end users (safe to log server-side). */
+function isInternalConfigError(message: string): boolean {
+  return (
+    /SUPABASE_SERVICE_ROLE_KEY|NEXT_PUBLIC_SUPABASE_URL|RESEND_API_KEY/.test(message) ||
+    message === "Supabase is not configured."
+  );
+}
+
 export function formatHumanPremiumError(message: string, locale: "ko" | "en"): string {
-  if (locale === "en") return EN_MESSAGES[message] ?? message;
-  return KO_MESSAGES[message] ?? message;
+  if (locale === "en") {
+    return EN_MESSAGES[message] ?? (isInternalConfigError(message) ? CONFIG_ERROR_EN : message);
+  }
+  return KO_MESSAGES[message] ?? (isInternalConfigError(message) ? CONFIG_ERROR_KO : message);
 }
