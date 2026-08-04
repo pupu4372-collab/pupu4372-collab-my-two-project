@@ -1,4 +1,4 @@
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { SajuLlmCacheInsert, SajuLlmCacheRow } from "@/lib/supabase/types";
 import type { Locale } from "@/lib/saju/types";
 import type { InterpretSajuResult } from "./types";
@@ -47,8 +47,7 @@ export async function getCachedInterpretResult(
 ): Promise<InterpretSajuResult | null> {
   if (!isLlmCacheEnabled()) return null;
 
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return null;
+  const supabase = getSupabaseServiceRoleClient();
 
   const { data, error } = await supabase
     .from("saju_llm_cache")
@@ -78,8 +77,7 @@ export async function setCachedInterpretResult(
 ): Promise<void> {
   if (!isLlmCacheEnabled()) return;
 
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return;
+  const supabase = getSupabaseServiceRoleClient();
 
   const row: SajuLlmCacheInsert = {
     cache_key: cacheKey,
@@ -105,8 +103,7 @@ export async function getCachedHumanPremiumSectionBody(
 ): Promise<string | null> {
   if (!isLlmCacheEnabled()) return null;
 
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return null;
+  const supabase = getSupabaseServiceRoleClient();
 
   const { data, error } = await supabase
     .from("saju_llm_cache")
@@ -131,8 +128,7 @@ export async function setCachedHumanPremiumSectionBody(
 ): Promise<void> {
   if (!isLlmCacheEnabled()) return;
 
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return;
+  const supabase = getSupabaseServiceRoleClient();
 
   const row: SajuLlmCacheInsert = {
     cache_key: cacheKey,
@@ -192,8 +188,7 @@ export async function getCachedPremiumCallResult(
 ): Promise<{ data: unknown; provider: string } | null> {
   if (!isLlmCacheEnabled()) return null;
 
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return null;
+  const supabase = getSupabaseServiceRoleClient();
 
   const { data, error } = await supabase
     .from("saju_llm_cache")
@@ -222,8 +217,7 @@ export async function setCachedPremiumCallResult(
 ): Promise<void> {
   if (!isLlmCacheEnabled()) return;
 
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return;
+  const supabase = getSupabaseServiceRoleClient();
 
   const row: SajuLlmCacheInsert = {
     cache_key: cacheKey,

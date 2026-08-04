@@ -1,6 +1,6 @@
 import { getBearerToken, getUserIdFromRequest } from "@/lib/supabase/auth-server";
 import { recordWithdrawnEmail } from "@/lib/auth/withdrawn-accounts";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function DELETE(request: Request) {
@@ -11,8 +11,10 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
-  const supabase = getSupabaseServerClient();
-  if (!supabase || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  let supabase;
+  try {
+    supabase = getSupabaseServiceRoleClient();
+  } catch {
     return NextResponse.json({ error: "Supabase admin is not configured." }, { status: 503 });
   }
 

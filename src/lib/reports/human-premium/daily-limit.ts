@@ -1,4 +1,4 @@
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { HumanPremiumCalendarType, HumanPremiumReportRow } from "./types";
 
 const KST_TIMEZONE = "Asia/Seoul";
@@ -82,8 +82,7 @@ function isReusableCompleted(row: HumanPremiumReportRow): boolean {
 }
 
 async function listTodayDailyReports(userId: string): Promise<HumanPremiumReportRow[]> {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) throw new Error("Supabase is not configured.");
+  const supabase = getSupabaseServiceRoleClient();
 
   const since = getKstDayStartUtc().toISOString();
   const { data, error } = await supabase

@@ -8,7 +8,7 @@ import {
 } from "@/lib/saju/pet-daily-fortune";
 import type { Locale } from "@/lib/saju/types";
 import type { PetSpecies } from "@/lib/supabase/types";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -33,8 +33,12 @@ type PetRow = {
 };
 
 async function loadSharedFortune(petId: string, locale: Locale) {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return null;
+  let supabase;
+  try {
+    supabase = getSupabaseServiceRoleClient();
+  } catch {
+    return null;
+  }
 
   const { data: rawPet, error } = await supabase
     .from("pets")

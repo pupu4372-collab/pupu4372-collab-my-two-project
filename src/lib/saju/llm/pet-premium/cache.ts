@@ -1,4 +1,4 @@
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { SajuLlmCacheInsert, SajuLlmCacheRow } from "@/lib/supabase/types";
 import type { Locale } from "@/lib/saju/types";
 import type { PetPremiumCachePayload, PetPremiumFeature } from "./types";
@@ -24,8 +24,7 @@ export async function getCachedPetPremiumResult<T>(
 ): Promise<{ data: T; provider: string } | null> {
   if (!isCacheEnabled()) return null;
 
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return null;
+  const supabase = getSupabaseServiceRoleClient();
 
   const { data, error } = await supabase
     .from("saju_llm_cache")
@@ -63,8 +62,7 @@ export async function setCachedPetPremiumResult(input: {
 }): Promise<void> {
   if (!isCacheEnabled()) return;
 
-  const supabase = getSupabaseServerClient();
-  if (!supabase) return;
+  const supabase = getSupabaseServiceRoleClient();
 
   const row: SajuLlmCacheInsert = {
     cache_key: input.cacheKey,

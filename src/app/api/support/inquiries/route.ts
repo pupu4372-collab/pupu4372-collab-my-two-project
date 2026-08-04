@@ -1,5 +1,8 @@
 import { getBearerToken, getUserIdFromRequest } from "@/lib/supabase/auth-server";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  getSupabaseServerClient,
+  getSupabaseServiceRoleClient,
+} from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 const VALID_CATEGORIES = new Set([
@@ -16,8 +19,10 @@ function isEmail(value: string) {
 }
 
 export async function GET(request: Request) {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) {
+  let supabase;
+  try {
+    supabase = getSupabaseServiceRoleClient();
+  } catch {
     return NextResponse.json({ error: "Supabase not configured." }, { status: 503 });
   }
 
@@ -41,6 +46,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  // Guest/public insert uses anon (RLS insert with check true) — not service role.
   const supabase = getSupabaseServerClient();
   if (!supabase) {
     return NextResponse.json({ error: "Supabase not configured." }, { status: 503 });

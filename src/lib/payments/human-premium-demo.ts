@@ -1,5 +1,3 @@
-import { getSupabaseServerClient } from "@/lib/supabase/server";
-
 /**
  * Env flag for human-premium demo checkout.
  * Prefer {@link isHumanPremiumDemoCheckoutAllowed} at call sites — production must never demo-pay.
@@ -25,5 +23,5 @@ export function isHumanPremiumDemoBackendReady(): boolean {
   if (!isHumanPremiumDemoCheckoutAllowed()) return false;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  return Boolean(url && serviceKey && getSupabaseServerClient());
+  return Boolean(url && serviceKey);
 }

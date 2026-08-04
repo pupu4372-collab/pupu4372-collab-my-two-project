@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import {
@@ -21,9 +21,7 @@ import { humanPremiumWebExpiresAt } from "./retention";
 type Db = SupabaseClient<Database>;
 
 function requireDb(): Db {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) throw new Error("Supabase is not configured.");
-  return supabase;
+  return getSupabaseServiceRoleClient();
 }
 
 function toBirthBasis(input: HumanPremiumReportInput): HumanPremiumBirthBasis {

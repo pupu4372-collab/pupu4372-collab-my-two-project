@@ -6,7 +6,7 @@ import {
   parsePortOneCustomData,
   verifyPortOneAmount,
 } from "@/lib/payments/portone/server";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { DAILY_EXTRA_PRODUCT_CODE } from "./daily-extra-constants";
 import {
   getCheckoutCurrency,
@@ -35,9 +35,7 @@ export interface DailyExtraOrderRow {
 }
 
 function requireDb() {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) throw new Error("Supabase is not configured.");
-  return supabase;
+  return getSupabaseServiceRoleClient();
 }
 
 export function createDailyExtraPaymentId(): string {
