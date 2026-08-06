@@ -685,8 +685,12 @@ function renderSlide3(result: SajuBasicResponse): string {
   );
   y += 36;
 
-  // [하단] CTA — 링크 없음, 시각적 안내용
-  const ctaH = 108;
+  // [하단] CTA — 링크 없음, 시각적 안내용 (2줄: 안내 + 도메인)
+  const ctaLine1Size = 28;
+  const ctaLine2Size = 36;
+  const ctaLineGap = 10;
+  const ctaPadY = 30;
+  const ctaH = ctaPadY * 2 + ctaLine1Size + ctaLineGap + ctaLine2Size; // 162
   const ctaY = CONTENT_BOTTOM - ctaH;
 
   // 케어 블록이 없으면 요약에 더 많은 줄을 허용해 아래쪽이 비지 않게 한다.
@@ -717,17 +721,31 @@ function renderSlide3(result: SajuBasicResponse): string {
     );
   }
 
-  roundRect(ctx, PAD, ctaY, CONTENT_W, ctaH, 54);
+  const ctaR = Math.min(54, ctaH / 2);
+  roundRect(ctx, PAD, ctaY, CONTENT_W, ctaH, ctaR);
   ctx.fillStyle = COLORS.cta;
   ctx.fill();
+
+  const ctaMidX = SIZE / 2;
+  const ctaMidY = ctaY + ctaH / 2;
+  const ctaBlockH = ctaLine1Size + ctaLineGap + ctaLine2Size;
+  const ctaLine1Y = ctaMidY - ctaBlockH / 2 + ctaLine1Size / 2;
+  const ctaLine2Y = ctaLine1Y + ctaLine1Size / 2 + ctaLineGap + ctaLine2Size / 2;
+
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = `700 36px ${SHARE_FONT}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+  ctx.font = `600 ${ctaLine1Size}px ${SHARE_FONT}`;
   ctx.fillText(
-    isKo ? "프로필 링크에서 확인하세요 ›" : "Link in bio ›",
-    SIZE / 2,
-    ctaY + ctaH / 2
+    isKo ? "우리 아이 사주도 궁금하다면?" : "Curious about your pet?",
+    ctaMidX,
+    ctaLine1Y
+  );
+  ctx.font = `800 ${ctaLine2Size}px ${SHARE_FONT}`;
+  ctx.fillText(
+    isKo ? "ksajupet.com ›" : "Try it at ksajupet.com ›",
+    ctaMidX,
+    ctaLine2Y
   );
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
@@ -744,11 +762,13 @@ async function ensureCarouselFonts() {
       `900 46px ${SHARE_FONT}`,
       `800 32px ${SHARE_FONT}`,
       `800 26px ${SHARE_FONT}`,
+      `800 36px ${SHARE_FONT}`,
       `700 36px ${SHARE_FONT}`,
       `700 30px ${SHARE_FONT}`,
       `700 28px ${SHARE_FONT}`,
       `700 26px ${SHARE_FONT}`,
       `700 24px ${SHARE_FONT}`,
+      `600 28px ${SHARE_FONT}`,
       `600 26px ${SHARE_FONT}`,
       `500 26px ${SHARE_FONT}`,
       `500 24px ${SHARE_FONT}`,
